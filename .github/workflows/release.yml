@@ -45,8 +45,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          # No `head` here on purpose: under `set -o pipefail` an early-closing
+          # pipe can fail the step. A plugin header carries exactly one
+          # Version: line, so this needs no truncation.
           header_version() {
-            sed -n 's/^ \* Version: *//p' "$1/$1.php" | head -1 | tr -d '[:space:]'
+            sed -n 's/^ \* Version: *//p' "$1/$1.php" | tr -d '[:space:]'
           }
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
