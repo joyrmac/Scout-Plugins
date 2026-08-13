@@ -9,6 +9,7 @@
  * Author:            Scout Media & Consulting
  * License:           GPL-2.0-or-later
  * Text Domain:       scout-forms-guard
+ * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-forms-guard
  *
  * @package Scout_Forms_Guard
  */
@@ -16,6 +17,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-scout-plugin-updater.php';
+Scout_Plugin_Updater::boot( __FILE__, 'scout-forms-guard' );
 
 final class Scout_Forms_Guard {
 

@@ -9,6 +9,7 @@
  * Author:            Scout Media & Consulting
  * License:           GPL-2.0-or-later
  * Text Domain:       scout-rvpark
+ * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-rvpark
  *
  * @package Scout_RVPark
  */
@@ -16,6 +17,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-scout-plugin-updater.php';
+Scout_Plugin_Updater::boot( __FILE__, 'scout-rvpark' );
 
 /**
  * Register the park's specific content types on the Scout Core action. In a

@@ -1,0 +1,72 @@
+name: Release
+
+# Publishes one plugin. Tag a plugin's version and push the tag:
+#
+#   git tag scout-seo-v0.2.0 && git push origin scout-seo-v0.2.0
+#
+# This builds <slug>.zip, attaches it to a GitHub release, and every site
+# running that plugin picks the update up within a few hours through the
+# updater in includes/class-scout-plugin-updater.php.
+
+on:
+  push:
+    tags:
+      - 'scout-*-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish the plugin zip
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out which plugin and which version
+        id: target
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          slug="${tag%-v*}"
+          version="${tag##*-v}"
+          if [ ! -f "${slug}/${slug}.php" ]; then
+            echo "::error::Tag '${tag}' does not match a plugin: ${slug}/${slug}.php not found."
+            exit 1
+          fi
+          echo "slug=${slug}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Check the tag matches the plugin's Version header
+        run: |
+          slug="${{ steps.target.outputs.slug }}"
+          tagged="${{ steps.target.outputs.version }}"
+          header="$(sed -n 's/^ \* Version: *//p' "${slug}/${slug}.php" | head -1 | tr -d '[:space:]')"
+          if [ "${header}" != "${tagged}" ]; then
+            echo "::error::${slug}.php says Version ${header}, tag says ${tagged}. Bump the header first."
+            exit 1
+          fi
+
+      - name: PHP syntax check
+        run: find "${{ steps.target.outputs.slug }}" -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Build the zip
+        run: |
+          slug="${{ steps.target.outputs.slug }}"
+          # Zip the plugin folder itself so it unpacks to wp-content/plugins/<slug>/.
+          zip -r "${slug}.zip" "${slug}" -x '*.DS_Store' -x '*/.git/*' >/dev/null
+          unzip -l "${slug}.zip" | head -20
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          slug="${{ steps.target.outputs.slug }}"
+          version="${{ steps.target.outputs.version }}"
+          notes="$(sed -n "/^## \[\?${version}\]\?/,/^## /p" "${slug}/CHANGELOG.md" | sed '$d')"
+          if [ -z "${notes}" ]; then
+            notes="See ${slug}/CHANGELOG.md."
+          fi
+          gh release create "${GITHUB_REF_NAME}" "${slug}.zip" \
+            --title "${slug} ${version}" \
+            --notes "${notes}"

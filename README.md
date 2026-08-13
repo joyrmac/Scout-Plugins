@@ -103,6 +103,30 @@ full worked example.
 
 ---
 
+## Updates
+
+Client sites update themselves from this repo's releases. Every plugin carries
+an `Update URI:` header, so WordPress hands its update check to the plugin,
+which looks up the newest release here. Updates then appear on the client's
+Plugins screen like any other, and WordPress's own auto-update toggle works on
+them. No updater plugin is installed on the client site and no third-party
+service sits in the middle.
+
+Shipping a fix to every site is bump, tag, push:
+
+```bash
+git tag scout-seo-v0.2.0
+git push origin scout-seo-v0.2.0
+```
+
+That builds the zip and publishes the release. Full process, including what
+breaks it, is in [`RELEASING.md`](RELEASING.md).
+
+This repo has to stay public for that to work. The updater calls the GitHub API
+without credentials, which is what keeps client sites free of access tokens.
+
+---
+
 ## Versioning ritual
 
 Every change to a plugin:
@@ -110,6 +134,9 @@ Every change to a plugin:
 1. Bumps the `Version:` header in the main plugin file.
 2. Bumps the matching `SCOUT_*_VERSION` constant.
 3. Adds a dated entry to that plugin's `CHANGELOG.md`.
+
+The release build checks the tag against the `Version:` header and fails if they
+disagree, so a forgotten bump cannot ship.
 
 ---
 

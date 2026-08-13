@@ -8,6 +8,7 @@
  * Author:            Scout Media & Consulting
  * License:           GPL-2.0-or-later
  * Text Domain:       scout-core
+ * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-core
  *
  * @package Scout_Core
  */
@@ -15,6 +16,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-scout-plugin-updater.php';
+Scout_Plugin_Updater::boot( __FILE__, 'scout-core' );
 
 define( 'SCOUT_CORE_VERSION', '0.1.0' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
