@@ -112,15 +112,11 @@ Plugins screen like any other, and WordPress's own auto-update toggle works on
 them. No updater plugin is installed on the client site and no third-party
 service sits in the middle.
 
-Shipping a fix to every site is bump, tag, push:
-
-```bash
-git tag scout-seo-v0.2.0
-git push origin scout-seo-v0.2.0
-```
-
-That builds the zip and publishes the release. Full process, including what
-breaks it, is in [`RELEASING.md`](RELEASING.md).
+Shipping a fix to every site: bump the plugin's `Version:` header, add a
+changelog entry, push, then **Actions → Release → Run workflow** and pick the
+plugin. That reads the version from the header, tags it, builds the zip, and
+publishes the release. Full process, including what breaks it, is in
+[`RELEASING.md`](RELEASING.md).
 
 This repo has to stay public for that to work. The updater calls the GitHub API
 without credentials, which is what keeps client sites free of access tokens.

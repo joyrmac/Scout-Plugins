@@ -25,29 +25,34 @@ hours, so a release reaches a site within a few hours rather than instantly.
 ## Shipping a release
 
 **1. Bump the version.** In the plugin's main file, update the `Version:` header
-and the matching `SCOUT_*_VERSION` constant where the plugin defines one. The
-tag and the header must agree or the release build fails on purpose.
+and the matching `SCOUT_*_VERSION` constant where the plugin defines one. This
+header is the source of truth for the release.
 
 **2. Write the changelog.** Add a dated entry at the top of that plugin's
 `CHANGELOG.md`. The release notes are pulled from this entry automatically.
 
-**3. Tag and push.**
+**3. Commit and push**, then release from the Actions tab:
+
+> **Actions → Release → Run workflow →** pick the plugin → **Run**
+
+That reads the version straight out of the plugin's header, creates the
+`<slug>-v<version>` tag for you, builds the zip, and publishes the release. The
+version can never disagree with the code because nobody retypes it.
+
+Each plugin is versioned and released on its own. Releasing one never touches
+the others.
+
+### Or from the command line
+
+If you would rather tag by hand, that still works:
 
 ```bash
-git commit -am "scout-seo 0.2.0: fix the canonical on paginated archives"
-git push
-
 git tag scout-seo-v0.2.0
 git push origin scout-seo-v0.2.0
 ```
 
-The tag format is `<slug>-v<version>`, so `scout-core-v0.3.1`,
-`scout-forms-guard-v1.0.0`, and so on. Each plugin is versioned and released on
-its own; tagging one never touches the others.
-
-Pushing the tag runs `.github/workflows/release.yml`, which checks the tag
-against the `Version:` header, lints the plugin, builds `<slug>.zip`, and
-publishes the release with the changelog entry as its notes.
+Here the tag has to match the plugin's `Version:` header, and the build fails on
+purpose if it does not.
 
 ---
 
@@ -74,7 +79,8 @@ itself so it unpacks to `wp-content/plugins/<slug>/`. Hand-built zips of the
 loose files install to the wrong place and orphan the old copy.
 
 **Never re-tag a released version.** Sites cache by version number. Ship
-`0.2.1` instead.
+`0.2.1` instead. The build refuses to publish over an existing release, so this
+one is enforced rather than remembered.
 
 **Skipping the changelog entry** just means the release notes fall back to a
 pointer at `CHANGELOG.md`. Nothing breaks, but the client-facing "View details"

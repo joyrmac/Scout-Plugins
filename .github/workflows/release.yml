@@ -1,14 +1,30 @@
 name: Release
 
-# Publishes one plugin. Tag a plugin's version and push the tag:
+# Publishes one plugin, two ways.
 #
+# Normally: Actions tab -> Release -> "Run workflow" -> pick the plugin. The
+# version is read from that plugin's Version: header, so the tag can never
+# disagree with the code, and the tag is created for you.
+#
+# Or by tag, if you prefer the command line:
 #   git tag scout-seo-v0.2.0 && git push origin scout-seo-v0.2.0
 #
-# This builds <slug>.zip, attaches it to a GitHub release, and every site
-# running that plugin picks the update up within a few hours through the
-# updater in includes/class-scout-plugin-updater.php.
+# Either way it builds <slug>.zip and attaches it to a GitHub release. Sites
+# running that plugin pick the update up within a few hours.
 
 on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: Which plugin to release (version comes from its header)
+        required: true
+        type: choice
+        options:
+          - scout-core
+          - scout-schema
+          - scout-seo
+          - scout-forms-guard
+          - scout-rvpark
   push:
     tags:
       - 'scout-*-v*'
@@ -24,26 +40,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Work out which plugin and which version
+      - name: Work out which plugin, which version, which tag
         id: target
         run: |
-          tag="${GITHUB_REF_NAME}"
-          slug="${tag%-v*}"
-          version="${tag##*-v}"
-          if [ ! -f "${slug}/${slug}.php" ]; then
-            echo "::error::Tag '${tag}' does not match a plugin: ${slug}/${slug}.php not found."
-            exit 1
+          set -euo pipefail
+
+          header_version() {
+            sed -n 's/^ \* Version: *//p' "$1/$1.php" | head -1 | tr -d '[:space:]'
+          }
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            slug="${{ inputs.plugin }}"
+            if [ ! -f "${slug}/${slug}.php" ]; then
+              echo "::error::No such plugin: ${slug}/${slug}.php not found."
+              exit 1
+            fi
+            version="$(header_version "${slug}")"
+            if [ -z "${version}" ]; then
+              echo "::error::${slug}.php has no readable Version: header."
+              exit 1
+            fi
+            tag="${slug}-v${version}"
+          else
+            tag="${GITHUB_REF_NAME}"
+            slug="${tag%-v*}"
+            version="${tag##*-v}"
+            if [ ! -f "${slug}/${slug}.php" ]; then
+              echo "::error::Tag '${tag}' does not match a plugin: ${slug}/${slug}.php not found."
+              exit 1
+            fi
+            header="$(header_version "${slug}")"
+            if [ "${header}" != "${version}" ]; then
+              echo "::error::${slug}.php says Version ${header}, tag says ${version}. Bump the header first."
+              exit 1
+            fi
           fi
+
           echo "slug=${slug}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "Releasing ${slug} ${version} as ${tag}"
 
-      - name: Check the tag matches the plugin's Version header
+      - name: Refuse to re-release a version that already shipped
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          slug="${{ steps.target.outputs.slug }}"
-          tagged="${{ steps.target.outputs.version }}"
-          header="$(sed -n 's/^ \* Version: *//p' "${slug}/${slug}.php" | head -1 | tr -d '[:space:]')"
-          if [ "${header}" != "${tagged}" ]; then
-            echo "::error::${slug}.php says Version ${header}, tag says ${tagged}. Bump the header first."
+          tag="${{ steps.target.outputs.tag }}"
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "::error::Release ${tag} already exists. Bump the version and try again; never re-tag a shipped version."
             exit 1
           fi
 
@@ -55,7 +99,7 @@ jobs:
           slug="${{ steps.target.outputs.slug }}"
           # Zip the plugin folder itself so it unpacks to wp-content/plugins/<slug>/.
           zip -r "${slug}.zip" "${slug}" -x '*.DS_Store' -x '*/.git/*' >/dev/null
-          unzip -l "${slug}.zip" | head -20
+          unzip -l "${slug}.zip"
 
       - name: Publish the release
         env:
@@ -63,10 +107,18 @@ jobs:
         run: |
           slug="${{ steps.target.outputs.slug }}"
           version="${{ steps.target.outputs.version }}"
-          notes="$(sed -n "/^## \[\?${version}\]\?/,/^## /p" "${slug}/CHANGELOG.md" | sed '$d')"
+          tag="${{ steps.target.outputs.tag }}"
+
+          notes="$(sed -n "/^## \[\?${version}\]\?/,/^## /p" "${slug}/CHANGELOG.md" 2>/dev/null | sed '$d')"
           if [ -z "${notes}" ]; then
             notes="See ${slug}/CHANGELOG.md."
           fi
-          gh release create "${GITHUB_REF_NAME}" "${slug}.zip" \
+
+          # --target creates the tag at this commit when it does not exist yet,
+          # which is what makes the dropdown run work without a pushed tag.
+          gh release create "${tag}" "${slug}.zip" \
+            --target "${GITHUB_SHA}" \
             --title "${slug} ${version}" \
             --notes "${notes}"
+
+          echo "Published ${tag}"
