@@ -47,8 +47,8 @@ the others.
 If you would rather tag by hand, that still works:
 
 ```bash
-git tag scout-seo-v0.2.0
-git push origin scout-seo-v0.2.0
+git tag scout-core-v1.0.2
+git push origin scout-core-v1.0.2
 ```
 
 Here the tag has to match the plugin's `Version:` header, and the build fails on
@@ -90,12 +90,12 @@ screen is where those notes show up.
 
 ## The updater file itself
 
-`includes/class-scout-plugin-updater.php` is identical in all five plugins, so
+`includes/class-scout-plugin-updater.php` is identical in every plugin, so
 each one can update itself when the others are inactive. Change it in one place
 and copy it to the rest:
 
 ```bash
-for p in scout-schema scout-seo scout-forms-guard scout-rvpark; do
+for p in scout-forms-guard scout-rvpark; do
   cp scout-core/includes/class-scout-plugin-updater.php "$p/includes/"
 done
 ```

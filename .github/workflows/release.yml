@@ -7,7 +7,7 @@ name: Release
 # disagree with the code, and the tag is created for you.
 #
 # Or by tag, if you prefer the command line:
-#   git tag scout-seo-v0.2.0 && git push origin scout-seo-v0.2.0
+#   git tag scout-core-v1.0.2 && git push origin scout-core-v1.0.2
 #
 # Either way it builds <slug>.zip and attaches it to a GitHub release. Sites
 # running that plugin pick the update up within a few hours.
@@ -21,8 +21,6 @@ on:
         type: choice
         options:
           - scout-core
-          - scout-schema
-          - scout-seo
           - scout-forms-guard
           - scout-rvpark
   push:

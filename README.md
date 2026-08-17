@@ -22,11 +22,13 @@ instead of a data-loss event.
 
 | Plugin | Version | What it does | Requires |
 |---|---|---|---|
-| [`scout-core`](scout-core/) | 0.1.0 | The content model: custom post types, native fields, the business identity, and Block Bindings. Everything else reads from it. | WP 6.5+, PHP 8.0+ |
-| [`scout-schema`](scout-schema/) | 0.1.0 | One JSON-LD `@graph` (LocalBusiness, WebSite, FAQPage, Review/AggregateRating, BlogPosting) built from Scout Core data. | `scout-core` |
-| [`scout-seo`](scout-seo/) | 0.1.0 | Titles, meta descriptions, canonicals, Open Graph, Twitter tags, robots control, an editor snippet preview, and XML sitemap tuning. The Yoast replacement. | WP 6.5+, PHP 8.0+ |
+| [`scout-core`](scout-core/) | 1.0.0 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
 | [`scout-forms-guard`](scout-forms-guard/) | 0.1.0 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
 | [`scout-rvpark`](scout-rvpark/) | 0.1.0 | The worked example of the companion pattern: one client's specific content types, registered without forking Scout Core. | `scout-core` |
+
+> `scout-schema` and `scout-seo` shipped separately until Scout Core 1.0.0 folded
+> them in as `includes/schema/` and `includes/seo/`. They are retired as
+> standalone plugins.
 
 Every plugin carries its own semver, its own `CHANGELOG.md`, and its own README.
 A fix in any of them ships to every client through a normal plugin update.
@@ -39,25 +41,24 @@ A fix in any of them ships to every client through a normal plugin update.
 from it rather than storing their own copies.
 
 ```
-                    ┌─────────────────┐
-                    │   scout-core    │  post types, fields,
-                    │  (the data)     │  business identity, bindings
-                    └────────┬────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-     ┌────────▼──────┐ ┌─────▼───────┐ ┌────▼──────────┐
-     │ scout-schema  │ │  scout-seo  │ │ scout-{client}│
-     │   JSON-LD     │ │  head tags  │ │  their types  │
-     └───────────────┘ └─────────────┘ └───────────────┘
+          ┌──────────────────────────────────┐
+          │            scout-core            │
+          │  business identity · content     │
+          │  model · schema · SEO · admin    │
+          └────────────────┬─────────────────┘
+                           │ scout_core_register
+                  ┌────────▼─────────┐
+                  │  scout-{client}  │  their own types
+                  └──────────────────┘
 
-     ┌────────────────────┐
-     │ scout-forms-guard  │  independent, hooks Gravity Forms
-     └────────────────────┘
+     ┌────────────────────┐   ┌────────────────┐
+     │ scout-forms-guard  │   │ scout-optimize │  both independent
+     └────────────────────┘   └────────────────┘
 ```
 
-`scout-schema` and `scout-seo` split the job cleanly: schema owns the JSON-LD,
-SEO owns the `<head>` tags. They do not overlap.
+Everything reads from the one business identity, so a client's name, address,
+and phone are typed in once and appear in the schema, the head tags, and the
+page copy without drifting apart.
 
 ---
 
@@ -66,13 +67,11 @@ SEO owns the `<head>` tags. They do not overlap.
 Activate in this order so dependencies resolve cleanly:
 
 1. `scout-core`
-2. `scout-schema`
-3. `scout-seo`
-4. `scout-forms-guard`
-5. The client companion plugin (`scout-rvpark` is the reference copy)
+2. `scout-forms-guard`
+3. The client companion plugin (`scout-rvpark` is the reference copy)
 
-Then go to **Settings → Scout Business** and fill in the name, address, phone,
-and email. That is the one place the business facts live, and every other plugin
+Then open the Scout admin screen and fill in the name, address, phone, and
+email. That is the one place the business facts live, and every other plugin
 reads from it.
 
 Full walkthrough, including how to set up a free local test site and verify the

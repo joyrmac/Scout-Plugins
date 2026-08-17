@@ -1,13 +1,15 @@
 # Scout Core
 
-The content model for every Scout website: custom post types, native fields,
-the business identity, and the Block Bindings that let the theme display all of
-it. It is a **plugin on purpose**. Content and SEO live here, design lives in
-the theme, so you can redesign a client's site without losing their content.
+The engine for a Scout client site: the business identity, the content model
+(post types, native fields, Block Bindings), the JSON-LD schema graph, and the
+in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard.
 
-> This README is also the build order for the whole in-house platform. The
-> suite overview and how the plugins connect are in the
-> [repo README](../README.md).
+It is a **plugin on purpose**. Content and SEO live here, design lives in the
+theme, so a client's site can be redesigned without losing either.
+
+> **1.0.0 folded in two plugins.** `scout-schema` and `scout-seo` used to ship
+> separately and are now `includes/schema/` and `includes/seo/`. They are
+> retired as standalone plugins. Everything a site needs is here.
 
 ---
 
@@ -24,8 +26,9 @@ instead of a data-loss event.
 
 1. Copy `scout-core/` into `wp-content/plugins/`.
 2. Activate it. On activation it registers the types and flushes rewrite rules.
-3. Go to **Settings → Scout Business** and fill in the NAP, hours, and profiles.
-4. (Per client) add a companion plugin for that client's specific types. See
+3. Fill in the business identity from the Scout admin screen: name, address,
+   phone, email, hours, profiles.
+4. (Per client) add a companion plugin for that client's own types. See
    [`../scout-rvpark`](../scout-rvpark) for the worked example.
 
 Requires WordPress 6.5+ (for Block Bindings) and PHP 8.0+.
@@ -34,31 +37,40 @@ Requires WordPress 6.5+ (for Block Bindings) and PHP 8.0+.
 
 ## What ships in the box
 
-**Universal post types** (confirmed across the Maravela's and North Crest builds):
+**Universal post types**
 
 | Type | Title | Editor | Fields |
 |---|---|---|---|
-| `testimonial` | Author name | The quote | location, rating, source, source URL, date, + featured image for handwritten scans |
+| `testimonial` | Author name | The quote | location, rating, source, source URL, date, plus a featured image for handwritten scans |
 | `faq` | The question | The answer | none (title + content is all FAQPage needs) |
 
-**Business identity** (`Settings → Scout Business`): name, legal name, schema
-type, phone, email, full address, price range, geo, hours, and profile URLs.
-One option, read everywhere.
+**Business identity.** Name, legal name, schema type, phone, email, full
+address, price range, geo, hours, and profile URLs. One option, read everywhere,
+typed in once.
+
+**Schema.** One JSON-LD `@graph` in `wp_head`: LocalBusiness (or the configured
+subtype), WebSite, FAQPage, Review and AggregateRating from testimonials, and
+BlogPosting on posts. Stable `@id`s throughout.
+
+**SEO.** Titles, meta descriptions, canonicals, Open Graph and Twitter tags,
+robots control, an editor snippet preview with live character counts, global
+defaults, and tuning of WordPress core's own XML sitemap. The Yoast replacement.
 
 ---
 
 ## Adding a client's own types (the companion pattern)
 
-Never fork `scout-core`. Each client gets a tiny companion plugin that registers
-their specific types through the public API, on the `scout_core_register` action:
+Never fork `scout-core`. Each client gets a small companion plugin that
+registers their types through the public API, on the `scout_core_register`
+action:
 
 ```php
 add_action( 'scout_core_register', function () {
-    scout_core_register_type( 'amenity', array(
-        'singular' => 'Amenity',
-        'plural'   => 'Amenities',
+    scout_core_register_type( 'attorney', array(
+        'singular' => 'Attorney',
+        'plural'   => 'Attorneys',
         'fields'   => array(
-            'summary' => array( 'label' => 'Summary', 'control' => 'textarea' ),
+            'bar_number' => array( 'label' => 'Bar Number', 'control' => 'text' ),
         ),
     ) );
 } );
@@ -73,8 +85,7 @@ stored as meta key `scout_summary`.
 
 ## Displaying it in the theme (Block Bindings)
 
-Design lives in the theme; this is the seam where content flows into it. Bind a
-block's content to a field on the current post, or to the business identity:
+Design lives in the theme; this is the seam where content flows into it.
 
 ```html
 <!-- A field on the current post -->
@@ -90,34 +101,16 @@ block's content to a field on the current post, or to the business identity:
 <!-- /wp:paragraph -->
 ```
 
-The editor types the data into a field; the design never changes unless the
-theme changes. That is the content/design separation, enforced.
+The editor types data into a field; the design never changes unless the theme
+changes. That is the content/design separation, enforced.
 
 ---
 
-## The platform build order (first to last)
+## Updates
 
-`scout-core` is step one because everything else reads from it. Build in this
-order:
-
-1. **`scout-core`** — content model + business identity + bindings. ✅ this plugin.
-2. **`scout-base`** (theme) — block theme, `theme.json` design tokens, templates
-   and patterns that bind to scout-core fields. The static HTML from Phase 5
-   converts into this.
-3. **`scout-schema`** — JSON-LD graph (LocalBusiness/subtype, FAQPage,
-   Review/AggregateRating, BlogPosting), reading the business identity and the
-   testimonial/faq content. Stable `@id`s.
-4. **`scout-seo`** — titles, meta descriptions, canonicals, OG/Twitter tags, XML
-   sitemap, robots, and the editor snippet-preview meta box. The Yoast replacement.
-5. **`scout-forms-guard`** — honeypot + timestamp + signed-token spam protection,
-   hooked into Gravity Forms (the one third-party plugin we keep).
-6. **`scout-importer`** (optional) — WP-CLI import/sync of structured content for
-   builds and migrations (the self-healing provisioning pattern, kept out of the
-   theme so content survives a redesign).
-
-Each gets its own folder in this repo, its own semver, and its own
-`CHANGELOG.md`. A fix in any of them ships to every client through a normal
-plugin update.
+The plugin updates itself from the Scout Plugins releases through the
+`Update URI:` header, so a fix ships to every client site through the normal
+Plugins screen. See [`../RELEASING.md`](../RELEASING.md).
 
 ---
 

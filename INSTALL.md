@@ -1,7 +1,7 @@
 # Install & See It Work
 
-A plain, no-experience-needed walkthrough to get the five Scout plugins running
-on a test WordPress so you can actually see them. Do it in order. Each step is
+A plain, no-experience-needed walkthrough to get the Scout plugins running on a
+test WordPress so you can actually see them. Do it in order. Each step is
 small.
 
 ---
@@ -27,7 +27,7 @@ Clone this repo, or download it as a zip from GitHub and unzip it:
 git clone https://github.com/joyrmac/Scout-Plugins.git
 ```
 
-Each top-level folder (`scout-core`, `scout-schema`, and so on) is a complete
+Each top-level folder (`scout-core`, `scout-forms-guard`, and so on) is a complete
 WordPress plugin.
 
 **To install:** copy the plugin folders straight into your site's
@@ -41,11 +41,9 @@ zip contains `scout-core/scout-core.php`, not just the loose files), then use
 
 ## Step 3 — Turn the plugins on, in this order
 
-1. `scout-core` (the filing cabinet, do this one first)
-2. `scout-schema`
-3. `scout-seo`
-4. `scout-forms-guard`
-5. `scout-rvpark`
+1. `scout-core` (the engine, do this one first)
+2. `scout-forms-guard`
+3. `scout-rvpark`
 
 > `scout-forms-guard` only does something once Gravity Forms is installed. It's
 > fine to activate it now; it just sits quietly until then.
@@ -57,7 +55,7 @@ zip contains `scout-core/scout-core.php`, not just the loose files), then use
 
 ## Step 4 — Fill in the business info (2 min)
 
-**Settings → Scout Business.** Type in the name, address, phone, email. Save.
+Open the **Scout** admin screen. Type in the name, address, phone, email. Save.
 This is the one place the business facts live, and every other plugin reads
 from it.
 
@@ -73,7 +71,8 @@ In the left admin menu you'll now see new items. Click them and add one of each:
 - **Amenities** → add one (this came from `scout-rvpark`).
 
 Then open any **Page** or **Post**. Scroll down. You'll see a **Scout SEO** box
-with a Google-style preview that updates as you type. That's your SEO control.
+with a Google-style preview that updates as you type. That's your SEO control,
+and it comes from Scout Core's SEO module.
 
 ---
 
@@ -85,7 +84,7 @@ URL:
 1. View your homepage, right-click → **View Page Source**, copy it all.
 2. Go to https://validator.schema.org/ → paste → **Run**.
 3. You should see your business listed as `LocalBusiness` (or your configured
-   type), plus any reviews and FAQs. That's `scout-schema` working.
+   type), plus any reviews and FAQs. That's Scout Core's schema module working.
 
 ---
 

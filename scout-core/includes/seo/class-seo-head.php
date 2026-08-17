@@ -127,6 +127,12 @@ final class Scout_SEO_Head {
 				}
 			}
 		}
+		if ( is_front_page() && class_exists( 'Scout_Core_SEO_Settings' ) ) {
+			$home = Scout_Core_SEO_Settings::value( 'home_description' );
+			if ( '' !== $home ) {
+				return $home;
+			}
+		}
 		if ( is_category() || is_tag() || is_tax() ) {
 			$term_desc = wp_strip_all_tags( term_description() );
 			if ( '' !== $term_desc ) {
@@ -170,6 +176,12 @@ final class Scout_SEO_Head {
 			$url = get_the_post_thumbnail_url( get_queried_object_id(), 'full' );
 			if ( $url ) {
 				return $url;
+			}
+		}
+		if ( class_exists( 'Scout_Core_SEO_Settings' ) ) {
+			$default = Scout_Core_SEO_Settings::value( 'default_image' );
+			if ( '' !== $default ) {
+				return $default;
 			}
 		}
 		$icon = get_site_icon_url();
