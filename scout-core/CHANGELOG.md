@@ -1,5 +1,19 @@
 # Scout Core — Changelog
 
+## 1.0.2
+Deleting the plugin no longer erases the client's business identity or their
+per-page SEO work.
+
+- `uninstall.php` wiped `scout_business` (the whole NAP, hours, geo, and
+  profiles) and every `_scout_seo_*` override on every page. Posts were spared,
+  which is what the comment promised, but the identity and the SEO work were
+  not, and losing them is invisible: the pages stay up and quietly stop saying
+  what they were set to say.
+- Both are now kept unless `purge_on_uninstall` is explicitly turned on. That
+  matters because deleting a plugin is a normal way to troubleshoot, migrate, or
+  re-install a broken copy, and none of those should cost a client anything.
+- Fixed a stale transient key left over from the retired manifest updater.
+
 ## 1.0.1
 Updates now come from the Scout Plugins releases instead of a hosted manifest.
 
