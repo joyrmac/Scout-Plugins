@@ -19,7 +19,7 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 | Scout Recon | scoutrecon.app | `scoutrecon1` | `joyrmac/Scout-Media-Raleigh` (`wordpress/recon-deploy/`, separation plan in `ops/`) | own product |
 | Hair by Patrick McGuire | **TODO** (live domain not launched; staging at hairbypatrick.wpenginepowered.com) | `hairbypatrick` (staging: indexing blocked in code) | **TODO** | **TODO** |
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
-| North Crest RV Park | **TODO** | **TODO** | **TODO** | **TODO** |
+| North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
 
 ## Versions
 
@@ -60,6 +60,15 @@ Where credentials live, not what they are. **TODO: fill and confirm 2FA per row.
 | GitHub org/repos | Joy, Sean | github.com/joyrmac | **TODO** |
 | Google (GA4, GSC, GBP) per client | **TODO** | **TODO** | **TODO** |
 | Gravity Forms license | **TODO** | **TODO** | **TODO** |
+
+## Deploy pipeline groundwork
+
+WP Engine **GitPush is available on our plan** (verified on `rlcnorthcrestr`,
+2026-09-03: git remote `git@git.wpengine.com:rlcnorthcrestr.git`, SSH key per
+developer). That is the future theme-deploy path (push to deploy instead of
+zip uploads). Division of labor stays clean: **themes deploy via GitPush,
+plugins update themselves via GitHub releases**; never manage the same
+directory both ways.
 
 ## Rituals
 
