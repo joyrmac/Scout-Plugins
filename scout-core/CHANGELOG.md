@@ -1,5 +1,16 @@
 # Scout Core — Changelog
 
+## 1.0.3
+Updates now install themselves.
+
+- The shared updater opts this plugin into WordPress's own automatic updates
+  (`auto_update_plugin`), so a published release reaches every client site on
+  the normal twice-daily check with nobody logging in to press Update.
+- A site can opt out by defining `SCOUT_DISABLE_AUTO_UPDATES` as `true` in
+  `wp-config.php`; updates then wait on the Plugins screen as before.
+- Only Scout plugins are affected. Every other plugin's auto-update decision
+  passes through untouched.
+
 ## 1.0.2
 Deleting the plugin no longer erases the client's business identity or their
 per-page SEO work.

@@ -14,7 +14,10 @@ in `includes/class-scout-plugin-updater.php` answers by looking up this repo's
 newest release for that plugin.
 
 The update then appears on the client's **Plugins** screen like any other, and
-WordPress's own **enable auto-updates** toggle works on it. Nothing extra is
+**installs itself automatically** on WordPress's own twice-daily check: the
+updater opts Scout plugins into core's automatic updates, so publishing a
+release here is the whole job. A site opts out by defining
+`SCOUT_DISABLE_AUTO_UPDATES` as `true` in `wp-config.php`. Nothing extra is
 installed on the client site and no third-party updater service is involved.
 
 Sites check for updates roughly twice a day, and the lookup is cached for six

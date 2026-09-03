@@ -22,6 +22,7 @@ on:
         options:
           - scout-core
           - scout-forms-guard
+          - scout-optimize
           - scout-rvpark
   push:
     tags:

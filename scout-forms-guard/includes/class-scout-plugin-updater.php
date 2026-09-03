@@ -90,6 +90,30 @@ final class Scout_Plugin_Updater {
 		add_filter( 'update_plugins_github.com', array( $updater, 'check' ), 10, 3 );
 		add_filter( 'plugins_api', array( $updater, 'details' ), 10, 3 );
 		add_action( 'upgrader_process_complete', array( $updater, 'flush' ), 10, 0 );
+		add_filter( 'auto_update_plugin', array( $updater, 'auto_update' ), 10, 2 );
+	}
+
+	/**
+	 * Install this plugin's updates automatically, so a release reaches the
+	 * whole roster on WordPress's own twice-daily check with nobody logging in
+	 * to press Update. Only ever answers for this plugin's own update offers;
+	 * every other plugin's decision passes through untouched.
+	 *
+	 * Opt a site out by defining SCOUT_DISABLE_AUTO_UPDATES as true in
+	 * wp-config.php; updates then wait on the Plugins screen as before.
+	 *
+	 * @param bool|null $update Whether to auto-update, as decided so far.
+	 * @param object    $item   The update offer, carrying the id set by check().
+	 * @return bool|null
+	 */
+	public function auto_update( $update, $item ) {
+		if ( ! isset( $item->id ) || 'github.com/' . self::REPO . '/' . $this->slug !== $item->id ) {
+			return $update;
+		}
+		if ( defined( 'SCOUT_DISABLE_AUTO_UPDATES' ) && SCOUT_DISABLE_AUTO_UPDATES ) {
+			return $update;
+		}
+		return true;
 	}
 
 	/**

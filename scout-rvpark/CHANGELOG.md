@@ -1,5 +1,13 @@
 # Scout — North Crest RV Park — Changelog
 
+## 0.1.1 — 2026-09-03
+
+Updates now install themselves.
+
+- The shared updater opts this plugin into WordPress's automatic updates;
+  define `SCOUT_DISABLE_AUTO_UPDATES` as `true` in `wp-config.php` to opt a
+  site out. Other plugins' auto-update decisions are untouched.
+
 ## 0.1.0 — 2026-06-18
 
 Initial scaffold.

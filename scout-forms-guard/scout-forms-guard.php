@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Forms Guard
  * Description:       In-house spam protection for Gravity Forms: a hidden honeypot, a time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  gravityforms
