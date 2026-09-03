@@ -33,7 +33,7 @@ disabled).
 | Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
 | Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.0** | 0.1.0 | 0.6.0 | **2.8.11 (old) + unregistered license** | Akismet 5.7.2 (active) |
 | Maravela's | Maravela's theme **TODO** | update pending | **1.0.0** | 0.1.0 | 0.6.0 (inactive) | 3.1.0.2 | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (inactive) |
-| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.0** | 0.1.0 | 0.6.0 | 3.1.0.2 (just updated) | GTM4WP 2.0.0 (active), Smush 4.3.2 (inactive) |
+| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.3 ✓** (self-updating, installed 2026-09-03) | **0.1.1 ✓** | **0.6.0 — still needs the 0.7.0 zip** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓** |
 
 Current repo versions (release these): scout-core **1.0.3**, scout-forms-guard
 **0.1.1**, scout-optimize **0.7.0**, scout-rvpark **0.1.1**. Every deployed
