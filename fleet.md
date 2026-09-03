@@ -35,10 +35,11 @@ disabled).
 | Maravela's | Maravela's theme **TODO** | update pending | **1.0.0** | 0.1.0 | 0.6.0 (inactive) | 3.1.0.2 | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (inactive) |
 | North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.3 ✓** (self-updating, installed 2026-09-03) | **0.1.1 ✓** | **0.6.0 — still needs the 0.7.0 zip** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓** |
 
-Current repo versions (release these): scout-core **1.0.3**, scout-forms-guard
-**0.1.1**, scout-optimize **0.7.0**, scout-rvpark **0.1.1**. Every deployed
-copy predates the working self-updater, so each site needs one manual upload
-of the current zips; after that, published releases install themselves.
+**Auto-update channel: LIVE as of 2026-09-03.** Published releases:
+scout-core **1.0.3**, scout-forms-guard **0.1.1**, scout-optimize **0.7.0**,
+scout-rvpark **0.1.1**. Any site running these versions installs every future
+release automatically (twice-daily check). Sites still on older copies need
+the one manual zip upload first; track that per site in the Versions table.
 
 ## How each site updates today (to be replaced by Site Sync)
 
