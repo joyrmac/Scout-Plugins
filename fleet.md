@@ -35,12 +35,11 @@ disabled).
 | Maravela's | Maravela's theme **TODO** | current | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓ (active; keep the delivery toggles off — see drift item on the hero)** | **3.1.1 ✓** | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (active). On the auto-update channel 2026-09-03. |
 | North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.4 ✓** (1.0.3 fataled, fixed same day) | **0.1.1 ✓** | **0.7.0 ✓** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓**. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
 
-**Auto-update channel: LIVE as of 2026-09-03.** Published releases:
-scout-forms-guard **0.1.1**, scout-optimize **0.7.0**, scout-rvpark **0.1.1**.
-**scout-core 1.0.4 still needs publishing** (fix merged; run Actions → Release
-→ scout-core) **and the broken 1.0.3 release needs deleting.** Any site on
-current versions installs every future release automatically (twice-daily
-check).
+**Auto-update channel: LIVE and healthy as of 2026-09-03.** Published:
+scout-core **1.0.4**, scout-forms-guard **0.1.1**, scout-optimize **0.7.0**,
+scout-rvpark **0.1.1**. Every site on these versions installs future releases
+automatically (twice-daily check). One cleanup left: **delete the broken
+scout-core 1.0.3 release** (Releases page) so it can never be installed.
 
 ## How each site updates today (to be replaced by Site Sync)
 
