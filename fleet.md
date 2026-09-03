@@ -6,8 +6,8 @@ updates today, and who has access. The platform map
 update it whenever a site deploys, a plugin updates, or a client joins or
 leaves. Fields marked **TODO** need Joy or Sean to fill from the live installs.
 
-Last verified: 2026-09-03 (versions from wp-admin screenshots and repo files;
-everything else pending a fill-in pass).
+Last verified: 2026-09-03 (Plugins + Updates screenshots from all five
+installs; remaining TODOs need the WP Engine portal and account answers).
 
 ---
 
@@ -17,22 +17,27 @@ everything else pending a fill-in pass).
 |---|---|---|---|---|
 | Scout Media | scoutraleigh.com | **TODO** | `joyrmac/Scout-Media-Raleigh` | own site |
 | Scout Recon | scoutrecon.app | `scoutrecon1` | `joyrmac/Scout-Media-Raleigh` (`wordpress/recon-deploy/`, separation plan in `ops/`) | own product |
-| Hair by Patrick McGuire | **TODO** | **TODO** (staging: indexing blocked in code) | **TODO** | **TODO** |
+| Hair by Patrick McGuire | **TODO** (live domain not launched; staging at hairbypatrick.wpenginepowered.com) | `hairbypatrick` (staging: indexing blocked in code) | **TODO** | **TODO** |
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | **TODO** | **TODO** | **TODO** | **TODO** |
 
 ## Versions
 
-| Site | Theme (version) | WordPress | scout-core | Other plugins | Updater active? |
-|---|---|---|---|---|---|
-| Scout Media | scout-media 1.21.6 | **TODO** | not installed (theme owns SEO/schema/setup) | Gravity Forms **TODO** | n/a |
-| Scout Recon | recon (static deploy) **TODO** | **TODO** | **TODO** | **TODO** | **TODO** |
-| Hair by Patrick | HBP theme 0.9.12 | 7.1 | **TODO** (Scout menu present) | Gravity Forms **TODO** | **TODO** |
-| Maravela's | Maravela's theme **TODO** | update pending (7.1 offered) | **TODO** (Scout menu present) | Genesis Blocks (flag: third-party, per architecture only Gravity Forms is allowed), Gravity Forms **TODO** | **TODO** |
-| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.0 (latest is 1.0.2 — update due)** | scout-optimize, Gravity Forms + scout-forms-guard | **TODO** |
+All five installs run WP Engine Smart Plugin Manager 6.1.8 as the vendor
+update layer (most plugins "Managed by" it, auto-updates otherwise largely
+disabled).
+
+| Site | Theme (version) | WordPress | scout-core | scout-forms-guard | scout-optimize | Gravity Forms | Third-party beyond GF |
+|---|---|---|---|---|---|---|---|
+| Scout Media | scout-media 1.21.6 | **TODO** | not installed (theme owns SEO/schema/setup) | 0.1.0 | **0.4.0 (behind 0.6.0)** + Pilot Toggle 1.1.0 (temp, delete after pilot) | 3.1.0.2 + reCAPTCHA add-on 2.2.2 | WordPress Importer (inactive-ok) |
+| Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
+| Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.0** | 0.1.0 | 0.6.0 | **2.8.11 (old) + unregistered license** | Akismet 5.7.2 (active) |
+| Maravela's | Maravela's theme **TODO** | update pending | **1.0.0** | 0.1.0 | 0.6.0 (inactive) | 3.1.0.2 | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (inactive) |
+| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.0** | 0.1.0 | 0.6.0 | 3.1.0.2 (just updated) | GTM4WP 2.0.0 (active), Smush 4.3.2 (inactive) |
 
 Latest platform releases (this repo): scout-core **1.0.2**, scout-forms-guard
-**0.1.0**. Any site below these is drift; close it on the next update pass.
+**0.1.0**. Every client site is on scout-core 1.0.0; per the 1.0.1 changelog,
+each needs one manual upload before the GitHub-releases updater can take over.
 
 ## How each site updates today (to be replaced by Site Sync)
 
@@ -68,14 +73,38 @@ Where credentials live, not what they are. **TODO: fill and confirm 2FA per row.
   a new site, and minutes per site per month to maintain. Falling numbers mean
   the platform is working.
 
-## Known drift to fix (as of 2026-09-03)
+## Known drift to fix (as of 2026-09-03, from the Plugins pass)
 
-1. North Crest runs scout-core 1.0.0; 1.0.2 fixes an uninstall data-loss bug.
-   Update at the next touch (needs the one manual upload noted in the 1.0.1
-   changelog).
-2. Maravela's carries Genesis Blocks, outside the one-third-party-plugin rule.
-   Decide: replace its blocks or record the deviation in that repo's
-   `decisions.md`.
-3. Maravela's has a WordPress update pending.
-4. Scout Media runs no scout plugins; its theme carries SEO/schema/setup
-   itself. Acceptable until Site Sync, then converge.
+Ordered by risk:
+
+1. **scout-core 1.0.0 on all three client sites** (HBP, Maravela's, North
+   Crest); 1.0.2 fixes an uninstall data-loss bug. Each needs the one manual
+   upload from the 1.0.1 changelog, after which the GitHub-releases updater
+   handles future releases. Do all three in one pass.
+2. **HBP: Gravity Forms 2.8.11 with an unregistered license.** Old version and
+   no update channel on a form the launch depends on. Register the license and
+   update before launch; this is a launch blocker.
+3. **HBP: Akismet active.** Architecture says scout-forms-guard replaces it
+   (no third-party calls). Remove before launch; also resolves the Akismet
+   setup nag.
+4. **Scout Media: 3 pages from a theme update missing** (seo-content,
+   website-security, local-seo); the admin notice offers Run Scout setup. Run
+   it on the next admin visit.
+5. **Scout Media: scout-optimize 0.4.0** while clients run 0.6.0; update, and
+   delete the Pilot Toggle helper when the pilot is done.
+6. **Scout Media: Gravity Forms reCAPTCHA add-on** contradicts the
+   forms-guard approach (no reCAPTCHA). Confirm which form still uses it, then
+   retire it or record the deviation.
+7. **Maravela's: Genesis Blocks Pro active** (third-party page builder beyond
+   the Gravity-Forms-only rule); its pages import as `wp:html`, so audit what
+   actually depends on it, then replace or record the deviation. Also:
+   scout-optimize installed but inactive (activate or remove) and a WordPress
+   update pending.
+8. **North Crest: GTM4WP active** (third-party; likely deliberate for Tag
+   Manager — record it in that repo's `decisions.md` or replace with a theme
+   snippet) and **Smush inactive** (redundant with scout-optimize; delete).
+9. **Scout Recon runs no Scout plugins** and carries Akismet + Genesis Blocks.
+   Its stack is its own product decision; record it deliberately rather than
+   by accident.
+10. **Scout Media runs no scout-core**; the theme owns SEO/schema/setup.
+    Acceptable until Site Sync, then converge.
