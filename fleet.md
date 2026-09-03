@@ -78,9 +78,13 @@ Where credentials live, not what they are. **TODO: fill and confirm 2FA per row.
 Ordered by risk:
 
 1. **scout-core 1.0.0 on all three client sites** (HBP, Maravela's, North
-   Crest); 1.0.2 fixes an uninstall data-loss bug. Each needs the one manual
-   upload from the 1.0.1 changelog, after which the GitHub-releases updater
-   handles future releases. Do all three in one pass.
+   Crest); 1.0.2 fixes an uninstall data-loss bug. Root cause found: **no
+   1.0.x release was ever published**; the newest GitHub release of every
+   plugin is 0.1.0 (2026-08-13), so even a working updater had nothing newer
+   to find. The fix is one pass: publish current releases (Actions → Release
+   per plugin), then manually upload fresh zips of all Scout plugins to each
+   site once (deployed 1.0.0/0.1.0 copies predate the working updater). From
+   1.0.3 / 0.1.1 on, releases install themselves automatically.
 2. **HBP: Gravity Forms 2.8.11 with an unregistered license.** Old version and
    no update channel on a form the launch depends on. Register the license and
    update before launch; this is a launch blocker.
