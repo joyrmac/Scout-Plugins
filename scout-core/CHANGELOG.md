@@ -1,5 +1,15 @@
 # Scout Core — Changelog
 
+## 1.0.4
+Fixes the fatal that took a site down on activation.
+
+- `scout-core.php` still called `Scout_Core_Updater::init()`, the retired
+  manifest updater whose file 1.0.1 deleted. Every 1.0.1+ install fataled on
+  every page load ("Class Scout_Core_Updater not found"); no site had run
+  1.0.1+ until 2026-09-03, when it took North Crest down on install. The stale
+  call is removed. Lesson recorded: `php -l` cannot catch a call to a missing
+  class, so a release needs an activation smoke test, not just a lint.
+
 ## 1.0.3
 Updates now install themselves.
 
