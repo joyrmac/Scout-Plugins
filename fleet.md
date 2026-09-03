@@ -110,16 +110,23 @@ Ordered by risk:
 6. **Scout Media: Gravity Forms reCAPTCHA add-on** contradicts the
    forms-guard approach (no reCAPTCHA). Confirm which form still uses it, then
    retire it or record the deviation.
-7. **Maravela's: Genesis Blocks Pro active** (third-party page builder beyond
+7. **Maravela's: hero images 404 via relative srcset.** The homepage hero
+   slides carry `srcset="assets/photos/..."` (relative, from the static
+   build) while `src` is absolute; browsers pick srcset and 404, blanking
+   the hero. Hotfixed by stripping srcset/sizes on the Home page in wp-admin
+   (2026-09-03); the permanent fix is in the theme's bundled page source,
+   pending access to the Maravela's theme repo. Scout Optimize was ruled
+   out (no picture rewriting in the served page).
+8. **Maravela's: Genesis Blocks Pro active** (third-party page builder beyond
    the Gravity-Forms-only rule); its pages import as `wp:html`, so audit what
    actually depends on it, then replace or record the deviation. Also:
    scout-optimize installed but inactive (activate or remove) and a WordPress
    update pending.
-8. **North Crest: GTM4WP active** (third-party; likely deliberate for Tag
+9. **North Crest: GTM4WP active** (third-party; likely deliberate for Tag
    Manager — record it in that repo's `decisions.md` or replace with a theme
    snippet) and **Smush inactive** (redundant with scout-optimize; delete).
-9. **Scout Recon runs no Scout plugins** and carries Akismet + Genesis Blocks.
+10. **Scout Recon runs no Scout plugins** and carries Akismet + Genesis Blocks.
    Its stack is its own product decision; record it deliberately rather than
    by accident.
-10. **Scout Media runs no scout-core**; the theme owns SEO/schema/setup.
+11. **Scout Media runs no scout-core**; the theme owns SEO/schema/setup.
     Acceptable until Site Sync, then converge.
