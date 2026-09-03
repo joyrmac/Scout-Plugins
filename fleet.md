@@ -31,7 +31,7 @@ disabled).
 |---|---|---|---|---|---|---|---|
 | Scout Media | scout-media 1.21.6 | **TODO** | not installed (theme owns SEO/schema/setup) | 0.1.0 | **0.4.0 (behind 0.6.0)** + Pilot Toggle 1.1.0 (temp, delete after pilot) | 3.1.0.2 + reCAPTCHA add-on 2.2.2 | WordPress Importer (inactive-ok) |
 | Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
-| Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓** | **2.8.11 INACTIVE (deactivated over WP Engine security-risk flag; forms dead until licensed + updated + reactivated). Launch blocker.** | Akismet 5.7.2 (active — remove). On the auto-update channel 2026-09-03. |
+| Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | removing (no forms on this site) | **0.7.0 ✓** | **removing — DECISION 2026-09-03: HBP runs no forms.** Delete order: forms-guard, then GF, then Akismet. Check book/contact pages for stray embeds after. | Akismet: delete. On the auto-update channel 2026-09-03. |
 | Maravela's | Maravela's theme **TODO** | current | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓ (active; keep the delivery toggles off — see drift item on the hero)** | **3.1.1 ✓** | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (active). On the auto-update channel 2026-09-03. |
 | North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.4 ✓** (1.0.3 fataled, fixed same day) | **0.1.1 ✓** | **0.7.0 ✓** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓**. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
 
@@ -97,12 +97,12 @@ Ordered by risk:
    per plugin), then manually upload fresh zips of all Scout plugins to each
    site once (deployed 1.0.0/0.1.0 copies predate the working updater). From
    1.0.3 / 0.1.1 on, releases install themselves automatically.
-2. **HBP: Gravity Forms 2.8.11 with an unregistered license.** Old version and
-   no update channel on a form the launch depends on. Register the license and
-   update before launch; this is a launch blocker.
-3. **HBP: Akismet active.** Architecture says scout-forms-guard replaces it
-   (no third-party calls). Remove before launch; also resolves the Akismet
-   setup nag.
+2. **HBP: forms removed by decision (2026-09-03).** The site runs no forms,
+   so Gravity Forms (flagged as a security risk at 2.8.11), scout-forms-guard,
+   and Akismet all come off. Resolves the old license/security items. Record
+   the no-forms decision in the HBP repo's decisions.md when that repo is
+   attached; verify book/contact pages carry no stray form embeds.
+3. *(resolved into item 2)*
 4. **Scout Media: 3 pages from a theme update missing** (seo-content,
    website-security, local-seo); the admin notice offers Run Scout setup. Run
    it on the next admin visit.
