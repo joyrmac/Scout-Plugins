@@ -31,15 +31,15 @@ disabled).
 |---|---|---|---|---|---|---|---|
 | Scout Media | scout-media 1.21.6 | **TODO** | not installed (theme owns SEO/schema/setup) | 0.1.0 | **0.4.0 (behind 0.6.0)** + Pilot Toggle 1.1.0 (temp, delete after pilot) | 3.1.0.2 + reCAPTCHA add-on 2.2.2 | WordPress Importer (inactive-ok) |
 | Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
-| Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.0** | 0.1.0 | 0.6.0 | **2.8.11 (old) + unregistered license** | Akismet 5.7.2 (active) |
-| Maravela's | Maravela's theme **TODO** | update pending | **1.0.0** | 0.1.0 | 0.6.0 (inactive) | 3.1.0.2 | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (inactive) |
-| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.3 ✓** | **0.1.1 ✓** | **0.7.0 ✓** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓**. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
+| Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | removing (no forms on this site) | **0.7.0 ✓** | **removing — DECISION 2026-09-03: HBP runs no forms.** Delete order: forms-guard, then GF, then Akismet. Check book/contact pages for stray embeds after. | Akismet: delete. On the auto-update channel 2026-09-03. |
+| Maravela's | Maravela's theme **TODO** | current | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓ (active; keep the delivery toggles off — see drift item on the hero)** | **3.1.1 ✓** | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (active). On the auto-update channel 2026-09-03. |
+| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.4 ✓** (1.0.3 fataled, fixed same day) | **0.1.1 ✓** | **0.7.0 ✓** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓**. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
 
-**Auto-update channel: LIVE as of 2026-09-03.** Published releases:
-scout-core **1.0.3**, scout-forms-guard **0.1.1**, scout-optimize **0.7.0**,
-scout-rvpark **0.1.1**. Any site running these versions installs every future
-release automatically (twice-daily check). Sites still on older copies need
-the one manual zip upload first; track that per site in the Versions table.
+**Auto-update channel: LIVE and healthy as of 2026-09-03.** Published:
+scout-core **1.0.4**, scout-forms-guard **0.1.1**, scout-optimize **0.7.0**,
+scout-rvpark **0.1.1**. Every site on these versions installs future releases
+automatically (twice-daily check). One cleanup left: **delete the broken
+scout-core 1.0.3 release** (Releases page) so it can never be installed.
 
 ## How each site updates today (to be replaced by Site Sync)
 
@@ -96,12 +96,12 @@ Ordered by risk:
    per plugin), then manually upload fresh zips of all Scout plugins to each
    site once (deployed 1.0.0/0.1.0 copies predate the working updater). From
    1.0.3 / 0.1.1 on, releases install themselves automatically.
-2. **HBP: Gravity Forms 2.8.11 with an unregistered license.** Old version and
-   no update channel on a form the launch depends on. Register the license and
-   update before launch; this is a launch blocker.
-3. **HBP: Akismet active.** Architecture says scout-forms-guard replaces it
-   (no third-party calls). Remove before launch; also resolves the Akismet
-   setup nag.
+2. **HBP: forms removed by decision (2026-09-03).** The site runs no forms,
+   so Gravity Forms (flagged as a security risk at 2.8.11), scout-forms-guard,
+   and Akismet all come off. Resolves the old license/security items. Record
+   the no-forms decision in the HBP repo's decisions.md when that repo is
+   attached; verify book/contact pages carry no stray form embeds.
+3. *(resolved into item 2)*
 4. **Scout Media: 3 pages from a theme update missing** (seo-content,
    website-security, local-seo); the admin notice offers Run Scout setup. Run
    it on the next admin visit.
@@ -110,16 +110,23 @@ Ordered by risk:
 6. **Scout Media: Gravity Forms reCAPTCHA add-on** contradicts the
    forms-guard approach (no reCAPTCHA). Confirm which form still uses it, then
    retire it or record the deviation.
-7. **Maravela's: Genesis Blocks Pro active** (third-party page builder beyond
+7. **Maravela's: hero images 404 via relative srcset.** The homepage hero
+   slides carry `srcset="assets/photos/..."` (relative, from the static
+   build) while `src` is absolute; browsers pick srcset and 404, blanking
+   the hero. Hotfixed by stripping srcset/sizes on the Home page in wp-admin
+   (2026-09-03); the permanent fix is in the theme's bundled page source,
+   pending access to the Maravela's theme repo. Scout Optimize was ruled
+   out (no picture rewriting in the served page).
+8. **Maravela's: Genesis Blocks Pro active** (third-party page builder beyond
    the Gravity-Forms-only rule); its pages import as `wp:html`, so audit what
    actually depends on it, then replace or record the deviation. Also:
    scout-optimize installed but inactive (activate or remove) and a WordPress
    update pending.
-8. **North Crest: GTM4WP active** (third-party; likely deliberate for Tag
+9. **North Crest: GTM4WP active** (third-party; likely deliberate for Tag
    Manager — record it in that repo's `decisions.md` or replace with a theme
    snippet) and **Smush inactive** (redundant with scout-optimize; delete).
-9. **Scout Recon runs no Scout plugins** and carries Akismet + Genesis Blocks.
+10. **Scout Recon runs no Scout plugins** and carries Akismet + Genesis Blocks.
    Its stack is its own product decision; record it deliberately rather than
    by accident.
-10. **Scout Media runs no scout-core**; the theme owns SEO/schema/setup.
+11. **Scout Media runs no scout-core**; the theme owns SEO/schema/setup.
     Acceptable until Site Sync, then converge.
