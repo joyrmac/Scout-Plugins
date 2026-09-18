@@ -5,6 +5,7 @@
  * the fields. That binding is the separation this whole platform is built on.
  *
  *   scout/field    — a field on the current post   (args: { "key": "summary" })
+ *                    For an image field bind "url" with args { "key": "hero_image", "attribute": "url" }.
  *   scout/business — a value from the business identity (args: { "key": "phone" })
  *
  * Example block markup, in a theme template or pattern:
@@ -55,7 +56,24 @@ final class Scout_Core_Block_Bindings {
 			return null;
 		}
 		$value = get_post_meta( $post_id, scout_core_meta_key( $source_args['key'] ), true );
-		return ( '' === $value ) ? null : $value;
+		if ( '' === $value || null === $value ) {
+			return null;
+		}
+		// Image fields store an attachment ID. Resolve it for image blocks:
+		// bind "url", "id", or "alt" on core/image and get the right piece.
+		$attr = isset( $source_args['attribute'] ) ? $source_args['attribute'] : '';
+		if ( is_numeric( $value ) && 'attachment' === get_post_type( (int) $value ) && in_array( $attr, array( 'url', 'id', 'alt' ), true ) ) {
+			$id = (int) $value;
+			if ( 'id' === $attr ) {
+				return $id;
+			}
+			if ( 'alt' === $attr ) {
+				return (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
+			}
+			$url = wp_get_attachment_image_url( $id, 'full' );
+			return $url ? $url : null;
+		}
+		return $value;
 	}
 
 	public static function get_business( $source_args ) {

@@ -58,6 +58,52 @@ defaults, and tuning of WordPress core's own XML sitemap. The Yoast replacement.
 
 ---
 
+## Page fieldsets: every headline and picture in its own field (1.1.0+)
+
+A designed page has a fixed layout and a set of words and pictures inside it.
+Fieldsets give the editor those words and pictures as labelled fields, grouped
+the way the page reads, and hide the block editor so the layout stays put.
+
+```php
+add_action( 'scout_core_register', function () {
+    scout_core_register_fields( 'about', array(
+        'label'    => 'About page content',
+        'for'      => array( 'template' => 'templates/about.php' ),
+        'sections' => array(
+            'hero' => array(
+                'label'  => 'Top of page',
+                'fields' => array(
+                    'hero_heading' => array( 'label' => 'Headline' ),
+                    'hero_text'    => array( 'label' => 'Intro paragraph', 'control' => 'textarea' ),
+                    'hero_image'   => array( 'label' => 'Background photo', 'control' => 'image' ),
+                ),
+            ),
+        ),
+    ) );
+} );
+```
+
+`for` takes `front_page => true`, `template => 'templates/x.php'`, `slug =>
+'about'`, or `post_type => 'service'` (every post of that type). The theme
+reads a value with `scout_core_field( 'hero_heading' )` and prints an image with
+`scout_core_image( 'hero_image', 'full', array( 'class' => 'hero__img' ) )`.
+
+Site-wide content that belongs to no page (header, footer, a shared call-to-
+action band) goes in a settings group, which appears as its own tab under the
+Scout menu:
+
+```php
+scout_core_register_settings_group( 'site', array(
+    'label'    => 'Site content',
+    'sections' => array( /* same shape as a fieldset */ ),
+) );
+// read: scout_core_setting( 'site', 'footer_tagline' ), scout_core_image( 'site:logo' )
+```
+
+Keep fieldsets to what actually changes. A page of forty fields is still
+better than a page builder, but a paragraph nobody will ever edit can stay in
+the template.
+
 ## Adding a client's own types (the companion pattern)
 
 Never fork `scout-core`. Each client gets a small companion plugin that
@@ -76,8 +122,9 @@ add_action( 'scout_core_register', function () {
 } );
 ```
 
-Field `control` values: `text`, `textarea`, `number`, `url`, `select` (with an
-`options` array). `scout-core` registers the post type, the REST-exposed meta,
+Field `control` values: `text`, `textarea`, `richtext`, `number`, `url`,
+`select` (with an `options` array), `checkbox`, and `image` (a media-library
+picker that stores the attachment ID). `scout-core` registers the post type, the REST-exposed meta,
 the editor meta box, and the block bindings for you. Field key `summary` is
 stored as meta key `scout_summary`.
 
