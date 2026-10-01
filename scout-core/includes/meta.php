@@ -23,7 +23,7 @@ final class Scout_Core_Meta {
 						'single'            => true,
 						'type'              => 'string',
 						'show_in_rest'      => true,
-						'sanitize_callback' => self::sanitizer_for( $field['control'] ),
+						'sanitize_callback' => Scout_Core_Controls::sanitizer_for( $field['control'] ),
 						'auth_callback'     => function () {
 							return current_user_can( 'edit_posts' );
 						},
@@ -36,45 +36,12 @@ final class Scout_Core_Meta {
 	/**
 	 * Strict, options-aware sanitize used by the meta box on save.
 	 *
-	 * @param string $control text|textarea|number|url|select.
+	 * @param string $control text|textarea|richtext|number|url|select|checkbox|image.
 	 * @param mixed  $value   Raw submitted value.
 	 * @param array  $options For select: allowed value => label.
 	 * @return string
 	 */
 	public static function sanitize( $control, $value, array $options = array() ) {
-		switch ( $control ) {
-			case 'textarea':
-				return sanitize_textarea_field( $value );
-			case 'url':
-				return esc_url_raw( $value );
-			case 'number':
-				return ( '' === $value || ! is_numeric( $value ) ) ? '' : (string) ( 0 + $value );
-			case 'select':
-				return array_key_exists( $value, $options ) ? $value : '';
-			case 'text':
-			default:
-				return sanitize_text_field( $value );
-		}
-	}
-
-	/**
-	 * Lenient sanitizer for the REST/meta layer (the meta box enforces the
-	 * stricter, options-aware rules on save).
-	 */
-	private static function sanitizer_for( $control ) {
-		switch ( $control ) {
-			case 'textarea':
-				return 'sanitize_textarea_field';
-			case 'url':
-				return 'esc_url_raw';
-			case 'number':
-				return function ( $value ) {
-					return ( '' === $value || ! is_numeric( $value ) ) ? '' : (string) ( 0 + $value );
-				};
-			case 'select':
-			case 'text':
-			default:
-				return 'sanitize_text_field';
-		}
+		return Scout_Core_Controls::sanitize( $control, $value, $options );
 	}
 }

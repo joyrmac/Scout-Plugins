@@ -1,5 +1,33 @@
 # Scout Core — Changelog
 
+## 1.1.0
+Pages become forms. Additive, nothing existing changes shape.
+
+- **Page fieldsets.** `scout_core_register_fields()` attaches a sectioned set
+  of fields to the front page, to pages using a given template, to a slug, or
+  to every post of a type. Each headline, paragraph, and picture on a designed
+  page gets its own labelled field, grouped the way the page reads. Matched
+  posts use the classic edit screen with the content editor hidden, so an
+  editor changes words and images and cannot touch the layout. Values are
+  plain post meta under `scout_<key>`, REST-exposed like every other field.
+- **Image control.** `'control' => 'image'` stores an attachment ID and draws
+  a preview with Choose image (media library, upload or pick) and Remove. Works
+  in type meta boxes, fieldsets, and settings groups. `scout/field` bindings
+  resolve it for `core/image` (`url`, `id`, `alt`).
+- **Rich text and checkbox controls.** `richtext` is a small visual editor
+  (bold, italic, link, lists) stored through `wp_kses_post`; `checkbox` stores
+  `1` or nothing.
+- **Settings groups.** `scout_core_register_settings_group()` adds a tab under
+  the Scout menu for site-wide content (header, footer, shared bands, 404),
+  one option per group, same controls.
+- **Template helpers.** `scout_core_field()`, `scout_core_setting()`,
+  `scout_core_image()`, `scout_core_image_id()`, `scout_core_image_url()`.
+- **Dashboard checks filter.** `scout_core_dashboard_checks` lets a companion
+  add its own cards to the health check.
+- All controls now render through one class, `Scout_Core_Controls`, and the
+  admin ships a small stylesheet and script (`assets/admin.css`, `assets/admin.js`)
+  loaded only on edit screens and the Scout pages.
+
 ## 1.0.4
 Fixes the fatal that took a site down on activation.
 
