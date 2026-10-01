@@ -114,6 +114,18 @@ Plugins screen. See [`../RELEASING.md`](../RELEASING.md).
 
 ---
 
+## APIs other plugins depend on
+
+These are a contract. Renaming or removing one breaks the plugin that uses it on
+every client site at the next automatic update. CI checks them
+(`tools/core-contract.sh`); change them only together with the dependent plugin.
+
+| API | Used by | For |
+|---|---|---|
+| `Scout_Core_Business::get()` (keys `name`, `phone`, `email`, `city`, `region`, `postal`, `same_as`) | scout-cards | Business details on the cards and in the saved contact |
+| The `scout` admin menu slug | scout-cards | Puts Cards & Links inside the Scout menu |
+| `Scout_SEO_Head::output` on `wp_head` priority 1 | scout-cards | Removed on card pages, which print their own tags |
+
 ## Versioning ritual
 
 Every change to this plugin:

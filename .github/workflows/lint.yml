@@ -25,3 +25,11 @@ jobs:
 
       - name: Lint every PHP file
         run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 -P4 php -l
+
+  core-contract:
+    name: Scout Core contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the Scout Core APIs other plugins depend on
+        run: bash tools/core-contract.sh
