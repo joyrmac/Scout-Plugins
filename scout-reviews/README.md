@@ -24,10 +24,51 @@ Standalone: does not need Scout Core.
 | `[scout_reviews featured="1" count="3"]` | Three featured reviews |
 | `[scout_reviews source="google" layout="row"]` | Google reviews in a sideways row |
 | `[scout_reviews summary="0" min_rating="5"]` | Five-star reviews, no summary |
+| `[scout_reviews topic="law-firms" count="3"]` | Reviews for one topic (featured ones until it has some) |
 | `[scout_review_summary]` | Only the rating summary |
 
 Options: `layout` (grid, row, list), `count`, `source`, `featured`,
-`min_rating`, `summary`.
+`min_rating`, `summary`, `topic`, `fallback`.
+
+## Inbox and topics (0.3.0)
+
+New Google reviews land in **Reviews > Inbox**. Each card has the pages it
+belongs on pre-checked (from each topic's keywords). Click **Add to site** and
+it shows on those pages; **Skip** keeps it as a hidden draft.
+
+Topics live at **Reviews > Topics**. Each one is a place reviews show on the
+site, usually one per page, with keywords that drive the inbox suggestions.
+
+## Theme integration
+
+One call per spot where reviews belong. It prints nothing when there is
+nothing to show, so it never leaves an empty section:
+
+```php
+<?php
+if ( function_exists( 'scout_reviews_slot' ) ) {
+	scout_reviews_slot( array(
+		'topic'  => 'law-firms',          // Default: the page's slug ("home" on the front page).
+		'count'  => 3,
+		'before' => '<section class="section"><div class="container"><h2>What firms say</h2>',
+		'after'  => '</div></section>',
+	) );
+}
+```
+
+Declare the theme's slots once in `functions.php` so the topics exist before
+anyone visits the pages:
+
+```php
+add_filter( 'scout_reviews_slots', function ( $slots ) {
+	$slots['law-firms'] = array( 'label' => 'Law firms', 'keywords' => array( 'law', 'attorney', 'lawyer' ) );
+	return $slots;
+} );
+```
+
+Other options: `layout` (grid, row, list), `summary` (rating line, default on),
+`fallback` ("featured" by default; "none" shows nothing when the topic is
+empty), `label` (topic name if it has to be created).
 
 ## Honesty rules built in
 
@@ -78,6 +119,8 @@ themes. To restyle:
 - `scout_reviews_sources`: add or rename a source
   (`slug => [ label, stars, sync ]`).
 - `scout_reviews_load_styles`: load the built-in stylesheet (bool).
+- `scout_reviews_slots`: declare the theme's review slots
+  (`slug => [ label, keywords ]`).
 
 ## Roadmap
 

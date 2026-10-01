@@ -74,7 +74,7 @@ final class Scout_Reviews_Google_Admin {
 				<p>
 					<?php
 					/* translators: %s: business name on Google. */
-					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones arrive as drafts so you can look before they go live.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
+					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones land in Reviews &gt; Inbox, where one click adds each to the right pages.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
 					?>
 				</p>
 				<p>
@@ -267,7 +267,7 @@ final class Scout_Reviews_Google_Admin {
 		self::back(
 			sprintf(
 				/* translators: 1: new reviews, 2: overall rating, 3: total review count. */
-				__( 'Sync done. %1$d new reviews are waiting as drafts. Google shows %2$s stars from %3$d reviews.', 'scout-reviews' ),
+				__( 'Sync done. %1$d new reviews are waiting in the inbox. Google shows %2$s stars from %3$d reviews.', 'scout-reviews' ),
 				(int) $result['new'],
 				number_format_i18n( (float) $result['rating'], 1 ),
 				(int) $result['count']
@@ -295,13 +295,13 @@ final class Scout_Reviews_Google_Admin {
 		}
 		$new = Scout_Reviews_Google_Sync::new_count();
 		if ( $new ) {
-			$link = admin_url( 'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE . '&post_status=draft' );
+			$link = Scout_Reviews_Inbox::url();
 			printf(
 				'<div class="notice notice-info"><p>%s <a href="%s">%s</a></p></div>',
 				/* translators: %d: number of new reviews. */
 				esc_html( sprintf( _n( '%d new Google review is waiting for a look.', '%d new Google reviews are waiting for a look.', $new, 'scout-reviews' ), $new ) ),
 				esc_url( $link ),
-				esc_html__( 'See them', 'scout-reviews' )
+				esc_html__( 'Open the inbox', 'scout-reviews' )
 			);
 		}
 	}

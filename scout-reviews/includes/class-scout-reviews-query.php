@@ -40,6 +40,7 @@ final class Scout_Reviews_Query {
 	 *     @type bool   $featured   Only reviews marked featured.
 	 *     @type int    $min_rating Only reviews at or above this many stars
 	 *                              (reviews without stars are left out when set).
+	 *     @type string $topic      Only reviews tagged with this topic slug.
 	 * }
 	 * @return array<int, array> Normalized reviews (see self::normalize()).
 	 */
@@ -51,6 +52,7 @@ final class Scout_Reviews_Query {
 				'source'     => '',
 				'featured'   => false,
 				'min_rating' => 0,
+				'topic'      => '',
 			)
 		);
 
@@ -82,8 +84,18 @@ final class Scout_Reviews_Query {
 			);
 		}
 
+		$tax_query = array();
+		if ( '' !== (string) $args['topic'] ) {
+			$tax_query[] = array(
+				'taxonomy' => Scout_Reviews_Topics::TAX,
+				'field'    => 'slug',
+				'terms'    => sanitize_title( (string) $args['topic'] ),
+			);
+		}
+
 		$query = new WP_Query(
 			array(
+				'tax_query'              => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery -- small, cached.
 				'post_type'              => Scout_Reviews_Post_Type::TYPE,
 				'post_status'            => 'publish',
 				'posts_per_page'         => (int) $args['count'] > 0 ? (int) $args['count'] : 100,
@@ -92,6 +104,7 @@ final class Scout_Reviews_Query {
 				'no_found_rows'          => true,
 				'ignore_sticky_posts'    => true,
 				'update_post_term_cache' => false,
+				'update_post_meta_cache' => true,
 			)
 		);
 

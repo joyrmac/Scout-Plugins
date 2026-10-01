@@ -1,5 +1,24 @@
 # Scout Reviews: Changelog
 
+## 0.3.0 (2026-10-01)
+
+Review inbox, topics, and theme slots: reviews land on the right pages in one click.
+
+- **Reviews > Inbox.** New Google reviews wait here as cards. "Add to site"
+  publishes one with the checked topics; "Skip" keeps it as a hidden draft.
+  "Add all" publishes every waiting review with its suggested topics. The
+  inbox count shows on the menu.
+- **Topics** (`scout_review_topic`): which pages a review shows on. Each topic
+  has keywords; the inbox pre-checks topics whose keywords appear in the
+  review. Edit keywords at Reviews > Topics.
+- **Theme slots.** `scout_reviews_slot()` shows the reviews for that spot, with
+  optional `before`/`after` markup printed only when there are reviews. A
+  theme declares its slots (label + keywords) with the `scout_reviews_slots`
+  filter; an undeclared slot registers itself as a topic on first render.
+- `topic` and `fallback` options on `[scout_reviews]`, plus a Topic field on
+  the block. A topic with no reviews yet shows featured reviews instead
+  (`fallback="none"` shows nothing).
+
 ## 0.2.0 (2026-10-01)
 
 Google reviews sync.

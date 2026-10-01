@@ -39,4 +39,14 @@ foreach ( $scout_reviews_ids as $scout_reviews_id ) {
 	wp_delete_post( $scout_reviews_id, true );
 }
 
+// The plugin is not loaded during uninstall, so the taxonomy must be registered to be queried.
+register_taxonomy( 'scout_review_topic', 'scout_review' );
+$scout_reviews_terms = get_terms( array( 'taxonomy' => 'scout_review_topic', 'hide_empty' => false, 'fields' => 'ids' ) );
+if ( is_array( $scout_reviews_terms ) ) {
+	foreach ( $scout_reviews_terms as $scout_reviews_term ) {
+		wp_delete_term( (int) $scout_reviews_term, 'scout_review_topic' );
+	}
+}
+
 delete_option( 'scout_reviews_settings' );
+delete_option( 'scout_reviews_seen_slots' );
