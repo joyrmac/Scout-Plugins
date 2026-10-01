@@ -106,6 +106,9 @@ final class Scout_Reviews_Query {
 	public static function normalize( WP_Post $post ): array {
 		$source = (string) get_post_meta( $post->ID, Scout_Reviews_Post_Type::META_SOURCE, true );
 		$photo  = get_the_post_thumbnail_url( $post, 'thumbnail' );
+		if ( ! $photo ) {
+			$photo = (string) get_post_meta( $post->ID, '_scout_review_photo_url', true ); // Google profile photo.
+		}
 
 		return array(
 			'id'     => $post->ID,

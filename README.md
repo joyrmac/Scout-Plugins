@@ -24,7 +24,7 @@ instead of a data-loss event.
 |---|---|---|---|
 | [`scout-core`](scout-core/) | 1.0.0 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
 | [`scout-forms-guard`](scout-forms-guard/) | 0.1.0 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
-| [`scout-reviews`](scout-reviews/) | 0.1.0 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Each card links to the original; the rating summary uses each platform's real totals. | WP 6.5+, PHP 8.0+ |
+| [`scout-reviews`](scout-reviews/) | 0.2.0 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Google reviews sync daily. Each card links to the original; the rating summary uses each platform's real totals. | WP 6.5+, PHP 8.0+ |
 | [`scout-rvpark`](scout-rvpark/) | 0.1.0 | The worked example of the companion pattern: one client's specific content types, registered without forking Scout Core. | `scout-core` |
 
 > `scout-schema` and `scout-seo` shipped separately until Scout Core 1.0.0 folded

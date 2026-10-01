@@ -36,12 +36,19 @@ Google reviews applications by hand. You are more likely to be approved when:
    contact, and the scope `https://www.googleapis.com/auth/business.manage`.
    Add the business account as a test user.
 6. **Create the credentials.** APIs & Services > Credentials > Create
-   credentials > OAuth client ID > **Web application**. The redirect URI will
-   come from the plugin's settings screen in 0.2.0. Keep the client ID and
-   secret somewhere safe (a password manager), never in email or the repo.
+   credentials > OAuth client ID > **Web application**. Under **Authorized
+   redirect URIs**, paste the address shown in WordPress at Reviews >
+   Settings (it looks like
+   `https://scoutraleigh.com/wp-admin/admin-post.php?action=scout_reviews_google_callback`).
+   Keep the client ID and secret in a password manager, never in email or
+   the repo.
+7. **Publish the app.** Back on the OAuth consent screen, click **Publish
+   app**. While it stays in "Testing", Google signs you out every 7 days and
+   the sync stops.
 
-When step 6 is done, the 0.2.0 settings screen takes the client ID and secret,
-you click **Connect Google** once, and reviews sync from then on.
+Then in WordPress: Reviews > Settings > paste the client ID and secret (or
+put them in `wp-config.php`), click **Connect Google**, pick the business.
+Reviews sync right away and then daily.
 
 ## What the sync will pull
 

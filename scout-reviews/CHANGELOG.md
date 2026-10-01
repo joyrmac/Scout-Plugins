@@ -1,5 +1,26 @@
 # Scout Reviews: Changelog
 
+## 0.2.0 (2026-10-01)
+
+Google reviews sync.
+
+- Reviews > Settings has a Google box: save the OAuth client (or define
+  `SCOUT_REVIEWS_GOOGLE_CLIENT_ID` and `SCOUT_REVIEWS_GOOGLE_CLIENT_SECRET` in
+  `wp-config.php`), Connect Google, pick the business, Sync now, Disconnect.
+- Syncs daily through the Business Profile API (v4 reviews). New reviews
+  arrive as drafts and are counted on the Reviews menu and dashboard until
+  published or trashed.
+- Google owns a synced review's name, text, stars, and date; you choose
+  whether it shows, the reviewer detail, Featured, and the order. A review
+  deleted on Google is unpublished here and marked removed.
+- Star-only reviews count in the totals but are not imported. Google's
+  machine translations are stripped so the reviewer's own words show.
+- The Google rating, review count, Maps link, and "leave a review" link fill
+  in automatically and lock while synced.
+- Reviewer profile photos show on synced cards.
+- Uninstall always removes the Google sign-in; deactivation stops the daily
+  sync.
+
 ## 0.1.0 (2026-10-01)
 
 First release. Manual entry for every source; automatic Google sync comes in 0.2.0.

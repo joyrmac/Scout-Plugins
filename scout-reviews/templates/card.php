@@ -30,7 +30,7 @@ $scout_date   = Scout_Reviews_Render::date( $review['date'] );
 
 	<footer class="scout-review__footer">
 		<?php if ( $review['photo'] ) : ?>
-			<img class="scout-review__avatar" src="<?php echo esc_url( $review['photo'] ); ?>" alt="" width="40" height="40" loading="lazy" decoding="async" />
+			<img class="scout-review__avatar" src="<?php echo esc_url( $review['photo'] ); ?>" alt="" width="40" height="40" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
 		<?php else : ?>
 			<span class="scout-review__avatar scout-review__avatar--initial" aria-hidden="true"><?php echo esc_html( Scout_Reviews_Render::initial( $review['name'] ) ); ?></span>
 		<?php endif; ?>

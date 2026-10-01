@@ -46,6 +46,20 @@ for law firms, state bar advertising rules.
 - **No review schema.** Google has not shown star ratings for a business's
   reviews of itself since 2019, so the markup would add risk and no benefit.
 
+## Google sync (0.2.0)
+
+Once Google approves API access ([setup steps](docs/google-business-profile-api.md)):
+
+1. **Reviews > Settings > Google reviews sync.** Paste the OAuth client ID and
+   secret, or define `SCOUT_REVIEWS_GOOGLE_CLIENT_ID` and
+   `SCOUT_REVIEWS_GOOGLE_CLIENT_SECRET` in `wp-config.php` (better).
+2. **Connect Google** and sign in with the account that manages the profile.
+3. **Pick the business.** The first sync runs right away, then daily.
+
+New reviews arrive as drafts with a count on the Reviews menu. Publish the
+ones you want. Google keeps control of the name, text, stars, and date; a
+review deleted on Google comes off the site on the next sync.
+
 ## Design
 
 The stylesheet reads Scout design tokens when the theme has them (`--surface`,
@@ -67,7 +81,4 @@ themes. To restyle:
 
 ## Roadmap
 
-- **0.2.0:** Google Business Profile sync. Pulls every review plus the real
-  rating and count on a schedule. New reviews arrive as drafts so nothing goes
-  live without a look. Setup steps: [`docs/google-business-profile-api.md`](docs/google-business-profile-api.md).
 - **0.3.0:** Facebook Page recommendations sync.

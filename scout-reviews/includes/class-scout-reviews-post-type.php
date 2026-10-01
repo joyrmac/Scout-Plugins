@@ -120,13 +120,16 @@ final class Scout_Reviews_Post_Type {
 			$source = 'google';
 		}
 
+		// Synced reviews show Google's values without letting them be changed.
+		$locked = class_exists( 'Scout_Reviews_Google_Sync' ) && Scout_Reviews_Google_Sync::is_synced( $post->ID );
+
 		wp_nonce_field( 'scout_review_save', self::NONCE );
 		?>
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><label for="scout-review-source"><?php esc_html_e( 'Where it was posted', 'scout-reviews' ); ?></label></th>
 				<td>
-					<select id="scout-review-source" name="scout_review[source]">
+					<select id="scout-review-source" name="scout_review[source]" <?php disabled( $locked ); ?>>
 						<?php foreach ( Scout_Reviews_Sources::all() as $slug => $info ) : ?>
 							<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $source, $slug ); ?>><?php echo esc_html( $info['label'] ); ?></option>
 						<?php endforeach; ?>
@@ -137,7 +140,7 @@ final class Scout_Reviews_Post_Type {
 			<tr>
 				<th scope="row"><label for="scout-review-rating"><?php esc_html_e( 'Star rating', 'scout-reviews' ); ?></label></th>
 				<td>
-					<select id="scout-review-rating" name="scout_review[rating]">
+					<select id="scout-review-rating" name="scout_review[rating]" <?php disabled( $locked ); ?>>
 						<option value="0" <?php selected( $rating, 0 ); ?>><?php esc_html_e( 'No star rating', 'scout-reviews' ); ?></option>
 						<?php for ( $i = 5; $i >= 1; $i-- ) : ?>
 							<option value="<?php echo (int) $i; ?>" <?php selected( $rating, $i ); ?>>
@@ -154,13 +157,13 @@ final class Scout_Reviews_Post_Type {
 			<tr>
 				<th scope="row"><label for="scout-review-url"><?php esc_html_e( 'Link to the review', 'scout-reviews' ); ?></label></th>
 				<td>
-					<input type="url" id="scout-review-url" class="large-text" name="scout_review[url]" value="<?php echo esc_attr( $url ); ?>" placeholder="https://" />
+					<input type="url" id="scout-review-url" class="large-text" name="scout_review[url]" value="<?php echo esc_attr( $url ); ?>" placeholder="https://" <?php disabled( $locked ); ?> />
 					<p class="description"><?php esc_html_e( 'The page where anyone can read the original. It becomes the "View on Google" link on the card. Leave empty for a direct client testimonial.', 'scout-reviews' ); ?></p>
 				</td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="scout-review-date"><?php esc_html_e( 'Date posted', 'scout-reviews' ); ?></label></th>
-				<td><input type="date" id="scout-review-date" name="scout_review[date]" value="<?php echo esc_attr( $date ); ?>" /></td>
+				<td><input type="date" id="scout-review-date" name="scout_review[date]" value="<?php echo esc_attr( $date ); ?>" <?php disabled( $locked ); ?> /></td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="scout-review-detail"><?php esc_html_e( 'Reviewer detail (optional)', 'scout-reviews' ); ?></label></th>
@@ -190,6 +193,9 @@ final class Scout_Reviews_Post_Type {
 			return;
 		}
 
+		// Synced reviews: Google owns source, stars, link, and date.
+		$synced = class_exists( 'Scout_Reviews_Google_Sync' ) && Scout_Reviews_Google_Sync::is_synced( $post_id );
+
 		$in = isset( $_POST['scout_review'] ) && is_array( $_POST['scout_review'] ) ? wp_unslash( $_POST['scout_review'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- each field sanitized below.
 
 		$source = sanitize_key( $in['source'] ?? '' );
@@ -206,10 +212,12 @@ final class Scout_Reviews_Post_Type {
 			$date = '';
 		}
 
-		update_post_meta( $post_id, self::META_SOURCE, $source );
-		update_post_meta( $post_id, self::META_RATING, $rating );
-		update_post_meta( $post_id, self::META_URL, $url );
-		update_post_meta( $post_id, self::META_DATE, $date );
+		if ( ! $synced ) {
+			update_post_meta( $post_id, self::META_SOURCE, $source );
+			update_post_meta( $post_id, self::META_RATING, $rating );
+			update_post_meta( $post_id, self::META_URL, $url );
+			update_post_meta( $post_id, self::META_DATE, $date );
+		}
 		update_post_meta( $post_id, self::META_DETAIL, sanitize_text_field( (string) ( $in['detail'] ?? '' ) ) );
 		update_post_meta( $post_id, self::META_FEATURED, ! empty( $in['featured'] ) );
 

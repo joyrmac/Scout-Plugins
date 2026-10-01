@@ -17,6 +17,11 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // Always safe to drop: the cached release lookup is rebuilt on the next check.
 delete_transient( 'scout_updater_scout-reviews' );
 
+// The Google sign-in is a credential, never content: it always goes.
+wp_clear_scheduled_hook( 'scout_reviews_google_sync' );
+delete_transient( 'scout_reviews_google_token' );
+delete_option( 'scout_reviews_google' );
+
 $scout_reviews_settings = get_option( 'scout_reviews_settings', array() );
 if ( ! is_array( $scout_reviews_settings ) || empty( $scout_reviews_settings['purge_on_uninstall'] ) ) {
 	return;

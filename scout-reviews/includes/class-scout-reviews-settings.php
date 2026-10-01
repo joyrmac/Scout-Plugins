@@ -21,6 +21,9 @@ final class Scout_Reviews_Settings {
 	const OPTION = 'scout_reviews_settings';
 	const PAGE   = 'scout-reviews-settings';
 
+	/** @var bool True while code (not the form) writes the option. */
+	private static $internal_write = false;
+
 	public static function defaults(): array {
 		return array(
 			'profiles'           => array(), // slug => { rating, count, url, write_url }.
@@ -72,11 +75,35 @@ final class Scout_Reviews_Settings {
 		);
 	}
 
+	/**
+	 * Replace one platform's totals from code (the Google sync), without going
+	 * through the form's rules.
+	 */
+	public static function set_profile( string $slug, array $profile ): void {
+		$settings                      = self::get();
+		$settings['profiles'][ $slug ] = array_merge( self::profile( $slug ), $profile );
+		self::$internal_write          = true;
+		update_option( self::OPTION, $settings );
+		self::$internal_write = false;
+		Scout_Reviews_Query::flush();
+	}
+
 	public static function sanitize( $input ): array {
+		if ( self::$internal_write && is_array( $input ) ) {
+			return $input;
+		}
 		$input = is_array( $input ) ? $input : array();
 		$out   = self::defaults();
 
 		foreach ( Scout_Reviews_Sources::all() as $slug => $info ) {
+			// While Google syncs, its row is Google's numbers, not the form's.
+			if ( 'google' === $slug && Scout_Reviews_Google::is_ready() ) {
+				$current = self::get()['profiles']['google'] ?? null;
+				if ( $current ) {
+					$out['profiles']['google'] = $current;
+				}
+				continue;
+			}
 			$row = $input['profiles'][ $slug ] ?? array();
 			if ( ! is_array( $row ) ) {
 				continue;
@@ -111,6 +138,8 @@ final class Scout_Reviews_Settings {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Review settings', 'scout-reviews' ); ?></h1>
 
+			<?php do_action( 'scout_reviews_settings_top' ); ?>
+
 			<form method="post" action="options.php">
 				<?php settings_fields( self::PAGE ); ?>
 
@@ -135,21 +164,28 @@ final class Scout_Reviews_Settings {
 							if ( 'direct' === $slug ) {
 								continue; // Direct testimonials have no platform profile.
 							}
-							$p    = self::profile( $slug );
-							$base = $name . '[profiles][' . $slug . ']';
+							$p      = self::profile( $slug );
+							$base   = $name . '[profiles][' . $slug . ']';
+							$synced = 'google' === $slug && Scout_Reviews_Google::is_ready();
+							$lock   = $synced ? ' readonly' : '';
 							?>
 							<tr>
-								<td><strong><?php echo esc_html( $info['label'] ); ?></strong></td>
+								<td>
+									<strong><?php echo esc_html( $info['label'] ); ?></strong>
+									<?php if ( $synced ) : ?>
+										<br /><span class="description"><?php esc_html_e( 'Synced', 'scout-reviews' ); ?></span>
+									<?php endif; ?>
+								</td>
 								<td>
 									<?php if ( $info['stars'] ) : ?>
-										<input type="number" step="0.1" min="1" max="5" style="width:80px;" name="<?php echo esc_attr( $base . '[rating]' ); ?>" value="<?php echo $p['rating'] ? esc_attr( (string) $p['rating'] ) : ''; ?>" />
+										<input type="number" step="0.1" min="1" max="5" style="width:80px;"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[rating]' ); ?>" value="<?php echo $p['rating'] ? esc_attr( (string) $p['rating'] ) : ''; ?>" />
 									<?php else : ?>
 										<span class="description"><?php esc_html_e( 'No stars', 'scout-reviews' ); ?></span>
 									<?php endif; ?>
 								</td>
-								<td><input type="number" min="0" step="1" style="width:90px;" name="<?php echo esc_attr( $base . '[count]' ); ?>" value="<?php echo $p['count'] ? esc_attr( (string) $p['count'] ) : ''; ?>" /></td>
-								<td><input type="url" class="regular-text" placeholder="https://" name="<?php echo esc_attr( $base . '[url]' ); ?>" value="<?php echo esc_attr( $p['url'] ); ?>" /></td>
-								<td><input type="url" class="regular-text" placeholder="https://" name="<?php echo esc_attr( $base . '[write_url]' ); ?>" value="<?php echo esc_attr( $p['write_url'] ); ?>" /></td>
+								<td><input type="number" min="0" step="1" style="width:90px;"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[count]' ); ?>" value="<?php echo $p['count'] ? esc_attr( (string) $p['count'] ) : ''; ?>" /></td>
+								<td><input type="url" class="regular-text" placeholder="https://"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[url]' ); ?>" value="<?php echo esc_attr( $p['url'] ); ?>" /></td>
+								<td><input type="url" class="regular-text" placeholder="https://"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[write_url]' ); ?>" value="<?php echo esc_attr( $p['write_url'] ); ?>" /></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
