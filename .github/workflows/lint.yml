@@ -23,8 +23,22 @@ jobs:
           php-version: ${{ matrix.php-version }}
           coverage: none
 
+      # Each plugin is linted only on the PHP versions its "Requires PHP" header
+      # supports (scout-optimize needs 8.1, so it skips the 8.0 run).
       - name: Lint every PHP file
-        run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 -P4 php -l
+        run: |
+          status=0
+          for dir in */; do
+            dir=${dir%/}
+            main="$dir/$dir.php"
+            req=$(grep -m1 -oP 'Requires PHP:\s*\K[0-9.]+' "$main" 2>/dev/null || echo 0)
+            if php -r "exit(version_compare(PHP_VERSION, '$req', '>=') ? 0 : 1);"; then
+              find "$dir" -name '*.php' -not -path '*/vendor/*' -print0 | xargs -0 -n1 -P4 php -l || status=1
+            else
+              echo "Skipping $dir: needs PHP $req"
+            fi
+          done
+          exit $status
 
   core-contract:
     name: Scout Core contract
