@@ -1,5 +1,13 @@
 # Scout Cards changelog
 
+## 1.0.1 (2026-10-01)
+
+- Richer spotlight design, tinted with the accent color. With a heading or note
+  it shows as a signed panel: "A note from <first name>", a bold lead (a blank
+  line in the note makes the first paragraph the lead), and the person's photo,
+  name, and title. The link row gets an accent glow, the domain in small caps
+  for outside links, and an arrow that slides on hover.
+
 ## 1.0.0 (2026-10-01)
 
 First release, ported from the cards built into the Scout Media and Scout Recon
@@ -16,8 +24,6 @@ themes so every client site can have them.
 - Card pages print their own title, canonical, and `noindex, follow`, and switch off
   Scout Core's head tags there. Unknown people return a real 404.
 - Optional spotlight under each card: a heading, a short note, and one link row
-  (a product, a booking page, or a second business). With a note it shows as a
-  signed panel tinted with the accent color; a blank line in the note makes the
-  first paragraph a bold lead. Blank hides it.
+  (a product, a booking page, or a second business). Blank hides it.
 - Warns when a WordPress Page already uses the card or links address.
 - Self-updating from the Scout Plugins releases.
