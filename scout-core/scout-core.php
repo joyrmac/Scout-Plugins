@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Core
  * Plugin URI:        https://scoutraleigh.com/platform/scout-core
  * Description:       The Scout engine for a client site: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard. The Yoast replacement, built to survive any future redesign.
- * Version:           1.0.4
+ * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CORE_VERSION', '1.0.4' );
+define( 'SCOUT_CORE_VERSION', '1.1.0' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CORE_FILE', __FILE__ );
 
@@ -33,7 +33,11 @@ define( 'SCOUT_SEO_META_CANONICAL', '_scout_seo_canonical' );
 define( 'SCOUT_SEO_META_NOINDEX', '_scout_seo_noindex' );
 
 /* ---- Content model (business identity, post types, fields, bindings) ---- */
+require_once SCOUT_CORE_DIR . 'includes/controls.php';
 require_once SCOUT_CORE_DIR . 'includes/registry.php';
+require_once SCOUT_CORE_DIR . 'includes/fieldsets.php';
+require_once SCOUT_CORE_DIR . 'includes/settings-groups.php';
+require_once SCOUT_CORE_DIR . 'includes/helpers.php';
 require_once SCOUT_CORE_DIR . 'includes/post-types.php';
 require_once SCOUT_CORE_DIR . 'includes/meta.php';
 require_once SCOUT_CORE_DIR . 'includes/meta-box.php';
@@ -69,14 +73,24 @@ Scout_Plugin_Updater::boot( __FILE__, 'scout-core' );
 add_action( 'init', function () { do_action( 'scout_core_register' ); }, 1 );
 add_action( 'init', array( 'Scout_Core_Post_Types', 'register_all' ), 5 );
 add_action( 'init', array( 'Scout_Core_Meta', 'register_all' ), 6 );
+add_action( 'init', array( 'Scout_Core_Fieldsets', 'register_meta' ), 6 );
 add_action( 'init', array( 'Scout_Core_Block_Bindings', 'register' ), 7 );
 
 add_action( 'add_meta_boxes', array( 'Scout_Core_Meta_Box', 'add' ) );
 add_action( 'save_post', array( 'Scout_Core_Meta_Box', 'save' ), 10, 2 );
 
+/* Page fieldsets: the box, the save, the classic screen for matched posts. */
+add_action( 'add_meta_boxes', array( 'Scout_Core_Fieldsets', 'add_boxes' ), 10, 2 );
+add_action( 'save_post', array( 'Scout_Core_Fieldsets', 'save' ), 10, 2 );
+add_filter( 'use_block_editor_for_post', array( 'Scout_Core_Fieldsets', 'use_block_editor' ), 10, 2 );
+
+/* Shared admin assets: the media picker and section layout. */
+add_action( 'admin_enqueue_scripts', array( 'Scout_Core_Controls', 'enqueue_admin' ) );
+
 /* Settings storage (options + sanitizers). The UI is the unified Scout admin. */
 add_action( 'admin_init', array( 'Scout_Core_Business', 'register_settings' ) );
 add_action( 'admin_init', array( 'Scout_Core_SEO_Settings', 'register_settings' ) );
+add_action( 'admin_init', array( 'Scout_Core_Settings_Groups', 'register_settings' ) );
 
 /* Schema: render the graph, keep its cache fresh. */
 add_action( 'wp_head', array( 'Scout_Schema', 'render' ), 20 );

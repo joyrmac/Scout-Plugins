@@ -20,6 +20,7 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 | Hair by Patrick McGuire | **TODO** (live domain not launched; staging at hairbypatrick.wpenginepowered.com) | `hairbypatrick` (staging: indexing blocked in code) | **TODO** | **TODO** |
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
+| Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `joyrmac/Andres-Borda---Golf-Carts` | The Build (favor). **In build, not deployed.** Companion plugin `scout-andysgolfcarts` 0.1.0 lives in the client repo. |
 
 ## Versions
 
@@ -29,14 +30,13 @@ disabled).
 
 | Site | Theme (version) | WordPress | scout-core | scout-forms-guard | scout-optimize | Gravity Forms | Third-party beyond GF |
 |---|---|---|---|---|---|---|---|
-
-> **scout-cards** (new 2026-10-01, 1.0.0): first rollout is Hair by Patrick. Scout Media and Scout Recon run the same cards inside their own themes (Scout 1.29.0, Recon 1.13.0), not this plugin. Add a column once a second site installs it.
-
-| Scout Media | scout-media 1.21.6 | **TODO** | not installed (theme owns SEO/schema/setup) | 0.1.0 | **0.4.0 (behind 0.6.0)** + Pilot Toggle 1.1.0 (temp, delete after pilot) | 3.1.0.2 + reCAPTCHA add-on 2.2.2 | WordPress Importer (inactive-ok) |
+| Scout Media | scout-media 1.30.1 | **TODO** | **DO NOT INSTALL.** Deleted 2026-09-24: it duplicated the theme's canonical/OG/meta tags and published 10 fabricated testimonials as Review schema. The theme owns SEO/schema/setup. | **0.1.1 ✓** | **0.7.0 ✓** + Pilot Toggle 1.1.0 (temp, delete after pilot) | 3.1.2 + Mailchimp add-on 5.7.2 + reCAPTCHA add-on 2.2.2 | WordPress Importer 0.9.6 (active; deactivate once imports are done) |
 | Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
 | Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | removing (no forms on this site) | **0.7.0 ✓** | **removing — DECISION 2026-09-03: HBP runs no forms.** Delete order: forms-guard, then GF, then Akismet. Check book/contact pages for stray embeds after. | Akismet: delete. On the auto-update channel 2026-09-03. |
 | Maravela's | Maravela's theme **TODO** | current | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓ (active; keep the delivery toggles off — see drift item on the hero)** | **3.1.1 ✓** | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (active). On the auto-update channel 2026-09-03. |
 | North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.4 ✓** (1.0.3 fataled, fixed same day) | **0.1.1 ✓** | **0.7.0 ✓** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓**. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
+
+> **scout-cards** (new 2026-10-01, 1.0.0): first rollout is Hair by Patrick. Scout Media and Scout Recon run the same cards inside their own themes (Scout 1.30.1, Recon 1.13.0), not this plugin. If Scout Media moves to the plugin, install scout-cards **without** scout-core (it works standalone). Add a column once a second site installs it.
 
 **Auto-update channel: LIVE and healthy as of 2026-09-03.** Published:
 scout-core **1.0.4**, scout-forms-guard **0.1.1**, scout-optimize **0.7.0**,
@@ -108,8 +108,9 @@ Ordered by risk:
 4. **Scout Media: 3 pages from a theme update missing** (seo-content,
    website-security, local-seo); the admin notice offers Run Scout setup. Run
    it on the next admin visit.
-5. **Scout Media: scout-optimize 0.4.0** while clients run 0.6.0; update, and
-   delete the Pilot Toggle helper when the pilot is done.
+5. **Scout Media: scout-optimize is current (0.7.0, verified 2026-09-24).** Delete
+   the Pilot Toggle helper when the pilot is done. Scout Core stays off this
+   site, and no testimonials go on it until real, approved client quotes exist.
 6. **Scout Media: Gravity Forms reCAPTCHA add-on** contradicts the
    forms-guard approach (no reCAPTCHA). Confirm which form still uses it, then
    retire it or record the deviation.
