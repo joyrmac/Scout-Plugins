@@ -1,6 +1,6 @@
 # Scout Cards changelog
 
-## 1.0.0 — 2026-10-01
+## 1.0.0 (2026-10-01)
 
 First release, ported from the cards built into the Scout Media and Scout Recon
 themes so every client site can have them.
