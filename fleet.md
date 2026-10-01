@@ -29,6 +29,9 @@ disabled).
 
 | Site | Theme (version) | WordPress | scout-core | scout-forms-guard | scout-optimize | Gravity Forms | Third-party beyond GF |
 |---|---|---|---|---|---|---|---|
+
+> **scout-cards** (new 2026-10-01, 1.0.0): first rollout is Hair by Patrick. Scout Media and Scout Recon run the same cards inside their own themes (Scout 1.29.0, Recon 1.13.0), not this plugin. Add a column once a second site installs it.
+
 | Scout Media | scout-media 1.21.6 | **TODO** | not installed (theme owns SEO/schema/setup) | 0.1.0 | **0.4.0 (behind 0.6.0)** + Pilot Toggle 1.1.0 (temp, delete after pilot) | 3.1.0.2 + reCAPTCHA add-on 2.2.2 | WordPress Importer (inactive-ok) |
 | Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
 | Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | removing (no forms on this site) | **0.7.0 ✓** | **removing — DECISION 2026-09-03: HBP runs no forms.** Delete order: forms-guard, then GF, then Akismet. Check book/contact pages for stray embeds after. | Akismet: delete. On the auto-update channel 2026-09-03. |

@@ -20,6 +20,7 @@ on:
         required: true
         type: choice
         options:
+          - scout-cards
           - scout-core
           - scout-forms-guard
           - scout-optimize
