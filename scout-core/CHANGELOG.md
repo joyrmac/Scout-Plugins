@@ -3,6 +3,11 @@
 ## 1.1.0
 Pages become forms. Additive, nothing existing changes shape.
 
+- **Fix: SEO box preview and counters.** Newer WordPress gives the SEO meta
+  box heading the id `scout-seo-title`, the same id as the title field, so the
+  live preview and character counts stopped updating. The fields now use
+  `scout-seo-field-title` and `scout-seo-field-desc`.
+
 - **Page fieldsets.** `scout_core_register_fields()` attaches a sectioned set
   of fields to the front page, to pages using a given template, to a slug, or
   to every post of a type. Each headline, paragraph, and picture on a designed
