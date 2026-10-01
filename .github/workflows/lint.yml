@@ -23,21 +23,27 @@ jobs:
           php-version: ${{ matrix.php-version }}
           coverage: none
 
-      # Each plugin is linted only on the PHP versions it supports, read from
-      # its own "Requires PHP:" header (scout-optimize needs 8.1, for example).
+      # Each plugin is linted only on the PHP versions its "Requires PHP" header
+      # supports (scout-optimize needs 8.1, so it skips the 8.0 run).
       - name: Lint every PHP file
         run: |
-          set -euo pipefail
-          current="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
+          status=0
           for dir in */; do
-            slug="${dir%/}"
-            main="${slug}/${slug}.php"
-            if [ -f "$main" ]; then
-              needs="$(sed -n 's/^ \* Requires PHP: *//p' "$main" | tr -d '[:space:]')"
-              if [ -n "$needs" ] && php -r "exit(version_compare('$current', '$needs', '<') ? 0 : 1);"; then
-                echo "Skipping ${slug}: requires PHP ${needs}, this job runs ${current}."
-                continue
-              fi
+            dir=${dir%/}
+            main="$dir/$dir.php"
+            req=$(grep -m1 -oP 'Requires PHP:\s*\K[0-9.]+' "$main" 2>/dev/null || echo 0)
+            if php -r "exit(version_compare(PHP_VERSION, '$req', '>=') ? 0 : 1);"; then
+              find "$dir" -name '*.php' -not -path '*/vendor/*' -print0 | xargs -0 -n1 -P4 php -l || status=1
+            else
+              echo "Skipping $dir: needs PHP $req"
             fi
-            find "$dir" -name '*.php' -not -path '*/vendor/*' -print0 | xargs -0 -r -n1 -P4 php -l
           done
+          exit $status
+
+  core-contract:
+    name: Scout Core contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the Scout Core APIs other plugins depend on
+        run: bash tools/core-contract.sh

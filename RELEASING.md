@@ -25,6 +25,23 @@ hours, so a release reaches a site within a few hours rather than instantly.
 
 ---
 
+## Before releasing Scout Core: check what depends on it
+
+Other Scout plugins call into Scout Core (Scout Cards reads the business identity,
+adds its screen under the Scout menu, and switches off Scout Core's head tags on
+card pages). A Scout Core release reaches every client site automatically, so a
+rename there can break a dependent plugin on every site at once.
+
+- **CI guards it.** `tools/core-contract.sh` (Lint workflow, "Scout Core contract")
+  fails when a Scout Core API a plugin depends on disappears. Fix the dependent
+  plugin in the same change, release both, and update the contract list.
+- **When a plugin starts using a new Scout Core API,** add a line to the contract in
+  `tools/core-contract.sh` in that same change.
+- **Release order when both change:** Scout Core first, then the dependent plugin,
+  so no site runs the new plugin against an old core.
+- **Smoke-test one site** (North Crest is first on the channel) after a Scout Core
+  release: open a card page and the Scout menu before calling the release done.
+
 ## Shipping a release
 
 **1. Bump the version.** In the plugin's main file, update the `Version:` header
