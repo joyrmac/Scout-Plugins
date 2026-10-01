@@ -98,7 +98,7 @@ each one can update itself when the others are inactive. Change it in one place
 and copy it to the rest:
 
 ```bash
-for p in scout-forms-guard scout-rvpark; do
+for p in scout-forms-guard scout-optimize scout-reviews scout-rvpark; do
   cp scout-core/includes/class-scout-plugin-updater.php "$p/includes/"
 done
 ```
