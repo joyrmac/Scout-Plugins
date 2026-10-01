@@ -141,6 +141,11 @@ final class Scout_Reviews_Topics {
 		if ( isset( $seen[ $slug ] ) ) {
 			return;
 		}
+		// The theme's declared name wins over the page title.
+		$declared = (array) apply_filters( 'scout_reviews_slots', array() );
+		if ( ! empty( $declared[ $slug ]['label'] ) ) {
+			$label = (string) $declared[ $slug ]['label'];
+		}
 		if ( ! term_exists( $slug, self::TAX ) ) {
 			wp_insert_term( $label ? $label : $slug, self::TAX, array( 'slug' => $slug ) );
 		}

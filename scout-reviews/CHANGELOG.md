@@ -18,6 +18,10 @@ Review inbox, topics, and theme slots: reviews land on the right pages in one cl
 - `topic` and `fallback` options on `[scout_reviews]`, plus a Topic field on
   the block. A topic with no reviews yet shows featured reviews instead
   (`fallback="none"` shows nothing).
+- The stylesheet loads in `<head>` when a page's content uses the shortcode or
+  block, so reviews never restyle after they paint.
+- A slot that registers its own topic uses the theme's declared name when
+  there is one.
 
 ## 0.2.0 (2026-10-01)
 

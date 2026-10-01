@@ -24,6 +24,8 @@ final class Scout_Reviews_Render {
 		add_shortcode( 'scout_reviews', array( __CLASS__, 'shortcode_reviews' ) );
 		add_shortcode( 'scout_review_summary', array( __CLASS__, 'shortcode_summary' ) );
 
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_early' ) );
+
 		register_block_type(
 			SCOUT_REVIEWS_DIR . 'assets/block',
 			array( 'render_callback' => array( __CLASS__, 'block' ) )
@@ -118,6 +120,21 @@ final class Scout_Reviews_Render {
 				'disclaimer' => Scout_Reviews_Settings::get()['disclaimer'],
 			)
 		);
+	}
+
+	/**
+	 * Put the stylesheet in <head> when the page's content uses the shortcode
+	 * or block, so the reviews never restyle after they paint. Theme slots can
+	 * do the same with wp_enqueue_style( 'scout-reviews' ).
+	 */
+	public static function enqueue_early(): void {
+		$post = get_queried_object();
+		if ( ! $post instanceof WP_Post ) {
+			return;
+		}
+		if ( has_block( 'scout/reviews', $post ) || has_shortcode( $post->post_content, 'scout_reviews' ) || has_shortcode( $post->post_content, 'scout_review_summary' ) ) {
+			self::enqueue();
+		}
 	}
 
 	public static function enqueue(): void {
