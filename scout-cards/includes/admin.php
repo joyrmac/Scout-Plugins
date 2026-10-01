@@ -79,6 +79,27 @@ final class Scout_Cards_Admin {
 			. '<p class="description">' . esc_html( $help ) . '</p></td></tr>';
 	}
 
+	/** Spotlight fields: an optional block under the card. Leave all blank to hide it. */
+	private static function spot_fields( $base, $v ) {
+		echo '<tr><th scope="row" colspan="2" style="padding-bottom:0">Spotlight <span class="description" style="font-weight:400">(optional block under the card, such as a product or booking page)</span></th></tr>';
+		self::field( "{$base}[spot_heading]", $v['spot_heading'] ?? '', 'Spotlight heading' );
+		self::field( "{$base}[spot_text]", $v['spot_text'] ?? '', 'Spotlight note', 'textarea' );
+		self::field( "{$base}[spot_label]", $v['spot_label'] ?? '', 'Button text' );
+		self::field( "{$base}[spot_sub]", $v['spot_sub'] ?? '', 'Small line under it' );
+		self::field( "{$base}[spot_url]", $v['spot_url'] ?? '', 'Button link', 'text', 'Start with / for a page on this site.' );
+	}
+
+	/** Sanitized spotlight values from a submitted card. */
+	private static function clean_spot( $v ) {
+		return array(
+			'spot_heading' => sanitize_text_field( (string) ( $v['spot_heading'] ?? '' ) ),
+			'spot_text'    => sanitize_textarea_field( (string) ( $v['spot_text'] ?? '' ) ),
+			'spot_label'   => sanitize_text_field( (string) ( $v['spot_label'] ?? '' ) ),
+			'spot_sub'     => sanitize_text_field( (string) ( $v['spot_sub'] ?? '' ) ),
+			'spot_url'     => esc_url_raw( trim( (string) ( $v['spot_url'] ?? '' ) ) ),
+		);
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'edit_pages' ) ) {
 			return;
@@ -138,6 +159,7 @@ final class Scout_Cards_Admin {
 		self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
 		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
 		self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
+		self::spot_fields( $n, $s );
 		echo '</table>';
 
 		echo '<h2>People</h2><p>Each person gets their own card, and shows on the main card. Leave the name blank to hide a slot.</p>';
@@ -152,6 +174,7 @@ final class Scout_Cards_Admin {
 			self::field( "{$n}[people][$i][pick]", $p['pick'], 'Why talk to them (on the main card)', 'textarea' );
 			self::field( "{$n}[people][$i][tags]", $p['tags'], 'Tags', 'text', 'Comma separated, two to four short topics.' );
 			self::photo( "{$n}[people][$i][photo_id]", (int) $p['photo_id'], 'Photo', 'A square headshot works best.' );
+			self::spot_fields( "{$n}[people][$i]", $p );
 			echo '</table></details>';
 		}
 
@@ -216,6 +239,7 @@ final class Scout_Cards_Admin {
 		$out['mode']         = 'light' === ( $in['mode'] ?? '' ) ? 'light' : 'dark';
 		$out['accent']       = sanitize_hex_color( $in['accent'] ?? '' ) ? sanitize_hex_color( $in['accent'] ) : '#0E8FE6';
 		$out['photo_id']     = absint( $in['photo_id'] ?? 0 );
+		$out                += self::clean_spot( $in );
 		$out['links_latest'] = empty( $in['links_latest'] ) ? 0 : 1;
 		$out['enable_cards'] = empty( $in['enable_cards'] ) ? 0 : 1;
 		$out['enable_links'] = empty( $in['enable_links'] ) ? 0 : 1;
@@ -236,7 +260,7 @@ final class Scout_Cards_Admin {
 				'pick'     => $area( $p['pick'] ?? '' ),
 				'tags'     => $txt( $p['tags'] ?? '' ),
 				'photo_id' => absint( $p['photo_id'] ?? 0 ),
-			);
+			) + self::clean_spot( $p );
 		}
 		$out['links'] = array();
 		foreach ( (array) ( $in['links'] ?? array() ) as $l ) {

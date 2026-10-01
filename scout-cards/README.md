@@ -37,7 +37,8 @@ No WordPress Pages are needed; the plugin owns these addresses. The words
    Customize, or Settings -> General) for the logo and home-screen icon.
 3. **Scout -> Cards & Links:** pick the accent color and mode, write the main intro,
    add each person (name, link name, title, email, intro, "why talk to them," tags,
-   headshot), and set the link rows.
+   headshot), and set the link rows. Each card has an optional **Spotlight** (a heading,
+   a short note, and one link row) for a product, booking page, or second business.
 4. Clear the host cache, then run the QA checklist in the Scout playbook
    (`ops/playbook/addon-digital-business-cards.md` in Scout-Media-Raleigh).
 

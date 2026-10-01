@@ -147,6 +147,26 @@ final class Scout_Cards_Render {
 		return '<div class="' . esc_attr( $class ) . ' scc-avatar-mark" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</div>';
 	}
 
+	/** The spotlight block under a card. */
+	private static function spot( $spot ) {
+		if ( ! $spot ) {
+			return;
+		}
+		echo '<section class="scc-spot"' . ( '' !== $spot['heading'] ? ' aria-labelledby="scc-spot-h"' : '' ) . '>';
+		if ( '' !== $spot['heading'] ) {
+			echo '<h2 id="scc-spot-h">' . esc_html( $spot['heading'] ) . '</h2>';
+		}
+		if ( '' !== $spot['text'] ) {
+			echo '<p class="scc-spot-text">' . esc_html( $spot['text'] ) . '</p>';
+		}
+		if ( '' !== $spot['label'] && '' !== $spot['href'] ) {
+			echo '<a class="scc-link" href="' . esc_url( $spot['href'] ) . '"><span><strong>' . esc_html( $spot['label'] ) . '</strong>'
+				. ( '' !== $spot['sub'] ? '<span>' . esc_html( $spot['sub'] ) . '</span>' : '' )
+				. '</span>' . self::icon( 'arrow' ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() returns fixed SVG.
+		}
+		echo '</section>';
+	}
+
 	public static function card_page( array $p, array $people ) {
 		$s       = Scout_Cards_Settings::get();
 		$is_team = 'team' === $p['key'];
@@ -185,6 +205,9 @@ final class Scout_Cards_Render {
   </section>
 		<?php
 		$others = array_diff_key( $people, array( 'team' => 1 ) );
+		if ( ! $is_team ) {
+			self::spot( $p['spot'] );
+		}
 		if ( $is_team && $others ) :
 			?>
   <section class="scc-pick" aria-labelledby="scc-pick-h">
@@ -201,7 +224,13 @@ final class Scout_Cards_Render {
     </a>
 			<?php endforeach; ?>
   </section>
-		<?php elseif ( ! $is_team ) : ?>
+		<?php endif; ?>
+		<?php
+		if ( $is_team ) {
+			self::spot( $p['spot'] );
+		}
+		?>
+		<?php if ( ! $is_team ) : ?>
   <a class="scc-backlink" href="<?php echo esc_url( Scout_Cards_Settings::card_url() ); ?>">See the full <?php echo esc_html( $s['name'] ); ?> card</a>
 		<?php endif; ?>
   <div class="scc-share">

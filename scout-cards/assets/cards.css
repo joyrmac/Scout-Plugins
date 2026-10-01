@@ -62,6 +62,10 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-tags span { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.1px; color: var(--scc-accent); border: 1px solid var(--scc-line); border-radius: 8px; padding: 3px 7px; }
 .scc-person > svg, .scc-link > svg { color: var(--scc-text-3); }
 
+.scc-spot { display: flex; flex-direction: column; gap: 10px; }
+.scc-spot h2 { font-size: 20px; letter-spacing: -0.02em; margin: 6px 2px 0; text-wrap: balance; }
+.scc-spot-text { color: var(--scc-text-2); margin: 0 2px 4px !important; font-size: 16px; line-height: 1.6; text-wrap: pretty; }
+
 .scc-backlink { text-align: center; color: var(--scc-accent) !important; font-size: 15px; }
 
 .scc-share { display: flex; flex-direction: column; align-items: center; gap: 10px; }

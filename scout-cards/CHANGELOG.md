@@ -15,5 +15,7 @@ themes so every client site can have them.
   card and links addresses.
 - Card pages print their own title, canonical, and `noindex, follow`, and switch off
   Scout Core's head tags there. Unknown people return a real 404.
+- Optional spotlight under each card: a heading, a short note, and one link row
+  (a product, a booking page, or a second business). Blank hides it.
 - Warns when a WordPress Page already uses the card or links address.
 - Self-updating from the Scout Plugins releases.

@@ -49,6 +49,11 @@ final class Scout_Cards_Settings {
 			'team_intro'   => get_bloginfo( 'description' ),
 			'pick_heading' => 'Who would you like to talk to?',
 			'photo_id'     => 0,
+			'spot_heading' => '',
+			'spot_text'    => '',
+			'spot_label'   => '',
+			'spot_sub'     => '',
+			'spot_url'     => '',
 			'people'       => array(),
 			'links_intro'  => get_bloginfo( 'description' ),
 			'links_latest' => 1,
@@ -103,6 +108,19 @@ final class Scout_Cards_Settings {
 		return home_url( $path );
 	}
 
+	/**
+	 * Spotlight under a card: an optional heading and note, then one link row
+	 * (e.g. a product, a booking page, or a second business). Null when empty.
+	 */
+	public static function spot( $v ) {
+		$out = array();
+		foreach ( array( 'heading', 'text', 'label', 'sub', 'url' ) as $k ) {
+			$out[ $k ] = (string) ( $v[ 'spot_' . $k ] ?? '' );
+		}
+		$out['href'] = '' !== $out['url'] ? self::href( $out['url'] ) : '';
+		return '' === $out['heading'] . $out['text'] . $out['label'] ? null : $out;
+	}
+
 	/** Everything each card needs, keyed 'team' then each person's link name. */
 	public static function people() {
 		$s   = self::get();
@@ -123,6 +141,7 @@ final class Scout_Cards_Settings {
 				'save'     => self::card_url( 'team', 'save' ),
 				'share'    => self::card_url( 'team', 'share' ),
 				'file'     => sanitize_title( $s['name'] ),
+				'spot'     => self::spot( $s ),
 			),
 		);
 		foreach ( (array) $s['people'] as $p ) {
@@ -147,6 +166,7 @@ final class Scout_Cards_Settings {
 				'save'     => self::card_url( $slug, 'save' ),
 				'share'    => self::card_url( $slug, 'share' ),
 				'file'     => sanitize_title( $p['name'] ),
+				'spot'     => self::spot( $p ),
 			);
 		}
 		return $out;
