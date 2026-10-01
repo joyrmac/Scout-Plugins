@@ -23,6 +23,7 @@ on:
           - scout-core
           - scout-forms-guard
           - scout-optimize
+          - scout-reviews
           - scout-rvpark
   push:
     tags:
