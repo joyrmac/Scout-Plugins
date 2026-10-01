@@ -65,6 +65,24 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-spot { display: flex; flex-direction: column; gap: 10px; }
 .scc-spot h2 { font-size: 20px; letter-spacing: -0.02em; margin: 6px 2px 0; text-wrap: balance; }
 .scc-spot-text { color: var(--scc-text-2); margin: 0 2px 4px !important; font-size: 16px; line-height: 1.6; text-wrap: pretty; }
+/* Note panel and spotlight link: the card's one rich moment, tinted with the client's accent. */
+.scc-spot.is-note { position: relative; gap: 14px; padding: 26px 22px 22px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--scc-accent) 30%, transparent); background: radial-gradient(120% 70% at 100% 0%, color-mix(in srgb, var(--scc-accent) 20%, transparent), transparent 60%), var(--scc-surface); overflow: hidden; }
+.scc-spot.is-note::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--scc-accent), transparent); }
+.scc-spot-eyebrow { color: var(--scc-accent); font-size: 11.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; }
+.scc-spot.is-note h2 { font-size: 26px; line-height: 1.12; letter-spacing: -0.03em; margin: 0; }
+.scc-spot-lead { font-size: 19px; line-height: 1.45; font-weight: 500; color: var(--scc-text); text-wrap: pretty; }
+.scc-spot.is-note .scc-spot-text { margin: 0 !important; }
+.scc-spot-sign { display: flex; align-items: center; gap: 12px; margin: 4px 0 6px !important; padding-top: 16px !important; border-top: 1px solid var(--scc-line); }
+.scc-spot-sign img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.scc-spot-sign > span { display: flex; flex-direction: column; gap: 2px; }
+.scc-spot-sign strong { font-size: 15px; font-weight: 600; }
+.scc-spot-sign > span > span { font-size: 13px; color: var(--scc-text-3); }
+.scc-spot-link { padding: 18px; border-color: color-mix(in srgb, var(--scc-accent) 45%, transparent); background: radial-gradient(130% 160% at 0% 0%, color-mix(in srgb, var(--scc-accent) 28%, transparent), transparent 80%), var(--scc-surface); box-shadow: 0 12px 32px -14px color-mix(in srgb, var(--scc-accent) 55%, transparent); }
+.scc-spot-link:hover { border-color: var(--scc-accent); }
+.scc-spot-host { font-style: normal; font-size: 11px; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; color: var(--scc-accent); }
+.scc-spot-link strong { font-size: 18px; }
+.scc-spot-link > svg { width: 34px; height: 34px; padding: 7px; border-radius: 50%; background: color-mix(in srgb, var(--scc-accent) 18%, transparent); color: var(--scc-accent) !important; transition: transform .15s ease; }
+.scc-spot-link:hover > svg { transform: translateX(3px); }
 
 .scc-backlink { text-align: center; color: var(--scc-accent) !important; font-size: 15px; }
 

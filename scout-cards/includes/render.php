@@ -147,20 +147,34 @@ final class Scout_Cards_Render {
 		return '<div class="' . esc_attr( $class ) . ' scc-avatar-mark" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</div>';
 	}
 
-	/** The spotlight block under a card. */
-	private static function spot( $spot ) {
+	/**
+	 * The spotlight block under a card. With a heading or note it renders as a
+	 * panel; on a person's card it is signed by them. A blank line in the note
+	 * splits it, and the first paragraph becomes the lead.
+	 */
+	private static function spot( $spot, $person = null ) {
 		if ( ! $spot ) {
 			return;
 		}
-		echo '<section class="scc-spot"' . ( '' !== $spot['heading'] ? ' aria-labelledby="scc-spot-h"' : '' ) . '>';
+		$note = '' !== $spot['heading'] . $spot['text'];
+		echo '<section class="scc-spot' . ( $note ? ' is-note' : '' ) . '"' . ( '' !== $spot['heading'] ? ' aria-labelledby="scc-spot-h"' : '' ) . '>';
+		if ( $note && $person ) {
+			echo '<p class="scc-spot-eyebrow">A note from ' . esc_html( $person['first'] ) . '</p>';
+		}
 		if ( '' !== $spot['heading'] ) {
 			echo '<h2 id="scc-spot-h">' . esc_html( $spot['heading'] ) . '</h2>';
 		}
-		if ( '' !== $spot['text'] ) {
-			echo '<p class="scc-spot-text">' . esc_html( $spot['text'] ) . '</p>';
+		$paras = array_values( array_filter( array_map( 'trim', preg_split( '/\n\s*\n/', $spot['text'] ) ) ) );
+		foreach ( $paras as $i => $para ) {
+			echo '<p class="' . ( 0 === $i && count( $paras ) > 1 ? 'scc-spot-lead' : 'scc-spot-text' ) . '">' . esc_html( $para ) . '</p>';
+		}
+		if ( $note && $person ) {
+			echo '<p class="scc-spot-sign">' . ( $person['photo'] ? '<img src="' . esc_url( $person['photo'] ) . '" width="36" height="36" alt="" loading="lazy">' : '' )
+				. '<span><strong>' . esc_html( $person['name'] ) . '</strong>' . ( $person['title'] ? '<span>' . esc_html( $person['title'] ) . '</span>' : '' ) . '</span></p>';
 		}
 		if ( '' !== $spot['label'] && '' !== $spot['href'] ) {
-			echo '<a class="scc-link" href="' . esc_url( $spot['href'] ) . '"><span><strong>' . esc_html( $spot['label'] ) . '</strong>'
+			$host = 0 === strpos( $spot['url'], '/' ) ? '' : preg_replace( '/^www\./', '', (string) wp_parse_url( $spot['href'], PHP_URL_HOST ) );
+			echo '<a class="scc-link scc-spot-link" href="' . esc_url( $spot['href'] ) . '"><span>' . ( $host ? '<em class="scc-spot-host">' . esc_html( $host ) . '</em>' : '' ) . '<strong>' . esc_html( $spot['label'] ) . '</strong>'
 				. ( '' !== $spot['sub'] ? '<span>' . esc_html( $spot['sub'] ) . '</span>' : '' )
 				. '</span>' . self::icon( 'arrow' ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() returns fixed SVG.
 		}
@@ -206,7 +220,7 @@ final class Scout_Cards_Render {
 		<?php
 		$others = array_diff_key( $people, array( 'team' => 1 ) );
 		if ( ! $is_team ) {
-			self::spot( $p['spot'] );
+			self::spot( $p['spot'], $p );
 		}
 		if ( $is_team && $others ) :
 			?>
