@@ -24,6 +24,8 @@ final class Scout_Reviews_Render {
 		add_shortcode( 'scout_reviews', array( __CLASS__, 'shortcode_reviews' ) );
 		add_shortcode( 'scout_review_summary', array( __CLASS__, 'shortcode_summary' ) );
 
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_early' ) );
+
 		register_block_type(
 			SCOUT_REVIEWS_DIR . 'assets/block',
 			array( 'render_callback' => array( __CLASS__, 'block' ) )
@@ -48,6 +50,9 @@ final class Scout_Reviews_Render {
 			'featured'   => $bool( $raw['featured'] ?? false ),
 			'min_rating' => max( 0, min( 5, (int) ( $raw['min_rating'] ?? 0 ) ) ),
 			'summary'    => $bool( $raw['summary'] ?? true ),
+			'topic'      => sanitize_title( (string) ( $raw['topic'] ?? '' ) ),
+			// When a topic has no reviews yet, show featured ones instead of nothing.
+			'fallback'   => 'none' === strtolower( (string) ( $raw['fallback'] ?? 'featured' ) ) ? 'none' : 'featured',
 		);
 	}
 
@@ -71,6 +76,7 @@ final class Scout_Reviews_Render {
 				'featured'   => ! empty( $attributes['featured'] ) ? '1' : '0',
 				'min_rating' => $attributes['minRating'] ?? 0,
 				'summary'    => ! isset( $attributes['showSummary'] ) || $attributes['showSummary'] ? '1' : '0',
+				'topic'      => $attributes['topic'] ?? '',
 			)
 		);
 		$html = self::section( $opts );
@@ -85,14 +91,19 @@ final class Scout_Reviews_Render {
 	 * so an empty section never leaves a blank gap on the page.
 	 */
 	public static function section( array $opts ): string {
-		$reviews = Scout_Reviews_Query::reviews(
-			array(
-				'count'      => $opts['count'],
-				'source'     => $opts['source'],
-				'featured'   => $opts['featured'],
-				'min_rating' => $opts['min_rating'],
-			)
+		$query = array(
+			'count'      => $opts['count'],
+			'source'     => $opts['source'],
+			'featured'   => $opts['featured'],
+			'min_rating' => $opts['min_rating'],
+			'topic'      => $opts['topic'] ?? '',
 		);
+		$reviews = Scout_Reviews_Query::reviews( $query );
+		if ( ! $reviews && '' !== $query['topic'] && 'featured' === ( $opts['fallback'] ?? 'featured' ) ) {
+			$query['topic']    = '';
+			$query['featured'] = true;
+			$reviews           = Scout_Reviews_Query::reviews( $query );
+		}
 		$totals = $opts['summary'] ? Scout_Reviews_Query::totals( $opts['source'] ) : array();
 
 		if ( ! $reviews && ! $totals ) {
@@ -109,6 +120,21 @@ final class Scout_Reviews_Render {
 				'disclaimer' => Scout_Reviews_Settings::get()['disclaimer'],
 			)
 		);
+	}
+
+	/**
+	 * Put the stylesheet in <head> when the page's content uses the shortcode
+	 * or block, so the reviews never restyle after they paint. Theme slots can
+	 * do the same with wp_enqueue_style( 'scout-reviews' ).
+	 */
+	public static function enqueue_early(): void {
+		$post = get_queried_object();
+		if ( ! $post instanceof WP_Post ) {
+			return;
+		}
+		if ( has_block( 'scout/reviews', $post ) || has_shortcode( $post->post_content, 'scout_reviews' ) || has_shortcode( $post->post_content, 'scout_review_summary' ) ) {
+			self::enqueue();
+		}
 	}
 
 	public static function enqueue(): void {
@@ -173,4 +199,67 @@ final class Scout_Reviews_Render {
 		$name = trim( $name );
 		return '' === $name ? '?' : mb_strtoupper( mb_substr( $name, 0, 1 ) );
 	}
+}
+
+/**
+ * Theme API: show the reviews that belong on this spot.
+ *
+ * Call it where reviews should appear in a template. It prints nothing when
+ * there are no reviews to show (and nothing at all if the plugin is off, as
+ * long as the call is wrapped in function_exists), so it can never leave an
+ * empty section behind.
+ *
+ *     <?php if ( function_exists( 'scout_reviews_slot' ) ) scout_reviews_slot( array( 'topic' => 'law-firms' ) ); ?>
+ *
+ * @param array $args {
+ *     @type string $topic    Topic slug. Default: the current page's slug ("home" on the front page).
+ *     @type string $label    Name for the topic if it does not exist yet. Default: the page title.
+ *     @type int    $count    How many reviews. Default 3.
+ *     @type string $layout   grid | row | list. Default grid.
+ *     @type bool   $summary  Show the platform rating line. Default true.
+ *     @type string $fallback "featured" (default) shows featured reviews when the topic has none; "none" shows nothing.
+ *     @type string $before   HTML printed before the reviews, only when there are reviews (the theme's section opener and heading).
+ *     @type string $after    HTML printed after, only when there are reviews.
+ * }
+ */
+function scout_reviews_slot( array $args = array() ): void {
+	echo scout_reviews_get_slot( $args ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped templates; before/after are theme-authored markup.
+}
+
+/**
+ * Same as scout_reviews_slot(), returned instead of printed.
+ */
+function scout_reviews_get_slot( array $args = array() ): string {
+	$page  = get_queried_object();
+	$topic = (string) ( $args['topic'] ?? '' );
+	$label = (string) ( $args['label'] ?? '' );
+
+	if ( '' === $topic ) {
+		if ( is_front_page() ) {
+			$topic = 'home';
+			$label = $label ? $label : __( 'Home page', 'scout-reviews' );
+		} elseif ( $page instanceof WP_Post ) {
+			$topic = $page->post_name;
+			$label = $label ? $label : get_the_title( $page );
+		}
+	}
+	if ( '' !== $topic ) {
+		Scout_Reviews_Topics::remember( $topic, $label ? $label : ucwords( str_replace( '-', ' ', $topic ) ) );
+	}
+
+	$opts = Scout_Reviews_Render::options(
+		array(
+			'topic'    => $topic,
+			'count'    => $args['count'] ?? 3,
+			'layout'   => $args['layout'] ?? 'grid',
+			'summary'  => ( $args['summary'] ?? true ) ? '1' : '0',
+			'fallback' => $args['fallback'] ?? 'featured',
+		)
+	);
+
+	$html = Scout_Reviews_Render::section( $opts );
+	if ( '' === $html ) {
+		return '';
+	}
+	return (string) ( $args['before'] ?? '' ) . $html . (string) ( $args['after'] ?? '' );
 }

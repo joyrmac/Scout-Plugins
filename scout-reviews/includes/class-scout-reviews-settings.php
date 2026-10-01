@@ -227,8 +227,10 @@ final class Scout_Reviews_Settings {
 				<li><code>[scout_reviews featured="1" count="3"]</code> <?php esc_html_e( 'shows three featured reviews, good for the home page.', 'scout-reviews' ); ?></li>
 				<li><code>[scout_reviews source="google" layout="row"]</code> <?php esc_html_e( 'shows only Google reviews in a sideways-scrolling row.', 'scout-reviews' ); ?></li>
 				<li><code>[scout_reviews summary="0"]</code> <?php esc_html_e( 'hides the rating summary.', 'scout-reviews' ); ?></li>
+				<li><code>[scout_reviews topic="law-firms" count="3"]</code> <?php esc_html_e( 'shows reviews tagged with one topic, or featured reviews until that topic has some.', 'scout-reviews' ); ?></li>
 				<li><code>[scout_review_summary]</code> <?php esc_html_e( 'shows only the rating summary.', 'scout-reviews' ); ?></li>
 			</ul>
+			<p><?php esc_html_e( 'Theme developers: call scout_reviews_slot() in a template to show the reviews for that page automatically. See the plugin README.', 'scout-reviews' ); ?></p>
 		</div>
 		<?php
 	}

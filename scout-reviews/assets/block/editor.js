@@ -12,6 +12,7 @@
 	var SelectControl = wp.components.SelectControl;
 	var RangeControl = wp.components.RangeControl;
 	var ToggleControl = wp.components.ToggleControl;
+	var TextControl = wp.components.TextControl;
 	var Placeholder = wp.components.Placeholder;
 	var ServerSideRender = wp.serverSideRender;
 
@@ -65,6 +66,12 @@
 							value: a.source,
 							options: SOURCES,
 							onChange: function ( v ) { set( { source: v } ); }
+						} ),
+						el( TextControl, {
+							label: __( 'Topic (optional)', 'scout-reviews' ),
+							help: __( 'A topic slug from Reviews > Topics, such as law-firms. Shows featured reviews if the topic has none yet.', 'scout-reviews' ),
+							value: a.topic,
+							onChange: function ( v ) { set( { topic: v } ); }
 						} ),
 						el( RangeControl, {
 							label: __( 'How many (0 shows all)', 'scout-reviews' ),
