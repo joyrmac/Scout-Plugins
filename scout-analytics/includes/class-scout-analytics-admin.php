@@ -160,9 +160,10 @@ final class Scout_Analytics_Admin {
 
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Events other Scout features send', 'scout-analytics' ); ?></h2>
-			<p><?php esc_html_e( 'Cards, the link page, booking and chat report their clicks here. In Tag Manager, make a Custom Event trigger for each name you want in GA4.', 'scout-analytics' ); ?></p>
-			<p><code>card_view</code> <code>card_save_contact</code> <code>card_call</code> <code>card_email</code> <code>card_book</code> <code>links_click</code> <code>links_post_click</code> <code>scout_consent_update</code></p>
-			<p class="description"><?php esc_html_e( 'Each one carries link_label, and link_url when it is a link.', 'scout-analytics' ); ?></p>
+			<p><?php esc_html_e( 'The digital business cards and the link page report their views and taps here. In Tag Manager, one Custom Event trigger catches them all: event name ^(card|links)_ with "Use regex matching" ticked, feeding a GA4 Event tag whose event name is {{Event}}.', 'scout-analytics' ); ?></p>
+			<p><code>card_view</code> <code>card_save_contact</code> <code>card_call</code> <code>card_email</code> <code>card_book</code> <code>card_links_click</code> <code>links_click</code> <code>links_post_click</code> <code>links_card_click</code></p>
+			<p class="description"><?php esc_html_e( 'scout_consent_update fires when a visitor answers the cookie notice. It is for Tag Manager only; leave it out of GA4.', 'scout-analytics' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Each event carries link_label, and link_url when it is a link. In Tag Manager, add both as Data Layer Variables and send them as event parameters.', 'scout-analytics' ); ?></p>
 		</section>
 		<?php
 		Scout_Admin_UI::close();

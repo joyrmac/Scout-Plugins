@@ -1,5 +1,13 @@
 # Scout Analytics changelog
 
+## 0.1.1 (2026-10-12)
+
+- **The events list is complete and simpler to set up.** It now names every
+  event the cards and link page send (card_links_click and links_card_click
+  were missing) and explains the one regex trigger that catches them all,
+  instead of a trigger per event. It no longer says booking and chat send
+  events, since they don't yet.
+
 ## 0.1.0 (2026-10-12)
 
 - First release. Loads Google Tag Manager (or, without a container, a GA4 tag)
