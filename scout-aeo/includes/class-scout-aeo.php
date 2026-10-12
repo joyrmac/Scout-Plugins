@@ -37,6 +37,8 @@ final class Scout_AEO {
 
 	public static function boot(): void {
 		add_filter( 'robots_txt', array( __CLASS__, 'robots' ), 20, 2 );
+		// Last of all, so every group (WordPress's, an SEO plugin's, ours) is in place first.
+		add_filter( 'robots_txt', array( __CLASS__, 'content_signal' ), PHP_INT_MAX, 2 );
 		add_action( 'init', array( __CLASS__, 'serve_llms' ), 1 );
 	}
 
@@ -92,6 +94,39 @@ final class Scout_AEO {
 			$out .= "\n# Plain-text guide for AI tools: " . home_url( '/llms.txt' ) . "\n";
 		}
 		return $out;
+	}
+
+	/**
+	 * The Content-Signal line (contentsignals.org): how the site's pages may be
+	 * used once a crawler has them. search = a search index, ai-input = quoted in
+	 * an AI answer, ai-train = training a model. Values follow the two switches.
+	 *
+	 * A crawler only reads the most specific group that names it, so the line
+	 * goes into every group, not only "*". If any Content-Signal line is already
+	 * there (a file, another plugin), it is left alone.
+	 */
+	public static function content_signal( $output, $public ) {
+		$output = (string) $output;
+		if ( ! $public || ! self::is_live() || preg_match( '/^\s*content-signal\s*:/im', $output ) ) {
+			return $output;
+		}
+		$s     = self::settings();
+		$value = (string) apply_filters(
+			'scout_aeo_content_signal',
+			'search=yes, ai-input=' . ( $s['search'] ? 'yes' : 'no' ) . ', ai-train=' . ( $s['training'] ? 'yes' : 'no' )
+		);
+		return '' === $value ? $output : self::add_signal( $output, $value );
+	}
+
+	/** Put "Content-Signal: $value" after each run of User-agent lines. Pure, for tests. */
+	public static function add_signal( string $output, string $value ): string {
+		$line    = 'Content-Signal: ' . $value . "\n";
+		$count   = 0;
+		$patched = preg_replace( '/((?:^[ \t]*user-agent[ \t]*:[^\r\n]*\r?\n)+)/im', '$1' . $line, $output, -1, $count );
+		if ( null !== $patched && $count > 0 ) {
+			return $patched;
+		}
+		return ( '' === trim( $output ) ? '' : rtrim( $output ) . "\n\n" ) . "User-agent: *\n" . $line;
 	}
 
 	public static function serve_llms(): void {

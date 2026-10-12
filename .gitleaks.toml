@@ -1,0 +1,44 @@
+# Secret scanning for this repo (gitleaks).
+#
+# Blocks NEW secrets: API keys, tokens, private keys, webhook URLs. It runs on
+# every pull request and every push to main (.github/workflows/secrets.yml),
+# and only looks at the commits being added, so an old, already-revoked key in
+# history never keeps the check red. The fix for a leaked key is always to
+# revoke it at the source first, then remove it from the file.
+#
+# Keys and passwords belong in the password manager or the host's settings,
+# never in a commit.
+
+title = "Scout secret scanning"
+
+[extend]
+# gitleaks' built-in rules: Google, OpenAI, AWS, Slack, GitHub, Stripe,
+# private keys, high-entropy generic keys, and more.
+useDefault = true
+
+[[rules]]
+id = "openai-project-key"
+description = "OpenAI project API key"
+regex = '''sk-proj-[A-Za-z0-9_-]{20,}'''
+keywords = ["sk-proj-"]
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API key"
+regex = '''sk-ant-[A-Za-z0-9_-]{20,}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
+id = "slack-incoming-webhook"
+description = "Slack incoming webhook URL"
+regex = '''https://hooks\.slack\.com/services/[A-Za-z0-9/]+'''
+keywords = ["hooks.slack.com/services"]
+
+[allowlist]
+description = "Example files and this config never count"
+paths = [
+  '''\.gitleaks\.toml$''',
+  '''\.gitleaksignore$''',
+  '''.*\.example$''',
+  '''.*\.sample$''',
+]

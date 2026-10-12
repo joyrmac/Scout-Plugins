@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout AI Search
  * Description:       Gets the site ready for AI search (ChatGPT, Google AI answers, Perplexity, Claude): lets the AI search crawlers in, serves a plain-text guide at /llms.txt, and adds question-and-answer sections with matching FAQ schema to any page.
- * Version:           0.1.2
+ * Version:           0.1.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_AEO_VERSION', '0.1.2' );
+define( 'SCOUT_AEO_VERSION', '0.1.3' );
 define( 'SCOUT_AEO_FILE', __FILE__ );
 
 // Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).

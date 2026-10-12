@@ -37,6 +37,8 @@ if ( ! $scout_core_purge ) {
 
 delete_option( 'scout_business' );
 delete_option( 'scout_seo_defaults' );
+delete_option( 'scout_seo_sitemap_found' );
+wp_clear_scheduled_hook( 'scout_seo_sitemap_check' );
 
 foreach ( array( '_scout_seo_title', '_scout_seo_desc', '_scout_seo_canonical', '_scout_seo_noindex' ) as $scout_core_meta_key ) {
 	delete_post_meta_by_key( $scout_core_meta_key );

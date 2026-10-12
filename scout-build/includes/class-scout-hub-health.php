@@ -168,7 +168,15 @@ final class Scout_Hub_Health {
 		if ( ! $public ) {
 			$out[] = array( 'label' => __( 'AI crawlers', 'scout-build' ), 'value' => __( 'Hidden', 'scout-build' ), 'state' => 'warn', 'note' => __( 'Search engines are switched off in Settings, Reading, so AI tools are kept out too. Right for staging only.', 'scout-build' ) );
 		} elseif ( $file ) {
-			$out[] = array( 'label' => __( 'AI crawlers', 'scout-build' ), 'value' => __( 'Check by hand', 'scout-build' ), 'state' => 'warn', 'note' => __( 'A robots.txt file on the server overrides WordPress. Make sure it does not block AI search tools.', 'scout-build' ) );
+			$safe  = '' === Scout_Hub_Robots::blocker();
+			$out[] = array(
+				'label'     => __( 'AI crawlers', 'scout-build' ),
+				'value'     => $safe ? __( 'File in the way', 'scout-build' ) : __( 'Check by hand', 'scout-build' ),
+				'state'     => 'warn',
+				'note'      => $safe ? __( 'A robots.txt file on the server hides WordPress\'s version and everything Scout adds to it. Switching is safe: no rule would be lost.', 'scout-build' ) : __( 'A robots.txt file on the server overrides WordPress, and it has rules of its own. Review it before switching.', 'scout-build' ),
+				'link'      => Scout_Hub_Robots::url(),
+				'link_text' => $safe ? __( 'Switch to WordPress\'s robots.txt', 'scout-build' ) : __( 'Review the file', 'scout-build' ),
+			);
 		} elseif ( $blocked ) {
 			/* translators: %s: crawler names */
 			$out[] = array( 'label' => __( 'AI crawlers', 'scout-build' ), 'value' => __( 'Blocked', 'scout-build' ), 'state' => 'bad', 'note' => sprintf( __( 'robots.txt blocks %s.', 'scout-build' ), implode( ', ', $blocked ) ), 'link' => $set, 'link_text' => $set_tx );
