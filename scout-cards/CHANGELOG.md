@@ -1,5 +1,14 @@
 # Scout Cards changelog
 
+## 1.0.5 (2026-10-12)
+
+- **Stands down when the theme already makes cards.** On the Scout Media theme
+  (which has its own cards and links pages), Scout Cards now does nothing: no
+  routes, no menu, no second "Site Build" section, and nothing that could take
+  over the theme's /card/ and /links/. The Plugins screen says so. Before, it
+  added its own section and its own Cards & Links screen on top of the
+  theme's. Filter `scout_cards_theme_has_cards` to decide.
+
 ## 1.0.4 (2026-10-12)
 
 - **A new look for every settings screen.** The plugin's screens now share

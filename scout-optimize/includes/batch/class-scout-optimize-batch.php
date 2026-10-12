@@ -62,7 +62,7 @@ final class Scout_Optimize_Batch {
 	 * @return void
 	 */
 	public function register(): void {
-		add_action( 'admin_menu', array( $this, 'register_page' ) );
+		add_action( 'admin_menu', array( $this, 'register_page' ), 20 );
 		add_action( 'admin_post_scout_optimize_sweep_start', array( $this, 'handle_start' ) );
 		add_action( 'admin_post_scout_optimize_sweep_stop', array( $this, 'handle_stop' ) );
 		add_action( self::CRON_HOOK, array( $this, 'run_batch' ) );
@@ -74,9 +74,10 @@ final class Scout_Optimize_Batch {
 	 * @return void
 	 */
 	public function register_page(): void {
-		add_management_page(
-			__( 'Scout Optimize Sweep', 'scout-optimize' ),
-			__( 'Scout Optimize Sweep', 'scout-optimize' ),
+		add_submenu_page(
+			Scout_Optimize::parent(),
+			__( 'Optimize existing images', 'scout-optimize' ),
+			__( 'Optimize existing images', 'scout-optimize' ),
 			SCOUT_OPTIMIZE_CAP,
 			'scout-optimize-sweep',
 			array( $this, 'render_page' )
@@ -296,7 +297,7 @@ final class Scout_Optimize_Batch {
 	 * @return void
 	 */
 	private function redirect(): void {
-		wp_safe_redirect( admin_url( 'tools.php?page=scout-optimize-sweep' ) );
+		wp_safe_redirect( Scout_Optimize::url( 'scout-optimize-sweep' ) );
 		exit;
 	}
 
@@ -315,7 +316,7 @@ final class Scout_Optimize_Batch {
 		$percent = $stats['total'] > 0 ? (int) round( ( $stats['optimized'] / $stats['total'] ) * 100 ) : 0;
 		$action  = admin_url( 'admin-post.php' );
 		?>
-		<?php Scout_Admin_UI::open( __( 'Optimize existing images', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Scout Optimize Sweep', 'scout-optimize' ) ); ?>
+		<?php Scout_Admin_UI::open( __( 'Optimize existing images', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Images', 'scout-optimize' ) ); ?>
 			<p style="max-width:760px;">
 				<?php esc_html_e( 'Optimize images already in the media library. This runs in the background in small batches, backing up each original before optimizing. New uploads are handled automatically; this is for the existing library.', 'scout-optimize' ); ?>
 			</p>

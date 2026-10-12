@@ -80,7 +80,9 @@ final class Scout_Optimize {
 	 * @return void
 	 */
 	private function init() {
-		add_action( 'admin_menu', array( $this, 'register_admin_page' ) );
+		// Priority 20: after the theme's Build section (9) and the Site Build hub (15).
+		add_action( 'admin_menu', array( $this, 'register_admin_page' ), 20 );
+		add_action( 'admin_menu', array( __CLASS__, 'redirect_old_urls' ), 1 );
 		add_action( 'admin_post_scout_optimize_save', array( $this, 'handle_save_settings' ) );
 
 		// Register the upload pipeline. Its callback is a no-op until the
@@ -151,12 +153,69 @@ final class Scout_Optimize {
 	 * @return void
 	 */
 	public function register_admin_page() {
-		add_management_page(
-			__( 'Scout Optimize', 'scout-optimize' ),
-			__( 'Scout Optimize', 'scout-optimize' ),
+		add_submenu_page(
+			self::parent(),
+			__( 'Image optimizer', 'scout-optimize' ),
+			__( 'Image optimizer', 'scout-optimize' ),
 			SCOUT_OPTIMIZE_CAP,
 			'scout-optimize',
 			array( $this, 'render_admin_page' )
+		);
+	}
+
+	/**
+	 * The site's Build section (the theme's Scout Build, Recon Build, or the
+	 * Site Build hub), so every Scout screen lives in one place. Tools only
+	 * when there is no Build section at all.
+	 *
+	 * @return string
+	 */
+	public static function parent() {
+		global $admin_page_hooks;
+		foreach ( array( 'scout-build', 'recon-build', 'site-build', 'scout' ) as $slug ) {
+			if ( isset( $admin_page_hooks[ $slug ] ) ) {
+				return $slug;
+			}
+		}
+		return 'tools.php';
+	}
+
+	/**
+	 * Admin URL of one of the optimizer's screens, wherever it lives.
+	 *
+	 * @param string $page Page slug.
+	 * @param array  $args Extra query args.
+	 * @return string
+	 */
+	public static function url( $page = 'scout-optimize', $args = array() ) {
+		$base = 'tools.php' === get_option( 'scout_optimize_parent', 'tools.php' ) ? 'tools.php' : 'admin.php';
+		return add_query_arg( array_merge( array( 'page' => $page ), $args ), admin_url( $base ) );
+	}
+
+	/**
+	 * Remember where the screens live (redirects run before menus exist), and
+	 * send old Tools bookmarks to the new place.
+	 *
+	 * @return void
+	 */
+	public static function redirect_old_urls() {
+		global $pagenow;
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'tools.php' === $pagenow && in_array( $page, array( 'scout-optimize', 'scout-optimize-sweep' ), true ) && 'tools.php' !== get_option( 'scout_optimize_parent', 'tools.php' ) ) {
+			$args = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $args['page'] );
+			wp_safe_redirect( self::url( $page, $args ) );
+			exit;
+		}
+		add_action(
+			'admin_menu',
+			static function () {
+				$parent = self::parent();
+				if ( get_option( 'scout_optimize_parent' ) !== $parent ) {
+					update_option( 'scout_optimize_parent', $parent, false );
+				}
+			},
+			21
 		);
 	}
 
@@ -208,7 +267,7 @@ final class Scout_Optimize {
 
 		update_option( self::SETTINGS_OPTION, $settings );
 
-		wp_safe_redirect( add_query_arg( 'updated', '1', admin_url( 'tools.php?page=scout-optimize' ) ) );
+		wp_safe_redirect( self::url( 'scout-optimize', array( 'updated' => '1' ) ) );
 		exit;
 	}
 
@@ -249,7 +308,7 @@ final class Scout_Optimize {
 			'rewrite_picture'  => __( 'Serve the smaller copies to visitors (wrap images in <picture>)', 'scout-optimize' ),
 		);
 		?>
-		<?php Scout_Admin_UI::open( __( 'Image optimizer', 'scout-optimize' ), __( 'Every photo you upload is resized and compressed so the site stays fast. The original is kept as a backup.', 'scout-optimize' ), __( 'Scout Optimize', 'scout-optimize' ) ); ?>
+		<?php Scout_Admin_UI::open( __( 'Image optimizer', 'scout-optimize' ), __( 'Every photo you upload is resized and compressed so the site stays fast. The original is kept as a backup.', 'scout-optimize' ), __( 'Images', 'scout-optimize' ) ); ?>
 
 			<?php if ( isset( $_GET['updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display flag after a nonce-checked save/redirect. ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'scout-optimize' ); ?></p></div>
@@ -314,8 +373,8 @@ final class Scout_Optimize {
 				<?php
 				printf(
 					/* translators: %s: URL of the sweep tool. */
-					wp_kses_post( __( 'To optimize images already in the library, use <a href="%s">Scout Optimize Sweep</a>. New uploads are handled automatically once the options above are on.', 'scout-optimize' ) ),
-					esc_url( admin_url( 'tools.php?page=scout-optimize-sweep' ) )
+					wp_kses_post( __( 'To optimize images already in the library, use <a href="%s">Optimize existing images</a>. New uploads are handled automatically once the options above are on.', 'scout-optimize' ) ),
+					esc_url( self::url( 'scout-optimize-sweep' ) )
 				);
 				?>
 			</p>
