@@ -51,13 +51,19 @@ header is the source of truth for the release.
 **2. Write the changelog.** Add a dated entry at the top of that plugin's
 `CHANGELOG.md`. The release notes are pulled from this entry automatically.
 
-**3. Commit and push**, then release from the Actions tab:
+**3. Commit, push, and merge the pull request into `main`.** That is the
+release. On every push to `main` the Release workflow reads each plugin's
+`Version:` header, and any version without a release yet gets one: it creates
+the `<slug>-v<version>` tag, builds the zip, and publishes the release. Scout
+Core goes first, then the rest, one at a time. A plugin whose version did not
+change is skipped, so merging never ships anything by accident. The version can
+never disagree with the code because nobody retypes it.
+
+### By hand, as a backup
 
 > **Actions → Release → Run workflow →** pick the plugin → **Run**
 
-That reads the version straight out of the plugin's header, creates the
-`<slug>-v<version>` tag for you, builds the zip, and publishes the release. The
-version can never disagree with the code because nobody retypes it.
+Same build, for one plugin. It refuses a version that already shipped.
 
 Each plugin is versioned and released on its own. Releasing one never touches
 the others.
