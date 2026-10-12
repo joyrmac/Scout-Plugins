@@ -2,6 +2,13 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.7.3 (2026-10-12)
+
+- **Moved out of Tools into the site's Build section** (Scout Build on the
+  Scout theme, Site Build on client sites), with plain names: "Image optimizer"
+  and "Optimize existing images". Old Tools links forward to the new place.
+  Tools is used only when a site has no Build section.
+
 ## 0.7.2 (2026-10-12)
 
 - **A new look for every settings screen.** The plugin's screens now share
