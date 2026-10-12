@@ -70,6 +70,7 @@ final class Scout_AEO_Admin {
 		$s     = Scout_AEO::settings();
 		$o     = Scout_AEO::OPTION;
 		$pages = get_pages( array( 'sort_column' => 'menu_order,post_title' ) );
+		$custom = has_filter( 'scout_aeo_llms_txt' );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'AI search', 'scout-aeo' ); ?></h1>
@@ -97,6 +98,12 @@ final class Scout_AEO_Admin {
 								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the guide', 'scout-aeo' ); ?></a> · <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View robots.txt', 'scout-aeo' ); ?></a></p>
 							<?php endif; ?></td>
 					</tr>
+					<?php if ( $custom ) : ?>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'What the guide says', 'scout-aeo' ); ?></th>
+						<td><p><?php esc_html_e( 'This site\'s theme writes its own guide, so its wording, pages and posts come from the theme. Open the guide above to read it.', 'scout-aeo' ); ?></p></td>
+					</tr>
+					<?php else : ?>
 					<tr>
 						<th scope="row"><label for="scout-aeo-intro"><?php esc_html_e( 'Short description', 'scout-aeo' ); ?></label></th>
 						<td><textarea id="scout-aeo-intro" name="<?php echo esc_attr( $o ); ?>[intro]" rows="4" class="large-text" placeholder="<?php echo esc_attr( Scout_AEO::summary() ); ?>"><?php echo esc_textarea( $s['intro'] ); ?></textarea>
@@ -115,6 +122,7 @@ final class Scout_AEO_Admin {
 						<th scope="row"><label for="scout-aeo-posts"><?php esc_html_e( 'Recent posts to list', 'scout-aeo' ); ?></label></th>
 						<td><input id="scout-aeo-posts" type="number" min="0" max="50" name="<?php echo esc_attr( $o ); ?>[posts]" value="<?php echo (int) $s['posts']; ?>" class="small-text"></td>
 					</tr>
+					<?php endif; ?>
 				</table>
 				<?php submit_button(); ?>
 			</form>

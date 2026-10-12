@@ -24,6 +24,7 @@ final class Scout_Hub_Admin {
 
 	public static function boot(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 15 );
+		add_action( 'admin_menu', array( __CLASS__, 'first' ), 999 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_post_' . self::PLAN_ACTION, array( __CLASS__, 'save_plan' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_HUB_FILE ), array( __CLASS__, 'action_link' ) );
@@ -71,6 +72,26 @@ final class Scout_Hub_Admin {
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
 			update_option( 'scout_hub_page', $slug, false );
+		}
+	}
+
+	/**
+	 * Inside a theme's Build section, put Features first, so clicking the
+	 * section opens the hub instead of the theme's setup tools.
+	 */
+	public static function first(): void {
+		global $submenu;
+		$parent = self::parent();
+		if ( 'site-build' === $parent || empty( $submenu[ $parent ] ) ) {
+			return;
+		}
+		foreach ( $submenu[ $parent ] as $i => $item ) {
+			if ( self::PAGE === ( $item[2] ?? '' ) ) {
+				unset( $submenu[ $parent ][ $i ] );
+				array_unshift( $submenu[ $parent ], $item );
+				$submenu[ $parent ] = array_values( $submenu[ $parent ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering only.
+				return;
+			}
 		}
 	}
 
@@ -174,87 +195,91 @@ final class Scout_Hub_Admin {
 			'on'      => __( 'On', 'scout-build' ),
 		);
 		?>
-		<p class="sh-lede">
-			<?php
-			echo $operator
-				? esc_html__( 'Turn features on or off for this site. Turning one off keeps its settings and content, so it comes back exactly as it was.', 'scout-build' )
-				: esc_html__( 'These are the features this site can use. Ask us to add anything that is off.', 'scout-build' );
-			?>
-		</p>
 		<?php
+		// Sort every feature into one of three groups.
+		$groups = array( 'on' => array(), 'ready' => array(), 'unused' => array() );
+		foreach ( $features as $slug => $f ) {
+			$st = Scout_Hub_Features::status( $slug );
+			if ( $f['hidden'] && 'missing' === $st['state'] ) {
+				continue; // One client's own plugin: only listed where it is installed.
+			}
+			$key                    = 'on' === $st['state'] ? 'on' : ( $f['blocked'] ? 'unused' : 'ready' );
+			$groups[ $key ][ $slug ] = array( 'f' => $f, 's' => $st );
+		}
 		$ai    = Scout_Hub_Health::ai_checks();
 		$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
 		?>
-		<p class="sh-ai-chip"><span class="sh-pill <?php echo $ready === count( $ai ) ? 'is-done' : 'is-progress'; ?>"><?php
-			/* translators: 1: checks passed, 2: total checks */
-			echo esc_html( sprintf( __( 'Ready for AI search: %1$d of %2$d', 'scout-build' ), $ready, count( $ai ) ) );
-		?></span> <a href="<?php echo esc_url( self::url( 'health' ) . '#ai-search' ); ?>"><?php esc_html_e( 'See what to fix', 'scout-build' ); ?> &rsaquo;</a></p>
-
-		<?php if ( $operator ) : ?>
-			<section class="sh-box sh-ops">
-				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
-					<input type="hidden" name="action" value="<?php echo esc_attr( self::PLAN_ACTION ); ?>">
-					<?php wp_nonce_field( self::PLAN_ACTION ); ?>
-					<label for="sh-plan" class="sh-label"><?php esc_html_e( 'This site\'s plan', 'scout-build' ); ?></label>
-					<select id="sh-plan" name="plan">
-						<option value=""><?php esc_html_e( 'Not set', 'scout-build' ); ?></option>
-						<?php foreach ( Scout_Hub_Access::PLANS as $key => $label ) : ?>
-							<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $plan, $key ); ?>><?php echo esc_html( $label ); ?></option>
-						<?php endforeach; ?>
-					</select>
-					<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
-				</form>
-				<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check for new versions', 'scout-build' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+		<section class="sh-box sh-summary">
+			<div class="sh-stats">
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo (int) count( $groups['on'] ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'features on', 'scout-build' ); ?></p>
+				</div>
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo (int) count( $groups['ready'] ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'ready to add', 'scout-build' ); ?></p>
+				</div>
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo esc_html( $ready . '/' . count( $ai ) ); ?></p>
+					<p class="sh-note"><a href="<?php echo esc_url( self::url( 'health' ) . '#ai-search' ); ?>"><?php esc_html_e( 'ready for AI search', 'scout-build' ); ?> &rsaquo;</a></p>
+				</div>
+				<div class="sh-stat">
+					<p class="sh-num sh-num-text"><?php echo esc_html( $plan ? Scout_Hub_Access::PLANS[ $plan ] ?? __( 'Not set', 'scout-build' ) : __( 'Not set', 'scout-build' ) ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'this site\'s plan', 'scout-build' ); ?></p>
+				</div>
+			</div>
+			<?php if ( $operator ) : ?>
+				<div class="sh-ops">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
+						<input type="hidden" name="action" value="<?php echo esc_attr( self::PLAN_ACTION ); ?>">
+						<?php wp_nonce_field( self::PLAN_ACTION ); ?>
+						<label for="sh-plan" class="screen-reader-text"><?php esc_html_e( 'This site\'s plan', 'scout-build' ); ?></label>
+						<select id="sh-plan" name="plan">
+							<option value=""><?php esc_html_e( 'Plan not set', 'scout-build' ); ?></option>
+							<?php foreach ( Scout_Hub_Access::PLANS as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $plan, $key ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
+					</form>
+					<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check for new versions', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+				</div>
 				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
 					<p class="sh-note"><?php esc_html_e( 'This site blocks plugin installs from the dashboard, so features that are not installed yet need to be uploaded by hand.', 'scout-build' ); ?></p>
 				<?php endif; ?>
+			<?php endif; ?>
+		</section>
+
+		<?php
+		$titles = array(
+			'on'    => __( 'On this site', 'scout-build' ),
+			'ready' => $operator ? __( 'Ready to turn on', 'scout-build' ) : __( 'Available to add', 'scout-build' ),
+		);
+		foreach ( $titles as $key => $title ) :
+			if ( ! $groups[ $key ] ) {
+				continue;
+			}
+			?>
+			<div class="sh-section-head">
+				<p class="sh-eyebrow"><?php echo esc_html( $title . ' · ' . count( $groups[ $key ] ) ); ?></p>
+			</div>
+			<div class="sh-grid">
+				<?php foreach ( $groups[ $key ] as $slug => $row ) : ?>
+					<?php self::card( $slug, $row['f'], $row['s'], $operator ); ?>
+				<?php endforeach; ?>
+			</div>
+		<?php endforeach; ?>
+
+		<?php if ( $groups['unused'] ) : ?>
+			<section class="sh-box sh-unused">
+				<p class="sh-label"><?php esc_html_e( 'Not used on this site', 'scout-build' ); ?></p>
+				<ul>
+					<?php foreach ( $groups['unused'] as $row ) : ?>
+						<li><strong><?php echo esc_html( $row['f']['name'] ); ?></strong> <span><?php echo esc_html( $row['f']['block_note'] ? $row['f']['block_note'] : __( 'The theme already does this.', 'scout-build' ) ); ?></span></li>
+					<?php endforeach; ?>
+				</ul>
 			</section>
 		<?php endif; ?>
-
-		<div class="sh-grid">
-			<?php foreach ( $features as $slug => $f ) : ?>
-				<?php
-				$s = Scout_Hub_Features::status( $slug );
-				if ( $f['hidden'] && 'missing' === $s['state'] ) {
-					continue; // One client's own plugin: only listed where it is installed.
-				}
-				$included = Scout_Hub_Access::included( $f['tier'] );
-				?>
-				<article class="sh-card is-<?php echo esc_attr( $s['state'] ); ?>">
-					<div class="sh-cardhead">
-						<h2><?php echo esc_html( $f['name'] ); ?></h2>
-						<span class="sh-pill is-<?php echo esc_attr( $s['state'] ); ?>"><?php echo esc_html( $states[ $s['state'] ] ); ?></span>
-					</div>
-					<p class="sh-summary"><?php echo esc_html( $f['summary'] ); ?></p>
-					<p class="sh-meta">
-						<span class="sh-tier<?php echo $included ? ' is-included' : ''; ?>"><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'] ) ); ?></span>
-						<?php if ( $f['law'] ) : ?><span class="sh-tag"><?php esc_html_e( 'Built for law firms', 'scout-build' ); ?></span><?php endif; ?>
-						<?php if ( $s['version'] ) : ?><span class="sh-ver"><?php echo esc_html( 'v' . $s['version'] ); ?></span><?php endif; ?>
-						<?php if ( $s['update'] ) : ?><span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update to v%s ready', 'scout-build' ), $s['update'] ) ); ?></span><?php endif; ?>
-						<?php if ( Scout_Hub_Features::held( $slug ) ) : ?><span class="sh-tag is-held"><?php esc_html_e( 'Updates paused', 'scout-build' ); ?></span><?php endif; ?>
-					</p>
-					<div class="sh-actions">
-						<?php
-						if ( $f['blocked'] && 'on' !== $s['state'] ) {
-							echo '<p class="sh-note">' . esc_html( $f['block_note'] ) . '</p>';
-						} elseif ( $operator ) {
-							if ( 'on' === $s['state'] ) {
-								echo Scout_Hub_Features::button( $slug, 'off', __( 'Turn off', 'scout-build' ) ); // phpcs:ignore WordPress.Security.EscapeOutput
-								if ( $s['previous'] ) {
-									echo Scout_Hub_Features::button( $slug, 'back', sprintf( /* translators: %s: version */ __( 'Go back to v%s', 'scout-build' ), $s['previous'] ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput
-								}
-							} else {
-								echo Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ), 'button button-primary' ); // phpcs:ignore WordPress.Security.EscapeOutput
-							}
-						} elseif ( 'on' !== $s['state'] ) {
-							$ask = sprintf( /* translators: %s: feature */ __( 'Please add %s to our site.', 'scout-build' ), $f['name'] );
-							echo '<a class="button" href="' . esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ) . '">' . esc_html__( 'Ask us to add this', 'scout-build' ) . '</a>';
-						}
-						?>
-					</div>
-				</article>
-			<?php endforeach; ?>
-		</div>
 
 		<?php
 		$log = Scout_Hub_Features::recent_log();
@@ -277,6 +302,50 @@ final class Scout_Hub_Admin {
 				</table>
 			</section>
 		<?php endif; ?>
+		<?php
+	}
+
+
+	/** One feature card. */
+	private static function card( string $slug, array $f, array $s, bool $operator ): void {
+		$states   = array(
+			'missing' => __( 'Not installed', 'scout-build' ),
+			'off'     => __( 'Off', 'scout-build' ),
+			'on'      => __( 'On', 'scout-build' ),
+		);
+		$included = Scout_Hub_Access::included( $f['tier'] );
+		?>
+		<article class="sh-card is-<?php echo esc_attr( $s['state'] ); ?>">
+			<div class="sh-cardhead">
+				<h2><?php echo esc_html( $f['name'] ); ?></h2>
+				<span class="sh-pill is-<?php echo esc_attr( $s['state'] ); ?>"><?php echo esc_html( $states[ $s['state'] ] ); ?></span>
+			</div>
+			<p class="sh-summary"><?php echo esc_html( $f['summary'] ); ?></p>
+			<p class="sh-meta">
+				<span class="sh-tier<?php echo $included ? ' is-included' : ''; ?>"><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'] ) ); ?></span>
+				<?php if ( $f['law'] ) : ?><span class="sh-tag"><?php esc_html_e( 'Built for law firms', 'scout-build' ); ?></span><?php endif; ?>
+				<?php if ( $s['version'] ) : ?><span class="sh-ver"><?php echo esc_html( 'v' . $s['version'] ); ?></span><?php endif; ?>
+				<?php if ( $s['update'] ) : ?><span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update to v%s ready', 'scout-build' ), $s['update'] ) ); ?></span><?php endif; ?>
+				<?php if ( Scout_Hub_Features::held( $slug ) ) : ?><span class="sh-tag is-held"><?php esc_html_e( 'Updates paused', 'scout-build' ); ?></span><?php endif; ?>
+			</p>
+			<div class="sh-actions">
+				<?php
+				if ( $operator ) {
+					if ( 'on' === $s['state'] ) {
+						echo Scout_Hub_Features::button( $slug, 'off', __( 'Turn off', 'scout-build' ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+						if ( $s['previous'] ) {
+							echo Scout_Hub_Features::button( $slug, 'back', sprintf( /* translators: %s: version */ __( 'Go back to v%s', 'scout-build' ), $s['previous'] ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput
+						}
+					} else {
+						echo Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ), 'button button-primary' ); // phpcs:ignore WordPress.Security.EscapeOutput
+					}
+				} elseif ( 'on' !== $s['state'] ) {
+					$ask = sprintf( /* translators: %s: feature */ __( 'Please add %s to our site.', 'scout-build' ), $f['name'] );
+					echo '<a class="button" href="' . esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ) . '">' . esc_html__( 'Ask us to add this', 'scout-build' ) . '</a>';
+				}
+				?>
+			</div>
+		</article>
 		<?php
 	}
 

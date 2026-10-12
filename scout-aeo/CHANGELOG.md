@@ -4,6 +4,9 @@
 
 - /llms.txt shows titles and summaries as plain text. WordPress curls quotes
   into entities like `&#8220;`, which showed up raw.
+- When the theme writes its own guide (the `scout_aeo_llms_txt` filter), the
+  settings screen says so and hides the description, page and post fields
+  that would not be used.
 
 ## 0.1.0 (2026-10-12)
 

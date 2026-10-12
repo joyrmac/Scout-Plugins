@@ -104,3 +104,14 @@
 .sh-check .sh-note a { color: var(--sh-accent-text); font-weight: 500; text-decoration: none; }
 .sh-ai-chip { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
 .sh-ai-chip a { color: var(--sh-accent-text); font-weight: 500; text-decoration: none; }
+.sh-summary { display: grid; gap: 16px; }
+.sh-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 24px; }
+.sh-stat .sh-num { margin: 0; font-family: var(--sh-mono); font-size: 30px; font-weight: 600; line-height: 1.1; letter-spacing: -.02em; color: var(--sh-text); font-variant-numeric: tabular-nums; }
+.sh-stat .sh-num-text { font-family: inherit; font-size: 20px; padding: 5px 0 4px; }
+.sh-stat .sh-note { margin-top: 2px; }
+.sh-stat .sh-note a { color: var(--sh-accent-text); text-decoration: none; font-weight: 500; }
+.sh-summary .sh-ops { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding-top: 14px; border-top: 1px solid var(--sh-border); }
+.sh-section-head .sh-eyebrow { margin: 0 0 -4px; }
+.sh-unused ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.sh-unused li { color: var(--sh-text-3); font-size: 13px; }
+.sh-unused li strong { color: var(--sh-text-2); font-weight: 600; margin-right: 6px; }

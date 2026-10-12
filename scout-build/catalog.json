@@ -46,7 +46,11 @@
       "summary": "A card for each person that saves to a phone in one tap, a QR code to share it, and a link page for your social bios.",
       "tier": "build",
       "law": false,
-      "requires": []
+      "requires": [],
+      "not_with_themes": [
+        "scout-media"
+      ],
+      "not_with_note": "Not used on this site. The theme already makes the cards and the links page."
     },
     {
       "slug": "scout-reviews",

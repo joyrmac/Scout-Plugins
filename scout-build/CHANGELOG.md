@@ -1,5 +1,17 @@
 # Scout Build changelog
 
+## 0.2.2 (2026-10-12)
+
+- **Features opens first.** Inside a theme's Build menu, Features moves to the
+  top, so clicking the section lands on the hub instead of the theme's setup
+  tools.
+- **Cleaner Features screen.** A summary bar (features on, ready to add, AI
+  search score, plan) with the plan and version check under it, then the
+  cards grouped into "On this site" and "Ready to turn on". Features the theme
+  already covers drop to a short "Not used on this site" list.
+- **Catalog:** Cards is marked not used on the Scout Media theme, which
+  already makes the cards and the links page.
+
 ## 0.2.1 (2026-10-12)
 
 - **Fix: a site crash when two Scout plugins load together.** Every Scout
