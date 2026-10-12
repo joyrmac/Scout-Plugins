@@ -1,5 +1,13 @@
 # Scout Build changelog
 
+## 0.2.5 (2026-10-12)
+
+- **Turn on works for a feature released in the last few hours.** The hub
+  remembers GitHub's release list for six hours, so a brand-new release
+  (Scout Analytics) showed "No release is published yet". When a feature has
+  no release in the remembered list, the hub now asks GitHub again before
+  saying so.
+
 ## 0.2.4 (2026-10-12)
 
 - **Fix a robots.txt file that hides WordPress's.** A real robots.txt file on

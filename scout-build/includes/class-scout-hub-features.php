@@ -145,6 +145,12 @@ final class Scout_Hub_Features {
 		if ( 'missing' === self::status( $slug )['state'] ) {
 			$releases = Scout_Hub_Catalog::releases( $slug );
 			if ( ! $releases ) {
+				// The release list is remembered for hours; a feature released since
+				// then is missing from it. Ask GitHub again once before giving up.
+				Scout_Hub_Catalog::flush();
+				$releases = Scout_Hub_Catalog::releases( $slug );
+			}
+			if ( ! $releases ) {
 				return Scout_Hub_Catalog::unreachable()
 					? new WP_Error( 'scout_hub', __( 'Could not reach GitHub to download it. Try again in a few minutes.', 'scout-build' ) )
 					: new WP_Error( 'scout_hub', __( 'No release is published yet, so it cannot be installed from here.', 'scout-build' ) );
