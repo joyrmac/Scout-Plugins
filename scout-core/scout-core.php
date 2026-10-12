@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Core
  * Plugin URI:        https://scoutraleigh.com/platform/scout-core
  * Description:       The Scout engine for a client site: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard. The Yoast replacement, built to survive any future redesign.
- * Version:           1.1.2
+ * Version:           1.1.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CORE_VERSION', '1.1.2' );
+define( 'SCOUT_CORE_VERSION', '1.1.3' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CORE_FILE', __FILE__ );
 
@@ -47,6 +47,7 @@ require_once SCOUT_CORE_DIR . 'includes/universal-types.php';
 
 /* ---- Schema module (was scout-schema) ---- */
 require_once SCOUT_CORE_DIR . 'includes/schema/class-scout-schema.php';
+require_once SCOUT_CORE_DIR . 'includes/schema/class-scout-schema-conflicts.php';
 
 /* ---- SEO module (was scout-seo) ---- */
 require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-head.php';
@@ -112,6 +113,7 @@ add_action( 'update_option_scout_business', array( 'Scout_Schema', 'clear_cache'
 Scout_SEO_Head::init();
 Scout_SEO_Box::init();
 Scout_SEO_Sitemap::init();
+Scout_Schema_Conflicts::init();
 
 /* The one Scout menu (Dashboard / Business / SEO). */
 Scout_Core_Admin::init();
@@ -125,4 +127,7 @@ register_activation_hook( __FILE__, function () {
 	Scout_Core_Post_Types::register_all();
 	flush_rewrite_rules();
 } );
-register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
+register_deactivation_hook( __FILE__, function () {
+	Scout_SEO_Sitemap::unschedule();
+	flush_rewrite_rules();
+} );

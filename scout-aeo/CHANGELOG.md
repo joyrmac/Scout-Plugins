@@ -1,5 +1,14 @@
 # Scout AI Search changelog
 
+## 0.1.3 (2026-10-12)
+
+- **Content-Signal in robots.txt.** The two switches (AI search, AI training)
+  are now also written as a `Content-Signal: search=yes, ai-input=..., ai-train=...`
+  line, the standard way to tell AI companies how pages may be used. It goes
+  into every group, because a crawler only reads the group that names it. If
+  a Content-Signal line is already there, it is left alone. Filter
+  `scout_aeo_content_signal` to change or remove it.
+
 ## 0.1.2 (2026-10-12)
 
 - **A new look for every settings screen.** The plugin's screens now share

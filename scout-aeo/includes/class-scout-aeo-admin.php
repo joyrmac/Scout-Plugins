@@ -95,7 +95,8 @@ final class Scout_AEO_Admin {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'AI model training', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[training]" value="1" <?php checked( $s['training'] ); ?>> <?php esc_html_e( 'Let AI companies learn from the site\'s public pages', 'scout-aeo' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Helps the AI know the business by name. Switching it off does not affect AI search above.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Helps the AI know the business by name. Switching it off does not affect AI search above.', 'scout-aeo' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Both choices are also written into robots.txt as a Content-Signal line, the standard way to tell AI companies how pages may be used.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Guide for AI tools', 'scout-aeo' ); ?></th>

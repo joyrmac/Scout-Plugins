@@ -1,5 +1,16 @@
 # Scout Core — Changelog
 
+## 1.1.3 (2026-10-12)
+
+- **Sitemap guard.** If robots.txt ends up with no Sitemap line (for example
+  an SEO plugin switched WordPress's sitemap off), Scout Core adds the one that
+  works. A daily background check finds it, so serving robots.txt never waits.
+- **One schema graph per page.** Once the business name is filled in, Scout's
+  graph stands alone: Yoast, Rank Math, All in One SEO and SEOPress are told not
+  to print their own JSON-LD, so Google never sees two businesses. Their titles
+  and sitemaps are untouched. Filter `scout_schema_take_over` to false to keep
+  theirs.
+
 ## 1.1.2 (2026-10-12)
 
 - **A new look for every settings screen.** The plugin's screens now share

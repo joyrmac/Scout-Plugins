@@ -1,5 +1,15 @@
 # Scout Build changelog
 
+## 0.2.4 (2026-10-12)
+
+- **Fix a robots.txt file that hides WordPress's.** A real robots.txt file on
+  the server (Yoast's file editor leaves one) overrides WordPress and
+  everything Scout adds to it. Site health now links to a new screen that
+  shows the file next to what WordPress would send, and when no rule in the
+  file would be lost, switches to WordPress's version with one click. The file
+  is renamed and kept as a backup, and can be put back from the same screen.
+  A file with rules of its own is left for a person to review.
+
 ## 0.2.3 (2026-10-12)
 
 - **The hub's tabs are easier to spot.** Features, Requests and Health are
