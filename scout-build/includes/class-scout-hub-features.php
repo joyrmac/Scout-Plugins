@@ -86,7 +86,18 @@ final class Scout_Hub_Features {
 		if ( 'refresh' === $do ) {
 			Scout_Hub_Catalog::flush();
 			Scout_Hub_Health::forget_scan();
+			// Each Scout plugin keeps its own release lookup for six hours, and
+			// WordPress keeps its update list for twelve. Drop both and ask again,
+			// so a release published minutes ago shows as "Update ready" now.
+			foreach ( array_merge( array( 'scout-build' ), array_keys( $features ) ) as $feature_slug ) {
+				delete_transient( 'scout_updater_' . $feature_slug );
+			}
 			wp_clean_plugins_cache( true );
+			delete_site_transient( 'update_plugins' );
+			if ( ! function_exists( 'wp_update_plugins' ) ) {
+				require_once ABSPATH . WPINC . '/update.php';
+			}
+			wp_update_plugins();
 			self::back( __( 'Checked for new features and versions.', 'scout-build' ) );
 		}
 		if ( ! isset( $features[ $slug ] ) ) {
