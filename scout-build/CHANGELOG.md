@@ -1,5 +1,12 @@
 # Scout Build changelog
 
+## 0.2.6 (2026-10-12)
+
+- **"Check for new versions" finds a release published minutes ago.** It
+  now also clears each Scout plugin's own saved release check (kept for six
+  hours) and WordPress's update list (kept for twelve), then checks again.
+  Before, a new release could take hours to show as "Update ready".
+
 ## 0.2.5 (2026-10-12)
 
 - **Turn on works for a feature released in the last few hours.** The hub
