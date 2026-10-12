@@ -34,7 +34,7 @@ final class Scout_Reviews_Google_Admin {
 
 	public static function box(): void {
 		$g        = Scout_Reviews_Google::get();
-		$settings = admin_url( 'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE . '&page=' . Scout_Reviews_Settings::PAGE );
+		$settings = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
 		?>
 		<div class="card" style="max-width:1100px;padding:16px 20px;margin:16px 0 24px;">
 			<h2 style="margin-top:0;"><?php esc_html_e( 'Google reviews sync', 'scout-reviews' ); ?></h2>
@@ -169,7 +169,7 @@ final class Scout_Reviews_Google_Admin {
 		if ( '' !== $message ) {
 			set_transient( self::NOTICE . get_current_user_id(), array( 'message' => $message, 'type' => $type ), MINUTE_IN_SECONDS );
 		}
-		wp_safe_redirect( admin_url( 'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE . '&page=' . Scout_Reviews_Settings::PAGE ) );
+		wp_safe_redirect( Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE ) );
 		exit;
 	}
 

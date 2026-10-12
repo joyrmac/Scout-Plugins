@@ -66,9 +66,9 @@ final class Scout_Reviews_Settings {
 
 	public static function menu(): void {
 		add_submenu_page(
-			'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE,
+			Scout_Reviews_Menu::parent(),
 			__( 'Review settings', 'scout-reviews' ),
-			__( 'Settings', 'scout-reviews' ),
+			'' !== Scout_Reviews_Menu::build() ? __( 'Review settings', 'scout-reviews' ) : __( 'Settings', 'scout-reviews' ),
 			'manage_options',
 			self::PAGE,
 			array( __CLASS__, 'page' )

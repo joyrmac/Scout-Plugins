@@ -9,7 +9,12 @@ Standalone: does not need Scout Core.
 
 ## Using it
 
-1. **Reviews > Settings.** For each platform you're on, enter the overall
+Where the screens are: on a site with a Build section (Scout Build, Recon Build,
+Site Build), every Reviews screen sits inside it: Reviews, Review inbox, Ask for
+reviews and Review settings. On any other site the plugin keeps its own Reviews
+menu, with the same screens under it.
+
+1. **Review settings.** For each platform you're on, enter the overall
    rating and total review count exactly as the platform shows them, plus the
    profile link and the "leave a review" link.
 2. **Reviews > Add review.** Reviewer name as the title, the review text word
@@ -32,7 +37,7 @@ Options: `layout` (grid, row, list), `count`, `source`, `featured`,
 
 ## Inbox and topics (0.3.0)
 
-New Google reviews land in **Reviews > Inbox**. Each card has the pages it
+New Google reviews land in **Review inbox**. Each card has the pages it
 belongs on pre-checked (from each topic's keywords). Click **Add to site** and
 it shows on those pages; **Skip** keeps it as a hidden draft.
 
@@ -41,14 +46,14 @@ site, usually one per page, with keywords that drive the inbox suggestions.
 
 ## Ask for reviews (0.4.0)
 
-**Reviews > Ask for reviews** gives the business one review link on its own
+**Ask for reviews** gives the business one review link on its own
 domain and everything needed to share it:
 
 | Address | What it shows |
 |---|---|
 | `/review/` | The review page: the ask, a button to the main platform, smaller buttons for the others, and a quiet private note link |
 | `/review/?via=qr` | The same page, counted as a QR scan (also `text`, `email`, `card`) |
-| `/review/note/` | The private note form. Entries land in Reviews > Inbox and are emailed to the site admin (filter `scout_reviews_note_recipient`) |
+| `/review/note/` | The private note form. Entries land in the Review inbox and are emailed to the site admin (filter `scout_reviews_note_recipient`) |
 
 The screen also has the QR code (SVG, PNG), three printable card layouts, a
 text message and an email ready to copy, and monthly visit counts by source.
@@ -116,7 +121,7 @@ for law firms, state bar advertising rules.
 
 Once Google approves API access ([setup steps](docs/google-business-profile-api.md)):
 
-1. **Reviews > Settings > Google reviews sync.** Paste the OAuth client ID and
+1. **Review settings > Google reviews sync.** Paste the OAuth client ID and
    secret, or define `SCOUT_REVIEWS_GOOGLE_CLIENT_ID` and
    `SCOUT_REVIEWS_GOOGLE_CLIENT_SECRET` in `wp-config.php` (better).
 2. **Connect Google** and sign in with the account that manages the profile.
