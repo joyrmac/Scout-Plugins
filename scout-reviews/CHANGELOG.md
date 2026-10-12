@@ -1,5 +1,16 @@
 # Scout Reviews: Changelog
 
+## 0.4.4 (2026-10-12)
+
+- **Printable cards print on one page in every browser.** Print now opens
+  only the chosen sheet in a hidden frame, so Safari no longer spreads the
+  business cards over five pages.
+- **The previews look right in Safari.** They are scaled with a transform
+  instead of zoom, so the QR code and text stay inside each card.
+- **Shorter name on cards and messages.** When no business name is set, the
+  site title is used without its tagline: "Smith Law | Raleigh, NC" prints as
+  "Smith Law". Set a name under Ask for reviews, Page settings to override it.
+
 ## 0.4.3 (2026-10-12)
 
 - **Reviews moved into the Build section.** On a site with Scout Build (or

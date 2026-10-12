@@ -110,22 +110,53 @@
 		img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent( svg );
 	}
 
+	// Prints one sheet from a hidden frame that holds nothing else, so every
+	// browser (Safari included) prints exactly one page at full size.
 	function print( layout ) {
 		var sheet = document.querySelector( '.srk-sheet[data-layout="' + layout + '"]' );
 		if ( ! sheet ) {
 			return;
 		}
-		sheet.classList.add( 'is-printing' );
-		document.body.classList.add( 'srk-printing' );
-		var cleanup = function () {
-			sheet.classList.remove( 'is-printing' );
-			document.body.classList.remove( 'srk-printing' );
-			window.removeEventListener( 'afterprint', cleanup );
+		var wrap   = sheet.closest( '.srk' );
+		var accent = wrap ? getComputedStyle( wrap ).getPropertyValue( '--srk-accent' ) : '';
+		var links  = Array.prototype.map.call(
+			document.querySelectorAll( 'link[rel="stylesheet"][id^="scout-reviews-"]' ),
+			function ( l ) { return '<link rel="stylesheet" href="' + l.href + '">'; }
+		).join( '' );
+		var old = document.getElementById( 'srk-print-frame' );
+		if ( old ) {
+			old.remove();
+		}
+		var frame = document.createElement( 'iframe' );
+		frame.id = 'srk-print-frame';
+		frame.setAttribute( 'aria-hidden', 'true' );
+		frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+		document.body.appendChild( frame );
+		var doc = frame.contentDocument;
+		doc.open();
+		doc.write(
+			'<!doctype html><html><head><meta charset="utf-8"><title>Review cards</title>' + links +
+			'<style>@page{size:letter;margin:.4in}html,body{margin:0;padding:0;background:#fff}</style></head>' +
+			'<body class="srk-print-frame"><div class="srk recon-theme" style="max-width:none;margin:0;padding:0;background:#fff;--srk-accent:' + accent.trim() + '">' +
+			sheet.outerHTML + '</div></body></html>'
+		);
+		doc.close();
+		var done = false;
+		var go = function () {
+			if ( done ) {
+				return;
+			}
+			done = true;
+			var win = frame.contentWindow;
+			var fonts = doc.fonts && doc.fonts.ready ? doc.fonts.ready : Promise.resolve();
+			fonts.then( function () {
+				win.focus();
+				win.print();
+			} );
 		};
-		window.addEventListener( 'afterprint', cleanup );
-		window.print();
+		frame.onload = go;
+		setTimeout( go, 1500 ); // Safety net if load already fired.
 	}
-
 	document.addEventListener( 'click', function ( e ) {
 		var t = e.target.closest( '[data-copy],[data-qr-download],[data-print]' );
 		if ( ! t ) {

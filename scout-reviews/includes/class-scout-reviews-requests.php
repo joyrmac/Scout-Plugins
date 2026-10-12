@@ -71,9 +71,19 @@ final class Scout_Reviews_Requests {
 		$saved = get_option( self::OPTION, array() );
 		$s     = array_merge( self::defaults(), is_array( $saved ) ? $saved : array() );
 		if ( '' === trim( $s['business'] ) ) {
-			$s['business'] = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+			$s['business'] = self::short_name( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
 		}
 		return $s;
+	}
+
+	/**
+	 * Site titles often carry a tagline for Google ("Smith Law | Raleigh, NC").
+	 * Cards and messages only want the name, so drop what follows a separator.
+	 */
+	public static function short_name( string $title ): string {
+		$parts = preg_split( '/\s+[|\x{2013}\x{2014}-]\s+/u', $title, 2 );
+		$name  = trim( (string) ( $parts[0] ?? '' ) );
+		return '' !== $name ? $name : $title;
 	}
 
 	public static function register(): void {
@@ -399,6 +409,7 @@ final class Scout_Reviews_Requests {
 						$copies = 'cards' === $key ? 10 : ( 'tent' === $key ? 2 : 1 );
 						?>
 						<figure class="srk-layout">
+							<div class="srk-sheet-wrap srk-wrap-<?php echo esc_attr( $key ); ?>">
 							<div class="srk-sheet srk-sheet-<?php echo esc_attr( $key ); ?>" data-layout="<?php echo esc_attr( $key ); ?>">
 								<?php for ( $i = 0; $i < $copies; $i++ ) : ?>
 									<div class="srk-card">
@@ -408,6 +419,7 @@ final class Scout_Reviews_Requests {
 										<p class="srk-scan"><?php echo esc_html( $display ); ?></p>
 									</div>
 								<?php endfor; ?>
+							</div>
 							</div>
 							<figcaption>
 								<span><?php echo esc_html( $label ); ?></span>
