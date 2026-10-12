@@ -1,0 +1,267 @@
+/*
+ * Scout Reviews: default design.
+ *
+ * Reads the Scout design tokens when the theme defines them (--surface,
+ * --line, --text-2, --accent-text, --font-mono, --r-card), and falls back to
+ * colors mixed from the text color, so it sits correctly on any light or dark
+ * theme. Override any --sr-* variable on .scout-reviews to restyle.
+ */
+
+.scout-reviews,
+.scout-reviews-summary {
+	--sr-surface: var(--surface, color-mix(in srgb, currentColor 4%, transparent));
+	--sr-line: var(--line, color-mix(in srgb, currentColor 12%, transparent));
+	--sr-muted: var(--text-2, color-mix(in srgb, currentColor 68%, transparent));
+	--sr-faint: var(--text-3, color-mix(in srgb, currentColor 50%, transparent));
+	--sr-link: var(--accent-text, #0a6fb4);
+	--sr-star: #fbb024;
+	--sr-star-empty: color-mix(in srgb, currentColor 18%, transparent);
+	--sr-mono: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace);
+	--sr-radius: var(--r-card, 18px);
+	--sr-gap: 20px;
+}
+
+.scout-reviews {
+	display: flex;
+	flex-direction: column;
+	gap: 28px;
+}
+
+/* ---- Rating summary ---- */
+
+.scout-reviews-summary {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 32px;
+	align-items: center;
+}
+
+.scout-reviews-summary__item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 12px;
+}
+
+.scout-reviews-summary__score {
+	font-family: var(--sr-mono);
+	font-size: 34px;
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: -0.02em;
+}
+
+.scout-reviews-summary__count,
+.scout-reviews-summary__write {
+	font-size: 15px;
+}
+
+.scout-reviews-summary__count {
+	color: var(--sr-muted);
+}
+
+.scout-reviews-summary a {
+	color: var(--sr-link);
+	text-decoration: none;
+	text-underline-offset: 3px;
+}
+
+.scout-reviews-summary a:hover,
+.scout-reviews-summary a:focus-visible {
+	text-decoration: underline;
+}
+
+/* ---- Stars ---- */
+
+/* Five stars from one masked element; --sr-pct sets how much is filled. */
+.scout-stars {
+	--sr-star-size: 16px;
+	display: inline-block;
+	flex: none;
+	width: calc(var(--sr-star-size) * 5 + 12px); /* five stars, four 3px gaps */
+	height: var(--sr-star-size);
+	vertical-align: -2px;
+	background: linear-gradient(90deg, var(--sr-star) var(--sr-pct, 100%), var(--sr-star-empty) var(--sr-pct, 100%));
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9z'/%3E%3C/svg%3E") 0 0 / var(--sr-star-size) var(--sr-star-size) space no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9z'/%3E%3C/svg%3E") 0 0 / var(--sr-star-size) var(--sr-star-size) space no-repeat;
+}
+
+@media (forced-colors: active) {
+	.scout-stars {
+		background: CanvasText;
+	}
+}
+
+/* ---- Cards ---- */
+
+.scout-reviews__list {
+	display: grid;
+	gap: var(--sr-gap);
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.scout-reviews--list .scout-reviews__list {
+	grid-template-columns: 1fr;
+	max-width: 760px;
+}
+
+/* Sideways row: scroll-snap, no script. */
+.scout-reviews--row .scout-reviews__list {
+	display: flex;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-padding-inline: 2px;
+	padding: 2px 2px 12px;
+	overscroll-behavior-inline: contain;
+}
+
+.scout-reviews--row .scout-review {
+	flex: 0 0 min(86%, 360px);
+	scroll-snap-align: start;
+}
+
+.scout-reviews--row .scout-reviews__list:focus-visible {
+	outline: 2px solid var(--sr-link);
+	outline-offset: 4px;
+	border-radius: var(--sr-radius);
+}
+
+.scout-review {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 0;
+	padding: 24px;
+	background: var(--sr-surface);
+	border: 1px solid var(--sr-line);
+	border-radius: var(--sr-radius);
+	transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.scout-review:hover {
+	transform: translateY(-2px);
+	border-color: color-mix(in srgb, var(--sr-line) 50%, currentColor 20%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.scout-review {
+		transition: none;
+	}
+	.scout-review:hover {
+		transform: none;
+	}
+}
+
+.scout-review__top {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 12px;
+}
+
+.scout-review__badge {
+	font-family: var(--sr-mono);
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 1.2px;
+	text-transform: uppercase;
+	color: var(--sr-muted);
+}
+
+.scout-review__text {
+	flex: 1;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 16px;
+	font-style: normal;
+	line-height: 1.6;
+}
+
+.scout-review__text p {
+	margin: 0 0 0.8em;
+}
+
+.scout-review__text p:last-child {
+	margin-bottom: 0;
+}
+
+.scout-review__footer {
+	display: grid;
+	grid-template-columns: 40px minmax(0, 1fr);
+	align-items: center;
+	gap: 4px 12px;
+	padding-top: 16px;
+	border-top: 1px solid var(--sr-line);
+}
+
+.scout-review__avatar {
+	grid-row: span 2;
+	align-self: start;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.scout-review__avatar--initial {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 16px;
+	background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.scout-review__who {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.scout-review__name {
+	font-weight: 600;
+	font-size: 15px;
+}
+
+.scout-review__meta {
+	font-size: 13px;
+	text-wrap: pretty;
+	color: var(--sr-faint);
+}
+
+.scout-review__link {
+	grid-column: 2;
+	justify-self: start;
+	margin-top: 4px;
+	font-size: 14px;
+	color: var(--sr-link);
+	text-decoration: none;
+	text-underline-offset: 3px;
+	white-space: nowrap;
+}
+
+.scout-review__link:hover,
+.scout-review__link:focus-visible {
+	text-decoration: underline;
+}
+
+.scout-reviews__disclaimer {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--sr-faint);
+}
+
+.scout-reviews .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

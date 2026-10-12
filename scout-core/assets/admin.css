@@ -1,0 +1,27 @@
+/* Scout Core admin: fieldsets, sections, controls. Scoped, no globals. */
+.scout-fieldset { margin: 0; }
+.scout-fieldset__intro { margin: 0 0 12px; color: #50575e; }
+details.scout-section { border: 1px solid #dcdcde; border-radius: 6px; margin: 0 0 10px; background: #fff; }
+details.scout-section > summary { cursor: pointer; list-style: none; padding: 10px 14px; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+details.scout-section > summary::-webkit-details-marker { display: none; }
+details.scout-section > summary::before { content: ""; width: 0; height: 0; border-left: 5px solid #50575e; border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .15s; }
+details.scout-section[open] > summary::before { transform: rotate(90deg); }
+details.scout-section > summary .scout-section__hint { font-weight: 400; color: #787c82; margin-left: auto; font-size: 12px; }
+.scout-section__body { padding: 4px 14px 14px; border-top: 1px solid #f0f0f1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.scout-control { min-width: 0; }
+.scout-control--full { grid-column: 1 / -1; }
+.scout-control__label { display: block; font-weight: 600; margin: 8px 0 4px; }
+.scout-control__help { margin: 4px 0 0; }
+.scout-control input.large-text, .scout-control textarea.large-text { width: 100%; }
+.scout-control .wp-editor-wrap { border-radius: 4px; }
+.scout-image { display: flex; gap: 14px; align-items: flex-start; }
+.scout-image__preview { width: 160px; min-height: 90px; background: #f0f0f1 repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0,0,0,.03) 8px, rgba(0,0,0,.03) 16px); border: 1px solid #dcdcde; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.scout-image__preview img { max-width: 100%; height: auto; display: block; }
+.scout-image__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 6px; }
+.scout-image__remove { color: #b32d2e; display: none; }
+.scout-image.has-image .scout-image__remove { display: inline; }
+.scout-image__file { color: #787c82; font-size: 12px; width: 100%; word-break: break-all; }
+.scout-control--checkbox { display: flex; align-items: center; padding-top: 22px; }
+@media (max-width: 782px) { .scout-section__body { grid-template-columns: 1fr; } }
+/* Settings group pages reuse the same section chrome inside the Scout admin. */
+.scout-admin .scout-fieldset { max-width: 900px; }

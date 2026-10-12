@@ -1,5 +1,68 @@
 # Scout Core — Changelog
 
+## 1.1.1 (2026-10-12)
+
+- **Fix: a site crash when two Scout plugins load together.** Every Scout
+  plugin carries the shared updater. On hosts that cache compiled PHP
+  (OPcache, as on WP Engine), a copy could be declared the moment its file
+  loaded, so a second plugin loading first crashed the site with "Cannot declare
+  class Scout_Plugin_Updater". The class now sits inside a conditional, and the
+  updater loads on `plugins_loaded`, after every plugin's own file.
+
+## 1.1.0
+Pages become forms. Additive, nothing existing changes shape.
+
+- **Fix: SEO box preview and counters.** Newer WordPress gives the SEO meta
+  box heading the id `scout-seo-title`, the same id as the title field, so the
+  live preview and character counts stopped updating. The fields now use
+  `scout-seo-field-title` and `scout-seo-field-desc`.
+
+- **Page fieldsets.** `scout_core_register_fields()` attaches a sectioned set
+  of fields to the front page, to pages using a given template, to a slug, or
+  to every post of a type. Each headline, paragraph, and picture on a designed
+  page gets its own labelled field, grouped the way the page reads. Matched
+  posts use the classic edit screen with the content editor hidden, so an
+  editor changes words and images and cannot touch the layout. Values are
+  plain post meta under `scout_<key>`, REST-exposed like every other field.
+- **Image control.** `'control' => 'image'` stores an attachment ID and draws
+  a preview with Choose image (media library, upload or pick) and Remove. Works
+  in type meta boxes, fieldsets, and settings groups. `scout/field` bindings
+  resolve it for `core/image` (`url`, `id`, `alt`).
+- **Rich text and checkbox controls.** `richtext` is a small visual editor
+  (bold, italic, link, lists) stored through `wp_kses_post`; `checkbox` stores
+  `1` or nothing.
+- **Settings groups.** `scout_core_register_settings_group()` adds a tab under
+  the Scout menu for site-wide content (header, footer, shared bands, 404),
+  one option per group, same controls.
+- **Template helpers.** `scout_core_field()`, `scout_core_setting()`,
+  `scout_core_image()`, `scout_core_image_id()`, `scout_core_image_url()`.
+- **Dashboard checks filter.** `scout_core_dashboard_checks` lets a companion
+  add its own cards to the health check.
+- All controls now render through one class, `Scout_Core_Controls`, and the
+  admin ships a small stylesheet and script (`assets/admin.css`, `assets/admin.js`)
+  loaded only on edit screens and the Scout pages.
+
+## 1.0.4
+Fixes the fatal that took a site down on activation.
+
+- `scout-core.php` still called `Scout_Core_Updater::init()`, the retired
+  manifest updater whose file 1.0.1 deleted. Every 1.0.1+ install fataled on
+  every page load ("Class Scout_Core_Updater not found"); no site had run
+  1.0.1+ until 2026-09-03, when it took North Crest down on install. The stale
+  call is removed. Lesson recorded: `php -l` cannot catch a call to a missing
+  class, so a release needs an activation smoke test, not just a lint.
+
+## 1.0.3
+Updates now install themselves.
+
+- The shared updater opts this plugin into WordPress's own automatic updates
+  (`auto_update_plugin`), so a published release reaches every client site on
+  the normal twice-daily check with nobody logging in to press Update.
+- A site can opt out by defining `SCOUT_DISABLE_AUTO_UPDATES` as `true` in
+  `wp-config.php`; updates then wait on the Plugins screen as before.
+- Only Scout plugins are affected. Every other plugin's auto-update decision
+  passes through untouched.
+
 ## 1.0.2
 Deleting the plugin no longer erases the client's business identity or their
 per-page SEO work.

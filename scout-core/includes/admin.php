@@ -28,11 +28,28 @@ final class Scout_Core_Admin {
 		add_submenu_page( 'scout', 'Scout Dashboard', 'Dashboard', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
 		add_submenu_page( 'scout', 'Business identity', 'Business', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
 		add_submenu_page( 'scout', 'SEO defaults', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
+		foreach ( self::groups() as $slug => $group ) {
+			add_submenu_page( 'scout', $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
+		}
+	}
+
+	/** Companion-registered settings groups, if the class is loaded. */
+	private static function groups() {
+		return class_exists( 'Scout_Core_Settings_Groups' ) ? Scout_Core_Settings_Groups::all() : array();
+	}
+
+	/** @return array<string,string> tab => label */
+	private static function tabs() {
+		$tabs = array( 'dashboard' => 'Dashboard', 'business' => 'Business', 'seo' => 'SEO' );
+		foreach ( self::groups() as $slug => $group ) {
+			$tabs[ $slug ] = $group['label'];
+		}
+		return $tabs;
 	}
 
 	private static function current_tab() {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'dashboard';
-		return in_array( $tab, array( 'dashboard', 'business', 'seo' ), true ) ? $tab : 'dashboard';
+		return array_key_exists( $tab, self::tabs() ) ? $tab : 'dashboard';
 	}
 
 	public static function render() {
@@ -45,7 +62,7 @@ final class Scout_Core_Admin {
 		echo '<div class="wrap scout-admin">';
 		echo '<h1 class="scout-admin-title"><span class="scout-bolt" aria-hidden="true"></span> Scout</h1>';
 		echo '<h2 class="nav-tab-wrapper">';
-		foreach ( array( 'dashboard' => 'Dashboard', 'business' => 'Business', 'seo' => 'SEO' ) as $key => $label ) {
+		foreach ( self::tabs() as $key => $label ) {
 			$url    = 'dashboard' === $key ? $base : $base . '&tab=' . $key;
 			$active = $tab === $key ? ' nav-tab-active' : '';
 			printf( '<a href="%s" class="nav-tab%s">%s</a>', esc_url( $url ), esc_attr( $active ), esc_html( $label ) );
@@ -56,6 +73,8 @@ final class Scout_Core_Admin {
 			self::tab_business();
 		} elseif ( 'seo' === $tab ) {
 			self::tab_seo();
+		} elseif ( array_key_exists( $tab, self::groups() ) ) {
+			Scout_Core_Settings_Groups::render_tab( $tab );
 		} else {
 			self::tab_dashboard();
 		}
@@ -171,7 +190,13 @@ final class Scout_Core_Admin {
 			'action_label' => $image ? '' : 'Add share image',
 		);
 
-		return $checks;
+		/**
+		 * Companions add their own checks (each: label, status good|warn,
+		 * message, action, action_label).
+		 *
+		 * @param array $checks
+		 */
+		return (array) apply_filters( 'scout_core_dashboard_checks', $checks );
 	}
 
 	private static function pages_missing_description() {

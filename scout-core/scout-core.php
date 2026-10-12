@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Core
  * Plugin URI:        https://scoutraleigh.com/platform/scout-core
  * Description:       The Scout engine for a client site: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard. The Yoast replacement, built to survive any future redesign.
- * Version:           1.0.2
+ * Version:           1.1.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CORE_VERSION', '1.0.2' );
+define( 'SCOUT_CORE_VERSION', '1.1.1' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CORE_FILE', __FILE__ );
 
@@ -33,7 +33,11 @@ define( 'SCOUT_SEO_META_CANONICAL', '_scout_seo_canonical' );
 define( 'SCOUT_SEO_META_NOINDEX', '_scout_seo_noindex' );
 
 /* ---- Content model (business identity, post types, fields, bindings) ---- */
+require_once SCOUT_CORE_DIR . 'includes/controls.php';
 require_once SCOUT_CORE_DIR . 'includes/registry.php';
+require_once SCOUT_CORE_DIR . 'includes/fieldsets.php';
+require_once SCOUT_CORE_DIR . 'includes/settings-groups.php';
+require_once SCOUT_CORE_DIR . 'includes/helpers.php';
 require_once SCOUT_CORE_DIR . 'includes/post-types.php';
 require_once SCOUT_CORE_DIR . 'includes/meta.php';
 require_once SCOUT_CORE_DIR . 'includes/meta-box.php';
@@ -58,8 +62,17 @@ require_once SCOUT_CORE_DIR . 'includes/admin.php';
  * manifest tracker, which needed a JSON file hosted somewhere and never got
  * switched on.
  */
-require_once SCOUT_CORE_DIR . 'includes/class-scout-plugin-updater.php';
-Scout_Plugin_Updater::boot( __FILE__, 'scout-core' );
+// Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
+// Loaded on plugins_loaded, after every plugin's own file, so older Scout
+// plugins that still declare the shared class at load time always go first.
+add_action(
+	'plugins_loaded',
+	static function () {
+		require_once __DIR__ . '/includes/class-scout-plugin-updater.php';
+		Scout_Plugin_Updater::boot( __DIR__ . '/scout-core.php', 'scout-core' );
+	},
+	0
+);
 
 /*
  * Registration pipeline. The registry is filled at init:1 via `scout_core_register`
@@ -69,14 +82,24 @@ Scout_Plugin_Updater::boot( __FILE__, 'scout-core' );
 add_action( 'init', function () { do_action( 'scout_core_register' ); }, 1 );
 add_action( 'init', array( 'Scout_Core_Post_Types', 'register_all' ), 5 );
 add_action( 'init', array( 'Scout_Core_Meta', 'register_all' ), 6 );
+add_action( 'init', array( 'Scout_Core_Fieldsets', 'register_meta' ), 6 );
 add_action( 'init', array( 'Scout_Core_Block_Bindings', 'register' ), 7 );
 
 add_action( 'add_meta_boxes', array( 'Scout_Core_Meta_Box', 'add' ) );
 add_action( 'save_post', array( 'Scout_Core_Meta_Box', 'save' ), 10, 2 );
 
+/* Page fieldsets: the box, the save, the classic screen for matched posts. */
+add_action( 'add_meta_boxes', array( 'Scout_Core_Fieldsets', 'add_boxes' ), 10, 2 );
+add_action( 'save_post', array( 'Scout_Core_Fieldsets', 'save' ), 10, 2 );
+add_filter( 'use_block_editor_for_post', array( 'Scout_Core_Fieldsets', 'use_block_editor' ), 10, 2 );
+
+/* Shared admin assets: the media picker and section layout. */
+add_action( 'admin_enqueue_scripts', array( 'Scout_Core_Controls', 'enqueue_admin' ) );
+
 /* Settings storage (options + sanitizers). The UI is the unified Scout admin. */
 add_action( 'admin_init', array( 'Scout_Core_Business', 'register_settings' ) );
 add_action( 'admin_init', array( 'Scout_Core_SEO_Settings', 'register_settings' ) );
+add_action( 'admin_init', array( 'Scout_Core_Settings_Groups', 'register_settings' ) );
 
 /* Schema: render the graph, keep its cache fresh. */
 add_action( 'wp_head', array( 'Scout_Schema', 'render' ), 20 );
@@ -89,9 +112,8 @@ Scout_SEO_Head::init();
 Scout_SEO_Box::init();
 Scout_SEO_Sitemap::init();
 
-/* The one Scout menu (Dashboard / Business / SEO) and the update tracker. */
+/* The one Scout menu (Dashboard / Business / SEO). */
 Scout_Core_Admin::init();
-Scout_Core_Updater::init();
 
 /*
  * On activation register the types once and flush rewrite rules so archive/slug

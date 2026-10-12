@@ -84,14 +84,14 @@ final class Scout_SEO_Box {
 			</div>
 
 			<p style="margin:0;">
-				<label for="scout-seo-title" style="font-weight:600;display:block;">SEO title <span id="scout-seo-title-count" style="font-weight:400;color:#646970;"></span></label>
-				<input type="text" id="scout-seo-title" name="scout_seo[title]" value="<?php echo esc_attr( $title ); ?>" style="width:100%;" placeholder="<?php echo esc_attr( $fallback ); ?>" />
+				<label for="scout-seo-field-title" style="font-weight:600;display:block;">SEO title <span id="scout-seo-title-count" style="font-weight:400;color:#646970;"></span></label>
+				<input type="text" id="scout-seo-field-title" name="scout_seo[title]" value="<?php echo esc_attr( $title ); ?>" style="width:100%;" placeholder="<?php echo esc_attr( $fallback ); ?>" />
 				<span style="color:#646970;font-size:12px;">Aim for about 60 characters. Leave blank to use the page title.</span>
 			</p>
 
 			<p style="margin:0;">
-				<label for="scout-seo-desc" style="font-weight:600;display:block;">Meta description <span id="scout-seo-desc-count" style="font-weight:400;color:#646970;"></span></label>
-				<textarea id="scout-seo-desc" name="scout_seo[desc]" rows="3" style="width:100%;"><?php echo esc_textarea( $desc ); ?></textarea>
+				<label for="scout-seo-field-desc" style="font-weight:600;display:block;">Meta description <span id="scout-seo-desc-count" style="font-weight:400;color:#646970;"></span></label>
+				<textarea id="scout-seo-field-desc" name="scout_seo[desc]" rows="3" style="width:100%;"><?php echo esc_textarea( $desc ); ?></textarea>
 				<span style="color:#646970;font-size:12px;">Aim for about 155 characters. Leave blank to auto-generate from the content.</span>
 			</p>
 
@@ -107,8 +107,8 @@ final class Scout_SEO_Box {
 		</div>
 		<script>
 		( function () {
-			var t  = document.getElementById( 'scout-seo-title' ),
-				d  = document.getElementById( 'scout-seo-desc' ),
+			var t  = document.getElementById( 'scout-seo-field-title' ),
+				d  = document.getElementById( 'scout-seo-field-desc' ),
 				pt = document.getElementById( 'scout-seo-pv-title' ),
 				pu = document.getElementById( 'scout-seo-pv-url' ),
 				pd = document.getElementById( 'scout-seo-pv-desc' ),

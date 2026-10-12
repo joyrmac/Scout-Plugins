@@ -36,40 +36,12 @@ final class Scout_Core_Meta_Box {
 		}
 		wp_nonce_field( 'scout_core_save_meta', 'scout_core_meta_nonce' );
 
-		echo '<div class="scout-core-fields" style="display:grid;gap:16px;">';
+		echo '<div class="scout-fieldset"><div class="scout-section__body" style="border:0;padding:0;">';
 		foreach ( $type['fields'] as $key => $field ) {
 			$value = get_post_meta( $post->ID, scout_core_meta_key( $key ), true );
-			$name  = 'scout_meta[' . esc_attr( $key ) . ']';
-			$id    = 'scout-field-' . esc_attr( $key );
-
-			echo '<p style="margin:0;">';
-			echo '<label for="' . esc_attr( $id ) . '" style="display:block;font-weight:600;margin-bottom:4px;">' . esc_html( $field['label'] ) . '</label>';
-
-			switch ( $field['control'] ) {
-				case 'textarea':
-					echo '<textarea id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" rows="3" style="width:100%;">' . esc_textarea( $value ) . '</textarea>';
-					break;
-				case 'select':
-					echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '">';
-					echo '<option value="">' . esc_html__( '— Select —', 'scout-core' ) . '</option>';
-					foreach ( $field['options'] as $opt_val => $opt_label ) {
-						echo '<option value="' . esc_attr( $opt_val ) . '" ' . selected( $value, $opt_val, false ) . '>' . esc_html( $opt_label ) . '</option>';
-					}
-					echo '</select>';
-					break;
-				case 'number':
-					echo '<input type="number" step="any" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" />';
-					break;
-				case 'url':
-					echo '<input type="url" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" style="width:100%;" />';
-					break;
-				case 'text':
-				default:
-					echo '<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" style="width:100%;" />';
-			}
-			echo '</p>';
+			Scout_Core_Controls::render( 'scout_meta[' . $key . ']', 'scout-field-' . $key, $field, $value );
 		}
-		echo '</div>';
+		echo '</div></div>';
 	}
 
 	public static function save( $post_id, $post ) {

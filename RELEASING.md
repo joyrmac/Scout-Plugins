@@ -14,13 +14,33 @@ in `includes/class-scout-plugin-updater.php` answers by looking up this repo's
 newest release for that plugin.
 
 The update then appears on the client's **Plugins** screen like any other, and
-WordPress's own **enable auto-updates** toggle works on it. Nothing extra is
+**installs itself automatically** on WordPress's own twice-daily check: the
+updater opts Scout plugins into core's automatic updates, so publishing a
+release here is the whole job. A site opts out by defining
+`SCOUT_DISABLE_AUTO_UPDATES` as `true` in `wp-config.php`. Nothing extra is
 installed on the client site and no third-party updater service is involved.
 
 Sites check for updates roughly twice a day, and the lookup is cached for six
 hours, so a release reaches a site within a few hours rather than instantly.
 
 ---
+
+## Before releasing Scout Core: check what depends on it
+
+Other Scout plugins call into Scout Core (Scout Cards reads the business identity,
+adds its screen under the Scout menu, and switches off Scout Core's head tags on
+card pages). A Scout Core release reaches every client site automatically, so a
+rename there can break a dependent plugin on every site at once.
+
+- **CI guards it.** `tools/core-contract.sh` (Lint workflow, "Scout Core contract")
+  fails when a Scout Core API a plugin depends on disappears. Fix the dependent
+  plugin in the same change, release both, and update the contract list.
+- **When a plugin starts using a new Scout Core API,** add a line to the contract in
+  `tools/core-contract.sh` in that same change.
+- **Release order when both change:** Scout Core first, then the dependent plugin,
+  so no site runs the new plugin against an old core.
+- **Smoke-test one site** (North Crest is first on the channel) after a Scout Core
+  release: open a card page and the Scout menu before calling the release done.
 
 ## Shipping a release
 
@@ -95,7 +115,7 @@ each one can update itself when the others are inactive. Change it in one place
 and copy it to the rest:
 
 ```bash
-for p in scout-forms-guard scout-rvpark; do
+for p in scout-forms-guard scout-optimize scout-reviews scout-rvpark; do
   cp scout-core/includes/class-scout-plugin-updater.php "$p/includes/"
 done
 ```

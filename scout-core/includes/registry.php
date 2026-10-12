@@ -52,14 +52,8 @@ final class Scout_Core_Registry {
 			if ( '' === $key ) {
 				continue;
 			}
-			$fields[ $key ] = wp_parse_args(
-				(array) $field,
-				array(
-					'label'   => ucfirst( str_replace( '_', ' ', $key ) ),
-					'control' => 'text', // text | textarea | number | url | select.
-					'options' => array(), // For select: value => label.
-				)
-			);
+			// text | textarea | richtext | number | url | select | checkbox | image.
+			$fields[ $key ] = Scout_Core_Controls::normalize( $key, $field );
 		}
 		$args['fields'] = $fields;
 
