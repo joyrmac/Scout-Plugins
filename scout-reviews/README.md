@@ -39,6 +39,27 @@ it shows on those pages; **Skip** keeps it as a hidden draft.
 Topics live at **Reviews > Topics**. Each one is a place reviews show on the
 site, usually one per page, with keywords that drive the inbox suggestions.
 
+## Ask for reviews (0.4.0)
+
+**Reviews > Ask for reviews** gives the business one review link on its own
+domain, `/review/`, plus everything needed to share it:
+
+- the link and a QR code (download SVG or PNG),
+- printable cards: 4 by 6 counter card, 10 business cards per page, table tent,
+- a text message and an email ready to copy,
+- monthly visit counts by source (QR, text, email, other).
+
+The link sends people to the "leave a review" link set in Settings, straight to
+one platform or to a page with a button for each. Add `?via=qr`, `?via=text`,
+`?via=email` or `?via=card` to count where a visit came from (the kit does this
+for you).
+
+Every client gets the same ask on purpose: asking only happy clients (review
+gating) breaks Google's rules and the FTC's, and so does offering anything in
+return. Law firms check their state bar's rules before sending requests.
+
+If visit counts look low on WP Engine, exclude `/review/` from the page cache.
+
 ## Theme integration
 
 One call per spot where reviews belong. It prints nothing when there is

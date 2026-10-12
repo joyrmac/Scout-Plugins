@@ -1,5 +1,26 @@
 # Scout Reviews: Changelog
 
+## 0.4.0 (2026-10-12)
+
+Ask for reviews: one short link, a QR code, printable cards, and ready-to-send messages.
+
+- **`/review/` on the client's own domain** sends people straight to the
+  "leave a review" link from Settings (Google by default), or to a simple page
+  with an equal button for each platform. The address is a setting. Printed
+  cards point here, so a changed review link never breaks a card.
+- **Reviews > Ask for reviews.** Copy the link, download the QR code (SVG for
+  printers, PNG), print a 4 by 6 counter card, a sheet of 10 business cards,
+  or a fold-in-half table tent, and copy a text message and email with the
+  business name and link filled in.
+- **Visit counts by month and source** (QR, text, email, other). Link-preview
+  bots and signed-in staff are not counted. Totals only; no visitor data is
+  stored.
+- **No review gating and no incentive wording,** by design: every client
+  gets the same ask. The page lists the rules, including the state bar check
+  for law firms.
+- `assets/qrcode.min.js`: qrcode-generator 1.4.4 by Kazuhiko Arase (MIT),
+  the same file Scout Cards uses.
+
 ## 0.3.0 (2026-10-01)
 
 Review inbox, topics, and theme slots: reviews land on the right pages in one click.

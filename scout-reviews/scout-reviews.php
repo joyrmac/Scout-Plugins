@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Reviews
  * Plugin URI:        https://scoutraleigh.com
  * Description:       Reviews from Google, Facebook, Yelp, Clutch, and anywhere else, kept in one place and shown on the site in a custom design. Every review links back to where it was posted, and the rating summary uses the real totals from each platform.
- * Version:           0.3.0
+ * Version:           0.4.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_REVIEWS_VERSION', '0.3.0' );
+define( 'SCOUT_REVIEWS_VERSION', '0.4.0' );
 define( 'SCOUT_REVIEWS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_REVIEWS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_REVIEWS_FILE', __FILE__ );
@@ -38,6 +38,7 @@ require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-google-sync.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-google-admin.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-topics.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-inbox.php';
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-requests.php';
 
 add_action( 'init', array( 'Scout_Reviews_Post_Type', 'register' ) );
 add_action( 'init', array( 'Scout_Reviews_Render', 'register' ) );
@@ -46,6 +47,7 @@ add_action( 'admin_menu', array( 'Scout_Reviews_Settings', 'menu' ) );
 
 Scout_Reviews_Google_Sync::boot();
 Scout_Reviews_Topics::boot();
+Scout_Reviews_Requests::boot();
 
 if ( is_admin() ) {
 	Scout_Reviews_Post_Type::admin_hooks();
@@ -61,5 +63,6 @@ register_activation_hook(
 		if ( Scout_Reviews_Google::is_ready() ) {
 			Scout_Reviews_Google_Sync::schedule();
 		}
+		delete_option( Scout_Reviews_Requests::ROUTES ); // Re-add the /review/ address on the next load.
 	}
 );
