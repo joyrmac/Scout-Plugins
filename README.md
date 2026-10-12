@@ -116,9 +116,11 @@ them. No updater plugin is installed on the client site and no third-party
 service sits in the middle.
 
 Shipping a fix to every site: bump the plugin's `Version:` header, add a
-changelog entry, push, then **Actions → Release → Run workflow** and pick the
-plugin. That reads the version from the header, tags it, builds the zip, and
-publishes the release. Full process, including what breaks it, is in
+changelog entry, and merge the pull request into `main`. The Release workflow
+then releases every plugin whose version has no release yet (Scout Core
+first): it tags it, builds the zip, and publishes the release. A plugin whose
+version did not change is skipped. **Actions → Release → Run workflow** still
+works as a manual backup. Full process, including what breaks it, is in
 [`RELEASING.md`](RELEASING.md).
 
 This repo has to stay public for that to work. The updater calls the GitHub API
