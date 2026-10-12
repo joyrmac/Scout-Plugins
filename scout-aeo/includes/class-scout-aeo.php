@@ -166,9 +166,14 @@ final class Scout_AEO {
 		return array_values( array_filter( (array) apply_filters( 'scout_aeo_llms_pages', $pages ), static fn( $p ) => ! in_array( (int) $p->ID, $skip_ids, true ) && ! self::noindexed( (int) $p->ID ) && '' === $p->post_password ) );
 	}
 
+	/** Text without HTML entities (WordPress curls quotes into &#8220; and friends). */
+	private static function plain( string $text ): string {
+		return html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	}
+
 	private static function describe( WP_Post $p ): string {
 		$text = has_excerpt( $p ) ? get_the_excerpt( $p ) : '';
-		$text = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( (string) $text ) ) );
+		$text = trim( preg_replace( '/\s+/', ' ', self::plain( wp_strip_all_tags( (string) $text ) ) ) );
 		return $text ? ': ' . wp_trim_words( $text, 30, '...' ) : '';
 	}
 
@@ -193,7 +198,7 @@ final class Scout_AEO {
 		if ( $pages ) {
 			$lines[] = '## Pages';
 			foreach ( $pages as $p ) {
-				$lines[] = '- [' . wp_specialchars_decode( get_the_title( $p ), ENT_QUOTES ) . '](' . get_permalink( $p ) . ')' . self::describe( $p );
+				$lines[] = '- [' . self::plain( get_the_title( $p ) ) . '](' . get_permalink( $p ) . ')' . self::describe( $p );
 			}
 			$lines[] = '';
 		}
@@ -204,7 +209,7 @@ final class Scout_AEO {
 		if ( $posts ) {
 			$lines[] = '## Articles';
 			foreach ( $posts as $p ) {
-				$lines[] = '- [' . wp_specialchars_decode( get_the_title( $p ), ENT_QUOTES ) . '](' . get_permalink( $p ) . ')' . self::describe( $p );
+				$lines[] = '- [' . self::plain( get_the_title( $p ) ) . '](' . get_permalink( $p ) . ')' . self::describe( $p );
 			}
 			$lines[] = '';
 		}

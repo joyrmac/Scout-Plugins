@@ -1,5 +1,10 @@
 # Scout AI Search changelog
 
+## 0.1.1 (2026-10-12)
+
+- /llms.txt shows titles and summaries as plain text. WordPress curls quotes
+  into entities like `&#8220;`, which showed up raw.
+
 ## 0.1.0 (2026-10-12)
 
 First release.
