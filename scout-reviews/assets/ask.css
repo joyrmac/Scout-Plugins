@@ -1,6 +1,6 @@
 /* Reviews > Ask for reviews and Reviews > Inbox: the light product theme
    (spec 4.3). Card sizes in the print kit are real print sizes in inches;
-   the on-screen previews are the same cards zoomed down. */
+   the on-screen previews are the same cards scaled down. */
 
 .srk.recon-theme {
 	--recon-bg: #F5F5F7;
@@ -160,7 +160,15 @@ a.srk-btnlink, .srk a.button { display: inline-flex; align-items: center; text-d
 .srk-print-grid { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; margin-top: 16px; }
 .srk-layout { margin: 0; display: grid; gap: 10px; justify-items: start; }
 .srk-layout figcaption { display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--recon-text-2); }
-.srk-sheet { zoom: 0.42; background: #fff; box-shadow: 0 0 0 2px var(--recon-border-strong); }
+/* Previews are the real print size scaled down. A transform scales the same in
+   every browser (Safari handles zoom differently), so the wrapper holds the
+   scaled size: the sheet's own size times 0.42. */
+.srk-sheet-wrap { overflow: hidden; box-shadow: 0 0 0 1px var(--recon-border-strong); background: #fff; }
+.srk-wrap-counter { width: calc(4in * .42); height: calc(6in * .42); }
+.srk-wrap-cards { width: calc(7in * .42); height: calc(10in * .42); }
+.srk-wrap-tent { width: calc(7.5in * .42); height: calc(9in * .42); }
+.srk-sheet { transform: scale(.42); transform-origin: 0 0; background: #fff; width: max-content; }
+.srk-sheet-cards .srk-card, .srk-sheet-tent .srk-card { overflow: hidden; }
 
 .srk-card {
 	box-sizing: border-box;
@@ -202,16 +210,10 @@ a.srk-btnlink, .srk a.button { display: inline-flex; align-items: center; text-d
 .srk-sheet-tent .srk-chead { grid-column: 1; grid-row: 2; font-size: 30pt; margin-top: .08in; }
 .srk-sheet-tent .srk-scan { grid-column: 1; grid-row: 3; font-size: 12pt; margin-top: .12in; }
 
-@media print {
-	@page { size: letter; margin: 0.4in; }
-	body.srk-printing * { visibility: hidden; }
-	body.srk-printing .srk-sheet.is-printing,
-	body.srk-printing .srk-sheet.is-printing * { visibility: visible; }
-	body.srk-printing .srk-sheet.is-printing { zoom: 1; box-shadow: none; position: absolute; left: 0; top: 0; }
-	body.srk-printing #wpadminbar, body.srk-printing #adminmenumain { display: none; }
-	body.srk-printing #wpcontent, body.srk-printing #wpbody-content { margin: 0; padding: 0; }
-	.srk-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-}
+/* Printing happens in a separate frame that holds only the chosen sheet
+   (assets/ask.js), so the page around it can never add blank pages. */
+.srk-print-frame .srk-sheet { transform: none; }
+.srk-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
 @media (prefers-reduced-motion: reduce) {
 	.srk .button { transition: none; }
