@@ -41,7 +41,7 @@ final class Scout_Reviews_Requests {
 		add_filter( 'query_vars', array( __CLASS__, 'query_vars' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'dispatch' ), 1 );
 		if ( is_admin() ) {
-			add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+			add_action( 'admin_menu', array( __CLASS__, 'menu' ), Scout_Reviews_Menu::PRIORITY + 2 );
 			add_action( 'admin_init', array( __CLASS__, 'register' ) );
 			add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		}
@@ -259,7 +259,7 @@ final class Scout_Reviews_Requests {
 
 	public static function menu(): void {
 		add_submenu_page(
-			'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE,
+			Scout_Reviews_Menu::parent(),
 			__( 'Ask for reviews', 'scout-reviews' ),
 			__( 'Ask for reviews', 'scout-reviews' ),
 			'manage_options',
@@ -331,7 +331,7 @@ final class Scout_Reviews_Requests {
 		$display = preg_replace( '#^https?://#', '', untrailingslashit( self::link() ) );
 		$stats   = get_option( self::STATS, array() );
 		$stats   = is_array( $stats ) ? array_slice( $stats, 0, 6, true ) : array();
-		$settings_url = admin_url( 'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE . '&page=' . Scout_Reviews_Settings::PAGE );
+		$settings_url = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
 		$test    = '<a class="button" href="' . esc_url( self::link() ) . '" target="_blank" rel="noopener">' . esc_html__( 'Open the review page', 'scout-reviews' ) . '</a>';
 		?>
 		<div class="wrap srk recon-theme" data-theme="light" style="--srk-accent:<?php echo esc_attr( $s['accent'] ); ?>">

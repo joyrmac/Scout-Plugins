@@ -21,28 +21,29 @@ final class Scout_Reviews_Inbox {
 	const META_SKIPPED = '_scout_review_skipped';
 
 	public static function boot(): void {
-		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 9 );
+		add_action( 'admin_menu', array( __CLASS__, 'menu' ), Scout_Reviews_Menu::PRIORITY + 1 );
 		add_action( 'admin_post_scout_reviews_inbox', array( __CLASS__, 'handle' ) );
 	}
 
 	public static function url(): string {
-		return admin_url( 'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE . '&page=' . self::PAGE );
+		return Scout_Reviews_Menu::url( self::PAGE );
 	}
 
 	public static function menu(): void {
 		$count = Scout_Reviews_Google_Sync::new_count();
-		$label = __( 'Inbox', 'scout-reviews' );
+		$build = Scout_Reviews_Menu::build();
+		$label = '' !== $build ? __( 'Review inbox', 'scout-reviews' ) : __( 'Inbox', 'scout-reviews' );
 		if ( $count ) {
 			$label .= ' <span class="awaiting-mod"><span class="pending-count">' . (int) $count . '</span></span>';
 		}
 		add_submenu_page(
-			'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE,
+			Scout_Reviews_Menu::parent(),
 			__( 'Review inbox', 'scout-reviews' ),
 			$label,
 			'edit_posts',
 			self::PAGE,
 			array( __CLASS__, 'page' ),
-			1
+			'' !== $build ? null : 1 // First under its own Reviews menu; in order inside Build.
 		);
 	}
 
@@ -178,7 +179,7 @@ final class Scout_Reviews_Inbox {
 					<button type="submit" name="do" value="skip" class="button button-primary"><?php esc_html_e( 'Mark as read', 'scout-reviews' ); ?></button>
 				<?php endif; ?>
 				<?php if ( $website ) : ?>
-					<a class="button" href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE . '&page=' . Scout_Reviews_Requests::PAGE . '#srk-messages' ) ); ?>"><?php esc_html_e( 'Ask for a Google review too', 'scout-reviews' ); ?></a>
+					<a class="button" href="<?php echo esc_url( Scout_Reviews_Menu::url( Scout_Reviews_Requests::PAGE, 'srk-messages' ) ); ?>"><?php esc_html_e( 'Ask for a Google review too', 'scout-reviews' ); ?></a>
 				<?php endif; ?>
 			</p>
 		</form>

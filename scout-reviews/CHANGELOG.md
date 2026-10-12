@@ -1,5 +1,14 @@
 # Scout Reviews: Changelog
 
+## 0.4.3 (2026-10-12)
+
+- **Reviews moved into the Build section.** On a site with Scout Build (or
+  Recon Build, or Site Build), the Reviews screens now sit inside it with the
+  other features: Reviews, Review inbox, Ask for reviews and Review settings.
+  The separate Reviews menu in the sidebar is gone on those sites. Old
+  bookmarks still work and land on the new screen. Sites without a Build
+  section keep the Reviews menu as before.
+
 ## 0.4.2 (2026-10-12)
 
 - **A new look for every settings screen.** The plugin's screens now share
