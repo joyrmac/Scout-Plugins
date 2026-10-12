@@ -85,6 +85,7 @@ final class Scout_Hub_Features {
 		$features = Scout_Hub_Catalog::features();
 		if ( 'refresh' === $do ) {
 			Scout_Hub_Catalog::flush();
+			Scout_Hub_Health::forget_scan();
 			wp_clean_plugins_cache( true );
 			self::back( __( 'Checked for new features and versions.', 'scout-build' ) );
 		}

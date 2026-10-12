@@ -40,3 +40,4 @@ require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-admin.php';
 Scout_Hub_Features::boot();
 Scout_Hub_Requests::boot();
 Scout_Hub_Admin::boot();
+Scout_Hub_Health::boot();

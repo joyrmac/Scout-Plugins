@@ -12,6 +12,62 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Hub_Health {
 
+	const SCAN_KEY  = 'scout_hub_answer_scan';
+	const SCAN_HOOK = 'scout_hub_answer_scan';
+
+	public static function boot(): void {
+		add_action( self::SCAN_HOOK, array( __CLASS__, 'run_scan' ) );
+	}
+
+	/**
+	 * Which key pages print FAQ schema. Themes and plugins all do FAQs their
+	 * own way, so this looks at what the pages actually send: it loads up to
+	 * 15 of the main pages from the site itself (in the background, through
+	 * WP-Cron) and counts those carrying FAQPage. Cached for 12 hours.
+	 *
+	 * @return array{found:int, checked:int, time:int}|null Null while the first scan runs.
+	 */
+	public static function answer_scan(): ?array {
+		$scan = get_transient( self::SCAN_KEY );
+		if ( is_array( $scan ) ) {
+			return $scan;
+		}
+		if ( ! wp_next_scheduled( self::SCAN_HOOK ) ) {
+			wp_schedule_single_event( time(), self::SCAN_HOOK );
+			spawn_cron();
+		}
+		return null;
+	}
+
+	public static function forget_scan(): void {
+		delete_transient( self::SCAN_KEY );
+	}
+
+	public static function run_scan(): void {
+		$all   = get_pages( array( 'sort_column' => 'menu_order,post_title' ) );
+		$front = (int) get_option( 'page_on_front' );
+		$top   = array_filter( $all, static fn( $p ) => ! $p->post_parent );
+		$ids   = wp_list_pluck( $top, 'ID' );
+		$kids  = array_filter( $all, static fn( $p ) => in_array( (int) $p->post_parent, array_map( 'intval', $ids ), true ) );
+		$pages = array_merge( $top, $kids );
+		usort( $pages, static fn( $a, $b ) => ( (int) $b->ID === $front ) <=> ( (int) $a->ID === $front ) );
+		$pages = array_slice( array_filter( $pages, static fn( $p ) => ! preg_match( '/^(privacy|terms|cookie|thank|sample-page|card|links)/', $p->post_name ) ), 0, 15 );
+
+		$found   = 0;
+		$checked = 0;
+		foreach ( $pages as $p ) {
+			$r = wp_remote_get( get_permalink( $p ), array( 'timeout' => 8, 'redirection' => 2, 'sslverify' => false, 'headers' => array( 'Cache-Control' => 'no-cache' ) ) );
+			if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
+				continue;
+			}
+			++$checked;
+			if ( preg_match( '/"@type"\s*:\s*(\[[^\]]*)?"FAQPage"/', (string) wp_remote_retrieve_body( $r ) ) ) {
+				++$found;
+			}
+		}
+		set_transient( self::SCAN_KEY, array( 'found' => $found, 'checked' => $checked, 'time' => time() ), $checked ? 12 * HOUR_IN_SECONDS : 30 * MINUTE_IN_SECONDS );
+	}
+
 	/**
 	 * @return array<int, array{label:string, value:string, state:string, note:string}>
 	 *         state is good | warn | bad.
@@ -152,29 +208,33 @@ final class Scout_Hub_Health {
 			) + ( $missing ? array( 'link' => admin_url( 'options-general.php?page=scout-business' ), 'link_text' => __( 'Business details', 'scout-build' ) ) : array() );
 		}
 
-		// 5. Direct answers on pages.
-		$pages = $aeo ? count( Scout_AEO_FAQ::pages_with_answers() ) : 0;
-		$hub   = post_type_exists( 'faq' ) ? (int) ( wp_count_posts( 'faq' )->publish ?? 0 ) : 0;
-		$theme = function_exists( 'scout_faq_node' );
-		$good  = $pages >= 3 || $hub >= 5 || $theme;
-		$bits  = array();
-		if ( $pages ) {
-			/* translators: %d: page count */
-			$bits[] = sprintf( _n( '%d page has answers', '%d pages have answers', $pages, 'scout-build' ), $pages );
+		// 5. Direct answers on pages: what the key pages actually print.
+		$scan = self::answer_scan();
+		$hub  = post_type_exists( 'faq' ) ? (int) ( wp_count_posts( 'faq' )->publish ?? 0 ) : 0;
+		if ( null === $scan ) {
+			$out[] = array( 'label' => __( 'Direct answers', 'scout-build' ), 'value' => __( 'Checking', 'scout-build' ), 'state' => 'warn', 'note' => __( 'Looking through the main pages for questions and answers. Refresh in a minute.', 'scout-build' ) );
+		} elseif ( ! $scan['checked'] ) {
+			$out[] = array( 'label' => __( 'Direct answers', 'scout-build' ), 'value' => __( 'Could not check', 'scout-build' ), 'state' => 'warn', 'note' => __( 'The site could not load its own pages (a password or firewall on staging does this). It tries again in 30 minutes.', 'scout-build' ) );
+		} else {
+			$good  = $scan['found'] >= min( 3, $scan['checked'] ) || $hub >= 5;
+			$bits  = array(
+				/* translators: 1: pages with answers, 2: pages checked */
+				sprintf( __( '%1$d of %2$d main pages answer questions', 'scout-build' ), $scan['found'], $scan['checked'] ),
+			);
+			if ( $hub ) {
+				/* translators: %d: FAQ count */
+				$bits[] = sprintf( _n( '%d FAQ', '%d FAQs', $hub, 'scout-build' ), $hub );
+			}
+			/* translators: %s: time since the check */
+			$bits[] = sprintf( __( 'checked %s ago', 'scout-build' ), human_time_diff( (int) $scan['time'] ) );
+			$out[]  = array(
+				'label' => __( 'Direct answers', 'scout-build' ),
+				/* translators: 1: pages with answers, 2: pages checked */
+				'value' => sprintf( __( '%1$d of %2$d pages', 'scout-build' ), $scan['found'], $scan['checked'] ),
+				'state' => $good ? 'good' : 'warn',
+				'note'  => ucfirst( implode( ', ', $bits ) ) . '.' . ( $good ? '' : ' ' . __( 'AI tools quote short, direct answers. Add questions to the pages that bring in business.', 'scout-build' ) ),
+			) + ( $good ? array() : array( 'link' => $set, 'link_text' => $set_tx ) );
 		}
-		if ( $hub ) {
-			/* translators: %d: FAQ count */
-			$bits[] = sprintf( _n( '%d FAQ', '%d FAQs', $hub, 'scout-build' ), $hub );
-		}
-		if ( $theme ) {
-			$bits[] = __( 'the theme\'s service pages carry FAQs', 'scout-build' );
-		}
-		$out[] = array(
-			'label' => __( 'Direct answers', 'scout-build' ),
-			'value' => $good ? __( 'Good', 'scout-build' ) : ( $bits ? __( 'A start', 'scout-build' ) : __( 'None yet', 'scout-build' ) ),
-			'state' => $good ? 'good' : 'warn',
-			'note'  => $bits ? ucfirst( implode( ', ', $bits ) ) . '.' : __( 'AI tools quote short, direct answers. Add questions to the pages that bring in business.', 'scout-build' ),
-		) + ( $good ? array() : array( 'link' => $set, 'link_text' => $set_tx ) );
 
 		// 6. Fresh content.
 		$last = get_posts( array( 'numberposts' => 1, 'post_status' => 'publish', 'orderby' => 'modified', 'order' => 'DESC' ) );

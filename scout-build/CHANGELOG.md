@@ -7,6 +7,10 @@
   answers on pages, fresh content, and real authors with bios. Each check reads
   WordPress itself, counts what the theme or Scout Core already does, and links
   operators to the fix. A meter shows "5 of 7 ready".
+- **Direct answers reads the real pages.** Client themes print FAQs their own
+  way, so the hub loads up to 15 main pages in the background (WP-Cron) and
+  counts the ones carrying FAQPage schema. Cached 12 hours; "Check for new
+  versions" re-runs it.
 - **Your features** shows the same score as a chip, linked to the scorecard.
 - **Catalog:** adds AI search (`scout-aeo`), included in every plan.
 
