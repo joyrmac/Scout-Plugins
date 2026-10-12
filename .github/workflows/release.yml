@@ -27,6 +27,7 @@ on:
         type: choice
         options:
           - scout-aeo
+          - scout-analytics
           - scout-build
           - scout-cards
           - scout-core
