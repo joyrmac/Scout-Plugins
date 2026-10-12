@@ -39,6 +39,7 @@ require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-google-admin.php'
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-topics.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-inbox.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-requests.php';
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-notes.php';
 
 add_action( 'init', array( 'Scout_Reviews_Post_Type', 'register' ) );
 add_action( 'init', array( 'Scout_Reviews_Render', 'register' ) );
@@ -48,6 +49,7 @@ add_action( 'admin_menu', array( 'Scout_Reviews_Settings', 'menu' ) );
 Scout_Reviews_Google_Sync::boot();
 Scout_Reviews_Topics::boot();
 Scout_Reviews_Requests::boot();
+Scout_Reviews_Notes::boot();
 
 if ( is_admin() ) {
 	Scout_Reviews_Post_Type::admin_hooks();

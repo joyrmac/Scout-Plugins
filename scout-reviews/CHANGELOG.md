@@ -2,22 +2,33 @@
 
 ## 0.4.0 (2026-10-12)
 
-Ask for reviews: one short link, a QR code, printable cards, and ready-to-send messages.
+Ask for reviews: a review page on the client's own domain, a private note
+form, a QR code, printable cards, and ready-to-send messages.
 
-- **`/review/` on the client's own domain** sends people straight to the
-  "leave a review" link from Settings (Google by default), or to a simple page
-  with an equal button for each platform. The address is a setting. Printed
-  cards point here, so a changed review link never breaks a card.
-- **Reviews > Ask for reviews.** Copy the link, download the QR code (SVG for
-  printers, PNG), print a 4 by 6 counter card, a sheet of 10 business cards,
-  or a fold-in-half table tent, and copy a text message and email with the
-  business name and link filled in.
-- **Visit counts by month and source** (QR, text, email, other). Link-preview
-  bots and signed-in staff are not counted. Totals only; no visitor data is
-  stored.
-- **No review gating and no incentive wording,** by design: every client
-  gets the same ask. The page lists the rules, including the state bar check
-  for law firms.
+- **`/review/`** is a dark phone page (Scout features spec 5.21): business
+  name, optional team photo, the ask line, a "Leave a Google review" button,
+  smaller buttons for any other platform with a link, and a quiet "Prefer to
+  send us a note privately?" link at the bottom. A setting skips the page and
+  goes straight to the main platform instead. The address is a setting.
+  Printed cards point here, so a changed review link never breaks a card.
+- **`/review/note/`**: stars (optional), the note, name, business (optional)
+  and an "OK to show this on {domain}" box. Notes arrive in Reviews > Inbox as
+  drafts and by email. A note without that OK can never be published: the
+  inbox only offers "Mark as read", and pressing Publish in the editor keeps
+  it a draft. Spam: hidden field, signed timestamp, five notes an hour per
+  connection.
+- **Reviews > Ask for reviews**: copy the link, download the QR code (SVG,
+  PNG), print a 4 by 6 counter card, a sheet of 10 business cards, or a table
+  tent ("Tell Google how we did."), and copy a text and an email with the
+  business name and link filled in. Monthly visit counts by source (QR, text,
+  email, other); link-preview bots and signed-in staff are not counted, and no
+  visitor data is stored.
+- **Reviews > Inbox** shows notes from the website with a "New · from the
+  website" pill and their consent state, plus "Ask for a Google review too".
+- Both screens use the light product look (spec 4.3).
+- **No review gating and no incentive wording,** by design: every client sees
+  the same page and the same ask. The page lists the rules, including the
+  state bar check for law firms.
 - `assets/qrcode.min.js`: qrcode-generator 1.4.4 by Kazuhiko Arase (MIT),
   the same file Scout Cards uses.
 
