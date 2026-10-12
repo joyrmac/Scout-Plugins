@@ -1,5 +1,14 @@
 # Scout Reviews: Changelog
 
+## 0.4.1 (2026-10-12)
+
+- **Fix: a site crash when two Scout plugins load together.** Every Scout
+  plugin carries the shared updater. On hosts that cache compiled PHP
+  (OPcache, as on WP Engine), a copy could be declared the moment its file
+  loaded, so a second plugin loading first crashed the site with "Cannot declare
+  class Scout_Plugin_Updater". The class now sits inside a conditional, and the
+  updater loads on `plugins_loaded`, after every plugin's own file.
+
 ## 0.4.0 (2026-10-12)
 
 Ask for reviews: a review page on the client's own domain, a private note

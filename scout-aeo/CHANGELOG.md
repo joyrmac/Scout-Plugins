@@ -4,6 +4,9 @@
 
 First release.
 
+- Loads the shared updater on `plugins_loaded`, inside a conditional, so it
+  never collides with another Scout plugin's copy.
+
 - robots.txt groups for AI search crawlers and AI training crawlers, each with
   its own switch, on the live site only.
 - `/llms.txt` built from the site: summary, contact, pages, posts, questions.

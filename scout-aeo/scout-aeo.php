@@ -21,8 +21,16 @@ define( 'SCOUT_AEO_VERSION', '0.1.0' );
 define( 'SCOUT_AEO_FILE', __FILE__ );
 
 // Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-scout-plugin-updater.php';
-Scout_Plugin_Updater::boot( __FILE__, 'scout-aeo' );
+// Loaded on plugins_loaded, after every plugin's own file, so older Scout
+// plugins that still declare the shared class at load time always go first.
+add_action(
+	'plugins_loaded',
+	static function () {
+		require_once __DIR__ . '/includes/class-scout-plugin-updater.php';
+		Scout_Plugin_Updater::boot( __DIR__ . '/scout-aeo.php', 'scout-aeo' );
+	},
+	0
+);
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-scout-aeo.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-scout-aeo-faq.php';

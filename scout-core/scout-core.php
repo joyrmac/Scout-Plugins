@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Core
  * Plugin URI:        https://scoutraleigh.com/platform/scout-core
  * Description:       The Scout engine for a client site: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard. The Yoast replacement, built to survive any future redesign.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CORE_VERSION', '1.1.0' );
+define( 'SCOUT_CORE_VERSION', '1.1.1' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CORE_FILE', __FILE__ );
 
@@ -62,8 +62,17 @@ require_once SCOUT_CORE_DIR . 'includes/admin.php';
  * manifest tracker, which needed a JSON file hosted somewhere and never got
  * switched on.
  */
-require_once SCOUT_CORE_DIR . 'includes/class-scout-plugin-updater.php';
-Scout_Plugin_Updater::boot( __FILE__, 'scout-core' );
+// Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
+// Loaded on plugins_loaded, after every plugin's own file, so older Scout
+// plugins that still declare the shared class at load time always go first.
+add_action(
+	'plugins_loaded',
+	static function () {
+		require_once __DIR__ . '/includes/class-scout-plugin-updater.php';
+		Scout_Plugin_Updater::boot( __DIR__ . '/scout-core.php', 'scout-core' );
+	},
+	0
+);
 
 /*
  * Registration pipeline. The registry is filled at init:1 via `scout_core_register`

@@ -2,6 +2,15 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.7.1 (2026-10-12)
+
+- **Fix: a site crash when two Scout plugins load together.** Every Scout
+  plugin carries the shared updater. On hosts that cache compiled PHP
+  (OPcache, as on WP Engine), a copy could be declared the moment its file
+  loaded, so a second plugin loading first crashed the site with "Cannot declare
+  class Scout_Plugin_Updater". The class now sits inside a conditional, and the
+  updater loads on `plugins_loaded`, after every plugin's own file.
+
 ## [0.7.0] — 2026-09-03 (joins the self-updating suite)
 
 - **What:** Graduated from the Scout-Media-Raleigh monorepo into Scout-Plugins,

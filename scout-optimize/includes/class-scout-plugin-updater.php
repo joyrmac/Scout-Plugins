@@ -23,9 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'Scout_Plugin_Updater' ) ) {
-	return;
-}
+// Every Scout plugin ships this file. The class sits inside a conditional on
+// purpose: a top-level class can be bound by OPcache when the file loads, even
+// behind an early return, which crashed a site when another copy had already
+// declared it ("Cannot declare class Scout_Plugin_Updater"). Inside the `if`,
+// only the first copy declares it and every other copy is skipped.
+if ( ! class_exists( 'Scout_Plugin_Updater', false ) ) :
 
 /**
  * Points one plugin at its latest GitHub release.
@@ -310,3 +313,5 @@ final class Scout_Plugin_Updater {
 		return 'scout_updater_' . $this->slug;
 	}
 }
+
+endif;
