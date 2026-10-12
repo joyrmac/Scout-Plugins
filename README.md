@@ -24,8 +24,9 @@ instead of a data-loss event.
 |---|---|---|---|
 | [`scout-core`](scout-core/) | 1.1.0 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
 | [`scout-forms-guard`](scout-forms-guard/) | 0.1.0 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
-| [`scout-cards`](scout-cards/) | 1.0.1 | Digital business cards and a link-in-bio page on the client's own site: Save contact, share mode with a QR code, home-screen icon, `/links/`. Reads the business identity from Scout Core. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
-| [`scout-reviews`](scout-reviews/) | 0.3.0 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Google reviews sync daily into an inbox; one click adds each to the right pages. Each card links to the original; the rating summary uses each platform's real totals. | WP 6.5+, PHP 8.0+ |
+| [`scout-cards`](scout-cards/) | 1.0.2 | Digital business cards and a link-in-bio page on the client's own site: Save contact, share mode with a QR code, home-screen icon, `/links/`. Reads the business identity from Scout Core. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
+| [`scout-reviews`](scout-reviews/) | 0.4.0 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Google reviews sync daily into an inbox; one click adds each to the right pages. A `/review/` page, private note form, QR code, printable cards and ready-to-send messages for asking clients. | WP 6.5+, PHP 8.0+ |
+| [`scout-build`](scout-build/) | 0.1.0 | The Site Build hub: one screen to see and switch the site's Scout features (operators only), go back a version, request a change, and check site health. Reads the feature list from `catalog.json`. | WP 6.5+, PHP 8.0+ |
 | [`scout-rvpark`](scout-rvpark/) | 0.1.0 | The worked example of the companion pattern: one client's specific content types, registered without forking Scout Core. | `scout-core` |
 
 > `scout-schema` and `scout-seo` shipped separately until Scout Core 1.0.0 folded

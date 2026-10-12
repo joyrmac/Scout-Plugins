@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "updated": "2026-10-12",
+  "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers: build, partnership, whole, addon. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there.",
+  "features": [
+    {
+      "slug": "scout-core",
+      "name": "Business info and SEO",
+      "summary": "Enter your business details once and they show up correctly everywhere Google looks: titles, schema, sitemap and social previews.",
+      "tier": "build",
+      "law": false,
+      "requires": [],
+      "not_with_themes": [
+        "scout-media",
+        "scout-recon"
+      ],
+      "not_with_note": "Not used on this site. The theme already handles business info and SEO, and running both doubles the tags."
+    },
+    {
+      "slug": "scout-optimize",
+      "name": "Automatic image optimizer",
+      "summary": "Every photo you upload is resized and compressed so the site stays fast. The original is kept as a backup.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-forms-guard",
+      "name": "Spam-free forms",
+      "summary": "Blocks spam on your forms quietly, so visitors never have to solve a puzzle.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-cards",
+      "name": "Digital business cards and link page",
+      "summary": "A card for each person that saves to a phone in one tap, a QR code to share it, and a link page for your social bios.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-reviews",
+      "name": "Reviews and review requests",
+      "summary": "Shows your Google, Yelp and Facebook reviews on the site, plus one review link with a QR code, printable cards and ready-to-send messages.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-rvpark",
+      "name": "RV park content",
+      "summary": "Sites, amenities and rates for an RV park, edited like a form.",
+      "tier": "build",
+      "law": false,
+      "requires": [
+        "scout-core"
+      ],
+      "client_specific": true
+    }
+  ]
+}

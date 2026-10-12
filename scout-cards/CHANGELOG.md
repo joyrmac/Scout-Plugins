@@ -1,5 +1,11 @@
 # Scout Cards changelog
 
+## 1.0.2 (2026-10-12)
+
+- Nests Cards & Links inside the site's existing Build menu (Scout Build, Recon
+  Build, Scout Core's Scout menu, or the Scout Build hub's section) instead of
+  adding a second Site Build menu. Sites with none of those are unchanged.
+
 ## 1.0.1 (2026-10-01)
 
 - Richer spotlight design, tinted with the accent color. With a heading or note
