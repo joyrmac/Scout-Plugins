@@ -1,5 +1,13 @@
 # Scout Chat changelog
 
+
+## 0.1.2 (2026-10-12)
+
+- **The chat button's pulse no longer slows the page.** The ring now grows
+  and fades with transform and opacity only, which the browser animates on
+  the GPU. Before, it animated a shadow and repainted on every frame, which
+  PageSpeed flagged.
+
 ## 0.1.1 (2026-10-12)
 
 - On phones the chat button is a round 56px bolt button instead of the wide
