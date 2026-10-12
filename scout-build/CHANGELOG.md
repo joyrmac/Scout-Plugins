@@ -1,5 +1,15 @@
 # Scout Build changelog
 
+## 0.2.0 (2026-10-12)
+
+- **Ready for AI search.** Site health gains a second scorecard: AI crawlers
+  allowed, the /llms.txt guide, structured data, business details, direct
+  answers on pages, fresh content, and real authors with bios. Each check reads
+  WordPress itself, counts what the theme or Scout Core already does, and links
+  operators to the fix. A meter shows "5 of 7 ready".
+- **Your features** shows the same score as a chip, linked to the scorecard.
+- **Catalog:** adds AI search (`scout-aeo`), included in every plan.
+
 ## 0.1.0 (2026-10-12)
 
 First release: the Site Build hub (phase 1 of `docs/site-build-hub-spec.md`).

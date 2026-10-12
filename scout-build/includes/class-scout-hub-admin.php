@@ -181,6 +181,14 @@ final class Scout_Hub_Admin {
 				: esc_html__( 'These are the features this site can use. Ask us to add anything that is off.', 'scout-build' );
 			?>
 		</p>
+		<?php
+		$ai    = Scout_Hub_Health::ai_checks();
+		$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
+		?>
+		<p class="sh-ai-chip"><span class="sh-pill <?php echo $ready === count( $ai ) ? 'is-done' : 'is-progress'; ?>"><?php
+			/* translators: 1: checks passed, 2: total checks */
+			echo esc_html( sprintf( __( 'Ready for AI search: %1$d of %2$d', 'scout-build' ), $ready, count( $ai ) ) );
+		?></span> <a href="<?php echo esc_url( self::url( 'health' ) . '#ai-search' ); ?>"><?php esc_html_e( 'See what to fix', 'scout-build' ); ?> &rsaquo;</a></p>
 
 		<?php if ( $operator ) : ?>
 			<section class="sh-box sh-ops">
@@ -351,14 +359,36 @@ final class Scout_Hub_Admin {
 	/* ------------------------------------------------------------------ */
 
 	private static function health(): void {
+		$ai    = Scout_Hub_Health::ai_checks();
+		$score = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
 		?>
 		<p class="sh-lede"><?php esc_html_e( 'A quick look at the basics, read from WordPress itself. Nothing here is sent anywhere.', 'scout-build' ); ?></p>
+		<?php self::check_grid( Scout_Hub_Health::checks() ); ?>
+		<div class="sh-section-head" id="ai-search">
+			<p class="sh-eyebrow"><?php esc_html_e( 'Ready for AI search', 'scout-build' ); ?></p>
+			<h2><?php
+				/* translators: 1: checks passed, 2: total checks */
+				echo esc_html( sprintf( __( '%1$d of %2$d ready', 'scout-build' ), $score, count( $ai ) ) );
+			?></h2>
+			<p class="sh-note"><?php esc_html_e( 'More people ask ChatGPT, Google\'s AI answers, Perplexity or Claude instead of searching. These are the things those tools need to find this site, trust it, and name it in their answers.', 'scout-build' ); ?></p>
+			<div class="sh-meter" role="img" aria-label="<?php echo esc_attr( sprintf( '%d / %d', $score, count( $ai ) ) ); ?>"><span style="width:<?php echo esc_attr( (string) round( 100 * $score / max( 1, count( $ai ) ) ) ); ?>%"></span></div>
+		</div>
+		<?php
+		self::check_grid( $ai );
+	}
+
+	/** @param array<int, array{label:string, value:string, state:string, note:string, link?:string, link_text?:string}> $checks */
+	private static function check_grid( array $checks ): void {
+		?>
 		<div class="sh-grid sh-grid-3">
-			<?php foreach ( Scout_Hub_Health::checks() as $c ) : ?>
+			<?php foreach ( $checks as $c ) : ?>
 				<section class="sh-box sh-check is-<?php echo esc_attr( $c['state'] ); ?>">
 					<p class="sh-label"><?php echo esc_html( $c['label'] ); ?></p>
 					<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $c['value'] ); ?></p>
 					<p class="sh-note"><?php echo esc_html( $c['note'] ); ?></p>
+					<?php if ( ! empty( $c['link'] ) && Scout_Hub_Access::is_operator() ) : ?>
+						<p class="sh-note"><a href="<?php echo esc_url( $c['link'] ); ?>"><?php echo esc_html( $c['link_text'] ?? __( 'Fix this', 'scout-build' ) ); ?> &rsaquo;</a></p>
+					<?php endif; ?>
 				</section>
 			<?php endforeach; ?>
 		</div>

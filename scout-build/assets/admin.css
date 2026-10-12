@@ -95,3 +95,12 @@
 .sh-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sh-good); flex: none; }
 .sh-check.is-warn .sh-dot { background: #FBB024; }
 .sh-check.is-bad .sh-dot { background: #F2553D; }
+
+.sh-section-head { margin-top: 32px; }
+.sh .sh-section-head h2 { font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -.02em; margin: 4px 0 0; }
+.sh-section-head .sh-note { max-width: 720px; }
+.sh-meter { height: 8px; max-width: 420px; border-radius: 980px; background: var(--sh-surface-2); overflow: hidden; margin-top: 12px; }
+.sh-meter span { display: block; height: 100%; border-radius: inherit; background: var(--sh-accent); }
+.sh-check .sh-note a { color: var(--sh-accent-text); font-weight: 500; text-decoration: none; }
+.sh-ai-chip { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
+.sh-ai-chip a { color: var(--sh-accent-text); font-weight: 500; text-decoration: none; }

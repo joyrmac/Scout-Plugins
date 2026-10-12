@@ -17,6 +17,14 @@
       "not_with_note": "Not used on this site. The theme already handles business info and SEO, and running both doubles the tags."
     },
     {
+      "slug": "scout-aeo",
+      "name": "AI search",
+      "summary": "Helps ChatGPT, Google's AI answers, Perplexity and Claude find the site, read it, and name it in their answers. Adds a question-and-answer box to every page.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
       "slug": "scout-optimize",
       "name": "Automatic image optimizer",
       "summary": "Every photo you upload is resized and compressed so the site stays fast. The original is kept as a backup.",
