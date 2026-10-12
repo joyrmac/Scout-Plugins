@@ -30,6 +30,7 @@ on:
           - scout-analytics
           - scout-build
           - scout-cards
+          - scout-chat
           - scout-core
           - scout-forms-guard
           - scout-optimize
