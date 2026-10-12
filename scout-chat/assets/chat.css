@@ -105,6 +105,11 @@
 
 @media (max-width: 480px) {
   .sc-root { right: 12px; bottom: 12px; }
+  /* A round 56px button on phones, so it never covers what someone is reading. */
+  .sc-launcher { width: 56px; height: 56px; min-height: 0; padding: 0; justify-content: center; }
+  .sc-launcher .sc-launcher-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sc-launcher .sc-stack > img { display: none; }
+  .sc-launcher .sc-stack > .sc-ai { width: 44px; height: 44px; border: 0; }
   .is-open.sc-root { inset: 0; right: 0; bottom: 0; }
   .is-open .sc-panel { width: 100vw; height: 100dvh; border-radius: 0; border: 0; }
   .sc-person { display: none; }
