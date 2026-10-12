@@ -17,7 +17,9 @@ Status: draft for Sean and Joy. Nothing built yet.
 ## Naming and placement
 
 - Plugin: `scout-build` (code name). Self-updating like the others.
-- Menu label: **Site Build** on client sites, **Scout Build** on scoutraleigh.com and Recon. Top-level,
+- Menu label: **Scout** on Scout client sites (Scout branded, Joy 2026-10-12: clients should see what we
+  do for them), **Scout Build** on scoutraleigh.com and Recon. Neutral **Site Build** only when
+  `SCOUT_HUB_BRAND` is false (partner-agency sites). Top-level,
   directly under Dashboard (build-standards "Dashboard standard").
 - The hub owns the `site-build` menu. Scout Cards already registers a top-level `site-build` menu,
   so Cards changes to nest under the hub when the hub is active (and keeps its own menu when not).
@@ -115,4 +117,4 @@ Built for our law-firm clients first; most of it helps every client.
   channel), then the rest.
 - Every phase is a normal Scout-Plugins release: version bump, changelog, `tools/core-contract.sh`
   updated if it calls Scout Core.
-- Plain-language labels everywhere, sentence case, no em dashes, "Site Build" on client sites.
+- Plain-language labels everywhere, sentence case, no em dashes, Scout branded on Scout client sites.
