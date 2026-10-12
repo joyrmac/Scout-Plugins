@@ -114,6 +114,18 @@ final class Scout_Core_Admin {
 			echo '<div class="scout-card-body">';
 			echo '<strong>' . esc_html( $c['label'] ) . '</strong>';
 			echo '<p>' . esc_html( $c['message'] ) . '</p>';
+			if ( ! empty( $c['items'] ) ) {
+				echo '<ul class="scout-card-list">';
+				foreach ( $c['items'] as $item_id ) {
+					$title = get_the_title( $item_id );
+					printf(
+						'<li><a href="%s">%s &rsaquo;</a></li>',
+						esc_url( (string) get_edit_post_link( $item_id ) ),
+						esc_html( '' !== $title ? $title : sprintf( '#%d', $item_id ) )
+					);
+				}
+				echo '</ul>';
+			}
 			if ( ! empty( $c['action'] ) && ! empty( $c['action_label'] ) ) {
 				printf( '<a href="%s">%s &rsaquo;</a>', esc_url( $c['action'] ), esc_html( $c['action_label'] ) );
 			}
@@ -152,24 +164,26 @@ final class Scout_Core_Admin {
 			'action_label' => $type ? '' : 'Set business type',
 		);
 
-		// 3. Pages missing a written description.
-		$missing = self::pages_missing_description();
-		$checks[] = array(
+		// 3. Pages missing a written description. Name them, so nobody has to hunt.
+		$missing_ids = self::pages_missing_description();
+		$missing     = count( $missing_ids );
+		$checks[]    = array(
 			'label'        => 'Page descriptions',
 			'status'       => $missing ? 'warn' : 'good',
 			'message'      => $missing
 				? sprintf(
 					_n(
-						'%d published page has no written description, so search engines guess one.',
-						'%d published pages have no written description, so search engines guess one.',
+						'%d published page has no written description, so search engines guess one. Open it and fill in the SEO box.',
+						'%d published pages have no written description, so search engines guess one. Open each and fill in the SEO box.',
 						$missing,
 						'scout-core'
 					),
 					$missing
 				)
 				: 'Every published page has a description written for search.',
-			'action'       => $missing ? admin_url( 'edit.php?post_type=page' ) : '',
-			'action_label' => $missing ? 'Review pages' : '',
+			'items'        => array_slice( $missing_ids, 0, 10 ),
+			'action'       => $missing > 10 ? admin_url( 'edit.php?post_type=page' ) : '',
+			'action_label' => $missing > 10 ? 'See all pages' : '',
 		);
 
 		// 4. Accidental noindex.
@@ -208,6 +222,7 @@ final class Scout_Core_Admin {
 		return (array) apply_filters( 'scout_core_dashboard_checks', $checks );
 	}
 
+	/** @return int[] Published pages and posts with no SEO description and no excerpt. */
 	private static function pages_missing_description() {
 		$ids = get_posts( array(
 			'post_type'      => array( 'page', 'post' ),
@@ -216,14 +231,14 @@ final class Scout_Core_Admin {
 			'posts_per_page' => 200,
 			'no_found_rows'  => true,
 		) );
-		$n = 0;
+		$out = array();
 		foreach ( $ids as $id ) {
 			$desc = get_post_meta( $id, SCOUT_SEO_META_DESC, true );
 			if ( '' === $desc && ! has_excerpt( $id ) ) {
-				$n++;
+				$out[] = (int) $id;
 			}
 		}
-		return $n;
+		return $out;
 	}
 
 	private static function pages_noindexed() {
@@ -310,6 +325,7 @@ final class Scout_Core_Admin {
 		.scout-card-body strong{display:block;font-size:15px;font-weight:600}
 		.scout-card-body p{margin:4px 0 6px;color:var(--sh-text-2);font-size:13px;line-height:1.5}
 		.scout-card-body a{font-size:13px;text-decoration:none;font-weight:500}
+		.scout-card-list{margin:2px 0 0;padding:0;list-style:none;display:grid;gap:4px}
 		</style>';
 	}
 }
