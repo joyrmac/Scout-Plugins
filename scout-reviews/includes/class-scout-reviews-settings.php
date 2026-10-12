@@ -135,8 +135,7 @@ final class Scout_Reviews_Settings {
 		$settings = self::get();
 		$name     = self::OPTION;
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Review settings', 'scout-reviews' ); ?></h1>
+		<?php Scout_Admin_UI::open( __( 'Review settings', 'scout-reviews' ), __( 'Your profile on each review platform, how reviews look on the site, and where to put them.', 'scout-reviews' ) ); ?>
 
 			<?php do_action( 'scout_reviews_settings_top' ); ?>
 
@@ -231,7 +230,7 @@ final class Scout_Reviews_Settings {
 				<li><code>[scout_review_summary]</code> <?php esc_html_e( 'shows only the rating summary.', 'scout-reviews' ); ?></li>
 			</ul>
 			<p><?php esc_html_e( 'Theme developers: call scout_reviews_slot() in a template to show the reviews for that page automatically. See the plugin README.', 'scout-reviews' ); ?></p>
-		</div>
+		<?php Scout_Admin_UI::close(); ?>
 		<?php
 	}
 }

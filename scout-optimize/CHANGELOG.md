@@ -2,6 +2,14 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.7.2 (2026-10-12)
+
+- **A new look for every settings screen.** The plugin's screens now share
+  one Scout design: a clear page header with the section name, settings
+  grouped into rounded boxes, pill buttons, and a short sign-off footer with
+  how to reach us. On client sites the header reads "Site Build" instead of
+  "Scout". Nothing about how the settings work changed.
+
 ## 0.7.1 (2026-10-12)
 
 - **Fix: a site crash when two Scout plugins load together.** Every Scout

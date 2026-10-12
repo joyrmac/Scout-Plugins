@@ -69,6 +69,10 @@ final class Scout_Hub_Admin {
 		if ( 'site-build' === $parent ) {
 			remove_submenu_page( 'site-build', self::PAGE ); // The section's first item already opens this screen.
 		}
+		// The other two tabs get their own sidebar entries, so nobody has to find the tabs first.
+		$base = 'site-build' === $parent ? 'site-build' : self::PAGE;
+		add_submenu_page( $parent, __( 'Request a change', 'scout-build' ), __( 'Request a change', 'scout-build' ), 'edit_posts', $base . '&tab=requests', array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Site health', 'scout-build' ), __( 'Site health', 'scout-build' ), 'edit_posts', $base . '&tab=health', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
 			update_option( 'scout_hub_page', $slug, false );
@@ -85,13 +89,17 @@ final class Scout_Hub_Admin {
 		if ( 'site-build' === $parent || empty( $submenu[ $parent ] ) ) {
 			return;
 		}
-		foreach ( $submenu[ $parent ] as $i => $item ) {
-			if ( self::PAGE === ( $item[2] ?? '' ) ) {
-				unset( $submenu[ $parent ][ $i ] );
-				array_unshift( $submenu[ $parent ], $item );
-				$submenu[ $parent ] = array_values( $submenu[ $parent ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering only.
-				return;
+		$mine = array();
+		$rest = array();
+		foreach ( $submenu[ $parent ] as $item ) {
+			if ( 0 === strpos( (string) ( $item[2] ?? '' ), self::PAGE ) ) {
+				$mine[] = $item;
+			} else {
+				$rest[] = $item;
 			}
+		}
+		if ( $mine ) {
+			$submenu[ $parent ] = array_merge( $mine, $rest ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering only.
 		}
 	}
 
@@ -102,7 +110,7 @@ final class Scout_Hub_Admin {
 
 	public static function assets( string $hook ): void {
 		if ( false !== strpos( $hook, self::PAGE ) || 'toplevel_page_site-build' === $hook ) {
-			wp_enqueue_style( 'scout-hub', SCOUT_HUB_URL . 'assets/admin.css', array(), SCOUT_HUB_VERSION );
+			Scout_Admin_UI::enqueue( SCOUT_HUB_URL . 'assets/scout-admin.css' );
 		}
 	}
 
@@ -139,9 +147,34 @@ final class Scout_Hub_Admin {
 					<p class="sh-brand"><span class="sh-bolt" aria-hidden="true"></span><?php esc_html_e( 'Scout', 'scout-build' ); ?></p>
 				<?php endif; ?>
 			</header>
+			<?php
+			$on   = 0;
+			foreach ( array_keys( Scout_Hub_Catalog::features() ) as $slug ) {
+				$on += 'on' === Scout_Hub_Features::status( $slug )['state'] ? 1 : 0;
+			}
+			$open = count(
+				array_filter(
+					Scout_Hub_Requests::all(),
+					static fn( $p ) => 'done' !== get_post_meta( $p->ID, Scout_Hub_Requests::META_STATUS, true )
+				)
+			);
+			$ai    = Scout_Hub_Health::ai_checks();
+			$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
+			$hints = array(
+				/* translators: %d: features on */
+				'features' => sprintf( _n( '%d feature on', '%d features on', $on, 'scout-build' ), $on ),
+				/* translators: %d: open requests */
+				'requests' => $open ? sprintf( _n( '%d open request', '%d open requests', $open, 'scout-build' ), $open ) : __( 'Ask us for a change', 'scout-build' ),
+				/* translators: 1: checks passed, 2: total */
+				'health'   => sprintf( __( 'AI search %1$d of %2$d', 'scout-build' ), $ready, count( $ai ) ),
+			);
+			?>
 			<nav class="sh-tabs" aria-label="<?php esc_attr_e( 'Site Build sections', 'scout-build' ); ?>">
 				<?php foreach ( $tabs as $key => $label ) : ?>
-					<a href="<?php echo esc_url( self::url( $key ) ); ?>" class="<?php echo $key === $tab ? 'is-active' : ''; ?>" <?php echo $key === $tab ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $label ); ?></a>
+					<a href="<?php echo esc_url( self::url( $key ) ); ?>" class="<?php echo $key === $tab ? 'is-active' : ''; ?>" <?php echo $key === $tab ? 'aria-current="page"' : ''; ?>>
+						<span class="sh-tab-label"><?php echo esc_html( $label ); ?></span>
+						<span class="sh-tab-hint"><?php echo esc_html( $hints[ $key ] ); ?></span>
+					</a>
 				<?php endforeach; ?>
 			</nav>
 			<?php self::notice(); ?>
@@ -209,7 +242,7 @@ final class Scout_Hub_Admin {
 		$ai    = Scout_Hub_Health::ai_checks();
 		$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
 		?>
-		<section class="sh-box sh-summary">
+		<section class="sh-box sh-overview">
 			<div class="sh-stats">
 				<div class="sh-stat">
 					<p class="sh-num"><?php echo (int) count( $groups['on'] ); ?></p>

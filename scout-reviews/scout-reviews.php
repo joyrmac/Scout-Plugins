@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Reviews
  * Plugin URI:        https://scoutraleigh.com
  * Description:       Reviews from Google, Facebook, Yelp, Clutch, and anywhere else, kept in one place and shown on the site in a custom design. Every review links back to where it was posted, and the rating summary uses the real totals from each platform.
- * Version:           0.4.1
+ * Version:           0.4.2
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_REVIEWS_VERSION', '0.4.1' );
+define( 'SCOUT_REVIEWS_VERSION', '0.4.2' );
 define( 'SCOUT_REVIEWS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_REVIEWS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_REVIEWS_FILE', __FILE__ );
@@ -36,6 +36,7 @@ add_action(
 	0
 );
 
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-admin-ui.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-sources.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-post-type.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-settings.php';
@@ -74,5 +75,15 @@ register_activation_hook(
 			Scout_Reviews_Google_Sync::schedule();
 		}
 		delete_option( Scout_Reviews_Requests::ROUTES ); // Re-add the /review/ address on the next load.
+	}
+);
+
+// The Scout admin look on the Review settings screen.
+add_action(
+	'admin_enqueue_scripts',
+	static function ( $hook ) {
+		if ( false !== strpos( (string) $hook, Scout_Reviews_Settings::PAGE ) ) {
+			Scout_Admin_UI::enqueue( SCOUT_REVIEWS_URL . 'assets/scout-admin.css' );
+		}
 	}
 );

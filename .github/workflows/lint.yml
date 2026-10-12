@@ -58,3 +58,14 @@ jobs:
           python3 -m json.tool catalog.json > /dev/null
           cmp catalog.json scout-build/catalog.json || { echo "::error::scout-build/catalog.json differs from catalog.json. Copy the root file over."; exit 1; }
 
+  admin-kit:
+    name: Admin kit copies match
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every plugin's copy of the Scout admin kit matches tools/admin-kit
+        run: |
+          status=0
+          for f in */assets/scout-admin.css; do cmp -s "$f" tools/admin-kit/scout-admin.css || { echo "::error file=$f::differs from tools/admin-kit/scout-admin.css. Copy the kit file over."; status=1; }; done
+          for f in */includes/class-scout-admin-ui.php; do cmp -s "$f" tools/admin-kit/class-scout-admin-ui.php || { echo "::error file=$f::differs from tools/admin-kit/class-scout-admin-ui.php. Copy the kit file over."; status=1; }; done
+          exit $status

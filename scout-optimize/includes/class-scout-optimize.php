@@ -249,8 +249,7 @@ final class Scout_Optimize {
 			'rewrite_picture'  => __( 'Serve the smaller copies to visitors (wrap images in <picture>)', 'scout-optimize' ),
 		);
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Scout Optimize', 'scout-optimize' ); ?></h1>
+		<?php Scout_Admin_UI::open( __( 'Image optimizer', 'scout-optimize' ), __( 'Every photo you upload is resized and compressed so the site stays fast. The original is kept as a backup.', 'scout-optimize' ), __( 'Scout Optimize', 'scout-optimize' ) ); ?>
 
 			<?php if ( isset( $_GET['updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display flag after a nonce-checked save/redirect. ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'scout-optimize' ); ?></p></div>
@@ -321,7 +320,7 @@ final class Scout_Optimize {
 				?>
 			</p>
 			<p style="color:#666;"><?php echo esc_html( sprintf( /* translators: %s: version. */ __( 'Scout Optimize %s', 'scout-optimize' ), SCOUT_OPTIMIZE_VERSION ) ); ?></p>
-		</div>
+		<?php Scout_Admin_UI::close(); ?>
 		<?php
 	}
 }

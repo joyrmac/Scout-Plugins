@@ -315,8 +315,7 @@ final class Scout_Optimize_Batch {
 		$percent = $stats['total'] > 0 ? (int) round( ( $stats['optimized'] / $stats['total'] ) * 100 ) : 0;
 		$action  = admin_url( 'admin-post.php' );
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Scout Optimize Sweep', 'scout-optimize' ); ?></h1>
+		<?php Scout_Admin_UI::open( __( 'Optimize existing images', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Scout Optimize Sweep', 'scout-optimize' ) ); ?>
 			<p style="max-width:760px;">
 				<?php esc_html_e( 'Optimize images already in the media library. This runs in the background in small batches, backing up each original before optimizing. New uploads are handled automatically; this is for the existing library.', 'scout-optimize' ); ?>
 			</p>
@@ -353,7 +352,7 @@ final class Scout_Optimize_Batch {
 			<p style="color:#666;max-width:760px;">
 				<?php esc_html_e( 'Each original is preserved in the originals folder before optimizing, so the sweep is reversible per image. Confirm your host storage headroom before running it on a large library.', 'scout-optimize' ); ?>
 			</p>
-		</div>
+		<?php Scout_Admin_UI::close(); ?>
 		<?php
 	}
 }

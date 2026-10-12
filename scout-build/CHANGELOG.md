@@ -1,5 +1,17 @@
 # Scout Build changelog
 
+## 0.2.3 (2026-10-12)
+
+- **The hub's tabs are easier to spot.** Features, Requests and Health are
+  now large buttons with a one-line status under each ("4 features on",
+  "2 open requests", "AI search 7 of 9"), and Requests and Health also sit in
+  the sidebar menu, so nobody has to find them inside the page.
+- **A new look for every settings screen.** The plugin's screens now share
+  one Scout design: a clear page header with the section name, settings
+  grouped into rounded boxes, pill buttons, and a short sign-off footer with
+  how to reach us. On client sites the header reads "Site Build" instead of
+  "Scout". Nothing about how the settings work changed.
+
 ## 0.2.2 (2026-10-12)
 
 - **Features opens first.** Inside a theme's Build menu, Features moves to the
