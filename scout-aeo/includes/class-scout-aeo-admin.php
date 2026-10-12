@@ -17,6 +17,7 @@ final class Scout_AEO_Admin {
 
 	public static function boot(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 30 );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'meta_box' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_post' ), 10, 2 );
@@ -40,6 +41,12 @@ final class Scout_AEO_Admin {
 
 	public static function menu(): void {
 		add_submenu_page( self::parent(), __( 'AI search', 'scout-aeo' ), __( 'AI search', 'scout-aeo' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+	}
+
+	public static function assets( string $hook ): void {
+		if ( false !== strpos( $hook, self::SLUG ) ) {
+			Scout_Admin_UI::enqueue( plugins_url( 'assets/scout-admin.css', SCOUT_AEO_FILE ) );
+		}
 	}
 
 	public static function action_link( array $links ): array {
@@ -72,13 +79,12 @@ final class Scout_AEO_Admin {
 		$pages = get_pages( array( 'sort_column' => 'menu_order,post_title' ) );
 		$custom = has_filter( 'scout_aeo_llms_txt' );
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'AI search', 'scout-aeo' ); ?></h1>
-			<p style="max-width:720px"><?php esc_html_e( 'More people now ask ChatGPT, Google\'s AI answers, Perplexity or Claude instead of searching. These settings help those tools find this site, read it, and name it in their answers.', 'scout-aeo' ); ?></p>
+		<?php Scout_Admin_UI::open( __( 'AI search', 'scout-aeo' ), __( 'More people now ask ChatGPT, Google\'s AI answers, Perplexity or Claude instead of searching. These settings help those tools find this site, read it, and name it in their answers.', 'scout-aeo' ) ); ?>
 			<?php if ( ! Scout_AEO::is_live() ) : ?>
 				<div class="notice notice-info inline"><p><?php esc_html_e( 'This copy of the site is not live (staging, or search engines are switched off), so robots.txt is left alone here. Everything below takes effect on the live site.', 'scout-aeo' ); ?></p></div>
 			<?php endif; ?>
-			<form method="post" action="options.php">
+			<form method="post" action="options.php" class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Who can read the site', 'scout-aeo' ); ?></h2>
 				<?php settings_fields( 'scout_aeo_group' ); ?>
 				<table class="form-table" role="presentation">
 					<tr>
@@ -111,7 +117,7 @@ final class Scout_AEO_Admin {
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Pages to list', 'scout-aeo' ); ?></th>
-						<td><fieldset style="max-height:260px;overflow:auto;border:1px solid #dcdcde;padding:8px 12px;max-width:520px;background:#fff">
+						<td><fieldset style="max-height:280px;overflow:auto;border:1px solid var(--sh-border-strong);border-radius:12px;padding:10px 14px;max-width:520px;background:#fff">
 							<?php foreach ( $pages as $p ) : ?>
 								<label style="display:block;margin:4px 0;padding-left:<?php echo (int) ( count( get_post_ancestors( $p ) ) * 18 ); ?>px"><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[pages][]" value="<?php echo (int) $p->ID; ?>" <?php checked( in_array( (int) $p->ID, $s['pages'], true ) ); ?>> <?php echo esc_html( get_the_title( $p ) ); ?></label>
 							<?php endforeach; ?>
@@ -126,22 +132,24 @@ final class Scout_AEO_Admin {
 				</table>
 				<?php submit_button(); ?>
 			</form>
+			<section class="sh-box">
 			<h2><?php esc_html_e( 'Questions and answers', 'scout-aeo' ); ?></h2>
-			<p style="max-width:720px"><?php esc_html_e( 'AI tools quote short, direct answers. Every page and post has a "Questions this page answers" box in the editor. Answers show at the end of the page (or wherever you put [scout_faq]) with the matching schema.', 'scout-aeo' ); ?></p>
+			<p><?php esc_html_e( 'AI tools quote short, direct answers. Every page and post has a "Questions this page answers" box in the editor. Answers show at the end of the page (or wherever you put [scout_faq]) with the matching schema.', 'scout-aeo' ); ?></p>
 			<?php
 			$with = Scout_AEO_FAQ::pages_with_answers();
 			if ( $with ) {
-				echo '<ul style="list-style:disc;padding-left:20px">';
+				echo '<ul style="list-style:disc;padding-left:20px;margin:0">';
 				foreach ( $with as $id ) {
 					echo '<li><a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a> (' . count( Scout_AEO_FAQ::get( $id ) ) . ')</li>';
 				}
 				echo '</ul>';
 			} else {
-				echo '<p><em>' . esc_html__( 'No pages have answers yet. Start with the pages that bring in the most business.', 'scout-aeo' ) . '</em></p>';
+				echo '<p class="sh-note">' . esc_html__( 'No pages have answers yet. Start with the pages that bring in the most business.', 'scout-aeo' ) . '</p>';
 			}
 			?>
-		</div>
+			</section>
 		<?php
+		Scout_Admin_UI::close();
 	}
 
 	public static function meta_box(): void {

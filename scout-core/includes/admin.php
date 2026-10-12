@@ -18,6 +18,13 @@ final class Scout_Core_Admin {
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+	}
+
+	public static function assets( $hook ) {
+		if ( 'toplevel_page_scout' === $hook ) {
+			Scout_Admin_UI::enqueue( plugins_url( 'assets/scout-admin.css', SCOUT_CORE_FILE ) );
+		}
 	}
 
 	public static function menu() {
@@ -59,15 +66,16 @@ final class Scout_Core_Admin {
 		$tab  = self::current_tab();
 		$base = admin_url( 'admin.php?page=scout' );
 		self::styles();
-		echo '<div class="wrap scout-admin">';
-		echo '<h1 class="scout-admin-title"><span class="scout-bolt" aria-hidden="true"></span> Scout</h1>';
-		echo '<h2 class="nav-tab-wrapper">';
-		foreach ( self::tabs() as $key => $label ) {
+		$tabs = self::tabs();
+		Scout_Admin_UI::open( 'Business info and SEO', 'Enter your business details once and they show up correctly everywhere Google looks.', $tabs[ $tab ] );
+		echo '<div class="scout-admin sh-sections">';
+		echo '<nav class="sh-tabs" aria-label="Scout sections">';
+		foreach ( $tabs as $key => $label ) {
 			$url    = 'dashboard' === $key ? $base : $base . '&tab=' . $key;
-			$active = $tab === $key ? ' nav-tab-active' : '';
-			printf( '<a href="%s" class="nav-tab%s">%s</a>', esc_url( $url ), esc_attr( $active ), esc_html( $label ) );
+			$active = $tab === $key;
+			printf( '<a href="%s" class="%s"%s><span class="sh-tab-label">%s</span></a>', esc_url( $url ), $active ? 'is-active' : '', $active ? ' aria-current="page"' : '', esc_html( $label ) );
 		}
-		echo '</h2>';
+		echo '</nav>';
 
 		if ( 'business' === $tab ) {
 			self::tab_business();
@@ -79,6 +87,7 @@ final class Scout_Core_Admin {
 			self::tab_dashboard();
 		}
 		echo '</div>';
+		Scout_Admin_UI::close();
 	}
 
 	/* ---------- Dashboard: the health check ---------- */
@@ -289,20 +298,18 @@ final class Scout_Core_Admin {
 
 	private static function styles() {
 		echo '<style>
-		.scout-admin .scout-admin-title{display:flex;align-items:center;gap:10px;font-weight:600}
-		.scout-admin .scout-bolt{width:22px;height:22px;background:#0E8FE6;clip-path:polygon(58% 0,0 58%,42% 58%,30% 100%,100% 40%,54% 40%);display:inline-block}
-		.scout-admin .scout-lead{max-width:64ch;font-size:14px;color:#50575e;margin:16px 0 20px}
-		.scout-hero{background:#fff;border:1px solid #dcdcde;border-left:4px solid #0E9E73;border-radius:8px;padding:20px 24px;margin:18px 0 22px;max-width:900px}
+		.scout-admin .scout-lead{max-width:64ch;font-size:14px;color:var(--sh-text-2);margin:16px 0 20px}
+		.scout-hero{background:var(--sh-surface);border:1px solid var(--sh-border);border-left:4px solid var(--sh-good);border-radius:16px;padding:20px 24px;margin:16px 0}
 		.scout-hero.warn{border-left-color:#FBB024}
-		.scout-hero h2{margin:0 0 4px;font-size:20px}
-		.scout-hero p{margin:0;color:#50575e}
-		.scout-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;max-width:900px}
-		.scout-card{display:flex;gap:12px;background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px}
-		.scout-card .scout-dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:#0E9E73}
+		.scout-hero h2{margin:0 0 4px;font-size:20px;font-weight:600;letter-spacing:-.02em}
+		.scout-hero p{margin:0;color:var(--sh-text-2)}
+		.scout-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+		.scout-card{display:flex;gap:12px;background:var(--sh-surface);border:1px solid var(--sh-border);border-radius:16px;padding:18px 20px}
+		.scout-card .scout-dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--sh-good)}
 		.scout-card.warn .scout-dot{background:#FBB024}
-		.scout-card-body strong{display:block;font-size:14px}
-		.scout-card-body p{margin:4px 0 6px;color:#50575e;font-size:13px;line-height:1.5}
-		.scout-card-body a{font-size:13px;text-decoration:none}
+		.scout-card-body strong{display:block;font-size:15px;font-weight:600}
+		.scout-card-body p{margin:4px 0 6px;color:var(--sh-text-2);font-size:13px;line-height:1.5}
+		.scout-card-body a{font-size:13px;text-decoration:none;font-weight:500}
 		</style>';
 	}
 }

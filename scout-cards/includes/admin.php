@@ -66,6 +66,7 @@ final class Scout_Cards_Admin {
 	public static function assets( $hook ) {
 		if ( false !== strpos( (string) $hook, self::SLUG ) || false !== strpos( (string) $hook, 'site-build' ) ) {
 			wp_enqueue_media();
+			Scout_Admin_UI::enqueue( SCOUT_CARDS_URL . 'assets/scout-admin.css' );
 		}
 	}
 
@@ -120,7 +121,7 @@ final class Scout_Cards_Admin {
 		$s      = Scout_Cards_Settings::get();
 		$n      = Scout_Cards_Settings::OPTION;
 		$people = Scout_Cards_Settings::people();
-		echo '<div class="wrap"><h1>Cards &amp; Links</h1>';
+		Scout_Admin_UI::open( 'Cards & Links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
 		}
@@ -227,7 +228,7 @@ final class Scout_Cards_Admin {
 		});
 		</script>
 		<?php
-		echo '</div>';
+		Scout_Admin_UI::close();
 	}
 
 	public static function save() {
