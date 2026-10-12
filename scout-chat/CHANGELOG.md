@@ -1,5 +1,11 @@
 # Scout Chat changelog
 
+## 0.1.1 (2026-10-12)
+
+- On phones the chat button is a round 56px bolt button instead of the wide
+  "Ask Sean & Joy" pill, so it no longer covers article text. The label is
+  still read out by screen readers.
+
 ## 0.1.0 (2026-10-12)
 
 - First release. A chat assistant in the corner of every page (design:
