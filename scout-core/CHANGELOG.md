@@ -1,5 +1,12 @@
 # Scout Core — Changelog
 
+## 1.1.4 (2026-10-12)
+
+- **Page descriptions names the pages.** When pages or posts have no written
+  description, the dashboard card now lists each one by title with a link
+  straight to its editor (up to 10, then a link to all pages), instead of a
+  count and a generic "Review pages" link.
+
 ## 1.1.3 (2026-10-12)
 
 - **Sitemap guard.** If robots.txt ends up with no Sitemap line (for example
