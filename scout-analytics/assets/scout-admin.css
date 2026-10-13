@@ -43,6 +43,16 @@
 
 .sh-tabs a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
 
+/* Section nav (kit 1.1.0): the same row on every Scout screen, read from the sidebar. */
+.sh-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px; padding: 6px; background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 980px; width: fit-content; max-width: 100%; }
+.sh-nav a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 14px; border-radius: 980px; color: var(--sh-text-2); font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; transition: background .15s ease, color .15s ease; }
+.sh-nav a:hover { background: var(--sh-surface-2); color: var(--sh-text); }
+.sh-nav a.is-active { background: var(--sh-accent); color: #fff; box-shadow: 0 2px 10px rgba(14, 143, 230, .28); }
+.sh-nav a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
+.sh-nav-hint { font-family: var(--sh-mono); font-size: 10px; letter-spacing: .6px; text-transform: uppercase; padding: 2px 7px; border-radius: 980px; background: var(--sh-surface-2); color: var(--sh-text-3); }
+.sh-nav a.is-active .sh-nav-hint { background: rgba(255, 255, 255, .2); color: #fff; }
+@media (max-width: 782px) { .sh-nav { border-radius: 16px; width: 100%; } .sh-nav a { flex: 1 1 auto; justify-content: center; } }
+
 .sh-box { background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 16px; padding: 20px 22px; margin-top: 16px; min-width: 0; }
 .sh-ops { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
 .sh-ops .sh-label { display: inline; margin: 0 8px 0 0; }
@@ -64,6 +74,8 @@
 .sh-ver { font-family: var(--sh-mono); }
 .sh-tag { padding: 1px 8px; border-radius: 980px; background: var(--sh-surface-2); color: var(--sh-text-2); }
 .sh-tag.is-update { background: var(--sh-glow); color: var(--sh-accent-text); }
+.sh-tag.is-current { background: rgba(14, 158, 115, .12); color: var(--sh-good); }
+.sh-tag.is-current::before { content: "\2713\00a0"; }
 .sh-tag.is-held { background: rgba(251, 176, 36, .18); color: var(--sh-warn); }
 .sh-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
 
@@ -92,6 +104,8 @@
 .sh-requests li:last-child { border-bottom: 0; padding-bottom: 0; }
 .sh-requests .sh-inline { margin-top: 8px; }
 
+.sh-list { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; }
+.sh-list a { color: var(--sh-accent-text); font-weight: 500; text-decoration: none; }
 .sh-check .sh-value { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600; margin: 0; }
 .sh-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sh-good); flex: none; }
 .sh-check.is-warn .sh-dot { background: #FBB024; }

@@ -1,5 +1,13 @@
 # Scout Core — Changelog
 
+## 1.2.0 (2026-10-12)
+
+- **Fits the Scout Build hub.** With Scout Build installed, the Scout menu opens on Business info and SEO as two plain screens, and the search checks move into the hub's Site health. Without the hub, Search health stays as the first screen.
+- **No more second tab bar.** The Dashboard / Business / SEO tabs are replaced by the shared section nav.
+- **Same cards as the hub.** Search health uses the shared check cards, with pages missing a description listed by name.
+- The Scout menu sits right under Dashboard with the cerulean bolt.
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
 ## 1.1.4 (2026-10-12)
 
 - **Page descriptions names the pages.** When pages or posts have no written

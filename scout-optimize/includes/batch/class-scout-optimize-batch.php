@@ -74,8 +74,11 @@ final class Scout_Optimize_Batch {
 	 * @return void
 	 */
 	public function register_page(): void {
+		// Inside the Scout menu this screen opens from a button on Image optimizer, so
+		// the sidebar keeps one entry per feature. Under Tools it stays listed.
+		$parent = Scout_Optimize::parent();
 		add_submenu_page(
-			Scout_Optimize::parent(),
+			'tools.php' === $parent ? $parent : '',
 			__( 'Optimize existing images', 'scout-optimize' ),
 			__( 'Optimize existing images', 'scout-optimize' ),
 			SCOUT_OPTIMIZE_CAP,
@@ -316,43 +319,37 @@ final class Scout_Optimize_Batch {
 		$percent = $stats['total'] > 0 ? (int) round( ( $stats['optimized'] / $stats['total'] ) * 100 ) : 0;
 		$action  = admin_url( 'admin-post.php' );
 		?>
-		<?php Scout_Admin_UI::open( __( 'Optimize existing images', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Images', 'scout-optimize' ) ); ?>
-			<p style="max-width:760px;">
-				<?php esc_html_e( 'Optimize images already in the media library. This runs in the background in small batches, backing up each original before optimizing. New uploads are handled automatically; this is for the existing library.', 'scout-optimize' ); ?>
-			</p>
-
-			<table class="widefat striped" style="max-width:420px;">
-				<tbody>
-					<tr><td><?php esc_html_e( 'Images total', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( (string) $stats['total'] ); ?></strong></td></tr>
-					<tr><td><?php esc_html_e( 'Optimized', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( (string) $stats['optimized'] ); ?></strong></td></tr>
-					<tr><td><?php esc_html_e( 'Remaining', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( (string) $stats['remaining'] ); ?></strong></td></tr>
-					<tr><td><?php esc_html_e( 'Progress', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $percent . '%' ); ?></strong></td></tr>
-				</tbody>
-			</table>
-
-			<p style="margin-top:16px;">
-				<?php if ( $running ) : ?>
-					<em><?php esc_html_e( 'A sweep is running in the background. Reload this page to see progress.', 'scout-optimize' ); ?></em>
-					<br /><br />
-					<form method="post" action="<?php echo esc_url( $action ); ?>" style="display:inline;">
-						<?php wp_nonce_field( 'scout_optimize_sweep' ); ?>
-						<input type="hidden" name="action" value="scout_optimize_sweep_stop" />
-						<button type="submit" class="button"><?php esc_html_e( 'Stop sweep', 'scout-optimize' ); ?></button>
-					</form>
-				<?php elseif ( $stats['remaining'] > 0 ) : ?>
-					<form method="post" action="<?php echo esc_url( $action ); ?>" style="display:inline;" onsubmit="return confirm('This backs up every original (roughly doubling image storage) and optimizes the library in the background. Continue?');">
-						<?php wp_nonce_field( 'scout_optimize_sweep' ); ?>
-						<input type="hidden" name="action" value="scout_optimize_sweep_start" />
-						<button type="submit" class="button button-primary"><?php esc_html_e( 'Start sweep', 'scout-optimize' ); ?></button>
-					</form>
-				<?php else : ?>
-					<em><?php esc_html_e( 'Every image has been optimized.', 'scout-optimize' ); ?></em>
-				<?php endif; ?>
-			</p>
-
-			<p style="color:#666;max-width:760px;">
-				<?php esc_html_e( 'Each original is preserved in the originals folder before optimizing, so the sweep is reversible per image. Confirm your host storage headroom before running it on a large library.', 'scout-optimize' ); ?>
-			</p>
+		<?php Scout_Admin_UI::open( __( 'Optimize existing images', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Images', 'scout-optimize' ), 'scout-optimize' ); ?>
+			<section class="sh-box">
+				<h2><?php esc_html_e( 'Your media library', 'scout-optimize' ); ?></h2>
+				<p><?php esc_html_e( 'This runs in the background in small batches and backs up each original first. New uploads are handled automatically, so this is only for the library you already have.', 'scout-optimize' ); ?></p>
+				<div class="sh-stats">
+					<div class="sh-stat"><p class="sh-num"><?php echo esc_html( (string) $stats['total'] ); ?></p><p class="sh-note"><?php esc_html_e( 'images', 'scout-optimize' ); ?></p></div>
+					<div class="sh-stat"><p class="sh-num"><?php echo esc_html( (string) $stats['optimized'] ); ?></p><p class="sh-note"><?php esc_html_e( 'optimized', 'scout-optimize' ); ?></p></div>
+					<div class="sh-stat"><p class="sh-num"><?php echo esc_html( (string) $stats['remaining'] ); ?></p><p class="sh-note"><?php esc_html_e( 'remaining', 'scout-optimize' ); ?></p></div>
+					<div class="sh-stat"><p class="sh-num"><?php echo esc_html( $percent . '%' ); ?></p><p class="sh-note"><?php esc_html_e( 'done', 'scout-optimize' ); ?></p></div>
+				</div>
+				<div class="sh-ops" style="margin-top:16px;">
+					<?php if ( $running ) : ?>
+						<span class="sh-tag is-update"><?php esc_html_e( 'Running in the background. Reload to see progress.', 'scout-optimize' ); ?></span>
+						<form method="post" action="<?php echo esc_url( $action ); ?>" class="sh-inline">
+							<?php wp_nonce_field( 'scout_optimize_sweep' ); ?>
+							<input type="hidden" name="action" value="scout_optimize_sweep_stop" />
+							<button type="submit" class="button"><?php esc_html_e( 'Stop', 'scout-optimize' ); ?></button>
+						</form>
+					<?php elseif ( $stats['remaining'] > 0 ) : ?>
+						<form method="post" action="<?php echo esc_url( $action ); ?>" class="sh-inline" onsubmit="return confirm('This backs up every original (roughly doubling image storage) and optimizes the library in the background. Continue?');">
+							<?php wp_nonce_field( 'scout_optimize_sweep' ); ?>
+							<input type="hidden" name="action" value="scout_optimize_sweep_start" />
+							<button type="submit" class="button button-primary"><?php esc_html_e( 'Start', 'scout-optimize' ); ?></button>
+						</form>
+					<?php else : ?>
+						<span class="sh-tag is-current"><?php esc_html_e( 'Every image has been optimized', 'scout-optimize' ); ?></span>
+					<?php endif; ?>
+					<a href="<?php echo esc_url( Scout_Optimize::url() ); ?>"><?php esc_html_e( 'Image optimizer settings', 'scout-optimize' ); ?> &rsaquo;</a>
+				</div>
+				<p class="sh-note"><?php esc_html_e( 'Each original is kept in the originals folder, so any image can be put back. On a large library, check the hosting storage first.', 'scout-optimize' ); ?></p>
+			</section>
 		<?php Scout_Admin_UI::close(); ?>
 		<?php
 	}

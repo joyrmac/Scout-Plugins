@@ -213,7 +213,7 @@ final class Scout_Hub_Health {
 				'state' => $missing ? 'warn' : 'good',
 				/* translators: %s: missing fields */
 				'note'  => $missing ? sprintf( __( 'Missing: %s. AI tools match these against Google and directories.', 'scout-build' ), implode( ', ', $missing ) ) : __( 'Name, phone and city are filled in.', 'scout-build' ),
-			) + ( $missing ? array( 'link' => admin_url( 'options-general.php?page=scout-business' ), 'link_text' => __( 'Business details', 'scout-build' ) ) : array() );
+			) + ( $missing ? array( 'link' => admin_url( 'admin.php?page=scout&tab=business' ), 'link_text' => __( 'Business details', 'scout-build' ) ) : array() );
 		}
 
 		// 5. Direct answers on pages: what the key pages actually print.

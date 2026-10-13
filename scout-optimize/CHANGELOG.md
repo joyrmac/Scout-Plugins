@@ -2,6 +2,12 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.8.0 (2026-10-12)
+
+- **Same boxes as every Scout screen.** Settings sit in the shared white boxes: what to do, quality and largest size side by side, then this server and images already in the library. Same fields, same save.
+- **One sidebar entry.** Optimize existing images now opens from a button on Image optimizer instead of its own sidebar item (it stays listed under Tools on sites without a Scout menu).
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
 ## 0.7.3 (2026-10-12)
 
 - **Moved out of Tools into the site's Build section** (Scout Build on the
