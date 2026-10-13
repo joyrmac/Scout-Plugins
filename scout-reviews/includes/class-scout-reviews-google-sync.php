@@ -219,6 +219,12 @@ final class Scout_Reviews_Google_Sync {
 		update_post_meta( $post_id, Scout_Reviews_Post_Type::META_URL, esc_url_raw( $profile_url ) );
 		delete_post_meta( $post_id, self::META_REMOVED );
 
+		// A brand-new 5-star review goes straight onto the site when the site asks for that.
+		if ( 'new' === $outcome && 5 === (int) $rating && ! empty( Scout_Reviews_Settings::get()['auto_add_five'] ) ) {
+			update_post_meta( $post_id, '_scout_review_auto_added', 1 );
+			Scout_Reviews_Inbox::add( $post_id, Scout_Reviews_Topics::suggest( $text ), false );
+		}
+
 		return $outcome;
 	}
 
