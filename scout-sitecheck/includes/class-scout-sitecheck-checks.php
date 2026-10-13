@@ -362,8 +362,12 @@ final class Scout_Sitecheck_Checks {
 		$secs  = number_format_i18n( $lcp, 1 );
 		$src  .= ' · ' . sprintf( /* translators: %d: score */ __( 'score %d', 'scout-sitecheck' ), $score );
 		if ( $score >= 90 ) {
-			/* translators: %s: seconds */
-			return self::row( 'speed', $t, 'pass', sprintf( __( 'The main content shows in %s seconds on phones. Google\'s goal is under 2.5 seconds.', 'scout-sitecheck' ), $secs ), $src );
+			if ( $lcp <= 2.5 ) {
+				/* translators: %s: seconds */
+				return self::row( 'speed', $t, 'pass', sprintf( __( 'The main content shows in %s seconds on phones, inside Google\'s 2.5-second goal.', 'scout-sitecheck' ), $secs ), $src );
+			}
+			/* translators: 1: score, 2: seconds */
+			return self::row( 'speed', $t, 'pass', sprintf( __( 'Google gives the site %1$d out of 100 for speed on phones. The main content shows in %2$s seconds, close to Google\'s 2.5-second goal.', 'scout-sitecheck' ), $score, $secs ), $src );
 		}
 		/* translators: %s: seconds */
 		return self::row( 'speed', $t, $score < 50 ? 'fail' : 'warn', sprintf( __( 'The main content takes %s seconds to show on phones. Aim for under 2.5 seconds.', 'scout-sitecheck' ), $secs ), $src );
