@@ -1,5 +1,7 @@
-/* /review/ and /review/note/: a dark phone page with a glow of the brand
-   color at the top. Max 480px wide, centered on desktop. */
+/* /review/ and /review/note/: a phone page in the client's colors and fonts
+   (set in Ask for reviews > Settings, written as variables by
+   Scout_Reviews_Brand), with a glow of the brand color at the top.
+   Max 480px wide, centered on desktop. Defaults are Scout's own look. */
 
 :root {
 	--accent: #0E8FE6;
@@ -14,6 +16,10 @@
 	--link: #5FB8F2;
 	--positive: #0E9E73;
 	--negative: #F2553D;
+	--on-accent: #fff;
+	--font-head: "Hanken Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
+	--font-body: "Hanken Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
+	--font-label: "Geist Mono", ui-monospace, Menlo, monospace;
 	color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -25,7 +31,7 @@ body {
 		radial-gradient(520px 360px at 50% -80px, color-mix(in srgb, var(--accent) 34%, transparent), transparent 72%),
 		var(--bg);
 	color: var(--text);
-	font: 400 16px/1.55 "Hanken Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
+	font: 400 16px/1.55 var(--font-body);
 	-webkit-font-smoothing: antialiased;
 }
 .rp {
@@ -38,12 +44,12 @@ body {
 }
 .rp-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .rp-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
-.rp-biz { font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.rp-biz { font-family: var(--font-head); font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
 .rp-photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 18px; border: 1px solid var(--line); }
 .rp-eyebrow,
 .rp-label,
 .rp-domain {
-	font-family: "Geist Mono", ui-monospace, Menlo, monospace;
+	font-family: var(--font-label);
 	font-weight: 500;
 	font-size: 12px;
 	letter-spacing: 1.4px;
@@ -54,6 +60,7 @@ body {
 .rp-label { color: var(--text-3); font-size: 11px; letter-spacing: 1.2px; display: block; margin-bottom: 8px; padding: 0; }
 .rp-domain { color: var(--text-3); text-align: center; margin-top: 24px; }
 h1 {
+	font-family: var(--font-head);
 	font-size: clamp(32px, 9vw, 40px);
 	line-height: 1.04;
 	letter-spacing: -.035em;
@@ -82,7 +89,7 @@ h1 {
 	transition: transform .2s ease, background .2s ease, border-color .2s ease;
 }
 .rp-btn:hover { transform: translateY(-1px); border-color: var(--link); }
-.rp-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.rp-btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .rp-btn-primary:hover { background: color-mix(in srgb, var(--accent) 86%, #000); border-color: transparent; }
 .rp-btn:focus-visible, .rp a:focus-visible, .rp input:focus-visible, .rp textarea:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
 .rp-quiet { text-align: center; margin: 20px 0 0; font-size: 14px; }

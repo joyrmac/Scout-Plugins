@@ -64,8 +64,7 @@ final class Scout_Reviews_Requests {
 			'ask'           => __( 'An honest review takes about a minute and helps other people find us.', 'scout-reviews' ),
 			'photo'         => '',
 			'card_headline' => '',
-			'accent'        => '#0E8FE6',
-		);
+		) + Scout_Reviews_Brand::defaults();
 	}
 
 	public static function get(): array {
@@ -123,7 +122,7 @@ final class Scout_Reviews_Requests {
 			'photo'         => esc_url_raw( trim( (string) ( $input['photo'] ?? '' ) ), array( 'https', 'http' ) ),
 			'card_headline' => sanitize_text_field( (string) ( $input['card_headline'] ?? '' ) ),
 			'accent'        => $color ? $color : $d['accent'],
-		);
+		) + Scout_Reviews_Brand::sanitize( $input, $d );
 	}
 
 	/**
@@ -286,6 +285,10 @@ final class Scout_Reviews_Requests {
 		}
 		wp_enqueue_style( 'scout-reviews-fonts', 'https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap', array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_enqueue_style( 'scout-reviews-ask', SCOUT_REVIEWS_URL . 'assets/ask.css', array(), SCOUT_REVIEWS_VERSION );
+		$brand = Scout_Reviews_Brand::fonts_url( self::get() );
+		if ( '' !== $brand ) {
+			wp_enqueue_style( 'scout-reviews-brand-fonts', $brand, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
 		if ( false !== strpos( $hook, self::PAGE ) ) {
 			wp_enqueue_script( 'scout-reviews-qr', SCOUT_REVIEWS_URL . 'assets/qrcode.min.js', array(), SCOUT_REVIEWS_VERSION, true );
 			wp_enqueue_script( 'scout-reviews-ask', SCOUT_REVIEWS_URL . 'assets/ask.js', array( 'scout-reviews-qr' ), SCOUT_REVIEWS_VERSION, true );
@@ -346,7 +349,7 @@ final class Scout_Reviews_Requests {
 		$settings_url = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
 		$test    = '<a class="button" href="' . esc_url( self::link() ) . '" target="_blank" rel="noopener">' . esc_html__( 'Open the review page', 'scout-reviews' ) . '</a>';
 		?>
-		<div class="wrap srk recon-theme" data-theme="light" style="--srk-accent:<?php echo esc_attr( $s['accent'] ); ?>">
+		<div class="wrap srk recon-theme" data-theme="light" style="<?php echo esc_attr( Scout_Reviews_Brand::card_vars( $s ) ); ?>">
 			<?php self::header( __( 'Ask for reviews', 'scout-reviews' ), __( 'Ask every client the same way', 'scout-reviews' ), $test ); ?>
 			<p class="srk-lede"><?php esc_html_e( 'One link for every review request. Share it by text, by email, or on a printed card with a QR code. If your review link ever changes, update it in Settings and every card and message keeps working.', 'scout-reviews' ); ?></p>
 
@@ -562,6 +565,41 @@ final class Scout_Reviews_Requests {
 							<td><input id="srk-accent" type="color" name="<?php echo esc_attr( $name . '[accent]' ); ?>" value="<?php echo esc_attr( $s['accent'] ); ?>" />
 								<p class="description"><?php esc_html_e( 'Used for the review button and the card headline.', 'scout-reviews' ); ?></p></td>
 						</tr>
+						<tr>
+							<th scope="row"><label for="srk-background"><?php esc_html_e( 'Page background', 'scout-reviews' ); ?></label></th>
+							<td><input id="srk-background" type="color" name="<?php echo esc_attr( $name . '[background]' ); ?>" value="<?php echo esc_attr( $s['background'] ); ?>" />
+								<p class="description"><?php esc_html_e( 'The review page background. Use the site\'s own background color so the page feels like part of the site.', 'scout-reviews' ); ?></p></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="srk-text-color"><?php esc_html_e( 'Text color', 'scout-reviews' ); ?></label></th>
+							<td><input id="srk-text-color" type="color" name="<?php echo esc_attr( $name . '[text_color]' ); ?>" value="<?php echo esc_attr( '' !== $s['text_color'] ? $s['text_color'] : '#1D1D1F' ); ?>" />
+								<label style="margin-left:12px"><input type="checkbox" name="<?php echo esc_attr( $name . '[text_auto]' ); ?>" value="1" <?php checked( '' === $s['text_color'] ); ?> /> <?php esc_html_e( 'Pick it for me from the background', 'scout-reviews' ); ?></label></td>
+						</tr>
+						<?php
+						$fonts = array_keys( Scout_Reviews_Brand::FONTS );
+						$rows  = array(
+							'heading_font' => array( __( 'Heading font', 'scout-reviews' ), false ),
+							'body_font'    => array( __( 'Body font', 'scout-reviews' ), false ),
+							'label_font'   => array( __( 'Small label font', 'scout-reviews' ), true ),
+						);
+						foreach ( $rows as $key => $row ) :
+							?>
+						<tr>
+							<th scope="row"><label for="srk-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $row[0] ); ?></label></th>
+							<td><select id="srk-<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>">
+								<?php if ( $row[1] ) : ?>
+									<option value="same" <?php selected( $s[ $key ], 'same' ); ?>><?php esc_html_e( 'Same as body', 'scout-reviews' ); ?></option>
+								<?php endif; ?>
+								<option value="system" <?php selected( $s[ $key ], 'system' ); ?>><?php esc_html_e( 'Device default', 'scout-reviews' ); ?></option>
+								<?php foreach ( $fonts as $font ) : ?>
+									<option value="<?php echo esc_attr( $font ); ?>" <?php selected( $s[ $key ], $font ); ?>><?php echo esc_html( $font ); ?></option>
+								<?php endforeach; ?>
+							</select>
+							<?php if ( 'heading_font' === $key ) : ?>
+								<p class="description"><?php esc_html_e( 'Match the fonts the website uses. They show on the review page and the printed cards.', 'scout-reviews' ); ?></p>
+							<?php endif; ?></td>
+						</tr>
+						<?php endforeach; ?>
 					</table>
 					<?php submit_button(); ?>
 				</form>
