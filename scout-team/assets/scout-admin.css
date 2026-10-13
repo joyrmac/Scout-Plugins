@@ -44,6 +44,8 @@
 .sh-tabs a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
 
 /* Section nav: a short row of groups, then the open group's screens as tabs. */
+.sh-screen-nav { margin: 14px 20px 6px 2px; }
+.sh-screen-nav .sh-nav { margin-top: 0; }
 .sh-nav { margin: 14px 0 4px; max-width: 100%; }
 .sh-nav-groups { display: flex; gap: 4px; padding: 5px; background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 980px; width: fit-content; max-width: 100%; box-sizing: border-box; overflow-x: auto; scrollbar-width: none; }
 .sh-nav-groups::-webkit-scrollbar, .sh-nav-sub::-webkit-scrollbar { display: none; }

@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.3.0';
+		const VERSION = '1.4.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -52,6 +52,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		 * older copy (in a theme, say) is the one asking.
 		 */
 		public static function enqueue( string $url ): void {
+			self::$kit = true;
 			if ( wp_style_is( 'scout-admin', 'enqueued' ) ) {
 				return;
 			}
@@ -81,7 +82,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				echo '<p class="sh-brand"><span class="sh-bolt" aria-hidden="true"></span>Scout</p>';
 			}
 			echo '</header>';
-			self::nav( $nav );
+			if ( ! self::$nav_printed ) {
+				self::nav( $nav );
+			}
 			if ( '' !== $lede ) {
 				echo '<p class="sh-lede">' . esc_html( $lede ) . '</p>';
 			}
@@ -110,6 +113,15 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/** @var array<string,string> Slug => the slug of its group's sidebar link. */
 		private static $leaders = array();
+
+		/** @var bool A Scout screen loaded the kit styles (it prints its own nav). */
+		private static $kit = false;
+
+		/** @var bool The section nav already printed on this screen. */
+		private static $nav_printed = false;
+
+		/** @var string Sidebar slug of a plain WordPress screen that gets the nav on top. */
+		private static $screen_slug = '';
 
 		/**
 		 * Shorten a long Scout sidebar menu to one link per group (Home,
@@ -191,6 +203,52 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/** A sidebar label without its count bubble. */
 		private static function clean( string $raw ): string {
 			return trim( wp_strip_all_tags( preg_replace( '#<span[^>]*class="[^"]*(update-plugins|awaiting-mod|count)[^"]*"[^>]*>.*?</span>#s', '', $raw ) ) );
+		}
+
+		/**
+		 * WordPress's own screens inside a shortened Scout menu (a review list,
+		 * Chat questions, team members) do not print the section nav, and their
+		 * sibling screens are hidden from the sidebar. Give those screens the
+		 * same nav on top, so no screen is a dead end.
+		 */
+		public static function screen_nav_prepare(): void {
+			if ( self::$kit || ! self::$leaders ) {
+				return;
+			}
+			global $typenow, $pagenow;
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- reading the screen address only.
+			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+			$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+			// phpcs:enable
+			$slug = '';
+			foreach ( array( '' !== $tab ? $page . '&tab=' . $tab : '', $page ) as $try ) {
+				if ( '' !== $try && isset( self::$leaders[ $try ] ) ) {
+					$slug = $try;
+					break;
+				}
+			}
+			if ( '' === $slug && '' === $page && $typenow && in_array( $pagenow, array( 'edit.php', 'post.php', 'post-new.php', 'edit-tags.php', 'term.php' ), true ) ) {
+				$list = 'edit.php?post_type=' . $typenow;
+				$slug = isset( self::$leaders[ $list ] ) ? $list : '';
+			}
+			if ( '' === $slug ) {
+				return;
+			}
+			self::$screen_slug = $slug;
+			$own = dirname( __DIR__ ) . '/assets/scout-admin.css';
+			if ( is_readable( $own ) && defined( 'WP_PLUGIN_DIR' ) && 0 === strpos( wp_normalize_path( $own ), wp_normalize_path( WP_PLUGIN_DIR ) ) ) {
+				wp_enqueue_style( 'scout-admin', plugins_url( 'assets/scout-admin.css', __DIR__ ), array(), self::VERSION );
+			}
+		}
+
+		/** Print the nav at the top of a plain WordPress screen picked above. */
+		public static function screen_nav(): void {
+			if ( '' === self::$screen_slug || self::$nav_printed ) {
+				return;
+			}
+			echo '<div class="sh sh-screen-nav">';
+			self::nav( self::$screen_slug );
+			echo '</div>';
 		}
 
 		/**
@@ -294,6 +352,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					'' !== $hint ? '<span class="sh-nav-hint">' . esc_html( $hint ) . '</span>' : ''
 				);
 			};
+			self::$nav_printed = true;
 			echo '<nav class="sh-nav" aria-label="' . esc_attr( self::branded() ? 'Scout' : 'Site Build' ) . '">';
 			if ( count( $groups ) > 1 ) {
 				echo '<div class="sh-nav-groups">';
@@ -327,5 +386,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'compact_menu' ), 1000 );
 	add_filter( 'submenu_file', array( 'Scout_Admin_UI', 'current_link' ), 20 );
 	add_action( 'admin_head', array( 'Scout_Admin_UI', 'menu_css' ) );
+	add_action( 'admin_enqueue_scripts', array( 'Scout_Admin_UI', 'screen_nav_prepare' ), 99 );
+	add_action( 'all_admin_notices', array( 'Scout_Admin_UI', 'screen_nav' ), 1 );
 
 endif;
