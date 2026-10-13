@@ -105,7 +105,14 @@ final class Scout_Chat_Admin {
 	public static function column( string $col, int $id ): void {
 		if ( 'scout_from' === $col ) {
 			$email = (string) get_post_meta( $id, '_scout_chat_email', true );
-			echo esc_html( (string) get_post_meta( $id, '_scout_chat_name', true ) ) . '<br><a href="' . esc_url( 'mailto:' . $email ) . '">' . esc_html( $email ) . '</a>';
+			$phone = (string) get_post_meta( $id, '_scout_chat_phone', true );
+			echo esc_html( (string) get_post_meta( $id, '_scout_chat_name', true ) );
+			if ( '' !== $phone ) {
+				echo '<br><a href="' . esc_url( 'sms:+' . $phone, array( 'sms' ) ) . '">' . esc_html( Scout_Chat::pretty_phone( $phone ) ) . '</a>';
+			}
+			if ( '' !== $email ) {
+				echo '<br><a href="' . esc_url( 'mailto:' . $email ) . '">' . esc_html( $email ) . '</a>';
+			}
 		} elseif ( 'scout_kind' === $col ) {
 			$k = (string) get_post_meta( $id, '_scout_chat_kind', true );
 			echo esc_html( array( 'question' => __( 'Question', 'scout-chat' ), 'change' => __( 'Change request', 'scout-chat' ), 'person' => __( 'Wants a person', 'scout-chat' ) )[ $k ] ?? $k );
@@ -134,8 +141,10 @@ final class Scout_Chat_Admin {
 		$subj  = rawurlencode( __( 'Your question', 'scout-chat' ) . ': ' . $post->post_title );
 		wp_nonce_field( 'scout_chat_answered', 'scout_chat_nonce' );
 		?>
-		<p><strong><?php echo esc_html( $name ); ?></strong><br><?php echo esc_html( $email ); ?></p>
-		<p><a class="button button-primary" href="<?php echo esc_url( 'mailto:' . $email . '?subject=' . $subj ); ?>"><?php esc_html_e( 'Reply by email', 'scout-chat' ); ?></a></p>
+		<?php $phone = (string) get_post_meta( $post->ID, '_scout_chat_phone', true ); ?>
+		<p><strong><?php echo esc_html( $name ); ?></strong><?php echo '' !== $phone ? '<br>' . esc_html( Scout_Chat::pretty_phone( $phone ) ) : ''; ?><?php echo '' !== $email ? '<br>' . esc_html( $email ) : ''; ?></p>
+		<?php if ( '' !== $phone ) : ?><p><a class="button button-primary" href="<?php echo esc_url( 'sms:+' . $phone, array( 'sms' ) ); ?>"><?php esc_html_e( 'Text back', 'scout-chat' ); ?></a></p><?php endif; ?>
+		<?php if ( '' !== $email ) : ?><p><a class="button<?php echo '' === $phone ? ' button-primary' : ''; ?>" href="<?php echo esc_url( 'mailto:' . $email . '?subject=' . $subj ); ?>"><?php esc_html_e( 'Reply by email', 'scout-chat' ); ?></a></p><?php endif; ?>
 		<p><label><input type="checkbox" name="scout_chat_answered" value="1" <?php checked( (bool) get_post_meta( $post->ID, '_scout_chat_answered', true ) ); ?>> <?php esc_html_e( 'Answered', 'scout-chat' ); ?></label></p>
 		<?php submit_button( __( 'Save', 'scout-chat' ), 'secondary', 'save', false ); ?>
 		<?php
@@ -174,6 +183,7 @@ final class Scout_Chat_Admin {
 			'teaser'    => ! empty( $in['teaser'] ) ? 1 : 0,
 			'teaser_by' => sanitize_text_field( (string) ( $in['teaser_by'] ?? '' ) ),
 			'notify'    => sanitize_email( (string) ( $in['notify'] ?? '' ) ),
+			'alert'     => sanitize_email( (string) ( $in['alert'] ?? '' ) ),
 			'book_url'  => esc_url_raw( (string) ( $in['book_url'] ?? '' ) ),
 			'work_url'  => esc_url_raw( (string) ( $in['work_url'] ?? '' ) ),
 			'photo_1'   => esc_url_raw( (string) ( $in['photo_1'] ?? '' ) ),
@@ -240,6 +250,7 @@ final class Scout_Chat_Admin {
 				<table class="form-table" role="presentation">
 					<?php
 					self::row( __( 'Email new questions to', 'scout-chat' ), self::text( 'notify', $s['notify'], get_option( 'admin_email' ), 'email' ) );
+					self::row( __( 'Text me new questions', 'scout-chat' ), self::text( 'alert', $s['alert'], '9195551234@vtext.com', 'email' ), __( 'A short text with the question and the number to text back. Use your cell number at your carrier: @vtext.com (Verizon), @tmomail.net (T-Mobile), @msg.fi.google.com (Google Fi). AT&T stopped this in 2025. Blank: no text.', 'scout-chat' ) );
 					self::row( __( 'Booking page', 'scout-chat' ), self::text( 'book_url', $s['book_url'], function_exists( 'scout_booking_url' ) ? scout_booking_url() : home_url( '/contact/' ), 'url' ), __( 'Blank uses the site\'s booking page, or Contact.', 'scout-chat' ) );
 					self::row( __( 'Our work page', 'scout-chat' ), self::text( 'work_url', $s['work_url'], 'https://', 'url' ), __( 'Blank hides "Show me your work".', 'scout-chat' ) );
 					?>
