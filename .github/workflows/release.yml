@@ -36,6 +36,7 @@ on:
           - scout-optimize
           - scout-reviews
           - scout-rvpark
+          - scout-sitecheck
 
 permissions:
   contents: write
