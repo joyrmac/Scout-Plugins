@@ -1,5 +1,9 @@
 # Scout AI Search changelog
 
+## 0.2.0 (2026-10-13)
+
+- **Instant updates (IndexNow).** When a public page is published or updated, its address goes to IndexNow, so Bing and Copilot pick up the change right away (ChatGPT search also draws on Bing). One non-blocking request at the end of the page load, from the live site only; staging never pings. Pages hidden from search or behind a password are skipped. The key is created once and served at `/{key}.txt`. On by default; switch it off under **AI search → Instant updates**.
+
 ## 0.1.10 (2026-10-13)
 
 - **No dead ends in the Scout menu.** WordPress's own list screens inside the shortened Scout menu (the Reviews list, Chat questions, team members, case results) now show the same tabs as every Scout screen, so Review inbox, Ask for reviews and Review settings are one tap away from the Reviews list. Shared admin kit 1.4.0.

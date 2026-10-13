@@ -10,3 +10,4 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 delete_option( 'scout_aeo' );
+delete_option( 'scout_aeo_indexnow_key' );
