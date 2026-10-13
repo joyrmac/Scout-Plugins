@@ -34,6 +34,7 @@ final class Scout_Reviews_Sources {
 			'designrush' => array( 'label' => 'DesignRush', 'stars' => true, 'sync' => false ),
 			'bbb'        => array( 'label' => 'BBB', 'stars' => true, 'sync' => false ),
 			'avvo'       => array( 'label' => 'Avvo', 'stars' => true, 'sync' => false ),
+			'tripadvisor' => array( 'label' => 'TripAdvisor', 'stars' => true, 'sync' => false ),
 			'direct'     => array( 'label' => 'Client', 'stars' => false, 'sync' => false ),
 		);
 
@@ -61,7 +62,13 @@ final class Scout_Reviews_Sources {
 	 */
 	public static function badge( string $slug ): string {
 		if ( 'direct' === $slug ) {
-			return __( 'Client testimonial', 'scout-reviews' );
+			/**
+			 * The badge on reviews sent to the business directly. An RV park or a
+			 * restaurant says "Guest", a law firm "Client".
+			 *
+			 * @param string $badge Default "Client testimonial".
+			 */
+			return (string) apply_filters( 'scout_reviews_direct_badge', __( 'Client testimonial', 'scout-reviews' ) );
 		}
 		/* translators: %s: platform name, e.g. Google. */
 		return sprintf( __( '%s review', 'scout-reviews' ), self::label( $slug ) );

@@ -58,6 +58,7 @@ final class Scout_Reviews_Requests {
 			'mode'          => 'page', // page: the review page. direct: skip it and go straight to one platform.
 			'primary'       => 'google',
 			'notes'         => true,   // The private note form at /review/note/.
+			'note_email'    => '',     // Who gets private notes. Empty: the site admin email.
 			'business'      => '',
 			'headline'      => __( 'Thanks for working with us.', 'scout-reviews' ),
 			'ask'           => __( 'An honest review takes about a minute and helps other people find us.', 'scout-reviews' ),
@@ -115,6 +116,7 @@ final class Scout_Reviews_Requests {
 			'mode'          => ( 'direct' === ( $input['mode'] ?? '' ) ) ? 'direct' : 'page',
 			'primary'       => Scout_Reviews_Sources::exists( $prime ) ? $prime : $d['primary'],
 			'notes'         => ! empty( $input['notes'] ),
+			'note_email'    => sanitize_email( (string) ( $input['note_email'] ?? '' ) ),
 			'business'      => sanitize_text_field( (string) ( $input['business'] ?? '' ) ),
 			'headline'      => $text( 'headline' ),
 			'ask'           => $text( 'ask' ),
@@ -527,6 +529,11 @@ final class Scout_Reviews_Requests {
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Private notes', 'scout-reviews' ); ?></th>
 							<td><label><input type="checkbox" name="<?php echo esc_attr( $name . '[notes]' ); ?>" value="1" <?php checked( $s['notes'] ); ?> /> <?php esc_html_e( 'Show the "send us a note privately" link and form', 'scout-reviews' ); ?></label></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="srk-note-email"><?php esc_html_e( 'Send private notes to', 'scout-reviews' ); ?></label></th>
+							<td><input id="srk-note-email" type="email" class="regular-text" name="<?php echo esc_attr( $name . '[note_email]' ); ?>" value="<?php echo esc_attr( $s['note_email'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" />
+							<p class="description"><?php esc_html_e( 'Leave empty to use the site\'s admin email.', 'scout-reviews' ); ?></p></td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="srk-business"><?php esc_html_e( 'Business name', 'scout-reviews' ); ?></label></th>

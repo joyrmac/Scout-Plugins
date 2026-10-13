@@ -242,7 +242,7 @@ final class Scout_Reviews_Notes {
 			sprintf( __( 'Read it in your inbox: %s', 'scout-reviews' ), Scout_Reviews_Inbox::url() ),
 		);
 		wp_mail(
-			(string) apply_filters( 'scout_reviews_note_recipient', get_option( 'admin_email' ) ),
+			(string) apply_filters( 'scout_reviews_note_recipient', '' !== Scout_Reviews_Requests::get()['note_email'] ? Scout_Reviews_Requests::get()['note_email'] : get_option( 'admin_email' ) ),
 			__( 'New note from your review page', 'scout-reviews' ),
 			implode( "\n", $lines )
 		);

@@ -1,5 +1,11 @@
 # Scout Reviews: Changelog
 
+## 0.4.7 (2026-10-13)
+
+- **TripAdvisor is a review source**, with stars and a "View on TripAdvisor" link. For RV parks, restaurants and venues.
+- **Choose who gets private notes.** Ask for reviews > Page settings > "Send private notes to". Empty keeps the site admin email.
+- **The badge on direct reviews can be renamed** with the `scout_reviews_direct_badge` filter (default "Client testimonial"), so a park can say "Guest".
+
 ## 0.4.6 (2026-10-13)
 
 - **Fix: the section nav was unstyled on theme screens.** A theme carrying an older copy of the admin kit loaded its old stylesheet. The kit (1.1.1) now always loads the stylesheet that matches its own code.
