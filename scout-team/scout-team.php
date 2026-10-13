@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Team
  * Description:       Team profiles with real credentials: role, photo, short bio, bar admissions, education, memberships, awards, military service, languages and profile links. Each person gets a profile page and Person schema, and a grid shortcode shows the whole team.
- * Version:           0.1.4
+ * Version:           0.1.5
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_TEAM_VERSION', '0.1.4' );
+define( 'SCOUT_TEAM_VERSION', '0.1.5' );
 define( 'SCOUT_TEAM_FILE', __FILE__ );
 define( 'SCOUT_TEAM_URL', plugin_dir_url( __FILE__ ) );
 
