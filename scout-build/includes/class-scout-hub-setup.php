@@ -14,7 +14,8 @@
  *   "reviews": { "business", "headline", "ask", "photo", "card_headline", "google_review_url",
  *                "background", "text_color", "accent", "heading_font", "body_font", "label_font" },
  *   "chat":    { "name", "team", "notify", "book_url", "work_url", "photo_1", "photo_2" },
- *   "hours":   { "confirmed": true, "days": { "tuesday": [ ["09:00", "17:00"] ] } }
+ *   "hours":   { "confirmed": true, "days": { "tuesday": [ ["09:00", "17:00"] ] } },
+ *   "analytics": { "gtm": "GTM-XXXXXXX" }
  * }
  * "photo" values are a path inside the theme (assets/img/joy.webp) or a full https:// address.
  *
@@ -61,6 +62,7 @@ final class Scout_Hub_Setup {
 			'reviews' => array( __CLASS__, 'reviews' ),
 			'chat'    => array( __CLASS__, 'chat' ),
 			'hours'   => array( __CLASS__, 'hours' ),
+			'analytics' => array( __CLASS__, 'analytics' ),
 		);
 		$changed = false;
 		foreach ( $jobs as $section => $job ) {
@@ -227,6 +229,17 @@ final class Scout_Hub_Setup {
 				'days'      => $days,
 			)
 		);
+		return true;
+	}
+
+	private static function analytics( array $in ): bool {
+		if ( ! class_exists( 'Scout_Analytics' ) ) {
+			return false;
+		}
+		$gtm = strtoupper( trim( (string) ( $in['gtm'] ?? '' ) ) );
+		if ( Scout_Analytics::valid_gtm( $gtm ) ) {
+			self::fill_option( Scout_Analytics::OPTION, array( 'gtm' => $gtm ) );
+		}
 		return true;
 	}
 
