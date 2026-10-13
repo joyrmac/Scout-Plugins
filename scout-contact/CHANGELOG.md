@@ -1,5 +1,8 @@
 # Scout Call Buttons changelog
 
+## 0.1.1 (2026-10-13)
+- Ships the current Scout admin kit (1.1.1), so the settings screen shows the shared section nav and the kit check passes.
+
 ## 0.1.0 (2026-10-13)
 - First release. A call, text and "Let's talk" bar pinned to the bottom of the screen on phones (design 4b).
 - "Let's talk" opens a sheet with numbered options: call, send a text, book a time. "Book a time" opens the booking page.
