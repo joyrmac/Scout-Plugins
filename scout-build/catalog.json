@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-12",
+  "updated": "2026-10-13",
   "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers: build, partnership, whole, addon. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there.",
   "features": [
     {
@@ -44,6 +44,14 @@
       "slug": "scout-analytics",
       "name": "Analytics and cookie notice",
       "summary": "Google Tag Manager on your live site with privacy set up the right way: a small cookie notice, an easy opt out, and click counts for your cards, links and booking.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-contact",
+      "name": "Call buttons",
+      "summary": "A call, text and booking bar pinned to the bottom of the screen on phones, so visitors can reach you with one tap from any page.",
       "tier": "build",
       "law": false,
       "requires": []
