@@ -97,6 +97,7 @@ final class Scout_Hub_Features {
 	public static function refresh(): void {
 		Scout_Hub_Catalog::flush();
 		Scout_Hub_Health::forget_scan();
+		delete_transient( 'scout_updater_feed' ); // The release list every Scout plugin shares.
 		foreach ( array_merge( array( 'scout-build' ), array_keys( Scout_Hub_Catalog::features() ) ) as $feature_slug ) {
 			delete_transient( 'scout_updater_' . $feature_slug );
 		}
