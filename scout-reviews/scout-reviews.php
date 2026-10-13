@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Reviews
  * Plugin URI:        https://scoutraleigh.com
  * Description:       Reviews from Google, Facebook, Yelp, Clutch, and anywhere else, kept in one place and shown on the site in a custom design. Every review links back to where it was posted, and the rating summary uses the real totals from each platform.
- * Version:           0.4.5
+ * Version:           0.4.6
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_REVIEWS_VERSION', '0.4.5' );
+define( 'SCOUT_REVIEWS_VERSION', '0.4.6' );
 define( 'SCOUT_REVIEWS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_REVIEWS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_REVIEWS_FILE', __FILE__ );
