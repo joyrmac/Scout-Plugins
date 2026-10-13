@@ -43,6 +43,8 @@ final class Scout_Hub_Requests {
 		add_action( 'init', array( __CLASS__, 'register' ) );
 		add_action( 'admin_post_' . self::ACTION, array( __CLASS__, 'handle' ) );
 		add_action( 'admin_bar_menu', array( __CLASS__, 'admin_bar' ), 90 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'bar_style' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'bar_style' ) );
 	}
 
 	public static function register(): void {
@@ -65,17 +67,61 @@ final class Scout_Hub_Requests {
 		return (string) apply_filters( 'scout_hub_request_recipient', $to );
 	}
 
+	/**
+	 * A Scout menu in the toolbar: the bolt and "Scout" (or "Site Build" on
+	 * unbranded sites), opening Features, with Site health and Request a
+	 * change under it.
+	 */
 	public static function admin_bar( WP_Admin_Bar $bar ): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
-		$here = is_admin() ? '' : home_url( add_query_arg( array() ) );
+		$branded = Scout_Hub_Admin::branded();
+		$label   = $branded ? __( 'Scout', 'scout-build' ) : __( 'Site Build', 'scout-build' );
+		$title   = ( $branded ? '<span class="scout-bar-bolt" aria-hidden="true"></span>' : '' ) . '<span class="scout-bar-label">' . esc_html( $label ) . '</span>';
+		$here    = is_admin() ? '' : home_url( add_query_arg( array() ) );
 		$bar->add_node(
 			array(
-				'id'    => 'scout-hub-request',
-				'title' => __( 'Request a change', 'scout-build' ),
-				'href'  => Scout_Hub_Admin::url( 'requests', $here ? array( 'from' => rawurlencode( $here ) ) : array() ),
+				'id'    => 'scout-hub',
+				'title' => $title,
+				'href'  => Scout_Hub_Admin::url( 'features' ),
 			)
+		);
+		$bar->add_node(
+			array(
+				'parent' => 'scout-hub',
+				'id'     => 'scout-hub-features',
+				'title'  => __( 'Features', 'scout-build' ),
+				'href'   => Scout_Hub_Admin::url( 'features' ),
+			)
+		);
+		$bar->add_node(
+			array(
+				'parent' => 'scout-hub',
+				'id'     => 'scout-hub-health',
+				'title'  => __( 'Site health', 'scout-build' ),
+				'href'   => Scout_Hub_Admin::url( 'health' ),
+			)
+		);
+		$bar->add_node(
+			array(
+				'parent' => 'scout-hub',
+				'id'     => 'scout-hub-request',
+				'title'  => __( 'Request a change', 'scout-build' ),
+				'href'   => Scout_Hub_Admin::url( 'requests', $here ? array( 'from' => rawurlencode( $here ) ) : array() ),
+			)
+		);
+	}
+
+	/** The cerulean bolt beside "Scout" in the toolbar. */
+	public static function bar_style(): void {
+		if ( ! is_admin_bar_showing() || ! Scout_Hub_Admin::branded() ) {
+			return;
+		}
+		wp_add_inline_style(
+			'admin-bar',
+			'#wpadminbar #wp-admin-bar-scout-hub>.ab-item{display:flex;align-items:center;gap:6px}'
+			. '#wpadminbar .scout-bar-bolt{display:inline-block;width:11px;height:14px;background:#0E8FE6;clip-path:polygon(58% 0,0 58%,42% 58%,30% 100%,100% 40%,54% 40%)}'
 		);
 	}
 

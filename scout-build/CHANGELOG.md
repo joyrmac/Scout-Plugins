@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.3.10 (2026-10-13)
+
+- **Scout in the toolbar.** The black bar at the top of every page shows a cerulean bolt and "Scout" ("Site Build" on unbranded sites). It opens Features, and its menu holds Site health and Request a change, which used to sit alone in the bar.
+
 ## 0.3.9 (2026-10-13)
 
 - **Plans set.** Every site gets the basics (SEO, AI search, images, forms, analytics, call buttons, redirects, hours, accessibility, team credentials). Reviews come with The Partnership. Chat, business cards and case results are add-ons on any plan, and The Whole System includes every add-on. Feature cards show the right label for each. Turning features on or off is unchanged.
