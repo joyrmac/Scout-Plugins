@@ -134,6 +134,15 @@
         "scout-core"
       ],
       "client_specific": true
+    },
+    {
+      "slug": "scout-sitecheck",
+      "name": "Free site check",
+      "summary": "A free website check visitors run from your site. They see the results right away and get the full report by email, and every request lands in your inbox so you can follow up.",
+      "tier": "build",
+      "law": false,
+      "requires": [],
+      "client_specific": true
     }
   ]
 }
