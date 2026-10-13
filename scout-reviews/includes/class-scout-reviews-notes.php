@@ -61,7 +61,7 @@ final class Scout_Reviews_Notes {
 	private static function open( array $s, string $title ): void {
 		status_header( 200 );
 		header( 'Content-Type: text/html; charset=utf-8' );
-		$fonts = (string) apply_filters( 'scout_reviews_page_fonts_url', 'https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Geist+Mono:wght@500&display=swap' );
+		$fonts = (string) apply_filters( 'scout_reviews_page_fonts_url', Scout_Reviews_Brand::fonts_url( $s ) );
 		$icon  = get_site_icon_url( 112 );
 		?>
 <!doctype html>
@@ -75,7 +75,7 @@ final class Scout_Reviews_Notes {
 <link rel="stylesheet" href="<?php echo esc_url( $fonts ); ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="<?php echo esc_url( SCOUT_REVIEWS_URL . 'assets/review-page.css?ver=' . SCOUT_REVIEWS_VERSION ); ?>">
-<style>:root{--accent:<?php echo esc_html( $s['accent'] ); ?>}</style>
+<style>:root{<?php echo wp_strip_all_tags( Scout_Reviews_Brand::page_vars( $s ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hex colors and fonts from a fixed list. ?>}</style>
 </head>
 <body>
 <main class="rp">
