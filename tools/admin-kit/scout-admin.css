@@ -60,7 +60,7 @@
 @media (max-width: 782px) {
 	.sh-nav-groups { width: 100%; }
 	.sh-nav-groups { gap: 2px; padding: 4px; }
-	.sh .sh-nav-groups a { flex: 1 1 auto; justify-content: center; min-width: 0; padding: 7px 8px; }
+	.sh .sh-nav-groups a { flex: 1 1 auto; justify-content: center; min-width: 0; padding: 7px 6px; font-size: 12px; }
 	.sh-nav-sub { flex-wrap: wrap; gap: 0 18px; }
 	.sh .sh-head h1 { font-size: 22px; }
 	.sh-head .sh-brand { display: none; }

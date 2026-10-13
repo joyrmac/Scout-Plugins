@@ -13,7 +13,7 @@
  *   Scout_Admin_UI::close();
  *
  * open() also prints the section nav, read live from WordPress's own menu: a
- * short row of groups (Overview, Search, Website, Reviews, Chat) with the open
+ * short row of groups (Home, Search, Website, Business, Reviews, Chat) with the open
  * group's screens as tabs underneath. Every Scout screen shows the same nav,
  * and a new plugin lands in the right group without anyone editing a list
  * (scout_admin_nav_group moves a screen to another group).
@@ -91,11 +91,12 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/** The nav groups, in the order they show. */
 		const GROUPS = array(
-			'home'    => 'Overview',
-			'search'  => 'Search',
-			'website' => 'Website',
-			'reviews' => 'Reviews',
-			'chat'    => 'Chat',
+			'home'     => 'Home',
+			'search'   => 'Search',
+			'website'  => 'Website',
+			'business' => 'Business',
+			'reviews'  => 'Reviews',
+			'chat'     => 'Chat',
 		);
 
 		/** Scout sidebar menus the kit tidies. */
@@ -111,8 +112,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		private static $leaders = array();
 
 		/**
-		 * Shorten a long Scout sidebar menu to one link per group (Overview,
-		 * Search, Website, Reviews, Chat). Every screen stays registered and
+		 * Shorten a long Scout sidebar menu to one link per group (Home,
+		 * Search, Website, Business, Reviews, Chat). Every screen stays registered and
 		 * reachable; the others are hidden from the sidebar only, and the
 		 * section nav on each screen leads to them.
 		 */
@@ -207,6 +208,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'home';
 			} elseif ( 'scout' === strtok( $s, '&' ) || preg_match( '/ai-search|analytics|robots/', $s ) ) {
 				$group = 'search';
+			} elseif ( preg_match( '/hours|team|results|cards|contact|booking|proposal/', $s . ' ' . $l ) ) {
+				$group = 'business';
 			} else {
 				$group = 'website';
 			}
@@ -216,7 +219,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/**
 		 * The section nav: every screen in this screen's sidebar menu, sorted into a
-		 * short row of groups (Overview, Search, Website, Reviews, Chat). The open
+		 * short row of groups (Home, Search, Website, Business, Reviews, Chat). The open
 		 * group's screens show as tabs underneath. Empty groups never show.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
