@@ -298,6 +298,7 @@ final class Scout_Hub_Admin {
 					$installed = array_filter( array_map( array( 'Scout_Hub_Features', 'status' ), array_keys( Scout_Hub_Catalog::features() ) ), static fn( $st ) => '' !== $st['version'] );
 					$waiting   = count( array_filter( $installed, static fn( $st ) => '' !== $st['update'] ) );
 					$checked   = $installed ? max( array_column( $installed, 'checked' ) ) : 0;
+					Scout_Hub_Features::refresh_if_stale( $checked );
 					?>
 					<p class="sh-inline sh-note">
 						<span class="sh-tag <?php echo $waiting ? 'is-update' : 'is-current'; ?>"><?php

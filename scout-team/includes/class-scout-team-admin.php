@@ -16,6 +16,7 @@ final class Scout_Team_Admin {
 
 	public static function boot(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 30 );
+		add_filter( 'parent_file', array( __CLASS__, 'highlight' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_TEAM_FILE ), array( __CLASS__, 'action_link' ) );
@@ -38,6 +39,25 @@ final class Scout_Team_Admin {
 
 	public static function menu(): void {
 		add_submenu_page( self::parent(), __( 'Team', 'scout-team' ), __( 'Team', 'scout-team' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		// The list sits in the Build menu too, so the sidebar keeps one Scout section.
+		if ( 'options-general.php' !== self::parent() ) {
+			$list = 'edit.php?post_type=' . Scout_Team::POST_TYPE;
+			global $submenu;
+			remove_menu_page( $list );
+			unset( $submenu[ $list ] ); // Its leftover sub-list would otherwise claim the screen.
+			add_submenu_page( self::parent(), __( 'Team members', 'scout-team' ), __( 'Team members', 'scout-team' ), 'edit_posts', $list );
+		}
+	}
+
+	/** Keep the Build menu open while editing an entry. */
+	public static function highlight( $file ) {
+		global $submenu_file;
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( 'options-general.php' !== self::parent() && $screen && Scout_Team::POST_TYPE === $screen->post_type && empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$submenu_file = 'edit.php?post_type=' . Scout_Team::POST_TYPE; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			return self::parent();
+		}
+		return $file;
 	}
 
 	public static function assets( string $hook ): void {
