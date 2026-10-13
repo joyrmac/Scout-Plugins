@@ -36,7 +36,7 @@ FILLER_RE = re.compile(
     r"here we|let's|we'll now|note that this|ensures? that|for better maintainability)\b",
     re.I,
 )
-PLACEHOLDER_RE = re.compile(r"\b(lorem ipsum|TODO:? implement|insert (text|copy) here)\b", re.I)
+PLACEHOLDER_RE = re.compile(r"\b(lorem ipsum|TODO:? implement|insert (text|copy) here)\b", re.I)  # slop-ok: the pattern list itself
 DEBUG_RES = {
     ".js": re.compile(r"\bconsole\.(log|debug)\("),
     ".mjs": re.compile(r"\bconsole\.(log|debug)\("),
