@@ -1,5 +1,9 @@
 # Scout Call Buttons changelog
 
+## 0.1.3 (2026-10-13)
+
+- **Shorter Scout sidebar.** The shared admin kit (1.3.0) shows a long Scout menu as one sidebar link per group (Overview, Search, Website, Reviews, Chat), in the same order as the tabs on each screen. Every screen still works and is one tap away in the tabs; only the sidebar got shorter. Count bubbles (like unanswered chat questions) carry over to the group's link.
+
 ## 0.1.2 (2026-10-13)
 - Ships admin kit 1.2.0: the Scout menu bar is grouped into five tabs (Overview, Search, Website, Reviews, Chat), with the open group's screens underneath.
 
