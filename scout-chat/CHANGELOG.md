@@ -1,6 +1,10 @@
 # Scout Chat changelog
 
 
+## 0.1.12 (2026-10-13)
+
+- **More hellos.** "whatsup", "what's up", "sup", "hello there", "hi y'all", "ty" and "cool" get the greeting too, instead of the ask-for-email step.
+
 ## 0.1.11 (2026-10-13)
 
 - **Fix: "hi" got "Good question."** A hello or a thanks now gets a greeting and the starter buttons instead of the ask-for-email step, and a message that isn't a question opens with "Thanks." instead of "Good question."
