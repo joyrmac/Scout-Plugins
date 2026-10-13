@@ -1,5 +1,9 @@
 # Scout Case Results changelog
 
+## 0.1.2 (2026-10-13)
+
+- **One Scout section in the sidebar.** The all case results list moved from its own sidebar item into the site's Build menu (Business tab), and the Build menu stays open while editing an entry. Sites without a Build menu keep the old sidebar item.
+
 ## 0.1.1 (2026-10-13)
 
 - Ships the shared admin kit 1.3.0: the Scout menu bar is grouped into tabs (Home, Search, Website, Business, Reviews, Chat), and a long Scout sidebar shows one link per group.

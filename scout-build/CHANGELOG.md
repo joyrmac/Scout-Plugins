@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.3.4 (2026-10-13)
+
+- **"Up to date" stays current.** When the Features screen opens and the last version check is over an hour old, a fresh check runs in the background (WordPress cron), so a release from earlier today shows as "Update ready" on the next look. The "Check for new versions" button still checks right away.
+- **Features keep themselves current.** Turning a feature on now also ticks its auto-update box. A one-time sweep ticks it for every Scout feature already on (and Scout Build itself), which fixes sites where Accessibility, Call buttons, Hours, Redirects and Team were installed with auto-updates off. Sites that block auto-updates are left alone.
+
 ## 0.3.3 (2026-10-13)
 
 - **Shorter Scout sidebar.** The shared admin kit (1.3.0) shows a long Scout menu as one sidebar link per group (Home, Search, Website, Business, Reviews, Chat; Business is new and holds hours, team, case results, cards, call buttons, booking and proposals), in the same order as the tabs on each screen. Every screen still works and is one tap away in the tabs; only the sidebar got shorter. Count bubbles (like unanswered chat questions) carry over to the group's link.

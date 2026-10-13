@@ -26,6 +26,8 @@ final class Scout_Hub_Features {
 
 	public static function boot(): void {
 		add_action( 'admin_post_' . self::ACTION, array( __CLASS__, 'handle' ) );
+		add_action( 'scout_hub_refresh_versions', array( __CLASS__, 'refresh' ) );
+		add_action( 'admin_init', array( __CLASS__, 'auto_update_sweep' ) );
 		add_filter( 'auto_update_plugin', array( __CLASS__, 'hold_updates' ), 20, 2 );
 	}
 
@@ -86,6 +88,46 @@ final class Scout_Hub_Features {
 			. '<button type="submit" class="' . esc_attr( $class ) . '">' . esc_html( $label ) . '</button></form>';
 	}
 
+	/**
+	 * Ask again for new features and versions. Each Scout plugin keeps its own
+	 * release lookup for six hours, and WordPress keeps its update list for
+	 * twelve: drop both, so a release published minutes ago shows as
+	 * "Update ready" now.
+	 */
+	public static function refresh(): void {
+		Scout_Hub_Catalog::flush();
+		Scout_Hub_Health::forget_scan();
+		foreach ( array_merge( array( 'scout-build' ), array_keys( Scout_Hub_Catalog::features() ) ) as $feature_slug ) {
+			delete_transient( 'scout_updater_' . $feature_slug );
+		}
+		if ( ! function_exists( 'wp_clean_plugins_cache' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php'; // Not loaded when this runs from cron.
+		}
+		wp_clean_plugins_cache( true );
+		delete_site_transient( 'update_plugins' );
+		if ( ! function_exists( 'wp_update_plugins' ) ) {
+			require_once ABSPATH . WPINC . '/update.php';
+		}
+		wp_update_plugins();
+	}
+
+	/** How old the last version check may get before the Features screen asks again by itself. */
+	const STALE_AFTER = HOUR_IN_SECONDS;
+
+	/**
+	 * When the Features screen opens on a version check older than an hour,
+	 * queue a fresh one in the background (WordPress cron), so the page never
+	 * waits on it and the "Up to date" marks are current on the next look.
+	 */
+	public static function refresh_if_stale( int $checked ): void {
+		if ( $checked && time() - $checked < self::STALE_AFTER ) {
+			return;
+		}
+		if ( ! wp_next_scheduled( 'scout_hub_refresh_versions' ) ) {
+			wp_schedule_single_event( time(), 'scout_hub_refresh_versions' );
+		}
+	}
+
 	public static function handle(): void {
 		$slug = sanitize_key( wp_unslash( (string) ( $_POST['slug'] ?? '' ) ) );
 		$do   = sanitize_key( wp_unslash( (string) ( $_POST['do'] ?? '' ) ) );
@@ -95,20 +137,7 @@ final class Scout_Hub_Features {
 		}
 		$features = Scout_Hub_Catalog::features();
 		if ( 'refresh' === $do ) {
-			Scout_Hub_Catalog::flush();
-			Scout_Hub_Health::forget_scan();
-			// Each Scout plugin keeps its own release lookup for six hours, and
-			// WordPress keeps its update list for twelve. Drop both and ask again,
-			// so a release published minutes ago shows as "Update ready" now.
-			foreach ( array_merge( array( 'scout-build' ), array_keys( $features ) ) as $feature_slug ) {
-				delete_transient( 'scout_updater_' . $feature_slug );
-			}
-			wp_clean_plugins_cache( true );
-			delete_site_transient( 'update_plugins' );
-			if ( ! function_exists( 'wp_update_plugins' ) ) {
-				require_once ABSPATH . WPINC . '/update.php';
-			}
-			wp_update_plugins();
+			self::refresh();
 			self::back( __( 'Checked for new features and versions.', 'scout-build' ) );
 		}
 		if ( ! isset( $features[ $slug ] ) ) {
@@ -183,7 +212,55 @@ final class Scout_Hub_Features {
 			}
 		}
 		$r = activate_plugin( self::file( $slug ) );
-		return is_wp_error( $r ) ? $r : true;
+		if ( is_wp_error( $r ) ) {
+			return $r;
+		}
+		self::auto_update( $slug );
+		return true;
+	}
+
+	/**
+	 * Every Scout feature keeps itself current: turning one on also ticks
+	 * WordPress's auto-update box for it, the same as the plugins installed
+	 * with the site. A site that blocks auto-updates (or file changes) is left alone.
+	 */
+	public static function auto_update( string $slug ): void {
+		$file = self::file( $slug );
+		if ( ! function_exists( 'wp_is_auto_update_enabled_for_type' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+		}
+		if ( '' === $file || ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) || ! wp_is_auto_update_enabled_for_type( 'plugin' ) ) {
+			return;
+		}
+		$on = (array) get_site_option( 'auto_update_plugins', array() );
+		if ( ! in_array( $file, $on, true ) ) {
+			$on[] = $file;
+			update_site_option( 'auto_update_plugins', $on );
+		}
+	}
+
+	/**
+	 * One time per site: features turned on before Build 0.3.4 never had their
+	 * auto-update box ticked. Tick it for every active Scout feature once.
+	 */
+	public static function auto_update_sweep(): void {
+		if ( get_option( 'scout_hub_auto_update_sweep' ) || ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$features = Scout_Hub_Catalog::features();
+		if ( ! $features ) {
+			return; // Catalog not reachable right now: try again on the next screen.
+		}
+		foreach ( array_keys( $features ) as $slug ) {
+			if ( is_plugin_active( self::file( $slug ) ) ) {
+				self::auto_update( $slug );
+			}
+		}
+		self::auto_update( 'scout-build' );
+		update_option( 'scout_hub_auto_update_sweep', time(), false );
 	}
 
 	/** @return true|WP_Error */
