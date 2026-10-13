@@ -217,6 +217,11 @@ a.srk-btnlink, .srk a.button { display: inline-flex; align-items: center; text-d
 /* Printing happens in a separate frame that holds only the chosen sheet
    (assets/ask.js), so the page around it can never add blank pages. */
 .srk-print-frame .srk-sheet { transform: none; }
+/* Ten cards at full size fill a letter page exactly (5 x 2 in = 10 in), and
+   Safari's own print margins push the last row onto a second page. Printed
+   business cards come out 94% size so the sheet always fits one page. */
+.srk-print-frame .srk-sheet-cards { zoom: .94; }
+.srk-print-frame .srk-card { break-inside: avoid; page-break-inside: avoid; }
 .srk-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
 @media (prefers-reduced-motion: reduce) {
