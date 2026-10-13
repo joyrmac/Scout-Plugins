@@ -1,5 +1,9 @@
 # Scout Reviews: Changelog
 
+## 0.5.2 (2026-10-13)
+
+- **Fix: business cards print on one page in Safari.** The ten-card sheet filled a letter page exactly, so Safari's print margins pushed the last row onto a second page. Printed cards now come out at 94% size (about 3.3 x 1.9 in) and always fit one page. Screen previews are unchanged.
+
 ## 0.5.1 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
