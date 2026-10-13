@@ -174,7 +174,7 @@ gtag('set','ads_data_redaction',ad==='denied');})(window.scoutConsentConfig);
 			. '.scout-consent[hidden]{display:none}.scout-consent p{margin:0 0 10px;color:var(--text-2,#B5B5B8);text-wrap:pretty}'
 			. '.scout-consent a{color:var(--accent-text,#5FB8F2)}.scout-consent-actions{display:flex;gap:8px;justify-content:flex-end}'
 			. '.scout-consent button{font:inherit;font-weight:500;min-height:44px;padding:0 18px;border-radius:980px;cursor:pointer;border:1px solid var(--line,rgba(255,255,255,.1));background:transparent;color:var(--text,#F5F5F7)}'
-			. '.scout-consent .scout-consent-yes{background:var(--accent,#0E8FE6);border-color:var(--accent,#0E8FE6);color:#fff}'
+			. '.scout-consent .scout-consent-yes{background:var(--accent,#0E8FE6);border-color:var(--accent,#0E8FE6);color:var(--on-accent,#fff)}'
 			. '.scout-consent button:focus-visible{outline:2px solid var(--accent,#0E8FE6);outline-offset:2px}'
 			. '@media (min-width:600px){.scout-consent{right:auto;left:24px;bottom:24px;padding:16px 18px;font-size:15px}}';
 	}

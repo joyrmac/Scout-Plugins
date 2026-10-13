@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.9 (2026-10-13)
+
+- **Fix: the cookie notice's OK button is readable on every theme.** Its text used a fixed white, which failed contrast on sites whose accent is light (North Crest's gold: 1.6:1). It now uses the theme's `--on-accent` color, falling back to white, so a theme with a light accent sets `--on-accent` to a dark color.
+
 ## 0.1.8 (2026-10-13)
 
 - **No dead ends in the Scout menu.** WordPress's own list screens inside the shortened Scout menu (the Reviews list, Chat questions, team members, case results) now show the same tabs as every Scout screen, so Review inbox, Ask for reviews and Review settings are one tap away from the Reviews list. Shared admin kit 1.4.0.
