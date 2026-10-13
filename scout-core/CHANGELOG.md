@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.2.4 (2026-10-13)
+
+- **Fix: Business info and SEO now sit inside the theme's own Build menu.** On a site whose theme has a Scout Build or Recon Build menu, Scout Core made a second, separate "Scout" menu, so its screens were missing from the Search tab. They now join the theme's menu (the screen address stays `admin.php?page=scout`, so every link still works). Sites without a Build menu keep the Scout menu as before.
+
 ## 1.2.3 (2026-10-13)
 
 - **Shorter Scout sidebar.** The shared admin kit (1.3.0) shows a long Scout menu as one sidebar link per group (Home, Search, Website, Business, Reviews, Chat; Business is new and holds hours, team, case results, cards, call buttons, booking and proposals), in the same order as the tabs on each screen. Every screen still works and is one tap away in the tabs; only the sidebar got shorter. Count bubbles (like unanswered chat questions) carry over to the group's link.
