@@ -1,5 +1,10 @@
 # Scout Accessibility changelog
 
+## 0.1.5 (2026-10-13)
+
+- **Ticking a launch check fills in today's date and your name right away**, and the label reads "Done once saved", so the row no longer looks half done before you save.
+- **Fix: missed updates on shared hosts.** Version checks read the version list the Release workflow publishes instead of GitHub's rate-limited API.
+
 ## 0.1.4 (2026-10-13)
 
 - **No dead ends in the Scout menu.** WordPress's own list screens inside the shortened Scout menu (the Reviews list, Chat questions, team members, case results) now show the same tabs as every Scout screen, so Review inbox, Ask for reviews and Review settings are one tap away from the Reviews list. Shared admin kit 1.4.0.

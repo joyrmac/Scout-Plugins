@@ -1,5 +1,9 @@
 # Scout AI Search changelog
 
+## 0.2.1 (2026-10-13)
+
+- **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
+
 ## 0.2.0 (2026-10-13)
 
 - **Instant updates (IndexNow).** When a public page is published or updated, its address goes to IndexNow, so Bing and Copilot pick up the change right away (ChatGPT search also draws on Bing). One non-blocking request at the end of the page load, from the live site only; staging never pings. Pages hidden from search or behind a password are skipped. The key is created once and served at `/{key}.txt`. On by default; switch it off under **AI search → Instant updates**.

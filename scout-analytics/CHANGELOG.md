@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.10 (2026-10-13)
+
+- **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
+
 ## 0.1.9 (2026-10-13)
 
 - **Fix: the cookie notice's OK button is readable on every theme.** Its text used a fixed white, which failed contrast on sites whose accent is light (North Crest's gold: 1.6:1). It now uses the theme's `--on-accent` color, falling back to white, so a theme with a light accent sets `--on-accent` to a dark color.

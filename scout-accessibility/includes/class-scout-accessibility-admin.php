@@ -489,6 +489,24 @@ final class Scout_Accessibility_Admin {
 			<p class="sh-note sa-foot"><?php esc_html_e( 'When both are ticked, the statement adds a line saying color contrast and keyboard use are reviewed by hand.', 'scout-accessibility' ); ?></p>
 			<?php submit_button( __( 'Save the checklist', 'scout-accessibility' ) ); ?>
 		</form>
+		<script>
+		// Ticking a check fills in today and the signed-in name right away, the
+		// same values a save would use, so the row never looks half done.
+		document.querySelectorAll( '.sa-launch input[type="checkbox"]' ).forEach( function ( box ) {
+			box.addEventListener( 'change', function () {
+				var row  = box.closest( '.sa-launch' );
+				var date = row.querySelector( 'input[type="date"]' );
+				var name = row.querySelector( 'input[type="text"]' );
+				var pill = row.querySelector( '.sh-pill' );
+				if ( box.checked ) {
+					if ( ! date.value ) { date.value = <?php echo wp_json_encode( current_time( 'Y-m-d' ) ); ?>; }
+					if ( ! name.value ) { name.value = name.placeholder; }
+				}
+				pill.classList.toggle( 'is-done', box.checked );
+				pill.textContent = box.checked ? <?php echo wp_json_encode( __( 'Done once saved', 'scout-accessibility' ) ); ?> : <?php echo wp_json_encode( __( 'To do', 'scout-accessibility' ) ); ?>;
+			} );
+		} );
+		</script>
 
 		<?php /* ---------------------------------------------- Statement */ ?>
 		<div class="sh-section-head" id="sa-statement">

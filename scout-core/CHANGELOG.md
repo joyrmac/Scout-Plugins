@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.3.1 (2026-10-13)
+
+- **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
+
 ## 1.3.0 (2026-10-13)
 
 - **Every page carries its dates.** Single posts and pages get a `WebPage` node in the schema graph with `datePublished` and `dateModified`, linked to the site (`isPartOf`) and the business (`about`). Search engines and AI tools can see how fresh a page is. It steps aside when a companion already describes the page (Scout Team's `ProfilePage`). Filter `scout_schema_webpage` to false to turn it off.

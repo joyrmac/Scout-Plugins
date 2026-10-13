@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.3.8 (2026-10-13)
+
+- **Fix: sites showed "Up to date" when they were not.** Version checks used GitHub's API, which allows 60 calls an hour per server address; shared hosts like WP Engine run out, the check failed quietly, and the Features screen still said everything was up to date (North Crest stayed on Reviews 0.4.13 after 0.5.0 shipped). Sites now read one version list the Release workflow publishes as a plain download, with the API only as a fallback. If both fail, the Features screen says it could not reach GitHub instead of "Everything is up to date".
+
 ## 0.3.7 (2026-10-13)
 
 - **No dead ends in the Scout menu.** WordPress's own list screens inside the shortened Scout menu (the Reviews list, Chat questions, team members, case results) now show the same tabs as every Scout screen, so Review inbox, Ask for reviews and Review settings are one tap away from the Reviews list. Shared admin kit 1.4.0.
