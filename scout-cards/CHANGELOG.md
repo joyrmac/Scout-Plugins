@@ -1,5 +1,9 @@
 # Scout Cards changelog
 
+## 1.0.6 (2026-10-12)
+
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
 ## 1.0.5 (2026-10-12)
 
 - **Stands down when the theme already makes cards.** On the Scout Media theme

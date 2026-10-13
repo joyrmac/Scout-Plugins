@@ -1,5 +1,9 @@
 # Scout AI Search changelog
 
+## 0.1.4 (2026-10-12)
+
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
 ## 0.1.3 (2026-10-12)
 
 - **Content-Signal in robots.txt.** The two switches (AI search, AI training)

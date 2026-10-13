@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.2 (2026-10-12)
+
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
 ## 0.1.1 (2026-10-12)
 
 - **The events list is complete and simpler to set up.** It now names every

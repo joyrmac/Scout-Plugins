@@ -1,5 +1,15 @@
 # Scout Build changelog
 
+## 0.3.0 (2026-10-12)
+
+- **Uses the shared frame.** Features, Site health and Request a change open in the same header, section nav and sign-off as every other Scout screen. The nav pills carry live hints (features on, AI search score, open requests).
+- **One menu order everywhere:** Features, Site health, Business info, SEO, AI search, Image optimizer, then the rest, with Request a change last.
+- **Site health shows the search listing checks** from Business info and SEO (page descriptions, visible to Google, social sharing), so there is one health screen.
+- **Every card says whether it is current.** A green "Up to date" mark, or "Update ready: vX" with an **Update now** button that runs WordPress's own updater. Next to Check for new versions: "Everything is up to date" or how many updates are waiting, and when the site last checked.
+- **Settings button on every feature that is on** and has a screen.
+- **Fix:** the Business details fix link pointed at a page that no longer exists.
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
 ## 0.2.6 (2026-10-12)
 
 - **"Check for new versions" finds a release published minutes ago.** It

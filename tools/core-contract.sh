@@ -30,6 +30,8 @@ scout-core/includes/seo/class-seo-head.php | final class Scout_SEO_Head | scout-
 scout-core/includes/seo/class-seo-head.php | add_action( 'wp_head', array( __CLASS__, 'output' ), 1 ) | scout-cards (remove_action must match this hook and priority)
 scout-core/includes/business.php | public static function get() | scout-aeo (/llms.txt name, contact line; scout-build AI checks)
 scout-core/scout-core.php | define( 'SCOUT_SEO_META_NOINDEX' | scout-aeo (noindexed pages stay out of /llms.txt)
+scout-core/includes/admin.php | public static function checks() | scout-build (Site health: search listing checks)
+scout-core/includes/admin.php | public static function render_checks( array $checks ) | scout-build (Site health: same check cards)
 CONTRACT
 
 exit "$fail"

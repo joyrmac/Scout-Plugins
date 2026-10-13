@@ -36,7 +36,7 @@ final class Scout_Hub_Features {
 	/**
 	 * Status for one feature.
 	 *
-	 * @return array{state:string, version:string, update:string, previous:string}
+	 * @return array{state:string, version:string, update:string, previous:string, checked:int}
 	 */
 	public static function status( string $slug ): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -45,7 +45,7 @@ final class Scout_Hub_Features {
 		$file    = self::file( $slug );
 		$plugins = get_plugins();
 		if ( ! isset( $plugins[ $file ] ) ) {
-			return array( 'state' => 'missing', 'version' => '', 'update' => '', 'previous' => '' );
+			return array( 'state' => 'missing', 'version' => '', 'update' => '', 'previous' => '', 'checked' => 0 );
 		}
 		$version  = (string) $plugins[ $file ]['Version'];
 		$updates  = get_site_transient( 'update_plugins' );
@@ -62,7 +62,18 @@ final class Scout_Hub_Features {
 			'version'  => $version,
 			'update'   => $update,
 			'previous' => $previous,
+			// When WordPress last asked for new versions: "Up to date" only shows once it has.
+			'checked'  => is_object( $updates ) ? (int) ( $updates->last_checked ?? 0 ) : 0,
 		);
+	}
+
+	/** WordPress's own one-click update for this feature, or '' when it cannot run here. */
+	public static function update_url( string $slug ): string {
+		$file = self::file( $slug );
+		if ( '' === $file || ! current_user_can( 'update_plugins' ) || ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) ) {
+			return '';
+		}
+		return wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( $file ) ), 'upgrade-plugin_' . $file );
 	}
 
 	/** The form button for one action, posted to admin-post.php. */

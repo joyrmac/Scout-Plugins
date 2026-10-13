@@ -314,71 +314,73 @@ final class Scout_Optimize {
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'scout-optimize' ); ?></p></div>
 			<?php endif; ?>
 
-			<p style="max-width:760px;">
-				<?php esc_html_e( 'Turn optimization on for this site. Everything is off until you enable it here. Originals are always backed up before any image is touched, so every change is reversible.', 'scout-optimize' ); ?>
-			</p>
-
-			<h2><?php esc_html_e( 'This server', 'scout-optimize' ); ?></h2>
-			<table class="widefat striped" style="max-width:420px;">
-				<tbody>
-					<tr><td><?php esc_html_e( 'Imagick image engine', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $caps['imagick'] ? $yes : $no ); ?></strong></td></tr>
-					<tr><td><?php esc_html_e( 'Can create WebP', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $caps['webp'] ? $yes : $no ); ?></strong></td></tr>
-					<tr><td><?php esc_html_e( 'Can create AVIF', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $caps['avif'] ? $yes : $no ); ?></strong></td></tr>
-				</tbody>
-			</table>
-			<?php if ( ! $caps['avif'] ) : ?>
-				<p style="color:#8a6d3b;max-width:760px;"><?php esc_html_e( 'This server cannot create AVIF, so AVIF copies are skipped even if the option below is on. WebP still works.', 'scout-optimize' ); ?></p>
-			<?php endif; ?>
-
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<?php wp_nonce_field( 'scout_optimize_settings' ); ?>
 				<input type="hidden" name="action" value="scout_optimize_save" />
 
-				<h2><?php esc_html_e( 'Quality preset', 'scout-optimize' ); ?></h2>
-				<select name="preset">
-					<?php
-					$presets = array(
-						'lossy'    => __( 'Lossy (smallest files)', 'scout-optimize' ),
-						'balanced' => __( 'Balanced (recommended)', 'scout-optimize' ),
-						'lossless' => __( 'Lossless (largest, highest quality)', 'scout-optimize' ),
-					);
-					foreach ( $presets as $key => $label ) :
-						?>
-						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['preset'], $key ); ?>><?php echo esc_html( $label ); ?></option>
-					<?php endforeach; ?>
-				</select>
+				<section class="sh-box">
+					<h2><?php esc_html_e( 'What to do', 'scout-optimize' ); ?></h2>
+					<p><?php esc_html_e( 'Everything is off until you turn it on here. Originals are always backed up before any image is touched, so every change can be undone.', 'scout-optimize' ); ?></p>
+					<fieldset>
+						<?php foreach ( $toggles as $key => $label ) : ?>
+							<p>
+								<label>
+									<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( ! empty( $s[ $key ] ) ); ?> />
+									<?php echo esc_html( $label ); ?>
+								</label>
+							</p>
+						<?php endforeach; ?>
+					</fieldset>
+				</section>
 
-				<h2><?php esc_html_e( 'What to do', 'scout-optimize' ); ?></h2>
-				<fieldset>
-					<?php foreach ( $toggles as $key => $label ) : ?>
-						<p>
-							<label>
-								<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( ! empty( $s[ $key ] ) ); ?> />
-								<?php echo esc_html( $label ); ?>
-							</label>
-						</p>
-					<?php endforeach; ?>
-				</fieldset>
-
-				<h2><?php esc_html_e( 'Maximum image width/height (pixels)', 'scout-optimize' ); ?></h2>
-				<p>
-					<input type="number" name="max_dimension" min="0" max="8000" step="10" value="<?php echo esc_attr( (string) $s['max_dimension'] ); ?>" />
-					<span class="description"><?php esc_html_e( 'New uploads larger than this are scaled down. 0 turns the cap off. Applies to new uploads only.', 'scout-optimize' ); ?></span>
-				</p>
+				<div class="sh-grid sh-grid-2">
+					<section class="sh-box">
+						<h2><?php esc_html_e( 'Quality', 'scout-optimize' ); ?></h2>
+						<p><?php esc_html_e( 'Balanced suits almost every site.', 'scout-optimize' ); ?></p>
+						<select name="preset">
+							<?php
+							$presets = array(
+								'lossy'    => __( 'Lossy (smallest files)', 'scout-optimize' ),
+								'balanced' => __( 'Balanced (recommended)', 'scout-optimize' ),
+								'lossless' => __( 'Lossless (largest, highest quality)', 'scout-optimize' ),
+							);
+							foreach ( $presets as $key => $label ) :
+								?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['preset'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</section>
+					<section class="sh-box">
+						<h2><?php esc_html_e( 'Largest image size', 'scout-optimize' ); ?></h2>
+						<p><?php esc_html_e( 'New uploads wider or taller than this are scaled down. 0 turns the limit off.', 'scout-optimize' ); ?></p>
+						<p class="sh-inline"><input type="number" name="max_dimension" min="0" max="8000" step="10" value="<?php echo esc_attr( (string) $s['max_dimension'] ); ?>" /> <?php esc_html_e( 'pixels', 'scout-optimize' ); ?></p>
+					</section>
+				</div>
 
 				<?php submit_button( __( 'Save settings', 'scout-optimize' ) ); ?>
 			</form>
 
-			<p style="max-width:760px;">
-				<?php
-				printf(
-					/* translators: %s: URL of the sweep tool. */
-					wp_kses_post( __( 'To optimize images already in the library, use <a href="%s">Optimize existing images</a>. New uploads are handled automatically once the options above are on.', 'scout-optimize' ) ),
-					esc_url( self::url( 'scout-optimize-sweep' ) )
-				);
-				?>
-			</p>
-			<p style="color:#666;"><?php echo esc_html( sprintf( /* translators: %s: version. */ __( 'Scout Optimize %s', 'scout-optimize' ), SCOUT_OPTIMIZE_VERSION ) ); ?></p>
+			<div class="sh-grid sh-grid-2">
+				<section class="sh-box">
+					<h2><?php esc_html_e( 'This server', 'scout-optimize' ); ?></h2>
+					<p><?php esc_html_e( 'What the hosting can do with images.', 'scout-optimize' ); ?></p>
+					<table class="widefat striped">
+						<tbody>
+							<tr><td><?php esc_html_e( 'Imagick image engine', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $caps['imagick'] ? $yes : $no ); ?></strong></td></tr>
+							<tr><td><?php esc_html_e( 'Can create WebP', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $caps['webp'] ? $yes : $no ); ?></strong></td></tr>
+							<tr><td><?php esc_html_e( 'Can create AVIF', 'scout-optimize' ); ?></td><td><strong><?php echo esc_html( $caps['avif'] ? $yes : $no ); ?></strong></td></tr>
+						</tbody>
+					</table>
+					<?php if ( ! $caps['avif'] ) : ?>
+						<p class="sh-note"><?php esc_html_e( 'This server cannot create AVIF, so AVIF copies are skipped even if that option is on. WebP still works.', 'scout-optimize' ); ?></p>
+					<?php endif; ?>
+				</section>
+				<section class="sh-box">
+				<h2><?php esc_html_e( 'Images already in the library', 'scout-optimize' ); ?></h2>
+				<p><?php esc_html_e( 'New uploads are handled automatically once the options above are on. Photos uploaded before that can be optimized in one pass.', 'scout-optimize' ); ?></p>
+				<p><a class="button" href="<?php echo esc_url( self::url( 'scout-optimize-sweep' ) ); ?>"><?php esc_html_e( 'Optimize existing images', 'scout-optimize' ); ?></a></p>
+			</section>
+			</div>
 		<?php Scout_Admin_UI::close(); ?>
 		<?php
 	}
