@@ -69,3 +69,13 @@ jobs:
           for f in */assets/scout-admin.css; do cmp -s "$f" tools/admin-kit/scout-admin.css || { echo "::error file=$f::differs from tools/admin-kit/scout-admin.css. Copy the kit file over."; status=1; }; done
           for f in */includes/class-scout-admin-ui.php; do cmp -s "$f" tools/admin-kit/class-scout-admin-ui.php || { echo "::error file=$f::differs from tools/admin-kit/class-scout-admin-ui.php. Copy the kit file over."; status=1; }; done
           exit $status
+
+  slop-check:
+    name: Code slop check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Emoji, placeholders, debug output and stray copy files fail; filler
+      # comments and visible em dashes warn. Rules: tools/slop-check.py.
+      - name: Check for code slop
+        run: python3 tools/slop-check.py
