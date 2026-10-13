@@ -1,5 +1,9 @@
 # Scout Reviews: Changelog
 
+## 0.5.1 (2026-10-13)
+
+- **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
+
 ## 0.5.0 (2026-10-13)
 
 - **The review page and printed cards wear the client's brand.** Ask for reviews > Settings adds page background, text color, and heading, body and small-label fonts next to the brand color. The /review/ and /review/note/ pages use them, text colors adjust to a light or dark background, and the button text picks white or near-black for contrast. The counter card, business cards and table tent print in the same fonts, with the brand color as the headline (deepened if too pale for paper). Fonts come from a fixed list of Google Fonts with each one's real weights, so the font request never fails. Defaults stay Scout's own look, and a client theme can supply its own with the `scout_reviews_brand` filter.

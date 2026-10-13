@@ -95,9 +95,23 @@ final class Scout_Hub_Catalog {
 		}
 		$out  = array();
 		$data = array();
-		// Up to three pages of 100: GitHub sorts by tag name, not date, so a
-		// plugin's releases can be spread across pages.
-		for ( $page = 1; $page <= 3; $page++ ) {
+		// First choice: the version list the plugin updater already downloaded,
+		// then the same file fetched here. Both skip GitHub's API, whose
+		// 60-calls-an-hour limit shared hosts run out of.
+		$shared = get_transient( 'scout_updater_feed' );
+		if ( is_array( $shared ) && ! empty( $shared['ok'] ) && ! empty( $shared['releases'] ) ) {
+			$data = (array) $shared['releases'];
+		} else {
+			$response = wp_remote_get( 'https://github.com/' . self::REPO . '/releases/download/feed/releases.json', array( 'timeout' => 10, 'headers' => array( 'User-Agent' => 'ScoutBuild/' . SCOUT_HUB_VERSION ) ) );
+			if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
+				$decoded = json_decode( wp_remote_retrieve_body( $response ), true );
+				$data    = is_array( $decoded ) ? $decoded : array();
+			}
+		}
+		// Fallback: the API, up to three pages of 100. GitHub sorts by tag name,
+		// not date, so a plugin's releases can be spread across pages.
+		$use_api = ! $data;
+		for ( $page = 1; $use_api && $page <= 3; $page++ ) {
 			$response = wp_remote_get(
 				'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100&page=' . $page,
 				array(

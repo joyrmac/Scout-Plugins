@@ -301,12 +301,16 @@ final class Scout_Hub_Admin {
 					Scout_Hub_Features::refresh_if_stale( $checked );
 					?>
 					<p class="sh-inline sh-note">
-						<span class="sh-tag <?php echo $waiting ? 'is-update' : 'is-current'; ?>"><?php
+						<?php $offline = ! $waiting && Scout_Hub_Catalog::unreachable(); ?>
+						<span class="sh-tag <?php echo ( $waiting || $offline ) ? 'is-update' : 'is-current'; ?>"><?php
 							echo esc_html(
 								$waiting
 									/* translators: %d: features with an update */
 									? sprintf( _n( '%d update ready', '%d updates ready', $waiting, 'scout-build' ), $waiting )
-									: __( 'Everything is up to date', 'scout-build' )
+									: ( $offline
+										// The check failed, so "up to date" would be a guess.
+										? __( 'Could not reach GitHub. Try again in 15 minutes.', 'scout-build' )
+										: __( 'Everything is up to date', 'scout-build' ) )
 							);
 						?></span>
 						<?php if ( $checked ) : ?>

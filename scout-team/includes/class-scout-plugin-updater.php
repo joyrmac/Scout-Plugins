@@ -61,6 +61,9 @@ final class Scout_Plugin_Updater {
 	 */
 	const FEED_KEY = 'scout_updater_feed';
 
+	/** The version list the Release workflow publishes (see .github/workflows/release.yml). */
+	const FEED_URL = 'https://github.com/joyrmac/Scout-Plugins/releases/download/feed/releases.json';
+
 	/**
 	 * The shared list for this request, so each copy reads it at most once.
 	 * @var array|null
@@ -311,12 +314,21 @@ final class Scout_Plugin_Updater {
 			self::$feed_ok = (bool) $cached['ok'];
 			return self::$feed = (array) $cached['releases'];
 		}
-		// GitHub pages the list 100 at a time and sorts it by tag name, not by
-		// date, so a plugin's newest release can sit on a later page. Read up
-		// to three pages (300 releases); stop at the first short page.
-		$data = array();
-		$ok   = true;
-		for ( $page = 1; $page <= 3; $page++ ) {
+		// First choice: the version list the Release workflow attaches to the
+		// "feed" release. It is a plain download, so it is not held to GitHub's
+		// 60-calls-an-hour API limit that shared hosts run out of.
+		$data = null;
+		$response = wp_remote_get( self::FEED_URL, array( 'timeout' => 10, 'headers' => array( 'User-Agent' => 'ScoutPluginUpdater' ) ) );
+		if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
+			$decoded = json_decode( wp_remote_retrieve_body( $response ), true );
+			$data    = ( is_array( $decoded ) && $decoded ) ? $decoded : null;
+		}
+		$ok = is_array( $data );
+
+		// Fallback: the API. GitHub pages the list 100 at a time and sorts it by
+		// tag name, not by date, so a plugin's newest release can sit on a later
+		// page. Read up to three pages (300 releases); stop at the first short page.
+		for ( $page = 1; ! $ok && $page <= 3; $page++ ) {
 			$response = wp_remote_get(
 				'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100&page=' . $page,
 				array(
@@ -333,11 +345,14 @@ final class Scout_Plugin_Updater {
 				$ok = 1 < $page; // A later page failing still leaves a usable list.
 				break;
 			}
-			$data = array_merge( $data, $batch );
+			$data = array_merge( (array) $data, $batch );
 			if ( count( $batch ) < 100 ) {
+				$ok = true;
 				break;
 			}
+			$ok = 3 === $page;
 		}
+		$data = (array) $data;
 		$list = array();
 		foreach ( $ok ? $data : array() as $release ) {
 			if ( ! is_array( $release ) || empty( $release['tag_name'] ) ) {

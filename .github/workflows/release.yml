@@ -163,3 +163,29 @@ jobs:
             --notes "${notes}"
 
           echo "Published ${tag}"
+
+  feed:
+    # Sites read this one file to learn every version, instead of GitHub's API.
+    # The API allows 60 calls an hour per server address, and shared hosts
+    # (WP Engine) run out, which made sites show "Up to date" when they were
+    # not. Release downloads have no such limit.
+    name: Publish the version list
+    needs: [plan, release]
+    if: ${{ always() && needs.plan.result == 'success' && needs.release.result != 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build releases.json and attach it to the "feed" release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/${GH_REPO}/releases?per_page=100" \
+            | jq -s '[ .[][] | select(.tag_name != "feed") | {tag_name, draft, prerelease, body: ((.body // "")[0:1500]), assets: [ .assets[] | {name, browser_download_url} ]} ]' \
+            > releases.json
+          echo "$(jq length releases.json) releases listed."
+          if ! gh release view feed >/dev/null 2>&1; then
+            gh release create feed --prerelease --target "${GITHUB_SHA}" --title "Version list for Scout sites" \
+              --notes "Updated by the Release workflow after every release. Scout plugins read releases.json from here. Do not delete."
+          fi
+          gh release upload feed releases.json --clobber
