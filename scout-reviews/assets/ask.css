@@ -26,6 +26,10 @@
 	--recon-font: "Hanken Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
 	--recon-font-mono: "Geist Mono", ui-monospace, Menlo, monospace;
 	--srk-accent: #0E8FE6;
+	--srk-ink: #1D1D1F;
+	--srk-font-head: var(--recon-font);
+	--srk-font-body: var(--recon-font);
+	--srk-font-label: var(--recon-font-mono);
 
 	max-width: 1180px;
 	margin-right: 24px;
@@ -173,13 +177,13 @@ a.srk-btnlink, .srk a.button { display: inline-flex; align-items: center; text-d
 .srk-card {
 	box-sizing: border-box;
 	display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-	color: #1D1D1F; font-family: var(--recon-font);
+	color: var(--srk-ink); font-family: var(--srk-font-body);
 	border: 1px dashed #c3c4c7;
 }
 .srk-card p { margin: 0; text-wrap: balance; }
-.srk-biz { font-family: var(--recon-font-mono); font-size: 10pt; letter-spacing: .12em; text-transform: uppercase; color: #515154; }
-.srk-chead { font-weight: 600; color: var(--srk-accent); letter-spacing: -.02em; line-height: 1.08; }
-.srk-scan { font-family: var(--recon-font-mono); color: #515154; line-height: 1.35; }
+.srk-biz { font-family: var(--srk-font-label); font-size: 10pt; letter-spacing: .12em; text-transform: uppercase; color: #515154; }
+.srk-chead { font-family: var(--srk-font-head); font-weight: 600; color: var(--srk-accent); letter-spacing: -.02em; line-height: 1.08; }
+.srk-scan { font-family: var(--srk-font-label); color: #515154; line-height: 1.35; }
 
 /* Counter card: 4 x 6 in, portrait. */
 .srk-sheet-counter .srk-card { width: 4in; height: 6in; padding: .4in; gap: .2in; }

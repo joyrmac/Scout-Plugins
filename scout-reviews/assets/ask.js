@@ -118,7 +118,8 @@
 			return;
 		}
 		var wrap   = sheet.closest( '.srk' );
-		var accent = wrap ? getComputedStyle( wrap ).getPropertyValue( '--srk-accent' ) : '';
+		// The client's colors and fonts ride along as the wrapper's own style.
+		var brand  = wrap ? ( wrap.getAttribute( 'style' ) || '' ).replace( /"/g, '&quot;' ) : '';
 		var links  = Array.prototype.map.call(
 			document.querySelectorAll( 'link[rel="stylesheet"][id^="scout-reviews-"]' ),
 			function ( l ) { return '<link rel="stylesheet" href="' + l.href + '">'; }
@@ -137,7 +138,7 @@
 		doc.write(
 			'<!doctype html><html><head><meta charset="utf-8"><title>Review cards</title>' + links +
 			'<style>@page{size:letter;margin:.4in}html,body{margin:0;padding:0;background:#fff}</style></head>' +
-			'<body class="srk-print-frame"><div class="srk recon-theme" style="max-width:none;margin:0;padding:0;background:#fff;--srk-accent:' + accent.trim() + '">' +
+			'<body class="srk-print-frame"><div class="srk recon-theme" style="max-width:none;margin:0;padding:0;background:#fff;' + brand + '">' +
 			sheet.outerHTML + '</div></body></html>'
 		);
 		doc.close();
