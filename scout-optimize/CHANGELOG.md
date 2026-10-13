@@ -2,6 +2,10 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.8.1 (2026-10-13)
+
+- **Fix: the section nav was unstyled on theme screens.** A theme carrying an older copy of the admin kit loaded its old stylesheet. The kit (1.1.1) now always loads the stylesheet that matches its own code.
+
 ## 0.8.0 (2026-10-12)
 
 - **Same boxes as every Scout screen.** Settings sit in the shared white boxes: what to do, quality and largest size side by side, then this server and images already in the library. Same fields, same save.

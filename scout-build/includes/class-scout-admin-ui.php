@@ -34,18 +34,27 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.1.0';
+		const VERSION = '1.1.1';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
 			return ! defined( 'SCOUT_HUB_BRAND' ) || SCOUT_HUB_BRAND;
 		}
 
-		/** Load the kit stylesheet once, whichever copy asks first. */
+		/**
+		 * Load the kit stylesheet once. When this class came from a plugin, use the
+		 * stylesheet beside it, so the CSS always matches the markup even if an
+		 * older copy (in a theme, say) is the one asking.
+		 */
 		public static function enqueue( string $url ): void {
-			if ( ! wp_style_is( 'scout-admin', 'enqueued' ) ) {
-				wp_enqueue_style( 'scout-admin', $url, array(), self::VERSION );
+			if ( wp_style_is( 'scout-admin', 'enqueued' ) ) {
+				return;
 			}
+			$own = dirname( __DIR__ ) . '/assets/scout-admin.css';
+			if ( defined( 'WP_PLUGIN_DIR' ) && is_readable( $own ) && 0 === strpos( wp_normalize_path( $own ), wp_normalize_path( WP_PLUGIN_DIR ) ) ) {
+				$url = plugins_url( 'assets/scout-admin.css', __DIR__ );
+			}
+			wp_enqueue_style( 'scout-admin', $url, array(), self::VERSION );
 		}
 
 		/**

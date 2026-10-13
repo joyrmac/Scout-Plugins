@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.2.1 (2026-10-13)
+
+- **Fix: the section nav was unstyled on theme screens.** A theme carrying an older copy of the admin kit loaded its old stylesheet. The kit (1.1.1) now always loads the stylesheet that matches its own code.
+
 ## 1.2.0 (2026-10-12)
 
 - **Fits the Scout Build hub.** With Scout Build installed, the Scout menu opens on Business info and SEO as two plain screens, and the search checks move into the hub's Site health. Without the hub, Search health stays as the first screen.
