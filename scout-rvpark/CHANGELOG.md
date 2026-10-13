@@ -1,5 +1,9 @@
 # Scout — North Crest RV Park — Changelog
 
+## 0.1.3 (2026-10-13)
+
+- **Fix: /amenities/ shows the site's Amenities page again.** The amenity type asked for a list page at /amenities/, and a post type's list page outranks a page at the same address, so visitors could get an empty list. The list page is off, and permalinks refresh once on update.
+
 ## 0.1.2 (2026-10-12)
 
 - **Fix: a site crash when two Scout plugins load together.** Every Scout
