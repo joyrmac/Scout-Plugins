@@ -23,8 +23,19 @@ final class Scout_Core_Admin {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 	}
 
+	/** The menu these screens sit in: a theme's Build menu when there is one, else Scout's own. */
+	public static function parent() {
+		global $admin_page_hooks;
+		foreach ( array( 'scout-build', 'recon-build' ) as $slug ) {
+			if ( isset( $admin_page_hooks[ $slug ] ) ) {
+				return $slug;
+			}
+		}
+		return 'scout';
+	}
+
 	public static function assets( $hook ) {
-		if ( 'toplevel_page_scout' === $hook ) {
+		if ( 'toplevel_page_scout' === $hook || '_page_scout' === substr( (string) $hook, -11 ) ) {
 			Scout_Admin_UI::enqueue( plugins_url( 'assets/scout-admin.css', SCOUT_CORE_FILE ) );
 		}
 	}
@@ -42,17 +53,23 @@ final class Scout_Core_Admin {
 		$icon  = 'data:image/svg+xml;base64,' . base64_encode(
 			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0E8FE6" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>'
 		);
-		add_menu_page( $label, $label, 'manage_options', 'scout', array( __CLASS__, 'render' ), $icon, 3 );
+		// A theme's own Build menu (Scout Build, Recon Build) comes first: the
+		// screens join it so the site has one Scout menu, not two. The page slug
+		// stays "scout" either way, so every link to these screens still works.
+		$parent = self::parent();
+		if ( 'scout' === $parent ) {
+			add_menu_page( $label, $label, 'manage_options', 'scout', array( __CLASS__, 'render' ), $icon, 3 );
+		}
 		if ( self::hub() ) {
 			// The hub's Site health carries these checks, so this screen opens on Business info.
-			add_submenu_page( 'scout', 'Business info', 'Business info', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, 'Business info', 'Business info', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
 		} else {
-			add_submenu_page( 'scout', 'Search health', 'Search health', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
-			add_submenu_page( 'scout', 'Business info', 'Business info', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, 'Search health', 'Search health', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, 'Business info', 'Business info', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
 		}
-		add_submenu_page( 'scout', 'SEO', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, 'SEO', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
 		foreach ( self::groups() as $slug => $group ) {
-			add_submenu_page( 'scout', $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
 		}
 	}
 
