@@ -195,7 +195,7 @@
       return;
     }
     // A hello or a thanks is not a question: greet back and offer the buttons.
-    if (/^(hi+|hello|hey+|hiya|howdy|yo|good (morning|afternoon|evening)|thanks?( you)?|thank you|ok(ay)?)[\s!.,]*$/i.test(text.trim())) {
+    if (/^((hi+|hello|hey+|hiya|howdy|yo|sup|wh?at'?s ?up|good (morning|afternoon|evening))( there| y'?all| guys)?|thanks?( you)?|thank you|ty|ok(ay)?|cool)[\s!.,?]*$/i.test(text.trim())) {
       bot([{ text: 'Hi there. What can we help you with? Type your question, or pick one below.', chips: startChips() }]);
       return;
     }
