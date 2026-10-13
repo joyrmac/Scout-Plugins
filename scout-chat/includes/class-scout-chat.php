@@ -46,6 +46,7 @@ final class Scout_Chat {
 			'teaser'    => ! isset( $s['teaser'] ) || ! empty( $s['teaser'] ),
 			'teaser_by' => (string) ( $s['teaser_by'] ?? '' ),
 			'notify'    => (string) ( $s['notify'] ?? get_option( 'admin_email' ) ),
+			'alert'     => (string) ( $s['alert'] ?? '' ),
 			'book_url'  => (string) ( $s['book_url'] ?? '' ),
 			'work_url'  => (string) ( $s['work_url'] ?? '' ),
 			'photo_1'   => (string) ( $s['photo_1'] ?? '' ),
@@ -190,11 +191,15 @@ final class Scout_Chat {
 		}
 		$name  = sanitize_text_field( mb_substr( (string) $req->get_param( 'name' ), 0, 100 ) );
 		$email = sanitize_email( (string) $req->get_param( 'email' ) );
+		$phone = self::phone( (string) $req->get_param( 'phone' ) );
 		if ( '' === $name ) {
 			return new WP_Error( 'scout_chat_name', __( 'Add your name so we know who we are talking to.', 'scout-chat' ), array( 'status' => 400 ) );
 		}
+		if ( '' === $phone && ! is_email( $email ) ) {
+			return new WP_Error( 'scout_chat_email', __( 'Add a phone number or an email so we can reply.', 'scout-chat' ), array( 'status' => 400 ) );
+		}
 		if ( ! is_email( $email ) ) {
-			return new WP_Error( 'scout_chat_email', __( 'That email does not look quite right.', 'scout-chat' ), array( 'status' => 400 ) );
+			$email = '';
 		}
 		$kinds   = array(
 			'question' => __( 'Question', 'scout-chat' ),
@@ -231,18 +236,40 @@ final class Scout_Chat {
 		}
 		update_post_meta( $id, '_scout_chat_name', $name );
 		update_post_meta( $id, '_scout_chat_email', $email );
+		update_post_meta( $id, '_scout_chat_phone', $phone );
 		update_post_meta( $id, '_scout_chat_kind', $kind );
 		update_post_meta( $id, '_scout_chat_page', $page );
 		update_post_meta( $id, '_scout_chat_answered', 0 );
 
-		$to = sanitize_email( self::settings()['notify'] );
+		$contact = trim( ( '' !== $phone ? __( 'Text back:', 'scout-chat' ) . ' ' . self::pretty_phone( $phone ) . ' ' : '' ) . ( '' !== $email ? '<' . $email . '>' : '' ) );
+		$to      = sanitize_email( self::settings()['notify'] );
 		if ( is_email( $to ) ) {
-			$body = $kinds[ $kind ] . "\n" . $name . ' <' . $email . ">\n" . ( $page ? __( 'Page:', 'scout-chat' ) . ' ' . $page . "\n" : '' )
+			$body = $kinds[ $kind ] . "\n" . $name . ' ' . $contact . "\n" . ( '' !== $phone ? __( 'Tap to text:', 'scout-chat' ) . ' sms:+' . $phone . "\n" : '' ) . ( $page ? __( 'Page:', 'scout-chat' ) . ' ' . $page . "\n" : '' )
 				. "\n" . implode( "\n\n", $lines ) . "\n\n" . __( 'Open the inbox:', 'scout-chat' ) . ' ' . admin_url( 'edit.php?post_type=' . self::CPT );
-			wp_mail( $to, sprintf( /* translators: %s: question title */ __( 'New chat: %s', 'scout-chat' ), $title ), $body, array( 'Reply-To: ' . $name . ' <' . $email . '>' ) );
+			wp_mail( $to, sprintf( /* translators: %s: question title */ __( 'New chat: %s', 'scout-chat' ), $title ), $body, '' !== $email ? array( 'Reply-To: ' . $name . ' <' . $email . '>' ) : array() );
+		}
+		// A short alert for a phone: the carrier's email-to-text address, or any address.
+		$alert = sanitize_email( self::settings()['alert'] );
+		if ( is_email( $alert ) ) {
+			$short = $name . ': ' . wp_trim_words( '' !== $first ? $first : $kinds[ $kind ], 14 ) . ( '' !== $phone ? ' | ' . __( 'Text', 'scout-chat' ) . ' ' . self::pretty_phone( $phone ) : ( '' !== $email ? ' | ' . $email : '' ) );
+			wp_mail( $alert, __( 'Site chat', 'scout-chat' ), mb_substr( $short, 0, 150 ) );
 		}
 		do_action( 'scout_chat_lead', $id, $kind, $name, $email );
 		return array( 'ok' => true );
+	}
+
+	/** Digits with the US country code, or '' when it is not a phone number. */
+	public static function phone( string $raw ): string {
+		$d = preg_replace( '/\D/', '', $raw );
+		if ( 10 === strlen( $d ) ) {
+			$d = '1' . $d;
+		}
+		return ( 11 === strlen( $d ) && '1' === $d[0] ) ? $d : '';
+	}
+
+	/** 19195551234 becomes (919) 555-1234. */
+	public static function pretty_phone( string $d ): string {
+		return 11 === strlen( $d ) ? sprintf( '(%s) %s-%s', substr( $d, 1, 3 ), substr( $d, 4, 3 ), substr( $d, 7 ) ) : $d;
 	}
 
 	/** Pass a free-text question to the AI server. Falls back to collecting. */

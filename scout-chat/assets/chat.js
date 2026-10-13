@@ -224,26 +224,31 @@
   function leadForm() {
     var f = el('form', 'sc-form'); f.noValidate = true;
     var n = el('input'); n.type = 'text'; n.name = 'name'; n.autocomplete = 'name'; n.required = true;
-    var e = el('input'); e.type = 'email'; e.name = 'email'; e.autocomplete = 'email'; e.required = true;
+    var t = el('input'); t.type = 'tel'; t.name = 'phone'; t.autocomplete = 'tel'; t.inputMode = 'tel';
+    var e = el('input'); e.type = 'email'; e.name = 'email'; e.autocomplete = 'email';
     var hp = el('input'); hp.type = 'text'; hp.name = 'website'; hp.tabIndex = -1; hp.autocomplete = 'off'; hp.className = 'sc-hp'; hp.setAttribute('aria-hidden', 'true');
     var id = 'sc' + Math.random().toString(36).slice(2, 7);
-    n.id = id + 'n'; e.id = id + 'e';
+    n.id = id + 'n'; t.id = id + 't'; e.id = id + 'e';
     var ln = el('label', null, 'Your name'); ln.htmlFor = n.id;
-    var le = el('label', null, 'Email'); le.htmlFor = e.id;
+    var lt = el('label', null, 'Phone, to text you back'); lt.htmlFor = t.id;
+    var le = el('label', null, 'Or email'); le.htmlFor = e.id;
     var err = el('p', 'sc-err'); err.setAttribute('role', 'alert');
     var b = el('button', 'sc-submit', 'Send'); b.type = 'submit';
-    [ln, n, le, e, hp, err, b].forEach(function (x) { f.appendChild(x); });
+    [ln, n, lt, t, le, e, hp, err, b].forEach(function (x) { f.appendChild(x); });
     f.addEventListener('submit', function (ev) {
       ev.preventDefault(); err.textContent = '';
       if (!n.value.trim()) { err.textContent = 'Add your name so we know who we are talking to.'; n.focus(); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.value.trim())) { err.textContent = 'That email does not look quite right.'; e.focus(); return; }
+      var digits = t.value.replace(/\D/g, ''), mail = e.value.trim();
+      if (!digits && !mail) { err.textContent = 'Add a phone number or an email so we can reply.'; t.focus(); return; }
+      if (digits && (digits.length < 10 || digits.length > 11)) { err.textContent = 'That phone number does not look quite right.'; t.focus(); return; }
+      if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { err.textContent = 'That email does not look quite right.'; e.focus(); return; }
       b.disabled = true; b.textContent = 'Sending';
-      post('/lead', { name: n.value.trim(), email: e.value.trim(), website: hp.value, kind: state.kind, history: history(), page: location.href }).then(function (r) {
+      post('/lead', { name: n.value.trim(), phone: t.value.trim(), email: e.value.trim(), website: hp.value, kind: state.kind, history: history(), page: location.href }).then(function (r) {
         if (r.error) { err.textContent = r.error; b.disabled = false; b.textContent = 'Send'; return; }
         track('lead_submit', { link_label: state.kind });
         f.querySelectorAll('input,button').forEach(function (x) { x.disabled = true; }); b.textContent = 'Sent';
         state.done = true;
-        bot([{ kind: 'done', title: 'Sent', text: 'Thanks, ' + n.value.trim().split(' ')[0] + '. ' + Team + ' will reply to ' + e.value.trim() + ', usually within one business day.' },
+        bot([{ kind: 'done', title: 'Sent', text: 'Thanks, ' + n.value.trim().split(' ')[0] + '. ' + Team + (digits ? ' will text you at ' + t.value.trim() : ' will reply to ' + mail) + ', usually within one business day.' },
              { text: 'Anything else?', chips: [CHIPS.book, CHIPS.other] }]);
       });
     });

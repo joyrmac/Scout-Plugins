@@ -1,6 +1,11 @@
 # Scout Chat changelog
 
 
+## 0.2.0 (2026-10-13)
+
+- **Text back from your own phone.** The chat form asks for a phone number to text the visitor back, with email as the other choice (one of the two is enough). The email alert and the inbox show the number with a Text back button.
+- **A text alert for new questions.** New setting "Text me new questions": a short message with the question and the number to text back, sent to your carrier's email-to-text address (Verizon, T-Mobile, Google Fi). No texting service or registration needed.
+
 ## 0.1.12 (2026-10-13)
 
 - **More hellos.** "whatsup", "what's up", "sup", "hello there", "hi y'all", "ty" and "cool" get the greeting too, instead of the ask-for-email step.
