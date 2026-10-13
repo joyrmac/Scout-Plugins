@@ -263,8 +263,10 @@ final class Scout_Plugin_Updater {
 	 */
 	private function fetch_release(): ?array {
 		$releases = self::feed();
-		// Releases come back newest first, so the first match wins.
+		// GitHub sorts by tag name as text ("v0.4.9" before "v0.4.11"), so
+		// compare version numbers and keep the highest.
 		$prefix = $this->slug . '-v';
+		$best   = null;
 		foreach ( $releases as $release ) {
 			if ( ! is_array( $release ) || empty( $release['tag_name'] ) ) {
 				continue;
@@ -281,14 +283,17 @@ final class Scout_Plugin_Updater {
 				continue; // Tagged but no built asset; not installable.
 			}
 
-			return array(
-				'version' => substr( (string) $release['tag_name'], strlen( $prefix ) ),
-				'package' => $package,
-				'notes'   => isset( $release['body'] ) ? (string) $release['body'] : '',
-			);
+			$version = substr( (string) $release['tag_name'], strlen( $prefix ) );
+			if ( null === $best || version_compare( $version, $best['version'], '>' ) ) {
+				$best = array(
+					'version' => $version,
+					'package' => $package,
+					'notes'   => isset( $release['body'] ) ? (string) $release['body'] : '',
+				);
+			}
 		}
 
-		return null;
+		return $best;
 	}
 
 	/**
@@ -306,21 +311,34 @@ final class Scout_Plugin_Updater {
 			self::$feed_ok = (bool) $cached['ok'];
 			return self::$feed = (array) $cached['releases'];
 		}
-		$response = wp_remote_get(
-			'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100',
-			array(
-				'timeout' => 10,
-				'headers' => array(
-					'Accept'     => 'application/vnd.github+json',
-					// GitHub rejects API requests that do not identify themselves.
-					'User-Agent' => 'ScoutPluginUpdater',
-				),
-			)
-		);
+		// GitHub pages the list 100 at a time and sorts it by tag name, not by
+		// date, so a plugin's newest release can sit on a later page. Read up
+		// to three pages (300 releases); stop at the first short page.
+		$data = array();
+		$ok   = true;
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$response = wp_remote_get(
+				'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100&page=' . $page,
+				array(
+					'timeout' => 10,
+					'headers' => array(
+						'Accept'     => 'application/vnd.github+json',
+						// GitHub rejects API requests that do not identify themselves.
+						'User-Agent' => 'ScoutPluginUpdater',
+					),
+				)
+			);
+			$batch = ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) ? json_decode( wp_remote_retrieve_body( $response ), true ) : null;
+			if ( ! is_array( $batch ) ) {
+				$ok = 1 < $page; // A later page failing still leaves a usable list.
+				break;
+			}
+			$data = array_merge( $data, $batch );
+			if ( count( $batch ) < 100 ) {
+				break;
+			}
+		}
 		$list = array();
-		$ok   = ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response );
-		$data = $ok ? json_decode( wp_remote_retrieve_body( $response ), true ) : null;
-		$ok   = $ok && is_array( $data );
 		foreach ( $ok ? $data : array() as $release ) {
 			if ( ! is_array( $release ) || empty( $release['tag_name'] ) ) {
 				continue;

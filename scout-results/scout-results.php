@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Case Results
  * Description:       A law firm's case results with the firm's approval on every one and the state disclaimer printed next to every result, shown in a grid visitors can filter by practice area.
- * Version:           0.1.3
+ * Version:           0.1.4
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_RESULTS_VERSION', '0.1.3' );
+define( 'SCOUT_RESULTS_VERSION', '0.1.4' );
 define( 'SCOUT_RESULTS_FILE', __FILE__ );
 define( 'SCOUT_RESULTS_URL', plugin_dir_url( __FILE__ ) );
 
