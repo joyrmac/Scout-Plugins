@@ -47,3 +47,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check the Scout Core APIs other plugins depend on
         run: bash tools/core-contract.sh
+
+  slop-check:
+    name: Code slop check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Emoji, placeholders, debug output and stray copy files fail; filler
+      # comments and visible em dashes warn. Rules: tools/slop-check.py.
+      - name: Check for code slop
+        run: python3 tools/slop-check.py
