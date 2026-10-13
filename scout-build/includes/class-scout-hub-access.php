@@ -72,7 +72,14 @@ final class Scout_Hub_Access {
 	 */
 	public static function included( string $tier ): bool {
 		$plan = self::plan();
-		if ( '' === $plan || 'addon' === $tier || ! isset( self::PLANS[ $tier ] ) ) {
+		if ( '' === $plan ) {
+			return false;
+		}
+		// The Whole System includes every add-on (Joy, 2026-10-13).
+		if ( 'addon' === $tier ) {
+			return 'whole' === $plan;
+		}
+		if ( ! isset( self::PLANS[ $tier ] ) ) {
 			return false;
 		}
 		$order = array_keys( self::PLANS );

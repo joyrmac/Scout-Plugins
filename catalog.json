@@ -92,7 +92,7 @@
       "slug": "scout-results",
       "name": "Case results",
       "summary": "Show the firm's case results with the firm's approval on each one and the disclaimer next to every result. Visitors can filter by practice area.",
-      "tier": "build",
+      "tier": "addon",
       "law": true,
       "requires": []
     },
@@ -100,7 +100,7 @@
       "slug": "scout-chat",
       "name": "Chat assistant",
       "summary": "A chat in the corner of your site that answers common questions, books calls and takes change requests. Every other question lands in your inbox with the visitor's email, and AI answers start once it's connected.",
-      "tier": "build",
+      "tier": "addon",
       "law": false,
       "requires": []
     },
@@ -108,7 +108,7 @@
       "slug": "scout-cards",
       "name": "Digital business cards and link page",
       "summary": "A card for each person that saves to a phone in one tap, a QR code to share it, and a link page for your social bios.",
-      "tier": "build",
+      "tier": "addon",
       "law": false,
       "requires": [],
       "not_with_themes": [
@@ -120,7 +120,7 @@
       "slug": "scout-reviews",
       "name": "Reviews and review requests",
       "summary": "Shows your Google, Yelp and Facebook reviews on the site, plus one review link with a QR code, printable cards and ready-to-send messages.",
-      "tier": "build",
+      "tier": "partnership",
       "law": false,
       "requires": []
     },
