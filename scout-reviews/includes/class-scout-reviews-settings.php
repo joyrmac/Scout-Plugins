@@ -29,6 +29,7 @@ final class Scout_Reviews_Settings {
 			'profiles'           => array(), // slug => { rating, count, url, write_url }.
 			'disclaimer'         => '',
 			'load_styles'        => true,
+			'auto_add_five'      => false, // Publish new 5-star Google reviews without the inbox.
 			'purge_on_uninstall' => false,
 		);
 	}
@@ -122,6 +123,7 @@ final class Scout_Reviews_Settings {
 
 		$out['disclaimer']         = sanitize_textarea_field( (string) ( $input['disclaimer'] ?? '' ) );
 		$out['load_styles']        = ! empty( $input['load_styles'] );
+		$out['auto_add_five']      = ! empty( $input['auto_add_five'] );
 		$out['purge_on_uninstall'] = ! empty( $input['purge_on_uninstall'] );
 
 		Scout_Reviews_Query::flush();
@@ -200,6 +202,13 @@ final class Scout_Reviews_Settings {
 						<td>
 							<textarea id="scout-reviews-disclaimer" class="large-text" rows="3" name="<?php echo esc_attr( $name . '[disclaimer]' ); ?>"><?php echo esc_textarea( $settings['disclaimer'] ); ?></textarea>
 							<p class="description"><?php esc_html_e( 'Shown under every reviews section. Law firms: your state bar may require one with testimonials, for example "Past results do not guarantee a similar outcome." Check your state\'s rules.', 'scout-reviews' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'New 5-star reviews', 'scout-reviews' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[auto_add_five]' ); ?>" value="1" <?php checked( ! empty( $settings['auto_add_five'] ) ); ?> /> <?php esc_html_e( 'Add new 5-star Google reviews to the site automatically, on the pages they match. Everything else still waits in the Review inbox.', 'scout-reviews' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Leave off for law firms: bar rules expect a person to approve each testimonial.', 'scout-reviews' ); ?></p>
 						</td>
 					</tr>
 					<tr>

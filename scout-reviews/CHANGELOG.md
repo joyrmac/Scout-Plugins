@@ -1,5 +1,9 @@
 # Scout Reviews: Changelog
 
+## 0.4.8 (2026-10-13)
+
+- **New 5-star Google reviews can go live on their own.** Review settings > "New 5-star reviews": when on, each new 5-star review from the Google sync is published on the pages it matches (topic keywords). Lower ratings and notes from the review page still wait in the Review inbox. Off by default; leave it off for law firms.
+
 ## 0.4.7 (2026-10-13)
 
 - **TripAdvisor is a review source**, with stars and a "View on TripAdvisor" link. For RV parks, restaurants and venues.
