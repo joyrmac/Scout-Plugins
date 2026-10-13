@@ -1,0 +1,99 @@
+/* Scout Redirects screen. Sits on top of the shared Scout admin kit
+   (scout-admin.css) and only adds what this screen needs. */
+
+body[class*="scout-redirects"] .sh .button,
+body[class*="scout-redirects"] .sh input[type="text"],
+body[class*="scout-redirects"] .sh input[type="search"],
+body[class*="scout-redirects"] .sh input[type="number"],
+body[class*="scout-redirects"] .sh select { min-height: 44px; }
+body[class*="scout-redirects"] .sh .button { display: inline-flex; align-items: center; justify-content: center; line-height: 1.2; }
+body[class*="scout-redirects"] .sh a:focus-visible,
+body[class*="scout-redirects"] .sh .button:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
+
+/* Stats */
+.sh-grid.sr-stats { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.sr-stat { padding: 20px 22px; }
+.sr-stat-label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; color: var(--sh-text-2); }
+.sr-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sh-accent); flex: none; }
+.sr-stat-num { margin: 8px 0 0; font-size: 40px; line-height: 1; font-weight: 600; letter-spacing: -.03em; color: var(--sh-text); font-variant-numeric: tabular-nums; }
+
+/* Two columns: the redirect list and the watch panels */
+.sr-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.sr-layout > .sh-box, .sr-side > .sh-box { margin-top: 16px; }
+.sr-side { min-width: 0; }
+@media (max-width: 1400px) { .sr-layout { grid-template-columns: 1fr; gap: 0; } }
+
+.sr-path { font-family: var(--sh-mono); font-size: 13px; color: var(--sh-text); overflow-wrap: anywhere; }
+.sr-empty { margin: 4px 0 0; padding: 16px; border-radius: 12px; background: var(--sh-surface-2); color: var(--sh-text-2); }
+.sr-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 980px; background: var(--sh-surface-2); color: var(--sh-text-2); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; vertical-align: 1px; white-space: nowrap; }
+.sr-chip { display: inline-block; padding: 3px 12px; border-radius: 980px; background: var(--sh-surface-2); color: var(--sh-text-2); font-family: var(--sh-mono); font-size: 12px; font-weight: 600; }
+.sr-inline { display: inline; margin: 0; }
+
+/* Add form */
+.sr-add { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 10px; align-items: end; margin-top: 14px; }
+.sr-field { display: grid; gap: 6px; margin: 0; min-width: 0; }
+.sr-field label { font-weight: 600; font-size: 13px; color: var(--sh-text-2); }
+.sh .sr-field input[type="text"] { width: 100%; font-family: var(--sh-mono); font-size: 13px; }
+.sr-field-go { display: flex; gap: 6px; }
+.sr-hint { margin-top: 10px; }
+@media (max-width: 782px) {
+	.sr-add { grid-template-columns: 1fr; }
+	.sr-field-go .button { flex: 1 1 auto; }
+}
+
+.sr-search { display: flex; gap: 8px; margin-top: 18px; }
+.sh .sr-search input[type="search"] { flex: 1 1 auto; max-width: 360px; }
+
+/* Redirect table */
+.sr-table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+.sr-table th { font-family: var(--sh-mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; color: var(--sh-text-3); text-align: left; padding: 0 12px 10px 0; border-bottom: 1px solid var(--sh-border); }
+.sr-table td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--sh-border); vertical-align: middle; color: var(--sh-text-2); }
+.sr-table td.sr-path a { color: var(--sh-accent-text); text-decoration: none; }
+.sr-table td.sr-path a:hover { text-decoration: underline; }
+.sr-table th.sr-num { text-align: right; }
+.sr-table td.sr-num { text-align: right; font-variant-numeric: tabular-nums; color: var(--sh-text); font-weight: 600; }
+.sr-table .sr-when { white-space: nowrap; font-size: 13px; }
+.sr-table .sr-actions { white-space: nowrap; text-align: right; padding-right: 0; }
+.sr-table tr.is-editing td { background: var(--sh-glow); }
+@media (max-width: 960px) {
+	.sr-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+	.sr-table, .sr-table tbody, .sr-table tr, .sr-table td { display: block; width: 100%; }
+	.sr-table tr { padding: 12px 0; border-bottom: 1px solid var(--sh-border); }
+	.sr-table td, .sr-table td.sr-num { border: 0; padding: 3px 0; text-align: left; }
+	.sr-table td[data-label] { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; }
+	.sr-table td[data-label]::before { content: attr(data-label); flex: none; width: 92px; font-family: var(--sh-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--sh-text-3); }
+	.sr-table td.sr-actions { text-align: left; padding-top: 6px; margin-left: -16px; }
+}
+
+.sr-pager { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+.sr-pager .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border-radius: 10px; text-decoration: none; color: var(--sh-accent-text); }
+.sr-pager .page-numbers.current { background: var(--sh-accent); color: #fff; }
+
+/* Missing pages and broken links */
+.sr-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.sr-list li { display: flex; gap: 12px; align-items: center; padding: 14px 0; border-top: 1px solid var(--sh-border); margin: 0; }
+.sr-list-text { flex: 1 1 auto; min-width: 0; }
+.sr-list-text p { margin: 0; }
+.sr-list-text .sh-note { margin-top: 3px; }
+.sr-strong { font-weight: 600; color: var(--sh-text); line-height: 1.4; }
+.sr-strong .sr-path { font-weight: 500; }
+.sr-list-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; flex: none; }
+.sr-flag { flex: none; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(251, 176, 36, .2); color: var(--sh-warn); font-weight: 700; font-size: 13px; }
+.sr-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 14px; border-top: 1px solid var(--sh-border); }
+@media (max-width: 600px) {
+	.sr-list li { flex-wrap: wrap; }
+	.sr-list-actions { width: 100%; justify-content: flex-start; }
+}
+
+/* Settings and import */
+.sr-check { margin: 14px 0 0; }
+.sr-check + .sh-note { margin: 4px 0 0 26px; }
+.sr-field-cap { margin-top: 16px; max-width: 220px; }
+.sr-import { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.sr-import label { font-weight: 600; width: 100%; }
+.sr-import input[type="file"] { flex: 1 1 220px; min-height: 44px; }
+.sr-export { margin-top: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+	body[class*="scout-redirects"] .sh * { transition: none !important; scroll-behavior: auto !important; }
+}

@@ -57,6 +57,46 @@
       "requires": []
     },
     {
+      "slug": "scout-redirects",
+      "name": "Redirects and missing pages",
+      "summary": "Forward old page addresses to new ones, see which missing pages people hit, and fix a broken link with one click.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-hours",
+      "name": "Hours and holiday closures",
+      "summary": "Set your hours and holiday closures once. The site shows an up-to-date Open now line, Google reads the hours, and you get a reminder to update your Google profile before each holiday.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-accessibility",
+      "name": "Accessibility statement and checks",
+      "summary": "An honest accessibility statement page, weekly checks for image descriptions, heading order and form labels, and a launch checklist for contrast and keyboard use.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-team",
+      "name": "Team credentials",
+      "summary": "A profile page for each person with their real credentials, such as bar admissions, education, awards and military service, plus a team grid that tells Google who your people are.",
+      "tier": "build",
+      "law": true,
+      "requires": []
+    },
+    {
+      "slug": "scout-results",
+      "name": "Case results",
+      "summary": "Show the firm's case results with the firm's approval on each one and the disclaimer next to every result. Visitors can filter by practice area.",
+      "tier": "build",
+      "law": true,
+      "requires": []
+    },
+    {
       "slug": "scout-chat",
       "name": "Chat assistant",
       "summary": "A chat in the corner of your site that answers common questions, books calls and takes change requests. Every other question lands in your inbox with the visitor's email, and AI answers start once it's connected.",
