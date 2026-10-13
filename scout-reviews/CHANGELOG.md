@@ -1,5 +1,9 @@
 # Scout Reviews: Changelog
 
+## 0.4.9 (2026-10-13)
+
+- **Cleaner Scout menu bar.** The shared admin kit (1.2.0) sorts the screens into five groups (Overview, Search, Website, Reviews, Chat). The open group's screens show as tabs underneath, so a site with many features no longer gets a wall of links, and on a phone the bar fits on one line.
+
 ## 0.4.8 (2026-10-13)
 
 - **New 5-star Google reviews can go live on their own.** Review settings > "New 5-star reviews": when on, each new 5-star review from the Google sync is published on the pages it matches (topic keywords). Lower ratings and notes from the review page still wait in the Review inbox. Off by default; leave it off for law firms.

@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.3.2 (2026-10-13)
+
+- **Cleaner Scout menu bar.** The shared admin kit (1.2.0) sorts the screens into five groups (Overview, Search, Website, Reviews, Chat). The open group's screens show as tabs underneath, so a site with many features no longer gets a wall of links, and on a phone the bar fits on one line.
+- **Your features, Site health and Request a change now use the screen name as the heading,** with the site name above it, so the title fits on a phone.
+
 ## 0.3.1 (2026-10-13)
 
 - **Fix: the section nav was unstyled on theme screens.** A theme carrying an older copy of the admin kit loaded its old stylesheet. The kit (1.1.1) now always loads the stylesheet that matches its own code.
