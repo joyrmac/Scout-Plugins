@@ -93,22 +93,35 @@ final class Scout_Hub_Catalog {
 		if ( is_array( $cached ) ) {
 			return $cached;
 		}
-		$out      = array();
-		$response = wp_remote_get(
-			'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100',
-			array(
-				'timeout' => 10,
-				'headers' => array(
-					'Accept'     => 'application/vnd.github+json',
-					'User-Agent' => 'ScoutBuild/' . SCOUT_HUB_VERSION,
-				),
-			)
-		);
-		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+		$out  = array();
+		$data = array();
+		// Up to three pages of 100: GitHub sorts by tag name, not date, so a
+		// plugin's releases can be spread across pages.
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$response = wp_remote_get(
+				'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100&page=' . $page,
+				array(
+					'timeout' => 10,
+					'headers' => array(
+						'Accept'     => 'application/vnd.github+json',
+						'User-Agent' => 'ScoutBuild/' . SCOUT_HUB_VERSION,
+					),
+				)
+			);
+			$batch = ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) ? json_decode( wp_remote_retrieve_body( $response ), true ) : null;
+			if ( ! is_array( $batch ) ) {
+				break;
+			}
+			$data = array_merge( $data, $batch );
+			if ( count( $batch ) < 100 ) {
+				break;
+			}
+		}
+		if ( ! $data ) {
 			set_transient( self::RELEASES_KEY, array( '_unreachable' => true ), 15 * MINUTE_IN_SECONDS );
 			return array( '_unreachable' => true );
 		}
-		foreach ( (array) json_decode( wp_remote_retrieve_body( $response ), true ) as $release ) {
+		foreach ( $data as $release ) {
 			if ( ! is_array( $release ) || ! empty( $release['draft'] ) || ! empty( $release['prerelease'] ) ) {
 				continue;
 			}
