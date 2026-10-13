@@ -12,10 +12,11 @@
  *   ... screen content in .sh-box sections ...
  *   Scout_Admin_UI::close();
  *
- * open() also prints the section nav: one pill per screen in the same sidebar
- * menu (Features, Site health, Business info, SEO, AI search, ...), read live
- * from WordPress's own menu, so every Scout screen shows the same row in the
- * same order and a new plugin appears in it without anyone editing a list.
+ * open() also prints the section nav, read live from WordPress's own menu: a
+ * short row of groups (Overview, Search, Website, Reviews, Chat) with the open
+ * group's screens as tabs underneath. Every Scout screen shows the same nav,
+ * and a new plugin lands in the right group without anyone editing a list
+ * (scout_admin_nav_group moves a screen to another group).
  * Plugins add a short live hint to their pill with the scout_admin_nav_hint
  * filter (slug, e.g. "5 on" or "5 of 7"). A screen hidden from the sidebar
  * passes the slug it belongs under as $nav, so its pill still lights up.
@@ -34,7 +35,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.1.1';
+		const VERSION = '1.2.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -84,8 +85,41 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			echo '<hr class="wp-header-end" style="display:none">';
 		}
 
+		/** The nav groups, in the order they show. */
+		const GROUPS = array(
+			'home'    => 'Overview',
+			'search'  => 'Search',
+			'website' => 'Website',
+			'reviews' => 'Reviews',
+			'chat'    => 'Chat',
+		);
+
 		/**
-		 * The section nav: every screen in this screen's sidebar menu, in sidebar order.
+		 * Which nav group a sidebar screen belongs to. Plugins can move a screen
+		 * with the scout_admin_nav_group filter (group key, slug, label).
+		 */
+		public static function group( string $slug, string $label ): string {
+			$s = strtolower( $slug );
+			$l = strtolower( $label );
+			if ( false !== strpos( $s . ' ' . $l, 'review' ) ) {
+				$group = 'reviews';
+			} elseif ( false !== strpos( $s . ' ' . $l, 'chat' ) ) {
+				$group = 'chat';
+			} elseif ( 0 === strpos( $s, 'site-build-features' ) || ( 'site-build' === strtok( $s, '&' ) && ( 'features' === $l || false !== strpos( $s, '&tab=' ) ) ) ) {
+				$group = 'home';
+			} elseif ( 'scout' === strtok( $s, '&' ) || preg_match( '/ai-search|analytics|robots/', $s ) ) {
+				$group = 'search';
+			} else {
+				$group = 'website';
+			}
+			$group = (string) apply_filters( 'scout_admin_nav_group', $group, $slug, $label );
+			return isset( self::GROUPS[ $group ] ) ? $group : 'website';
+		}
+
+		/**
+		 * The section nav: every screen in this screen's sidebar menu, sorted into a
+		 * short row of groups (Overview, Search, Website, Reviews, Chat). The open
+		 * group's screens show as tabs underneath. Empty groups never show.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
 		 */
@@ -114,7 +148,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			if ( count( $items ) < 2 ) {
 				return;
 			}
-			// The pill that matches the address best: same page and tab, else the page's plain entry.
+			// The entry that matches the address best: same page and tab, else the page's plain entry.
 			$active = '';
 			$target = '' !== $current ? $current : $page . ( '' !== $tab ? '&tab=' . $tab : '' );
 			foreach ( $items as $item ) {
@@ -129,20 +163,52 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					}
 				}
 			}
-			echo '<nav class="sh-nav" aria-label="' . esc_attr( self::branded() ? 'Scout' : 'Site Build' ) . '">';
+			// Sort into groups, keeping sidebar order inside each.
+			$groups = array_fill_keys( array_keys( self::GROUPS ), array() );
+			$open   = '';
 			foreach ( $items as $item ) {
 				$slug  = (string) $item[2];
-				$url   = false !== strpos( $slug, '.php' ) ? admin_url( $slug ) : admin_url( 'admin.php?page=' . $slug );
 				$label = trim( wp_strip_all_tags( preg_replace( '#<span[^>]*class="[^"]*(update-plugins|awaiting-mod|count)[^"]*"[^>]*>.*?</span>#s', '', (string) $item[0] ) ) );
-				$hint  = (string) apply_filters( 'scout_admin_nav_hint', '', $slug );
-				$on    = $slug === $active;
+				$key   = self::group( $slug, $label );
+				$groups[ $key ][] = array(
+					'url'   => false !== strpos( $slug, '.php' ) ? admin_url( $slug ) : admin_url( 'admin.php?page=' . $slug ),
+					'label' => $label,
+					'hint'  => (string) apply_filters( 'scout_admin_nav_hint', '', $slug ),
+					'on'    => $slug === $active,
+				);
+				if ( $slug === $active ) {
+					$open = $key;
+				}
+			}
+			$groups = array_filter( $groups );
+			if ( '' === $open ) {
+				$open = (string) array_key_first( $groups );
+			}
+			$link = static function ( array $entry, string $text, bool $on, string $hint ): void {
 				printf(
 					'<a href="%1$s"%2$s>%3$s%4$s</a>',
-					esc_url( $url ),
+					esc_url( $entry['url'] ),
 					$on ? ' class="is-active" aria-current="page"' : '',
-					esc_html( $label ),
+					esc_html( $text ),
 					'' !== $hint ? '<span class="sh-nav-hint">' . esc_html( $hint ) . '</span>' : ''
 				);
+			};
+			echo '<nav class="sh-nav" aria-label="' . esc_attr( self::branded() ? 'Scout' : 'Site Build' ) . '">';
+			if ( count( $groups ) > 1 ) {
+				echo '<div class="sh-nav-groups">';
+				foreach ( $groups as $key => $entries ) {
+					// A one-screen group links straight to it and carries its hint.
+					$solo = 1 === count( $entries );
+					$link( $entries[0], self::GROUPS[ $key ], $key === $open, $solo ? $entries[0]['hint'] : '' );
+				}
+				echo '</div>';
+			}
+			if ( count( $groups[ $open ] ?? array() ) > 1 || 1 === count( $groups ) ) {
+				echo '<div class="sh-nav-sub">';
+				foreach ( $groups[ $open ] as $entry ) {
+					$link( $entry, $entry['label'], $entry['on'], $entry['hint'] );
+				}
+				echo '</div>';
 			}
 			echo '</nav>';
 		}

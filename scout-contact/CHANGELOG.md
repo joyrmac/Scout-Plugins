@@ -1,5 +1,8 @@
 # Scout Call Buttons changelog
 
+## 0.1.2 (2026-10-13)
+- Ships admin kit 1.2.0: the Scout menu bar is grouped into five tabs (Overview, Search, Website, Reviews, Chat), with the open group's screens underneath.
+
 ## 0.1.1 (2026-10-13)
 - Ships the current Scout admin kit (1.1.1), so the settings screen shows the shared section nav and the kit check passes.
 

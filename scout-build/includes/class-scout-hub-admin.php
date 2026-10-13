@@ -198,7 +198,9 @@ final class Scout_Hub_Admin {
 			'health'   => __( 'Site health', 'scout-build' ),
 		);
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'features';
-		Scout_Admin_UI::open( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ), '', $tabs[ $tab ] );
+		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
+		$site = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
+		Scout_Admin_UI::open( $tabs[ $tab ], '', $site );
 		?>
 			<?php self::notice(); ?>
 			<?php
