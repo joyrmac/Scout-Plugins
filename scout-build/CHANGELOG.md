@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.0 (2026-10-13)
+
+- **The client setup file.** A client theme can carry `scout-setup.json` with the client's own facts (team, review page, chat, hours). When a feature is on, Scout Build fills it in on the next admin page load, so nobody retypes it. A section runs again only when the theme ships new facts, and it only fills blanks: anything already set in WordPress stays. Photos can be theme files; each becomes one Media Library item. Format in `includes/class-scout-hub-setup.php`.
+
 ## 0.3.10 (2026-10-13)
 
 - **Scout in the toolbar.** The black bar at the top of every page shows a cerulean bolt and "Scout" ("Site Build" on unbranded sites). It opens Features, and its menu holds Site health and Request a change, which used to sit alone in the bar.
