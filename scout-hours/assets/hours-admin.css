@@ -1,0 +1,85 @@
+/* Scout Build -> Hours. Sits on top of the shared Scout admin kit. */
+
+.shh-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.shh-layout .sh-box:first-child { margin-top: 16px; }
+@media (max-width: 1100px) { .shh-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.shh-box-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Confirmation */
+.shh-confirm.is-pending { border-color: rgba(251, 176, 36, .55); background: #FFFBF2; }
+.shh-confirm-head { display: flex; align-items: center; gap: 10px; }
+.shh-confirm .sh-pill { font-size: 13px; padding: 5px 12px; }
+.shh-confirm-text { color: var(--sh-text-2); margin: 10px 0 6px; max-width: 640px; }
+.shh-check-row { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; }
+.sh .shh-check-row input[type="checkbox"] { margin: 0; }
+
+/* Weekly hours */
+.shh-days { margin-top: 8px; }
+.shh-day { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 6px 14px; margin: 0; padding: 10px 0; border: 0; border-top: 1px solid var(--sh-border); min-width: 0; }
+.shh-day:first-child { border-top: 0; }
+.shh-day-name { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; font-size: 15px; cursor: pointer; }
+.sh .shh-day-name input[type="checkbox"] { margin: 0; width: 20px; height: 20px; }
+.sh .shh-day-name input[type="checkbox"]:checked::before { width: 24px; height: 24px; margin: -3px 0 0 -3px; }
+.shh-closed-label { margin: 0; color: var(--sh-text-3); font-size: 15px; display: none; }
+.shh-times { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-width: 0; }
+.shh-range { display: flex; align-items: center; gap: 8px; }
+.sh .shh-range input[type="time"] { min-height: 44px; width: 140px; font-size: 15px; font-variant-numeric: tabular-nums; }
+.shh-to { color: var(--sh-text-3); }
+.shh-split { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--sh-text-2); font-size: 13px; cursor: pointer; }
+.sh .shh-split input[type="checkbox"] { margin: 0; }
+
+/* With the script running, closed days and unused second ranges fold away. */
+.shh-js .shh-day.is-closed .shh-times { display: none; }
+.shh-js .shh-day.is-closed .shh-closed-label { display: block; }
+.shh-js .shh-day:not(.is-split) .shh-range-2 { display: none; }
+
+.shh-radios { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; border: 0; }
+.shh-radios label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.sh .shh-radios input[type="radio"] { margin: 0; }
+.shh-save { margin: 16px 0 0; }
+.sh .shh-save .button-primary { min-height: 44px; padding: 8px 28px; font-size: 15px; }
+
+/* Closures */
+.shh-closures { list-style: none; margin: 4px 0 0; padding: 0; }
+.shh-closures li { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--sh-border); }
+.shh-closures li:last-child { border-bottom: 1px solid var(--sh-border); }
+.shh-closure-main { min-width: 0; }
+.shh-closure-name { margin: 0; font-weight: 600; font-size: 15px; }
+.shh-closure-when { margin: 2px 0 0; font-family: var(--sh-mono); font-size: 12px; color: var(--sh-text-2); }
+.shh-closure-note { margin: 4px 0 0; color: var(--sh-text-3); font-size: 13px; }
+.sh .shh-remove { min-height: 44px; color: var(--sh-bad); }
+.sh .shh-remove:hover { background: rgba(194, 58, 38, .08); color: var(--sh-bad); }
+.shh-empty { color: var(--sh-text-3); }
+
+.shh-add { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 14px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--sh-border); }
+.sh h3.shh-add-title { grid-column: 1 / -1; font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.shh-field { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 0; min-width: 0; }
+.shh-field > label, .shh-field > legend { font-weight: 600; font-size: 13px; padding: 0; }
+.shh-field-wide { grid-column: 1 / -1; }
+.sh .shh-field input[type="text"], .sh .shh-field input[type="date"], .sh .shh-field input[type="time"] { width: 100%; min-height: 44px; }
+.shh-add fieldset.shh-radios { flex-direction: row; }
+.shh-add fieldset.shh-radios legend { margin-bottom: 0; }
+.shh-js .shh-add:not(.is-special) .shh-special { display: none; }
+.shh-add p.shh-field-wide { margin: 10px 0 0; }
+.sh .shh-add .button { min-height: 44px; padding: 8px 22px; }
+@media (max-width: 600px) { .shh-add { grid-template-columns: minmax(0, 1fr); } }
+
+/* Where it updates */
+.shh-where-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.shh-where-list li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--sh-border); }
+.shh-where-name { margin: 0; font-weight: 600; font-size: 15px; }
+.shh-where-list .sh-note { margin-top: 2px; }
+.shh-tick { flex: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(14, 158, 115, .14); position: relative; }
+.shh-tick::after { content: ""; position: absolute; left: 10px; top: 7px; width: 6px; height: 11px; border: solid var(--sh-good); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.shh-where-list li.is-off .shh-tick, .shh-where-list li.is-pending .shh-tick { background: var(--sh-surface-2); }
+.shh-where-list li.is-off .shh-tick::after, .shh-where-list li.is-pending .shh-tick::after { border-color: #8E8E93; }
+.shh-where.is-pending .shh-where-name { color: var(--sh-text-2); }
+
+@media (max-width: 782px) {
+	.shh-day { grid-template-columns: minmax(0, 1fr); }
+	.sh .shh-range input[type="time"] { width: 138px; padding: 6px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.sh * { transition: none !important; }
+}
