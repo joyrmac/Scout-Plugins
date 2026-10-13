@@ -42,13 +42,14 @@ final class Scout_AEO {
 		add_action( 'init', array( __CLASS__, 'serve_llms' ), 1 );
 	}
 
-	/** @return array{search:bool, training:bool, llms:bool, intro:string, pages:int[], posts:int} */
+	/** @return array{search:bool, training:bool, llms:bool, indexnow:bool, intro:string, pages:int[], posts:int} */
 	public static function settings(): array {
 		$s = (array) get_option( self::OPTION, array() );
 		return array(
 			'search'   => ! isset( $s['search'] ) || ! empty( $s['search'] ),
 			'training' => ! isset( $s['training'] ) || ! empty( $s['training'] ),
 			'llms'     => ! isset( $s['llms'] ) || ! empty( $s['llms'] ),
+			'indexnow' => ! isset( $s['indexnow'] ) || ! empty( $s['indexnow'] ),
 			'intro'    => (string) ( $s['intro'] ?? '' ),
 			'pages'    => array_values( array_filter( array_map( 'absint', (array) ( $s['pages'] ?? array() ) ) ) ),
 			'posts'    => isset( $s['posts'] ) ? max( 0, min( 50, (int) $s['posts'] ) ) : 20,

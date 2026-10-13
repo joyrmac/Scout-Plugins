@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.3.0 (2026-10-13)
+
+- **Every page carries its dates.** Single posts and pages get a `WebPage` node in the schema graph with `datePublished` and `dateModified`, linked to the site (`isPartOf`) and the business (`about`). Search engines and AI tools can see how fresh a page is. It steps aside when a companion already describes the page (Scout Team's `ProfilePage`). Filter `scout_schema_webpage` to false to turn it off.
+
 ## 1.2.7 (2026-10-13)
 
 - **No dead ends in the Scout menu.** WordPress's own list screens inside the shortened Scout menu (the Reviews list, Chat questions, team members, case results) now show the same tabs as every Scout screen, so Review inbox, Ask for reviews and Review settings are one tap away from the Reviews list. Shared admin kit 1.4.0.
