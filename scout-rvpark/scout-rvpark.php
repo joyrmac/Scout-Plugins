@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout — North Crest RV Park
  * Description:       Per-client content types for the North Crest RV Park build. The worked example of the Scout Core companion pattern: register a client's specific types without ever forking Scout Core.
- * Version:           0.1.2
+ * Version:           0.1.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  scout-core
@@ -47,7 +47,9 @@ add_action( 'scout_core_register', function () {
 			'singular'    => 'Amenity',
 			'plural'      => 'Amenities',
 			'menu_icon'   => 'dashicons-palmtree',
-			'has_archive' => true,
+			// No list page: /amenities/ belongs to the site's Amenities page, and a
+			// post type's list page would take that address over.
+			'has_archive' => false,
 			'rewrite'     => array( 'slug' => 'amenities' ),
 			'fields'      => array(
 				'icon'      => array( 'label' => 'Icon (dashicon name or emoji)', 'control' => 'text' ),
@@ -80,3 +82,12 @@ add_action( 'scout_core_register', function () {
 		)
 	);
 } );
+
+// The amenity list page is gone (0.1.3): refresh permalinks once so its old
+// address rule stops claiming /amenities/.
+add_action( 'init', function () {
+	if ( get_option( 'scout_rvpark_rewrite' ) !== '0.1.3' ) {
+		flush_rewrite_rules( false );
+		update_option( 'scout_rvpark_rewrite', '0.1.3', false );
+	}
+}, 99 );
