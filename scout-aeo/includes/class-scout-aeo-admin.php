@@ -64,6 +64,7 @@ final class Scout_AEO_Admin {
 			'search'   => ! empty( $in['search'] ) ? 1 : 0,
 			'training' => ! empty( $in['training'] ) ? 1 : 0,
 			'llms'     => ! empty( $in['llms'] ) ? 1 : 0,
+			'indexnow' => ! empty( $in['indexnow'] ) ? 1 : 0,
 			'intro'    => sanitize_textarea_field( (string) ( $in['intro'] ?? '' ) ),
 			'pages'    => array_values( array_filter( array_map( 'absint', (array) ( $in['pages'] ?? array() ) ) ) ),
 			'posts'    => max( 0, min( 50, (int) ( $in['posts'] ?? 20 ) ) ),
@@ -97,6 +98,11 @@ final class Scout_AEO_Admin {
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[training]" value="1" <?php checked( $s['training'] ); ?>> <?php esc_html_e( 'Let AI companies learn from the site\'s public pages', 'scout-aeo' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Helps the AI know the business by name. Switching it off does not affect AI search above.', 'scout-aeo' ); ?></p>
 							<p class="description"><?php esc_html_e( 'Both choices are also written into robots.txt as a Content-Signal line, the standard way to tell AI companies how pages may be used.', 'scout-aeo' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Instant updates', 'scout-aeo' ); ?></th>
+						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[indexnow]" value="1" <?php checked( $s['indexnow'] ); ?>> <?php esc_html_e( 'Tell Bing and Copilot right away when a page is published or updated (IndexNow)', 'scout-aeo' ); ?></label>
+							<p class="description"><?php esc_html_e( 'ChatGPT search also draws on Bing, so changes reach AI answers sooner. Runs on the live site only.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Guide for AI tools', 'scout-aeo' ); ?></th>
