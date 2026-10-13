@@ -1,0 +1,84 @@
+/* Scout Team on the client site. Inherits the theme's fonts and colors.
+   Restyle from the theme with these custom properties:
+     --scout-team-accent   links and the role line (default: the theme's link color)
+     --scout-team-muted    secondary text
+     --scout-team-line     hairlines and card borders
+     --scout-team-surface  card background
+     --scout-team-radius   photo and card corners
+     --scout-team-gap      grid gap */
+
+.scout-team-profile,
+.scout-team-grid {
+	--scout-team-accent: var(--wp--preset--color--primary, currentColor);
+	--scout-team-muted: color-mix(in srgb, currentColor 72%, transparent);
+	--scout-team-line: color-mix(in srgb, currentColor 16%, transparent);
+	--scout-team-surface: transparent;
+	--scout-team-radius: 12px;
+	--scout-team-gap: clamp(16px, 3vw, 32px);
+	font: inherit;
+	color: inherit;
+}
+.scout-team-profile *,
+.scout-team-grid * { box-sizing: border-box; }
+.scout-team-profile a,
+.scout-team-grid a { color: inherit; text-underline-offset: .18em; }
+.scout-team-profile a:focus-visible,
+.scout-team-grid a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 4px; }
+
+/* ---- Profile page ---- */
+.scout-team-profile { display: grid; gap: var(--scout-team-gap); }
+.scout-team-profile__head { display: grid; gap: var(--scout-team-gap); align-items: start; }
+@media (min-width: 700px) {
+	.scout-team-profile__head { grid-template-columns: minmax(180px, 280px) 1fr; }
+}
+.scout-team-profile__photo { margin: 0; }
+.scout-team-profile__photo img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--scout-team-radius); }
+.scout-team-profile__intro > * { margin: 0 0 .75em; }
+.scout-team-profile__role { font-size: .85em; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--scout-team-accent); }
+.scout-team-profile__bio { font-size: 1.15em; line-height: 1.55; text-wrap: pretty; }
+.scout-team-profile__contact { display: flex; flex-wrap: wrap; gap: 10px; }
+.scout-team-button { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 18px; border: 1px solid var(--scout-team-line); border-radius: 980px; text-decoration: none; overflow-wrap: anywhere; }
+.scout-team-button:hover { border-color: currentColor; }
+.scout-team-profile__body > :first-child { margin-top: 0; }
+.scout-team-profile__body > :last-child { margin-bottom: 0; }
+
+.scout-team-profile__facts { display: grid; gap: var(--scout-team-gap); }
+@media (min-width: 700px) {
+	.scout-team-profile__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.scout-team-facts { border-top: 1px solid var(--scout-team-line); padding-top: 14px; min-width: 0; }
+.scout-team-profile .scout-team-facts__title { font-size: 1em; line-height: 1.3; margin: 0 0 8px; text-wrap: balance; }
+.scout-team-facts__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; line-height: 1.5; }
+.scout-team-facts__list li { margin: 0; overflow-wrap: anywhere; }
+.scout-team-muted { color: var(--scout-team-muted); }
+.scout-team-facts__list a { color: var(--scout-team-accent); }
+.scout-team-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.scout-team-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border: 1px solid var(--scout-team-line); border-radius: 980px; text-decoration: none; color: inherit; }
+.scout-team-links a:hover { border-color: currentColor; }
+
+/* ---- Grid ---- */
+.scout-team-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--scout-team-gap); grid-template-columns: 1fr; }
+@media (min-width: 600px) {
+	.scout-team-grid { grid-template-columns: repeat(min(2, var(--scout-team-cols, 3)), minmax(0, 1fr)); }
+}
+@media (min-width: 960px) {
+	.scout-team-grid { grid-template-columns: repeat(var(--scout-team-cols, 3), minmax(0, 1fr)); }
+}
+.scout-team-card { margin: 0; display: flex; flex-direction: column; gap: 14px; background: var(--scout-team-surface); min-width: 0; }
+.scout-team-card__photo { display: block; border-radius: var(--scout-team-radius); overflow: hidden; }
+.scout-team-card__photo img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; transition: transform .3s ease; }
+.scout-team-card__photo:hover img { transform: scale(1.02); }
+.scout-team-card__text > * { margin: 0 0 6px; }
+.scout-team-grid .scout-team-card__name { font-size: 1.2em; line-height: 1.25; margin: 0 0 4px; text-wrap: balance; }
+.scout-team-card__name a { text-decoration: none; display: inline-block; min-height: 44px; padding-top: 10px; margin-top: -10px; }
+.scout-team-card__name a:hover { text-decoration: underline; }
+.scout-team-card__role { font-size: .85em; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--scout-team-accent); }
+.scout-team-card__meta { font-size: .9em; color: var(--scout-team-muted); }
+.scout-team-card__bio { line-height: 1.55; text-wrap: pretty; }
+
+@media (prefers-reduced-motion: reduce) {
+	.scout-team-card__photo img { transition: none; }
+	.scout-team-card__photo:hover img { transform: none; }
+}
+
+.scout-team-profile .screen-reader-text { border: 0; clip: rect(1px, 1px, 1px, 1px); clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; word-wrap: normal !important; }

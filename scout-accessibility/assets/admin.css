@@ -1,0 +1,42 @@
+/* Scout Accessibility: the check rows on Build -> Accessibility. Sits on top
+   of the shared Scout admin kit (scout-admin.css) and uses its tokens. */
+
+.sh .sa-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 20px; flex-wrap: wrap; }
+.sh .sa-head form { margin: 0; }
+.sh .sa-rows { list-style: none; margin: 0; padding: 0; }
+.sh .sa-row { display: grid; grid-template-columns: 32px 1fr auto; gap: 4px 16px; align-items: start; padding: 16px 0; margin: 0; border-bottom: 1px solid var(--sh-border); }
+.sh .sa-row:first-child { padding-top: 4px; }
+.sh .sa-row:last-child { border-bottom: 0; }
+.sh .sa-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; background: var(--sh-surface-2); color: var(--sh-text-2); margin-top: 1px; }
+.sh .sa-row.is-pass .sa-icon { background: rgba(14, 158, 115, .14); color: var(--sh-good); }
+.sh .sa-row.is-fix .sa-icon { background: rgba(251, 176, 36, .2); color: var(--sh-warn); }
+.sh .sa-body { min-width: 0; }
+.sh .sa-name { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: var(--sh-text); }
+.sh .sa-detail { margin: 2px 0 0; color: var(--sh-text-2); max-width: 680px; text-wrap: pretty; }
+.sh .sa-row .sh-pill { margin-top: 3px; }
+.sh .sa-more { margin-top: 8px; }
+.sh .sa-more summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--sh-accent-text); font-weight: 500; }
+.sh .sa-more summary:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; border-radius: 6px; }
+.sh .sa-more ul { margin: 4px 0 0; padding-left: 18px; list-style: disc; color: var(--sh-text-2); }
+.sh .sa-more li { margin: 4px 0; }
+.sh .sa-foot { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--sh-border); }
+
+/* At launch: a real checkbox where the icon sits, 44px to tap. */
+.sh .sa-tick { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -8px 0 0 -8px; cursor: pointer; }
+.sh .sa-tick input[type="checkbox"] { width: 22px; height: 22px; margin: 0; }
+.sh .sa-launch { grid-template-columns: 36px 1fr auto; }
+.sh .sa-by { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 10px; }
+.sh .sa-by label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--sh-text-2); }
+.sh .sa-by input { min-height: 44px; }
+.sh .sa-inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sh .sa-inline-form select { min-height: 44px; max-width: 100%; }
+.sh .sa-head .button, .sh .sa-inline-form .button, .sh #sa-footer + .sh-grid .button { min-height: 44px; }
+.sh .sa-tick input:focus-visible, .sh .button:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
+
+@media (max-width: 600px) {
+	.sh .sa-row { grid-template-columns: 32px 1fr; }
+	.sh .sa-row .sh-pill { grid-column: 2; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.sh .sa-row, .sh .sa-more summary { transition: none; }
+}
