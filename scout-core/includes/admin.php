@@ -1,6 +1,8 @@
 <?php
 /**
- * The one Scout admin screen. A top-level "Scout" menu with three tabs:
+ * The Scout admin screens. A top-level "Scout" menu with three screens
+ * (with the Scout Build hub: Business info and SEO; its Site health shows the
+ * search checks). The shared kit draws the section nav across all of them:
  *  - Dashboard: a plain-language health check ("is my site healthy and getting
  *    found?"), the heart of the plugin.
  *  - Business: the NAP + identity form (Scout_Core_Business).
@@ -18,18 +20,56 @@ final class Scout_Core_Admin {
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+	}
+
+	/** The menu these screens sit in: a theme's Build menu when there is one, else Scout's own. */
+	public static function parent() {
+		global $admin_page_hooks;
+		foreach ( array( 'scout-build', 'recon-build' ) as $slug ) {
+			if ( isset( $admin_page_hooks[ $slug ] ) ) {
+				return $slug;
+			}
+		}
+		return 'scout';
+	}
+
+	public static function assets( $hook ) {
+		if ( 'toplevel_page_scout' === $hook || '_page_scout' === substr( (string) $hook, -11 ) ) {
+			Scout_Admin_UI::enqueue( plugins_url( 'assets/scout-admin.css', SCOUT_CORE_FILE ) );
+		}
+	}
+
+	/**
+	 * Is the Scout Build hub running? Then it owns the home screen and site
+	 * health, and this plugin adds only its settings screens.
+	 */
+	public static function hub() {
+		return class_exists( 'Scout_Hub_Admin' );
 	}
 
 	public static function menu() {
-		$icon = 'data:image/svg+xml;base64,' . base64_encode(
-			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="58,0 0,58 42,58 30,100 100,40 54,40" fill="#a7aaad"/></svg>'
+		$label = Scout_Admin_UI::branded() ? 'Scout' : 'Site Build';
+		$icon  = 'data:image/svg+xml;base64,' . base64_encode(
+			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0E8FE6" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>'
 		);
-		add_menu_page( 'Scout', 'Scout', 'manage_options', 'scout', array( __CLASS__, 'render' ), $icon, 58 );
-		add_submenu_page( 'scout', 'Scout Dashboard', 'Dashboard', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
-		add_submenu_page( 'scout', 'Business identity', 'Business', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
-		add_submenu_page( 'scout', 'SEO defaults', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
+		// A theme's own Build menu (Scout Build, Recon Build) comes first: the
+		// screens join it so the site has one Scout menu, not two. The page slug
+		// stays "scout" either way, so every link to these screens still works.
+		$parent = self::parent();
+		if ( 'scout' === $parent ) {
+			add_menu_page( $label, $label, 'manage_options', 'scout', array( __CLASS__, 'render' ), $icon, 3 );
+		}
+		if ( self::hub() ) {
+			// The hub's Site health carries these checks, so this screen opens on Business info.
+			add_submenu_page( $parent, 'Business info', 'Business info', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
+		} else {
+			add_submenu_page( $parent, 'Search health', 'Search health', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, 'Business info', 'Business info', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
+		}
+		add_submenu_page( $parent, 'SEO', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
 		foreach ( self::groups() as $slug => $group ) {
-			add_submenu_page( 'scout', $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
 		}
 	}
 
@@ -40,7 +80,9 @@ final class Scout_Core_Admin {
 
 	/** @return array<string,string> tab => label */
 	private static function tabs() {
-		$tabs = array( 'dashboard' => 'Dashboard', 'business' => 'Business', 'seo' => 'SEO' );
+		$tabs = self::hub()
+			? array( 'business' => 'Business info', 'seo' => 'SEO' )
+			: array( 'dashboard' => 'Search health', 'business' => 'Business info', 'seo' => 'SEO' );
 		foreach ( self::groups() as $slug => $group ) {
 			$tabs[ $slug ] = $group['label'];
 		}
@@ -48,26 +90,25 @@ final class Scout_Core_Admin {
 	}
 
 	private static function current_tab() {
-		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'dashboard';
-		return array_key_exists( $tab, self::tabs() ) ? $tab : 'dashboard';
+		$home = self::hub() ? 'business' : 'dashboard';
+		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : $home;
+		return array_key_exists( $tab, self::tabs() ) ? $tab : $home;
 	}
 
 	public static function render() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$tab  = self::current_tab();
-		$base = admin_url( 'admin.php?page=scout' );
+		$tab   = self::current_tab();
+		$tabs  = self::tabs();
+		$ledes = array(
+			'dashboard' => 'A quick check that search engines and AI tools can find the business and read it correctly.',
+			'business'  => 'Your name, address, phone and profiles, entered once. They feed your search listing and every page that shows them. Keep them identical to your Google Business Profile.',
+			'seo'       => 'Site-wide search settings. Each page can set its own title and description in its SEO box, and your sitemap is built automatically at /wp-sitemap.xml.',
+		);
 		self::styles();
-		echo '<div class="wrap scout-admin">';
-		echo '<h1 class="scout-admin-title"><span class="scout-bolt" aria-hidden="true"></span> Scout</h1>';
-		echo '<h2 class="nav-tab-wrapper">';
-		foreach ( self::tabs() as $key => $label ) {
-			$url    = 'dashboard' === $key ? $base : $base . '&tab=' . $key;
-			$active = $tab === $key ? ' nav-tab-active' : '';
-			printf( '<a href="%s" class="nav-tab%s">%s</a>', esc_url( $url ), esc_attr( $active ), esc_html( $label ) );
-		}
-		echo '</h2>';
+		Scout_Admin_UI::open( $tabs[ $tab ], $ledes[ $tab ] ?? '', $tabs[ $tab ] );
+		echo '<div class="scout-admin sh-sections">';
 
 		if ( 'business' === $tab ) {
 			self::tab_business();
@@ -79,42 +120,61 @@ final class Scout_Core_Admin {
 			self::tab_dashboard();
 		}
 		echo '</div>';
+		Scout_Admin_UI::close();
 	}
 
 	/* ---------- Dashboard: the health check ---------- */
 
 	public static function tab_dashboard() {
 		$checks = self::checks();
-		$warn   = array_filter( $checks, static function ( $c ) { return 'good' !== $c['status']; } );
-		$count  = count( $warn );
+		$count  = count( array_filter( $checks, static function ( $c ) { return 'good' !== $c['status']; } ) );
+		echo '<section class="sh-box">';
+		echo '<h2>' . esc_html( $count ? sprintf( _n( '%d thing to look at', '%d things to look at', $count, 'scout-core' ), $count ) : 'Your site is healthy' ) . '</h2>';
+		echo '<p>' . esc_html( $count ? 'Your site is running. These would make it stronger.' : 'Business details, search visibility and sharing are all set.' ) . '</p>';
+		echo '</section>';
+		self::render_checks( $checks );
+	}
 
-		echo '<div class="scout-hero ' . ( $count ? 'warn' : 'good' ) . '">';
-		if ( $count ) {
-			echo '<h2>' . esc_html( sprintf( _n( '%d thing to look at', '%d things to look at', $count, 'scout-core' ), $count ) ) . '</h2>';
-			echo '<p>Your site is running. These would make it stronger.</p>';
-		} else {
-			echo '<h2>Your site is healthy</h2>';
-			echo '<p>Business details, search visibility, and sharing are all set. Nice work.</p>';
-		}
-		echo '</div>';
-
-		echo '<div class="scout-cards">';
+	/**
+	 * Check cards in the shared Scout style. The Scout Build hub prints the same
+	 * cards on its Site health screen, so both read as one product.
+	 *
+	 * @param array<int,array<string,mixed>> $checks From checks().
+	 */
+	public static function render_checks( array $checks ) {
+		echo '<div class="sh-grid sh-grid-3">';
 		foreach ( $checks as $c ) {
-			echo '<div class="scout-card ' . esc_attr( $c['status'] ) . '">';
-			echo '<span class="scout-dot" aria-hidden="true"></span>';
-			echo '<div class="scout-card-body">';
-			echo '<strong>' . esc_html( $c['label'] ) . '</strong>';
-			echo '<p>' . esc_html( $c['message'] ) . '</p>';
-			if ( ! empty( $c['action'] ) && ! empty( $c['action_label'] ) ) {
-				printf( '<a href="%s">%s &rsaquo;</a>', esc_url( $c['action'] ), esc_html( $c['action_label'] ) );
+			$state = 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' );
+			echo '<section class="sh-box sh-check is-' . esc_attr( $state ) . '">';
+			echo '<p class="sh-label">' . esc_html( $c['label'] ) . '</p>';
+			echo '<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>' . esc_html( 'good' === $state ? 'All set' : 'Needs a look' ) . '</p>';
+			echo '<p class="sh-note">' . esc_html( $c['message'] ) . '</p>';
+			if ( ! empty( $c['items'] ) ) {
+				echo '<ul class="sh-list">';
+				foreach ( $c['items'] as $item_id ) {
+					$title = get_the_title( $item_id );
+					printf(
+						'<li><a href="%s">%s &rsaquo;</a></li>',
+						esc_url( (string) get_edit_post_link( $item_id ) ),
+						esc_html( '' !== $title ? $title : sprintf( '#%d', $item_id ) )
+					);
+				}
+				echo '</ul>';
 			}
-			echo '</div></div>';
+			if ( ! empty( $c['action'] ) && ! empty( $c['action_label'] ) ) {
+				printf( '<p class="sh-note"><a href="%s">%s &rsaquo;</a></p>', esc_url( $c['action'] ), esc_html( $c['action_label'] ) );
+			}
+			echo '</section>';
 		}
 		echo '</div>';
 	}
 
-	/** @return array<int,array<string,string>> */
-	private static function checks() {
+	/**
+	 * The search checks, also shown in the Scout Build hub's Site health.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function checks() {
 		$base     = admin_url( 'admin.php?page=scout' );
 		$biz      = Scout_Core_Business::get();
 		$checks   = array();
@@ -143,24 +203,26 @@ final class Scout_Core_Admin {
 			'action_label' => $type ? '' : 'Set business type',
 		);
 
-		// 3. Pages missing a written description.
-		$missing = self::pages_missing_description();
-		$checks[] = array(
+		// 3. Pages missing a written description. Name them, so nobody has to hunt.
+		$missing_ids = self::pages_missing_description();
+		$missing     = count( $missing_ids );
+		$checks[]    = array(
 			'label'        => 'Page descriptions',
 			'status'       => $missing ? 'warn' : 'good',
 			'message'      => $missing
 				? sprintf(
 					_n(
-						'%d published page has no written description, so search engines guess one.',
-						'%d published pages have no written description, so search engines guess one.',
+						'%d published page has no written description, so search engines guess one. Open it and fill in the SEO box.',
+						'%d published pages have no written description, so search engines guess one. Open each and fill in the SEO box.',
 						$missing,
 						'scout-core'
 					),
 					$missing
 				)
 				: 'Every published page has a description written for search.',
-			'action'       => $missing ? admin_url( 'edit.php?post_type=page' ) : '',
-			'action_label' => $missing ? 'Review pages' : '',
+			'items'        => array_slice( $missing_ids, 0, 10 ),
+			'action'       => $missing > 10 ? admin_url( 'edit.php?post_type=page' ) : '',
+			'action_label' => $missing > 10 ? 'See all pages' : '',
 		);
 
 		// 4. Accidental noindex.
@@ -199,6 +261,7 @@ final class Scout_Core_Admin {
 		return (array) apply_filters( 'scout_core_dashboard_checks', $checks );
 	}
 
+	/** @return int[] Published pages and posts with no SEO description and no excerpt. */
 	private static function pages_missing_description() {
 		$ids = get_posts( array(
 			'post_type'      => array( 'page', 'post' ),
@@ -207,14 +270,14 @@ final class Scout_Core_Admin {
 			'posts_per_page' => 200,
 			'no_found_rows'  => true,
 		) );
-		$n = 0;
+		$out = array();
 		foreach ( $ids as $id ) {
 			$desc = get_post_meta( $id, SCOUT_SEO_META_DESC, true );
 			if ( '' === $desc && ! has_excerpt( $id ) ) {
-				$n++;
+				$out[] = (int) $id;
 			}
 		}
-		return $n;
+		return $out;
 	}
 
 	private static function pages_noindexed() {
@@ -241,7 +304,6 @@ final class Scout_Core_Admin {
 
 	public static function tab_business() {
 		$values = Scout_Core_Business::get();
-		echo '<p class="scout-lead">One source of truth for your name, address, phone, and profiles. This feeds your search listing (schema) and any page that binds to it. Keep it identical to your Google Business Profile.</p>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_business_group' );
 		echo '<table class="form-table" role="presentation"><tbody>';
@@ -265,7 +327,6 @@ final class Scout_Core_Admin {
 
 	public static function tab_seo() {
 		$values = Scout_Core_SEO_Settings::get();
-		echo '<p class="scout-lead">Site-wide fallbacks. Each page can override its own title and description in the <strong>Scout SEO</strong> box while you edit it. Your XML sitemap is generated automatically at <code>/wp-sitemap.xml</code> for search engines.</p>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_seo_group' );
 		echo '<table class="form-table" role="presentation"><tbody>';
@@ -289,20 +350,7 @@ final class Scout_Core_Admin {
 
 	private static function styles() {
 		echo '<style>
-		.scout-admin .scout-admin-title{display:flex;align-items:center;gap:10px;font-weight:600}
-		.scout-admin .scout-bolt{width:22px;height:22px;background:#0E8FE6;clip-path:polygon(58% 0,0 58%,42% 58%,30% 100%,100% 40%,54% 40%);display:inline-block}
-		.scout-admin .scout-lead{max-width:64ch;font-size:14px;color:#50575e;margin:16px 0 20px}
-		.scout-hero{background:#fff;border:1px solid #dcdcde;border-left:4px solid #0E9E73;border-radius:8px;padding:20px 24px;margin:18px 0 22px;max-width:900px}
-		.scout-hero.warn{border-left-color:#FBB024}
-		.scout-hero h2{margin:0 0 4px;font-size:20px}
-		.scout-hero p{margin:0;color:#50575e}
-		.scout-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;max-width:900px}
-		.scout-card{display:flex;gap:12px;background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px}
-		.scout-card .scout-dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:#0E9E73}
-		.scout-card.warn .scout-dot{background:#FBB024}
-		.scout-card-body strong{display:block;font-size:14px}
-		.scout-card-body p{margin:4px 0 6px;color:#50575e;font-size:13px;line-height:1.5}
-		.scout-card-body a{font-size:13px;text-decoration:none}
+		.scout-admin .scout-lead{max-width:64ch;font-size:14px;color:var(--sh-text-2);margin:16px 0 20px}
 		</style>';
 	}
 }

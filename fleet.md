@@ -34,7 +34,7 @@ disabled).
 | Scout Recon | **TODO** | **TODO** | none (no Scout plugins at all) | none | none | 3.1.0.2 | Akismet 5.7.2, Genesis Blocks 3.1.11, WordPress Importer |
 | Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | removing (no forms on this site) | **0.7.0 ✓** | **removing — DECISION 2026-09-03: HBP runs no forms.** Delete order: forms-guard, then GF, then Akismet. Check book/contact pages for stray embeds after. | Akismet: delete. On the auto-update channel 2026-09-03. |
 | Maravela's | Maravela's theme **TODO** | current | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓ (active; keep the delivery toggles off — see drift item on the hero)** | **3.1.1 ✓** | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (active). On the auto-update channel 2026-09-03. |
-| North Crest | north-crest 3.11.1 | 7.0.4 | **1.0.4 ✓** (1.0.3 fataled, fixed same day) | **0.1.1 ✓** | **0.7.0 ✓** | 3.1.0.2 | GTM4WP 2.0.0 (2.0.1 pending), Smush 4.3.2 (inactive, delete); scout-rvpark **0.1.1 ✓**. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
+| North Crest | north-crest **3.13.0** (2026-10-12) | 7.1.3 | **1.1.3 ✓** | **0.1.2 ✓** | **0.7.3 ✓** | 3.1.3 | GTM4WP 2.0.6 (owns GTM; Scout Analytics off); scout-rvpark **0.1.2 ✓**; scout-build **0.2.6**, scout-aeo **0.1.3** (2026-10-12). Smush deleted. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
 
 > **scout-cards** (new 2026-10-01, 1.0.1): first rollout is Hair by Patrick. Scout Media and Scout Recon run the same cards inside their own themes (Scout 1.30.1, Recon 1.13.0), not this plugin. If Scout Media moves to the plugin, install scout-cards **without** scout-core (it works standalone). Add a column once a second site installs it.
 

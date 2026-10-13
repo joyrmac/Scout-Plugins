@@ -29,6 +29,7 @@ final class Scout_Reviews_Settings {
 			'profiles'           => array(), // slug => { rating, count, url, write_url }.
 			'disclaimer'         => '',
 			'load_styles'        => true,
+			'auto_add_five'      => false, // Publish new 5-star Google reviews without the inbox.
 			'purge_on_uninstall' => false,
 		);
 	}
@@ -66,9 +67,9 @@ final class Scout_Reviews_Settings {
 
 	public static function menu(): void {
 		add_submenu_page(
-			'edit.php?post_type=' . Scout_Reviews_Post_Type::TYPE,
+			Scout_Reviews_Menu::parent(),
 			__( 'Review settings', 'scout-reviews' ),
-			__( 'Settings', 'scout-reviews' ),
+			'' !== Scout_Reviews_Menu::build() ? __( 'Review settings', 'scout-reviews' ) : __( 'Settings', 'scout-reviews' ),
 			'manage_options',
 			self::PAGE,
 			array( __CLASS__, 'page' )
@@ -122,6 +123,7 @@ final class Scout_Reviews_Settings {
 
 		$out['disclaimer']         = sanitize_textarea_field( (string) ( $input['disclaimer'] ?? '' ) );
 		$out['load_styles']        = ! empty( $input['load_styles'] );
+		$out['auto_add_five']      = ! empty( $input['auto_add_five'] );
 		$out['purge_on_uninstall'] = ! empty( $input['purge_on_uninstall'] );
 
 		Scout_Reviews_Query::flush();
@@ -135,8 +137,7 @@ final class Scout_Reviews_Settings {
 		$settings = self::get();
 		$name     = self::OPTION;
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Review settings', 'scout-reviews' ); ?></h1>
+		<?php Scout_Admin_UI::open( __( 'Review settings', 'scout-reviews' ), __( 'Your profile on each review platform, how reviews look on the site, and where to put them.', 'scout-reviews' ) ); ?>
 
 			<?php do_action( 'scout_reviews_settings_top' ); ?>
 
@@ -204,6 +205,13 @@ final class Scout_Reviews_Settings {
 						</td>
 					</tr>
 					<tr>
+						<th scope="row"><?php esc_html_e( 'New 5-star reviews', 'scout-reviews' ); ?></th>
+						<td>
+							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[auto_add_five]' ); ?>" value="1" <?php checked( ! empty( $settings['auto_add_five'] ) ); ?> /> <?php esc_html_e( 'Add new 5-star Google reviews to the site automatically, on the pages they match. Everything else still waits in the Review inbox.', 'scout-reviews' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Leave off for law firms: bar rules expect a person to approve each testimonial.', 'scout-reviews' ); ?></p>
+						</td>
+					</tr>
+					<tr>
 						<th scope="row"><?php esc_html_e( 'Built-in design', 'scout-reviews' ); ?></th>
 						<td>
 							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[load_styles]' ); ?>" value="1" <?php checked( $settings['load_styles'] ); ?> /> <?php esc_html_e( 'Load the Scout Reviews stylesheet. Turn off only if your theme styles the reviews itself.', 'scout-reviews' ); ?></label>
@@ -231,7 +239,7 @@ final class Scout_Reviews_Settings {
 				<li><code>[scout_review_summary]</code> <?php esc_html_e( 'shows only the rating summary.', 'scout-reviews' ); ?></li>
 			</ul>
 			<p><?php esc_html_e( 'Theme developers: call scout_reviews_slot() in a template to show the reviews for that page automatically. See the plugin README.', 'scout-reviews' ); ?></p>
-		</div>
+		<?php Scout_Admin_UI::close(); ?>
 		<?php
 	}
 }

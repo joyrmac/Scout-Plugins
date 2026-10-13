@@ -28,6 +28,16 @@ scout-core/includes/business.php | 'same_as' | scout-cards (social profile URLs)
 scout-core/includes/admin.php | 'manage_options', 'scout', | scout-cards (adds Cards & Links under the 'scout' menu slug)
 scout-core/includes/seo/class-seo-head.php | final class Scout_SEO_Head | scout-cards (removes Scout Core head tags on card pages)
 scout-core/includes/seo/class-seo-head.php | add_action( 'wp_head', array( __CLASS__, 'output' ), 1 ) | scout-cards (remove_action must match this hook and priority)
+scout-core/includes/business.php | public static function get() | scout-contact (Scout_Core_Business::get() for the default phone number)
+scout-core/includes/business.php | 'phone' | scout-contact (default phone number for the call bar)
+scout-core/includes/schema/class-scout-schema.php | apply_filters( 'scout_schema_graph' | scout-hours, scout-team (add hours to the business node; add Person/ProfilePage nodes)
+scout-core/includes/schema/class-scout-schema.php | home_url( '/#business' ) | scout-hours, scout-team (business @id they extend and point worksFor at)
+scout-core/includes/schema/class-scout-schema.php | $graph['article'] | scout-team (sets the BlogPosting author to the Person)
+scout-core/includes/business.php | final class Scout_Core_Business | scout-accessibility (business name, email and phone for the statement)
+scout-core/includes/business.php | public static function get() | scout-aeo (/llms.txt name, contact line; scout-build AI checks)
+scout-core/scout-core.php | define( 'SCOUT_SEO_META_NOINDEX' | scout-aeo (noindexed pages stay out of /llms.txt)
+scout-core/includes/admin.php | public static function checks() | scout-build (Site health: search listing checks)
+scout-core/includes/admin.php | public static function render_checks( array $checks ) | scout-build (Site health: same check cards)
 CONTRACT
 
 exit "$fail"

@@ -22,11 +22,15 @@ instead of a data-loss event.
 
 | Plugin | Version | What it does | Requires |
 |---|---|---|---|
-| [`scout-core`](scout-core/) | 1.1.0 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
-| [`scout-forms-guard`](scout-forms-guard/) | 0.1.0 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
-| [`scout-cards`](scout-cards/) | 1.0.1 | Digital business cards and a link-in-bio page on the client's own site: Save contact, share mode with a QR code, home-screen icon, `/links/`. Reads the business identity from Scout Core. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
-| [`scout-reviews`](scout-reviews/) | 0.3.0 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Google reviews sync daily into an inbox; one click adds each to the right pages. Each card links to the original; the rating summary uses each platform's real totals. | WP 6.5+, PHP 8.0+ |
-| [`scout-rvpark`](scout-rvpark/) | 0.1.0 | The worked example of the companion pattern: one client's specific content types, registered without forking Scout Core. | `scout-core` |
+| [`scout-core`](scout-core/) | 1.1.3 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
+| [`scout-forms-guard`](scout-forms-guard/) | 0.1.2 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
+| [`scout-cards`](scout-cards/) | 1.0.5 | Digital business cards and a link-in-bio page on the client's own site: Save contact, share mode with a QR code, home-screen icon, `/links/`. Reads the business identity from Scout Core. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
+| [`scout-reviews`](scout-reviews/) | 0.4.2 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Google reviews sync daily into an inbox; one click adds each to the right pages. A `/review/` page, private note form, QR code, printable cards and ready-to-send messages for asking clients. | WP 6.5+, PHP 8.0+ |
+| [`scout-analytics`](scout-analytics/) | 0.1.0 | Google Tag Manager (our standard on every client site) with Google consent mode set first, a small opt-out cookie notice, and one click-reporting API for cards, links and booking. | WP 6.5+, PHP 8.0+ |
+| [`scout-chat`](scout-chat/) | 0.1.1 | A chat assistant in the corner of the site: answers common questions, books calls, takes change requests, and saves every other question with the visitor's email to an inbox. AI answers once connected to an AI server (key stays off the site). | WP 6.5+, PHP 8.0+ |
+| [`scout-aeo`](scout-aeo/) | 0.1.3 | AI search readiness: names the AI search crawlers in robots.txt and lets them in (live site only), serves a plain-text guide at `/llms.txt`, and adds a "Questions this page answers" box to every page with matching FAQ schema. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
+| [`scout-build`](scout-build/) | 0.2.5 | The Site Build hub: one screen to see and switch the site's Scout features (operators only), go back a version, request a change, and check site health, including a "Ready for AI search" scorecard. Reads the feature list from `catalog.json`. | WP 6.5+, PHP 8.0+ |
+| [`scout-rvpark`](scout-rvpark/) | 0.1.2 | The worked example of the companion pattern: one client's specific content types, registered without forking Scout Core. | `scout-core` |
 
 > `scout-schema` and `scout-seo` shipped separately until Scout Core 1.0.0 folded
 > them in as `includes/schema/` and `includes/seo/`. They are retired as
@@ -114,9 +118,11 @@ them. No updater plugin is installed on the client site and no third-party
 service sits in the middle.
 
 Shipping a fix to every site: bump the plugin's `Version:` header, add a
-changelog entry, push, then **Actions → Release → Run workflow** and pick the
-plugin. That reads the version from the header, tags it, builds the zip, and
-publishes the release. Full process, including what breaks it, is in
+changelog entry, and merge the pull request into `main`. The Release workflow
+then releases every plugin whose version has no release yet (Scout Core
+first): it tags it, builds the zip, and publishes the release. A plugin whose
+version did not change is skipped. **Actions → Release → Run workflow** still
+works as a manual backup. Full process, including what breaks it, is in
 [`RELEASING.md`](RELEASING.md).
 
 This repo has to stay public for that to work. The updater calls the GitHub API
