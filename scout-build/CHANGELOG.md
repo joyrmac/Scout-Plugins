@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.1 (2026-10-13)
+
+- **The setup file fills Analytics too.** A client theme's `scout-setup.json` can carry `"analytics": { "gtm": "GTM-XXXXXXX" }`, and Scout Build puts the container ID into Scout Analytics once that feature is on. Blank only: an ID already set stays.
+
 ## 0.4.0 (2026-10-13)
 
 - **The client setup file.** A client theme can carry `scout-setup.json` with the client's own facts (team, review page, chat, hours). When a feature is on, Scout Build fills it in on the next admin page load, so nobody retypes it. A section runs again only when the theme ships new facts, and it only fills blanks: anything already set in WordPress stays. Photos can be theme files; each becomes one Media Library item. Format in `includes/class-scout-hub-setup.php`.
