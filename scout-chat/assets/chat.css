@@ -49,7 +49,8 @@
 .sc-head { display: flex; align-items: center; gap: 10px; padding: 14px 12px 14px 14px; background: radial-gradient(400px 160px at 20% 0%, rgba(14,143,230,.22), transparent 70%), var(--sc-surface); border-bottom: 1px solid var(--sc-line); }
 .sc-head-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .sc-head-text strong { font-size: 15.5px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sc-status { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sc-mono); font-size: 10.5px; letter-spacing: .6px; color: var(--sc-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-status { display: inline-flex; align-items: center; gap: 6px; font-family: var(--sc-mono); font-size: 10.5px; letter-spacing: .4px; line-height: 1.35; color: var(--sc-text-3); }
+.sc-status .sc-dot { flex: none; }
 .sc-dot { width: 6px; height: 6px; border-radius: 50%; background: #0E9E73; flex: none; }
 .sc-person { flex: none; min-height: 34px; padding: 0 12px; border-radius: 980px; border: 1px solid rgba(14,143,230,.55); background: none; color: var(--sc-accent-text); font-size: 13px; font-weight: 500; cursor: pointer; }
 .sc-person:hover { background: var(--sc-accent); border-color: var(--sc-accent); color: #fff; }

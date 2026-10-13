@@ -194,15 +194,21 @@
       askForContact('change', 'Got it. ' + Team + ' will take care of it and confirm by email.');
       return;
     }
+    // A hello or a thanks is not a question: greet back and offer the buttons.
+    if (/^(hi+|hello|hey+|hiya|howdy|yo|good (morning|afternoon|evening)|thanks?( you)?|thank you|ok(ay)?)[\s!.,]*$/i.test(text.trim())) {
+      bot([{ text: 'Hi there. What can we help you with? Type your question, or pick one below.', chips: startChips() }]);
+      return;
+    }
     state.pending = text;
-    if (!C.ai) { askForContact('question', 'Good question. ' + Team + ' answer these personally, usually within one business day.'); return; }
+    var lead = /\?\s*$/.test(text) ? 'Good question. ' : 'Thanks. ';
+    if (!C.ai) { askForContact('question', lead + Team + ' answer these personally, usually within one business day.'); return; }
     var dots = el('div', 'sc-msg sc-bot sc-typing'); dots.innerHTML = '<span></span><span></span><span></span>'; stream.appendChild(dots); scroll(); busy = true;
     post('/ask', { question: text, history: history(), page: location.href }).then(function (r) {
       dots.remove(); busy = false;
       if (r && r.answer) {
         bot([{ text: r.answer, chips: r.handoff ? [CHIPS.person, CHIPS.book] : [CHIPS.book, CHIPS.person] }]);
       } else {
-        askForContact('question', 'Good question. ' + Team + ' will answer it personally, usually within one business day.');
+        askForContact('question', lead + Team + ' will answer it personally, usually within one business day.');
       }
     });
   }

@@ -1,6 +1,11 @@
 # Scout Chat changelog
 
 
+## 0.1.11 (2026-10-13)
+
+- **Fix: "hi" got "Good question."** A hello or a thanks now gets a greeting and the starter buttons instead of the ask-for-email step, and a message that isn't a question opens with "Thanks." instead of "Good question."
+- **Fix: the header cut off "Sean & Joy on call".** The status line wraps instead of trimming.
+
 ## 0.1.10 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
