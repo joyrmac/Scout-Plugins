@@ -52,6 +52,29 @@ final class Scout_Plugin_Updater {
 	const CACHE_TTL = 6 * HOUR_IN_SECONDS;
 
 	/**
+	 * One shared copy of the release list for every Scout plugin on the site.
+	 * Each plugin used to download the same list on its own, one after
+	 * another, and a page that checked them all could wait past the host's
+	 * 60-second limit (a 502 "Bad gateway" on WP Engine). Now the first plugin
+	 * to ask downloads it once and the rest read it.
+	 * @var string
+	 */
+	const FEED_KEY = 'scout_updater_feed';
+
+	/**
+	 * The shared list for this request, so each copy reads it at most once.
+	 * @var array|null
+	 */
+	private static $feed = null;
+
+	/**
+	 * Whether the last download worked. A failed one is retried after 15
+	 * minutes instead of being remembered as "no update" for six hours.
+	 * @var bool
+	 */
+	private static $feed_ok = true;
+
+	/**
 	 * Absolute path to the plugin's main file.
 	 *
 	 * @var string
@@ -226,7 +249,9 @@ final class Scout_Plugin_Updater {
 		}
 
 		$release = $this->fetch_release();
-		set_transient( $this->cache_key(), ( null === $release ) ? array() : $release, self::CACHE_TTL );
+		if ( self::$feed_ok ) {
+			set_transient( $this->cache_key(), ( null === $release ) ? array() : $release, self::CACHE_TTL );
+		}
 
 		return $release;
 	}
@@ -237,27 +262,7 @@ final class Scout_Plugin_Updater {
 	 * @return array{version:string,package:string,notes:string}|null
 	 */
 	private function fetch_release(): ?array {
-		$response = wp_remote_get(
-			'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100',
-			array(
-				'timeout' => 10,
-				'headers' => array(
-					'Accept'     => 'application/vnd.github+json',
-					// GitHub rejects API requests that do not identify themselves.
-					'User-Agent' => 'ScoutPluginUpdater/' . $this->slug,
-				),
-			)
-		);
-
-		if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-			return null;
-		}
-
-		$releases = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( ! is_array( $releases ) ) {
-			return null;
-		}
-
+		$releases = self::feed();
 		// Releases come back newest first, so the first match wins.
 		$prefix = $this->slug . '-v';
 		foreach ( $releases as $release ) {
@@ -284,6 +289,59 @@ final class Scout_Plugin_Updater {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Every release in the suite, newest first, trimmed to what the updater
+	 * reads. Downloaded once and shared by all Scout plugins.
+	 *
+	 * @return array<int, array>
+	 */
+	private static function feed(): array {
+		if ( is_array( self::$feed ) ) {
+			return self::$feed;
+		}
+		$cached = get_transient( self::FEED_KEY );
+		if ( is_array( $cached ) && isset( $cached['ok'], $cached['releases'] ) ) {
+			self::$feed_ok = (bool) $cached['ok'];
+			return self::$feed = (array) $cached['releases'];
+		}
+		$response = wp_remote_get(
+			'https://api.github.com/repos/' . self::REPO . '/releases?per_page=100',
+			array(
+				'timeout' => 10,
+				'headers' => array(
+					'Accept'     => 'application/vnd.github+json',
+					// GitHub rejects API requests that do not identify themselves.
+					'User-Agent' => 'ScoutPluginUpdater',
+				),
+			)
+		);
+		$list = array();
+		$ok   = ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response );
+		$data = $ok ? json_decode( wp_remote_retrieve_body( $response ), true ) : null;
+		$ok   = $ok && is_array( $data );
+		foreach ( $ok ? $data : array() as $release ) {
+			if ( ! is_array( $release ) || empty( $release['tag_name'] ) ) {
+				continue;
+			}
+			$assets = array();
+			foreach ( (array) ( $release['assets'] ?? array() ) as $asset ) {
+				if ( isset( $asset['name'], $asset['browser_download_url'] ) ) {
+					$assets[] = array( 'name' => (string) $asset['name'], 'browser_download_url' => (string) $asset['browser_download_url'] );
+				}
+			}
+			$list[] = array(
+				'tag_name'   => (string) $release['tag_name'],
+				'draft'      => ! empty( $release['draft'] ),
+				'prerelease' => ! empty( $release['prerelease'] ),
+				'body'       => substr( (string) ( $release['body'] ?? '' ), 0, 1500 ),
+				'assets'     => $assets,
+			);
+		}
+		set_transient( self::FEED_KEY, array( 'ok' => $ok, 'releases' => $list ), $ok ? self::CACHE_TTL : 15 * MINUTE_IN_SECONDS );
+		self::$feed_ok = $ok;
+		return self::$feed = $list;
 	}
 
 	/**

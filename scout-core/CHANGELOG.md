@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.2.5 (2026-10-13)
+
+- **Fix: no more "Bad gateway" from update checks.** Every Scout plugin used to download the same release list from GitHub on its own, one after another (up to 10 seconds each). When those caches expired, one dashboard page could wait on all of them, past WP Engine's 60-second limit, and show a 502 "Bad gateway". The plugins now share one download, cached for six hours; a failed download is retried after 15 minutes instead of hiding updates for six hours.
+
 ## 1.2.4 (2026-10-13)
 
 - **Fix: Business info and SEO now sit inside the theme's own Build menu.** On a site whose theme has a Scout Build or Recon Build menu, Scout Core made a second, separate "Scout" menu, so its screens were missing from the Search tab. They now join the theme's menu (the screen address stays `admin.php?page=scout`, so every link still works). Sites without a Build menu keep the Scout menu as before.
