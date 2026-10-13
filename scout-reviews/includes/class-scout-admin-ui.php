@@ -13,10 +13,14 @@
  *   Scout_Admin_UI::close();
  *
  * open() also prints the section nav, read live from WordPress's own menu: a
- * short row of groups (Overview, Search, Website, Reviews, Chat) with the open
+ * short row of groups (Home, Search, Website, Business, Reviews, Chat) with the open
  * group's screens as tabs underneath. Every Scout screen shows the same nav,
  * and a new plugin lands in the right group without anyone editing a list
  * (scout_admin_nav_group moves a screen to another group).
+ *
+ * A long Scout sidebar menu (more than six screens) gets the same treatment:
+ * one sidebar link per group, labelled with the group's name. The other
+ * screens stay registered and reachable and are hidden from the sidebar only.
  * Plugins add a short live hint to their pill with the scout_admin_nav_hint
  * filter (slug, e.g. "5 on" or "5 of 7"). A screen hidden from the sidebar
  * passes the slug it belongs under as $nav, so its pill still lights up.
@@ -35,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.2.0';
+		const VERSION = '1.3.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -87,12 +91,107 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/** The nav groups, in the order they show. */
 		const GROUPS = array(
-			'home'    => 'Overview',
-			'search'  => 'Search',
-			'website' => 'Website',
-			'reviews' => 'Reviews',
-			'chat'    => 'Chat',
+			'home'     => 'Home',
+			'search'   => 'Search',
+			'website'  => 'Website',
+			'business' => 'Business',
+			'reviews'  => 'Reviews',
+			'chat'     => 'Chat',
 		);
+
+		/** Scout sidebar menus the kit tidies. */
+		const MENUS = array( 'scout-build', 'recon-build', 'site-build', 'scout' );
+
+		/** A Scout menu longer than this shows one sidebar link per group instead. */
+		const COMPACT_AFTER = 6;
+
+		/** @var array<string,string> Original sidebar label per slug, for the section nav. */
+		private static $labels = array();
+
+		/** @var array<string,string> Slug => the slug of its group's sidebar link. */
+		private static $leaders = array();
+
+		/**
+		 * Shorten a long Scout sidebar menu to one link per group (Home,
+		 * Search, Website, Business, Reviews, Chat). Every screen stays registered and
+		 * reachable; the others are hidden from the sidebar only, and the
+		 * section nav on each screen leads to them.
+		 */
+		public static function compact_menu(): void {
+			global $submenu;
+			foreach ( self::MENUS as $parent ) {
+				if ( empty( $submenu[ $parent ] ) || count( $submenu[ $parent ] ) <= self::COMPACT_AFTER ) {
+					continue;
+				}
+				// Same order as the section nav: group by group, sidebar order inside each.
+				$order = array_flip( array_keys( self::GROUPS ) );
+				$keyed = array();
+				foreach ( array_values( $submenu[ $parent ] ) as $i => $item ) {
+					$keyed[] = array( $order[ self::group( (string) ( $item[2] ?? '' ), self::clean( (string) ( $item[0] ?? '' ) ) ) ], $i, $item );
+				}
+				usort( $keyed, static fn( $x, $y ) => $x[0] <=> $y[0] ?: $x[1] <=> $y[1] );
+				$submenu[ $parent ] = array_column( $keyed, 2 ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering only.
+				$lead   = array(); // group => index of its sidebar link.
+				$bubble = array(); // group => first count bubble in it.
+				foreach ( $submenu[ $parent ] as $i => $item ) {
+					$slug  = (string) ( $item[2] ?? '' );
+					$raw   = (string) ( $item[0] ?? '' );
+					$label = self::clean( $raw );
+					$group = self::group( $slug, $label );
+					self::$labels[ $slug ] = $label;
+					if ( ! isset( $bubble[ $group ] ) && preg_match( '#<span[^>]*class="[^"]*(update-plugins|awaiting-mod|count)[^"]*"[^>]*>.*?</span>(\s*</span>)?#s', $raw, $m ) ) {
+						$bubble[ $group ] = ' ' . $m[0];
+					}
+					if ( ! isset( $lead[ $group ] ) && current_user_can( (string) ( $item[1] ?? 'manage_options' ) ) ) {
+						$lead[ $group ] = $i;
+					}
+				}
+				foreach ( $submenu[ $parent ] as $i => $item ) {
+					$slug  = (string) ( $item[2] ?? '' );
+					$group = self::group( $slug, self::$labels[ $slug ] );
+					if ( ! isset( $lead[ $group ] ) ) {
+						continue;
+					}
+					$item[3] = $item[3] ?? self::$labels[ $slug ];
+					if ( $lead[ $group ] === $i ) {
+						$item[0] = esc_html( self::GROUPS[ $group ] ) . ( $bubble[ $group ] ?? '' );
+					} else {
+						$item[4] = trim( ( $item[4] ?? '' ) . ' sh-menu-hidden' );
+					}
+					self::$leaders[ $slug ] = (string) $submenu[ $parent ][ $lead[ $group ] ][2];
+					$submenu[ $parent ][ $i ] = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- relabel and hide only.
+				}
+			}
+		}
+
+		/** On a hidden screen, light up its group's sidebar link. */
+		public static function current_link( $file ) {
+			if ( ! self::$leaders ) {
+				return $file;
+			}
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- reading the screen address only.
+			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+			$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+			// phpcs:enable
+			foreach ( array( (string) $file, $page . '&tab=' . $tab, $page ) as $slug ) {
+				if ( '' !== $slug && isset( self::$leaders[ $slug ] ) ) {
+					return self::$leaders[ $slug ];
+				}
+			}
+			return $file;
+		}
+
+		/** Hide the grouped screens' sidebar links. */
+		public static function menu_css(): void {
+			if ( self::$leaders ) {
+				echo '<style>#adminmenu .sh-menu-hidden{display:none}</style>';
+			}
+		}
+
+		/** A sidebar label without its count bubble. */
+		private static function clean( string $raw ): string {
+			return trim( wp_strip_all_tags( preg_replace( '#<span[^>]*class="[^"]*(update-plugins|awaiting-mod|count)[^"]*"[^>]*>.*?</span>#s', '', $raw ) ) );
+		}
 
 		/**
 		 * Which nav group a sidebar screen belongs to. Plugins can move a screen
@@ -109,6 +208,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'home';
 			} elseif ( 'scout' === strtok( $s, '&' ) || preg_match( '/ai-search|analytics|robots/', $s ) ) {
 				$group = 'search';
+			} elseif ( preg_match( '/hours|team|results|cards|contact|booking|proposal/', $s . ' ' . $l ) ) {
+				$group = 'business';
 			} else {
 				$group = 'website';
 			}
@@ -118,7 +219,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/**
 		 * The section nav: every screen in this screen's sidebar menu, sorted into a
-		 * short row of groups (Overview, Search, Website, Reviews, Chat). The open
+		 * short row of groups (Home, Search, Website, Business, Reviews, Chat). The open
 		 * group's screens show as tabs underneath. Empty groups never show.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
@@ -168,7 +269,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			$open   = '';
 			foreach ( $items as $item ) {
 				$slug  = (string) $item[2];
-				$label = trim( wp_strip_all_tags( preg_replace( '#<span[^>]*class="[^"]*(update-plugins|awaiting-mod|count)[^"]*"[^>]*>.*?</span>#s', '', (string) $item[0] ) ) );
+				$label = self::$labels[ $slug ] ?? self::clean( (string) $item[0] );
 				$key   = self::group( $slug, $label );
 				$groups[ $key ][] = array(
 					'url'   => false !== strpos( $slug, '.php' ) ? admin_url( $slug ) : admin_url( 'admin.php?page=' . $slug ),
@@ -221,5 +322,10 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			echo '</div>';
 		}
 	}
+
+	// After every plugin and the hub's own ordering (999) have built the menu.
+	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'compact_menu' ), 1000 );
+	add_filter( 'submenu_file', array( 'Scout_Admin_UI', 'current_link' ), 20 );
+	add_action( 'admin_head', array( 'Scout_Admin_UI', 'menu_css' ) );
 
 endif;

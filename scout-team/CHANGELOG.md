@@ -1,5 +1,9 @@
 # Scout Team changelog
 
+## 0.1.1 (2026-10-13)
+
+- Ships the shared admin kit 1.3.0: the Scout menu bar is grouped into tabs (Home, Search, Website, Business, Reviews, Chat), and a long Scout sidebar shows one link per group.
+
 ## 0.1.0 (2026-10-13)
 
 - First release. A `scout_team` post type with a profile page for each

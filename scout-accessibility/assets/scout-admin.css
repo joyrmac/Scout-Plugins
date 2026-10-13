@@ -43,15 +43,28 @@
 
 .sh-tabs a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
 
-/* Section nav (kit 1.1.0): the same row on every Scout screen, read from the sidebar. */
-.sh-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px; padding: 6px; background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 980px; width: fit-content; max-width: 100%; }
-.sh-nav a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 14px; border-radius: 980px; color: var(--sh-text-2); font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; transition: background .15s ease, color .15s ease; }
-.sh-nav a:hover { background: var(--sh-surface-2); color: var(--sh-text); }
-.sh-nav a.is-active { background: var(--sh-accent); color: #fff; box-shadow: 0 2px 10px rgba(14, 143, 230, .28); }
-.sh-nav a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
+/* Section nav: a short row of groups, then the open group's screens as tabs. */
+.sh-nav { margin: 14px 0 4px; max-width: 100%; }
+.sh-nav-groups { display: flex; gap: 4px; padding: 5px; background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 980px; width: fit-content; max-width: 100%; box-sizing: border-box; overflow-x: auto; scrollbar-width: none; }
+.sh-nav-groups::-webkit-scrollbar, .sh-nav-sub::-webkit-scrollbar { display: none; }
+.sh .sh-nav-groups a { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 16px; border-radius: 980px; color: var(--sh-text-2); font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; transition: background .15s ease, color .15s ease; }
+.sh .sh-nav-groups a:hover { background: var(--sh-surface-2); color: var(--sh-text); }
+.sh .sh-nav-groups a.is-active { background: var(--sh-accent); color: #fff; box-shadow: 0 2px 10px rgba(14, 143, 230, .28); }
+.sh-nav-sub { display: flex; gap: 22px; margin-top: 10px; padding: 0 4px; border-bottom: 1px solid var(--sh-border); overflow-x: auto; scrollbar-width: none; }
+.sh .sh-nav-sub a { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 9px 0 10px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--sh-text-2); font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.sh .sh-nav-sub a:hover { color: var(--sh-text); }
+.sh .sh-nav-sub a.is-active { color: var(--sh-text); border-bottom-color: var(--sh-accent); }
+.sh .sh-nav a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
 .sh-nav-hint { font-family: var(--sh-mono); font-size: 10px; letter-spacing: .6px; text-transform: uppercase; padding: 2px 7px; border-radius: 980px; background: var(--sh-surface-2); color: var(--sh-text-3); }
-.sh-nav a.is-active .sh-nav-hint { background: rgba(255, 255, 255, .2); color: #fff; }
-@media (max-width: 782px) { .sh-nav { border-radius: 16px; width: 100%; } .sh-nav a { flex: 1 1 auto; justify-content: center; } }
+.sh .sh-nav-groups a.is-active .sh-nav-hint { background: rgba(255, 255, 255, .2); color: #fff; }
+@media (max-width: 782px) {
+	.sh-nav-groups { width: 100%; }
+	.sh-nav-groups { gap: 2px; padding: 4px; }
+	.sh .sh-nav-groups a { flex: 1 1 auto; justify-content: center; min-width: 0; padding: 7px 6px; font-size: 12px; }
+	.sh-nav-sub { flex-wrap: wrap; gap: 0 18px; }
+	.sh .sh-head h1 { font-size: 22px; }
+	.sh-head .sh-brand { display: none; }
+}
 
 .sh-box { background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 16px; padding: 20px 22px; margin-top: 16px; min-width: 0; }
 .sh-ops { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
