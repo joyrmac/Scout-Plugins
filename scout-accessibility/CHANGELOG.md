@@ -1,5 +1,9 @@
 # Scout Accessibility changelog
 
+## 0.1.9 (2026-10-14)
+
+- **Fix: "Published, but no link to it was found" when the footer link is there.** The check loaded the site's own home page to look for the link, and some hosts and firewalls block a site from loading itself (scoutraleigh.com showed the warning with the link in its footer). Now, whenever `[scout_accessibility_link]` prints the link on a visitor's page, the plugin notes the day, and the check counts the link as found for 30 days. Open any page of the site once after updating, then run the checks.
+
 ## 0.1.8 (2026-10-14)
 
 - **Fix: "a second main heading (H1)" on every page of some block themes.** The heading check assumed the theme prints each page title as the H1. Block themes that put the H1 in the page content (Hair by Patrick does) were flagged on 16 pages. The check now reads the page's template: when the template prints no H1, the content's first H1 is the page title and counts as correct. A second H1 is still flagged.

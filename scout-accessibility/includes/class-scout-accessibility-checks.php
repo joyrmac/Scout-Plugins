@@ -325,6 +325,11 @@ final class Scout_Accessibility_Checks {
 		if ( ! empty( Scout_Accessibility::settings()['footer_link'] ) ) {
 			return true;
 		}
+		// The theme or a widget printed [scout_accessibility_link] on a live page in the last 30 days.
+		$seen = (string) get_option( Scout_Accessibility::LINK_SEEN, '' );
+		if ( '' !== $seen && strtotime( $seen ) >= strtotime( '-30 days' ) ) {
+			return true;
+		}
 		$path     = (string) wp_parse_url( $url, PHP_URL_PATH );
 		$response = wp_remote_get(
 			home_url( '/' ),
