@@ -44,7 +44,7 @@ final class Scout_Analytics {
 		add_shortcode( 'scout_privacy_choices', array( __CLASS__, 'choices_link' ) );
 	}
 
-	/** @return array{gtm:string, ga4:string, mode:string, ads:bool, skip_editors:bool, notice:string, privacy_page:int} */
+	/** @return array{gtm:string, ga4:string, mode:string, ads:bool, skip_editors:bool, notice:string, privacy_page:int, late:bool} */
 	public static function settings(): array {
 		$s = (array) get_option( self::OPTION, array() );
 		return array(
@@ -55,6 +55,8 @@ final class Scout_Analytics {
 			'skip_editors' => ! isset( $s['skip_editors'] ) || ! empty( $s['skip_editors'] ),
 			'notice'       => (string) ( $s['notice'] ?? '' ),
 			'privacy_page' => (int) ( $s['privacy_page'] ?? (int) get_option( 'wp_page_for_privacy_policy' ) ),
+			// On by default: the tag loads once the page has shown, so it never slows the first screen.
+			'late'         => ! isset( $s['late'] ) || ! empty( $s['late'] ),
 		);
 	}
 
@@ -119,7 +121,14 @@ gtag('set','ads_data_redaction',ad==='denied');})(window.scoutConsentConfig);
 		if ( 'gtm' === self::tag() ) {
 			$id = esc_js( $s['gtm'] );
 			?>
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_js above. ?>');</script>
+<script>(function(w,d,s,l,i,late){function go(){if(w.scoutGtmLoaded)return;w.scoutGtmLoaded=1;w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}
+if(!late){go();return;}
+/* After the page has shown: on load (plus a moment), or the first tap, scroll or key, whichever comes first. */
+var ev=['pointerdown','keydown','scroll','touchstart'];function now(){ev.forEach(function(e){w.removeEventListener(e,now,{passive:true});});go();}
+ev.forEach(function(e){w.addEventListener(e,now,{passive:true,once:true});});
+function idle(){(w.requestIdleCallback||function(cb){setTimeout(cb,1500);})(go,{timeout:3000});}
+if(d.readyState==='complete'){idle();}else{w.addEventListener('load',idle);}
+})(window,document,'script','dataLayer','<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_js above. ?>',<?php echo $s['late'] ? 'true' : 'false'; ?>);</script>
 			<?php
 		} else {
 			$id = $s['ga4'];

@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.11 (2026-10-14)
+
+- **Faster first screen: Tag Manager loads after the page shows.** Tag Manager and GA4 are about 285 KB of script; loading them in the head cost scoutraleigh.com most of its mobile PageSpeed score (90 to 68). The consent defaults still set first, then the tag loads once the page has loaded (when the browser is idle, within 3 seconds) or at the visitor's first tap, scroll or key. On by default; Scout → Search → Analytics → Page speed turns it off. A visitor who leaves in the first second or two is not counted.
+
 ## 0.1.10 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
