@@ -25,6 +25,7 @@ final class Scout_Accessibility {
 
 	public static function boot(): void {
 		add_action( 'init', array( __CLASS__, 'register' ) );
+		add_action( 'admin_init', array( __CLASS__, 'fill_description' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'footer_style' ) );
 		add_action( 'wp_footer', array( __CLASS__, 'footer_link' ), 50 );
 	}
@@ -134,6 +135,9 @@ final class Scout_Accessibility {
 			if ( 'publish' !== $page->post_status ) {
 				$update['post_status'] = 'publish';
 			}
+			if ( ! has_excerpt( $page ) ) {
+				$update['post_excerpt'] = self::description();
+			}
 			if ( count( $update ) > 1 ) {
 				wp_update_post( wp_slash( $update ) );
 			}
@@ -147,6 +151,7 @@ final class Scout_Accessibility {
 						'post_title'   => __( 'Accessibility', 'scout-accessibility' ),
 						'post_name'    => 'accessibility',
 						'post_content' => self::PAGE_CONTENT,
+						'post_excerpt' => self::description(),
 					)
 				)
 			);
@@ -156,6 +161,33 @@ final class Scout_Accessibility {
 			update_option( self::OPTION, $s );
 		}
 		return $id;
+	}
+
+	/** The page's search description, so search engines don't have to guess one. */
+	public static function description(): string {
+		$name = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+		/* translators: %s: site name */
+		return sprintf( __( 'How %s keeps this website usable for everyone, what we check, and how to reach us if something doesn\'t work for you.', 'scout-accessibility' ), $name );
+	}
+
+	/**
+	 * Give an existing statement page its description once. Sites that made the
+	 * page before 0.1.6 have none, and Site health flags it.
+	 */
+	public static function fill_description(): void {
+		if ( get_option( 'scout_accessibility_desc_v1' ) || ! current_user_can( 'edit_pages' ) ) {
+			return;
+		}
+		$page = self::page();
+		if ( $page && ! has_excerpt( $page ) && '' === (string) get_post_meta( $page->ID, '_scout_seo_desc', true ) ) {
+			wp_update_post(
+				array(
+					'ID'           => $page->ID,
+					'post_excerpt' => self::description(),
+				)
+			);
+		}
+		update_option( 'scout_accessibility_desc_v1', 1, false );
 	}
 
 	/** Format a phone number for a tel: link. */
