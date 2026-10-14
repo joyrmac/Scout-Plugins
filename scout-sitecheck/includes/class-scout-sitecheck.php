@@ -138,7 +138,12 @@ final class Scout_Sitecheck {
 				</div>
 				<p class="ssc-hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
 				<button class="ssc-btn" type="submit"><?php esc_html_e( 'Check my site', 'scout-sitecheck' ); ?></button>
-				<p class="ssc-fine"><?php esc_html_e( 'It\'s free and takes about a minute. We\'ll show the results here and email you the full report.', 'scout-sitecheck' ); ?></p>
+				<p class="ssc-fine">
+					<?php esc_html_e( 'It\'s free and takes about a minute. We\'ll show the results here and email you the full report.', 'scout-sitecheck' ); ?>
+					<?php if ( get_privacy_policy_url() ) : ?>
+						<a href="<?php echo esc_url( get_privacy_policy_url() ); ?>"><?php esc_html_e( 'How we use your details', 'scout-sitecheck' ); ?></a>
+					<?php endif; ?>
+				</p>
 				<p class="ssc-error" data-ssc-error role="alert" hidden></p>
 			</form>
 
