@@ -1,5 +1,9 @@
 # Scout Accessibility changelog
 
+## 0.1.6 (2026-10-14)
+
+- **The Accessibility page gets a search description.** Site health flagged it as the one page with no description. New pages get one when they're made, and an existing page gets one the first time an admin opens the dashboard after the update (only if it has none).
+
 ## 0.1.5 (2026-10-13)
 
 - **Ticking a launch check fills in today's date and your name right away**, and the label reads "Done once saved", so the row no longer looks half done before you save.
