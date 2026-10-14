@@ -114,7 +114,7 @@ final class Scout_Accessibility_Checks {
 				);
 			}
 
-			$skips = self::heading_skips( $html );
+			$skips = self::heading_skips( $html, self::template_prints_title( $post ) );
 			if ( $skips ) {
 				$headings[] = array(
 					'id'    => $id,
@@ -188,19 +188,49 @@ final class Scout_Accessibility_Checks {
 	}
 
 	/**
-	 * Heading levels that skip a step. The theme prints the page title as
-	 * the H1, so content starts below it.
+	 * Does the theme print the page title as the H1 above the content?
+	 * Classic themes do. A block theme does only when its template for this
+	 * page has a level-1 title block or its own H1; many custom block themes
+	 * put the H1 in the page content instead.
+	 */
+	public static function template_prints_title( WP_Post $post ): bool {
+		if ( ! function_exists( 'wp_is_block_theme' ) || ! wp_is_block_theme() || ! function_exists( 'get_block_template' ) ) {
+			return true;
+		}
+		$custom = (string) get_page_template_slug( $post );
+		$slugs  = 'page' === $post->post_type
+			? array( $custom, 'page-' . $post->post_name, 'page-' . $post->ID, 'page', 'singular', 'index' )
+			: array( $custom, 'single-' . $post->post_type . '-' . $post->post_name, 'single-' . $post->post_type, 'single', 'singular', 'index' );
+		foreach ( array_filter( $slugs ) as $slug ) {
+			$template = get_block_template( get_stylesheet() . '//' . $slug, 'wp_template' );
+			if ( $template && '' !== (string) $template->content ) {
+				return (bool) preg_match( '/<h1\b|wp:post-title\s+\{[^}]*"level":\s*1\b/i', (string) $template->content );
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Heading levels that skip a step. When the theme prints the page title
+	 * as the H1, content starts below it; when it doesn't, the content's own
+	 * first H1 is the page title and is fine.
 	 *
 	 * @return array<int,array{from:int,to:int}> to = 1 means an extra H1.
 	 */
-	public static function heading_skips( string $html ): array {
+	public static function heading_skips( string $html, bool $title_in_template = true ): array {
 		$skips = array();
 		if ( ! preg_match_all( '/<h([1-6])\b/i', $html, $m ) ) {
 			return $skips;
 		}
-		$prev = 1;
+		$prev    = 1;
+		$own_h1  = ! $title_in_template;
 		foreach ( $m[1] as $level ) {
 			$level = (int) $level;
+			if ( 1 === $level && $own_h1 ) {
+				$own_h1 = false; // The page's one H1, written in the content.
+				$prev   = 1;
+				continue;
+			}
 			if ( 1 === $level ) {
 				$skips[] = array(
 					'from' => $prev,
