@@ -1,5 +1,9 @@
 # Scout Call Buttons changelog
 
+## 0.1.8 (2026-10-14)
+
+- **Faster first paint.** The call bar's small stylesheet (under 5 KB) prints inside the page instead of loading as a separate file, which PageSpeed listed as holding up the first paint on phones. The `scout_contact_inline_css` filter turns it back into a file.
+
 ## 0.1.7 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.

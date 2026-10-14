@@ -108,7 +108,17 @@ final class Scout_Contact {
 		if ( ! self::active() ) {
 			return;
 		}
-		wp_enqueue_style( 'scout-contact', SCOUT_CONTACT_URL . 'assets/contact.css', array(), SCOUT_CONTACT_VERSION );
+		// The bar is on screen from the first paint, so its styles can't load late,
+		// and a separate file held up the first paint (PageSpeed: 150 ms). The
+		// stylesheet is under 5 KB, so it prints inline in <head> instead.
+		$css = (string) @file_get_contents( plugin_dir_path( SCOUT_CONTACT_FILE ) . 'assets/contact.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( '' !== $css && apply_filters( 'scout_contact_inline_css', true ) ) {
+			wp_register_style( 'scout-contact', false, array(), SCOUT_CONTACT_VERSION );
+			wp_enqueue_style( 'scout-contact' );
+			wp_add_inline_style( 'scout-contact', $css );
+		} else {
+			wp_enqueue_style( 'scout-contact', SCOUT_CONTACT_URL . 'assets/contact.css', array(), SCOUT_CONTACT_VERSION );
+		}
 		wp_enqueue_script( 'scout-contact', SCOUT_CONTACT_URL . 'assets/contact.js', array(), SCOUT_CONTACT_VERSION, array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 
