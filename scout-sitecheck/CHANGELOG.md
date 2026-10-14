@@ -1,6 +1,13 @@
 # Scout Site Check changelog
 
 
+## 0.2.0 (2026-10-14)
+
+- **A landing-page layout.** `[scout_site_check layout="hero"]` puts the form and the sample report side by side for the top of a page. The default stays stacked.
+- **The sample report shows all eight checks,** with a big score, a headline and one colored bar per check. When it scrolls into view the rows resolve one at a time, once (it stays still for visitors who turn motion off).
+- **Calmer live run.** A progress bar and one dot per step replace the spinning circles, and the result shows the score as a big numeral instead of a cerulean ring.
+- Inputs use the 8px corner from the Scout design system, buttons darken on hover with `--accent-fill-hover`, and focus rings use the brand cerulean.
+
 ## 0.1.1 (2026-10-13)
 
 - **Fix: a passing speed line contradicted itself.** A site with a speed score of 90 or more but main content slower than 2.5 seconds read "shows in 3.2 seconds. Google's goal is under 2.5 seconds" next to a green check. It now gives the score and says the time is close to the goal.

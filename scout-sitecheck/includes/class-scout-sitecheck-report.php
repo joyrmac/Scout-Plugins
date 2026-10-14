@@ -44,8 +44,12 @@ final class Scout_Sitecheck_Report {
 		return array(
 			array( 'key' => 'speed', 'title' => __( 'Speed', 'scout-sitecheck' ), 'status' => 'warn', 'text' => __( 'The main content takes 4.8 seconds to show on phones. Aim for under 2.5 seconds.', 'scout-sitecheck' ), 'source' => __( 'Google speed tool', 'scout-sitecheck' ) ),
 			array( 'key' => 'security', 'title' => __( 'Security lock', 'scout-sitecheck' ), 'status' => 'pass', 'text' => __( 'HTTPS is on and the security certificate is current.', 'scout-sitecheck' ), 'source' => '' ),
+			array( 'key' => 'titles', 'title' => __( 'Page titles', 'scout-sitecheck' ), 'status' => 'pass', 'text' => __( 'All 5 pages we checked have their own title.', 'scout-sitecheck' ), 'source' => '' ),
 			array( 'key' => 'schema', 'title' => __( 'Business info for Google', 'scout-sitecheck' ), 'status' => 'fail', 'text' => __( 'No business info for Google found, so Google has to guess your hours and address.', 'scout-sitecheck' ), 'source' => __( 'Schema markup', 'scout-sitecheck' ) ),
+			array( 'key' => 'mobile', 'title' => __( 'Phone layout', 'scout-sitecheck' ), 'status' => 'pass', 'text' => __( 'The page is set up to fit phone screens.', 'scout-sitecheck' ), 'source' => '' ),
 			array( 'key' => 'ai', 'title' => __( 'AI crawlers', 'scout-sitecheck' ), 'status' => 'warn', 'text' => __( 'ChatGPT, Claude, Perplexity and Gemini can read your site. Apple Intelligence is blocked.', 'scout-sitecheck' ), 'source' => __( 'Crawler check', 'scout-sitecheck' ) ),
+			array( 'key' => 'sitemap', 'title' => __( 'Sitemap', 'scout-sitecheck' ), 'status' => 'pass', 'text' => __( 'Found at /sitemap.xml, so Google can find every page.', 'scout-sitecheck' ), 'source' => '' ),
+			array( 'key' => 'photos', 'title' => __( 'Photo sizes', 'scout-sitecheck' ), 'status' => 'pass', 'text' => __( 'All 12 photos on your home page are under 500 KB, a good size for phones.', 'scout-sitecheck' ), 'source' => '' ),
 		);
 	}
 
@@ -54,7 +58,7 @@ final class Scout_Sitecheck_Report {
 		$out = '<ul class="ssc-rows">';
 		foreach ( $rows as $r ) {
 			$status = isset( self::COLORS[ $r['status'] ] ) ? $r['status'] : 'skip';
-			$out   .= '<li class="ssc-r is-' . esc_attr( $status ) . '"><span class="ssc-ico" aria-hidden="true">' . self::COLORS[ $status ][2] . '</span>'
+			$out   .= '<li class="ssc-r is-' . esc_attr( $status ) . '" data-status="' . esc_attr( $status ) . '"><span class="ssc-ico" aria-hidden="true">' . self::COLORS[ $status ][2] . '</span>'
 				. '<span class="ssc-rt"><strong>' . esc_html( $r['title'] ) . '</strong><span class="screen-reader-text"> (' . esc_html( self::status_word( $status ) ) . ')</span> ' . esc_html( $r['text'] )
 				. ( '' !== (string) $r['source'] ? ' <span class="ssc-src">' . esc_html( $r['source'] ) . '</span>' : '' ) . '</span></li>';
 		}
