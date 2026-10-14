@@ -14,9 +14,57 @@ final class Scout_Hub_Health {
 
 	const SCAN_KEY  = 'scout_hub_answer_scan';
 	const SCAN_HOOK = 'scout_hub_answer_scan';
+	const SEEN_KEY  = 'scout_hub_answer_seen';
 
 	public static function boot(): void {
 		add_action( self::SCAN_HOOK, array( __CLASS__, 'run_scan' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'watch_page' ), 99 );
+	}
+
+	/**
+	 * Many hosts and firewalls stop a site from loading its own pages, which
+	 * leaves the background scan stuck. So when a visitor opens a page, note
+	 * whether it carries FAQPage, at most once a day per page. The scan falls
+	 * back to these notes.
+	 */
+	public static function watch_page(): void {
+		if ( is_admin() || ! is_page() || 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || is_preview() ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- compared only.
+			return;
+		}
+		$id    = (int) get_queried_object_id();
+		$seen  = (array) get_option( self::SEEN_KEY, array() );
+		$today = gmdate( 'Y-m-d' );
+		if ( ! $id || ( isset( $seen[ $id ]['d'] ) && $today === $seen[ $id ]['d'] ) ) {
+			return;
+		}
+		ob_start(
+			static function ( $html ) use ( $id, $today ) {
+				if ( is_string( $html ) && false !== stripos( $html, '</html>' ) ) {
+					$seen        = (array) get_option( self::SEEN_KEY, array() );
+					$seen[ $id ] = array( 'f' => (bool) preg_match( '/"@type"\s*:\s*(\[[^\]]*)?"FAQPage"/', $html ), 'd' => $today, 't' => time() );
+					update_option( self::SEEN_KEY, $seen, false );
+				}
+				return $html;
+			}
+		);
+	}
+
+	/** What visitors' page views showed in the last 30 days, or null when there are none. */
+	private static function seen_scan(): ?array {
+		$found   = 0;
+		$checked = 0;
+		$time    = 0;
+		$cut     = strtotime( '-30 days' );
+		foreach ( (array) get_option( self::SEEN_KEY, array() ) as $id => $row ) {
+			$t = (int) ( $row['t'] ?? strtotime( (string) ( $row['d'] ?? '' ) ) );
+			if ( ! $t || $t < $cut || 'publish' !== get_post_status( (int) $id ) ) {
+				continue;
+			}
+			++$checked;
+			$found += empty( $row['f'] ) ? 0 : 1;
+			$time   = max( $time, $t );
+		}
+		return $checked ? array( 'found' => $found, 'checked' => $checked, 'time' => $time ) : null;
 	}
 
 	/**
@@ -29,6 +77,13 @@ final class Scout_Hub_Health {
 	 */
 	public static function answer_scan(): ?array {
 		$scan = get_transient( self::SCAN_KEY );
+		if ( is_array( $scan ) && ! empty( $scan['checked'] ) ) {
+			return $scan;
+		}
+		$seen = self::seen_scan();
+		if ( $seen ) {
+			return $seen;
+		}
 		if ( is_array( $scan ) ) {
 			return $scan;
 		}
