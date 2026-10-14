@@ -133,6 +133,9 @@ final class Scout_Accessibility {
 				}
 			}
 		}
+		if ( $page && empty( $s['own_page'] ) && ! has_shortcode( $page->post_content, self::SHORTCODE ) && strlen( trim( wp_strip_all_tags( $page->post_content ) ) ) > 200 ) {
+			$s['own_page'] = 1; // Someone replaced our statement with their own words; keep them.
+		}
 		if ( $page && ! empty( $s['own_page'] ) ) {
 			if ( 'publish' === $page->post_status ) {
 				$s['page_id'] = $page->ID;
