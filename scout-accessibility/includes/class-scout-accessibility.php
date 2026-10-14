@@ -52,6 +52,7 @@ final class Scout_Accessibility {
 			'other_formats' => 0,
 			'last_reviewed' => '',
 			'page_id'       => 0,
+			'own_page'      => 0,
 			'footer_link'   => 0,
 		);
 	}
@@ -125,7 +126,19 @@ final class Scout_Accessibility {
 			$found = get_page_by_path( 'accessibility' );
 			if ( $found instanceof WP_Post && 'trash' !== $found->post_status ) {
 				$page = $found;
+				// A statement someone already wrote by hand is kept word for word.
+				// We link to it and check it, and never add ours on top.
+				if ( ! has_shortcode( $found->post_content, self::SHORTCODE ) && strlen( trim( wp_strip_all_tags( $found->post_content ) ) ) > 200 ) {
+					$s['own_page'] = 1;
+				}
 			}
+		}
+		if ( $page && ! empty( $s['own_page'] ) ) {
+			if ( 'publish' === $page->post_status ) {
+				$s['page_id'] = $page->ID;
+				update_option( self::OPTION, $s );
+			}
+			return (int) $page->ID;
 		}
 		if ( $page ) {
 			$update = array( 'ID' => $page->ID );
