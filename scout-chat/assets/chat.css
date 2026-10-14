@@ -37,7 +37,10 @@
 .is-open .sc-launcher { display: none; }
 
 /* Teaser */
-.sc-teaser { position: relative; max-width: 300px; background: var(--sc-surface); border: 1px solid var(--sc-line); border-radius: 18px; box-shadow: 0 18px 50px -14px rgba(0,0,0,.6); }
+/* The greeting floats above the launcher instead of joining the column, so the
+   corner widget never changes size when it appears. Before, the widget grew
+   upward and PageSpeed counted that as a layout shift (0.069 on scoutraleigh.com). */
+.sc-teaser { position: absolute; right: 0; bottom: calc(100% + 12px); width: max-content; max-width: min(300px, calc(100vw - 24px)); background: var(--sc-surface); border: 1px solid var(--sc-line); border-radius: 18px; box-shadow: 0 18px 50px -14px rgba(0,0,0,.6); }
 .sc-teaser-body { display: flex; flex-direction: column; gap: 4px; padding: 14px 36px 14px 16px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; }
 .sc-teaser-by { font-family: var(--sc-mono); font-size: 11px; font-weight: 500; letter-spacing: 1.3px; text-transform: uppercase; color: var(--sc-accent-text); }
 .sc-teaser-text { color: var(--sc-text-2); font-size: 14.5px; text-wrap: pretty; }

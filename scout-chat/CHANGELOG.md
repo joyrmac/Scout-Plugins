@@ -1,6 +1,10 @@
 # Scout Chat changelog
 
 
+## 0.2.1 (2026-10-14)
+
+- **Fix: the greeting no longer shifts the page.** "Questions about your website?" now floats above the chat button instead of making the corner widget taller, so PageSpeed stops counting a layout shift when it appears (0.069 on scoutraleigh.com's phone test).
+
 ## 0.2.0 (2026-10-13)
 
 - **Text back from your own phone.** The chat form asks for a phone number to text the visitor back, with email as the other choice (one of the two is enough). The email alert and the inbox show the number with a Text back button.
