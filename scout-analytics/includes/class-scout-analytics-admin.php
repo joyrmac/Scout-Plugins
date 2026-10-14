@@ -73,6 +73,7 @@ final class Scout_Analytics_Admin {
 			'mode'         => 'optin' === ( $in['mode'] ?? '' ) ? 'optin' : 'optout',
 			'ads'          => ! empty( $in['ads'] ) ? 1 : 0,
 			'skip_editors' => ! empty( $in['skip_editors'] ) ? 1 : 0,
+			'late'         => ! empty( $in['late'] ) ? 1 : 0,
 			'notice'       => sanitize_textarea_field( (string) ( $in['notice'] ?? '' ) ),
 			'privacy_page' => absint( $in['privacy_page'] ?? 0 ),
 		);
@@ -153,6 +154,11 @@ final class Scout_Analytics_Admin {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'People editing the site', 'scout-analytics' ); ?></th>
 					<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[skip_editors]" value="1" <?php checked( $s['skip_editors'] ); ?>> <?php esc_html_e( 'Do not count visits from anyone logged in who can edit', 'scout-analytics' ); ?></label></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Page speed', 'scout-analytics' ); ?></th>
+					<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[late]" value="1" <?php checked( $s['late'] ); ?>> <?php esc_html_e( 'Load Tag Manager after the page shows (recommended)', 'scout-analytics' ); ?></label>
+					<p class="description"><?php esc_html_e( 'Tag Manager starts once the page has loaded, or at the visitor\'s first tap, scroll or key. The page shows faster on phones. A visitor who leaves in the first second or two is not counted.', 'scout-analytics' ); ?></p></td>
 				</tr>
 			</table>
 			<?php submit_button(); ?>
