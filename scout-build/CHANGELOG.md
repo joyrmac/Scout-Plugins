@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.3 (2026-10-14)
+
+- **Fix: "Structured data: Missing" on Recon.** The Recon theme prints its own schema (`recon_head()`), and the check only knew Scout Media's. It now counts `recon_head()` and any theme that declares `add_theme_support( 'scout-seo-head' )`.
+
 ## 0.4.2 (2026-10-14)
 
 - **Fix: "Direct answers" stuck on Checking.** The check loads the main pages from the site itself in the background, and many hosts and firewalls block a site from loading itself (scoutraleigh.com showed Checking for good). Now, when a visitor opens a page, Scout Build notes whether it carries FAQ answers, once a day per page, and the check uses those notes when the background scan can't run. Pages count for 30 days.

@@ -250,7 +250,8 @@ final class Scout_Hub_Health {
 		) + ( $llms ? array() : array( 'link' => $set, 'link_text' => $set_tx ) );
 
 		// 3. Structured data.
-		$schema = class_exists( 'Scout_Schema' ) || function_exists( 'scout_head' ) || defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' );
+		// Scout themes that print their own JSON-LD (Scout Media's scout_head(), Recon's recon_head()) count too.
+		$schema = class_exists( 'Scout_Schema' ) || function_exists( 'scout_head' ) || function_exists( 'recon_head' ) || current_theme_supports( 'scout-seo-head' ) || defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' );
 		$out[]  = array(
 			'label' => __( 'Structured data', 'scout-build' ),
 			'value' => $schema ? __( 'On', 'scout-build' ) : __( 'Missing', 'scout-build' ),
