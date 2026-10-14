@@ -1,6 +1,10 @@
 # Scout Site Check changelog
 
 
+## 0.2.1 (2026-10-14)
+
+- **A privacy link under the button.** The line under Check my site now links to the site's privacy policy ("How we use your details"), so people see how their name and email are used before they send them. It shows when WordPress has a privacy page set (Settings, Privacy).
+
 ## 0.2.0 (2026-10-14)
 
 - **A landing-page layout.** `[scout_site_check layout="hero"]` puts the form and the sample report side by side for the top of a page. The default stays stacked.

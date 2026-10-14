@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.2 (2026-10-14)
+
+- **Fix: "Direct answers" stuck on Checking.** The check loads the main pages from the site itself in the background, and many hosts and firewalls block a site from loading itself (scoutraleigh.com showed Checking for good). Now, when a visitor opens a page, Scout Build notes whether it carries FAQ answers, once a day per page, and the check uses those notes when the background scan can't run. Pages count for 30 days.
+
 ## 0.4.1 (2026-10-13)
 
 - **The setup file fills Analytics too.** A client theme's `scout-setup.json` can carry `"analytics": { "gtm": "GTM-XXXXXXX" }`, and Scout Build puts the container ID into Scout Analytics once that feature is on. Blank only: an ID already set stays.

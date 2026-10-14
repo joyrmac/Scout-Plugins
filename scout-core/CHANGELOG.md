@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.3.2 (2026-10-14)
+
+- **Fix: two sets of share tags on themes that write their own.** Scout Media and Recon themes print their own title, description, canonical and Open Graph tags, and Scout Core printed a second set above them. Facebook and LinkedIn read the first `og:image`, so links showed the site icon instead of the page's share card. The SEO head now steps aside when the theme handles it (`scout_head()`, `recon_head()`, or `add_theme_support( 'scout-seo-head' )`). Filter `scout_core_seo_head` to force it either way.
+
 ## 1.3.1 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.

@@ -13,6 +13,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'scout_hub_plan' );
 delete_option( 'scout_hub_update_holds' );
 delete_option( 'scout_hub_log' );
+delete_option( 'scout_hub_answer_seen' );
 delete_option( 'scout_hub_page' );
 delete_transient( 'scout_hub_catalog' );
 delete_transient( 'scout_hub_releases' );

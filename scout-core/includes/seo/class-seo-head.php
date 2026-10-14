@@ -42,7 +42,23 @@ final class Scout_SEO_Head {
 		return $title;
 	}
 
+	/**
+	 * Some Scout themes write their own title, description, canonical and share
+	 * tags (Scout Media's scout_head(), Recon's recon_head()). Printing ours too
+	 * doubles every tag, and Facebook and LinkedIn read the first og:image, so
+	 * the wrong share image wins. Step aside for them. A theme can also say so
+	 * with add_theme_support( 'scout-seo-head' ), or a site with the
+	 * scout_core_seo_head filter.
+	 */
+	public static function theme_handles_head(): bool {
+		$theme = current_theme_supports( 'scout-seo-head' ) || function_exists( 'scout_head' ) || function_exists( 'recon_head' );
+		return ! (bool) apply_filters( 'scout_core_seo_head', ! $theme );
+	}
+
 	public static function output() {
+		if ( self::theme_handles_head() ) {
+			return;
+		}
 		$description = self::description();
 		$canonical   = self::canonical();
 		$title       = wp_get_document_title();

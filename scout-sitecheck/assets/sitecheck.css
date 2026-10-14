@@ -16,6 +16,7 @@
 .ssc-btn:focus-visible{outline:2px solid var(--ssc-accent);outline-offset:3px}
 .ssc-btn[disabled]{opacity:.6;cursor:default;transform:none}
 .ssc-fine{margin:12px 0 0;font-size:14px;color:var(--ssc-text-2)}
+.ssc-fine a{color:var(--ssc-accent-text);text-decoration:underline;text-underline-offset:2px}
 .ssc-error{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:rgba(242,85,61,.12);color:var(--ssc-text);font-size:15px}
 .ssc-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
 .ssc-eyebrow{margin:0;font-family:var(--ssc-mono);font-size:12px;font-weight:500;letter-spacing:1.4px;text-transform:uppercase;color:var(--ssc-accent-text)}
