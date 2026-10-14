@@ -111,13 +111,18 @@ final class Scout_Sitecheck {
 		);
 	}
 
-	/** [scout_site_check sample="yes"] */
+	/**
+	 * [scout_site_check sample="yes" layout="stack"]
+	 *
+	 * layout="hero" puts the form and the sample report side by side, for the top of a landing page.
+	 */
 	public static function shortcode( $atts ): string {
-		$atts = shortcode_atts( array( 'sample' => 'yes' ), (array) $atts, 'scout_site_check' );
+		$atts = shortcode_atts( array( 'sample' => 'yes', 'layout' => 'stack' ), (array) $atts, 'scout_site_check' );
 		self::assets();
+		$hero = 'hero' === $atts['layout'];
 		ob_start();
 		?>
-		<div class="ssc" data-ssc>
+		<div class="ssc<?php echo $hero ? ' ssc-hero' : ''; ?>" data-ssc>
 			<form class="ssc-form" data-ssc-form novalidate>
 				<label class="ssc-label" for="ssc-url"><?php esc_html_e( 'Your website address', 'scout-sitecheck' ); ?></label>
 				<input class="ssc-input ssc-url" id="ssc-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="yourbusiness.com" required>
@@ -140,21 +145,37 @@ final class Scout_Sitecheck {
 			<div class="ssc-run" data-ssc-run hidden aria-live="polite">
 				<p class="ssc-eyebrow" data-ssc-site></p>
 				<h2 class="ssc-h" data-ssc-head><?php esc_html_e( 'Checking your site now.', 'scout-sitecheck' ); ?></h2>
+				<div class="ssc-progress" aria-hidden="true"><i data-ssc-bar></i></div>
 				<ul class="ssc-steps">
-					<li data-step="basics"><span class="ssc-spin" aria-hidden="true"></span><?php esc_html_e( 'Security, page titles, business info and phone layout', 'scout-sitecheck' ); ?></li>
-					<li data-step="speed"><span class="ssc-spin" aria-hidden="true"></span><?php esc_html_e( 'Speed on phones (Google\'s speed tool takes the longest)', 'scout-sitecheck' ); ?></li>
-					<li data-step="crawlers"><span class="ssc-spin" aria-hidden="true"></span><?php esc_html_e( 'AI tools and your sitemap', 'scout-sitecheck' ); ?></li>
-					<li data-step="photos"><span class="ssc-spin" aria-hidden="true"></span><?php esc_html_e( 'Photo sizes', 'scout-sitecheck' ); ?></li>
+					<li data-step="basics"><span class="ssc-dot" aria-hidden="true"></span><?php esc_html_e( 'Security, page titles, business info and phone layout', 'scout-sitecheck' ); ?></li>
+					<li data-step="speed"><span class="ssc-dot" aria-hidden="true"></span><?php esc_html_e( 'Speed on phones (Google\'s speed tool takes the longest)', 'scout-sitecheck' ); ?></li>
+					<li data-step="crawlers"><span class="ssc-dot" aria-hidden="true"></span><?php esc_html_e( 'AI tools and your sitemap', 'scout-sitecheck' ); ?></li>
+					<li data-step="photos"><span class="ssc-dot" aria-hidden="true"></span><?php esc_html_e( 'Photo sizes', 'scout-sitecheck' ); ?></li>
 				</ul>
 				<div class="ssc-result" data-ssc-result hidden></div>
 			</div>
 
 			<?php if ( 'no' !== $atts['sample'] ) : ?>
+				<?php
+				$rows   = Scout_Sitecheck_Report::sample();
+				$passed = count( array_filter( $rows, static fn( $r ) => 'pass' === $r['status'] ) );
+				?>
 				<aside class="ssc-sample" data-ssc-sample aria-label="<?php esc_attr_e( 'Sample report', 'scout-sitecheck' ); ?>">
-					<p class="ssc-eyebrow"><?php esc_html_e( 'What you get · sample', 'scout-sitecheck' ); ?></p>
+					<div class="ssc-sample-top">
+						<p class="ssc-eyebrow"><?php esc_html_e( 'Sample report', 'scout-sitecheck' ); ?></p>
+						<span class="ssc-site">yourbusiness.com</span>
+					</div>
+					<div class="ssc-score">
+						<span class="ssc-n"><span data-ssc-pass><?php echo (int) $passed; ?></span><small>/<?php echo count( $rows ); ?></small><span class="screen-reader-text"> <?php esc_html_e( 'checks passed', 'scout-sitecheck' ); ?></span></span>
+						<div>
+							<p class="ssc-score-h" data-ssc-sample-head><?php echo esc_html( Scout_Sitecheck_Report::headline( $passed, count( $rows ) ) ); ?></p>
+							<div class="ssc-seg" aria-hidden="true"><?php foreach ( $rows as $r ) : ?><i class="is-<?php echo esc_attr( $r['status'] ); ?>"></i><?php endforeach; ?></div>
+						</div>
+					</div>
 					<?php
-					echo Scout_Sitecheck_Report::rows_html( Scout_Sitecheck_Report::sample() ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+					echo Scout_Sitecheck_Report::rows_html( $rows ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 					?>
+					<p class="ssc-sample-note"><?php esc_html_e( 'These are example results, so yours will look different.', 'scout-sitecheck' ); ?></p>
 				</aside>
 			<?php endif; ?>
 		</div>
