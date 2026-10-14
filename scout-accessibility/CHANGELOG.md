@@ -1,5 +1,9 @@
 # Scout Accessibility changelog
 
+## 0.1.7 (2026-10-14)
+
+- **A hand-written Accessibility page is kept word for word.** If a site already has its own page at /accessibility/ (Hair by Patrick has one with his text-first contact and his in-person notes), saving the statement now uses that page as is: it's linked and checked, and our statement is never added on top. The screen says so.
+
 ## 0.1.6 (2026-10-14)
 
 - **The Accessibility page gets a search description.** Site health flagged it as the one page with no description. New pages get one when they're made, and an existing page gets one the first time an admin opens the dashboard after the update (only if it has none).

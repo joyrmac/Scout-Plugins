@@ -119,7 +119,7 @@ final class Scout_Accessibility_Admin {
 		update_option( Scout_Accessibility::OPTION, $s );
 		Scout_Accessibility::ensure_page();
 		self::refresh_statement_result();
-		self::back( 'statement', 'sa-statement' );
+		self::back( empty( Scout_Accessibility::settings()['own_page'] ) ? 'statement' : 'statement_own', 'sa-statement' );
 	}
 
 	/** Run the weekly checks now. */
@@ -215,6 +215,7 @@ final class Scout_Accessibility_Admin {
 		$msg  = isset( $_GET['msg'] ) ? sanitize_key( wp_unslash( $_GET['msg'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$list = array(
 			'statement'    => array( 'success', __( 'Saved. The Accessibility page is published with the statement.', 'scout-accessibility' ) ),
+			'statement_own' => array( 'success', __( 'Saved. This site already has its own Accessibility page, so we kept its words exactly as they are and use it as the statement.', 'scout-accessibility' ) ),
 			'run'          => array( 'success', __( 'Checks finished. Results are below.', 'scout-accessibility' ) ),
 			'launch'       => array( 'success', __( 'At-launch checklist saved.', 'scout-accessibility' ) ),
 			'footer'       => array( 'success', __( 'Footer link setting saved.', 'scout-accessibility' ) ),
@@ -513,6 +514,9 @@ final class Scout_Accessibility_Admin {
 			<p class="sh-eyebrow"><?php esc_html_e( 'Statement', 'scout-accessibility' ); ?></p>
 			<h2><?php esc_html_e( 'The accessibility statement', 'scout-accessibility' ); ?></h2>
 			<p class="sh-note"><?php esc_html_e( 'Saving creates the Accessibility page, or updates it if it already exists. The wording is plain and honest: it says the site aims for the standard and how to report a barrier, and never claims full compliance.', 'scout-accessibility' ); ?></p>
+			<?php if ( ! empty( Scout_Accessibility::settings()['own_page'] ) ) : ?>
+				<p class="sh-note"><strong><?php esc_html_e( 'This site uses its own Accessibility page.', 'scout-accessibility' ); ?></strong> <?php esc_html_e( 'Its words stay exactly as written. Edit that page to change them; the settings below are kept for reference only.', 'scout-accessibility' ); ?></p>
+			<?php endif; ?>
 		</div>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-box">
 			<input type="hidden" name="action" value="scout_a11y_statement">
