@@ -326,7 +326,28 @@ final class Scout_Accessibility {
 	 * @param array|string $atts Unused.
 	 */
 	public static function link_shortcode( $atts = array() ): string {
-		return self::link_html();
+		$html = self::link_html();
+		if ( '' !== $html ) {
+			self::mark_link_seen();
+		}
+		return $html;
+	}
+
+	const LINK_SEEN = 'scout_accessibility_link_seen';
+
+	/**
+	 * Remember that a visitor-facing page printed the link. The statement check trusts this
+	 * when the site can't load its own home page (hosts and firewalls often block that).
+	 * Written at most once a day.
+	 */
+	public static function mark_link_seen(): void {
+		if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			return;
+		}
+		$today = gmdate( 'Y-m-d' );
+		if ( get_option( self::LINK_SEEN ) !== $today ) {
+			update_option( self::LINK_SEEN, $today, false );
+		}
 	}
 
 	/** Optional small link printed at the very end of every page. */

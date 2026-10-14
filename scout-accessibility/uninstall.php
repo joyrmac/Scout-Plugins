@@ -24,4 +24,5 @@ if ( $scout_page instanceof WP_Post && 'page' === $scout_page->post_type ) {
 delete_option( 'scout_accessibility' );
 delete_option( 'scout_accessibility_results' );
 delete_option( 'scout_accessibility_launch' );
+delete_option( 'scout_accessibility_link_seen' );
 wp_clear_scheduled_hook( 'scout_accessibility_weekly' );
