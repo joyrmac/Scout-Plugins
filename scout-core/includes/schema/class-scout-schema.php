@@ -242,7 +242,10 @@ final class Scout_Schema {
 				$ratings[] = (float) $rating;
 			}
 
-			if ( count( $reviews ) >= $limit ) {
+			// Google's review snippet needs a star rating on every Review. Testimonials
+			// without one stay on the page but are left out of the markup, which
+			// Maravela's Rich Results test flagged as 10 invalid items (Oct 15).
+			if ( count( $reviews ) >= $limit || ! is_numeric( $rating ) ) {
 				continue;
 			}
 
@@ -260,13 +263,11 @@ final class Scout_Schema {
 			if ( '' !== $body ) {
 				$node['reviewBody'] = $body;
 			}
-			if ( is_numeric( $rating ) ) {
-				$node['reviewRating'] = array(
-					'@type'       => 'Rating',
-					'ratingValue' => (string) ( 0 + $rating ),
-					'bestRating'  => '5',
-				);
-			}
+			$node['reviewRating'] = array(
+				'@type'       => 'Rating',
+				'ratingValue' => (string) ( 0 + $rating ),
+				'bestRating'  => '5',
+			);
 			$date = get_post_meta( $post->ID, scout_core_meta_key( 'date' ), true );
 			if ( '' !== $date ) {
 				$node['datePublished'] = $date;
