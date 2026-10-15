@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.12 (2026-10-15)
+
+- **Fix: the cookie notice's OK button passes contrast on themes without an accent color.** Its fallback was the bright Scout blue `#0E8FE6`, and white text on it is 3.45:1 (Hair by Patrick flagged it). The fallback is now the deeper `#0A78C2`, 4.69:1. Themes that set `--accent` keep their own color.
+
 ## 0.1.11 (2026-10-14)
 
 - **Faster first screen: Tag Manager loads after the page shows.** Tag Manager and GA4 are about 285 KB of script; loading them in the head cost scoutraleigh.com most of its mobile PageSpeed score (90 to 68). The consent defaults still set first, then the tag loads once the page has loaded (when the browser is idle, within 3 seconds) or at the visitor's first tap, scroll or key. On by default; Scout → Search → Analytics → Page speed turns it off. A visitor who leaves in the first second or two is not counted.
