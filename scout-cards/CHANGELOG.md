@@ -1,5 +1,9 @@
 # Scout Cards changelog
 
+## 1.0.18 (2026-10-15)
+
+- **Full-photo person cards.** A person with a photo now gets the layout Scout's own team cards use: the photo fills the top with their name and role on it, the business name (and logo) links back to the main card, then Save my contact, Call / Text / Book, their intro, tags and details. People without a photo keep the classic card.
+
 ## 1.0.17 (2026-10-15)
 
 - **A share picture for each person.** Each person gets an optional wide share picture, used when their own card (and their share page) is texted or posted.
