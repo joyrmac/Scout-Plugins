@@ -155,6 +155,8 @@ final class Scout_Cards_Admin {
 		echo '<tr><th scope="row">Mode</th><td><label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="dark"' . checked( $s['mode'], 'dark', false ) . '> Dark</label> &nbsp; <label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="light"' . checked( $s['mode'], 'light', false ) . '> Light</label></td></tr>';
 		echo '<tr><th scope="row"><label for="scc-accent">Accent color</label></th><td><input type="color" id="scc-accent" name="' . esc_attr( $n ) . '[accent]" value="' . esc_attr( $s['accent'] ) . '"><p class="description">The brand color for buttons, links, and tags.</p></td></tr>';
 		self::field( "{$n}[font]", $s['font'], 'Font (optional)', 'text', 'Leave blank to use the site\'s own font. Or a CSS font list, e.g. "Hanken Grotesk", sans-serif.' );
+		self::photo( "{$n}[share_card_id]", (int) $s['share_card_id'], 'Share picture: card', 'Shows when someone texts or posts the card link. 1200 by 630 pixels.' );
+		self::photo( "{$n}[share_links_id]", (int) $s['share_links_id'], 'Share picture: links page', 'Shows when the links page is shared. Blank uses the card\'s.' );
 		echo '</table>';
 
 		echo '<h2>Business details</h2><table class="form-table" role="presentation">';
@@ -253,6 +255,8 @@ final class Scout_Cards_Admin {
 		$out['mode']         = 'light' === ( $in['mode'] ?? '' ) ? 'light' : 'dark';
 		$out['accent']       = sanitize_hex_color( $in['accent'] ?? '' ) ? sanitize_hex_color( $in['accent'] ) : '#0E8FE6';
 		$out['photo_id']     = absint( $in['photo_id'] ?? 0 );
+		$out['share_card_id']  = absint( $in['share_card_id'] ?? 0 );
+		$out['share_links_id'] = absint( $in['share_links_id'] ?? 0 );
 		$out                += self::clean_spot( $in );
 		$out['links_latest'] = empty( $in['links_latest'] ) ? 0 : 1;
 		$out['enable_cards'] = empty( $in['enable_cards'] ) ? 0 : 1;

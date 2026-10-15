@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.6 (2026-10-15)
+
+- **The setup file sets the card's share pictures.** `share_card` and `share_links` in the `cards` section (theme paths) become the wide pictures shown when the card or links page is shared, filled once while blank.
+
 ## 0.4.5 (2026-10-15)
 
 - **The setup file fills the digital business card.** A `cards` section in the client theme's `scout-setup.json` sets the card's look, contact details, intro, booking spotlight, photo and link page rows once Cards is on. As with the other sections it fills only blanks and untouched defaults; the site admin's email also counts as blank, since on client sites it is often whoever set WordPress up.
