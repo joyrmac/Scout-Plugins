@@ -69,7 +69,8 @@ final class Scout_Hub_Setup {
 			if ( empty( $data[ $section ] ) || ! is_array( $data[ $section ] ) ) {
 				continue;
 			}
-			$hash = md5( (string) wp_json_encode( $data[ $section ] ) );
+			// The reviews section reruns once after 0.4.4, when untouched defaults started counting as blank.
+			$hash = md5( (string) wp_json_encode( $data[ $section ] ) . ( 'reviews' === $section ? '|defaults-blank' : '' ) );
 			if ( ( $done[ $section ] ?? '' ) === $hash ) {
 				continue;
 			}
@@ -159,7 +160,9 @@ final class Scout_Hub_Setup {
 		if ( ! empty( $in['photo'] ) ) {
 			$fill['photo'] = self::url( (string) $in['photo'] );
 		}
-		self::fill_option( Scout_Reviews_Requests::OPTION, array_map( 'sanitize_text_field', $fill ) );
+		// A setting still on the plugin's own default counts as blank, so the client's look wins
+		// on sites where the review page was saved before the theme carried it (North Crest, Oct 15).
+		self::fill_option( Scout_Reviews_Requests::OPTION, array_map( 'sanitize_text_field', $fill ), Scout_Reviews_Requests::defaults() );
 
 		$write = esc_url_raw( (string) ( $in['google_review_url'] ?? '' ), array( 'https' ) );
 		if ( '' !== $write && class_exists( 'Scout_Reviews_Settings' ) ) {
@@ -246,12 +249,19 @@ final class Scout_Hub_Setup {
 	/* ---------- helpers ---------- */
 
 	/** Set keys that are missing or blank in an option; leave everything else. */
-	private static function fill_option( string $option, array $fill ): void {
+	/**
+	 * Fill blank settings. A setting that still holds the plugin's own default
+	 * (from $defaults) also counts as blank, since nobody chose it.
+	 */
+	private static function fill_option( string $option, array $fill, array $defaults = array() ): void {
 		$saved = get_option( $option, array() );
 		$saved = is_array( $saved ) ? $saved : array();
 		$dirty = false;
 		foreach ( $fill as $key => $value ) {
-			if ( '' !== $value && ( ! isset( $saved[ $key ] ) || '' === $saved[ $key ] ) ) {
+			$current = isset( $saved[ $key ] ) ? (string) $saved[ $key ] : '';
+			$default = isset( $defaults[ $key ] ) && is_scalar( $defaults[ $key ] ) ? (string) $defaults[ $key ] : null;
+			$blank   = '' === $current || ( null !== $default && 0 === strcasecmp( $current, $default ) );
+			if ( '' !== $value && $blank && 0 !== strcasecmp( $current, (string) $value ) ) {
 				$saved[ $key ] = $value;
 				$dirty         = true;
 			}
