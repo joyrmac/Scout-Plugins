@@ -175,6 +175,7 @@ final class Scout_Cards_Admin {
 		self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
 		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
 		self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
+		self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Logo for the links and share pages', 'Optional. When the card shows a person, the links page and share page can show the logo instead.' );
 		self::spot_fields( $n, $s );
 		echo '</table>';
 
@@ -255,6 +256,7 @@ final class Scout_Cards_Admin {
 		$out['mode']         = 'light' === ( $in['mode'] ?? '' ) ? 'light' : 'dark';
 		$out['accent']       = sanitize_hex_color( $in['accent'] ?? '' ) ? sanitize_hex_color( $in['accent'] ) : '#0E8FE6';
 		$out['photo_id']     = absint( $in['photo_id'] ?? 0 );
+		$out['logo_id']        = absint( $in['logo_id'] ?? 0 );
 		$out['share_card_id']  = absint( $in['share_card_id'] ?? 0 );
 		$out['share_links_id'] = absint( $in['share_links_id'] ?? 0 );
 		$out                += self::clean_spot( $in );

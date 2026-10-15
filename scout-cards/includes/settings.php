@@ -49,6 +49,7 @@ final class Scout_Cards_Settings {
 			'team_intro'   => get_bloginfo( 'description' ),
 			'pick_heading' => 'Who would you like to talk to?',
 			'photo_id'     => 0,
+			'logo_id'        => 0,
 			'share_card_id'  => 0,
 			'share_links_id' => 0,
 			'spot_heading' => '',
@@ -80,7 +81,7 @@ final class Scout_Cards_Settings {
 				}
 				continue;
 			}
-			if ( in_array( $k, array( 'enable_cards', 'enable_links', 'links_latest', 'photo_id', 'share_card_id', 'share_links_id' ), true ) ) {
+			if ( in_array( $k, array( 'enable_cards', 'enable_links', 'links_latest', 'photo_id', 'logo_id', 'share_card_id', 'share_links_id' ), true ) ) {
 				$d[ $k ] = (int) $v;
 				continue;
 			}
@@ -184,6 +185,13 @@ final class Scout_Cards_Settings {
 		$id = 'links' === $which && $s['share_links_id'] ? $s['share_links_id'] : $s['share_card_id'];
 		$src = $id ? wp_get_attachment_image_src( (int) $id, 'full' ) : false;
 		return $src ? array( 'url' => $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] ) : null;
+	}
+
+	/** The logo for the links page and share page, or '' (they fall back to the main card's photo). */
+	public static function logo_url() {
+		$id = (int) self::get()['logo_id'];
+		$u  = $id ? wp_get_attachment_image_url( $id, 'medium' ) : '';
+		return $u ? (string) $u : '';
 	}
 
 	public static function photo_url( $photo_id, $team ) {

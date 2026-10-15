@@ -1,5 +1,10 @@
 # Scout Cards changelog
 
+## 1.0.16 (2026-10-15)
+
+- **A logo for the links and share pages.** New "Logo for the links and share pages" picker. When the main card shows a person, the links page shows the logo instead, and the share page shows it above the QR code. Blank keeps the card photo as before.
+- **Fix: links page rows shrank and centered on themes that style every `<nav>`** (North Crest's header rule). The list now stays full width on any theme.
+
 ## 1.0.15 (2026-10-15)
 
 - **Share pictures.** Two new pickers under Look: a wide picture for the card and one for the links page (1200 by 630). When someone texts or posts either link, that picture shows in the preview instead of a small headshot, with its size and the large-image tags set. The share mode page uses the card's picture. Blank keeps the old behavior.

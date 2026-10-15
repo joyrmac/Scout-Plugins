@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.7 (2026-10-15)
+
+- **The setup file sets the card's logo.** `logo` in the `cards` section (a theme path) fills the new Cards logo setting while blank.
+
 ## 0.4.6 (2026-10-15)
 
 - **The setup file sets the card's share pictures.** `share_card` and `share_links` in the `cards` section (theme paths) become the wide pictures shown when the card or links page is shared, filled once while blank.
