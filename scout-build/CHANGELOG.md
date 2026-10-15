@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.4.9 (2026-10-15)
+
+- **Direct answers checks the pages that matter.** The check now looks at the home page, then the pages its menus link to (read from the home page itself, so classic menus, Navigation blocks and hand-written headers all count), then top-level pages and their children, and skips utility pages (site map, search, the blog index, legal pages). Before, it took top-level pages alphabetically, so on Maravela's it checked the site map, gallery and booking forms and missed every service page. Visitor page notes count only for these same pages, and old counts are dropped.
+- **Fill from theme again.** A button beside Check for new versions (only when the theme has a setup file) runs the setup file again. It still fills blanks only. For when a save from a page opened before a theme update blanked what the setup filled.
+
 ## 0.4.8 (2026-10-15)
 
 - **The setup file fills people cards.** A `people` list in the `cards` section adds each person's card (name, title, intro, tags, photo, share picture) while the site has none. `pick_heading` is filled too.

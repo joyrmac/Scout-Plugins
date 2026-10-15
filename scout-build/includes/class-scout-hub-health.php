@@ -12,7 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Hub_Health {
 
-	const SCAN_KEY  = 'scout_hub_answer_scan';
+	const SCAN_KEY  = 'scout_hub_answer_scan_v2';
+	const NAV_KEY   = 'scout_hub_nav_pages'; // Page IDs linked from the home page's menus, in order. // v2 (0.4.9): new page choice, so old counts are dropped.
 	const SCAN_HOOK = 'scout_hub_answer_scan';
 	const SEEN_KEY  = 'scout_hub_answer_seen';
 
@@ -43,6 +44,9 @@ final class Scout_Hub_Health {
 					$seen        = (array) get_option( self::SEEN_KEY, array() );
 					$seen[ $id ] = array( 'f' => (bool) preg_match( '/"@type"\s*:\s*(\[[^\]]*)?"FAQPage"/', $html ), 'd' => $today, 't' => time() );
 					update_option( self::SEEN_KEY, $seen, false );
+					if ( (int) get_option( 'page_on_front' ) === $id ) {
+						self::note_nav( $html );
+					}
 				}
 				return $html;
 			}
@@ -55,9 +59,10 @@ final class Scout_Hub_Health {
 		$checked = 0;
 		$time    = 0;
 		$cut     = strtotime( '-30 days' );
+		$main    = array_map( 'intval', wp_list_pluck( self::main_pages(), 'ID' ) );
 		foreach ( (array) get_option( self::SEEN_KEY, array() ) as $id => $row ) {
 			$t = (int) ( $row['t'] ?? strtotime( (string) ( $row['d'] ?? '' ) ) );
-			if ( ! $t || $t < $cut || 'publish' !== get_post_status( (int) $id ) ) {
+			if ( ! $t || $t < $cut || ! in_array( (int) $id, $main, true ) || 'publish' !== get_post_status( (int) $id ) ) {
 				continue;
 			}
 			++$checked;
@@ -98,15 +103,103 @@ final class Scout_Hub_Health {
 		delete_transient( self::SCAN_KEY );
 	}
 
-	public static function run_scan(): void {
+	/**
+	 * The pages that bring in business: the home page, then the pages in the
+	 * site's menus (what visitors are steered to), then top-level pages and
+	 * their children. Utility pages (legal, site map, search, the blog index)
+	 * are left out. Maravela's, Oct 15: picking top-level pages alphabetically
+	 * checked the site map, gallery and booking forms and missed every service page.
+	 *
+	 * @return WP_Post[]
+	 */
+	public static function main_pages(): array {
 		$all   = get_pages( array( 'sort_column' => 'menu_order,post_title' ) );
+		$byid  = array();
+		foreach ( $all as $p ) {
+			$byid[ (int) $p->ID ] = $p;
+		}
+		$order = array();
 		$front = (int) get_option( 'page_on_front' );
-		$top   = array_filter( $all, static fn( $p ) => ! $p->post_parent );
-		$ids   = wp_list_pluck( $top, 'ID' );
-		$kids  = array_filter( $all, static fn( $p ) => in_array( (int) $p->post_parent, array_map( 'intval', $ids ), true ) );
-		$pages = array_merge( $top, $kids );
-		usort( $pages, static fn( $a, $b ) => ( (int) $b->ID === $front ) <=> ( (int) $a->ID === $front ) );
-		$pages = array_slice( array_filter( $pages, static fn( $p ) => ! preg_match( '/^(privacy|terms|cookie|thank|sample-page|card|links)/', $p->post_name ) ), 0, 15 );
+		if ( $front ) {
+			$order[] = $front;
+		}
+		foreach ( (array) get_nav_menu_locations() as $menu ) {
+			foreach ( (array) wp_get_nav_menu_items( $menu ) as $item ) {
+				if ( 'post_type' === ( $item->type ?? '' ) && 'page' === ( $item->object ?? '' ) ) {
+					$order[] = (int) $item->object_id;
+				}
+			}
+		}
+		// Whatever the theme does (classic menus, Navigation blocks, a hand-written
+		// header), the home page's own menu links are noted when it is loaded.
+		foreach ( (array) get_option( self::NAV_KEY, array() ) as $id ) {
+			$order[] = (int) $id;
+		}
+		// Block themes keep their menus as Navigation posts instead.
+		$walk = static function ( array $blocks ) use ( &$walk, &$order ): void {
+			foreach ( $blocks as $b ) {
+				$a = $b['attrs'] ?? array();
+				if ( in_array( $b['blockName'] ?? '', array( 'core/navigation-link', 'core/navigation-submenu' ), true ) && 'page' === ( $a['type'] ?? '' ) && ! empty( $a['id'] ) ) {
+					$order[] = (int) $a['id'];
+				}
+				if ( ! empty( $b['innerBlocks'] ) ) {
+					$walk( $b['innerBlocks'] );
+				}
+			}
+		};
+		foreach ( get_posts( array( 'post_type' => 'wp_navigation', 'post_status' => 'publish', 'numberposts' => 5 ) ) as $nav ) {
+			$walk( parse_blocks( (string) $nav->post_content ) );
+		}
+		$top = array_filter( $all, static fn( $p ) => ! $p->post_parent );
+		$ids = array_map( 'intval', wp_list_pluck( $top, 'ID' ) );
+		foreach ( $top as $p ) {
+			$order[] = (int) $p->ID;
+		}
+		foreach ( $all as $p ) {
+			if ( in_array( (int) $p->post_parent, $ids, true ) ) {
+				$order[] = (int) $p->ID;
+			}
+		}
+		$skip  = '/^(privacy|terms|cookie|thank|sample-page|card|links|site-?map|search|accessibility)/';
+		$posts = (int) get_option( 'page_for_posts' );
+		$out   = array();
+		foreach ( array_unique( $order ) as $id ) {
+			if ( isset( $byid[ $id ] ) && $id !== $posts && ! preg_match( $skip, $byid[ $id ]->post_name ) ) {
+				$out[] = $byid[ $id ];
+			}
+		}
+		return array_slice( $out, 0, 15 );
+	}
+
+	/** Note the pages the home page's menus link to. */
+	public static function note_nav( string $html ): void {
+		if ( ! preg_match_all( '#<nav\b[^>]*>(.*?)</nav>#is', $html, $navs ) ) {
+			return;
+		}
+		$ids = array();
+		foreach ( $navs[1] as $nav ) {
+			if ( ! preg_match_all( '#href=["\']([^"\'\#?]+)#i', $nav, $links ) ) {
+				continue;
+			}
+			foreach ( $links[1] as $href ) {
+				$id = url_to_postid( 0 === strpos( $href, '/' ) ? home_url( $href ) : $href );
+				if ( $id && 'page' === get_post_type( $id ) ) {
+					$ids[] = (int) $id;
+				}
+			}
+		}
+		$ids = array_values( array_unique( $ids ) );
+		if ( $ids && get_option( self::NAV_KEY ) !== $ids ) {
+			update_option( self::NAV_KEY, $ids, false );
+		}
+	}
+
+	public static function run_scan(): void {
+		$home  = wp_remote_get( home_url( '/' ), array( 'timeout' => 8, 'redirection' => 2, 'sslverify' => false, 'headers' => array( 'Cache-Control' => 'no-cache' ) ) );
+		if ( ! is_wp_error( $home ) && 200 === (int) wp_remote_retrieve_response_code( $home ) ) {
+			self::note_nav( (string) wp_remote_retrieve_body( $home ) );
+		}
+		$pages = self::main_pages();
 
 		$found   = 0;
 		$checked = 0;
