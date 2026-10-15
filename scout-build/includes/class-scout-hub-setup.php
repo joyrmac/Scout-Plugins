@@ -18,7 +18,8 @@
  *   "analytics": { "gtm": "GTM-XXXXXXX" },
  *   "cards":   { "mode", "accent", "font", "name", "phone", "email", "city", "region", "postal",
  *                "footer", "note", "team_intro", "links_intro", "photo", "spot_heading", "spot_text",
- *                "spot_label", "spot_sub", "spot_url", "links": [ { "label", "sub", "url" } ] }
+ *                "spot_label", "spot_sub", "spot_url", "share_card", "share_links",
+ *                "links": [ { "label", "sub", "url" } ] }
  * }
  * "photo" values are a path inside the theme (assets/img/joy.webp) or a full https:// address.
  *
@@ -284,6 +285,16 @@ final class Scout_Hub_Setup {
 			if ( $att ) {
 				$saved['photo_id'] = $att;
 				$dirty             = true;
+			}
+		}
+		// Share pictures (1200 by 630) for the card and the links page.
+		foreach ( array( 'share_card' => 'share_card_id', 'share_links' => 'share_links_id' ) as $from => $key ) {
+			if ( empty( $saved[ $key ] ) && ! empty( $in[ $from ] ) ) {
+				$att = self::attachment( (string) $in[ $from ] );
+				if ( $att ) {
+					$saved[ $key ] = $att;
+					$dirty         = true;
+				}
 			}
 		}
 		// The links list is filled only while it is empty or still the plugin's two starter rows.

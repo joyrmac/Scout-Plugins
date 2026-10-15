@@ -1,5 +1,9 @@
 # Scout Cards changelog
 
+## 1.0.15 (2026-10-15)
+
+- **Share pictures.** Two new pickers under Look: a wide picture for the card and one for the links page (1200 by 630). When someone texts or posts either link, that picture shows in the preview instead of a small headshot, with its size and the large-image tags set. The share mode page uses the card's picture. Blank keeps the old behavior.
+
 ## 1.0.14 (2026-10-15)
 
 - **Fix: the card no longer falls back to the WordPress admin email.** A blank card email used the site admin's address, which on a client site can belong to whoever installed WordPress rather than the business, and it went out on the saved phone contact. The card now uses the email from Scout → Business, or shows none.

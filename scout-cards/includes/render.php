@@ -50,7 +50,13 @@ final class Scout_Cards_Render {
 <meta property="og:title" content="<?php echo esc_attr( $meta['title'] ); ?>">
 <meta property="og:description" content="<?php echo esc_attr( $meta['desc'] ); ?>">
 <meta property="og:url" content="<?php echo esc_url( $meta['canonical'] ); ?>">
-<?php if ( ! empty( $meta['image'] ) ) : ?>
+<?php if ( ! empty( $meta['wide'] ) ) : ?>
+<meta property="og:image" content="<?php echo esc_url( $meta['wide']['url'] ); ?>">
+<meta property="og:image:width" content="<?php echo (int) $meta['wide']['width']; ?>">
+<meta property="og:image:height" content="<?php echo (int) $meta['wide']['height']; ?>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="<?php echo esc_url( $meta['wide']['url'] ); ?>">
+<?php elseif ( ! empty( $meta['image'] ) ) : ?>
 <meta property="og:image" content="<?php echo esc_url( $meta['image'] ); ?>">
 <?php endif; ?>
 <meta name="theme-color" content="<?php echo esc_attr( $bg ); ?>">
@@ -192,6 +198,7 @@ final class Scout_Cards_Render {
 				'desc'      => $is_team ? 'Save ' . $s['name'] . ' to your phone, then reach the right person directly.' : $p['name'] . ( $p['title'] ? ', ' . $p['title'] : '' ) . ' at ' . $s['name'] . '. Save the contact, call, text, or email.',
 				'canonical' => $p['url'],
 				'image'     => $p['photo'],
+				'wide'      => $is_team ? Scout_Cards_Settings::share_image( 'card' ) : null,
 			),
 			'scc-card scc-' . $p['key']
 		);
@@ -264,6 +271,7 @@ final class Scout_Cards_Render {
 				'title'     => 'Share: ' . $p['name'],
 				'desc'      => 'Share ' . $p['name'] . "'s contact card.",
 				'canonical' => $p['share'],
+				'wide'      => 'team' === $p['key'] ? Scout_Cards_Settings::share_image( 'card' ) : null,
 				'app'       => $p['share'] . 'manifest/',
 				'short'     => 'team' === $p['key'] ? $s['name'] : $p['first'],
 			),
@@ -303,6 +311,7 @@ final class Scout_Cards_Render {
 				'desc'      => $s['links_intro'],
 				'canonical' => home_url( '/' . $s['links_base'] . '/' ),
 				'image'     => $team['photo'],
+				'wide'      => Scout_Cards_Settings::share_image( 'links' ),
 			),
 			'scc-links'
 		);

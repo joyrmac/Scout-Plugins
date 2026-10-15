@@ -49,6 +49,8 @@ final class Scout_Cards_Settings {
 			'team_intro'   => get_bloginfo( 'description' ),
 			'pick_heading' => 'Who would you like to talk to?',
 			'photo_id'     => 0,
+			'share_card_id'  => 0,
+			'share_links_id' => 0,
 			'spot_heading' => '',
 			'spot_text'    => '',
 			'spot_label'   => '',
@@ -78,7 +80,7 @@ final class Scout_Cards_Settings {
 				}
 				continue;
 			}
-			if ( in_array( $k, array( 'enable_cards', 'enable_links', 'links_latest', 'photo_id' ), true ) ) {
+			if ( in_array( $k, array( 'enable_cards', 'enable_links', 'links_latest', 'photo_id', 'share_card_id', 'share_links_id' ), true ) ) {
 				$d[ $k ] = (int) $v;
 				continue;
 			}
@@ -173,6 +175,17 @@ final class Scout_Cards_Settings {
 	}
 
 	/** Photo URL: the uploaded photo, else (team card only) the Site Icon, else ''. */
+	/**
+	 * The wide picture shown when a page is shared in a text or a post (1200 by 630 works
+	 * everywhere). 'card' or 'links'; the links page falls back to the card's. Null when unset.
+	 */
+	public static function share_image( $which ) {
+		$s  = self::get();
+		$id = 'links' === $which && $s['share_links_id'] ? $s['share_links_id'] : $s['share_card_id'];
+		$src = $id ? wp_get_attachment_image_src( (int) $id, 'full' ) : false;
+		return $src ? array( 'url' => $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] ) : null;
+	}
+
 	public static function photo_url( $photo_id, $team ) {
 		if ( $photo_id ) {
 			$u = wp_get_attachment_image_url( $photo_id, 'medium' );
