@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.3.3 (2026-10-15)
+
+- **Fix: review markup without stars.** Testimonials with no star rating were still marked up as `Review` items, and Google requires a rating on each one, so the Rich Results test showed them as invalid (Maravela's: 10 invalid review snippets). Only rated testimonials are marked up now; unrated ones still show on the page. The aggregate rating is unchanged (it only ever counted rated ones).
+
 ## 1.3.2 (2026-10-14)
 
 - **Fix: two sets of share tags on themes that write their own.** Scout Media and Recon themes print their own title, description, canonical and Open Graph tags, and Scout Core printed a second set above them. Facebook and LinkedIn read the first `og:image`, so links showed the site icon instead of the page's share card. The SEO head now steps aside when the theme handles it (`scout_head()`, `recon_head()`, or `add_theme_support( 'scout-seo-head' )`). Filter `scout_core_seo_head` to force it either way.
