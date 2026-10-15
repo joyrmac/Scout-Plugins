@@ -207,7 +207,7 @@ final class Scout_Cards_Render {
 				'desc'      => $is_team ? 'Save ' . $s['name'] . ' to your phone, then reach the right person directly.' : $p['name'] . ( $p['title'] ? ', ' . $p['title'] : '' ) . ' at ' . $s['name'] . '. Save the contact, call, text, or email.',
 				'canonical' => $p['url'],
 				'image'     => $p['photo'],
-				'wide'      => $is_team ? Scout_Cards_Settings::share_image( 'card' ) : null,
+				'wide'      => $is_team ? Scout_Cards_Settings::share_image( 'card' ) : Scout_Cards_Settings::share_image( 'person', $p['share_id'] ?? 0 ),
 			),
 			'scc-card scc-' . $p['key']
 		);
@@ -280,7 +280,7 @@ final class Scout_Cards_Render {
 				'title'     => 'Share: ' . $p['name'],
 				'desc'      => 'Share ' . $p['name'] . "'s contact card.",
 				'canonical' => $p['share'],
-				'wide'      => 'team' === $p['key'] ? Scout_Cards_Settings::share_image( 'card' ) : null,
+				'wide'      => 'team' === $p['key'] ? Scout_Cards_Settings::share_image( 'card' ) : Scout_Cards_Settings::share_image( 'person', $p['share_id'] ?? 0 ),
 				'app'       => $p['share'] . 'manifest/',
 				'short'     => 'team' === $p['key'] ? $s['name'] : $p['first'],
 			),
