@@ -528,21 +528,54 @@ final class Scout_Hub_Admin {
 	/* ------------------------------------------------------------------ */
 
 	private static function health(): void {
-		$ai    = Scout_Hub_Health::ai_checks();
-		$score = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
-		?>
-		<p class="sh-lede"><?php esc_html_e( 'A quick look at the basics, read from WordPress itself. Nothing here is sent anywhere.', 'scout-build' ); ?></p>
-		<?php self::check_grid( Scout_Hub_Health::checks() ); ?>
-		<?php
-		// Scout Core's search checks, minus the two the AI search list below already covers.
+		$ai     = Scout_Hub_Health::ai_checks();
+		$score  = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
+		$basics = Scout_Hub_Health::checks();
+		$search = array();
 		if ( class_exists( 'Scout_Core_Admin' ) && method_exists( 'Scout_Core_Admin', 'render_checks' ) ) {
+			// Scout Core's search checks, minus the two the AI search list below already covers.
 			$search = array_values(
 				array_filter(
 					Scout_Core_Admin::checks(),
 					static fn( $c ) => ! in_array( $c['label'], array( 'Business details', 'Search listing (schema)' ), true )
 				)
 			);
-			$good   = count( array_filter( $search, static fn( $c ) => 'good' === $c['status'] ) );
+		}
+		?>
+		<style>
+			/* Compact, so the whole report fits on one screen (and one screenshot). */
+			.sh-health .sh-grid-3{grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px}
+			.sh-health .sh-box{padding:12px 14px; border-radius:12px}
+			.sh-health .sh-label{font-size:10.5px}
+			.sh-health .sh-check .sh-value{font-size:15px; margin-top:4px}
+			.sh-health .sh-note{font-size:12.5px; line-height:1.4; margin-top:4px}
+			.sh-health .sh-section-head{margin:18px 0 8px}
+			.sh-health .sh-section-head h2{font-size:17px}
+			.sh-health .sh-section-head .sh-note,.sh-health .sh-meter{display:none}
+			.sh-copy{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin:12px 0 14px}
+			.sh-copy .sh-note{margin:0}
+		</style>
+		<div class="sh-health">
+		<div class="sh-copy">
+			<button type="button" class="button button-primary" id="sh-copy-report"><?php esc_html_e( 'Copy for Claude', 'scout-build' ); ?></button>
+			<p class="sh-note" id="sh-copy-note"><?php esc_html_e( 'Copies every check on this page, plus each Scout plugin and its version, as plain text to paste into a chat.', 'scout-build' ); ?></p>
+			<textarea id="sh-copy-text" hidden readonly><?php echo esc_textarea( self::health_report( $basics, $search, $ai ) ); ?></textarea>
+		</div>
+		<script>
+		document.getElementById( 'sh-copy-report' ).addEventListener( 'click', function () {
+			var text = document.getElementById( 'sh-copy-text' ).value, note = document.getElementById( 'sh-copy-note' );
+			var done = function () { note.textContent = <?php echo wp_json_encode( __( 'Copied. Paste it into the chat.', 'scout-build' ) ); ?>; };
+			if ( navigator.clipboard && window.isSecureContext ) {
+				navigator.clipboard.writeText( text ).then( done );
+			} else {
+				var t = document.getElementById( 'sh-copy-text' ); t.hidden = false; t.select(); document.execCommand( 'copy' ); t.hidden = true; done();
+			}
+		} );
+		</script>
+		<?php self::check_grid( $basics ); ?>
+		<?php
+		if ( $search ) {
+			$good = count( array_filter( $search, static fn( $c ) => 'good' === $c['status'] ) );
 			?>
 			<div class="sh-section-head" id="search">
 				<p class="sh-eyebrow"><?php esc_html_e( 'Search listing', 'scout-build' ); ?></p>
@@ -567,6 +600,50 @@ final class Scout_Hub_Admin {
 		</div>
 		<?php
 		self::check_grid( $ai );
+		echo '</div>';
+	}
+
+	/**
+	 * The whole Site health page as plain text: one line per check, then the
+	 * active Scout plugins with versions. Built for pasting into a chat.
+	 */
+	private static function health_report( array $basics, array $search, array $ai ): string {
+		$mark  = static fn( string $state ): string => 'good' === $state ? '[ok]  ' : ( 'bad' === $state ? '[fix] ' : '[look]' );
+		$lines = array(
+			sprintf( 'Scout Build site health: %s (%s)', get_bloginfo( 'name' ), home_url( '/' ) ),
+			'Checked ' . wp_date( 'Y-m-d H:i' ) . ', plan: ' . (string) get_option( Scout_Hub_Access::PLAN_OPTION, '' ),
+			'',
+			'BASICS',
+		);
+		foreach ( $basics as $c ) {
+			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . $c['note'];
+		}
+		if ( $search ) {
+			$lines[] = '';
+			$lines[] = 'SEARCH LISTING';
+			foreach ( $search as $c ) {
+				$state   = 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' );
+				$items   = ! empty( $c['items'] ) ? ' (' . implode( ', ', array_map( 'get_the_title', (array) $c['items'] ) ) . ')' : '';
+				$lines[] = $mark( $state ) . ' ' . $c['label'] . ': ' . $c['message'] . $items;
+			}
+		}
+		$lines[] = '';
+		$lines[] = 'READY FOR AI SEARCH';
+		foreach ( $ai as $c ) {
+			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . $c['note'];
+		}
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$lines[] = '';
+		$lines[] = 'PLUGINS';
+		foreach ( get_plugins() as $file => $data ) {
+			$on      = is_plugin_active( $file );
+			$lines[] = ( $on ? 'on   ' : 'off  ' ) . $data['Name'] . ' ' . $data['Version'];
+		}
+		$lines[] = '';
+		$lines[] = 'Theme: ' . wp_get_theme()->get( 'Name' ) . ' ' . wp_get_theme()->get( 'Version' ) . ', WordPress ' . get_bloginfo( 'version' ) . ', PHP ' . PHP_VERSION;
+		return implode( "\n", $lines );
 	}
 
 	/** @param array<int, array{label:string, value:string, state:string, note:string, link?:string, link_text?:string}> $checks */
