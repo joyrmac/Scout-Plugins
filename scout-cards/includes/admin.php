@@ -191,6 +191,7 @@ final class Scout_Cards_Admin {
 			self::field( "{$n}[people][$i][pick]", $p['pick'], 'Why talk to them (on the main card)', 'textarea' );
 			self::field( "{$n}[people][$i][tags]", $p['tags'], 'Tags', 'text', 'Comma separated, two to four short topics.' );
 			self::photo( "{$n}[people][$i][photo_id]", (int) $p['photo_id'], 'Photo', 'A square headshot works best.' );
+			self::photo( "{$n}[people][$i][share_id]", (int) ( $p['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this person\'s card link is texted or posted. 1200 by 630 pixels.' );
 			self::spot_fields( "{$n}[people][$i]", $p );
 			echo '</table></details>';
 		}
@@ -280,6 +281,7 @@ final class Scout_Cards_Admin {
 				'pick'     => $area( $p['pick'] ?? '' ),
 				'tags'     => $txt( $p['tags'] ?? '' ),
 				'photo_id' => absint( $p['photo_id'] ?? 0 ),
+				'share_id' => absint( $p['share_id'] ?? 0 ),
 			) + self::clean_spot( $p );
 		}
 		$out['links'] = array();

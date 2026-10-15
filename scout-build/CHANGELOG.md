@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.4.8 (2026-10-15)
+
+- **The setup file fills people cards.** A `people` list in the `cards` section adds each person's card (name, title, intro, tags, photo, share picture) while the site has none. `pick_heading` is filled too.
+- **Pictures the setup file placed can be swapped by a newer theme.** A card photo, logo or share picture the setup file imported itself counts as blank; one somebody picked by hand stays.
+
 ## 0.4.7 (2026-10-15)
 
 - **The setup file sets the card's logo.** `logo` in the `cards` section (a theme path) fills the new Cards logo setting while blank.

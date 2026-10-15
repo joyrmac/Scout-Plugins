@@ -170,6 +170,7 @@ final class Scout_Cards_Settings {
 				'share'    => self::card_url( $slug, 'share' ),
 				'file'     => sanitize_title( $p['name'] ),
 				'spot'     => self::spot( $p ),
+				'share_id' => (int) ( $p['share_id'] ?? 0 ),
 			);
 		}
 		return $out;
@@ -180,9 +181,12 @@ final class Scout_Cards_Settings {
 	 * The wide picture shown when a page is shared in a text or a post (1200 by 630 works
 	 * everywhere). 'card' or 'links'; the links page falls back to the card's. Null when unset.
 	 */
-	public static function share_image( $which ) {
+	public static function share_image( $which, $person_share_id = 0 ) {
 		$s  = self::get();
 		$id = 'links' === $which && $s['share_links_id'] ? $s['share_links_id'] : $s['share_card_id'];
+		if ( 'person' === $which ) {
+			$id = (int) $person_share_id;
+		}
 		$src = $id ? wp_get_attachment_image_src( (int) $id, 'full' ) : false;
 		return $src ? array( 'url' => $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] ) : null;
 	}

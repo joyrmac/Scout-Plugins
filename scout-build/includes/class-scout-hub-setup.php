@@ -18,7 +18,8 @@
  *   "analytics": { "gtm": "GTM-XXXXXXX" },
  *   "cards":   { "mode", "accent", "font", "name", "phone", "email", "city", "region", "postal",
  *                "footer", "note", "team_intro", "links_intro", "photo", "spot_heading", "spot_text",
- *                "spot_label", "spot_sub", "spot_url", "logo", "share_card", "share_links",
+ *                "pick_heading", "spot_label", "spot_sub", "spot_url", "logo", "share_card", "share_links",
+ *                "people": [ { "name", "slug", "title", "email", "intro", "pick", "tags", "photo", "share" } ],
  *                "links": [ { "label", "sub", "url" } ] }
  * }
  * "photo" values are a path inside the theme (assets/img/joy.webp) or a full https:// address.
@@ -255,7 +256,7 @@ final class Scout_Hub_Setup {
 		if ( ! class_exists( 'Scout_Cards_Settings' ) ) {
 			return false;
 		}
-		$keys = array( 'mode', 'accent', 'font', 'name', 'phone', 'email', 'city', 'region', 'postal', 'footer', 'note', 'team_intro', 'links_intro', 'spot_heading', 'spot_text', 'spot_label', 'spot_sub', 'spot_url' );
+		$keys = array( 'mode', 'accent', 'font', 'name', 'phone', 'email', 'city', 'region', 'postal', 'footer', 'note', 'team_intro', 'links_intro', 'pick_heading', 'spot_heading', 'spot_text', 'spot_label', 'spot_sub', 'spot_url' );
 		$fill = array();
 		foreach ( $keys as $key ) {
 			if ( ! isset( $in[ $key ] ) || '' === (string) $in[ $key ] ) {
@@ -280,21 +281,46 @@ final class Scout_Hub_Setup {
 		$saved = get_option( Scout_Cards_Settings::OPTION, array() );
 		$saved = is_array( $saved ) ? $saved : array();
 		$dirty = false;
-		if ( empty( $saved['photo_id'] ) && ! empty( $in['photo'] ) ) {
-			$att = self::attachment( (string) $in['photo'] );
-			if ( $att ) {
-				$saved['photo_id'] = $att;
-				$dirty             = true;
-			}
-		}
-		// The logo (links and share pages) and the share pictures (1200 by 630).
-		foreach ( array( 'logo' => 'logo_id', 'share_card' => 'share_card_id', 'share_links' => 'share_links_id' ) as $from => $key ) {
-			if ( empty( $saved[ $key ] ) && ! empty( $in[ $from ] ) ) {
+		// The photo, logo and share pictures. A picture this file put there earlier (from the
+		// theme) still counts as blank, so a new theme version can swap it; one picked by hand stays.
+		$ours = array_map( 'intval', array_values( (array) get_option( self::MEDIA, array() ) ) );
+		foreach ( array( 'photo' => 'photo_id', 'logo' => 'logo_id', 'share_card' => 'share_card_id', 'share_links' => 'share_links_id' ) as $from => $key ) {
+			$current = (int) ( $saved[ $key ] ?? 0 );
+			if ( ( ! $current || in_array( $current, $ours, true ) ) && ! empty( $in[ $from ] ) ) {
 				$att = self::attachment( (string) $in[ $from ] );
-				if ( $att ) {
+				if ( $att && $att !== $current ) {
 					$saved[ $key ] = $att;
 					$dirty         = true;
 				}
+			}
+		}
+		// People cards, filled only while there are none.
+		if ( ! empty( $in['people'] ) && is_array( $in['people'] ) && empty( $saved['people'] ) ) {
+			$people = array();
+			foreach ( $in['people'] as $p ) {
+				$name = sanitize_text_field( (string) ( $p['name'] ?? '' ) );
+				if ( '' === $name ) {
+					continue;
+				}
+				$row = array(
+					'name'     => $name,
+					'slug'     => sanitize_title( (string) ( $p['slug'] ?? $name ) ),
+					'title'    => sanitize_text_field( (string) ( $p['title'] ?? '' ) ),
+					'email'    => sanitize_email( (string) ( $p['email'] ?? '' ) ),
+					'intro'    => sanitize_textarea_field( (string) ( $p['intro'] ?? '' ) ),
+					'pick'     => sanitize_textarea_field( (string) ( $p['pick'] ?? '' ) ),
+					'tags'     => sanitize_text_field( (string) ( $p['tags'] ?? '' ) ),
+					'photo_id' => ! empty( $p['photo'] ) ? self::attachment( (string) $p['photo'] ) : 0,
+					'share_id' => ! empty( $p['share'] ) ? self::attachment( (string) $p['share'] ) : 0,
+				);
+				foreach ( array( 'heading', 'text', 'label', 'sub', 'url' ) as $k ) {
+					$row[ 'spot_' . $k ] = sanitize_text_field( (string) ( $p[ 'spot_' . $k ] ?? '' ) );
+				}
+				$people[] = $row;
+			}
+			if ( $people ) {
+				$saved['people'] = $people;
+				$dirty           = true;
 			}
 		}
 		// The links list is filled only while it is empty or still the plugin's two starter rows.

@@ -1,5 +1,9 @@
 # Scout Cards changelog
 
+## 1.0.17 (2026-10-15)
+
+- **A share picture for each person.** Each person gets an optional wide share picture, used when their own card (and their share page) is texted or posted.
+
 ## 1.0.16 (2026-10-15)
 
 - **A logo for the links and share pages.** New "Logo for the links and share pages" picker. When the main card shows a person, the links page shows the logo instead, and the share page shows it above the QR code. Blank keeps the card photo as before.
