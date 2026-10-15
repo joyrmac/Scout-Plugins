@@ -39,7 +39,7 @@ final class Scout_Cards_Settings {
 			'font'         => '',
 			'name'         => $id['name'] ? $id['name'] : get_bloginfo( 'name' ),
 			'phone'        => $id['phone'],
-			'email'        => $id['email'] ? $id['email'] : get_option( 'admin_email' ),
+			'email'        => $id['email'], // never the WordPress admin email: on client sites that is often not the business
 			'city'         => $id['city'],
 			'region'       => $id['region'],
 			'postal'       => $id['postal'],

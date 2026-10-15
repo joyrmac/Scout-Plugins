@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.5 (2026-10-15)
+
+- **The setup file fills the digital business card.** A `cards` section in the client theme's `scout-setup.json` sets the card's look, contact details, intro, booking spotlight, photo and link page rows once Cards is on. As with the other sections it fills only blanks and untouched defaults; the site admin's email also counts as blank, since on client sites it is often whoever set WordPress up.
+
 ## 0.4.4 (2026-10-15)
 
 - **Fix: the setup file now wins over untouched defaults.** On North Crest the review page kept Scout's headline and blue button after the theme carried its own, because those settings had been saved earlier with the plugin's defaults and the setup file only filled blanks. A setting that still holds the plugin's own default now counts as blank. Anything someone actually changed stays as it is. The review page section runs again on the next admin page load.
