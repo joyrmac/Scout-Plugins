@@ -153,6 +153,15 @@ final class Scout_Cards_Render {
 		return '<div class="' . esc_attr( $class ) . ' scc-avatar-mark" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</div>';
 	}
 
+	/** The logo when one is set (links and share pages), else the usual avatar. */
+	private static function logo_or_avatar( array $p ) {
+		$logo = Scout_Cards_Settings::logo_url();
+		if ( $logo ) {
+			return '<img class="scc-avatar scc-logo" src="' . esc_url( $logo ) . '" width="112" height="112" alt="' . esc_attr( $p['name'] ) . '">';
+		}
+		return self::avatar( $p );
+	}
+
 	/**
 	 * The spotlight block under a card. With a heading or note it renders as a
 	 * panel; on a person's card it is signed by them. A blank line in the note
@@ -286,6 +295,7 @@ final class Scout_Cards_Render {
 		);
 		?>
   <section class="scc-card scc-share-card" aria-labelledby="scc-name">
+    <?php if ( 'team' === $p['key'] && Scout_Cards_Settings::logo_url() ) : ?><?php echo self::logo_or_avatar( $p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><?php endif; ?>
     <p class="scc-eyebrow">Scan to save my contact</p>
     <h1 id="scc-name"><?php echo esc_html( $p['name'] ); ?></h1>
     <div class="scc-qr-big" data-qr-url="<?php echo esc_url( $u ); ?>" role="img" aria-label="QR code that opens <?php echo esc_attr( $u ); ?>"></div>
@@ -317,7 +327,7 @@ final class Scout_Cards_Render {
 		);
 		?>
   <section class="scc-card" aria-labelledby="scc-name">
-    <?php echo self::avatar( $team ); // phpcs:ignore ?>
+    <?php echo self::logo_or_avatar( $team ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
     <h1 id="scc-name"><?php echo esc_html( $s['name'] ); ?></h1>
     <?php if ( $s['links_intro'] ) : ?><p class="scc-intro scc-intro-last"><?php echo esc_html( $s['links_intro'] ); ?></p><?php endif; ?>
   </section>

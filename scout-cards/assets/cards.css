@@ -30,6 +30,7 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 
 .scc-card { background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: 18px; padding: 28px 22px 22px; text-align: center; }
 .scc-avatar { width: 112px; height: 112px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 16px; border: 2px solid var(--scc-line); }
+.scc-logo { object-fit: contain; background: #fff; padding: 10px; }
 .scc-avatar-mark { display: grid; place-items: center; background: var(--scc-accent); color: var(--scc-on-accent); font-size: 44px; font-weight: 600; border: 0; }
 .scc-eyebrow { color: var(--scc-accent); font-size: 12px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 6px !important; }
 .scc-card h1 { font-size: 32px; line-height: 1.1; letter-spacing: -0.03em; text-wrap: balance; }
@@ -97,6 +98,9 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-qr-big { width: min(300px, 78vw); margin: 16px auto 4px; }
 
 .scc-linklist { display: flex; flex-direction: column; gap: 10px; }
+/* Themes often style every <nav> (a centered header row). Keep the list full width either way. */
+.scc nav.scc-linklist { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; }
+.scc nav.scc-linklist > a.scc-link { width: 100%; margin: 0; color: inherit; font-size: inherit; font-weight: inherit; text-transform: none; letter-spacing: normal; }
 .scc-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: 18px; transition: border-color .15s ease, transform .15s ease; }
 .scc-link:hover { border-color: var(--scc-accent); transform: translateY(-1px); }
 .scc-link > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }

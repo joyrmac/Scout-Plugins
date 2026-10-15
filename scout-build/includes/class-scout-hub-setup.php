@@ -18,7 +18,7 @@
  *   "analytics": { "gtm": "GTM-XXXXXXX" },
  *   "cards":   { "mode", "accent", "font", "name", "phone", "email", "city", "region", "postal",
  *                "footer", "note", "team_intro", "links_intro", "photo", "spot_heading", "spot_text",
- *                "spot_label", "spot_sub", "spot_url", "share_card", "share_links",
+ *                "spot_label", "spot_sub", "spot_url", "logo", "share_card", "share_links",
  *                "links": [ { "label", "sub", "url" } ] }
  * }
  * "photo" values are a path inside the theme (assets/img/joy.webp) or a full https:// address.
@@ -287,8 +287,8 @@ final class Scout_Hub_Setup {
 				$dirty             = true;
 			}
 		}
-		// Share pictures (1200 by 630) for the card and the links page.
-		foreach ( array( 'share_card' => 'share_card_id', 'share_links' => 'share_links_id' ) as $from => $key ) {
+		// The logo (links and share pages) and the share pictures (1200 by 630).
+		foreach ( array( 'logo' => 'logo_id', 'share_card' => 'share_card_id', 'share_links' => 'share_links_id' ) as $from => $key ) {
 			if ( empty( $saved[ $key ] ) && ! empty( $in[ $from ] ) ) {
 				$att = self::attachment( (string) $in[ $from ] );
 				if ( $att ) {
