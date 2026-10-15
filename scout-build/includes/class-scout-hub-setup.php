@@ -69,7 +69,8 @@ final class Scout_Hub_Setup {
 			if ( empty( $data[ $section ] ) || ! is_array( $data[ $section ] ) ) {
 				continue;
 			}
-			$hash = md5( (string) wp_json_encode( $data[ $section ] ) );
+			// The reviews section reruns once after 0.4.4, when untouched defaults started counting as blank.
+			$hash = md5( (string) wp_json_encode( $data[ $section ] ) . ( 'reviews' === $section ? '|defaults-blank' : '' ) );
 			if ( ( $done[ $section ] ?? '' ) === $hash ) {
 				continue;
 			}
