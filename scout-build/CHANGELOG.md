@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.4.4 (2026-10-15)
+
+- **Fix: the setup file now wins over untouched defaults.** On North Crest the review page kept Scout's headline and blue button after the theme carried its own, because those settings had been saved earlier with the plugin's defaults and the setup file only filled blanks. A setting that still holds the plugin's own default now counts as blank. Anything someone actually changed stays as it is. The review page section runs again on the next admin page load.
+
 ## 0.4.3 (2026-10-14)
 
 - **Fix: "Structured data: Missing" on Recon.** The Recon theme prints its own schema (`recon_head()`), and the check only knew Scout Media's. It now counts `recon_head()` and any theme that declares `add_theme_support( 'scout-seo-head' )`.
