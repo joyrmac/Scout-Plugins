@@ -15,7 +15,10 @@
  *                "background", "text_color", "accent", "heading_font", "body_font", "label_font" },
  *   "chat":    { "name", "team", "notify", "book_url", "work_url", "photo_1", "photo_2" },
  *   "hours":   { "confirmed": true, "days": { "tuesday": [ ["09:00", "17:00"] ] } },
- *   "analytics": { "gtm": "GTM-XXXXXXX" }
+ *   "analytics": { "gtm": "GTM-XXXXXXX" },
+ *   "cards":   { "mode", "accent", "font", "name", "phone", "email", "city", "region", "postal",
+ *                "footer", "note", "team_intro", "links_intro", "photo", "spot_heading", "spot_text",
+ *                "spot_label", "spot_sub", "spot_url", "links": [ { "label", "sub", "url" } ] }
  * }
  * "photo" values are a path inside the theme (assets/img/joy.webp) or a full https:// address.
  *
@@ -63,6 +66,7 @@ final class Scout_Hub_Setup {
 			'chat'    => array( __CLASS__, 'chat' ),
 			'hours'   => array( __CLASS__, 'hours' ),
 			'analytics' => array( __CLASS__, 'analytics' ),
+			'cards'   => array( __CLASS__, 'cards' ),
 		);
 		$changed = false;
 		foreach ( $jobs as $section => $job ) {
@@ -242,6 +246,69 @@ final class Scout_Hub_Setup {
 		$gtm = strtoupper( trim( (string) ( $in['gtm'] ?? '' ) ) );
 		if ( Scout_Analytics::valid_gtm( $gtm ) ) {
 			self::fill_option( Scout_Analytics::OPTION, array( 'gtm' => $gtm ) );
+		}
+		return true;
+	}
+
+	private static function cards( array $in ): bool {
+		if ( ! class_exists( 'Scout_Cards_Settings' ) ) {
+			return false;
+		}
+		$keys = array( 'mode', 'accent', 'font', 'name', 'phone', 'email', 'city', 'region', 'postal', 'footer', 'note', 'team_intro', 'links_intro', 'spot_heading', 'spot_text', 'spot_label', 'spot_sub', 'spot_url' );
+		$fill = array();
+		foreach ( $keys as $key ) {
+			if ( ! isset( $in[ $key ] ) || '' === (string) $in[ $key ] ) {
+				continue;
+			}
+			$value = (string) $in[ $key ];
+			if ( 'email' === $key ) {
+				$value = sanitize_email( $value );
+			} elseif ( in_array( $key, array( 'note', 'team_intro', 'links_intro', 'spot_text' ), true ) ) {
+				$value = sanitize_textarea_field( $value );
+			} else {
+				$value = sanitize_text_field( $value );
+			}
+			$fill[ $key ] = $value;
+		}
+		// The card's untouched defaults count as blank. So does the site admin's email: on client
+		// sites that is often whoever set WordPress up, not the business (Hair by Patrick, Oct 15).
+		$defaults          = Scout_Cards_Settings::defaults();
+		$defaults['email'] = (string) get_option( 'admin_email' );
+		self::fill_option( Scout_Cards_Settings::OPTION, $fill, $defaults );
+
+		$saved = get_option( Scout_Cards_Settings::OPTION, array() );
+		$saved = is_array( $saved ) ? $saved : array();
+		$dirty = false;
+		if ( empty( $saved['photo_id'] ) && ! empty( $in['photo'] ) ) {
+			$att = self::attachment( (string) $in['photo'] );
+			if ( $att ) {
+				$saved['photo_id'] = $att;
+				$dirty             = true;
+			}
+		}
+		// The links list is filled only while it is empty or still the plugin's two starter rows.
+		if ( ! empty( $in['links'] ) && is_array( $in['links'] ) && ( empty( $saved['links'] ) || $saved['links'] == $defaults['links'] ) ) { // phpcs:ignore Universal.Operators.StrictComparisons -- compares row arrays.
+			$rows = array();
+			foreach ( $in['links'] as $row ) {
+				$label = sanitize_text_field( (string) ( $row['label'] ?? '' ) );
+				$url   = (string) ( $row['url'] ?? '' );
+				if ( '' === $label || '' === $url ) {
+					continue;
+				}
+				$rows[] = array(
+					'label'    => $label,
+					'sub'      => sanitize_text_field( (string) ( $row['sub'] ?? '' ) ),
+					'url'      => 0 === strpos( $url, '/' ) ? sanitize_text_field( $url ) : esc_url_raw( $url ),
+					'external' => 0 === strpos( $url, '/' ) ? 0 : 1,
+				);
+			}
+			if ( $rows ) {
+				$saved['links'] = $rows;
+				$dirty          = true;
+			}
+		}
+		if ( $dirty ) {
+			update_option( Scout_Cards_Settings::OPTION, $saved );
 		}
 		return true;
 	}

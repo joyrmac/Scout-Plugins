@@ -1,5 +1,9 @@
 # Scout Cards changelog
 
+## 1.0.14 (2026-10-15)
+
+- **Fix: the card no longer falls back to the WordPress admin email.** A blank card email used the site admin's address, which on a client site can belong to whoever installed WordPress rather than the business, and it went out on the saved phone contact. The card now uses the email from Scout → Business, or shows none.
+
 ## 1.0.13 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
