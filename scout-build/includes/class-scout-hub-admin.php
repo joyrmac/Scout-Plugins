@@ -294,6 +294,9 @@ final class Scout_Hub_Admin {
 						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
 					</form>
 					<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check for new versions', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+					<?php if ( Scout_Hub_Setup::data() ) : ?>
+						<?php echo Scout_Hub_Features::button( '', 'refill', __( 'Fill from theme again', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+					<?php endif; ?>
 					<?php
 					$installed = array_filter( array_map( array( 'Scout_Hub_Features', 'status' ), array_keys( Scout_Hub_Catalog::features() ) ), static fn( $st ) => '' !== $st['version'] );
 					$waiting   = count( array_filter( $installed, static fn( $st ) => '' !== $st['update'] ) );

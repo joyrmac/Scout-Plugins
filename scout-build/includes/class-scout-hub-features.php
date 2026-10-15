@@ -141,6 +141,14 @@ final class Scout_Hub_Features {
 			self::refresh();
 			self::back( __( 'Checked for new features and versions.', 'scout-build' ) );
 		}
+		if ( 'refill' === $do ) {
+			// The setup file runs once per theme version. A save from a page that was
+			// open before the theme update can blank what it filled (Hair by Patrick,
+			// Oct 15), so this lets it run again. It still fills blanks only.
+			delete_option( Scout_Hub_Setup::DONE );
+			Scout_Hub_Setup::run();
+			self::back( __( 'Filled in from the theme\'s setup file. Anything already set stayed as it was.', 'scout-build' ) );
+		}
 		if ( ! isset( $features[ $slug ] ) ) {
 			self::back( __( 'That feature is not in the list.', 'scout-build' ), 'error' );
 		}
