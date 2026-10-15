@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.5.0 (2026-10-15)
+
+- **Copy for Claude.** Site health has a button that copies the whole page as plain text: every check with its state, value and note, the pages a search check names, each installed plugin with its version and whether it is on, the theme version, WordPress and PHP. Paste it into a chat instead of taking screenshots.
+- **Site health fits on one screen.** Smaller cards in a tighter grid, and the section intros and progress bar are hidden on this page, so one screenshot shows everything.
+
 ## 0.4.9 (2026-10-15)
 
 - **Direct answers checks the pages that matter.** The check now looks at the home page, then the pages its menus link to (read from the home page itself, so classic menus, Navigation blocks and hand-written headers all count), then top-level pages and their children, and skips utility pages (site map, search, the blog index, legal pages). Before, it took top-level pages alphabetically, so on Maravela's it checked the site map, gallery and booking forms and missed every service page. Visitor page notes count only for these same pages, and old counts are dropped.
