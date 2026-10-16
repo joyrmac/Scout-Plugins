@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.13 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.1.12 (2026-10-15)
 
 - **Fix: the cookie notice's OK button passes contrast on themes without an accent color.** Its fallback was the bright Scout blue `#0E8FE6`, and white text on it is 3.45:1 (Hair by Patrick flagged it). The fallback is now the deeper `#0A78C2`, 4.69:1. Themes that set `--accent` keep their own color.

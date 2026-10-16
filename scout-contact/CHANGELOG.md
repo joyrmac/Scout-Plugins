@@ -1,5 +1,9 @@
 # Scout Call Buttons changelog
 
+## 0.1.9 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.1.8 (2026-10-14)
 
 - **Faster first paint.** The call bar's small stylesheet (under 5 KB) prints inside the page instead of loading as a separate file, which PageSpeed listed as holding up the first paint on phones. The `scout_contact_inline_css` filter turns it back into a file.
