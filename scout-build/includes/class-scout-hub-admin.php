@@ -610,7 +610,7 @@ final class Scout_Hub_Admin {
 	private static function health_report( array $basics, array $search, array $ai ): string {
 		$mark  = static fn( string $state ): string => 'good' === $state ? '[ok]  ' : ( 'bad' === $state ? '[fix] ' : '[look]' );
 		$lines = array(
-			sprintf( 'Scout Build site health: %s (%s)', get_bloginfo( 'name' ), home_url( '/' ) ),
+			sprintf( 'Scout Build site health: %s (%s)', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ), home_url( '/' ) ),
 			'Checked ' . wp_date( 'Y-m-d H:i' ) . ', plan: ' . (string) get_option( Scout_Hub_Access::PLAN_OPTION, '' ),
 			'',
 			'BASICS',

@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.6.1 (2026-10-16)
+
+- **The Email test is a proper email.** Joy: "this email should be cuter though, no?" The plain-text test is now a small card in the site's own color (from Cards or Reviews, else Scout's cerulean) with the site icon, the headline "Your website can send email.", one plain line on what that means, and a Visit the site button. Inline styles only, so it looks the same in Gmail, Apple Mail and Outlook.
+- **Fix: Copy for Claude printed "Andy&#039;s".** The site name in the report header is decoded.
+
 ## 0.6.0 (2026-10-16)
 
 - **Email: the site's mail goes out through Google.** A new Scout, Website, Email screen. Enter a Gmail or Google Workspace address and a Google app password, Save, Send test. Every email the site sends (form notices, password resets, Scout checks) then goes through Google's mail server as that address instead of the host's, which on WP Engine landed in junk or vanished (Andy's form saved its entries but no email arrived). When a form asks to send as someone else, that address becomes the reply-to. The password is stored encrypted and never shown again, or can be set in wp-config.php as `SCOUT_MAIL_PASSWORD`. Replaces WP Mail SMTP on Scout sites.

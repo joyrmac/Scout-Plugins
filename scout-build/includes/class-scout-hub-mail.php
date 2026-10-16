@@ -198,8 +198,11 @@ final class Scout_Hub_Mail {
 			}
 		);
 		$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		$html = static fn() => 'text/html';
+		add_filter( 'wp_mail_content_type', $html );
 		/* translators: %s: site name */
-		$ok = wp_mail( $to, sprintf( __( 'Test email from %s', 'scout-build' ), $site ), sprintf( __( "This is a test from %1\$s (%2\$s).\n\nIf it reached your inbox, the site's form emails will too.", 'scout-build' ), $site, home_url( '/' ) ) );
+		$ok = wp_mail( $to, sprintf( __( 'Your website can send email: %s', 'scout-build' ), $site ), self::test_body( $site ) );
+		remove_filter( 'wp_mail_content_type', $html );
 
 		$s         = self::settings();
 		$s['last'] = array( 'ok' => (bool) $ok, 'to' => $to, 'at' => time(), 'error' => $ok ? '' : self::$error );
@@ -212,6 +215,54 @@ final class Scout_Hub_Mail {
 			self::notice( __( 'Google did not accept it: ', 'scout-build' ) . self::explain( self::$error ), 'error' );
 		}
 		self::back();
+	}
+
+	/**
+	 * The test email: a small card in the site's own colors, with its icon,
+	 * that says plainly what just worked. Inline styles only, so it renders
+	 * the same in Gmail, Apple Mail and Outlook.
+	 */
+	private static function test_body( string $site ): string {
+		$accent = self::accent();
+		$icon   = function_exists( 'get_site_icon_url' ) ? get_site_icon_url( 160 ) : '';
+		$s      = self::settings();
+		$from   = $s['email'];
+		$url    = home_url( '/' );
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		$esc    = static fn( $t ) => esc_html( (string) $t );
+		ob_start();
+		?>
+<!doctype html><html><body style="margin:0;padding:0;background:#F5F5F7">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F7;padding:32px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border-radius:18px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1D1D1F">
+<tr><td style="height:8px;background:<?php echo esc_attr( $accent ); ?>"></td></tr>
+<tr><td style="padding:32px 32px 8px;text-align:center">
+<?php if ( $icon ) : ?><img src="<?php echo esc_url( $icon ); ?>" width="72" height="72" alt="" style="display:block;margin:0 auto 18px;border-radius:50%"><?php endif; ?>
+<p style="margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#86868B"><?php echo $esc( $site ); ?></p>
+<h1 style="margin:0;font-size:26px;line-height:1.2;font-weight:600;letter-spacing:-.02em"><?php esc_html_e( 'Your website can send email.', 'scout-build' ); ?></h1>
+</td></tr>
+<tr><td style="padding:12px 32px 8px;font-size:16px;line-height:1.6;color:#3A3A3C;text-align:center">
+<?php
+/* translators: 1: site address, 2: sending address */
+echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form messages, booking notes and password resets will arrive the same way, in the inbox instead of junk.', 'scout-build' ), $host, $from ) );
+?>
+</td></tr>
+<tr><td style="padding:20px 32px 32px;text-align:center"><a href="<?php echo esc_url( $url ); ?>" style="display:inline-block;background:<?php echo esc_attr( $accent ); ?>;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:980px"><?php esc_html_e( 'Visit the site', 'scout-build' ); ?></a></td></tr>
+<tr><td style="padding:16px 32px;border-top:1px solid #EDEDF0;font-size:12px;color:#86868B;text-align:center"><?php echo Scout_Hub_Admin::branded() ? $esc( __( 'Sent from the Scout Email screen. Built and looked after by Scout Media & Consulting.', 'scout-build' ) ) : $esc( __( 'Sent from the Email screen.', 'scout-build' ) ); ?></td></tr>
+</table></td></tr></table></body></html>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/** The site's brand color: Scout Cards, then Scout Reviews, then Scout's own darker cerulean. */
+	private static function accent(): string {
+		foreach ( array( 'scout_cards_settings', 'scout_reviews_brand', 'scout_reviews_settings' ) as $opt ) {
+			$o = get_option( $opt );
+			if ( is_array( $o ) && ! empty( $o['accent'] ) && preg_match( '/^#[0-9a-fA-F]{6}$/', (string) $o['accent'] ) ) {
+				return (string) $o['accent'];
+			}
+		}
+		return '#0A78C2';
 	}
 
 	/** Turn Google's error text into the fix. */
