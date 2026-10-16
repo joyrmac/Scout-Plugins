@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.6.4 (2026-10-16)
+
+- **Email color picks from the site's own colors.** Joy, on the Mac color grid: "not a good one". The field is now a hex box with a color chip, plus round swatches of the site's real colors: the block theme's palette (grays left out), the Cards and Reviews colors, and Scout's cerulean. Click one or type a code. On Maravela's the swatches include its rust, #A04E10.
+
 ## 0.6.3 (2026-10-16)
 
 - **Email color.** The Email screen has a color picker for the test email's top bar and button. It starts on the color Scout found (Scout Cards, Scout Reviews, then a block theme's accent, primary or brand color) and keeps whatever you pick. Joy: Maravela's test came out in Scout blue, "the wrong theme". Themes can also set it with the `scout_brand_accent` filter.

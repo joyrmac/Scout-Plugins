@@ -258,6 +258,47 @@ echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form 
 		return (string) ob_get_clean();
 	}
 
+	/**
+	 * Colors to click on the Email screen: the block theme's own palette
+	 * (grays, near-white and near-black left out), the Cards and Reviews
+	 * colors, and Scout's cerulean. Hex code => name.
+	 *
+	 * @return array<string,string>
+	 */
+	private static function swatches(): array {
+		$out = array();
+		$add = static function ( $hex, $name ) use ( &$out ) {
+			$hex = strtoupper( (string) $hex );
+			if ( ! preg_match( '/^#[0-9A-F]{6}$/', $hex ) || isset( $out[ $hex ] ) ) {
+				return;
+			}
+			$rgb = array_map( 'hexdec', str_split( substr( $hex, 1 ), 2 ) );
+			$max = max( $rgb );
+			$min = min( $rgb );
+			if ( $max - $min < 24 || $max < 40 || $min > 235 ) {
+				return; // Grays, near-black and near-white make poor buttons.
+			}
+			$out[ $hex ] = (string) $name;
+		};
+		$add( self::detected_accent(), __( 'Detected', 'scout-build' ) );
+		if ( function_exists( 'wp_get_global_settings' ) ) {
+			$palettes = (array) wp_get_global_settings( array( 'color', 'palette' ) );
+			foreach ( array( 'custom', 'theme' ) as $origin ) {
+				foreach ( (array) ( $palettes[ $origin ] ?? array() ) as $c ) {
+					$add( $c['color'] ?? '', $c['name'] ?? ( $c['slug'] ?? '' ) );
+				}
+			}
+		}
+		foreach ( array( 'scout_cards_settings', 'scout_reviews_brand', 'scout_reviews_settings' ) as $opt ) {
+			$o = get_option( $opt );
+			if ( is_array( $o ) ) {
+				$add( $o['accent'] ?? '', __( 'Brand', 'scout-build' ) );
+			}
+		}
+		$add( '#0A78C2', 'Scout' );
+		return array_slice( $out, 0, 16, true );
+	}
+
 	/** The email color: the one picked on this screen, else the detected brand color. */
 	private static function accent(): string {
 		$picked = self::settings()['accent'];
@@ -341,7 +382,13 @@ echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form 
 			.sm-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
 			.sm-row label{display:grid; gap:6px; font-weight:600}
 			.sm-row input{width:100%}
-			.sm-row input[type=color]{height:36px; padding:2px; cursor:pointer}
+			.sm-color{display:grid; gap:6px; align-content:start}
+			.sm-color > label{font-weight:600}
+			.sm-color-row{display:flex; gap:8px; align-items:center}
+			.sm-chip{flex:0 0 36px; height:36px; border-radius:8px; border:1px solid #dcdcde}
+			.sm-swatches{display:flex; flex-wrap:wrap; gap:6px}
+			.sm-swatch{width:28px; height:28px; padding:0; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #c3c4c7; cursor:pointer}
+			.sm-swatch:hover,.sm-swatch:focus{box-shadow:0 0 0 2px #0A78C2; outline:none}
 			.sm-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin-top:14px}
 			.sm-actions label{display:grid; gap:6px; font-weight:600; flex:1 1 240px}
 		</style>
@@ -384,10 +431,30 @@ echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form 
 					<label><?php esc_html_e( 'Sender name', 'scout-build' ); ?>
 						<input type="text" name="name" value="<?php echo esc_attr( $s['name'] ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>">
 					</label>
-					<label><?php esc_html_e( 'Email color', 'scout-build' ); ?>
-						<input type="color" name="accent" value="<?php echo esc_attr( self::accent() ); ?>">
-					</label>
+					<div class="sm-color">
+						<label for="sm-accent"><?php esc_html_e( 'Email color', 'scout-build' ); ?></label>
+						<span class="sm-color-row">
+							<span class="sm-chip" id="sm-chip" style="background:<?php echo esc_attr( self::accent() ); ?>" aria-hidden="true"></span>
+							<input type="text" id="sm-accent" name="accent" value="<?php echo esc_attr( self::accent() ); ?>" maxlength="7" pattern="#[0-9a-fA-F]{6}" placeholder="#A04E10" spellcheck="false">
+						</span>
+						<span class="sm-swatches">
+							<?php foreach ( self::swatches() as $hex => $name ) : ?>
+								<button type="button" class="sm-swatch" data-c="<?php echo esc_attr( $hex ); ?>" style="background:<?php echo esc_attr( $hex ); ?>" title="<?php echo esc_attr( $name . ' ' . $hex ); ?>" aria-label="<?php echo esc_attr( $name . ' ' . $hex ); ?>"></button>
+							<?php endforeach; ?>
+						</span>
+						<span class="sh-note"><?php esc_html_e( 'Click one of the site\'s colors, or type a hex code.', 'scout-build' ); ?></span>
+					</div>
 				</div>
+				<script>
+				( function () {
+					var input = document.getElementById( 'sm-accent' ), chip = document.getElementById( 'sm-chip' );
+					function show() { if ( /^#[0-9a-fA-F]{6}$/.test( input.value ) ) { chip.style.background = input.value; } }
+					input.addEventListener( 'input', show );
+					document.querySelectorAll( '.sm-swatch' ).forEach( function ( b ) {
+						b.addEventListener( 'click', function () { input.value = b.getAttribute( 'data-c' ); show(); } );
+					} );
+				} )();
+				</script>
 				<p class="sh-note" style="margin-top:10px"><?php esc_html_e( 'Every email the site sends goes out as this address. When a form asks to send as someone else, that address becomes the reply-to, so replies still reach them.', 'scout-build' ); ?></p>
 				<div class="sm-actions">
 					<button type="submit" class="button button-primary"><?php esc_html_e( 'Save', 'scout-build' ); ?></button>
