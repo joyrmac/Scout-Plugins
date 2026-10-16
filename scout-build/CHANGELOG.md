@@ -1,5 +1,11 @@
 # Scout Build changelog
 
+## 0.6.0 (2026-10-16)
+
+- **Email: the site's mail goes out through Google.** A new Scout, Website, Email screen. Enter a Gmail or Google Workspace address and a Google app password, Save, Send test. Every email the site sends (form notices, password resets, Scout checks) then goes through Google's mail server as that address instead of the host's, which on WP Engine landed in junk or vanished (Andy's form saved its entries but no email arrived). When a form asks to send as someone else, that address becomes the reply-to. The password is stored encrypted and never shown again, or can be set in wp-config.php as `SCOUT_MAIL_PASSWORD`. Replaces WP Mail SMTP on Scout sites.
+- **A Scout box on the WordPress Dashboard,** first on the page: features on, AI search score, Google email on or off, your review rating and any new reviews, open requests, the site checks that need a look, and a box to send a change request without leaving the Dashboard.
+- **Site health shows Site email:** host mail, through Google, or last test failed, with a link to the Email screen. Copy for Claude includes it.
+
 ## 0.5.0 (2026-10-15)
 
 - **Copy for Claude.** Site health has a button that copies the whole page as plain text: every check with its state, value and note, the pages a search check names, each installed plugin with its version and whether it is on, the theme version, WordPress and PHP. Paste it into a chat instead of taking screenshots.

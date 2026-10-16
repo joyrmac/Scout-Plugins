@@ -273,6 +273,10 @@ final class Scout_Hub_Health {
 			'note'  => $public ? __( 'Google can find the site.', 'scout-build' ) : __( 'Settings, Reading asks search engines to stay away. Right for staging, wrong for a live site.', 'scout-build' ),
 		);
 
+		if ( class_exists( 'Scout_Hub_Mail' ) ) {
+			$out[] = Scout_Hub_Mail::check();
+		}
+
 		$health = json_decode( (string) get_transient( 'health-check-site-status-result' ), true );
 		if ( is_array( $health ) ) {
 			$critical = (int) ( $health['critical'] ?? 0 );
