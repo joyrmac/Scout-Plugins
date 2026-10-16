@@ -146,7 +146,8 @@ final class Scout_Plugin_Updater {
 	}
 
 	/**
-	 * Offer an update when the newest release is ahead of what is installed.
+	 * Report the newest release. WordPress offers it as an update when it is
+	 * ahead of what is installed, and lists the plugin as up to date otherwise.
 	 *
 	 * @param array|false $update      Update payload from a previous filter.
 	 * @param array       $plugin_data The plugin's headers, including Version.
@@ -164,10 +165,9 @@ final class Scout_Plugin_Updater {
 		if ( '' === $installed || null === $release ) {
 			return $update;
 		}
-		if ( ! version_compare( $release['version'], $installed, '>' ) ) {
-			return $update;
-		}
-
+		// Answer even when nothing is newer: WordPress then lists the plugin as
+		// up to date (no_update), which is what lets the Plugins screen show its
+		// auto-update state instead of a blank column.
 		return array(
 			'id'           => 'github.com/' . self::REPO . '/' . $this->slug,
 			'slug'         => $this->slug,

@@ -1,5 +1,9 @@
 # Scout Forms Guard — Changelog
 
+## 0.2.1 (2026-10-16)
+
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+
 ## 0.2.0 (2026-10-16)
 
 - **Counts the spam it blocks.** Each blocked submission adds one to a monthly count (the last 13 months are kept; nothing about the sender is stored). Scout Build 0.6.2 shows it on the Dashboard, so the client can see the protection working. `Scout_Forms_Guard::blocked()` returns this month's count, `blocked( 'all' )` the total kept.
