@@ -75,6 +75,33 @@ final class Scout_Hub_Dashboard {
 		<?php
 	}
 
+	/** Spam blocked this month, when Scout Forms Guard 0.2.0+ is on. */
+	private static function spam(): void {
+		if ( ! class_exists( 'Scout_Forms_Guard' ) || ! method_exists( 'Scout_Forms_Guard', 'blocked' ) ) {
+			return;
+		}
+		$month = (int) Scout_Forms_Guard::blocked();
+		$all   = (int) Scout_Forms_Guard::blocked( 'all' );
+		?>
+		<p class="sd-spam">
+			<span class="sd-shield" aria-hidden="true"></span>
+			<?php
+			if ( $month ) {
+				/* translators: %d: spam submissions blocked this month */
+				echo '<strong>' . esc_html( sprintf( _n( '%d spam submission blocked this month', '%d spam submissions blocked this month', $month, 'scout-build' ), $month ) ) . '</strong>';
+			} else {
+				esc_html_e( 'Spam protection is on. Nothing blocked yet this month.', 'scout-build' );
+			}
+			if ( $all > $month ) {
+				/* translators: %d: spam submissions blocked in the last year */
+				echo ' &middot; ' . esc_html( sprintf( _n( '%d in the last year', '%d in the last year', $all, 'scout-build' ), $all ) );
+			}
+			?>
+			<span class="sd-note"><?php esc_html_e( 'Your forms check every message invisibly, with no puzzles for real visitors.', 'scout-build' ); ?></span>
+		</p>
+		<?php
+	}
+
 	public static function render(): void {
 		$on = 0;
 		foreach ( array_keys( Scout_Hub_Catalog::features() ) as $slug ) {
