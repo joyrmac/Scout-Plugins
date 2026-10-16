@@ -42,7 +42,7 @@ final class Scout_Hub_Mail {
 		add_filter( 'scout_admin_nav_hint', array( __CLASS__, 'nav_hint' ), 10, 2 );
 	}
 
-	/** @return array{email:string, name:string, password:string, last:array} */
+	/** @return array{email:string, name:string, password:string, accent:string, last:array} */
 	private static function settings(): array {
 		$s = get_option( self::OPTION, array() );
 		$s = is_array( $s ) ? $s : array();
@@ -50,6 +50,7 @@ final class Scout_Hub_Mail {
 			'email'    => (string) ( $s['email'] ?? '' ),
 			'name'     => (string) ( $s['name'] ?? '' ),
 			'password' => (string) ( $s['password'] ?? '' ),
+			'accent'   => (string) ( $s['accent'] ?? '' ),
 			'last'     => is_array( $s['last'] ?? null ) ? $s['last'] : array(),
 		);
 	}
@@ -172,6 +173,9 @@ final class Scout_Hub_Mail {
 		}
 		$s['email'] = $email;
 		$s['name']  = sanitize_text_field( wp_unslash( (string) ( $_POST['name'] ?? '' ) ) );
+		$accent      = sanitize_hex_color( wp_unslash( (string) ( $_POST['accent'] ?? '' ) ) );
+		// Only keep a color someone changed; the detected one stays automatic.
+		$s['accent'] = ( $accent && strtolower( $accent ) !== strtolower( self::detected_accent() ) ) ? $accent : '';
 		if ( '' !== $pass ) {
 			$s['password'] = self::encrypt( $pass );
 			$s['last']     = array();
@@ -254,12 +258,37 @@ echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form 
 		return (string) ob_get_clean();
 	}
 
-	/** The site's brand color: Scout Cards, then Scout Reviews, then Scout's own darker cerulean. */
+	/** The email color: the one picked on this screen, else the detected brand color. */
 	private static function accent(): string {
+		$picked = self::settings()['accent'];
+		return preg_match( '/^#[0-9a-fA-F]{6}$/', $picked ) ? $picked : self::detected_accent();
+	}
+
+	/**
+	 * The site's brand color: the scout_brand_accent filter, Scout Cards, Scout
+	 * Reviews, a block theme's accent/primary/brand color, then Scout's own
+	 * darker cerulean.
+	 */
+	private static function detected_accent(): string {
+		$hex      = '/^#[0-9a-fA-F]{6}$/';
+		$filtered = (string) apply_filters( 'scout_brand_accent', '' );
+		if ( preg_match( $hex, $filtered ) ) {
+			return $filtered;
+		}
 		foreach ( array( 'scout_cards_settings', 'scout_reviews_brand', 'scout_reviews_settings' ) as $opt ) {
 			$o = get_option( $opt );
 			if ( is_array( $o ) && ! empty( $o['accent'] ) && preg_match( '/^#[0-9a-fA-F]{6}$/', (string) $o['accent'] ) ) {
 				return (string) $o['accent'];
+			}
+		}
+		if ( function_exists( 'wp_get_global_settings' ) ) {
+			$palette = (array) wp_get_global_settings( array( 'color', 'palette', 'theme' ) );
+			foreach ( array( 'accent', 'primary', 'brand' ) as $want ) {
+				foreach ( $palette as $c ) {
+					if ( ( $c['slug'] ?? '' ) === $want && preg_match( $hex, (string) ( $c['color'] ?? '' ) ) ) {
+						return (string) $c['color'];
+					}
+				}
 			}
 		}
 		return '#0A78C2';
@@ -312,6 +341,7 @@ echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form 
 			.sm-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
 			.sm-row label{display:grid; gap:6px; font-weight:600}
 			.sm-row input{width:100%}
+			.sm-row input[type=color]{height:36px; padding:2px; cursor:pointer}
 			.sm-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin-top:14px}
 			.sm-actions label{display:grid; gap:6px; font-weight:600; flex:1 1 240px}
 		</style>
@@ -353,6 +383,9 @@ echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form 
 					</label>
 					<label><?php esc_html_e( 'Sender name', 'scout-build' ); ?>
 						<input type="text" name="name" value="<?php echo esc_attr( $s['name'] ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>">
+					</label>
+					<label><?php esc_html_e( 'Email color', 'scout-build' ); ?>
+						<input type="color" name="accent" value="<?php echo esc_attr( self::accent() ); ?>">
 					</label>
 				</div>
 				<p class="sh-note" style="margin-top:10px"><?php esc_html_e( 'Every email the site sends goes out as this address. When a form asks to send as someone else, that address becomes the reply-to, so replies still reach them.', 'scout-build' ); ?></p>

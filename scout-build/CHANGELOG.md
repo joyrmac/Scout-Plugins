@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.6.3 (2026-10-16)
+
+- **Email color.** The Email screen has a color picker for the test email's top bar and button. It starts on the color Scout found (Scout Cards, Scout Reviews, then a block theme's accent, primary or brand color) and keeps whatever you pick. Joy: Maravela's test came out in Scout blue, "the wrong theme". Themes can also set it with the `scout_brand_accent` filter.
+
 ## 0.6.2 (2026-10-16)
 
 - **The Dashboard box shows the spam your forms blocked.** With Scout Forms Guard 0.2.0 or later on, a line under the reviews reads "23 spam submissions blocked this month · 140 in the last year", or "Spam protection is on. Nothing blocked yet this month." Joy wanted clients to see the protection working. Sites without Forms Guard show nothing.

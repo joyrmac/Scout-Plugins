@@ -29,7 +29,7 @@ instead of a data-loss event.
 | [`scout-analytics`](scout-analytics/) | 0.1.0 | Google Tag Manager (our standard on every client site) with Google consent mode set first, a small opt-out cookie notice, and one click-reporting API for cards, links and booking. | WP 6.5+, PHP 8.0+ |
 | [`scout-chat`](scout-chat/) | 0.1.1 | A chat assistant in the corner of the site: answers common questions, books calls, takes change requests, and saves every other question with the visitor's email to an inbox. AI answers once connected to an AI server (key stays off the site). | WP 6.5+, PHP 8.0+ |
 | [`scout-aeo`](scout-aeo/) | 0.1.3 | AI search readiness: names the AI search crawlers in robots.txt and lets them in (live site only), serves a plain-text guide at `/llms.txt`, and adds a "Questions this page answers" box to every page with matching FAQ schema. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
-| [`scout-build`](scout-build/) | 0.6.2 | The Site Build hub: one screen to see and switch the site's Scout features (operators only), go back a version, request a change, and check site health, including a "Ready for AI search" scorecard. Reads the feature list from `catalog.json`. | WP 6.5+, PHP 8.0+ |
+| [`scout-build`](scout-build/) | 0.6.3 | The Site Build hub: one screen to see and switch the site's Scout features (operators only), go back a version, request a change, and check site health, including a "Ready for AI search" scorecard. Reads the feature list from `catalog.json`. | WP 6.5+, PHP 8.0+ |
 | [`scout-rvpark`](scout-rvpark/) | 0.1.2 | The worked example of the companion pattern: one client's specific content types, registered without forking Scout Core. | `scout-core` |
 
 > `scout-schema` and `scout-seo` shipped separately until Scout Core 1.0.0 folded
