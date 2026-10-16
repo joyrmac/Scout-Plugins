@@ -1,5 +1,9 @@
 # Scout Reviews: Changelog
 
+## 0.5.3 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.5.2 (2026-10-13)
 
 - **Fix: business cards print on one page in Safari.** The ten-card sheet filled a letter page exactly, so Safari's print margins pushed the last row onto a second page. Printed cards now come out at 94% size (about 3.3 x 1.9 in) and always fit one page. Screen previews are unchanged.

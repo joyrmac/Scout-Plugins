@@ -1,6 +1,10 @@
 # Scout Site Check changelog
 
 
+## 0.2.2 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.2.1 (2026-10-14)
 
 - **A privacy link under the button.** The line under Check my site now links to the site's privacy policy ("How we use your details"), so people see how their name and email are used before they send them. It shows when WordPress has a privacy page set (Settings, Privacy).

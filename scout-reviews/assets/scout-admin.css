@@ -30,6 +30,11 @@
 .sh *, .sh *::before, .sh *::after { box-sizing: border-box; }
 .sh-head { margin: 12px 0 10px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
 .sh-bolt { display: inline-block; width: 14px; height: 18px; background: var(--sh-accent); clip-path: polygon(58% 0, 0 58%, 42% 58%, 30% 100%, 100% 40%, 54% 40%); flex: none; }
+.sh-lockup { display: flex; align-items: center; gap: 16px; }
+.sh .sh-client { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: var(--sh-text); }
+.sh-client img { display: block; height: 64px; width: auto; max-width: 200px; object-fit: contain; border-radius: 10px; }
+.sh-client-name { font-size: 17px; font-weight: 600; letter-spacing: -.02em; max-width: 220px; line-height: 1.2; }
+.sh-lockup-x { width: 1px; height: 36px; background: var(--sh-border); }
 .sh-brand { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.02em; color: var(--sh-text); }
 .sh-foot { display: flex; align-items: center; gap: 10px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--sh-border); color: var(--sh-text-3); font-size: 13px; }
 .sh-foot p { margin: 0; }
@@ -65,7 +70,10 @@
 	.sh .sh-nav-groups a { flex: 1 1 auto; justify-content: center; min-width: 0; padding: 7px 6px; font-size: 12px; }
 	.sh-nav-sub { flex-wrap: wrap; gap: 0 18px; }
 	.sh .sh-head h1 { font-size: 22px; }
-	.sh-head .sh-brand { display: none; }
+	.sh-head .sh-brand, .sh-lockup-x { display: none; }
+	.sh-head { align-items: center; }
+	.sh-lockup { order: -1; width: 100%; }
+	.sh-client img { height: 44px; }
 }
 
 .sh-box { background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: 16px; padding: 20px 22px; margin-top: 16px; min-width: 0; }

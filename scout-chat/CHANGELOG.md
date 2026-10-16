@@ -1,6 +1,10 @@
 # Scout Chat changelog
 
 
+## 0.2.2 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.2.1 (2026-10-14)
 
 - **Fix: the greeting no longer shifts the page.** "Questions about your website?" now floats above the chat button instead of making the corner widget taller, so PageSpeed stops counting a layout shift when it appears (0.069 on scoutraleigh.com's phone test).

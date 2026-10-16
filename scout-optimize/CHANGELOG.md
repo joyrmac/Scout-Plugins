@@ -2,6 +2,10 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.9.1 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.9.0 (2026-10-16)
 
 - **Forms and jQuery stop holding up the first paint, on every site.** Gravity Forms' stylesheets load at low priority, and every script that needs jQuery (Gravity Forms and its helpers included) prints at the end of the page with everything it depends on. Forms in a page's content are enqueued up front so Gravity Forms does not print its scripts mid-page. On phones PageSpeed counted 1 to 2 seconds of render-blocking from these on North Crest, Hair by Patrick, Maravela's and Andy's. The same fix lived in the Scout Media and Andy's themes; it is the platform's now. Off switches: `scout_optimize_speed` and `scout_jquery_in_footer` filters, or `SCOUT_OPTIMIZE_SPEED` false in wp-config.php. Themes that print forms from a template add their IDs with `scout_optimize_form_ids`. `includes/class-scout-optimize-speed.php`.

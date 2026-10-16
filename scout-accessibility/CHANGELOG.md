@@ -1,5 +1,9 @@
 # Scout Accessibility changelog
 
+## 0.1.10 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 0.1.9 (2026-10-14)
 
 - **Fix: "Published, but no link to it was found" when the footer link is there.** The check loaded the site's own home page to look for the link, and some hosts and firewalls block a site from loading itself (scoutraleigh.com showed the warning with the link in its footer). Now, whenever `[scout_accessibility_link]` prints the link on a visitor's page, the plugin notes the day, and the check counts the link as found for 30 days. Open any page of the site once after updating, then run the checks.

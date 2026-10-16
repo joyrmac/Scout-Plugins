@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.3.4 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
 ## 1.3.3 (2026-10-15)
 
 - **Fix: review markup without stars.** Testimonials with no star rating were still marked up as `Review` items, and Google requires a rating on each one, so the Rich Results test showed them as invalid (Maravela's: 10 invalid review snippets). Only rated testimonials are marked up now; unrated ones still show on the page. The aggregate rating is unchanged (it only ever counted rated ones).

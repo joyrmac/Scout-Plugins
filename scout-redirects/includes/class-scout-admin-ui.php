@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.4.0';
+		const VERSION = '1.5.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -78,9 +78,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			echo '<p class="sh-eyebrow">' . esc_html( $brand . ' · ' . ( '' !== $section ? $section : $title ) ) . '</p>';
 			echo '<h1>' . esc_html( $title ) . '</h1>';
 			echo '</div>';
-			if ( self::branded() ) {
-				echo '<p class="sh-brand"><span class="sh-bolt" aria-hidden="true"></span>Scout</p>';
-			}
+			self::lockup();
 			echo '</header>';
 			if ( ! self::$nav_printed ) {
 				self::nav( $nav );
@@ -90,6 +88,34 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			}
 			// WordPress prints admin notices right after the first heading in .wrap.
 			echo '<hr class="wp-header-end" style="display:none">';
+		}
+
+		/**
+		 * The client's logo beside the Scout mark, top right of every screen,
+		 * so it is plain whose site this is. Logo order: the scout_admin_client_logo
+		 * filter, the theme's custom logo, the Site Icon; with none, the site name.
+		 */
+		private static function lockup(): void {
+			$name = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
+			$logo = (string) apply_filters( 'scout_admin_client_logo', '' );
+			if ( '' === $logo ) {
+				$id   = (int) get_theme_mod( 'custom_logo' );
+				$logo = $id ? (string) wp_get_attachment_image_url( $id, 'medium' ) : '';
+			}
+			if ( '' === $logo && function_exists( 'get_site_icon_url' ) ) {
+				$logo = (string) get_site_icon_url( 128 );
+			}
+			echo '<div class="sh-lockup">';
+			echo '<a class="sh-client" href="' . esc_url( home_url( '/' ) ) . '" target="_blank" rel="noopener" title="' . esc_attr( $name ) . '">';
+			if ( '' !== $logo ) {
+				echo '<img src="' . esc_url( $logo ) . '" alt="' . esc_attr( $name ) . '">';
+			}
+			echo '<span class="sh-client-name">' . esc_html( $name ) . '</span></a>';
+			if ( self::branded() ) {
+				echo '<span class="sh-lockup-x" aria-hidden="true"></span>';
+				echo '<p class="sh-brand"><span class="sh-bolt" aria-hidden="true"></span>Scout</p>';
+			}
+			echo '</div>';
 		}
 
 		/** The nav groups, in the order they show. */
