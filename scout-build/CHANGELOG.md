@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.6.2 (2026-10-16)
+
+- **The Dashboard box shows the spam your forms blocked.** With Scout Forms Guard 0.2.0 or later on, a line under the reviews reads "23 spam submissions blocked this month · 140 in the last year", or "Spam protection is on. Nothing blocked yet this month." Joy wanted clients to see the protection working. Sites without Forms Guard show nothing.
+
 ## 0.6.1 (2026-10-16)
 
 - **The Email test is a proper email.** Joy: "this email should be cuter though, no?" The plain-text test is now a small card in the site's own color (from Cards or Reviews, else Scout's cerulean) with the site icon, the headline "Your website can send email.", one plain line on what that means, and a Visit the site button. Inline styles only, so it looks the same in Gmail, Apple Mail and Outlook.

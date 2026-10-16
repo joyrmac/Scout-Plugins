@@ -1,5 +1,9 @@
 # Scout Forms Guard — Changelog
 
+## 0.2.0 (2026-10-16)
+
+- **Counts the spam it blocks.** Each blocked submission adds one to a monthly count (the last 13 months are kept; nothing about the sender is stored). Scout Build 0.6.2 shows it on the Dashboard, so the client can see the protection working. `Scout_Forms_Guard::blocked()` returns this month's count, `blocked( 'all' )` the total kept.
+
 ## 0.1.5 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.

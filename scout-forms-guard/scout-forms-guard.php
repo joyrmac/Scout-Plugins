@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Forms Guard
  * Description:       In-house spam protection for Gravity Forms: a hidden honeypot, a time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls.
- * Version:           0.1.5
+ * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  gravityforms
@@ -35,6 +35,7 @@ final class Scout_Forms_Guard {
 	const HP  = 'scout_hp';   // Honeypot field.
 	const TS  = 'scout_ts';   // Render timestamp.
 	const SIG = 'scout_sig';  // HMAC of timestamp + form id.
+	const LOG = 'scout_forms_guard_blocked'; // Blocked count per month: array( 'Y-m' => n ).
 
 	/** @var bool Did we block the current submission? */
 	private static $blocked = false;
@@ -111,8 +112,34 @@ final class Scout_Forms_Guard {
 	private static function fail( $validation_result ) {
 		$validation_result['is_valid'] = false;
 		self::$blocked                 = true;
+		self::count();
 		do_action( 'scout_forms_guard_blocked', isset( $validation_result['form'] ) ? $validation_result['form'] : array() );
 		return $validation_result;
+	}
+
+	/** Add one to this month's blocked count. Keeps the last 13 months. */
+	private static function count() {
+		$log   = get_option( self::LOG, array() );
+		$log   = is_array( $log ) ? $log : array();
+		$month = wp_date( 'Y-m' );
+		$log[ $month ] = ( isset( $log[ $month ] ) ? (int) $log[ $month ] : 0 ) + 1;
+		krsort( $log );
+		update_option( self::LOG, array_slice( $log, 0, 13, true ), false );
+	}
+
+	/**
+	 * Spam submissions blocked in a month ('Y-m', default this month in the
+	 * site's timezone), or across every month kept when $month is 'all'.
+	 * Scout Build shows this on the Dashboard.
+	 */
+	public static function blocked( $month = '' ) {
+		$log = get_option( self::LOG, array() );
+		$log = is_array( $log ) ? $log : array();
+		if ( 'all' === $month ) {
+			return (int) array_sum( array_map( 'intval', $log ) );
+		}
+		$month = '' === $month ? wp_date( 'Y-m' ) : (string) $month;
+		return isset( $log[ $month ] ) ? (int) $log[ $month ] : 0;
 	}
 
 	/**
