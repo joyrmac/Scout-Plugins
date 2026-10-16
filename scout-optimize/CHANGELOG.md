@@ -2,6 +2,10 @@
 
 All notable changes to this plugin. Format: date, what changed, why, which files.
 
+## 0.9.0 (2026-10-16)
+
+- **Forms and jQuery stop holding up the first paint, on every site.** Gravity Forms' stylesheets load at low priority, and every script that needs jQuery (Gravity Forms and its helpers included) prints at the end of the page with everything it depends on. Forms in a page's content are enqueued up front so Gravity Forms does not print its scripts mid-page. On phones PageSpeed counted 1 to 2 seconds of render-blocking from these on North Crest, Hair by Patrick, Maravela's and Andy's. The same fix lived in the Scout Media and Andy's themes; it is the platform's now. Off switches: `scout_optimize_speed` and `scout_jquery_in_footer` filters, or `SCOUT_OPTIMIZE_SPEED` false in wp-config.php. Themes that print forms from a template add their IDs with `scout_optimize_form_ids`. `includes/class-scout-optimize-speed.php`.
+
 ## 0.8.7 (2026-10-13)
 
 - **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.

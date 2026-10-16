@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Optimize
  * Plugin URI:        https://scoutraleigh.com
  * Description:       Scout-owned media optimization. Compresses, resizes, and reformats images on upload, with batch optimization for existing libraries. Part of the Scout plugin suite.
- * Version:           0.8.7
+ * Version:           0.9.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            Scout Media & Consulting
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_OPTIMIZE_VERSION', '0.8.7' );
+define( 'SCOUT_OPTIMIZE_VERSION', '0.9.0' );
 define( 'SCOUT_OPTIMIZE_FILE', __FILE__ );
 define( 'SCOUT_OPTIMIZE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_OPTIMIZE_URL', plugin_dir_url( __FILE__ ) );
@@ -48,6 +48,7 @@ add_action(
 
 require_once SCOUT_OPTIMIZE_DIR . 'includes/class-scout-admin-ui.php';
 require_once SCOUT_OPTIMIZE_DIR . 'includes/class-scout-optimize.php';
+require_once SCOUT_OPTIMIZE_DIR . 'includes/class-scout-optimize-speed.php';
 
 register_activation_hook( __FILE__, array( 'Scout_Optimize', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Scout_Optimize', 'deactivate' ) );
@@ -56,6 +57,9 @@ register_deactivation_hook( __FILE__, array( 'Scout_Optimize', 'deactivate' ) );
  * Boot the plugin after all plugins are loaded (suite-friendly ordering).
  */
 add_action( 'plugins_loaded', array( 'Scout_Optimize', 'instance' ) );
+
+// Forms and jQuery stop holding up the first paint (includes/class-scout-optimize-speed.php).
+add_action( 'plugins_loaded', array( 'Scout_Optimize_Speed', 'boot' ) );
 
 // The Scout admin look on the optimizer's two screens.
 add_action(
