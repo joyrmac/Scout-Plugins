@@ -21,6 +21,7 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
 | Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `joyrmac/Andres-Borda---Golf-Carts` | The Build (favor). **In build, not deployed.** Companion plugin `scout-andysgolfcarts` 0.1.0 lives in the client repo. |
+| Walter Lutz Services | walterlutzelectric.com (live 2026-10-19) | **TODO** | `joyrmac/Walter-Lutz-Services` (theme on `main`; repo default branch still `claude/new-client-dzfr0t`) | The Build. Sean signs off for Scout. |
 
 ## Versions
 
@@ -35,6 +36,7 @@ disabled).
 | Hair by Patrick | HBP theme 0.9.12 | 7.1 | **1.0.4 ✓** | removing (no forms on this site) | **0.7.0 ✓** | **removing — DECISION 2026-09-03: HBP runs no forms.** Delete order: forms-guard, then GF, then Akismet. Check book/contact pages for stray embeds after. | Akismet: delete. On the auto-update channel 2026-09-03. |
 | Maravela's | Maravela's theme **TODO** | current | **1.0.4 ✓** | **0.1.1 ✓** | **0.7.0 ✓ (active; keep the delivery toggles off — see drift item on the hero)** | **3.1.1 ✓** | Genesis Blocks Pro 3.1.11 (active), WordPress Importer (active). On the auto-update channel 2026-09-03. |
 | North Crest | north-crest **3.13.0** (2026-10-12) | 7.1.3 | **1.3.0 ✓** (2026-10-13) | **0.1.4 ✓** | **0.8.6 ✓** | 3.1.3 | GTM4WP 2.0.6 (owns GTM); scout-rvpark **0.1.5 ✓**; scout-aeo **0.2.0 ✓** (IndexNow on); scout-analytics **0.1.9**, scout-accessibility **0.1.4**, scout-reviews **0.4.13** (Site Build screen, 2026-10-13; plan: The Partnership; 6/7 ready for AI search). robots.txt carries a `Crawl-delay: 10` in the `*` group from outside Scout code (host or another plugin). Smush deleted. **All Scout plugins self-updating as of 2026-09-03 — first site fully on the channel.** |
+| Walter Lutz | walter-lutz-theme **0.3.0** (live 2026-10-19) | **TODO** | **none yet** | **none yet** | **none yet** | active (form 1, quote form with a **visible** photo upload: jpg/png/heic/webp, 10 MB) | No Scout plugins on the front end at launch: no Scout Build, analytics, cookie notice or GTM. Build-out card `wl-plugins` on the rollout page. robots.txt carries the same `Crawl-delay: 10` as the other WP Engine sites. |
 
 > **scout-cards** (new 2026-10-01, 1.0.1): first rollout is Hair by Patrick. Scout Media and Scout Recon run the same cards inside their own themes (Scout 1.30.1, Recon 1.13.0), not this plugin. If Scout Media moves to the plugin, install scout-cards **without** scout-core (it works standalone). Add a column once a second site installs it.
 
