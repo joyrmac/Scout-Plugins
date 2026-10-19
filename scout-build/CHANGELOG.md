@@ -2,6 +2,7 @@
 
 ## 0.6.6 (2026-10-16)
 
+- **Hidden upload fields in Site health.** With Scout Forms Guard 0.3.0 or newer, Site health has a "Hidden upload fields" row: green when no form has a File Upload field set to Hidden, red with the form names when one does, linking to the form. Those fields are open to a reported Gravity Forms security flaw.
 - **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
 
 ## 0.6.5 (2026-10-16)

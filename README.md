@@ -23,7 +23,7 @@ instead of a data-loss event.
 | Plugin | Version | What it does | Requires |
 |---|---|---|---|
 | [`scout-core`](scout-core/) | 1.1.3 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
-| [`scout-forms-guard`](scout-forms-guard/) | 0.2.1 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
+| [`scout-forms-guard`](scout-forms-guard/) | 0.3.0 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. Refuses files sent to File Upload fields set to Hidden (a reported Gravity Forms flaw) and names those fields to fix. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
 | [`scout-cards`](scout-cards/) | 1.0.5 | Digital business cards and a link-in-bio page on the client's own site: Save contact, share mode with a QR code, home-screen icon, `/links/`. Reads the business identity from Scout Core. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
 | [`scout-reviews`](scout-reviews/) | 0.4.2 | Reviews from Google, Facebook, Yelp, Clutch, and the rest, shown in a custom design. Google reviews sync daily into an inbox; one click adds each to the right pages. A `/review/` page, private note form, QR code, printable cards and ready-to-send messages for asking clients. | WP 6.5+, PHP 8.0+ |
 | [`scout-analytics`](scout-analytics/) | 0.1.0 | Google Tag Manager (our standard on every client site) with Google consent mode set first, a small opt-out cookie notice, and one click-reporting API for cards, links and booking. | WP 6.5+, PHP 8.0+ |
