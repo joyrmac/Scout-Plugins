@@ -1,5 +1,8 @@
 # Scout Core — Changelog
 
+## 1.4.1 (2026-10-22)
+
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
 ## 1.4.0 (2026-10-22)
 
 - **Site Sync.** One updating system for every Scout site, replacing each theme's own setup and sync screen over time. A theme lists the copy it bundles in a `scout-sync.json` file (page content, page fields, SEO titles and descriptions, shared settings, site title and tagline). Scout compares each item three ways: the theme copy, what WordPress holds, and what was there at the last sync.

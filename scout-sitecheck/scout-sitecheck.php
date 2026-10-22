@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Site Check
  * Description:       A free website check visitors can run from your site. It checks speed, security, page titles, business info for Google, phone layout, AI crawlers, the sitemap and photo sizes, shows the result on the page, emails the full report, and saves every request to an inbox.
- * Version:           0.2.2
+ * Version:           0.2.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_SITECHECK_VERSION', '0.2.2' );
+define( 'SCOUT_SITECHECK_VERSION', '0.2.3' );
 define( 'SCOUT_SITECHECK_FILE', __FILE__ );
 define( 'SCOUT_SITECHECK_URL', plugin_dir_url( __FILE__ ) );
 

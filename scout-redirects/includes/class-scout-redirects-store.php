@@ -23,6 +23,7 @@ final class Scout_Redirects_Store {
 	const DB_OPTION    = 'scout_redirects_db';
 	const COUNT_OPTION = 'scout_redirects_count';
 	const CACHE_GROUP  = 'scout_redirects';
+	const CACHE_OPTION = 'scout_redirects_cache_v';
 
 	public static function table(): string {
 		global $wpdb;
@@ -91,6 +92,24 @@ final class Scout_Redirects_Store {
 		return md5( $path );
 	}
 
+	/**
+	 * Cache key for one lookup. It carries a version number that every change
+	 * bumps, so a change takes effect at once on every object cache. Group
+	 * flushing alone is not enough: WP Engine's cache does not support it, and
+	 * a remembered "no redirect here" then hid a new redirect for an hour.
+	 */
+	private static function cache_key( string $hash ): string {
+		return (int) get_option( self::CACHE_OPTION, 0 ) . ':' . $hash;
+	}
+
+	/** Forget every remembered lookup. */
+	private static function forget(): void {
+		update_option( self::CACHE_OPTION, (int) get_option( self::CACHE_OPTION, 0 ) + 1, true );
+		if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_group' ) ) {
+			wp_cache_flush_group( self::CACHE_GROUP );
+		}
+	}
+
 	/* ---------------------------------------------------------------- */
 	/* Redirects                                                         */
 	/* ---------------------------------------------------------------- */
@@ -106,21 +125,21 @@ final class Scout_Redirects_Store {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$n = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 		update_option( self::COUNT_OPTION, $n, true );
-		wp_cache_flush_group( self::CACHE_GROUP );
+		self::forget();
 	}
 
 	/** The redirect for a normalized old path, or null. */
 	public static function find( string $source ): ?object {
 		global $wpdb;
 		$hash  = self::hash( $source );
-		$found = wp_cache_get( $hash, self::CACHE_GROUP, false, $hit );
+		$found = wp_cache_get( self::cache_key( $hash ), self::CACHE_GROUP, false, $hit );
 		if ( $hit ) {
 			return $found ? $found : null;
 		}
 		$table = self::table();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE source_hash = %s", $hash ) );
-		wp_cache_set( $hash, $row ? $row : 0, self::CACHE_GROUP, HOUR_IN_SECONDS );
+		wp_cache_set( self::cache_key( $hash ), $row ? $row : 0, self::CACHE_GROUP, HOUR_IN_SECONDS );
 		return $row ? $row : null;
 	}
 
@@ -227,7 +246,7 @@ final class Scout_Redirects_Store {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->update( $table, array( 'target' => $to_path ), array( 'target' => $old ) );
 		}
-		wp_cache_flush_group( self::CACHE_GROUP );
+		self::forget();
 	}
 
 	/** Count one use of a redirect. */
@@ -236,7 +255,7 @@ final class Scout_Redirects_Store {
 		$table = self::table();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET hits = hits + 1, last_hit = %s WHERE id = %d", self::now(), (int) $row->id ) );
-		wp_cache_delete( $row->source_hash, self::CACHE_GROUP );
+		wp_cache_delete( self::cache_key( (string) $row->source_hash ), self::CACHE_GROUP );
 	}
 
 	/* ---------------------------------------------------------------- */

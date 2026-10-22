@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Scout Forms Guard
- * Description:       In-house spam protection for Gravity Forms: a hidden honeypot, a time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls.
- * Version:           0.2.0
+ * Description:       In-house spam protection for Gravity Forms: a hidden honeypot, a time trap, and a signed token. Also refuses files sent to File Upload fields set to Hidden (a reported Gravity Forms security flaw) and names those fields for you to fix. No reCAPTCHA, no Akismet, no third-party calls.
+ * Version:           0.3.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  gravityforms
@@ -29,6 +29,11 @@ add_action(
 	},
 	0
 );
+
+// Hidden upload guard. Booted at load time so its plugins_loaded check is
+// registered before plugins_loaded fires.
+require_once __DIR__ . '/includes/class-scout-forms-guard-uploads.php';
+Scout_Forms_Guard_Uploads::boot();
 
 final class Scout_Forms_Guard {
 
@@ -112,9 +117,34 @@ final class Scout_Forms_Guard {
 	private static function fail( $validation_result ) {
 		$validation_result['is_valid'] = false;
 		self::$blocked                 = true;
-		self::count();
-		do_action( 'scout_forms_guard_blocked', isset( $validation_result['form'] ) ? $validation_result['form'] : array() );
+		self::record_block( isset( $validation_result['form'] ) ? $validation_result['form'] : array() );
 		return $validation_result;
+	}
+
+	/**
+	 * Count one blocked submission or upload and tell anyone listening.
+	 * Spam and refused hidden uploads share the monthly count.
+	 */
+	public static function record_block( $form ) {
+		self::count();
+		do_action( 'scout_forms_guard_blocked', is_array( $form ) ? $form : array() );
+	}
+
+	/**
+	 * Hidden upload fields, as a Scout Build health check
+	 * (label, value, state, note, link, link_text).
+	 */
+	public static function upload_check(): array {
+		return Scout_Forms_Guard_Uploads::check();
+	}
+
+	/**
+	 * Every File Upload field set to Hidden or Administrative on an active form.
+	 *
+	 * @return array<int, array{form_id:int, form_title:string, field_id:int, field_label:string}>
+	 */
+	public static function hidden_uploads(): array {
+		return Scout_Forms_Guard_Uploads::find();
 	}
 
 	/** Add one to this month's blocked count. Keeps the last 13 months. */

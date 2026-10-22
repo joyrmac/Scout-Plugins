@@ -1,5 +1,13 @@
 # Scout Analytics changelog
 
+## 0.1.15 (2026-10-22)
+
+- **The cookie notice is readable on every site.** It borrowed the theme's color names, so a site that defined some of them and not others got a mismatch: on Andy's light site the panel was white with light gray text and a "No thanks" button in white on white (Joy: "contrast is weird"). The notice now carries its own colors: light by default, dark when the page sets `data-theme="dark"` (scoutraleigh.com), and the OK button in the site's brand color from Scout Build, with dark text when that color is too light for white.
+
+## 0.1.14 (2026-10-16)
+
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+
 ## 0.1.13 (2026-10-16)
 
 - **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.

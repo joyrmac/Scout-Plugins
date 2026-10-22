@@ -1,5 +1,17 @@
 # Scout Build changelog
 
+## 0.6.7 (2026-10-22)
+
+- **Form emails in the site's own colors.** Gravity Forms notifications now arrive in the same card as the Email test: the site's color bar, its Site Icon, the site name, and the subject as the headline, with the form answers below. When the message has a phone number, it gets Call and Text buttons; when it has an email address, an Email back button. Confirmations sent to the person who filled in the form get the card without those buttons. Light colors like Carolina blue get dark button text so it stays readable. Only HTML notifications, only while Scout Email is set up. Joy, on Andy's request email: "can these be branded?" Off switch: the `scout_mail_brand_forms` filter.
+- **Other Scout plugins can use the site's brand color.** `Scout_Hub_Mail::brand_color()` returns the Email screen's pick or the detected color; Scout Analytics 0.1.15 colors the cookie notice's OK button with it.
+- **The headline leaves out the phone number.** It already has its Call button, and mail apps turned the number in the headline into a large link (Joy's test on Andy's staging).
+- **Email back finds plain addresses.** Gravity Forms sends the visitor's email as plain text, so the button now reads the first address in the message that is not the site's own (Joy's second test showed Call and Text but no Email back).
+
+## 0.6.6 (2026-10-16)
+
+- **Hidden upload fields in Site health.** With Scout Forms Guard 0.3.0 or newer, Site health has a "Hidden upload fields" row: green when no form has a File Upload field set to Hidden, red with the form names when one does, linking to the form. Those fields are open to a reported Gravity Forms security flaw.
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+
 ## 0.6.5 (2026-10-16)
 
 - **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.

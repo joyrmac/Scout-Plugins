@@ -1,5 +1,13 @@
 # Scout Redirects changelog
 
+## 0.1.8 (2026-10-22)
+
+- **A new redirect works the moment you save it.** Lookups are remembered for an hour, including "no redirect here". Saving was meant to clear that memory, but WP Engine's cache cannot clear one group, so a redirect for an address someone had just asked for stayed hidden for up to an hour. Found on Andy's launch day: `/sitemap_index.xml` kept returning "not found" after the redirect was added. Every change now moves the cache to a fresh version, which works on every host.
+
+## 0.1.7 (2026-10-16)
+
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+
 ## 0.1.6 (2026-10-16)
 
 - **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
