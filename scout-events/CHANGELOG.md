@@ -1,5 +1,14 @@
 # Scout Events changelog
 
+## 0.5.0 (2026-10-22)
+
+- **Presenters apply and keep their own profile.** `[scout_presenter_portal event="..."]` on any page shows an application (name, pronouns, email, phone, what they do, bios, links, photo, up to two class ideas, what they need in the room, a photo release). Sending it creates a Presenter account (WordPress emails them a set-password link), a speaker in Pending Review and draft sessions for their classes. Logged in, a presenter sees their status and sessions and can update their profile.
+- **The owner approves everything.** Publishing a pending speaker approves the application and emails them. Profile updates wait on the speaker's edit screen with a before-and-after view and Approve or Discard. New applications and waiting changes lead the Needs you list.
+- **Private stays private.** Phone, pronouns, room needs, notes and the photo release show only on the speaker's edit screen, never on the site or in schema.
+- Presenters never see the dashboard: it sends them to their profile page, and the toolbar is hidden for them.
+- Spam guard on the forms: a hidden field, a minimum time on the form, and a nonce.
+- **Events sits right under Scout** in the sidebar with the identical Scout bolt (Joy: "near each other at the top... the same bolt").
+
 ## 0.4.1 (2026-10-22)
 
 - **Import keeps one copy when a session changes event.** A row now also matches a session with the same title and the same speaker in any event, so moving a session to its right year on a second run updates it instead of adding a copy.

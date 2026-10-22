@@ -43,12 +43,12 @@ final class Scout_Events_Admin {
 		return $args ? add_query_arg( $args, $base ) : $base;
 	}
 
-	/** The bolt, drawn from the brand's clip-path, as a menu icon WordPress can recolor. */
+	/** The same bolt the Scout menu uses, so the two read as one family. */
 	private static function icon(): string {
 		if ( ! Scout_Admin_UI::branded() ) {
 			return 'dashicons-calendar-alt';
 		}
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon fill="black" points="11.6,0 0,11.6 8.4,11.6 6,20 20,8 10.8,8"/></svg>';
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0E8FE6" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>';
 		return 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- menu icon data URI.
 	}
 
@@ -65,7 +65,7 @@ final class Scout_Events_Admin {
 	}
 
 	public static function menu(): void {
-		add_menu_page( __( 'Scout Events', 'scout-events' ), __( 'Events', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ), self::icon(), 25 );
+		add_menu_page( __( 'Scout Events', 'scout-events' ), __( 'Events', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.1' );
 		add_submenu_page( self::SLUG, __( 'Scout Events', 'scout-events' ), __( 'Overview', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
 		global $submenu;
 		$lists = array(

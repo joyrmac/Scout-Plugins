@@ -12,7 +12,7 @@ this plugin stays the content and display layer in front of it.
 
 ## Where it lives
 
-**Events** has its own item in the dashboard sidebar, marked with the Scout
+**Events** has its own item in the dashboard sidebar, right under Scout, with the same Scout
 bolt (a plain calendar icon on partner sites with `SCOUT_HUB_BRAND` false), so
 it reads as Scout's and sits apart from the site's Build settings. Under it:
 **Overview** (the numbers, a **Needs you** list of everything waiting on a
@@ -56,6 +56,25 @@ properties: `--scout-events-accent`, `--scout-events-on-accent`,
 
 The ticket button carries `data-scout-track="ticket_click"` and the map link
 `data-scout-track="directions_click"`, which Scout Analytics reports.
+
+## Presenters
+
+Put `[scout_presenter_portal event="summit-2027"]` on a page (the event's
+address word links the proposed classes to it; leave it out to link them later).
+
+- **Logged out:** the application. It creates a Presenter account (WordPress's
+  own set-password email), a speaker in **Pending Review** with their photo, and
+  draft sessions for up to two class ideas.
+- **Logged in:** their status, their sessions, and a profile form. Changes wait
+  for approval; phone and room needs save straight away (organizers only).
+- **The owner:** new applications and waiting changes lead **Needs you**.
+  Publish a pending speaker to approve them (they are emailed). The speaker's
+  edit screen shows the private details and any waiting changes side by side
+  with **Approve changes** and **Discard**.
+- Private details live in `_scout_speaker_private` and never reach the site,
+  schema or the import. Presenters are sent away from wp-admin.
+- Mail goes through `wp_mail`, so the site needs working email (on WP Engine,
+  an SMTP plugin or the host's mail) for the set-password and approval emails.
 
 ## Bringing in a spreadsheet
 

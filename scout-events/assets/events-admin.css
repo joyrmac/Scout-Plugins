@@ -82,3 +82,12 @@
 .se-needs li span { flex: 1 1 320px; font-size: 14px; }
 .se-allclear { color: var(--se-good); font-weight: 500; }
 .se-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.se-private { margin: 0 0 8px; display: grid; gap: 2px; }
+.se-private dt { font-family: var(--se-mono); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--se-text-2); margin-top: 8px; }
+.se-private dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.se-pending { margin-top: 12px; padding: 12px; border-radius: 12px; background: #FBF0DC; }
+.se-pending dt { font-weight: 600; font-size: 12px; margin-top: 8px; }
+.se-pending dd { margin: 2px 0 0; font-size: 13px; }
+.se-pending del { color: var(--se-text-3); }
+.se-pending ins { text-decoration: none; background: #E3F4EE; }
+.se-pending-actions { display: flex; gap: 8px; flex-wrap: wrap; }
