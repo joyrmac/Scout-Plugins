@@ -1,0 +1,140 @@
+/* /review/ and /review/note/: a phone page in the client's colors and fonts
+   (set in Ask for reviews > Settings, written as variables by
+   Scout_Reviews_Brand), with a glow of the brand color at the top.
+   Max 480px wide, centered on desktop. Defaults are Scout's own look. */
+
+:root {
+	--accent: #0E8FE6;
+	--bg: #0B0B0B;
+	--surface: #161616;
+	--surface-2: #1E1E1E;
+	--text: #F5F5F7;
+	--text-2: #B5B5B8;
+	--text-3: #86868B;
+	--line: rgba(255, 255, 255, .10);
+	--strong: rgba(255, 255, 255, .14);
+	--link: #5FB8F2;
+	--positive: #0E9E73;
+	--negative: #F2553D;
+	--on-accent: #fff;
+	--font-head: "Hanken Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
+	--font-body: "Hanken Grotesk", -apple-system, "Segoe UI", system-ui, sans-serif;
+	--font-label: "Geist Mono", ui-monospace, Menlo, monospace;
+	color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+	margin: 0;
+	min-height: 100vh;
+	background:
+		radial-gradient(520px 360px at 50% -80px, color-mix(in srgb, var(--accent) 34%, transparent), transparent 72%),
+		var(--bg);
+	color: var(--text);
+	font: 400 16px/1.55 var(--font-body);
+	-webkit-font-smoothing: antialiased;
+}
+.rp {
+	max-width: 480px;
+	margin: 0 auto;
+	padding: max(28px, env(safe-area-inset-top)) 22px max(28px, env(safe-area-inset-bottom));
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.rp-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.rp-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+.rp-biz { font-family: var(--font-head); font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.rp-photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 18px; border: 1px solid var(--line); }
+.rp-eyebrow,
+.rp-label,
+.rp-domain {
+	font-family: var(--font-label);
+	font-weight: 500;
+	font-size: 12px;
+	letter-spacing: 1.4px;
+	text-transform: uppercase;
+	margin: 0;
+}
+.rp-eyebrow { color: var(--link); margin-top: 8px; }
+.rp-label { color: var(--text-3); font-size: 11px; letter-spacing: 1.2px; display: block; margin-bottom: 8px; padding: 0; }
+.rp-domain { color: var(--text-3); text-align: center; margin-top: 24px; }
+h1 {
+	font-family: var(--font-head);
+	font-size: clamp(32px, 9vw, 40px);
+	line-height: 1.04;
+	letter-spacing: -.035em;
+	font-weight: 600;
+	margin: 0;
+	text-wrap: balance;
+}
+.rp-lede { color: var(--text-2); font-size: 17px; margin: 0; text-wrap: pretty; }
+.rp-actions { display: grid; gap: 10px; margin-top: 8px; }
+.rp-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 54px;
+	padding: 14px 24px;
+	border-radius: 980px;
+	border: 1px solid var(--strong);
+	background: var(--surface);
+	color: var(--text);
+	font-family: inherit;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	transition: transform .2s ease, background .2s ease, border-color .2s ease;
+}
+.rp-btn:hover { transform: translateY(-1px); border-color: var(--link); }
+.rp-btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+.rp-btn-primary:hover { background: color-mix(in srgb, var(--accent) 86%, #000); border-color: transparent; }
+.rp-btn:focus-visible, .rp a:focus-visible, .rp input:focus-visible, .rp textarea:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+.rp-quiet { text-align: center; margin: 20px 0 0; font-size: 14px; }
+.rp-quiet a { color: var(--text-2); text-underline-offset: 3px; }
+.rp-quiet a:hover { color: var(--text); }
+
+/* Note form */
+.rp-form { display: grid; gap: 18px; margin-top: 8px; }
+.rp-field { display: grid; }
+.rp-form input[type="text"],
+.rp-form textarea {
+	width: 100%;
+	min-height: 50px;
+	padding: 12px 14px;
+	border-radius: 12px;
+	border: 1px solid var(--strong);
+	background: var(--bg);
+	color: var(--text);
+	font-family: inherit;
+	font-size: 16px;
+	line-height: 1.5;
+}
+.rp-form textarea { resize: vertical; min-height: 128px; }
+.rp-form input:focus, .rp-form textarea:focus { border-color: var(--accent); outline: none; }
+.rp-form [aria-invalid="true"] { border-color: var(--negative); }
+.rp-err { color: #FF8A7A; font-size: 14px; margin: 6px 0 0; }
+.rp-stars { border: 0; margin: 0; padding: 0; }
+.rp-starrow { display: inline-flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; }
+.rp-starrow input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rp-starrow label { width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 8px; }
+.rp-starrow svg { width: 30px; height: 30px; fill: none; stroke: var(--text-3); stroke-width: 1.5; stroke-linejoin: round; transition: fill .15s, stroke .15s; }
+.rp-starrow input:checked ~ label svg,
+.rp-starrow label:hover svg,
+.rp-starrow label:hover ~ label svg { fill: var(--accent); stroke: var(--accent); }
+.rp-starrow input:focus-visible + label { outline: 2px solid var(--link); outline-offset: 2px; }
+.rp-check { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; color: var(--text-2); cursor: pointer; }
+.rp-check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.rp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.rp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Thank-you */
+.rp-done { width: 56px; height: 56px; border-radius: 50%; background: var(--positive); display: grid; place-items: center; margin-top: 12px; }
+.rp-done svg { width: 28px; height: 28px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (prefers-reduced-motion: reduce) {
+	.rp-btn, .rp-starrow svg { transition: none; }
+	.rp-btn:hover { transform: none; }
+}

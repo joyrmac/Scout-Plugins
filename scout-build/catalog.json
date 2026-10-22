@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "updated": "2026-10-13",
+  "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers: build, partnership, whole, addon. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there.",
+  "features": [
+    {
+      "slug": "scout-core",
+      "name": "Business info and SEO",
+      "summary": "Enter your business details once and they show up correctly everywhere Google looks: titles, schema, sitemap and social previews.",
+      "tier": "build",
+      "law": false,
+      "requires": [],
+      "not_with_themes": [
+        "scout-media",
+        "scout-recon"
+      ],
+      "not_with_note": "Not used on this site. The theme already handles business info and SEO, and running both doubles the tags."
+    },
+    {
+      "slug": "scout-aeo",
+      "name": "AI search",
+      "summary": "Helps ChatGPT, Google's AI answers, Perplexity and Claude find the site, read it, and name it in their answers. Adds a question-and-answer box to every page.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-optimize",
+      "name": "Automatic image optimizer",
+      "summary": "Every photo you upload is resized and compressed so the site stays fast. The original is kept as a backup.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-forms-guard",
+      "name": "Spam-free forms",
+      "summary": "Blocks spam on your forms quietly, so visitors never have to solve a puzzle.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-analytics",
+      "name": "Analytics and cookie notice",
+      "summary": "Google Tag Manager on your live site with privacy set up the right way: a small cookie notice, an easy opt out, and click counts for your cards, links and booking.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-contact",
+      "name": "Call buttons",
+      "summary": "A call, text and booking bar pinned to the bottom of the screen on phones, so visitors can reach you with one tap from any page.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-redirects",
+      "name": "Redirects and missing pages",
+      "summary": "Forward old page addresses to new ones, see which missing pages people hit, and fix a broken link with one click.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-hours",
+      "name": "Hours and holiday closures",
+      "summary": "Set your hours and holiday closures once. The site shows an up-to-date Open now line, Google reads the hours, and you get a reminder to update your Google profile before each holiday.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-accessibility",
+      "name": "Accessibility statement and checks",
+      "summary": "An honest accessibility statement page, weekly checks for image descriptions, heading order and form labels, and a launch checklist for contrast and keyboard use.",
+      "tier": "build",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-team",
+      "name": "Team credentials",
+      "summary": "A profile page for each person with their real credentials, such as bar admissions, education, awards and military service, plus a team grid that tells Google who your people are.",
+      "tier": "build",
+      "law": true,
+      "requires": []
+    },
+    {
+      "slug": "scout-results",
+      "name": "Case results",
+      "summary": "Show the firm's case results with the firm's approval on each one and the disclaimer next to every result. Visitors can filter by practice area.",
+      "tier": "addon",
+      "law": true,
+      "requires": []
+    },
+    {
+      "slug": "scout-chat",
+      "name": "Chat assistant",
+      "summary": "A chat in the corner of your site that answers common questions, books calls and takes change requests. Every other question lands in your inbox with the visitor's email, and AI answers start once it's connected.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-cards",
+      "name": "Digital business cards and link page",
+      "summary": "A card for each person that saves to a phone in one tap, a QR code to share it, and a link page for your social bios.",
+      "tier": "addon",
+      "law": false,
+      "requires": [],
+      "not_with_themes": [
+        "scout-media"
+      ],
+      "not_with_note": "Not used on this site. The theme already makes the cards and the links page."
+    },
+    {
+      "slug": "scout-reviews",
+      "name": "Reviews and review requests",
+      "summary": "Shows your Google, Yelp and Facebook reviews on the site, plus one review link with a QR code, printable cards and ready-to-send messages.",
+      "tier": "partnership",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-rvpark",
+      "name": "RV park content",
+      "summary": "Sites, amenities and rates for an RV park, edited like a form.",
+      "tier": "build",
+      "law": false,
+      "requires": [
+        "scout-core"
+      ],
+      "client_specific": true
+    },
+    {
+      "slug": "scout-sitecheck",
+      "name": "Free site check",
+      "summary": "A free website check visitors run from your site. They see the results right away and get the full report by email, and every request lands in your inbox so you can follow up.",
+      "tier": "build",
+      "law": false,
+      "requires": [],
+      "client_specific": true
+    }
+  ]
+}

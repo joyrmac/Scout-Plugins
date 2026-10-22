@@ -104,6 +104,20 @@ Keep fieldsets to what actually changes. A page of forty fields is still
 better than a page builder, but a paragraph nobody will ever edit can stay in
 the template.
 
+## Site Sync: theme copy in, hand edits kept (1.4.0+)
+
+A theme lists the copy it bundles in `scout-sync.json` at its root: page
+content, page fields, SEO, shared settings, site title and tagline. Scout
+compares each item with what WordPress holds and with what was there at the
+last sync. Pages nobody edited update on their own after a theme update;
+anything changed in WordPress waits on **Scout → Site Sync** for "Keep the
+WordPress copy" or "Use the theme copy". Every sync can be undone. A theme
+without the file gets the screen in status-only mode.
+
+Manifest format, states and write safety: `docs/site-sync-spec.md`
+("As built"). Command line: `wp scout sync status`, `wp scout sync run
+--dry-run`. Test: `tools/tests/site-sync.php` against a disposable WordPress.
+
 ## Adding a client's own types (the companion pattern)
 
 Never fork `scout-core`. Each client gets a small companion plugin that

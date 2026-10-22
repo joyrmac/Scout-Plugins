@@ -1,18 +1,24 @@
 name: Release
 
-# Publishes one plugin, two ways.
+# Publishes plugins as GitHub releases. Sites running a plugin pick the update
+# up within a few hours.
 #
-# Normally: Actions tab -> Release -> "Run workflow" -> pick the plugin. The
-# version is read from that plugin's Version: header, so the tag can never
-# disagree with the code, and the tag is created for you.
+# Automatically: every push to main (a merged pull request) checks each
+# plugin's Version: header. Any plugin whose version has no release yet is
+# released, Scout Core first. Bump the version and merge; that is the release.
+# A plugin whose version did not change is skipped, so nothing ships by
+# accident.
 #
-# Or by tag, if you prefer the command line:
-#   git tag scout-core-v1.0.2 && git push origin scout-core-v1.0.2
+# By hand, as a backup: Actions tab -> Release -> "Run workflow" -> pick the
+# plugin. Or push a tag: git tag scout-core-v1.0.2 && git push origin scout-core-v1.0.2
 #
-# Either way it builds <slug>.zip and attaches it to a GitHub release. Sites
-# running that plugin pick the update up within a few hours.
+# Each release builds <slug>.zip from the plugin folder and attaches it.
 
 on:
+  push:
+    branches: [main]
+    tags:
+      - 'scout-*-v*'
   workflow_dispatch:
     inputs:
       plugin:
@@ -20,29 +26,37 @@ on:
         required: true
         type: choice
         options:
+          - scout-aeo
+          - scout-analytics
+          - scout-build
           - scout-cards
+          - scout-chat
           - scout-core
           - scout-forms-guard
           - scout-optimize
           - scout-reviews
           - scout-rvpark
-  push:
-    tags:
-      - 'scout-*-v*'
+          - scout-sitecheck
 
 permissions:
   contents: write
 
 jobs:
-  release:
-    name: Build and publish the plugin zip
+  plan:
+    name: Find versions that have not shipped
     runs-on: ubuntu-latest
-
+    outputs:
+      targets: ${{ steps.plan.outputs.targets }}
+      any: ${{ steps.plan.outputs.any }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Work out which plugin, which version, which tag
-        id: target
+      - name: Work out which plugins, which versions, which tags
+        id: plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT: ${{ github.event_name }}
+          PICKED: ${{ inputs.plugin }}
         run: |
           set -euo pipefail
 
@@ -53,8 +67,33 @@ jobs:
             sed -n 's/^ \* Version: *//p' "$1/$1.php" | tr -d '[:space:]'
           }
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            slug="${{ inputs.plugin }}"
+          slugs=()
+          if [ "${EVENT}" = "workflow_dispatch" ]; then
+            slugs=("${PICKED}")
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            tag="${GITHUB_REF_NAME}"
+            slug="${tag%-v*}"
+            if [ ! -f "${slug}/${slug}.php" ]; then
+              echo "::error::Tag '${tag}' does not match a plugin: ${slug}/${slug}.php not found."
+              exit 1
+            fi
+            if [ "$(header_version "${slug}")" != "${tag##*-v}" ]; then
+              echo "::error::${slug}.php says Version $(header_version "${slug}"), tag says ${tag##*-v}. Bump the header first."
+              exit 1
+            fi
+            slugs=("${slug}")
+          else
+            # Push to main: every plugin, Scout Core first (the others call it).
+            [ -f scout-core/scout-core.php ] && slugs+=("scout-core")
+            for dir in scout-*/; do
+              slug="${dir%/}"
+              [ "${slug}" = "scout-core" ] && continue
+              [ -f "${slug}/${slug}.php" ] && slugs+=("${slug}")
+            done
+          fi
+
+          targets="[]"
+          for slug in "${slugs[@]}"; do
             if [ ! -f "${slug}/${slug}.php" ]; then
               echo "::error::No such plugin: ${slug}/${slug}.php not found."
               exit 1
@@ -65,42 +104,42 @@ jobs:
               exit 1
             fi
             tag="${slug}-v${version}"
-          else
-            tag="${GITHUB_REF_NAME}"
-            slug="${tag%-v*}"
-            version="${tag##*-v}"
-            if [ ! -f "${slug}/${slug}.php" ]; then
-              echo "::error::Tag '${tag}' does not match a plugin: ${slug}/${slug}.php not found."
+            if gh release view "${tag}" >/dev/null 2>&1; then
+              if [ "${EVENT}" = "push" ] && [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+                echo "${tag}: already released, skipping."
+                continue
+              fi
+              echo "::error::Release ${tag} already exists. Bump the version and try again; never re-tag a shipped version."
               exit 1
             fi
-            header="$(header_version "${slug}")"
-            if [ "${header}" != "${version}" ]; then
-              echo "::error::${slug}.php says Version ${header}, tag says ${version}. Bump the header first."
-              exit 1
-            fi
-          fi
+            echo "${tag}: will release."
+            targets="$(jq -c --arg s "${slug}" --arg v "${version}" --arg t "${tag}" '. + [{slug:$s, version:$v, tag:$t}]' <<< "${targets}")"
+          done
 
-          echo "slug=${slug}" >> "$GITHUB_OUTPUT"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "Releasing ${slug} ${version} as ${tag}"
+          echo "targets=${targets}" >> "$GITHUB_OUTPUT"
+          if [ "${targets}" = "[]" ]; then echo "any=false" >> "$GITHUB_OUTPUT"; else echo "any=true" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Refuse to re-release a version that already shipped
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tag="${{ steps.target.outputs.tag }}"
-          if gh release view "${tag}" >/dev/null 2>&1; then
-            echo "::error::Release ${tag} already exists. Bump the version and try again; never re-tag a shipped version."
-            exit 1
-          fi
+  release:
+    name: Release ${{ matrix.target.tag }}
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      # One at a time, in plan order, so Scout Core ships before the plugins that use it.
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.plan.outputs.targets) }}
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: PHP syntax check
-        run: find "${{ steps.target.outputs.slug }}" -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find "${{ matrix.target.slug }}" -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Build the zip
         run: |
-          slug="${{ steps.target.outputs.slug }}"
+          slug="${{ matrix.target.slug }}"
           # Zip the plugin folder itself so it unpacks to wp-content/plugins/<slug>/.
           zip -r "${slug}.zip" "${slug}" -x '*.DS_Store' -x '*/.git/*' >/dev/null
           unzip -l "${slug}.zip"
@@ -109,20 +148,45 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          slug="${{ steps.target.outputs.slug }}"
-          version="${{ steps.target.outputs.version }}"
-          tag="${{ steps.target.outputs.tag }}"
+          slug="${{ matrix.target.slug }}"
+          version="${{ matrix.target.version }}"
+          tag="${{ matrix.target.tag }}"
 
           notes="$(sed -n "/^## \[\?${version}\]\?/,/^## /p" "${slug}/CHANGELOG.md" 2>/dev/null | sed '$d')"
           if [ -z "${notes}" ]; then
             notes="See ${slug}/CHANGELOG.md."
           fi
 
-          # --target creates the tag at this commit when it does not exist yet,
-          # which is what makes the dropdown run work without a pushed tag.
+          # --target creates the tag at this commit when it does not exist yet.
           gh release create "${tag}" "${slug}.zip" \
             --target "${GITHUB_SHA}" \
             --title "${slug} ${version}" \
             --notes "${notes}"
 
           echo "Published ${tag}"
+
+  feed:
+    # Sites read this one file to learn every version, instead of GitHub's API.
+    # The API allows 60 calls an hour per server address, and shared hosts
+    # (WP Engine) run out, which made sites show "Up to date" when they were
+    # not. Release downloads have no such limit.
+    name: Publish the version list
+    needs: [plan, release]
+    if: ${{ always() && needs.plan.result == 'success' && needs.release.result != 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build releases.json and attach it to the "feed" release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/${GH_REPO}/releases?per_page=100" \
+            | jq -s '[ .[][] | select(.tag_name != "feed") | {tag_name, draft, prerelease, body: ((.body // "")[0:1500]), assets: [ .assets[] | {name, browser_download_url} ]} ]' \
+            > releases.json
+          echo "$(jq length releases.json) releases listed."
+          if ! gh release view feed >/dev/null 2>&1; then
+            gh release create feed --prerelease --target "${GITHUB_SHA}" --title "Version list for Scout sites" \
+              --notes "Updated by the Release workflow after every release. Scout plugins read releases.json from here. Do not delete."
+          fi
+          gh release upload feed releases.json --clobber

@@ -50,7 +50,13 @@ final class Scout_Cards_Render {
 <meta property="og:title" content="<?php echo esc_attr( $meta['title'] ); ?>">
 <meta property="og:description" content="<?php echo esc_attr( $meta['desc'] ); ?>">
 <meta property="og:url" content="<?php echo esc_url( $meta['canonical'] ); ?>">
-<?php if ( ! empty( $meta['image'] ) ) : ?>
+<?php if ( ! empty( $meta['wide'] ) ) : ?>
+<meta property="og:image" content="<?php echo esc_url( $meta['wide']['url'] ); ?>">
+<meta property="og:image:width" content="<?php echo (int) $meta['wide']['width']; ?>">
+<meta property="og:image:height" content="<?php echo (int) $meta['wide']['height']; ?>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="<?php echo esc_url( $meta['wide']['url'] ); ?>">
+<?php elseif ( ! empty( $meta['image'] ) ) : ?>
 <meta property="og:image" content="<?php echo esc_url( $meta['image'] ); ?>">
 <?php endif; ?>
 <meta name="theme-color" content="<?php echo esc_attr( $bg ); ?>">
@@ -103,6 +109,52 @@ final class Scout_Cards_Render {
 		<?php
 	}
 
+	/**
+	 * A person's card led by their photo: the picture fills the top, their name and role sit
+	 * on it, then Save, Call / Text / Book, their intro and details. Ported from the Scout
+	 * Media theme's own team cards so every client's people get the same treatment.
+	 */
+	private static function hero_card( array $p, array $s, $tel, $photo ) {
+		$team = Scout_Cards_Settings::people()['team'];
+		$book = '';
+		if ( ! empty( $p['spot']['href'] ) ) {
+			$book = $p['spot']['href'];
+		} elseif ( ! empty( $team['spot']['href'] ) ) {
+			$book = $team['spot']['href'];
+		}
+		$host = preg_replace( '#^www\.#', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$logo = Scout_Cards_Settings::logo_url();
+		$role = $p['title'] ? $p['title'] : $s['name']; // the business name is already on the photo
+		?>
+  <section class="scc-hero-card" aria-labelledby="scc-name">
+    <div class="scc-hero">
+      <img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $p['name'] ); ?>" fetchpriority="high">
+      <a class="scc-hero-brand" href="<?php echo esc_url( Scout_Cards_Settings::card_url() ); ?>"><?php if ( $logo ) : ?><img src="<?php echo esc_url( $logo ); ?>" alt="" width="36" height="36"><?php endif; ?><span><?php echo esc_html( $s['name'] ); ?></span></a>
+      <div class="scc-hero-name">
+        <h1 id="scc-name"><?php echo esc_html( $p['name'] ); ?></h1>
+        <p class="scc-role"><?php echo esc_html( $role ); ?></p>
+      </div>
+    </div>
+    <div class="scc-hero-body">
+      <a class="scc-btn" href="<?php echo esc_url( $p['save'] ); ?>" download="<?php echo esc_attr( $p['file'] ); ?>.vcf"><?php echo self::icon( 'save' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span>Save my contact</span></a>
+      <div class="scc-actions scc-actions-3">
+        <?php if ( $tel ) : ?><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo self::icon( 'call' ); // phpcs:ignore ?><span>Call</span></a>
+        <a href="<?php echo esc_url( 'sms:' . $tel, array( 'sms' ) ); ?>"><?php echo self::icon( 'text' ); // phpcs:ignore ?><span>Text</span></a><?php endif; ?>
+        <?php if ( $book ) : ?><a href="<?php echo esc_url( $book ); ?>"><?php echo self::icon( 'book' ); // phpcs:ignore ?><span>Book</span></a>
+        <?php elseif ( $p['email'] ) : ?><a href="<?php echo esc_url( 'mailto:' . $p['email'], array( 'mailto' ) ); ?>"><?php echo self::icon( 'email' ); // phpcs:ignore ?><span>Email</span></a><?php endif; ?>
+      </div>
+      <?php if ( $p['intro'] ) : ?><p class="scc-intro"><?php echo esc_html( $p['intro'] ); ?></p><?php endif; ?>
+      <?php if ( $p['tags'] ) : ?><p class="scc-tags scc-hero-tags"><?php foreach ( $p['tags'] as $t ) { echo '<span>' . esc_html( $t ) . '</span>'; } ?></p><?php endif; ?>
+      <dl class="scc-details">
+        <?php if ( $tel ) : ?><div><dt>Phone</dt><dd><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo esc_html( $s['phone'] ); ?></a></dd></div><?php endif; ?>
+        <?php if ( $p['email'] ) : ?><div><dt>Email</dt><dd><a href="<?php echo esc_url( 'mailto:' . $p['email'], array( 'mailto' ) ); ?>"><?php echo esc_html( $p['email'] ); ?></a></dd></div><?php endif; ?>
+        <div><dt>Web</dt><dd><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( $host ); ?></a></dd></div>
+      </dl>
+    </div>
+  </section>
+		<?php
+	}
+
 	public static function icon( $name ) {
 		$paths = array(
 			'save'  => '<path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"/>',
@@ -112,6 +164,7 @@ final class Scout_Cards_Render {
 			'web'   => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
 			'share' => '<path d="M12 3v13M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>',
 			'arrow' => '<path d="M5 12h14M13 6l6 6-6 6"/>',
+			'book'  => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
 			'copy'  => '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
 		);
 		return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $paths[ $name ] . '</svg>';
@@ -145,6 +198,15 @@ final class Scout_Cards_Render {
 		}
 		$initial = function_exists( 'mb_substr' ) ? mb_substr( $p['name'], 0, 1 ) : substr( $p['name'], 0, 1 );
 		return '<div class="' . esc_attr( $class ) . ' scc-avatar-mark" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</div>';
+	}
+
+	/** The logo when one is set (links and share pages), else the usual avatar. */
+	private static function logo_or_avatar( array $p ) {
+		$logo = Scout_Cards_Settings::logo_url();
+		if ( $logo ) {
+			return '<img class="scc-avatar scc-logo" src="' . esc_url( $logo ) . '" width="112" height="112" alt="' . esc_attr( $p['name'] ) . '">';
+		}
+		return self::avatar( $p );
 	}
 
 	/**
@@ -192,10 +254,17 @@ final class Scout_Cards_Render {
 				'desc'      => $is_team ? 'Save ' . $s['name'] . ' to your phone, then reach the right person directly.' : $p['name'] . ( $p['title'] ? ', ' . $p['title'] : '' ) . ' at ' . $s['name'] . '. Save the contact, call, text, or email.',
 				'canonical' => $p['url'],
 				'image'     => $p['photo'],
+				'wide'      => $is_team ? Scout_Cards_Settings::share_image( 'card' ) : Scout_Cards_Settings::share_image( 'person', $p['share_id'] ?? 0 ),
 			),
 			'scc-card scc-' . $p['key']
 		);
+		// A person with a photo gets the full-photo card (the layout Scout's own team cards use).
+		$hero = ! $is_team && ! empty( $p['photo_id'] ) ? (string) wp_get_attachment_image_url( (int) $p['photo_id'], 'large' ) : '';
+		if ( $hero ) {
+			self::hero_card( $p, $s, $tel, $hero );
+		}
 		?>
+<?php if ( ! $hero ) : ?>
   <section class="scc-card" aria-labelledby="scc-name">
     <?php echo self::avatar( $p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
     <?php if ( ! $is_team ) : ?><p class="scc-eyebrow"><?php echo esc_html( $s['name'] ); ?></p><?php endif; ?>
@@ -217,6 +286,7 @@ final class Scout_Cards_Render {
       <?php if ( $place ) : ?><div><dt>Based in</dt><dd><?php echo esc_html( $place ); ?></dd></div><?php endif; ?>
     </dl>
   </section>
+<?php endif; ?>
 		<?php
 		$others = array_diff_key( $people, array( 'team' => 1 ) );
 		if ( ! $is_team ) {
@@ -264,6 +334,7 @@ final class Scout_Cards_Render {
 				'title'     => 'Share: ' . $p['name'],
 				'desc'      => 'Share ' . $p['name'] . "'s contact card.",
 				'canonical' => $p['share'],
+				'wide'      => 'team' === $p['key'] ? Scout_Cards_Settings::share_image( 'card' ) : Scout_Cards_Settings::share_image( 'person', $p['share_id'] ?? 0 ),
 				'app'       => $p['share'] . 'manifest/',
 				'short'     => 'team' === $p['key'] ? $s['name'] : $p['first'],
 			),
@@ -278,6 +349,7 @@ final class Scout_Cards_Render {
 		);
 		?>
   <section class="scc-card scc-share-card" aria-labelledby="scc-name">
+    <?php if ( 'team' === $p['key'] && Scout_Cards_Settings::logo_url() ) : ?><?php echo self::logo_or_avatar( $p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><?php endif; ?>
     <p class="scc-eyebrow">Scan to save my contact</p>
     <h1 id="scc-name"><?php echo esc_html( $p['name'] ); ?></h1>
     <div class="scc-qr-big" data-qr-url="<?php echo esc_url( $u ); ?>" role="img" aria-label="QR code that opens <?php echo esc_attr( $u ); ?>"></div>
@@ -303,12 +375,13 @@ final class Scout_Cards_Render {
 				'desc'      => $s['links_intro'],
 				'canonical' => home_url( '/' . $s['links_base'] . '/' ),
 				'image'     => $team['photo'],
+				'wide'      => Scout_Cards_Settings::share_image( 'links' ),
 			),
 			'scc-links'
 		);
 		?>
   <section class="scc-card" aria-labelledby="scc-name">
-    <?php echo self::avatar( $team ); // phpcs:ignore ?>
+    <?php echo self::logo_or_avatar( $team ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
     <h1 id="scc-name"><?php echo esc_html( $s['name'] ); ?></h1>
     <?php if ( $s['links_intro'] ) : ?><p class="scc-intro scc-intro-last"><?php echo esc_html( $s['links_intro'] ); ?></p><?php endif; ?>
   </section>

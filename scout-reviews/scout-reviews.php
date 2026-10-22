@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Reviews
  * Plugin URI:        https://scoutraleigh.com
  * Description:       Reviews from Google, Facebook, Yelp, Clutch, and anywhere else, kept in one place and shown on the site in a custom design. Every review links back to where it was posted, and the rating summary uses the real totals from each platform.
- * Version:           0.3.0
+ * Version:           0.5.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,15 +19,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_REVIEWS_VERSION', '0.3.0' );
+define( 'SCOUT_REVIEWS_VERSION', '0.5.3' );
 define( 'SCOUT_REVIEWS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_REVIEWS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_REVIEWS_FILE', __FILE__ );
 
 // Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
-require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-plugin-updater.php';
-Scout_Plugin_Updater::boot( __FILE__, 'scout-reviews' );
+// Loaded on plugins_loaded, after every plugin's own file, so older Scout
+// plugins that still declare the shared class at load time always go first.
+add_action(
+	'plugins_loaded',
+	static function () {
+		require_once __DIR__ . '/includes/class-scout-plugin-updater.php';
+		Scout_Plugin_Updater::boot( __DIR__ . '/scout-reviews.php', 'scout-reviews' );
+	},
+	0
+);
 
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-admin-ui.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-sources.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-post-type.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-settings.php';
@@ -38,16 +47,23 @@ require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-google-sync.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-google-admin.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-topics.php';
 require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-inbox.php';
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-brand.php';
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-requests.php';
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-notes.php';
+require_once SCOUT_REVIEWS_DIR . 'includes/class-scout-reviews-menu.php';
 
 add_action( 'init', array( 'Scout_Reviews_Post_Type', 'register' ) );
 add_action( 'init', array( 'Scout_Reviews_Render', 'register' ) );
 add_action( 'admin_init', array( 'Scout_Reviews_Settings', 'register' ) );
-add_action( 'admin_menu', array( 'Scout_Reviews_Settings', 'menu' ) );
+add_action( 'admin_menu', array( 'Scout_Reviews_Settings', 'menu' ), Scout_Reviews_Menu::PRIORITY + 3 );
 
 Scout_Reviews_Google_Sync::boot();
 Scout_Reviews_Topics::boot();
+Scout_Reviews_Requests::boot();
+Scout_Reviews_Notes::boot();
 
 if ( is_admin() ) {
+	Scout_Reviews_Menu::boot();
 	Scout_Reviews_Post_Type::admin_hooks();
 	Scout_Reviews_Google_Admin::boot();
 	Scout_Reviews_Inbox::boot();
@@ -60,6 +76,17 @@ register_activation_hook(
 	static function () {
 		if ( Scout_Reviews_Google::is_ready() ) {
 			Scout_Reviews_Google_Sync::schedule();
+		}
+		delete_option( Scout_Reviews_Requests::ROUTES ); // Re-add the /review/ address on the next load.
+	}
+);
+
+// The Scout admin look on the Review settings screen.
+add_action(
+	'admin_enqueue_scripts',
+	static function ( $hook ) {
+		if ( false !== strpos( (string) $hook, Scout_Reviews_Settings::PAGE ) ) {
+			Scout_Admin_UI::enqueue( SCOUT_REVIEWS_URL . 'assets/scout-admin.css' );
 		}
 	}
 );

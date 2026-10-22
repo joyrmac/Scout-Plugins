@@ -23,10 +23,19 @@ final class Scout_Cards_Admin {
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_CARDS_FILE ), array( __CLASS__, 'action_link' ) );
 	}
 
-	/** Parent menu: Scout Core's "scout" section when present, else our own "Site Build". */
+	/**
+	 * Parent menu: the site's existing Build section when there is one (the Scout
+	 * Media theme's Scout Build, Recon's Recon Build, or Scout Core's Scout menu),
+	 * else Site Build (created by the Scout Build hub, or by Cards itself).
+	 */
 	public static function parent() {
 		global $admin_page_hooks;
-		return isset( $admin_page_hooks['scout'] ) ? 'scout' : 'site-build';
+		foreach ( array( 'scout-build', 'recon-build', 'scout' ) as $slug ) {
+			if ( isset( $admin_page_hooks[ $slug ] ) ) {
+				return $slug;
+			}
+		}
+		return 'site-build';
 	}
 
 	public static function url( $args = array() ) {
@@ -34,13 +43,17 @@ final class Scout_Cards_Admin {
 	}
 
 	public static function menu() {
+		global $admin_page_hooks;
 		$parent = self::parent();
-		if ( 'site-build' === $parent ) {
+		// Create the Site Build section only when nothing else has: the Scout Build
+		// hub plugin (scout-build) registers it first and Cards nests inside it.
+		$own = 'site-build' === $parent && ! isset( $admin_page_hooks['site-build'] );
+		if ( $own ) {
 			add_menu_page( 'Site Build', 'Site Build', 'edit_pages', 'site-build', array( __CLASS__, 'render' ), 'dashicons-id-alt', 3 );
 			add_submenu_page( 'site-build', 'Cards & Links', 'Cards & Links', 'edit_pages', 'site-build', array( __CLASS__, 'render' ) );
 		}
 		add_submenu_page( $parent, 'Cards & Links', 'Cards & Links', 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
-		if ( 'site-build' === $parent ) {
+		if ( $own ) {
 			remove_submenu_page( 'site-build', self::SLUG ); // the section's first item already opens this screen
 		}
 	}
@@ -53,6 +66,7 @@ final class Scout_Cards_Admin {
 	public static function assets( $hook ) {
 		if ( false !== strpos( (string) $hook, self::SLUG ) || false !== strpos( (string) $hook, 'site-build' ) ) {
 			wp_enqueue_media();
+			Scout_Admin_UI::enqueue( SCOUT_CARDS_URL . 'assets/scout-admin.css' );
 		}
 	}
 
@@ -107,7 +121,7 @@ final class Scout_Cards_Admin {
 		$s      = Scout_Cards_Settings::get();
 		$n      = Scout_Cards_Settings::OPTION;
 		$people = Scout_Cards_Settings::people();
-		echo '<div class="wrap"><h1>Cards &amp; Links</h1>';
+		Scout_Admin_UI::open( 'Cards & Links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
 		}
@@ -141,6 +155,8 @@ final class Scout_Cards_Admin {
 		echo '<tr><th scope="row">Mode</th><td><label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="dark"' . checked( $s['mode'], 'dark', false ) . '> Dark</label> &nbsp; <label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="light"' . checked( $s['mode'], 'light', false ) . '> Light</label></td></tr>';
 		echo '<tr><th scope="row"><label for="scc-accent">Accent color</label></th><td><input type="color" id="scc-accent" name="' . esc_attr( $n ) . '[accent]" value="' . esc_attr( $s['accent'] ) . '"><p class="description">The brand color for buttons, links, and tags.</p></td></tr>';
 		self::field( "{$n}[font]", $s['font'], 'Font (optional)', 'text', 'Leave blank to use the site\'s own font. Or a CSS font list, e.g. "Hanken Grotesk", sans-serif.' );
+		self::photo( "{$n}[share_card_id]", (int) $s['share_card_id'], 'Share picture: card', 'Shows when someone texts or posts the card link. 1200 by 630 pixels.' );
+		self::photo( "{$n}[share_links_id]", (int) $s['share_links_id'], 'Share picture: links page', 'Shows when the links page is shared. Blank uses the card\'s.' );
 		echo '</table>';
 
 		echo '<h2>Business details</h2><table class="form-table" role="presentation">';
@@ -159,6 +175,7 @@ final class Scout_Cards_Admin {
 		self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
 		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
 		self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
+		self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Logo for the links and share pages', 'Optional. When the card shows a person, the links page and share page can show the logo instead.' );
 		self::spot_fields( $n, $s );
 		echo '</table>';
 
@@ -174,6 +191,7 @@ final class Scout_Cards_Admin {
 			self::field( "{$n}[people][$i][pick]", $p['pick'], 'Why talk to them (on the main card)', 'textarea' );
 			self::field( "{$n}[people][$i][tags]", $p['tags'], 'Tags', 'text', 'Comma separated, two to four short topics.' );
 			self::photo( "{$n}[people][$i][photo_id]", (int) $p['photo_id'], 'Photo', 'A square headshot works best.' );
+			self::photo( "{$n}[people][$i][share_id]", (int) ( $p['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this person\'s card link is texted or posted. 1200 by 630 pixels.' );
 			self::spot_fields( "{$n}[people][$i]", $p );
 			echo '</table></details>';
 		}
@@ -214,7 +232,7 @@ final class Scout_Cards_Admin {
 		});
 		</script>
 		<?php
-		echo '</div>';
+		Scout_Admin_UI::close();
 	}
 
 	public static function save() {
@@ -239,6 +257,9 @@ final class Scout_Cards_Admin {
 		$out['mode']         = 'light' === ( $in['mode'] ?? '' ) ? 'light' : 'dark';
 		$out['accent']       = sanitize_hex_color( $in['accent'] ?? '' ) ? sanitize_hex_color( $in['accent'] ) : '#0E8FE6';
 		$out['photo_id']     = absint( $in['photo_id'] ?? 0 );
+		$out['logo_id']        = absint( $in['logo_id'] ?? 0 );
+		$out['share_card_id']  = absint( $in['share_card_id'] ?? 0 );
+		$out['share_links_id'] = absint( $in['share_links_id'] ?? 0 );
 		$out                += self::clean_spot( $in );
 		$out['links_latest'] = empty( $in['links_latest'] ) ? 0 : 1;
 		$out['enable_cards'] = empty( $in['enable_cards'] ) ? 0 : 1;
@@ -260,6 +281,7 @@ final class Scout_Cards_Admin {
 				'pick'     => $area( $p['pick'] ?? '' ),
 				'tags'     => $txt( $p['tags'] ?? '' ),
 				'photo_id' => absint( $p['photo_id'] ?? 0 ),
+				'share_id' => absint( $p['share_id'] ?? 0 ),
 			) + self::clean_spot( $p );
 		}
 		$out['links'] = array();

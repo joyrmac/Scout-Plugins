@@ -1,5 +1,108 @@
 # Scout Core — Changelog
 
+## 1.4.0 (2026-10-22)
+
+- **Site Sync.** One updating system for every Scout site, replacing each theme's own setup and sync screen over time. A theme lists the copy it bundles in a `scout-sync.json` file (page content, page fields, SEO titles and descriptions, shared settings, site title and tagline). Scout compares each item three ways: the theme copy, what WordPress holds, and what was there at the last sync.
+  - **Untouched pages update on their own** after a theme update. Anything edited in WordPress is never overwritten without a person choosing to.
+  - **Scout → Site Sync** shows what is up to date, what is ready to update, and what was changed in WordPress, side by side, with "Keep the WordPress copy" or "Use the theme copy" for each. A kept copy stays kept, even when a later theme moves on.
+  - **Safe writes.** One sync at a time, an undo record saved before anything changes, every field checked again right before it is written, a page revision for content, and **Undo the last sync** that leaves anything edited since alone.
+  - **Images** in a manifest go into the media library once and are matched by file, so a re-run never duplicates them.
+  - A theme without the file gets the screen in status-only mode. Nothing changes on any site until its theme ships a manifest.
+  - Health check row and an admin notice when items need a look. `wp scout sync status` and `wp scout sync run --dry-run` for the command line.
+  - Companions can add items through the `scout_sync_manifest` filter and react through `scout_sync_applied`. Automatic runs can be turned off with `scout_sync_auto`.
+  - Started from the reviewed content update built for a client site in September 2026, generalized so every site shares it. Spec: `docs/site-sync-spec.md`.
+
+## 1.3.4 (2026-10-16)
+
+- **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
+
+## 1.3.3 (2026-10-15)
+
+- **Fix: review markup without stars.** Testimonials with no star rating were still marked up as `Review` items, and Google requires a rating on each one, so the Rich Results test showed them as invalid (Maravela's: 10 invalid review snippets). Only rated testimonials are marked up now; unrated ones still show on the page. The aggregate rating is unchanged (it only ever counted rated ones).
+
+## 1.3.2 (2026-10-14)
+
+- **Fix: two sets of share tags on themes that write their own.** Scout Media and Recon themes print their own title, description, canonical and Open Graph tags, and Scout Core printed a second set above them. Facebook and LinkedIn read the first `og:image`, so links showed the site icon instead of the page's share card. The SEO head now steps aside when the theme handles it (`scout_head()`, `recon_head()`, or `add_theme_support( 'scout-seo-head' )`). Filter `scout_core_seo_head` to force it either way.
+
+## 1.3.1 (2026-10-13)
+
+- **Fix: missed updates on shared hosts.** Version checks read one version list the Release workflow publishes as a plain download, instead of GitHub's API, which allows only 60 calls an hour per server address and ran out on WP Engine. The API stays as a fallback.
+
+## 1.3.0 (2026-10-13)
+
+- **Every page carries its dates.** Single posts and pages get a `WebPage` node in the schema graph with `datePublished` and `dateModified`, linked to the site (`isPartOf`) and the business (`about`). Search engines and AI tools can see how fresh a page is. It steps aside when a companion already describes the page (Scout Team's `ProfilePage`). Filter `scout_schema_webpage` to false to turn it off.
+
+## 1.2.7 (2026-10-13)
+
+- **No dead ends in the Scout menu.** WordPress's own list screens inside the shortened Scout menu (the Reviews list, Chat questions, team members, case results) now show the same tabs as every Scout screen, so Review inbox, Ask for reviews and Review settings are one tap away from the Reviews list. Shared admin kit 1.4.0.
+
+## 1.2.6 (2026-10-13)
+
+- **Fix: newer versions were being missed.** GitHub lists releases by tag name as text, so "0.4.9" came before "0.4.11" and the updater offered the wrong one (Scout Reviews stopped at 0.4.9). It now compares version numbers and reads up to three pages of releases instead of one.
+
+## 1.2.5 (2026-10-13)
+
+- **Fix: no more "Bad gateway" from update checks.** Every Scout plugin used to download the same release list from GitHub on its own, one after another (up to 10 seconds each). When those caches expired, one dashboard page could wait on all of them, past WP Engine's 60-second limit, and show a 502 "Bad gateway". The plugins now share one download, cached for six hours; a failed download is retried after 15 minutes instead of hiding updates for six hours.
+
+## 1.2.4 (2026-10-13)
+
+- **Fix: Business info and SEO now sit inside the theme's own Build menu.** On a site whose theme has a Scout Build or Recon Build menu, Scout Core made a second, separate "Scout" menu, so its screens were missing from the Search tab. They now join the theme's menu (the screen address stays `admin.php?page=scout`, so every link still works). Sites without a Build menu keep the Scout menu as before.
+
+## 1.2.3 (2026-10-13)
+
+- **Shorter Scout sidebar.** The shared admin kit (1.3.0) shows a long Scout menu as one sidebar link per group (Home, Search, Website, Business, Reviews, Chat; Business is new and holds hours, team, case results, cards, call buttons, booking and proposals), in the same order as the tabs on each screen. Every screen still works and is one tap away in the tabs; only the sidebar got shorter. Count bubbles (like unanswered chat questions) carry over to the group's link.
+
+## 1.2.2 (2026-10-13)
+
+- **Cleaner Scout menu bar.** The shared admin kit (1.2.0) sorts the screens into five groups (Overview, Search, Website, Reviews, Chat). The open group's screens show as tabs underneath, so a site with many features no longer gets a wall of links, and on a phone the bar fits on one line.
+
+## 1.2.1 (2026-10-13)
+
+- **Fix: the section nav was unstyled on theme screens.** A theme carrying an older copy of the admin kit loaded its old stylesheet. The kit (1.1.1) now always loads the stylesheet that matches its own code.
+
+## 1.2.0 (2026-10-12)
+
+- **Fits the Scout Build hub.** With Scout Build installed, the Scout menu opens on Business info and SEO as two plain screens, and the search checks move into the hub's Site health. Without the hub, Search health stays as the first screen.
+- **No more second tab bar.** The Dashboard / Business / SEO tabs are replaced by the shared section nav.
+- **Same cards as the hub.** Search health uses the shared check cards, with pages missing a description listed by name.
+- The Scout menu sits right under Dashboard with the cerulean bolt.
+- **One section nav on every Scout screen.** The shared admin kit (1.1.0) prints the same row of pills on every screen in the Scout menu (Features, Site health, Business info, SEO, AI search, Image optimizer and so on), read live from the sidebar, so the screens read as one product and a new feature appears in the row by itself.
+
+## 1.1.4 (2026-10-12)
+
+- **Page descriptions names the pages.** When pages or posts have no written
+  description, the dashboard card now lists each one by title with a link
+  straight to its editor (up to 10, then a link to all pages), instead of a
+  count and a generic "Review pages" link.
+
+## 1.1.3 (2026-10-12)
+
+- **Sitemap guard.** If robots.txt ends up with no Sitemap line (for example
+  an SEO plugin switched WordPress's sitemap off), Scout Core adds the one that
+  works. A daily background check finds it, so serving robots.txt never waits.
+- **One schema graph per page.** Once the business name is filled in, Scout's
+  graph stands alone: Yoast, Rank Math, All in One SEO and SEOPress are told not
+  to print their own JSON-LD, so Google never sees two businesses. Their titles
+  and sitemaps are untouched. Filter `scout_schema_take_over` to false to keep
+  theirs.
+
+## 1.1.2 (2026-10-12)
+
+- **A new look for every settings screen.** The plugin's screens now share
+  one Scout design: a clear page header with the section name, settings
+  grouped into rounded boxes, pill buttons, and a short sign-off footer with
+  how to reach us. On client sites the header reads "Site Build" instead of
+  "Scout". Nothing about how the settings work changed.
+
+## 1.1.1 (2026-10-12)
+
+- **Fix: a site crash when two Scout plugins load together.** Every Scout
+  plugin carries the shared updater. On hosts that cache compiled PHP
+  (OPcache, as on WP Engine), a copy could be declared the moment its file
+  loaded, so a second plugin loading first crashed the site with "Cannot declare
+  class Scout_Plugin_Updater". The class now sits inside a conditional, and the
+  updater loads on `plugins_loaded`, after every plugin's own file.
+
 ## 1.1.0
 Pages become forms. Additive, nothing existing changes shape.
 

@@ -35,7 +35,7 @@ final class Scout_Schema {
 			return;
 		}
 
-		$graph = apply_filters( 'scout_schema_graph', self::build_graph() );
+		$graph = self::add_webpage( (array) apply_filters( 'scout_schema_graph', self::build_graph() ) );
 		if ( empty( $graph ) ) {
 			return;
 		}
@@ -48,6 +48,47 @@ final class Scout_Schema {
 		echo "\n<script type=\"application/ld+json\">"
 			. wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )
 			. "</script>\n";
+	}
+
+	/**
+	 * Add a WebPage node with published and updated dates on single posts and
+	 * pages. Runs after companions extend the graph, and steps aside when one
+	 * already describes the page (Scout Team's ProfilePage, for example).
+	 *
+	 * @param array<string,array> $graph
+	 * @return array<string,array>
+	 */
+	public static function add_webpage( array $graph ) {
+		if ( ! is_singular() || ! apply_filters( 'scout_schema_webpage', true ) ) {
+			return $graph;
+		}
+		$page_types = array( 'WebPage', 'ProfilePage', 'AboutPage', 'ContactPage', 'CollectionPage', 'ItemPage', 'FAQPage', 'QAPage' );
+		foreach ( $graph as $node ) {
+			$types = isset( $node['@type'] ) ? (array) $node['@type'] : array();
+			if ( array_intersect( $types, $page_types ) ) {
+				return $graph;
+			}
+		}
+		$id = get_queried_object_id();
+		if ( ! $id ) {
+			return $graph;
+		}
+		$url  = get_permalink( $id );
+		$node = array(
+			'@type'         => 'WebPage',
+			'@id'           => $url . '#webpage',
+			'url'           => $url,
+			'name'          => wp_strip_all_tags( get_the_title( $id ) ),
+			'isPartOf'      => array( '@id' => home_url( '/#website' ) ),
+			'about'         => array( '@id' => home_url( '/#business' ) ),
+			'datePublished' => get_the_date( 'c', $id ),
+			'dateModified'  => get_the_modified_date( 'c', $id ),
+		);
+		if ( has_excerpt( $id ) ) {
+			$node['description'] = wp_strip_all_tags( get_the_excerpt( $id ) );
+		}
+		$graph['webpage'] = $node;
+		return $graph;
 	}
 
 	/**
@@ -201,7 +242,10 @@ final class Scout_Schema {
 				$ratings[] = (float) $rating;
 			}
 
-			if ( count( $reviews ) >= $limit ) {
+			// Google's review snippet needs a star rating on every Review. Testimonials
+			// without one stay on the page but are left out of the markup, which
+			// Maravela's Rich Results test flagged as 10 invalid items (Oct 15).
+			if ( count( $reviews ) >= $limit || ! is_numeric( $rating ) ) {
 				continue;
 			}
 
@@ -219,13 +263,11 @@ final class Scout_Schema {
 			if ( '' !== $body ) {
 				$node['reviewBody'] = $body;
 			}
-			if ( is_numeric( $rating ) ) {
-				$node['reviewRating'] = array(
-					'@type'       => 'Rating',
-					'ratingValue' => (string) ( 0 + $rating ),
-					'bestRating'  => '5',
-				);
-			}
+			$node['reviewRating'] = array(
+				'@type'       => 'Rating',
+				'ratingValue' => (string) ( 0 + $rating ),
+				'bestRating'  => '5',
+			);
 			$date = get_post_meta( $post->ID, scout_core_meta_key( 'date' ), true );
 			if ( '' !== $date ) {
 				$node['datePublished'] = $date;

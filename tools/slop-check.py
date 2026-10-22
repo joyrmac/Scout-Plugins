@@ -27,8 +27,10 @@ SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", "__pycache__"}
 EMOJI_RE = re.compile(
     "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F000-\U0001F2FF\U00002B50\U00002B55\U0000FE0F]"
 )
-# Symbols that do real UI work: star ratings, check and cross marks.
-EMOJI_OK = set("\u2605\u2606\u2713\u2714\u2717\u2718")
+# Symbols that do real UI work: star ratings, check and cross marks, the four-point star.
+EMOJI_OK = set("\u2605\u2606\u2713\u2714\u2717\u2718\u2726")
+# Tests feed emoji in as input data on purpose.
+TEST_DIRS = {"test", "tests", "__tests__"}
 COMMENT_RE = re.compile(r"^\s*(//|#(?![!\[{])|/\*|\*(?!/)|<!--)")
 FILLER_RE = re.compile(
     r"\b(elegant(ly)?|seamless(ly)?|robust|comprehensive|leverag(e|es|ing)|cutting[- ]edge|"
@@ -45,7 +47,12 @@ DEBUG_RES = {
 }
 # Dashed section dividers are a normal habit; ===, ### and *** walls are not.
 BANNER_RE = re.compile(r"^\s*(//|#|/\*|\*)\s*[=*#]{8,}")
-STRAY_FILE_RE = re.compile(r"( copy( \d+)?|[-_]old|[-_]new|[-_]backup|[-_]bak|[-_]final|[-_]v\d+)(\.[^/]+)?$|\.(bak|orig|tmp)$", re.I)
+# Version numbers in a name (ledger_v1.0, archive-v1) are deliberate, so they pass.
+STRAY_FILE_RE = re.compile(r"( copy( \d+)?|[-_]old|[-_]backup|[-_]bak|[-_]final)(\.[^/]+)?$|\.(bak|orig|tmp)$", re.I)
+# Command-line scripts print on purpose. Only code that ships to a browser or a
+# WordPress page is checked for leftover debug output.
+CLI_DIRS = {"scripts", "tools", "bin", "evals", "test", "tests"}
+CLI_STEMS = {"build", "log", "logger", "cli"}
 AI_COMMIT_RE = re.compile(
     r"\b(claude|anthropic|chatgpt|gpt-?\d|openai|copilot|gemini|opus|sonnet|haiku|ai[- ]generated|generated (with|by))\b|claude\.(ai|com)",
     re.I,
@@ -75,10 +82,12 @@ def check_file(path, report):
     except (UnicodeDecodeError, OSError):
         return
     debug_re = DEBUG_RES.get(path.suffix.lower())
+    if CLI_DIRS & set(path.parts) or path.stem.lower() in CLI_STEMS or lines[:1] and lines[0].startswith("#!"):
+        debug_re = None
     for n, line in enumerate(lines, 1):
         if "slop-ok" in line:
             continue
-        if any(EMOJI_RE.match(c) and c not in EMOJI_OK for c in line):
+        if not TEST_DIRS & set(path.parts) and any(EMOJI_RE.match(c) and c not in EMOJI_OK for c in line):
             report("FAIL", path, n, "emoji in code or output. Use plain text")
         if PLACEHOLDER_RE.search(line):
             report("FAIL", path, n, f"placeholder left in: {PLACEHOLDER_RE.search(line).group(0)!r}")
