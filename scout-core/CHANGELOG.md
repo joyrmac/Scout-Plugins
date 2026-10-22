@@ -1,5 +1,20 @@
 # Scout Core — Changelog
 
+## Unreleased (Site Sync phase 1)
+Not released and not on any site. Additive: a theme without `scout-sync.json`
+sees one status line and nothing changes.
+
+- **Site Sync tab** under Scout. Compares each page with the copy bundled in
+  the theme by content hash and a stored base, sorts it into in sync, update
+  ready, edited in WordPress, both changed, or not tracked, and offers Sync
+  safe pages, Compare, Take theme copy, Keep WordPress copy, and Undo.
+- **Never overwrites a hand edit without a click.** Every write saves the old
+  body first, so Undo puts it back.
+- **Starter records, search descriptions, site identity** from the theme's
+  manifest. Each only adds what is missing.
+- **Dashboard card** "Page content" when the theme ships a manifest.
+- Spec and as-built notes: `docs/site-sync-spec.md`.
+
 ## 1.1.0
 Pages become forms. Additive, nothing existing changes shape.
 

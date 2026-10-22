@@ -57,6 +57,11 @@ require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-sitemap.php';
 require_once SCOUT_CORE_DIR . 'includes/seo/seo-settings.php';
 require_once SCOUT_CORE_DIR . 'includes/admin.php';
 
+/* ---- Site Sync: page freshness against the theme's scout-sync.json ---- */
+require_once SCOUT_CORE_DIR . 'includes/sync/class-sync-manifest.php';
+require_once SCOUT_CORE_DIR . 'includes/sync/class-sync-engine.php';
+require_once SCOUT_CORE_DIR . 'includes/sync/class-sync-admin.php';
+
 /*
  * Self-updating from the Scout Plugins releases. Replaces the earlier hosted
  * manifest tracker, which needed a JSON file hosted somewhere and never got
@@ -103,8 +108,9 @@ Scout_SEO_Head::init();
 Scout_SEO_Box::init();
 Scout_SEO_Sitemap::init();
 
-/* The one Scout menu (Dashboard / Business / SEO). */
+/* The one Scout menu (Dashboard / Business / SEO / Site Sync). */
 Scout_Core_Admin::init();
+Scout_Core_Sync_Admin::init();
 
 /*
  * On activation register the types once and flush rewrite rules so archive/slug
