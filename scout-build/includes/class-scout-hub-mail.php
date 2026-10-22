@@ -331,6 +331,7 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 		$to_customer = 'field' === ( $notification['toType'] ?? '' );
 		$buttons     = array();
 		if ( ! $to_customer && ( preg_match( '#href=["\']tel:([+0-9().\s-]{7,})["\']#i', $message, $m ) || preg_match( '#(\(?\d{3}\)?[\s.-]?\d{3}[\s.-]\d{4})#', wp_strip_all_tags( $message ), $m ) ) ) {
+			$phone  = trim( $m[1] );
 			$digits = preg_replace( '/[^0-9+]/', '', $m[1] );
 			if ( strlen( ltrim( $digits, '+' ) ) >= 10 ) {
 				$buttons[] = array( __( 'Call', 'scout-build' ), 'tel:' . $digits );
@@ -346,7 +347,13 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 			? sprintf( __( 'Sent from a form on %s. Website by Scout Media & Consulting.', 'scout-build' ), (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) )
 			/* translators: %s: site address */
 			: sprintf( __( 'Sent from a form on %s.', 'scout-build' ), (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
-		$email['message'] = self::card( $site, wp_specialchars_decode( (string) ( $email['subject'] ?? '' ), ENT_QUOTES ), wp_kses_post( $message ), $buttons, $footer );
+		$title = wp_specialchars_decode( (string) ( $email['subject'] ?? '' ), ENT_QUOTES );
+		// The number already has its Call button, and mail apps turn a number in
+		// the headline into a big link, so the headline drops it.
+		if ( isset( $phone ) && '' !== $phone ) {
+			$title = trim( preg_replace( '/\s*[(\[]?\s*' . preg_quote( $phone, '/' ) . '\s*[)\]]?/', '', $title ), " \t-:|," ) ?: $title;
+		}
+		$email['message'] = self::card( $site, $title, wp_kses_post( $message ), $buttons, $footer );
 		return $email;
 	}
 
