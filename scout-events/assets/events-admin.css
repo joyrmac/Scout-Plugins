@@ -75,11 +75,6 @@
 .se-report-head { font-weight: 600; }
 .se-report ul { margin: 8px 0 0 18px; list-style: disc; }
 .se-report li { margin: 0 0 4px; font-size: 13px; }
-.se-hubtabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; }
-.se-hubtabs a { padding: 8px 14px; border-radius: 980px; background: #fff; border: 1px solid var(--se-line); color: var(--se-text); text-decoration: none; font-size: 13px; font-weight: 500; }
-.se-hubtabs a:hover { border-color: rgba(14, 143, 230, .45); }
-.se-hubtabs a.is-active { background: #0A78C2; border-color: #0A78C2; color: #fff; }
-.se-hubtabs a:focus-visible { outline: 2px solid var(--se-accent-text); outline-offset: 2px; }
 .se-admin > .sh-box + .sh-box { margin-top: 18px; }
 .se-needs { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
 .se-needs li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--se-line); margin: 0; }

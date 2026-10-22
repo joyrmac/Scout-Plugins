@@ -1,11 +1,9 @@
 <?php
 /**
- * Scout Build -> Events: what's coming up, what each event still needs, how
- * to place the lists on a page, and the few site-wide settings.
- *
- * The Events, Sessions and Speakers lists move into the Build menu, so the
- * sidebar keeps one Scout section. Anyone who can edit posts sees the
- * overview; only administrators change the settings.
+ * The Events hub: its own sidebar item with the Scout bolt, holding the
+ * Overview (numbers, Needs you, Coming up), the Events, Sessions and Speakers
+ * lists, the spreadsheet import, and settings. Anyone who can edit posts sees
+ * all of it; only administrators change the settings.
  *
  * @package Scout_Events
  */
@@ -25,23 +23,33 @@ final class Scout_Events_Admin {
 		add_action( 'admin_post_scout_events_settings', array( __CLASS__, 'save_settings' ) );
 		add_action( 'admin_post_scout_events_import', array( __CLASS__, 'import' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_EVENTS_FILE ), array( __CLASS__, 'action_link' ) );
-		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 2 );
 	}
 
-	/** Nest under the site's Build section; fall back to Settings. */
+	/**
+	 * Events is a tool the owner uses every week, so it has its own place in
+	 * the sidebar with the Scout bolt (Joy, 2026-10-22), instead of sitting
+	 * inside the Build menu with the site's settings. Partner sites
+	 * (SCOUT_HUB_BRAND false) get a plain calendar icon.
+	 */
 	public static function parent(): string {
-		global $admin_page_hooks;
-		foreach ( array( 'scout-build', 'recon-build', 'site-build', 'scout' ) as $slug ) {
-			if ( isset( $admin_page_hooks[ $slug ] ) ) {
-				return $slug;
-			}
-		}
-		return 'options-general.php';
+		return self::SLUG;
 	}
 
+	/** The hub, or one of its views ('import', 'settings'). */
 	public static function url( array $args = array() ): string {
-		$base = 'options-general.php' === self::parent() ? admin_url( 'options-general.php?page=' . self::SLUG ) : admin_url( 'admin.php?page=' . self::SLUG );
+		$view = $args['view'] ?? '';
+		unset( $args['view'] );
+		$base = admin_url( 'admin.php?page=' . self::SLUG . ( in_array( $view, array( 'import', 'settings' ), true ) ? '-' . $view : '' ) );
 		return $args ? add_query_arg( $args, $base ) : $base;
+	}
+
+	/** The bolt, drawn from the brand's clip-path, as a menu icon WordPress can recolor. */
+	private static function icon(): string {
+		if ( ! Scout_Admin_UI::branded() ) {
+			return 'dashicons-calendar-alt';
+		}
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon fill="black" points="11.6,0 0,11.6 8.4,11.6 6,20 20,8 10.8,8"/></svg>';
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- menu icon data URI.
 	}
 
 	/**
@@ -57,10 +65,8 @@ final class Scout_Events_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Events', 'scout-events' ), __( 'Events', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
-		if ( 'options-general.php' === self::parent() ) {
-			return;
-		}
+		add_menu_page( __( 'Scout Events', 'scout-events' ), __( 'Events', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ), self::icon(), 25 );
+		add_submenu_page( self::SLUG, __( 'Scout Events', 'scout-events' ), __( 'Overview', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
 		global $submenu;
 		$lists = array(
 			Scout_Events::EVENT   => __( 'All events', 'scout-events' ),
@@ -71,28 +77,23 @@ final class Scout_Events_Admin {
 			$list = 'edit.php?post_type=' . $type;
 			remove_menu_page( $list );
 			unset( $submenu[ $list ] ); // Its leftover sub-list would otherwise claim the screen.
-			add_submenu_page( self::parent(), $label, $label, 'edit_posts', $list );
+			add_submenu_page( self::SLUG, $label, $label, 'edit_posts', $list );
 		}
+		add_submenu_page( self::SLUG, __( 'Bring in a spreadsheet', 'scout-events' ), __( 'Import', 'scout-events' ), 'edit_posts', self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
+		add_submenu_page( self::SLUG, __( 'Showing events and settings', 'scout-events' ), __( 'Settings', 'scout-events' ), 'edit_posts', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
+		// Tickets, members and applications add their screens here, before Import.
+		do_action( 'scout_events_menu', self::SLUG );
 	}
 
-	/** Keep the Build menu open while editing an event, session or speaker. */
+	/** Keep the Events menu open while editing an event, session or speaker. */
 	public static function highlight( $file ) {
 		global $submenu_file;
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( 'options-general.php' !== self::parent() && $screen && in_array( $screen->post_type, Scout_Events::post_types(), true ) && empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $screen && in_array( $screen->post_type, Scout_Events::post_types(), true ) && empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$submenu_file = 'edit.php?post_type=' . $screen->post_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			return self::parent();
+			return self::SLUG;
 		}
 		return $file;
-	}
-
-	/** Events and its lists sit with the other business screens. */
-	public static function nav_group( $group, $slug ) {
-		$slug = (string) $slug;
-		if ( self::SLUG === $slug || false !== strpos( $slug, 'post_type=scout_event' ) || false !== strpos( $slug, 'post_type=scout_session' ) || false !== strpos( $slug, 'post_type=scout_speaker' ) ) {
-			return 'business';
-		}
-		return $group;
 	}
 
 	public static function assets( string $hook ): void {
@@ -222,22 +223,6 @@ final class Scout_Events_Admin {
 	}
 
 	/**
-	 * The hub's tabs. Other Scout features (tickets, members, applications)
-	 * add theirs with the scout_events_hub_tabs filter: key => [label, url].
-	 */
-	private static function tabs(): array {
-		$tabs = array(
-			'overview' => array( __( 'Overview', 'scout-events' ), self::url() ),
-			'events'   => array( __( 'All events', 'scout-events' ), admin_url( 'edit.php?post_type=' . Scout_Events::EVENT ) ),
-			'sessions' => array( __( 'Sessions', 'scout-events' ), admin_url( 'edit.php?post_type=' . Scout_Events::SESSION ) ),
-			'speakers' => array( __( 'Speakers', 'scout-events' ), admin_url( 'edit.php?post_type=' . Scout_Events::SPEAKER ) ),
-			'import'   => array( __( 'Bring in a spreadsheet', 'scout-events' ), self::url( array( 'view' => 'import' ) ) ),
-			'settings' => array( __( 'Showing events and settings', 'scout-events' ), self::url( array( 'view' => 'settings' ) ) ),
-		);
-		return (array) apply_filters( 'scout_events_hub_tabs', $tabs );
-	}
-
-	/**
 	 * Everything waiting on a person, most useful first. Other Scout
 	 * features add theirs with the scout_events_needs_you filter.
 	 *
@@ -329,11 +314,18 @@ final class Scout_Events_Admin {
 		return (array) apply_filters( 'scout_events_needs_you', $items );
 	}
 
-	public static function render(): void {
+	public static function render_import(): void {
+		self::render( 'import' );
+	}
+
+	public static function render_settings(): void {
+		self::render( 'settings' );
+	}
+
+	public static function render( string $view = 'overview' ): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
-		$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : 'overview'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which tab to show.
 		$view = in_array( $view, array( 'overview', 'import', 'settings' ), true ) ? $view : 'overview';
 
 		Scout_Admin_UI::open(
@@ -343,12 +335,6 @@ final class Scout_Events_Admin {
 		);
 		self::message();
 		echo '<div class="se-admin">';
-		echo '<nav class="se-hubtabs" aria-label="' . esc_attr__( 'Events sections', 'scout-events' ) . '">';
-		foreach ( self::tabs() as $key => $tab ) {
-			$on = $key === $view;
-			printf( '<a href="%1$s"%2$s>%3$s</a>', esc_url( $tab[1] ), $on ? ' class="is-active" aria-current="page"' : '', esc_html( $tab[0] ) );
-		}
-		echo '</nav>';
 		if ( 'import' === $view ) {
 			self::view_import();
 		} elseif ( 'settings' === $view ) {

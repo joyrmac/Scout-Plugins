@@ -12,14 +12,15 @@ this plugin stays the content and display layer in front of it.
 
 ## Where it lives
 
-Scout Build (or Site Build) → **Events** is the hub. Its Overview shows the
-numbers, a **Needs you** list of everything waiting on a person, and Coming
-up; tabs lead to every list, the spreadsheet import, and settings. Other Scout
-features add tabs and Needs you items with the `scout_events_hub_tabs` and
-`scout_events_needs_you` filters. **All events**, **Sessions** and **Speakers** sit in the
-same menu. Falls back to Settings → Events on a site without a Build section.
-Anyone who can edit posts can manage events; only administrators change
-settings.
+**Events** has its own item in the dashboard sidebar, marked with the Scout
+bolt (a plain calendar icon on partner sites with `SCOUT_HUB_BRAND` false), so
+it reads as Scout's and sits apart from the site's Build settings. Under it:
+**Overview** (the numbers, a **Needs you** list of everything waiting on a
+person, and Coming up), **All events**, **Sessions**, **Speakers**, **Import**
+and **Settings**. Other Scout features add their screens to this menu on the
+`scout_events_menu` action and their items to Needs you with the
+`scout_events_needs_you` filter. Anyone who can edit posts can manage events;
+only administrators change settings.
 
 ## The content
 
