@@ -6,8 +6,6 @@
  *  - Business: the NAP + identity form (Scout_Core_Business).
  *  - SEO: site-wide SEO defaults (Scout_Core_SEO_Settings). Per-page SEO stays
  *    in the Scout SEO box on each page.
- *  - Site Sync: page freshness against the theme's bundled copy
- *    (Scout_Core_Sync_Admin).
  *
  * @package Scout_Core
  */
@@ -30,7 +28,6 @@ final class Scout_Core_Admin {
 		add_submenu_page( 'scout', 'Scout Dashboard', 'Dashboard', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
 		add_submenu_page( 'scout', 'Business identity', 'Business', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
 		add_submenu_page( 'scout', 'SEO defaults', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
-		add_submenu_page( 'scout', 'Site Sync', 'Site Sync', 'manage_options', 'scout&tab=sync', array( __CLASS__, 'render' ) );
 		foreach ( self::groups() as $slug => $group ) {
 			add_submenu_page( 'scout', $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
 		}
@@ -43,7 +40,7 @@ final class Scout_Core_Admin {
 
 	/** @return array<string,string> tab => label */
 	private static function tabs() {
-		$tabs = array( 'dashboard' => 'Dashboard', 'business' => 'Business', 'seo' => 'SEO', 'sync' => 'Site Sync' );
+		$tabs = array( 'dashboard' => 'Dashboard', 'business' => 'Business', 'seo' => 'SEO' );
 		foreach ( self::groups() as $slug => $group ) {
 			$tabs[ $slug ] = $group['label'];
 		}
@@ -76,8 +73,6 @@ final class Scout_Core_Admin {
 			self::tab_business();
 		} elseif ( 'seo' === $tab ) {
 			self::tab_seo();
-		} elseif ( 'sync' === $tab ) {
-			Scout_Core_Sync_Admin::render();
 		} elseif ( array_key_exists( $tab, self::groups() ) ) {
 			Scout_Core_Settings_Groups::render_tab( $tab );
 		} else {

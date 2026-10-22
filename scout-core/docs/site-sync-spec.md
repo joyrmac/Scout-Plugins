@@ -3,8 +3,7 @@
 One updating system for every Scout site. Today each theme carries its own
 homegrown version of the same job, and this module replaces all of them with
 one shared engine in `scout-core` plus a small declarative contract the theme
-ships. Status: **phase 1 built, not released** (2026-10-22, see "Phase 1 as
-built" below). Owner: Sean and Joy.
+ships. Status: spec ratified, not yet built. Owner: Sean and Joy.
 
 ---
 
@@ -149,45 +148,3 @@ WordPress-side edit.
 - Per-client extras (Maravela's category backfill, one-off fixups) live in that
   client's companion plugin as extra dashboard actions, registered through a
   scout-core hook, so the shared engine never grows client-specific code.
-
-## Phase 1 as built (2026-10-22, unreleased)
-
-Code: `includes/sync/` (manifest reader, engine, the Scout > Site Sync tab).
-Manual only: nothing runs on a theme update yet (that is phase 2).
-
-- **States** match the table above, plus: *missing* (create it), *matches, not
-  tracked yet* (start tracking, no write), *theme copy missing* (manifest
-  names a file the theme does not ship).
-- **Sync safe pages** creates missing pages, writes stale pages, and starts
-  tracking identical ones. Edited, conflict, and untracked-but-different
-  pages are never touched by it.
-- **Per page:** Compare (side-by-side diff, changed lines only), Take theme
-  copy, Keep WordPress copy, Undo last sync. Every write saves the old body
-  first (`_scout_sync_snapshot`), so Undo is one click.
-- **Keep WordPress copy** marks the base `kept`. Until the repo catches up,
-  any later theme copy for that page is a conflict, never an auto-sync, so a
-  kept edit cannot be overwritten silently on the next update.
-- **Identical text is always in sync**, whatever the base says; Sync safe
-  pages then refreshes the base so the next change compares against today.
-- **The db hash is read back after each write**, so anything WordPress
-  changes on save (filters, kses) never reads as a hand edit.
-- **Seeds** rows: `title` (required), `content`, `excerpt`, `fields` (Scout
-  field key => value). Skips any title already used by that type.
-- **SEO** file: `{ "slug": { "title": "...", "description": "..." } }`.
-  Fills blanks only; anything written in a Scout SEO box wins.
-- **Identity:** title and tagline set to the theme's; front and posts page
-  pointed at manifest pages; logo and icon added only when the site has none,
-  imported to the media library once.
-- **Safety:** every source path must resolve inside the theme folder; a
-  traversal or missing file becomes an error row, never a read. All actions
-  are `manage_options`, nonce-checked, and post-redirect-get.
-- **Status only:** a theme with no manifest shows one line and changes nothing.
-- **Dashboard card:** "Page content" joins the Scout health check when the
-  theme ships a manifest.
-
-Tested 2026-10-22 on WordPress 7.1.3 against a fixture built from Hair by
-Patrick's 20 real pages, 14 testimonials and 41 FAQs (52 checks, all pass).
-
-**Before the first release:** decide the release version (1.2.0), write the
-HBP manifest generator in the HBP repo, and add the theme's `scout-sync.json`
-there. The HBP theme keeps its own dashboard until the pilot proves out.
