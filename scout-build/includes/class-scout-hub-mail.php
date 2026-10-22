@@ -412,6 +412,14 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 		return array_slice( $out, 0, 16, true );
 	}
 
+	/**
+	 * The site's brand color for other Scout plugins (the cookie notice uses
+	 * it): the Email screen's pick, else the detected brand color.
+	 */
+	public static function brand_color(): string {
+		return self::accent();
+	}
+
 	/** The email color: the one picked on this screen, else the detected brand color. */
 	private static function accent(): string {
 		$picked = self::settings()['accent'];
