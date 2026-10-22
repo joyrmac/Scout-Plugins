@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.5.2 (2026-10-22)
+
+- **Events in the top toolbar**, right after Scout and with the same bolt (Joy asked). A small count shows how many things need you; the menu opens Overview, Needs you, Add event, Add session and Add speaker, from the dashboard and from the site.
+
 ## 0.5.1 (2026-10-22)
 
 - Fix: a speaker page no longer says the same thing twice when the full bio opens with the short bio (seven 2026 Bliss Boogie presenters, Kai among them). The short bio still feeds cards and schema.

@@ -23,6 +23,9 @@ final class Scout_Events_Admin {
 		add_action( 'admin_post_scout_events_settings', array( __CLASS__, 'save_settings' ) );
 		add_action( 'admin_post_scout_events_import', array( __CLASS__, 'import' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_EVENTS_FILE ), array( __CLASS__, 'action_link' ) );
+		add_action( 'admin_bar_menu', array( __CLASS__, 'toolbar' ), 91 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'toolbar_style' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'toolbar_style' ) );
 	}
 
 	/**
@@ -94,6 +97,64 @@ final class Scout_Events_Admin {
 			return self::SLUG;
 		}
 		return $file;
+	}
+
+	/**
+	 * Events in the toolbar, right after Scout, with the same bolt: the
+	 * overview, what needs attention, and quick adds.
+	 */
+	public static function toolbar( WP_Admin_Bar $bar ): void {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+		$branded = Scout_Admin_UI::branded();
+		$count   = is_admin() || is_admin_bar_showing() ? count( self::needs_you() ) : 0;
+		$title   = ( $branded ? '<span class="se-bar-bolt" aria-hidden="true"></span>' : '<span class="ab-icon dashicons dashicons-calendar-alt" aria-hidden="true"></span>' )
+			. '<span class="se-bar-label">' . esc_html__( 'Events', 'scout-events' ) . '</span>'
+			. ( $count ? ' <span class="se-bar-count" aria-label="' . esc_attr( sprintf( /* translators: %d: number of items. */ _n( '%d thing needs you', '%d things need you', $count, 'scout-events' ), $count ) ) . '">' . (int) $count . '</span>' : '' );
+		$bar->add_node(
+			array(
+				'id'    => 'scout-events',
+				'title' => $title,
+				'href'  => self::url(),
+			)
+		);
+		$items = array(
+			'scout-events-overview' => array( __( 'Overview', 'scout-events' ), self::url() ),
+			'scout-events-needs'    => array(
+				$count
+					/* translators: %d: number of items. */
+					? sprintf( _n( 'Needs you (%d)', 'Needs you (%d)', $count, 'scout-events' ), $count )
+					: __( 'Needs you', 'scout-events' ),
+				self::url() . '#se-needs',
+			),
+			'scout-events-add'      => array( __( 'Add event', 'scout-events' ), admin_url( 'post-new.php?post_type=' . Scout_Events::EVENT ) ),
+			'scout-events-session'  => array( __( 'Add session', 'scout-events' ), admin_url( 'post-new.php?post_type=' . Scout_Events::SESSION ) ),
+			'scout-events-speaker'  => array( __( 'Add speaker', 'scout-events' ), admin_url( 'post-new.php?post_type=' . Scout_Events::SPEAKER ) ),
+		);
+		foreach ( $items as $id => $item ) {
+			$bar->add_node(
+				array(
+					'parent' => 'scout-events',
+					'id'     => $id,
+					'title'  => esc_html( $item[0] ),
+					'href'   => $item[1],
+				)
+			);
+		}
+	}
+
+	/** The bolt and the count beside "Events" in the toolbar. */
+	public static function toolbar_style(): void {
+		if ( ! is_admin_bar_showing() ) {
+			return;
+		}
+		wp_add_inline_style(
+			'admin-bar',
+			'#wpadminbar #wp-admin-bar-scout-events>.ab-item{display:flex;align-items:center;gap:6px}'
+			. '#wpadminbar .se-bar-bolt{display:inline-block;width:11px;height:14px;background:#0E8FE6;clip-path:polygon(58% 0,0 58%,42% 58%,30% 100%,100% 40%,54% 40%)}'
+			. '#wpadminbar .se-bar-count{display:inline-block;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#0A78C2;color:#fff;font-size:11px;line-height:18px;text-align:center}'
+		);
 	}
 
 	public static function assets( string $hook ): void {
