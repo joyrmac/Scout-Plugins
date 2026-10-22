@@ -1,5 +1,17 @@
 # Scout Core — Changelog
 
+## 1.4.0 (2026-10-22)
+
+- **Site Sync.** One updating system for every Scout site, replacing each theme's own setup and sync screen over time. A theme lists the copy it bundles in a `scout-sync.json` file (page content, page fields, SEO titles and descriptions, shared settings, site title and tagline). Scout compares each item three ways: the theme copy, what WordPress holds, and what was there at the last sync.
+  - **Untouched pages update on their own** after a theme update. Anything edited in WordPress is never overwritten without a person choosing to.
+  - **Scout → Site Sync** shows what is up to date, what is ready to update, and what was changed in WordPress, side by side, with "Keep the WordPress copy" or "Use the theme copy" for each. A kept copy stays kept, even when a later theme moves on.
+  - **Safe writes.** One sync at a time, an undo record saved before anything changes, every field checked again right before it is written, a page revision for content, and **Undo the last sync** that leaves anything edited since alone.
+  - **Images** in a manifest go into the media library once and are matched by file, so a re-run never duplicates them.
+  - A theme without the file gets the screen in status-only mode. Nothing changes on any site until its theme ships a manifest.
+  - Health check row and an admin notice when items need a look. `wp scout sync status` and `wp scout sync run --dry-run` for the command line.
+  - Companions can add items through the `scout_sync_manifest` filter and react through `scout_sync_applied`. Automatic runs can be turned off with `scout_sync_auto`.
+  - Started from the reviewed content update built for a client site in September 2026, generalized so every site shares it. Spec: `docs/site-sync-spec.md`.
+
 ## 1.3.4 (2026-10-16)
 
 - **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.

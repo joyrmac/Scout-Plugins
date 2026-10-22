@@ -3,7 +3,13 @@
 One updating system for every Scout site. Today each theme carries its own
 homegrown version of the same job, and this module replaces all of them with
 one shared engine in `scout-core` plus a small declarative contract the theme
-ships. Status: spec ratified, not yet built. Owner: Sean and Joy.
+ships. Status: **phases 1 and 2 built in Scout Core 1.4.0** (engine, dashboard,
+automatic runs, review, undo, WP-CLI). Section markers (phase 3) and retiring
+per-theme code (phase 4) are next. Owner: Sean and Joy.
+
+Decision (Joy, 2026-10-22): every site is built the same way, and Site Sync
+starts from the field-level, conflict-safe content update built for the Walter
+Lutz site in September 2026.
 
 ---
 
@@ -148,3 +154,60 @@ WordPress-side edit.
 - Per-client extras (Maravela's category backfill, one-off fixups) live in that
   client's companion plugin as extra dashboard actions, registered through a
   scout-core hook, so the shared engine never grows client-specific code.
+
+---
+
+## As built: Scout Core 1.4.0
+
+### Manifest v1 (`scout-sync.json` at the theme root)
+
+```json
+{
+  "sync_version": 1,
+  "pages": [
+    { "slug": "about", "source": "sync/pages/about.html" },
+    { "slug": "contact", "content": "<p>Inline copy.</p>", "previous": ["Copy an earlier release shipped"] },
+    { "slug": "services/weddings", "title": "Weddings", "source": "sync/pages/services-weddings.html" }
+  ],
+  "fields": [
+    { "post_type": "service", "slug": "panel-upgrades", "field": "hero_heading", "value": "Panel upgrades" },
+    { "slug": "about", "seo": "title", "value": "About Us | Client" },
+    { "slug": "about", "seo": "desc", "value": "One sentence for search results." },
+    { "slug": "about", "field": "hero_image", "image": "sync/img/about-hero.webp" },
+    { "slug": "about", "meta": "_wp_page_template", "value": "templates/about.php" }
+  ],
+  "settings": [ { "group": "site", "key": "cta_heading", "value": "Call us today" } ],
+  "options":  [ { "option": "blogname", "value": "Client Name" }, { "option": "blogdescription", "value": "Tagline" } ]
+}
+```
+
+- `pages` sync post content (and the title when given). `post_type` defaults to `page`.
+- `fields` target one post by `post_type` and `slug`: `field` is a Scout field (`scout_<key>` meta), `seo` is `title` or `desc`, `meta` is a raw meta key, `post_field` is `title`, `content` or `excerpt`.
+- Each item takes `value`, `source` (a file inside the theme) or `image` (a file inside the theme, imported once).
+- `previous` lists copies an earlier release shipped. On a site never synced before, a saved value that matches one counts as untouched. That is how a live site adopts Site Sync without a full reset.
+- `options` accepts only `blogname` and `blogdescription`.
+- Pages are never created. A page the manifest names but the site lacks is reported as "Page not found"; the theme's setup or a companion creates it.
+
+### States
+
+| State | Meaning | What happens |
+|---|---|---|
+| current | WordPress matches the theme, or a kept WordPress copy | nothing |
+| update | theme moved, WordPress untouched since the last sync (or empty, or a known `previous` copy) | synced automatically after a theme update, or with "Sync these now" |
+| edited | changed in WordPress, theme unchanged | waits for a person |
+| conflict | both changed, a kept copy the theme moved past, or an unknown value never synced | waits for a person |
+| missing | the page or post is not on the site | reported |
+
+Bases are stored per item in the `scout_sync_bases` option as two hashes (theme copy and saved copy at the last sync), plus a `kept` flag when a person kept the WordPress copy.
+
+### Write safety
+
+The plan hash a person reviewed must still match (`stale` otherwise); one sync at a time (`scout_sync_lock`, 15 minutes); images imported before any text changes; the undo record (`scout_sync_journal`) saved before the first write; each field compared again right before writing; the run stops at the first field that moved. Undo puts back only fields still holding what the sync wrote.
+
+### Automatic runs
+
+On the first admin page load by an administrator after the theme, its version or its manifest changes, Scout syncs the `update` rows and leaves the rest for review, then shows "the theme update brought N changes". `scout_sync_auto` returns false to turn this off.
+
+### Tests
+
+An integration script (30 checks) runs against a real WordPress: safe fills, known earlier copies, missing pages, unknown values, refused options, stale reviews, automatic runs, kept copies, take, undo, racing edits and status-only mode. It lives at `tools/tests/site-sync.php` (outside the plugin, so it never ships) and runs against a disposable WordPress.
