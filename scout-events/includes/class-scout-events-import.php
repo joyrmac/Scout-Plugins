@@ -225,7 +225,7 @@ final class Scout_Events_Import {
 				$this->note( 'sessions', $line, sprintf( __( 'No speaker called "%s".', 'scout-events' ), $who ) );
 			}
 		}
-		$id = $this->find_session( $r['slug'] ?? '', $title, $event );
+		$id = $this->find_session( $r['slug'] ?? '', $title, $event, $speakers );
 		$id = $this->save_post( Scout_Events::SESSION, 'sessions', $id, $r, $title, $line );
 		if ( $id ) {
 			$this->index[ Scout_Events::SESSION . '|e|' . $event . '|' . strtolower( $title ) ] = $id;
@@ -341,8 +341,14 @@ final class Scout_Events_Import {
 		return 0;
 	}
 
-	/** A session by slug, else by title within the same event. */
-	private function find_session( string $slug, string $title, int $event ): int {
+	/**
+	 * A session by slug, else by title within the same event, else by title
+	 * and the same speakers in any event, so a session moved to another event
+	 * between runs is updated rather than copied.
+	 *
+	 * @param int[] $speakers Speaker ids named on the row.
+	 */
+	private function find_session( string $slug, string $title, int $event, array $speakers = array() ): int {
 		if ( '' !== $slug ) {
 			$id = $this->find( Scout_Events::SESSION, $slug, '' );
 			if ( $id ) {
@@ -359,6 +365,23 @@ final class Scout_Events_Import {
 		foreach ( Scout_Events::session_ids_any( $event ) as $sid ) {
 			if ( self::same_title( (string) get_post_field( 'post_title', $sid, 'raw' ), $title ) ) {
 				return $sid;
+			}
+		}
+		$people = array_filter( $speakers, static fn( $p ) => $p > 0 );
+		if ( $people ) {
+			$candidates = get_posts(
+				array(
+					'post_type'      => Scout_Events::SESSION,
+					'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+					'title'          => $title,
+					'posts_per_page' => 20,
+					'fields'         => 'ids',
+				)
+			);
+			foreach ( $candidates as $sid ) {
+				if ( array_intersect( $people, Scout_Events::session( (int) $sid )['speakers'] ) ) {
+					return (int) $sid;
+				}
 			}
 		}
 		return 0;

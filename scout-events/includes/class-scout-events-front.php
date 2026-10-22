@@ -8,6 +8,7 @@
  *   [scout_schedule event="12"]             the schedule, day by day
  *   [scout_schedule event="12" layout="grid"]  rooms across, times down
  *   [scout_speakers event="12"]             speaker cards (all speakers without event)
+ *   event and id also take the event's address word: event="summit-2027"
  *
  * Single event, session and speaker pages fill themselves in: the event page
  * gets its details panel above the description and the schedule, speakers and
@@ -461,7 +462,13 @@ final class Scout_Events_Front {
 
 	/** The event a shortcode means: id="", event="", the current event page, or the next upcoming one. */
 	private static function event_id( array $atts, bool $fallback = true ): int {
-		$id = absint( $atts['id'] ?? ( $atts['event'] ?? 0 ) );
+		$want = (string) ( $atts['id'] ?? ( $atts['event'] ?? '' ) );
+		$id   = absint( $want );
+		if ( ! $id && '' !== $want ) {
+			// An event's address word works too: [scout_speakers event="bliss-boogie-2026"].
+			$found = get_page_by_path( sanitize_title( $want ), OBJECT, Scout_Events::EVENT );
+			$id    = $found ? (int) $found->ID : 0;
+		}
 		if ( ! $id && is_singular( Scout_Events::EVENT ) ) {
 			$id = (int) get_the_ID();
 		}

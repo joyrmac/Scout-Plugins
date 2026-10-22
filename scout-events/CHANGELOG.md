@@ -1,5 +1,10 @@
 # Scout Events changelog
 
+## 0.4.1 (2026-10-22)
+
+- **Import keeps one copy when a session changes event.** A row now also matches a session with the same title and the same speaker in any event, so moving a session to its right year on a second run updates it instead of adding a copy.
+- Shortcodes take an event's address word as well as its number: `[scout_speakers event="bliss-boogie-2026"]`, so a page keeps working when moved between sites.
+
 ## 0.4.0 (2026-10-22)
 
 - **Events has its own place in the sidebar**, marked with the Scout bolt, instead of sitting inside the Scout menu with the site's settings (Joy asked: "so it's clear it's ours"). Under it: Overview, All events, Sessions, Speakers, Import and Settings. Partner sites without Scout branding get a calendar icon.
