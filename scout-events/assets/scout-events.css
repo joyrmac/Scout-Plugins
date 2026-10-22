@@ -1,0 +1,97 @@
+/* Scout Events on the site: event cards, the details panel, the schedule
+   and speaker cards. Fonts and text color come from the theme. Every color
+   that matters is a custom property, so a theme can retune it:
+   --scout-events-accent, --scout-events-on-accent, --scout-events-line,
+   --scout-events-muted, --scout-events-inset, --scout-events-radius. */
+
+.se-details, .se-schedule, .se-speakers, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts {
+	--se-accent: var(--scout-events-accent, #1D1D1F);
+	--se-on-accent: var(--scout-events-on-accent, #fff);
+	--se-line: var(--scout-events-line, rgba(127, 127, 127, .28));
+	--se-muted: var(--scout-events-muted, inherit);
+	--se-inset: var(--scout-events-inset, rgba(127, 127, 127, .08));
+	--se-radius: var(--scout-events-radius, 14px);
+}
+
+/* Details panel. */
+.se-details { margin: 0 0 2em; padding: 1.25em 1.4em; border: 1px solid var(--se-line); border-radius: var(--se-radius); }
+.se-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1em 1.5em; margin: 0; }
+.se-facts > div { min-width: 0; }
+.se-facts dt { font-size: .75em; letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin: 0 0 .25em; }
+.se-facts > div > dt, .se-facts > div > dd { margin: 0; padding: 0; }
+.se-facts dd { line-height: 1.45; overflow-wrap: anywhere; }
+.se-map { white-space: nowrap; }
+.se-banner { margin: 0 0 1em; padding: .6em .9em; border-radius: calc(var(--se-radius) - 6px); background: var(--se-inset); font-weight: 600; }
+.se-banner.is-cancelled { color: #B42318; }
+.se-cta { margin: 1.25em 0 0; }
+.se-button { display: inline-block; padding: .8em 1.6em; border-radius: 980px; background: var(--se-accent); color: var(--se-on-accent); text-decoration: none; font-weight: 600; line-height: 1.2; }
+.se-button:hover, .se-button:focus-visible { filter: brightness(1.1); text-decoration: none; color: var(--se-on-accent); }
+.se-button:focus-visible { outline: 2px solid var(--se-accent); outline-offset: 3px; }
+.se-soldout, .se-soon { display: inline-block; padding: .6em 1.1em; border-radius: 980px; border: 1px solid var(--se-line); font-weight: 600; }
+
+/* What to know. */
+.se-know ul { margin: .5em 0 0; padding-left: 1.2em; }
+.se-know li { margin: .3em 0; }
+.se-know, .se-block { margin: 2.25em 0 0; }
+
+/* Schedule, list layout: time on the left, sessions on the right. */
+.se-day { margin: 1.5em 0 .5em; }
+.se-slots { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--se-line); }
+.se-slot { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: .5em 1.25em; padding: 1em 0; border-bottom: 1px solid var(--se-line); margin: 0; }
+.se-slot-time { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.se-slot-items { display: grid; gap: .9em; min-width: 0; }
+@media (max-width: 560px) { .se-slot { grid-template-columns: 1fr; } }
+.se-session { min-width: 0; }
+.se-session p { margin: 0; }
+.se-session-title { font-weight: 600; }
+.se-session summary { cursor: pointer; list-style: none; display: block; }
+.se-session summary::-webkit-details-marker { display: none; }
+.se-session summary::after { content: "+"; display: inline-block; margin-left: .45em; font-weight: 600; opacity: .6; }
+.se-session details[open] > summary::after { content: "\2212"; }
+.se-session summary:focus-visible { outline: 2px solid var(--se-accent); outline-offset: 2px; border-radius: 4px; }
+.se-session-desc { margin: .5em 0 .25em; }
+.se-session-desc > :last-child { margin-bottom: 0; }
+.se-meta { font-size: .9em; opacity: .75; }
+.se-people-line { font-size: .9em; }
+.se-session.is-break .se-session-title { font-weight: 400; font-style: italic; }
+
+/* Schedule, grid layout: scrolls sideways inside its own box. */
+.se-grid-wrap { overflow-x: auto; border: 1px solid var(--se-line); border-radius: var(--se-radius); }
+.se-grid-wrap:focus-visible { outline: 2px solid var(--se-accent); outline-offset: 2px; }
+.se-grid-table { border-collapse: collapse; width: 100%; min-width: 640px; margin: 0; }
+.se-grid-table th, .se-grid-table td { border: 0; border-bottom: 1px solid var(--se-line); padding: .75em .9em; text-align: left; vertical-align: top; }
+.se-grid-table thead th { font-size: .8em; letter-spacing: .06em; text-transform: uppercase; background: var(--se-inset); }
+.se-grid-table tbody th { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.se-grid-table td .se-session + .se-session { margin-top: .75em; }
+
+/* Speakers. */
+.se-speakers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5em 1.25em; }
+.se-speaker { margin: 0; display: flex; flex-direction: column; gap: .25em; min-width: 0; }
+.se-speaker a { text-decoration: none; display: flex; flex-direction: column; gap: .6em; }
+.se-speaker-photo { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--se-radius); display: block; max-width: 100%; }
+.se-speaker-photo.is-empty { display: grid; place-items: center; background: var(--se-inset); font-size: 1.6em; font-weight: 600; }
+.se-speaker-name { font-weight: 600; }
+.se-speaker a:hover .se-speaker-name { text-decoration: underline; }
+.se-speaker-role { font-size: .9em; opacity: .75; }
+.se-speaker-head { margin: 0 0 1.5em; }
+.se-role { font-weight: 600; margin: 0 0 .4em; }
+.se-short { font-size: 1.1em; margin: 0 0 .6em; }
+.se-links { margin: 0; }
+.se-session-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .8em; }
+.se-session-list li { margin: 0; display: flex; flex-direction: column; }
+
+/* Event cards. */
+.se-events { list-style: none; margin: 0; padding: 0; display: grid; gap: 1em; }
+.se-event-card { margin: 0; display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: 1.1em; padding: 1.1em 1.2em; border: 1px solid var(--se-line); border-radius: var(--se-radius); }
+.se-date { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: calc(var(--se-radius) - 4px); background: var(--se-inset); padding: .5em 0; line-height: 1.1; align-self: start; }
+.se-date-m { font-size: .75em; letter-spacing: .1em; text-transform: uppercase; }
+.se-date-d { font-size: 1.6em; font-weight: 700; font-variant-numeric: tabular-nums; }
+.se-event-body { min-width: 0; }
+.se-event-title { margin: 0 0 .25em; font-size: 1.2em; line-height: 1.25; }
+.se-event-title a { text-decoration: none; }
+.se-event-title a:hover { text-decoration: underline; }
+.se-event-body p { margin: 0 0 .35em; }
+.se-tags { font-weight: 600; font-size: .9em; }
+.se-empty { opacity: .8; }
+
+@media (prefers-reduced-motion: reduce) { .se-button { transition: none; } }
