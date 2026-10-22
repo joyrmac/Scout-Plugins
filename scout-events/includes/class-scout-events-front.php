@@ -130,7 +130,7 @@ final class Scout_Events_Front {
 		if ( '' !== $p['role'] ) {
 			$out .= '<p class="se-role">' . esc_html( $p['role'] ) . '</p>';
 		}
-		if ( '' !== $p['short'] ) {
+		if ( '' !== $p['short'] && ! self::repeats( $p['short'], $content ) ) {
 			$out .= '<p class="se-short">' . esc_html( $p['short'] ) . '</p>';
 		}
 		$links = array();
@@ -163,6 +163,21 @@ final class Scout_Events_Front {
 			$out .= '</ul></section>';
 		}
 		return $out;
+	}
+
+	/**
+	 * True when the full bio opens with the short bio (often word for word, or
+	 * with only the name changed), so the page does not say it twice. Compares
+	 * words three to twelve of each.
+	 */
+	private static function repeats( string $short, string $bio ): bool {
+		$words = static function ( string $t ): array {
+			preg_match_all( "/[\\p{L}']+/u", mb_strtolower( wp_strip_all_tags( $t ) ), $m );
+			return array_slice( $m[0], 2, 10 );
+		};
+		$a = $words( $short );
+		$b = $words( $bio );
+		return count( $a ) >= 6 && count( array_intersect( $a, $b ) ) >= 7;
 	}
 
 	/* ---------- event details panel ---------- */

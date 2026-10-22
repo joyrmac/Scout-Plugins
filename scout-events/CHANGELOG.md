@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.5.1 (2026-10-22)
+
+- Fix: a speaker page no longer says the same thing twice when the full bio opens with the short bio (seven 2026 Bliss Boogie presenters, Kai among them). The short bio still feeds cards and schema.
+
 ## 0.5.0 (2026-10-22)
 
 - **Presenters apply and keep their own profile.** `[scout_presenter_portal event="..."]` on any page shows an application (name, pronouns, email, phone, what they do, bios, links, photo, up to two class ideas, what they need in the room, a photo release). Sending it creates a Presenter account (WordPress emails them a set-password link), a speaker in Pending Review and draft sessions for their classes. Logged in, a presenter sees their status and sessions and can update their profile.
