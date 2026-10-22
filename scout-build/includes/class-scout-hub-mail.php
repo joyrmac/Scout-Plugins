@@ -40,6 +40,7 @@ final class Scout_Hub_Mail {
 		add_action( 'admin_post_' . self::SAVE, array( __CLASS__, 'save' ) );
 		add_action( 'admin_post_' . self::TEST, array( __CLASS__, 'test' ) );
 		add_filter( 'scout_admin_nav_hint', array( __CLASS__, 'nav_hint' ), 10, 2 );
+		add_filter( 'gform_pre_send_email', array( __CLASS__, 'brand_form' ), 20, 4 );
 	}
 
 	/** @return array{email:string, name:string, password:string, accent:string, last:array} */
@@ -227,35 +228,126 @@ final class Scout_Hub_Mail {
 	 * the same in Gmail, Apple Mail and Outlook.
 	 */
 	private static function test_body( string $site ): string {
+		$s    = self::settings();
+		$url  = home_url( '/' );
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+		/* translators: 1: site address, 2: sending address */
+		$text = sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form messages, booking notes and password resets will arrive the same way, in the inbox instead of junk.', 'scout-build' ), $host, $s['email'] );
+		return self::card(
+			$site,
+			__( 'Your website can send email.', 'scout-build' ),
+			'<p style="margin:0;text-align:center">' . esc_html( $text ) . '</p>',
+			array( array( __( 'Visit the site', 'scout-build' ), $url ) ),
+			Scout_Hub_Admin::branded() ? __( 'Sent from the Scout Email screen. Built and looked after by Scout Media & Consulting.', 'scout-build' ) : __( 'Sent from the Email screen.', 'scout-build' )
+		);
+	}
+
+	/**
+	 * One email card in the site's own color with its icon: the test email and
+	 * every form message use it. Inline styles only, so it renders the same in
+	 * Gmail, Apple Mail and Outlook.
+	 *
+	 * @param string $eyebrow Small line above the title (the site name).
+	 * @param string $title   The headline.
+	 * @param string $body    Body HTML, already escaped by the caller.
+	 * @param array  $buttons Each [ label, url ]; the first is filled, the rest outlined.
+	 * @param string $footer  Plain text for the footer line.
+	 */
+	private static function card( string $eyebrow, string $title, string $body, array $buttons, string $footer ): string {
 		$accent = self::accent();
+		$ink    = self::ink( $accent );
 		$icon   = function_exists( 'get_site_icon_url' ) ? get_site_icon_url( 160 ) : '';
-		$s      = self::settings();
-		$from   = $s['email'];
-		$url    = home_url( '/' );
-		$host   = wp_parse_url( $url, PHP_URL_HOST );
-		$esc    = static fn( $t ) => esc_html( (string) $t );
 		ob_start();
 		?>
-<!doctype html><html><body style="margin:0;padding:0;background:#F5F5F7">
+<!doctype html><html><body style="margin:0;padding:0;background:#F5F5F7"><!-- scout-card -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F7;padding:32px 12px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border-radius:18px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1D1D1F">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:18px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1D1D1F">
 <tr><td style="height:8px;background:<?php echo esc_attr( $accent ); ?>"></td></tr>
 <tr><td style="padding:32px 32px 8px;text-align:center">
 <?php if ( $icon ) : ?><img src="<?php echo esc_url( $icon ); ?>" width="72" height="72" alt="" style="display:block;margin:0 auto 18px;border-radius:50%"><?php endif; ?>
-<p style="margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#86868B"><?php echo $esc( $site ); ?></p>
-<h1 style="margin:0;font-size:26px;line-height:1.2;font-weight:600;letter-spacing:-.02em"><?php esc_html_e( 'Your website can send email.', 'scout-build' ); ?></h1>
+<p style="margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#86868B"><?php echo esc_html( $eyebrow ); ?></p>
+<h1 style="margin:0;font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-.02em"><?php echo esc_html( $title ); ?></h1>
 </td></tr>
-<tr><td style="padding:12px 32px 8px;font-size:16px;line-height:1.6;color:#3A3A3C;text-align:center">
+<tr><td style="padding:16px 32px 8px;font-size:16px;line-height:1.6;color:#3A3A3C"><?php echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by the caller. ?></td></tr>
+<?php if ( $buttons ) : ?>
+<tr><td style="padding:20px 32px 32px;text-align:center">
 <?php
-/* translators: 1: site address, 2: sending address */
-echo $esc( sprintf( __( 'This came from %1$s through Google, sent as %2$s. Form messages, booking notes and password resets will arrive the same way, in the inbox instead of junk.', 'scout-build' ), $host, $from ) );
+foreach ( array_values( $buttons ) as $i => $b ) {
+	$style = 0 === $i
+		? 'background:' . $accent . ';color:' . $ink . ';border:2px solid ' . $accent
+		: 'background:#FFFFFF;color:#1D1D1F;border:2px solid ' . $accent;
+	echo '<a href="' . esc_url( (string) $b[1], array( 'http', 'https', 'tel', 'sms', 'mailto' ) ) . '" style="display:inline-block;margin:4px;' . esc_attr( $style ) . ';text-decoration:none;font-weight:600;font-size:15px;padding:10px 22px;border-radius:980px">' . esc_html( (string) $b[0] ) . '</a>';
+}
 ?>
 </td></tr>
-<tr><td style="padding:20px 32px 32px;text-align:center"><a href="<?php echo esc_url( $url ); ?>" style="display:inline-block;background:<?php echo esc_attr( $accent ); ?>;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:980px"><?php esc_html_e( 'Visit the site', 'scout-build' ); ?></a></td></tr>
-<tr><td style="padding:16px 32px;border-top:1px solid #EDEDF0;font-size:12px;color:#86868B;text-align:center"><?php echo Scout_Hub_Admin::branded() ? $esc( __( 'Sent from the Scout Email screen. Built and looked after by Scout Media & Consulting.', 'scout-build' ) ) : $esc( __( 'Sent from the Email screen.', 'scout-build' ) ); ?></td></tr>
+<?php endif; ?>
+<tr><td style="padding:16px 32px;border-top:1px solid #EDEDF0;font-size:12px;color:#86868B;text-align:center"><?php echo esc_html( $footer ); ?></td></tr>
 </table></td></tr></table></body></html>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Text color for a button filled with $hex: white when it reads at 4.5:1
+	 * (WCAG AA), else near-black. Carolina blue and other light colors get dark text.
+	 */
+	private static function ink( string $hex ): string {
+		$lum = 0.0;
+		foreach ( array( 0.2126, 0.7152, 0.0722 ) as $i => $w ) {
+			$c    = hexdec( substr( ltrim( $hex, '#' ), $i * 2, 2 ) ) / 255;
+			$lum += $w * ( $c <= 0.03928 ? $c / 12.92 : ( ( $c + 0.055 ) / 1.055 ) ** 2.4 );
+		}
+		return 1.05 / ( $lum + 0.05 ) >= 4.5 ? '#FFFFFF' : '#1D1D1F';
+	}
+
+	/**
+	 * Gravity Forms messages arrive in the same card as the test email, in the
+	 * site's color with its icon, with Call and Text buttons for the first phone
+	 * number in the message and Email back for the first email address (business
+	 * notifications only, never a confirmation sent to the customer). Only HTML
+	 * notifications, only while Scout Email is set up, and never twice. Off
+	 * switch: scout_mail_brand_forms.
+	 *
+	 * @param array  $email        to, subject, message, headers, attachments, abort_email.
+	 * @param string $format       html or text.
+	 * @param array  $notification The notification settings.
+	 * @param array  $entry        The entry.
+	 */
+	public static function brand_form( $email, $format = 'html', $notification = array(), $entry = array() ) {
+		if ( ! is_array( $email ) || 'html' !== $format || ! self::ready() || ! apply_filters( 'scout_mail_brand_forms', true, $notification, $entry ) ) {
+			return $email;
+		}
+		$message = (string) ( $email['message'] ?? '' );
+		if ( '' === trim( $message ) || false !== strpos( $message, '<!-- scout-card -->' ) ) {
+			return $email;
+		}
+		// Gravity Forms may already wrap the message in <html><body>: keep only what is inside.
+		if ( preg_match( '#<body[^>]*>(.*)</body>#is', $message, $inner ) ) {
+			$message = $inner[1];
+		}
+		$message = preg_replace( '#</?(html|head|body)[^>]*>|<head>.*?</head>#is', '', $message );
+		// Call, Text and Email back are for the business. A message going to the
+		// person who filled in the form (a confirmation) gets no contact buttons.
+		$to_customer = 'field' === ( $notification['toType'] ?? '' );
+		$buttons     = array();
+		if ( ! $to_customer && ( preg_match( '#href=["\']tel:([+0-9().\s-]{7,})["\']#i', $message, $m ) || preg_match( '#(\(?\d{3}\)?[\s.-]?\d{3}[\s.-]\d{4})#', wp_strip_all_tags( $message ), $m ) ) ) {
+			$digits = preg_replace( '/[^0-9+]/', '', $m[1] );
+			if ( strlen( ltrim( $digits, '+' ) ) >= 10 ) {
+				$buttons[] = array( __( 'Call', 'scout-build' ), 'tel:' . $digits );
+				$buttons[] = array( __( 'Text', 'scout-build' ), 'sms:' . $digits );
+			}
+		}
+		if ( ! $to_customer && preg_match( '#href=["\']mailto:([^"\'?]+)#i', $message, $m ) && is_email( rawurldecode( $m[1] ) ) ) {
+			$buttons[] = array( __( 'Email back', 'scout-build' ), 'mailto:' . rawurldecode( $m[1] ) );
+		}
+		$site   = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		$footer = Scout_Hub_Admin::branded()
+			/* translators: %s: site address */
+			? sprintf( __( 'Sent from a form on %s. Website by Scout Media & Consulting.', 'scout-build' ), (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) )
+			/* translators: %s: site address */
+			: sprintf( __( 'Sent from a form on %s.', 'scout-build' ), (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) );
+		$email['message'] = self::card( $site, wp_specialchars_decode( (string) ( $email['subject'] ?? '' ), ENT_QUOTES ), wp_kses_post( $message ), $buttons, $footer );
+		return $email;
 	}
 
 	/**

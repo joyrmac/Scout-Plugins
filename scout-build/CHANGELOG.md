@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.6.7 (2026-10-22)
+
+- **Form emails in the site's own colors.** Gravity Forms notifications now arrive in the same card as the Email test: the site's color bar, its Site Icon, the site name, and the subject as the headline, with the form answers below. When the message has a phone number, it gets Call and Text buttons; when it has an email address, an Email back button. Confirmations sent to the person who filled in the form get the card without those buttons. Light colors like Carolina blue get dark button text so it stays readable. Only HTML notifications, only while Scout Email is set up. Joy, on Andy's request email: "can these be branded?" Off switch: the `scout_mail_brand_forms` filter.
+
 ## 0.6.6 (2026-10-16)
 
 - **Hidden upload fields in Site health.** With Scout Forms Guard 0.3.0 or newer, Site health has a "Hidden upload fields" row: green when no form has a File Upload field set to Hidden, red with the form names when one does, linking to the form. Those fields are open to a reported Gravity Forms security flaw.
