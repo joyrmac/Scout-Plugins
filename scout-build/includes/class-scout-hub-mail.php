@@ -338,8 +338,22 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 				$buttons[] = array( __( 'Text', 'scout-build' ), 'sms:' . $digits );
 			}
 		}
-		if ( ! $to_customer && preg_match( '#href=["\']mailto:([^"\'?]+)#i', $message, $m ) && is_email( rawurldecode( $m[1] ) ) ) {
-			$buttons[] = array( __( 'Email back', 'scout-build' ), 'mailto:' . rawurldecode( $m[1] ) );
+		// The visitor's address: a mailto link, else the first plain address in
+		// the text that is not the site's own sending address.
+		$reply = '';
+		if ( preg_match( '#href=["\']mailto:([^"\'?]+)#i', $message, $m ) ) {
+			$reply = rawurldecode( $m[1] );
+		} elseif ( preg_match_all( '/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i', wp_strip_all_tags( str_replace( '<', ' <', $message ) ), $all ) ) {
+			$own = array_map( 'strtolower', array( self::settings()['email'], (string) get_option( 'admin_email' ) ) );
+			foreach ( $all[0] as $addr ) {
+				if ( ! in_array( strtolower( $addr ), $own, true ) ) {
+					$reply = $addr;
+					break;
+				}
+			}
+		}
+		if ( ! $to_customer && is_email( $reply ) ) {
+			$buttons[] = array( __( 'Email back', 'scout-build' ), 'mailto:' . $reply );
 		}
 		$site   = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 		$footer = Scout_Hub_Admin::branded()
