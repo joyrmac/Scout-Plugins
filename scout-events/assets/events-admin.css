@@ -68,3 +68,10 @@
 .se-slug { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; font-family: var(--se-mono); font-size: 12px; color: var(--se-text-3); }
 .se-slug input { width: 140px; min-height: 36px; font-size: 14px; }
 .se-short-input { max-width: 100px; }
+.se-import .se-field input[type="file"] { min-height: 0; font-size: 14px; }
+.se-report { margin: 0 0 16px; padding: 14px 16px; border-radius: 12px; background: var(--se-inset); }
+.se-report.is-done { background: #E3F4EE; }
+.se-report p { margin: 0 0 6px; }
+.se-report-head { font-weight: 600; }
+.se-report ul { margin: 8px 0 0 18px; list-style: disc; }
+.se-report li { margin: 0 0 4px; font-size: 13px; }

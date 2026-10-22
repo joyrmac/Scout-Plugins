@@ -552,6 +552,28 @@ final class Scout_Events {
 	}
 
 	/**
+	 * Every session of an event in any state but the trash, for matching on import.
+	 *
+	 * @return int[]
+	 */
+	public static function session_ids_any( int $event_id ): array {
+		return array_map(
+			'intval',
+			get_posts(
+				array(
+					'post_type'      => self::SESSION,
+					'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'meta_key'       => '_scout_session_event', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- small table.
+					'meta_value'     => $event_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- small table.
+					'no_found_rows'  => true,
+				)
+			)
+		);
+	}
+
+	/**
 	 * Published sessions a speaker appears in, in schedule order.
 	 *
 	 * @return int[]

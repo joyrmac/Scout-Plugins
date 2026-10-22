@@ -53,6 +53,27 @@ properties: `--scout-events-accent`, `--scout-events-on-accent`,
 The ticket button carries `data-scout-track="ticket_click"` and the map link
 `data-scout-track="directions_click"`, which Scout Analytics reports.
 
+## Bringing in a spreadsheet
+
+Scout → Events → **Bring in a spreadsheet** takes up to three CSV files, read in
+this order so sessions can point at what came before:
+
+| File | Columns |
+|---|---|
+| events | title, slug, start_date, start_time, end_date, end_time, status, mode, venue, street, city, region, postal, country, online_url, availability, ticket_url, ticket_label, price_from, price_to, sales_start, sales_end, min_age, capacity, know, schema_type, excerpt, description, photo, post_status |
+| speakers | name, slug, role, short_bio, bio, website, links, photo, order, post_status |
+| sessions | title, slug, event, date, start, end, room, track, kind, speakers, capacity, description, post_status |
+
+Dates are `YYYY-MM-DD`, times `HH:MM`. `links`, `speakers` and `know` take
+several values separated by `|`. `event` and `speakers` match by slug, then by
+title or name. `photo` is a file name already in the Media Library or a web
+address. Unknown columns are ignored.
+
+Every run is a preview until "Bring them in" is ticked. A row updates the
+entry with the same slug or title (sessions: same title in the same event),
+only for cells that have a value, so running the same files twice changes
+nothing. Notes list rows that could not be matched or read.
+
 ## Schema
 
 - Event pages: an Event node (or EducationEvent, Festival, SocialEvent) with

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Events
  * Description:       Events, sessions and speakers the owner edits in plain forms: event pages with dates, venue, ticket button and what to know, a day-by-day schedule, speaker pages, and Event schema so the event can appear in Google. Works with any ticket link today and is built to sit in front of a WooCommerce ticket engine later.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_EVENTS_VERSION', '0.1.0' );
+define( 'SCOUT_EVENTS_VERSION', '0.2.0' );
 define( 'SCOUT_EVENTS_FILE', __FILE__ );
 define( 'SCOUT_EVENTS_URL', plugin_dir_url( __FILE__ ) );
 
@@ -38,6 +38,7 @@ require_once __DIR__ . '/includes/class-scout-events.php';
 require_once __DIR__ . '/includes/class-scout-events-editor.php';
 require_once __DIR__ . '/includes/class-scout-events-front.php';
 require_once __DIR__ . '/includes/class-scout-events-schema.php';
+require_once __DIR__ . '/includes/class-scout-events-import.php';
 require_once __DIR__ . '/includes/class-scout-events-admin.php';
 require_once __DIR__ . '/includes/functions.php';
 

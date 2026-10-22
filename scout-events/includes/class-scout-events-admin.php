@@ -23,6 +23,7 @@ final class Scout_Events_Admin {
 		add_filter( 'parent_file', array( __CLASS__, 'highlight' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_post_scout_events_settings', array( __CLASS__, 'save_settings' ) );
+		add_action( 'admin_post_scout_events_import', array( __CLASS__, 'import' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_EVENTS_FILE ), array( __CLASS__, 'action_link' ) );
 		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 2 );
 	}
@@ -41,6 +42,18 @@ final class Scout_Events_Admin {
 	public static function url( array $args = array() ): string {
 		$base = 'options-general.php' === self::parent() ? admin_url( 'options-general.php?page=' . self::SLUG ) : admin_url( 'admin.php?page=' . self::SLUG );
 		return $args ? add_query_arg( $args, $base ) : $base;
+	}
+
+	/**
+	 * Back to the screen a form came from. The admin menu is not built on
+	 * admin-post.php, so parent() cannot be trusted there; the referer can.
+	 */
+	private static function back( string $msg, string $hash = '' ): void {
+		$ref = wp_get_referer();
+		$url = ( $ref && false !== strpos( $ref, 'page=' . self::SLUG ) ) ? remove_query_arg( 'scout-events', $ref ) : admin_url( 'admin.php?page=' . self::SLUG );
+		$url = preg_replace( '/#.*$/', '', $url );
+		wp_safe_redirect( add_query_arg( 'scout-events', $msg, $url ) . $hash );
+		exit;
 	}
 
 	public static function menu(): void {
@@ -118,15 +131,82 @@ final class Scout_Events_Admin {
 		// Three types cannot share one address.
 		$slugs = array( $new['event_slug'], $new['session_slug'], $new['speaker_slug'] );
 		if ( count( array_unique( $slugs ) ) < 3 ) {
-			wp_safe_redirect( self::url( array( 'scout-events' => 'sameslug' ) ) );
-			exit;
+			self::back( 'sameslug' );
 		}
 		if ( ! preg_match( '/^[A-Z]{3}$/', $new['currency'] ) ) {
 			$new['currency'] = $old['currency'];
 		}
 		update_option( Scout_Events::OPTION, $new );
-		wp_safe_redirect( self::url( array( 'scout-events' => 'saved' ) ) );
-		exit;
+		self::back( 'saved' );
+	}
+
+	/** Run an import (or its preview) and come back to the screen with the report. */
+	public static function import(): void {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'You do not have permission to import events.', 'scout-events' ), 403 );
+		}
+		check_admin_referer( 'scout_events_import' );
+		$paths = array();
+		foreach ( array( 'events', 'speakers', 'sessions' ) as $kind ) {
+			$file = $_FILES[ 'se_' . $kind ] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the temp path is used, after is_uploaded_file().
+			if ( is_array( $file ) && UPLOAD_ERR_OK === (int) ( $file['error'] ?? UPLOAD_ERR_NO_FILE ) && is_uploaded_file( (string) $file['tmp_name'] ) ) {
+				$paths[ $kind ] = (string) $file['tmp_name'];
+			}
+		}
+		if ( ! $paths ) {
+			self::back( 'nofile', '#se-import' );
+		}
+		$dry = empty( $_POST['se_apply'] );
+		if ( ! $dry && ! current_user_can( 'upload_files' ) ) {
+			$dry = true;
+		}
+		$report = ( new Scout_Events_Import( $dry ) )->run( $paths );
+		set_transient( 'scout_events_import_' . get_current_user_id(), $report, HOUR_IN_SECONDS );
+		self::back( $dry ? 'previewed' : 'imported', '#se-import' );
+	}
+
+	/** The last import report for this user, once. */
+	private static function import_report(): void {
+		$key    = 'scout_events_import_' . get_current_user_id();
+		$report = get_transient( $key );
+		if ( ! is_array( $report ) ) {
+			return;
+		}
+		delete_transient( $key );
+		$labels = array(
+			'events'   => __( 'events', 'scout-events' ),
+			'speakers' => __( 'speakers', 'scout-events' ),
+			'sessions' => __( 'sessions', 'scout-events' ),
+		);
+		$lines  = array();
+		foreach ( $labels as $kind => $label ) {
+			$c = (int) $report['created'][ $kind ];
+			$u = (int) $report['updated'][ $kind ];
+			if ( $c || $u ) {
+				$lines[] = $report['dry']
+					/* translators: 1: count new, 2: count updated, 3: "events" etc. */
+					? sprintf( __( '%1$d new and %2$d updated %3$s', 'scout-events' ), $c, $u, $label )
+					/* translators: 1: count added, 2: count updated, 3: "events" etc. */
+					: sprintf( __( '%1$d added and %2$d updated %3$s', 'scout-events' ), $c, $u, $label );
+			}
+		}
+		echo '<div class="se-report ' . ( $report['dry'] ? 'is-preview' : 'is-done' ) . '">';
+		echo '<p class="se-report-head">' . esc_html( $report['dry'] ? __( 'Preview. Nothing has changed yet.', 'scout-events' ) : __( 'Import finished.', 'scout-events' ) ) . '</p>';
+		echo '<p>' . esc_html( $lines ? implode( ', ', $lines ) . '.' : __( 'No rows to bring in.', 'scout-events' ) ) . '</p>';
+		if ( $report['notes'] ) {
+			echo '<details' . ( count( $report['notes'] ) < 8 ? ' open' : '' ) . '><summary>';
+			/* translators: %d: number of notes. */
+			echo esc_html( sprintf( _n( '%d note to check', '%d notes to check', count( $report['notes'] ), 'scout-events' ), count( $report['notes'] ) ) );
+			echo '</summary><ul>';
+			foreach ( $report['notes'] as $n ) {
+				echo '<li>' . esc_html( $n ) . '</li>';
+			}
+			echo '</ul></details>';
+		}
+		if ( $report['dry'] ) {
+			echo '<p>' . esc_html__( 'If that looks right, choose the same files again, tick "Bring them in", and import.', 'scout-events' ) . '</p>';
+		}
+		echo '</div>';
 	}
 
 	private static function message(): void {
@@ -134,6 +214,7 @@ final class Scout_Events_Admin {
 		$texts = array(
 			'saved'    => array( 'success', __( 'Settings saved. Page addresses update on the next visit.', 'scout-events' ) ),
 			'sameslug' => array( 'error', __( 'Events, sessions and speakers each need their own address word. Nothing was saved.', 'scout-events' ) ),
+			'nofile'   => array( 'error', __( 'Choose at least one spreadsheet file to import.', 'scout-events' ) ),
 		);
 		if ( isset( $texts[ $msg ] ) ) {
 			printf( '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $texts[ $msg ][0] ), esc_html( $texts[ $msg ][1] ) );
@@ -184,6 +265,22 @@ final class Scout_Events_Admin {
 						<tr><td>[scout_speakers event="12"]</td><td><?php esc_html_e( 'Speaker cards for one event. Without event, every speaker.', 'scout-events' ); ?></td></tr>
 					</table>
 					<p class="sh-note"><?php esc_html_e( 'The event id is the number in the address bar when you edit the event (post=12).', 'scout-events' ); ?></p>
+				</section>
+
+				<section class="sh-box" id="se-import">
+					<h2 class="sh-title"><?php esc_html_e( 'Bring in a spreadsheet', 'scout-events' ); ?></h2>
+					<p><?php esc_html_e( 'Add many events, speakers and sessions at once from CSV files saved from a spreadsheet. Each run is a preview first, so nothing changes until you say so. Running the same files again updates what is there instead of adding copies.', 'scout-events' ); ?></p>
+					<?php self::import_report(); ?>
+					<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-import">
+						<input type="hidden" name="action" value="scout_events_import">
+						<?php wp_nonce_field( 'scout_events_import' ); ?>
+						<p class="se-field"><label for="se-f-events"><?php esc_html_e( 'Events file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-events" name="se_events" accept=".csv,text/csv"></p>
+						<p class="se-field"><label for="se-f-speakers"><?php esc_html_e( 'Speakers file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-speakers" name="se_speakers" accept=".csv,text/csv"></p>
+						<p class="se-field"><label for="se-f-sessions"><?php esc_html_e( 'Sessions file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-sessions" name="se_sessions" accept=".csv,text/csv"></p>
+						<p class="se-field"><label for="se-apply"><input type="checkbox" id="se-apply" name="se_apply" value="1"> <?php esc_html_e( 'Bring them in (leave unticked to preview)', 'scout-events' ); ?></label></p>
+						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-events' ); ?></button></p>
+					</form>
+					<p class="sh-note"><?php esc_html_e( 'Photos: put a file name already in the Media Library, or a web address, in the photo column. Columns are listed in the plugin README.', 'scout-events' ); ?></p>
 				</section>
 
 				<?php if ( current_user_can( 'manage_options' ) ) : ?>
