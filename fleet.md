@@ -44,12 +44,17 @@ scout-rvpark **0.1.1**. Every site on these versions installs future releases
 automatically (twice-daily check). One cleanup left: **delete the broken
 scout-core 1.0.3 release** (Releases page) so it can never be installed.
 
-## How each site updates today (to be replaced by Site Sync)
+## How each site updates today (moving to Site Sync)
+
+Site Sync shipped in scout-core 1.4.0 (2026-10-22); 1.4.1 fixes adoption on
+live sites and must be on a site before its theme ships `scout-sync.json`.
+Every site already runs 1.4.0 in status-only mode (no theme ships a manifest
+yet), so nothing changes until a theme does.
 
 | Site | Mechanism | Blueprint state |
 |---|---|---|
 | Scout Media | Copy hardcoded in PHP templates; one-click setup + Tools → Scout Build; deploy = theme zip via `/deploy-wordpress` | pre-blueprint |
-| Hair by Patrick | Scout dashboard: char-count freshness, re-sync from theme, seeders, SEO filler | pre-blueprint, closest to Site Sync |
+| Hair by Patrick | Scout dashboard: char-count freshness, re-sync from theme, seeders, SEO filler | **Site Sync pilot:** theme 1.2.0 ships the manifest (built, not deployed; needs scout-core 1.4.1). Its own dashboard retires once the pilot holds |
 | Maravela's | Tools importer: bundled HTML → `wp:html` pages, dry run / force overwrite, identity reset, seeders | pre-blueprint |
 | North Crest | Theme Dashboard: status, re-run setup, content map (copy edited in repo, deployed); defers to Scout plugins | pre-blueprint, model status-only site |
 
