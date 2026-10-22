@@ -16,6 +16,9 @@ final class Scout_Events_Admin {
 
 	const SLUG = 'scout-events';
 
+	/** Unfinished events listed one by one under Needs you; the rest share one line. */
+	const UNFINISHED_SHOWN = 3;
+
 	public static function boot(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 30 );
 		add_filter( 'parent_file', array( __CLASS__, 'highlight' ) );
@@ -317,13 +320,19 @@ final class Scout_Events_Admin {
 				'fields'         => 'ids',
 			)
 		);
+		// The soonest few unfinished events get a line each; the rest are counted
+		// in one line, so a year-long calendar does not bury everything else.
+		$unfinished = 0;
 		foreach ( array_merge( $upcoming, array_map( 'intval', $event_drafts ) ) as $id ) {
 			$e    = Scout_Events::event( $id );
 			$todo = array();
 			foreach ( Scout_Events::checks( $id ) as $c ) {
 				if ( ! $c[1] ) {
-					$todo[] = strtolower( $c[0] );
+					$todo[] = lcfirst( $c[0] );
 				}
+			}
+			if ( $todo && ++$unfinished > self::UNFINISHED_SHOWN ) {
+				$todo = array();
 			}
 			if ( $todo ) {
 				$items[] = array(
@@ -356,6 +365,15 @@ final class Scout_Events_Admin {
 					'action' => __( 'Set times', 'scout-events' ),
 				);
 			}
+		}
+		if ( $unfinished > self::UNFINISHED_SHOWN ) {
+			$rest    = $unfinished - self::UNFINISHED_SHOWN;
+			$items[] = array(
+				/* translators: %d: number of events. */
+				'text'   => sprintf( _n( '%d more event still needs details. Coming up, below, shows what each one is missing.', '%d more events still need details. Coming up, below, shows what each one is missing.', $rest, 'scout-events' ), $rest ),
+				'url'    => '#se-coming-up',
+				'action' => __( 'See them', 'scout-events' ),
+			);
 		}
 
 		$no_photo = array_filter(
@@ -464,7 +482,7 @@ final class Scout_Events_Admin {
 			<?php endif; ?>
 		</section>
 
-		<section class="sh-box">
+		<section class="sh-box" id="se-coming-up">
 			<div class="se-box-head">
 				<h2 class="sh-title"><?php esc_html_e( 'Coming up', 'scout-events' ); ?></h2>
 				<span class="se-actions">

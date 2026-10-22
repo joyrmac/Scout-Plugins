@@ -25,7 +25,8 @@
  * match by slug, then by title or name.
  *
  * A row matches an existing entry by slug, else by title (sessions: title
- * within the same event). Matching rows are updated with the columns that
+ * within the same event). Rows that share a title but name different slugs
+ * stay separate entries. Matching rows are updated with the columns that
  * have a value; empty cells never wipe a field. Running the same files twice
  * changes nothing. Every run starts as a preview that writes nothing.
  *
@@ -42,6 +43,9 @@ final class Scout_Events_Import {
 
 	/** @var array<string,int> slug or lowercased title => post id, per type, filled as rows are read. */
 	private array $index = array();
+
+	/** @var array<string,int[]> post ids written by this run, per type. */
+	private array $seen = array();
 
 	private bool $dry;
 
@@ -140,7 +144,7 @@ final class Scout_Events_Import {
 			$this->note( 'events', $line, __( 'No title, skipped.', 'scout-events' ) );
 			return;
 		}
-		$id    = $this->find( Scout_Events::EVENT, $r['slug'] ?? '', $title );
+		$id    = $this->find( Scout_Events::EVENT, $r['slug'] ?? '', $title, true );
 		$merge = array();
 		$map   = array( 'start_date', 'start_time', 'end_date', 'end_time', 'status', 'mode', 'venue', 'street', 'city', 'region', 'postal', 'country', 'online_url', 'availability', 'ticket_url', 'ticket_label', 'price_from', 'price_to', 'sales_start', 'sales_end', 'min_age', 'capacity', 'schema_type' );
 		foreach ( $map as $key ) {
@@ -172,7 +176,7 @@ final class Scout_Events_Import {
 			$this->note( 'speakers', $line, __( 'No name, skipped.', 'scout-events' ) );
 			return;
 		}
-		$id = $this->find( Scout_Events::SPEAKER, $r['slug'] ?? '', $name );
+		$id = $this->find( Scout_Events::SPEAKER, $r['slug'] ?? '', $name, true );
 		$r['description'] = $r['bio'] ?? '';
 		$id               = $this->save_post( Scout_Events::SPEAKER, 'speakers', $id, $r, $name, $line );
 		if ( ! $id || $this->dry ) {
@@ -299,14 +303,24 @@ final class Scout_Events_Import {
 		return (int) $result;
 	}
 
-	/** An existing post of a type by slug, then title, including ones read earlier in this run. */
-	private function find( string $type, string $slug, string $title ): int {
+	/**
+	 * An existing post of a type by slug, then title, including ones read
+	 * earlier in this run.
+	 *
+	 * For a row that names its own slug, the title only matches a post this
+	 * run has not written yet, so rows that share a title (Pause & Play in
+	 * January, April and August) stay separate posts.
+	 *
+	 * @param bool $row True when looking up the row being imported, false for a reference to another post.
+	 */
+	private function find( string $type, string $slug, string $title, bool $row = false ): int {
 		$slug_key  = $type . '|s|' . sanitize_title( $slug );
 		$title_key = $type . '|t|' . strtolower( trim( $title ) );
+		$own_slug  = $row && '' !== $slug;
 		if ( '' !== $slug && isset( $this->index[ $slug_key ] ) ) {
 			return $this->index[ $slug_key ];
 		}
-		if ( '' !== $title && isset( $this->index[ $title_key ] ) ) {
+		if ( ! $own_slug && '' !== $title && isset( $this->index[ $title_key ] ) ) {
 			return $this->index[ $title_key ];
 		}
 		$statuses = array( 'publish', 'draft', 'pending', 'private', 'future' );
@@ -330,6 +344,7 @@ final class Scout_Events_Import {
 					'post_type'      => $type,
 					'title'          => $title,
 					'post_status'    => $statuses,
+					'post__not_in'   => $own_slug ? array_filter( $this->seen[ $type ] ?? array(), static fn( $i ) => $i > 0 ) : array(),
 					'posts_per_page' => 1,
 					'fields'         => 'ids',
 				)
@@ -400,6 +415,7 @@ final class Scout_Events_Import {
 			$this->index[ $type . '|s|' . sanitize_title( $slug ) ] = $id;
 		}
 		$this->index[ $type . '|t|' . strtolower( trim( $title ) ) ] = $id;
+		$this->seen[ $type ][]                                      = $id;
 	}
 
 	/** Set the featured image from a Media Library file name or a web address, once. */

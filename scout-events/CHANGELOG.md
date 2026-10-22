@@ -1,5 +1,10 @@
 # Scout Events changelog
 
+## 0.5.3 (2026-10-22)
+
+- Import: rows that share a title but name different slugs now stay separate entries. A calendar with Pause & Play in January, April and August imports as three events instead of one updated three times.
+- Overview: Needs you lists the three soonest unfinished events one by one and counts the rest in one line that jumps to Coming up, so a year-long calendar no longer buries the other items. "Google" keeps its capital in those lines.
+
 ## 0.5.2 (2026-10-22)
 
 - **Events in the top toolbar**, right after Scout and with the same bolt (Joy asked). A small count shows how many things need you; the menu opens Overview, Needs you, Add event, Add session and Add speaker, from the dashboard and from the site.
