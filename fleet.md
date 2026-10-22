@@ -48,8 +48,9 @@ scout-core 1.0.3 release** (Releases page) so it can never be installed.
 
 Site Sync shipped in scout-core 1.4.0 (2026-10-22); 1.4.1 fixes adoption on
 live sites and must be on a site before its theme ships `scout-sync.json`.
-Every site already runs 1.4.0 in status-only mode (no theme ships a manifest
-yet), so nothing changes until a theme does.
+Sites on the auto-update channel pick up 1.4.0 on their own (versions not
+checked on the live installs yet). It runs status-only until a theme ships a
+manifest, and none does yet, so nothing changes on any site.
 
 | Site | Mechanism | Blueprint state |
 |---|---|---|
