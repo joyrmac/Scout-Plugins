@@ -48,14 +48,14 @@ scout-core 1.0.3 release** (Releases page) so it can never be installed.
 
 Site Sync shipped in scout-core 1.4.0 (2026-10-22); 1.4.1 fixes adoption on
 live sites and must be on a site before its theme ships `scout-sync.json`.
-Sites on the auto-update channel pick up 1.4.0 on their own (versions not
-checked on the live installs yet). It runs status-only until a theme ships a
+Sites on the auto-update channel pick up 1.4.0 on their own (confirmed on
+Hair by Patrick, Site Health 2026-10-22 14:25; the others not checked yet). It runs status-only until a theme ships a
 manifest, and none does yet, so nothing changes on any site.
 
 | Site | Mechanism | Blueprint state |
 |---|---|---|
 | Scout Media | Copy hardcoded in PHP templates; one-click setup + Tools → Scout Build; deploy = theme zip via `/deploy-wordpress` | pre-blueprint |
-| Hair by Patrick | Scout dashboard: char-count freshness, re-sync from theme, seeders, SEO filler | **Site Sync pilot:** theme 1.2.0 ships the manifest (built, not deployed; needs scout-core 1.4.1). Its own dashboard retires once the pilot holds |
+| Hair by Patrick | Scout dashboard: char-count freshness, re-sync from theme, seeders, SEO filler | **Site Sync pilot:** theme 1.2.0 (built on live 1.1.8) ships the manifest (not deployed; needs scout-core 1.4.1). Its own dashboard retires once the pilot holds |
 | Maravela's | Tools importer: bundled HTML → `wp:html` pages, dry run / force overwrite, identity reset, seeders | pre-blueprint |
 | North Crest | Theme Dashboard: status, re-run setup, content map (copy edited in repo, deployed); defers to Scout plugins | pre-blueprint, model status-only site |
 
