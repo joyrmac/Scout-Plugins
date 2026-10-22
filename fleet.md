@@ -55,7 +55,7 @@ manifest, and none does yet, so nothing changes on any site.
 | Site | Mechanism | Blueprint state |
 |---|---|---|
 | Scout Media | Copy hardcoded in PHP templates; one-click setup + Tools → Scout Build; deploy = theme zip via `/deploy-wordpress` | pre-blueprint |
-| Hair by Patrick | Scout dashboard: char-count freshness, re-sync from theme, seeders, SEO filler | **Site Sync pilot:** theme 1.2.0 (built on live 1.1.8) ships the manifest (not deployed; needs scout-core 1.4.1). Its own dashboard retires once the pilot holds |
+| Hair by Patrick | Scout dashboard: char-count freshness, re-sync from theme, seeders, SEO filler | **Site Sync ready:** theme 1.2.0 (built on live 1.1.8) ships the manifest (not deployed; fourth in the Oct 22 order; needs scout-core 1.4.1). Its own dashboard retires once the pilot holds |
 | Maravela's | Tools importer: bundled HTML → `wp:html` pages, dry run / force overwrite, identity reset, seeders | pre-blueprint |
 | North Crest | Theme Dashboard: status, re-run setup, content map (copy edited in repo, deployed); defers to Scout plugins | pre-blueprint, model status-only site |
 
