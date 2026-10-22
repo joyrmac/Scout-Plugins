@@ -12,8 +12,11 @@ this plugin stays the content and display layer in front of it.
 
 ## Where it lives
 
-Scout Build (or Site Build) → **Events**: the overview, how to place lists on
-pages, and settings. **All events**, **Sessions** and **Speakers** sit in the
+Scout Build (or Site Build) → **Events** is the hub. Its Overview shows the
+numbers, a **Needs you** list of everything waiting on a person, and Coming
+up; tabs lead to every list, the spreadsheet import, and settings. Other Scout
+features add tabs and Needs you items with the `scout_events_hub_tabs` and
+`scout_events_needs_you` filters. **All events**, **Sessions** and **Speakers** sit in the
 same menu. Falls back to Settings → Events on a site without a Build section.
 Anyone who can edit posts can manage events; only administrators change
 settings.

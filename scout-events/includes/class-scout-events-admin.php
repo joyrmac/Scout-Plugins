@@ -221,10 +221,146 @@ final class Scout_Events_Admin {
 		}
 	}
 
+	/**
+	 * The hub's tabs. Other Scout features (tickets, members, applications)
+	 * add theirs with the scout_events_hub_tabs filter: key => [label, url].
+	 */
+	private static function tabs(): array {
+		$tabs = array(
+			'overview' => array( __( 'Overview', 'scout-events' ), self::url() ),
+			'events'   => array( __( 'All events', 'scout-events' ), admin_url( 'edit.php?post_type=' . Scout_Events::EVENT ) ),
+			'sessions' => array( __( 'Sessions', 'scout-events' ), admin_url( 'edit.php?post_type=' . Scout_Events::SESSION ) ),
+			'speakers' => array( __( 'Speakers', 'scout-events' ), admin_url( 'edit.php?post_type=' . Scout_Events::SPEAKER ) ),
+			'import'   => array( __( 'Bring in a spreadsheet', 'scout-events' ), self::url( array( 'view' => 'import' ) ) ),
+			'settings' => array( __( 'Showing events and settings', 'scout-events' ), self::url( array( 'view' => 'settings' ) ) ),
+		);
+		return (array) apply_filters( 'scout_events_hub_tabs', $tabs );
+	}
+
+	/**
+	 * Everything waiting on a person, most useful first. Other Scout
+	 * features add theirs with the scout_events_needs_you filter.
+	 *
+	 * @return array<int,array{text:string,url:string,action:string}>
+	 */
+	public static function needs_you(): array {
+		$items  = array();
+		$drafts = get_posts(
+			array(
+				'post_type'      => Scout_Events::SESSION,
+				'post_status'    => array( 'draft', 'pending' ),
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+		if ( $drafts ) {
+			$items[] = array(
+				/* translators: %d: number of draft sessions. */
+				'text'   => sprintf( _n( '%d session is a draft. Check its day and time, then publish it.', '%d sessions are drafts. Check their day and time, then publish them.', count( $drafts ), 'scout-events' ), count( $drafts ) ),
+				'url'    => admin_url( 'edit.php?post_type=' . Scout_Events::SESSION . '&post_status=draft' ),
+				'action' => __( 'Check sessions', 'scout-events' ),
+			);
+		}
+
+		$upcoming = Scout_Events::event_ids( 'upcoming' );
+		$event_drafts = get_posts(
+			array(
+				'post_type'      => Scout_Events::EVENT,
+				'post_status'    => array( 'draft', 'pending' ),
+				'posts_per_page' => 50,
+				'fields'         => 'ids',
+			)
+		);
+		foreach ( array_merge( $upcoming, array_map( 'intval', $event_drafts ) ) as $id ) {
+			$e    = Scout_Events::event( $id );
+			$todo = array();
+			foreach ( Scout_Events::checks( $id ) as $c ) {
+				if ( ! $c[1] ) {
+					$todo[] = strtolower( $c[0] );
+				}
+			}
+			if ( $todo ) {
+				$items[] = array(
+					/* translators: 1: event name, 2: list of missing items. */
+					'text'   => sprintf( __( '%1$s still needs %2$s.', 'scout-events' ), get_the_title( $id ), implode( ', ', $todo ) ),
+					'url'    => (string) get_edit_post_link( $id, 'raw' ),
+					'action' => __( 'Finish event', 'scout-events' ),
+				);
+			}
+			if ( 'onsale' === $e['availability'] && '' !== $e['sales_end'] && $e['sales_end'] < Scout_Events::now()->format( 'Y-m-d' ) ) {
+				$items[] = array(
+					/* translators: %s: event name. */
+					'text'   => sprintf( __( 'Ticket sales for %s were set to close, but it still says On sale.', 'scout-events' ), get_the_title( $id ) ),
+					'url'    => (string) get_edit_post_link( $id, 'raw' ),
+					'action' => __( 'Update tickets', 'scout-events' ),
+				);
+			}
+			$untimed = 0;
+			foreach ( Scout_Events::session_ids( $id ) as $sid ) {
+				$sd = Scout_Events::session( $sid );
+				if ( '' === $sd['date'] || '' === $sd['start'] ) {
+					++$untimed;
+				}
+			}
+			if ( $untimed ) {
+				$items[] = array(
+					/* translators: 1: number of sessions, 2: event name. */
+					'text'   => sprintf( _n( '%1$d session in %2$s has no day or time yet.', '%1$d sessions in %2$s have no day or time yet.', $untimed, 'scout-events' ), $untimed, get_the_title( $id ) ),
+					'url'    => admin_url( 'edit.php?post_type=' . Scout_Events::SESSION . '&se_event=' . $id ),
+					'action' => __( 'Set times', 'scout-events' ),
+				);
+			}
+		}
+
+		$no_photo = array_filter(
+			Scout_Events::speaker_ids(),
+			static fn( $pid ) => ! has_post_thumbnail( $pid )
+		);
+		if ( $no_photo ) {
+			$names   = array_map( 'get_the_title', array_slice( array_values( $no_photo ), 0, 3 ) );
+			$more    = count( $no_photo ) > 3 ? ' ' . sprintf( /* translators: %d: how many more. */ __( 'and %d more', 'scout-events' ), count( $no_photo ) - 3 ) : '';
+			$items[] = array(
+				/* translators: 1: names, 2: "and 3 more" or nothing. */
+				'text'   => sprintf( __( 'No photo yet: %1$s%2$s.', 'scout-events' ), implode( ', ', $names ), $more ),
+				'url'    => admin_url( 'edit.php?post_type=' . Scout_Events::SPEAKER ),
+				'action' => __( 'Add photos', 'scout-events' ),
+			);
+		}
+		return (array) apply_filters( 'scout_events_needs_you', $items );
+	}
+
 	public static function render(): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
+		$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : 'overview'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which tab to show.
+		$view = in_array( $view, array( 'overview', 'import', 'settings' ), true ) ? $view : 'overview';
+
+		Scout_Admin_UI::open(
+			__( 'Your events', 'scout-events' ),
+			__( 'Everything about your events in one place: what is coming up, what needs you, and every event, session and speaker. Change something here and the site follows.', 'scout-events' ),
+			__( 'Events', 'scout-events' )
+		);
+		self::message();
+		echo '<div class="se-admin">';
+		echo '<nav class="se-hubtabs" aria-label="' . esc_attr__( 'Events sections', 'scout-events' ) . '">';
+		foreach ( self::tabs() as $key => $tab ) {
+			$on = $key === $view;
+			printf( '<a href="%1$s"%2$s>%3$s</a>', esc_url( $tab[1] ), $on ? ' class="is-active" aria-current="page"' : '', esc_html( $tab[0] ) );
+		}
+		echo '</nav>';
+		if ( 'import' === $view ) {
+			self::view_import();
+		} elseif ( 'settings' === $view ) {
+			self::view_settings();
+		} else {
+			self::view_overview();
+		}
+		echo '</div>';
+		Scout_Admin_UI::close();
+	}
+
+	private static function view_overview(): void {
 		$upcoming = Scout_Events::event_ids( 'upcoming' );
 		$drafts   = get_posts(
 			array(
@@ -234,89 +370,136 @@ final class Scout_Events_Admin {
 				'fields'         => 'ids',
 			)
 		);
-		$s        = Scout_Events::settings();
-		$add      = admin_url( 'post-new.php?post_type=' . Scout_Events::EVENT );
-
-		Scout_Admin_UI::open(
-			__( 'Your events', 'scout-events' ),
-			__( 'Add an event once and its page, schedule, speakers and Google listing stay in step. Edit a date or mark it sold out here, and the site follows.', 'scout-events' ),
-			__( 'Events', 'scout-events' )
-		);
-		self::message();
+		$sessions = 0;
+		foreach ( $upcoming as $id ) {
+			$sessions += count( Scout_Events::session_ids( $id ) );
+		}
+		$needs = self::needs_you();
+		$next  = $upcoming ? Scout_Events::event( $upcoming[0] ) : null;
 		?>
-		<div class="se-admin">
-			<section class="sh-box">
-				<div class="se-box-head">
-					<h2 class="sh-title"><?php esc_html_e( 'Coming up', 'scout-events' ); ?></h2>
-					<a class="button button-primary" href="<?php echo esc_url( $add ); ?>"><?php esc_html_e( 'Add event', 'scout-events' ); ?></a>
+		<section class="sh-box">
+			<div class="sh-stats">
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo (int) count( $upcoming ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'upcoming events', 'scout-events' ); ?></p>
 				</div>
-				<?php self::table( array_merge( $upcoming, array_map( 'intval', $drafts ) ) ); ?>
-			</section>
-
-			<div class="se-admin-cols">
-				<section class="sh-box">
-					<h2 class="sh-title"><?php esc_html_e( 'Showing events on the site', 'scout-events' ); ?></h2>
-					<p><?php esc_html_e( 'Each event already has its own page with the details, schedule and speakers. Paste these on any page to list them there.', 'scout-events' ); ?></p>
-					<table class="sh-table">
-						<tr><td>[scout_events]</td><td><?php esc_html_e( 'Upcoming events, soonest first.', 'scout-events' ); ?></td></tr>
-						<tr><td>[scout_events show="past" limit="6"]</td><td><?php esc_html_e( 'The six most recent past events.', 'scout-events' ); ?></td></tr>
-						<tr><td>[scout_event id="12"]</td><td><?php esc_html_e( 'One event’s details and ticket button. Without an id, the next event.', 'scout-events' ); ?></td></tr>
-						<tr><td>[scout_schedule event="12"]</td><td><?php esc_html_e( 'The schedule, day by day. Add layout="grid" for rooms side by side.', 'scout-events' ); ?></td></tr>
-						<tr><td>[scout_speakers event="12"]</td><td><?php esc_html_e( 'Speaker cards for one event. Without event, every speaker.', 'scout-events' ); ?></td></tr>
-					</table>
-					<p class="sh-note"><?php esc_html_e( 'The event id is the number in the address bar when you edit the event (post=12).', 'scout-events' ); ?></p>
-				</section>
-
-				<section class="sh-box" id="se-import">
-					<h2 class="sh-title"><?php esc_html_e( 'Bring in a spreadsheet', 'scout-events' ); ?></h2>
-					<p><?php esc_html_e( 'Add many events, speakers and sessions at once from CSV files saved from a spreadsheet. Each run is a preview first, so nothing changes until you say so. Running the same files again updates what is there instead of adding copies.', 'scout-events' ); ?></p>
-					<?php self::import_report(); ?>
-					<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-import">
-						<input type="hidden" name="action" value="scout_events_import">
-						<?php wp_nonce_field( 'scout_events_import' ); ?>
-						<p class="se-field"><label for="se-f-events"><?php esc_html_e( 'Events file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-events" name="se_events" accept=".csv,text/csv"></p>
-						<p class="se-field"><label for="se-f-speakers"><?php esc_html_e( 'Speakers file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-speakers" name="se_speakers" accept=".csv,text/csv"></p>
-						<p class="se-field"><label for="se-f-sessions"><?php esc_html_e( 'Sessions file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-sessions" name="se_sessions" accept=".csv,text/csv"></p>
-						<p class="se-field"><label for="se-apply"><input type="checkbox" id="se-apply" name="se_apply" value="1"> <?php esc_html_e( 'Bring them in (leave unticked to preview)', 'scout-events' ); ?></label></p>
-						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-events' ); ?></button></p>
-					</form>
-					<p class="sh-note"><?php esc_html_e( 'Photos: put a file name already in the Media Library, or a web address, in the photo column. Columns are listed in the plugin README.', 'scout-events' ); ?></p>
-				</section>
-
-				<?php if ( current_user_can( 'manage_options' ) ) : ?>
-					<section class="sh-box">
-						<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-events' ); ?></h2>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-settings">
-							<input type="hidden" name="action" value="scout_events_settings">
-							<?php wp_nonce_field( 'scout_events_settings' ); ?>
-							<p class="se-field">
-								<label for="se-set-event"><?php esc_html_e( 'Event page address', 'scout-events' ); ?></label>
-								<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-event" name="scout_events[event_slug]" value="<?php echo esc_attr( $s['event_slug'] ); ?>">/name</span>
-							</p>
-							<p class="se-field">
-								<label for="se-set-session"><?php esc_html_e( 'Session page address', 'scout-events' ); ?></label>
-								<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-session" name="scout_events[session_slug]" value="<?php echo esc_attr( $s['session_slug'] ); ?>">/name</span>
-							</p>
-							<p class="se-field">
-								<label for="se-set-speaker"><?php esc_html_e( 'Speaker page address', 'scout-events' ); ?></label>
-								<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-speaker" name="scout_events[speaker_slug]" value="<?php echo esc_attr( $s['speaker_slug'] ); ?>">/name</span>
-							</p>
-							<p class="se-field">
-								<label for="se-set-currency"><?php esc_html_e( 'Currency code', 'scout-events' ); ?></label>
-								<input type="text" id="se-set-currency" name="scout_events[currency]" value="<?php echo esc_attr( $s['currency'] ); ?>" maxlength="3" class="se-short-input">
-							</p>
-							<p class="se-field">
-								<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Add event schema for Google', 'scout-events' ); ?></label>
-								<span class="sh-note"><?php esc_html_e( 'Turn off only if the theme already prints its own event schema.', 'scout-events' ); ?></span>
-							</p>
-							<p><button type="submit" class="button"><?php esc_html_e( 'Save settings', 'scout-events' ); ?></button></p>
-						</form>
-					</section>
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo (int) $sessions; ?></p>
+					<p class="sh-note"><?php esc_html_e( 'sessions in them', 'scout-events' ); ?></p>
+				</div>
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo (int) count( Scout_Events::speaker_ids() ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'speakers', 'scout-events' ); ?></p>
+				</div>
+				<div class="sh-stat">
+					<p class="sh-num"><?php echo (int) count( $needs ); ?></p>
+					<p class="sh-note"><a href="#se-needs"><?php esc_html_e( 'things need you', 'scout-events' ); ?> &rsaquo;</a></p>
+				</div>
+				<?php if ( $next ) : ?>
+					<div class="sh-stat">
+						<p class="sh-num sh-num-text"><?php echo esc_html( Scout_Events::dates_label( $next ) ); ?></p>
+						<p class="sh-note"><?php echo esc_html( get_the_title( $upcoming[0] ) ); ?></p>
+					</div>
 				<?php endif; ?>
 			</div>
+		</section>
+
+		<section class="sh-box" id="se-needs">
+			<h2 class="sh-title"><?php esc_html_e( 'Needs you', 'scout-events' ); ?></h2>
+			<?php if ( $needs ) : ?>
+				<ul class="se-needs">
+					<?php foreach ( $needs as $n ) : ?>
+						<li><span><?php echo esc_html( $n['text'] ); ?></span><a class="button" href="<?php echo esc_url( $n['url'] ); ?>"><?php echo esc_html( $n['action'] ); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php else : ?>
+				<p class="se-allclear"><?php esc_html_e( 'Nothing is waiting on you. Every upcoming event is ready to share.', 'scout-events' ); ?></p>
+			<?php endif; ?>
+		</section>
+
+		<section class="sh-box">
+			<div class="se-box-head">
+				<h2 class="sh-title"><?php esc_html_e( 'Coming up', 'scout-events' ); ?></h2>
+				<span class="se-actions">
+					<a class="button button-primary" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . Scout_Events::EVENT ) ); ?>"><?php esc_html_e( 'Add event', 'scout-events' ); ?></a>
+					<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . Scout_Events::SESSION ) ); ?>"><?php esc_html_e( 'Add session', 'scout-events' ); ?></a>
+					<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . Scout_Events::SPEAKER ) ); ?>"><?php esc_html_e( 'Add speaker', 'scout-events' ); ?></a>
+				</span>
+			</div>
+			<?php self::table( array_merge( $upcoming, array_map( 'intval', $drafts ) ) ); ?>
+		</section>
+		<?php
+		do_action( 'scout_events_hub_overview' );
+	}
+
+	private static function view_import(): void {
+		?>
+		<section class="sh-box" id="se-import">
+			<h2 class="sh-title"><?php esc_html_e( 'Bring in a spreadsheet', 'scout-events' ); ?></h2>
+			<p><?php esc_html_e( 'Add many events, speakers and sessions at once from CSV files saved from a spreadsheet. Each run is a preview first, so nothing changes until you say so. Running the same files again updates what is there instead of adding copies.', 'scout-events' ); ?></p>
+			<?php self::import_report(); ?>
+			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-import">
+				<input type="hidden" name="action" value="scout_events_import">
+				<?php wp_nonce_field( 'scout_events_import' ); ?>
+				<p class="se-field"><label for="se-f-events"><?php esc_html_e( 'Events file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-events" name="se_events" accept=".csv,text/csv"></p>
+				<p class="se-field"><label for="se-f-speakers"><?php esc_html_e( 'Speakers file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-speakers" name="se_speakers" accept=".csv,text/csv"></p>
+				<p class="se-field"><label for="se-f-sessions"><?php esc_html_e( 'Sessions file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-sessions" name="se_sessions" accept=".csv,text/csv"></p>
+				<p class="se-field"><label for="se-apply"><input type="checkbox" id="se-apply" name="se_apply" value="1"> <?php esc_html_e( 'Bring them in (leave unticked to preview)', 'scout-events' ); ?></label></p>
+				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-events' ); ?></button></p>
+			</form>
+			<p class="sh-note"><?php esc_html_e( 'Photos: put a file name already in the Media Library, or a web address, in the photo column. Columns are listed in the plugin README.', 'scout-events' ); ?></p>
+		</section>
+		<?php
+	}
+
+	private static function view_settings(): void {
+		$s = Scout_Events::settings();
+		?>
+		<div class="se-admin-cols">
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Showing events on the site', 'scout-events' ); ?></h2>
+				<p><?php esc_html_e( 'Each event already has its own page with the details, schedule and speakers. Paste these on any page to list them there.', 'scout-events' ); ?></p>
+				<table class="sh-table">
+					<tr><td>[scout_events]</td><td><?php esc_html_e( 'Upcoming events, soonest first.', 'scout-events' ); ?></td></tr>
+					<tr><td>[scout_events show="past" limit="6"]</td><td><?php esc_html_e( 'The six most recent past events.', 'scout-events' ); ?></td></tr>
+					<tr><td>[scout_event id="12"]</td><td><?php esc_html_e( 'One event’s details and ticket button. Without an id, the next event.', 'scout-events' ); ?></td></tr>
+					<tr><td>[scout_schedule event="12"]</td><td><?php esc_html_e( 'The schedule, day by day. Add layout="grid" for rooms side by side.', 'scout-events' ); ?></td></tr>
+					<tr><td>[scout_speakers event="12"]</td><td><?php esc_html_e( 'Speaker cards for one event. Without event, every speaker.', 'scout-events' ); ?></td></tr>
+				</table>
+				<p class="sh-note"><?php esc_html_e( 'The event id is the number in the address bar when you edit the event (post=12).', 'scout-events' ); ?></p>
+			</section>
+			<?php if ( current_user_can( 'manage_options' ) ) : ?>
+				<section class="sh-box">
+					<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-events' ); ?></h2>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-settings">
+						<input type="hidden" name="action" value="scout_events_settings">
+						<?php wp_nonce_field( 'scout_events_settings' ); ?>
+						<p class="se-field">
+							<label for="se-set-event"><?php esc_html_e( 'Event page address', 'scout-events' ); ?></label>
+							<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-event" name="scout_events[event_slug]" value="<?php echo esc_attr( $s['event_slug'] ); ?>">/name</span>
+						</p>
+						<p class="se-field">
+							<label for="se-set-session"><?php esc_html_e( 'Session page address', 'scout-events' ); ?></label>
+							<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-session" name="scout_events[session_slug]" value="<?php echo esc_attr( $s['session_slug'] ); ?>">/name</span>
+						</p>
+						<p class="se-field">
+							<label for="se-set-speaker"><?php esc_html_e( 'Speaker page address', 'scout-events' ); ?></label>
+							<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-speaker" name="scout_events[speaker_slug]" value="<?php echo esc_attr( $s['speaker_slug'] ); ?>">/name</span>
+						</p>
+						<p class="se-field">
+							<label for="se-set-currency"><?php esc_html_e( 'Currency code', 'scout-events' ); ?></label>
+							<input type="text" id="se-set-currency" name="scout_events[currency]" value="<?php echo esc_attr( $s['currency'] ); ?>" maxlength="3" class="se-short-input">
+						</p>
+						<p class="se-field">
+							<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Add event schema for Google', 'scout-events' ); ?></label>
+							<span class="sh-note"><?php esc_html_e( 'Turn off only if the theme already prints its own event schema.', 'scout-events' ); ?></span>
+						</p>
+						<p><button type="submit" class="button"><?php esc_html_e( 'Save settings', 'scout-events' ); ?></button></p>
+					</form>
+				</section>
+			<?php endif; ?>
 		</div>
 		<?php
-		Scout_Admin_UI::close();
 	}
 
 	/** The upcoming and draft events with what each still needs. */
