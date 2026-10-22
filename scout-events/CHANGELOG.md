@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.6.0 (2026-10-22)
+
+- Hooks for Scout Members and other Scout features: `scout_events_detail_rows`, `scout_events_ticket_html` and `scout_events_card_tags` filters on the event panel, ticket button and event cards, and a `scout_events_imported_event` action after each events.csv row, carrying every column. Nothing changes on a site without them.
+
 ## 0.5.3 (2026-10-22)
 
 - Import: rows that share a title but name different slugs now stay separate entries. A calendar with Pause & Play in January, April and August imports as three events instead of one updated three times.

@@ -167,6 +167,8 @@ final class Scout_Events_Import {
 			$current = $id > 0 ? get_post_meta( $id, '_scout_event', true ) : array();
 			Scout_Events::save_event( $id, array_merge( is_array( $current ) ? $current : array(), $merge ) );
 			$this->photo( $id, $r['photo'] ?? '', 'events', $line );
+			/** After an events.csv row is saved, with every column, so other Scout features can read their own. */
+			do_action( 'scout_events_imported_event', $id, $r );
 		}
 	}
 

@@ -1,0 +1,54 @@
+/* Scout Members: the Members hub. Light Scout Build look, scoped here. */
+
+.sm-admin {
+	--sm-text-2: #515154;
+	--sm-text-3: #6E6E73;
+	--sm-line: rgba(0, 0, 0, .08);
+	--sm-inset: #F5F5F7;
+	--sm-good: #0B7F5D;
+	--sm-warn: #8A5A00;
+	--sm-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.sm-box-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.sm-box-head .sh-title { margin: 0; }
+.sm-allclear { color: var(--sm-good); font-weight: 500; }
+.sm-setup ol { margin: 8px 0 0 18px; }
+.sm-setup li { margin-bottom: 6px; }
+
+/* Applications. */
+.sm-apps { margin: 0; padding: 0; list-style: none; }
+.sm-app { border-bottom: 1px solid var(--sm-line); margin: 0; }
+.sm-app:last-child { border-bottom: 0; }
+.sm-app summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 14px 0; cursor: pointer; list-style: none; }
+.sm-app summary::-webkit-details-marker { display: none; }
+.sm-app-name { font-size: 15px; font-weight: 600; }
+.sm-app-meta { flex: 1 1 240px; font-size: 13px; color: var(--sm-text-2); }
+.sm-app-open { font-size: 13px; color: #0A6FB4; }
+.sm-app details[open] .sm-app-open { visibility: hidden; }
+.sm-answers { margin: 0 0 16px; display: grid; gap: 0; border: 1px solid var(--sm-line); border-radius: 12px; overflow: hidden; }
+.sm-answers > div { display: grid; grid-template-columns: minmax(200px, 2fr) 3fr; gap: 6px 20px; padding: 10px 14px; border-bottom: 1px solid var(--sm-line); }
+.sm-answers > div:nth-child(odd) { background: var(--sm-inset); }
+.sm-answers > div:last-child { border-bottom: 0; }
+.sm-answers dt { font-size: 13px; color: var(--sm-text-2); }
+.sm-answers dd { margin: 0; font-size: 14px; }
+.sm-none { color: var(--sm-text-3); font-style: italic; }
+.sm-decide { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 4px; }
+.sm-decide label { display: inline-flex; align-items: center; gap: 6px; }
+.sm-quiet { background: transparent !important; }
+
+/* Members table. */
+.sm-table-wrap { overflow-x: auto; }
+.sm-table td { vertical-align: top; }
+.sm-table select, .sm-table input[type="date"] { max-width: 100%; }
+.sm-row-actions { white-space: nowrap; }
+.sm-row-actions .button { margin: 0 4px 4px 0; }
+.sm-chip { display: inline-block; margin-top: 4px; font-family: var(--sm-mono); font-size: 11px; padding: 2px 8px; border-radius: 980px; background: var(--sm-inset); }
+.sm-chip.is-warn { background: #FBF0DC; color: var(--sm-warn); }
+
+/* Import and settings. */
+.sm-report { padding: 12px 16px; border-radius: 12px; background: var(--sm-inset); margin: 12px 0; }
+.sm-field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 16px; }
+.sm-field > label { font-weight: 600; }
+.sm-admin-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 0 20px; align-items: start; }
+.sm-admin-cols > .sh-box { margin-top: 20px; }
+@media (max-width: 1100px) { .sm-admin-cols { grid-template-columns: 1fr; } .sm-answers > div { grid-template-columns: 1fr; } }

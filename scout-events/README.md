@@ -54,6 +54,13 @@ stylesheet loads only on pages that show events. Colors are custom
 properties: `--scout-events-accent`, `--scout-events-on-accent`,
 `--scout-events-line`, `--scout-events-inset`, `--scout-events-radius`.
 
+Other Scout features add to the event pages with filters:
+`scout_events_detail_rows` (rows of the details panel), `scout_events_ticket_html`
+(the ticket button or its stand-in) and `scout_events_card_tags` (the small
+tags on event cards). `scout_events_imported_event` runs after each events.csv
+row with every column, so a feature can read its own (Scout Members reads
+`members_only`).
+
 The ticket button carries `data-scout-track="ticket_click"` and the map link
 `data-scout-track="directions_click"`, which Scout Analytics reports.
 

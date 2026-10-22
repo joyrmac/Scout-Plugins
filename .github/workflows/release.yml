@@ -33,6 +33,7 @@ on:
           - scout-chat
           - scout-core
           - scout-events
+          - scout-members
           - scout-forms-guard
           - scout-optimize
           - scout-reviews

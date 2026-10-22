@@ -151,6 +151,14 @@
       "tier": "addon",
       "law": false,
       "requires": []
+    },
+    {
+      "slug": "scout-members",
+      "name": "Membership",
+      "summary": "People apply on the site, you approve each one, and members sign in to see members-only pages and events. Plans, renewal dates and a members list you run from the dashboard.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
     }
   ]
 }

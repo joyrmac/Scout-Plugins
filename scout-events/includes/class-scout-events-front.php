@@ -226,19 +226,27 @@ final class Scout_Events_Front {
 			/* translators: %d: minimum age. */
 			$rows[] = array( __( 'Ages', 'scout-events' ), esc_html( sprintf( __( '%d and over', 'scout-events' ), $e['min_age'] ) ) );
 		}
+		/**
+		 * Rows of the details panel, as [label, escaped html] pairs. Scout
+		 * Members adds "Members only" here.
+		 */
+		$rows = (array) apply_filters( 'scout_events_detail_rows', $rows, $id, $e );
 		$out .= self::facts( $rows );
 
 		if ( ! $past && 'cancelled' !== $e['status'] ) {
+			$cta = '';
 			if ( Scout_Events::ticket_open( $e ) ) {
-				$out .= '<p class="se-cta"><a class="se-button wp-element-button" href="' . esc_url( $e['ticket_url'] ) . '" data-scout-track="ticket_click" data-scout-event="' . esc_attr( get_the_title( $id ) ) . '">' . esc_html( Scout_Events::ticket_label( $e ) ) . '</a></p>';
+				$cta = '<p class="se-cta"><a class="se-button wp-element-button" href="' . esc_url( $e['ticket_url'] ) . '" data-scout-track="ticket_click" data-scout-event="' . esc_attr( get_the_title( $id ) ) . '">' . esc_html( Scout_Events::ticket_label( $e ) ) . '</a></p>';
 			} elseif ( 'soldout' === $e['availability'] ) {
-				$out .= '<p class="se-cta"><span class="se-soldout">' . esc_html__( 'Sold out', 'scout-events' ) . '</span></p>';
+				$cta = '<p class="se-cta"><span class="se-soldout">' . esc_html__( 'Sold out', 'scout-events' ) . '</span></p>';
 			} elseif ( 'notyet' === $e['availability'] ) {
 				$opens = '' !== $e['sales_start'] ? Scout_Events::day_label( $e['sales_start'] ) : '';
 				/* translators: %s: date tickets go on sale. */
 				$text  = '' !== $opens ? sprintf( __( 'Tickets go on sale %s.', 'scout-events' ), $opens ) : __( 'Tickets are not on sale yet.', 'scout-events' );
-				$out  .= '<p class="se-cta"><span class="se-soon">' . esc_html( $text ) . '</span></p>';
+				$cta   = '<p class="se-cta"><span class="se-soon">' . esc_html( $text ) . '</span></p>';
 			}
+			/** The ticket button or its stand-in. Scout Members swaps it for a join link on members-only events. */
+			$out .= (string) apply_filters( 'scout_events_ticket_html', $cta, $id, $e );
 		}
 		return $out . '</div>';
 	}
@@ -429,6 +437,7 @@ final class Scout_Events_Front {
 			if ( '' !== $price ) {
 				$tags[] = $price;
 			}
+			$tags = (array) apply_filters( 'scout_events_card_tags', $tags, $id, $e );
 			if ( $tags ) {
 				$out .= '<p class="se-tags">' . esc_html( implode( ' · ', $tags ) ) . '</p>';
 			}
