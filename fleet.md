@@ -21,7 +21,7 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
 | Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `joyrmac/Andres-Borda---Golf-Carts` | The Build (favor). **In build, not deployed.** Companion plugin `scout-andysgolfcarts` 0.1.0 lives in the client repo. |
-| Walter Lutz Services | walterlutzelectric.com (live 2026-10-19) | **TODO** | `joyrmac/Walter-Lutz-Services` (theme on `main`; repo default branch still `claude/new-client-dzfr0t`) | The Build. Sean signs off for Scout. |
+| Walter Lutz Electrical (Walter Lutz Services LLC) | walterlutzelectric.com (live 2026-10-19) | **TODO** | `joyrmac/Walter-Lutz-Services` (theme on `main`; repo default branch still `claude/new-client-dzfr0t`) | The Build. Sean signs off for Scout. |
 
 ## Versions
 
