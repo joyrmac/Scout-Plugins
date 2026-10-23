@@ -23,7 +23,7 @@ instead of a data-loss event.
 | Plugin | Version | What it does | Requires |
 |---|---|---|---|
 | [`scout-core`](scout-core/) | 1.1.3 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
-| [`scout-events`](scout-events/) | 0.10.0 | Events, sessions and speakers edited in plain forms: event pages with the ticket button, a day-by-day schedule, speaker pages, and Event schema for Google, plus a spreadsheet import. Works with any ticket link. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
+| [`scout-events`](scout-events/) | 0.10.1 | Events, sessions and speakers edited in plain forms: event pages with the ticket button, a day-by-day schedule, speaker pages, and Event schema for Google, plus a spreadsheet import. Works with any ticket link. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
 | [`scout-members`](scout-members/) | 0.1.1 | A membership run from the dashboard: applications with the owner's own questions, approval, member sign-in, plans and renewal dates, members-only pages and events, and a CSV import for members moving from another system. | WP 6.5+, PHP 8.0+ (Scout Events optional) |
 | [`scout-forms-guard`](scout-forms-guard/) | 0.2.0 | Spam protection for Gravity Forms: honeypot, time trap, and a signed token. No reCAPTCHA, no Akismet, no third-party calls. | Gravity Forms |
 | [`scout-cards`](scout-cards/) | 1.0.5 | Digital business cards and a link-in-bio page on the client's own site: Save contact, share mode with a QR code, home-screen icon, `/links/`. Reads the business identity from Scout Core. | WP 6.5+, PHP 8.0+ (Scout Core optional) |

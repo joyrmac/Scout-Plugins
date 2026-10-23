@@ -387,7 +387,7 @@ final class Scout_Events_Admin {
 
 		$no_photo = array_filter(
 			Scout_Events::speaker_ids(),
-			static fn( $pid ) => ! has_post_thumbnail( $pid )
+			static fn( $pid ) => ! has_post_thumbnail( $pid ) && ! get_post_meta( $pid, Scout_Events_Photos::NONE, true )
 		);
 		if ( $no_photo ) {
 			$names   = array_map( 'get_the_title', array_slice( array_values( $no_photo ), 0, 3 ) );

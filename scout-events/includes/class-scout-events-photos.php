@@ -21,6 +21,7 @@ final class Scout_Events_Photos {
 
 	const META  = '_scout_speaker_photos';
 	const STRIP = '_scout_speaker_strip';
+	const NONE  = '_scout_speaker_no_photo';
 	const NONCE = '_se_photos_box';
 	const MAX_UPLOADS = 4;
 
@@ -114,6 +115,7 @@ final class Scout_Events_Photos {
 		<?php endif; ?>
 		<p><button type="button" class="button se-photos-add"><?php esc_html_e( 'Add photos', 'scout-events' ); ?></button></p>
 		<p><label><input type="checkbox" name="se_photo_strip" value="1" <?php checked( (bool) get_post_meta( $id, self::STRIP, true ) ); ?>> <?php esc_html_e( 'Show the other photos on their public page', 'scout-events' ); ?></label></p>
+		<p><label><input type="checkbox" name="se_photo_none" value="1" <?php checked( (bool) get_post_meta( $id, self::NONE, true ) ); ?>> <?php esc_html_e( 'No photo for now, on purpose', 'scout-events' ); ?></label><br><span class="se-help"><?php esc_html_e( 'Keeps this speaker out of the "No photo yet" reminder until a photo is added.', 'scout-events' ); ?></span></p>
 		<p class="se-help"><?php esc_html_e( 'Choose a main photo and click Update. Removing a photo here keeps it in the Media Library.', 'scout-events' ); ?></p>
 		<?php
 	}
@@ -134,6 +136,7 @@ final class Scout_Events_Photos {
 			set_post_thumbnail( (int) $post_id, $main );
 		}
 		update_post_meta( (int) $post_id, self::STRIP, empty( $_POST['se_photo_strip'] ) ? 0 : 1 );
+		update_post_meta( (int) $post_id, self::NONE, empty( $_POST['se_photo_none'] ) || has_post_thumbnail( $post_id ) ? 0 : 1 );
 	}
 
 	/* ---------- the public page ---------- */
