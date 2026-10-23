@@ -90,3 +90,18 @@ Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-perk-text`, `.sm-member-link`. Colors are custom properties:
 `--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
 `--scout-members-inset`, `--scout-members-radius`.
+
+## What themes rely on (keep stable)
+
+The Bliss Boogie theme (2.5.0) builds on these. Change one only together with
+the theme, and say so in the changelog.
+
+- `Scout_Members_Front::member_link()` stays public and returns
+  `array( 'label' => …, 'url' => … )`.
+- `Scout_Members::home_id()` stays public (the theme picks a members template
+  for the home and the pages under it).
+- The application form `#sm-apply`: each group is a `fieldset` that is a
+  direct child of the form, and the submit button sits in its own `<p>`. The
+  theme turns the fieldsets into click-through steps.
+- `.sm-next` is the account view's next-step note (a `div`). Do not style it
+  globally: the theme uses the same class name on its step buttons.
