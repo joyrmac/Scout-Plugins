@@ -1,5 +1,10 @@
 # Scout Events changelog
 
+## 0.8.0 (2026-10-23)
+
+- **Add to calendar.** Every upcoming event shows "Add to calendar: Google · Apple or Outlook" under its ticket button or sign-up form. The .ics file (`?se_ics=1` on the event address) also rides along with each ticket email. Events without a start time go in as all-day.
+- **Day-before reminders.** Everyone going to an event that takes sign-ups gets one email in the 24 hours before it starts, with their ticket link and QR code. People who signed up inside that window are skipped, since their ticket just arrived. An hourly check sends them; the sign-ups table gains a `reminded` column on update.
+
 ## 0.7.1 (2026-10-23)
 
 - Speaker cards answer to their address word, so a link to `/summit-speakers#nick-blum` lands on that card (the first time a speaker appears on the page).

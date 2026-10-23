@@ -21,7 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Events_RSVP {
 
-	const DB_VERSION  = '1';
+	const DB_VERSION  = '2';
+	const CRON        = 'scout_events_reminders';
 	const DB_OPTION   = 'scout_events_db';
 	const MIN_SECONDS = 3;
 
@@ -37,6 +38,8 @@ final class Scout_Events_RSVP {
 			add_action( 'admin_post_' . $action, array( __CLASS__, 'nopriv_' . substr( $action, 13 ) ) );
 		}
 		add_action( 'admin_post_scout_events_checkin', array( __CLASS__, 'checkin_action' ) );
+		add_action( 'init', array( __CLASS__, 'schedule' ) );
+		add_action( self::CRON, array( __CLASS__, 'send_reminders' ) );
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'exporter' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'eraser' ) );
 	}
@@ -66,6 +69,7 @@ final class Scout_Events_RSVP {
 				created datetime NOT NULL,
 				checked_in datetime NULL,
 				checked_in_by bigint(20) unsigned NOT NULL DEFAULT 0,
+				reminded datetime NULL,
 				PRIMARY KEY  (id),
 				UNIQUE KEY code (code),
 				KEY event_status (event_id,status),
@@ -78,6 +82,58 @@ final class Scout_Events_RSVP {
 	public static function maybe_install(): void {
 		if ( self::DB_VERSION !== get_option( self::DB_OPTION ) ) {
 			self::install();
+		}
+	}
+
+	/* ---------- reminders ---------- */
+
+	/** Check every hour for events starting within the next day. */
+	public static function schedule(): void {
+		if ( ! wp_next_scheduled( self::CRON ) ) {
+			wp_schedule_event( time() + 300, 'hourly', self::CRON );
+		}
+	}
+
+	public static function unschedule(): void {
+		wp_clear_scheduled_hook( self::CRON );
+	}
+
+	/**
+	 * Everyone going to an event that starts in the next 24 hours gets one
+	 * reminder with their ticket. Sign-ups made inside that window already
+	 * have their ticket, so they are skipped.
+	 */
+	public static function send_reminders(): void {
+		global $wpdb;
+		$now    = Scout_Events::now();
+		$events = get_posts(
+			array(
+				'post_type'      => Scout_Events::EVENT,
+				'post_status'    => 'publish',
+				'posts_per_page' => 50,
+				'fields'         => 'ids',
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- an hourly check of a short list.
+					array(
+						'key'     => '_scout_event_start',
+						'value'   => array( $now->format( 'Y-m-d H:i' ), $now->modify( '+24 hours' )->format( 'Y-m-d H:i' ) ),
+						'compare' => 'BETWEEN',
+						'type'    => 'CHAR',
+					),
+				),
+			)
+		);
+		$cutoff = $now->modify( '-24 hours' )->format( 'Y-m-d H:i:s' );
+		foreach ( array_map( 'intval', $events ) as $id ) {
+			$e = Scout_Events::event( $id );
+			if ( empty( $e['signup'] ) || 'cancelled' === $e['status'] ) {
+				continue;
+			}
+			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table() . " WHERE event_id = %d AND status = 'going' AND reminded IS NULL AND created < %s", $id, $cutoff ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+			foreach ( $rows as $row ) {
+				// Mark first, so a slow mail server never sends the same reminder twice.
+				$wpdb->update( self::table(), array( 'reminded' => current_time( 'mysql' ) ), array( 'id' => (int) $row['id'] ), array( '%s' ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				self::email( $row, true );
+			}
 		}
 	}
 
@@ -544,8 +600,8 @@ final class Scout_Events_RSVP {
 
 	/* ---------- email ---------- */
 
-	/** The ticket email, or the waitlist one. */
-	public static function email( array $row ): void {
+	/** The ticket email, the waitlist one, or (with $reminder) the day-before reminder. */
+	public static function email( array $row, bool $reminder = false ): void {
 		$id    = (int) $row['event_id'];
 		$e     = Scout_Events::event( $id );
 		$site  = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
@@ -560,10 +616,15 @@ final class Scout_Events_RSVP {
 				. __( 'The event is full right now, so you are on the waitlist. If a place opens up, we will email you a ticket.', 'scout-events' ) . "\n\n"
 				. __( 'Your place in line:', 'scout-events' ) . "\n" . self::ticket_url( $row ) . "\n";
 		} else {
-			/* translators: %s: event name. */
-			$subject = sprintf( __( 'Your ticket for %s', 'scout-events' ), $title );
+			$subject = $reminder
+				/* translators: %s: event name. */
+				? sprintf( __( 'See you soon: %s', 'scout-events' ), $title )
+				/* translators: %s: event name. */
+				: sprintf( __( 'Your ticket for %s', 'scout-events' ), $title );
 			$body    = sprintf( /* translators: %s: name. */ __( 'Hi %s,', 'scout-events' ), $row['name'] ) . "\n\n"
-				. __( 'You are going. Show the QR code at the door, from this email or from your ticket page:', 'scout-events' ) . "\n"
+				. ( $reminder
+					? __( 'A reminder that you are signed up, and we look forward to seeing you. Show the QR code at the door, from this email or from your ticket page:', 'scout-events' )
+					: __( 'You are going. Show the QR code at the door, from this email or from your ticket page:', 'scout-events' ) ) . "\n"
 				. self::ticket_url( $row ) . "\n\n"
 				. $title . "\n" . ( '' !== $when ? $when . "\n" : '' ) . ( '' !== $where ? $where . "\n" : '' );
 			if ( (int) $row['guests'] > 0 ) {
@@ -574,6 +635,12 @@ final class Scout_Events_RSVP {
 			$png   = self::qr_png_file( self::ticket_url( $row ) );
 			if ( '' !== $png ) {
 				$files[] = $png;
+			}
+			if ( ! $reminder ) {
+				$ics = Scout_Events_Calendar::ics_file( $id );
+				if ( '' !== $ics ) {
+					$files[] = $ics;
+				}
 			}
 		}
 		$body .= "\n" . $site . "\n" . home_url( '/' );
