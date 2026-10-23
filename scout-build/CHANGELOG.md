@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.0 (2026-10-23)
+
+- **Themes update themselves too.** A client theme that names its own repo (`Update URI` and `Scout Release` in `style.css`) now updates like the Scout plugins: a **Theme** box on the Features screen shows its version and "Up to date" or the version ready, with **Update the theme now**, and it auto-updates within a few hours of each release. Client repos stay private: an operator pastes a read-only key once, stored encrypted, sent to GitHub's API only. **Check for new versions** checks the theme as well. The release workflow for client repos is in `tools/theme-release/`. Joy asked for themes and plugins to update "so this is all cohesive and works together".
+
 ## 0.6.5 (2026-10-16)
 
 - **Whose site is this, at a glance.** Every Scout screen shows the client's logo (theme logo, else Site Icon) and name top right, beside the Scout mark, so a Scout screen never leaves you guessing which client's site you are on. Joy asked for "them and us together". Shared admin kit 1.5.0.
