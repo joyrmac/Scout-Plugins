@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## Next
+
+- Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
+
 ## 0.9.0 (2026-10-23)
 
 - **Volunteer shifts.** A Volunteer shifts box on each event lists the jobs it needs (job, day, from, to, how many people, a note). `[scout_volunteer event="..."]` shows them by day with spots left, and volunteers pick one or more with their name, email and phone. They get a confirmation listing every shift, a link to see or drop their shifts, and a reminder the day before. **Events, Volunteers** is the roster: each shift with who is on it, what is still open, Take off shift, and a spreadsheet download. Open spots in the next two weeks show in Needs you. Volunteers live in their own table and are in the privacy export and erase tools.
