@@ -167,6 +167,14 @@
       "tier": "addon",
       "law": false,
       "requires": []
+    },
+    {
+      "slug": "scout-crm",
+      "name": "Customer list sync",
+      "summary": "Everyone who buys a ticket, signs up, volunteers, applies or joins goes into one customer list in FluentCRM on your own site, tagged by what they did, the event and its region.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
     }
   ]
 }

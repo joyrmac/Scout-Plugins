@@ -213,6 +213,19 @@ entry with the same slug or title (sessions: same title in the same event),
 only for cells that have a value, so running the same files twice changes
 nothing. Notes list rows that could not be matched or read.
 
+## Hooks for other features
+
+- `scout_events_person` ( $person ): someone signed up, volunteered, or
+  applied as a vendor or presenter. Keys: email, name, role (attendee,
+  waitlist, volunteer, vendor, presenter), event (id or 0), and phone and org
+  when known. Scout CRM Sync uses it.
+- `scout_events_ticket_bought` ( $order, $event_id, $product_id, $qty ):
+  a paid shop ticket line.
+- `scout_events_event` filter ( $event, $id ): stand in for event fields on
+  the site (the shop's price and stock use it).
+- `scout_events_imported_event`, `_session`, `_speaker`, `_vendor`
+  ( $id, $row ): after each spreadsheet row, for extra columns.
+
 ## Schema
 
 - Event pages: an Event node (or EducationEvent, Festival, SocialEvent) with

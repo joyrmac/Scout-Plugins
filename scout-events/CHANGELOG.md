@@ -8,6 +8,7 @@
 
 - **Tickets from a WooCommerce shop.** A Tickets from the shop box on each event picks its ticket products. The event page lists them with price, "N left", Sold out and Add to cart; the event's price and on sale / sold out state, cards and Google listing follow the products; product pages name their event; the events list gets Tickets sold. Paid orders fire `scout_events_ticket_bought` once per ticket line. Only active when WooCommerce is.
 - New filter `scout_events_event` ( $event, $id ) on the site side, so other features can stand in for fields. Edit screens still show what was typed.
+- New action `scout_events_person` ( $person ) when someone signs up, volunteers, or applies as a vendor or presenter: email, name, role, event, and phone and org when known. Scout CRM Sync listens to it.
 
 ## 0.12.0 (2026-10-23)
 

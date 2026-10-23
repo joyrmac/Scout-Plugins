@@ -258,7 +258,24 @@ final class Scout_Events_RSVP {
 			),
 			array( '%d', '%d', '%s', '%s', '%d', '%s', '%s', '%s' )
 		);
-		return $ok ? self::find( $code ) : null;
+		if ( ! $ok ) {
+			return null;
+		}
+		/**
+		 * Someone took part. Fired here, by volunteers, vendors and presenters, with
+		 * email, name, role (attendee, waitlist, volunteer, vendor, presenter), event
+		 * (id, or 0) and, when known, phone and org. A customer list listens to it.
+		 */
+		do_action(
+			'scout_events_person',
+			array(
+				'email' => strtolower( $email ),
+				'name'  => $name,
+				'role'  => 'going' === $status ? 'attendee' : 'waitlist',
+				'event' => $event_id,
+			)
+		);
+		return self::find( $code );
 	}
 
 	public static function set_status( int $id, string $status ): void {

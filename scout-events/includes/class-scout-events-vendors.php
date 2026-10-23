@@ -338,6 +338,17 @@ final class Scout_Events_Vendors {
 				'applied'  => Scout_Events::now()->format( 'Y-m-d H:i' ),
 			)
 		);
+		do_action(
+			'scout_events_person',
+			array(
+				'email' => $email,
+				'name'  => $who,
+				'phone' => sanitize_text_field( (string) ( $v['phone'] ?? '' ) ),
+				'role'  => 'vendor',
+				'event' => $event && Scout_Events::EVENT === get_post_type( $event ) ? $event : 0,
+				'org'   => $name,
+			)
+		);
 		$photo = 0;
 		if ( ! empty( $_FILES['se_photo']['name'] ) ) {
 			$file = $_FILES['se_photo']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- handed to WordPress's own upload checks.

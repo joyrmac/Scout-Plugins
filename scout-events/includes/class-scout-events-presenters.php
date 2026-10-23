@@ -448,6 +448,15 @@ final class Scout_Events_Presenters {
 			}
 		}
 
+		do_action(
+			'scout_events_person',
+			array(
+				'email' => $in['email'],
+				'name'  => $in['name'],
+				'role'  => 'presenter',
+				'event' => $event ? (int) $event->ID : 0,
+			)
+		);
 		/* translators: %s: presenter name. */
 		$subject = sprintf( __( 'New presenter application: %s', 'scout-events' ), $in['name'] );
 		/* translators: %s: link to review. */

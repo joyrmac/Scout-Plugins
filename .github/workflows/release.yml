@@ -35,6 +35,7 @@ on:
           - scout-events
           - scout-members
           - scout-partners
+          - scout-crm
           - scout-forms-guard
           - scout-optimize
           - scout-reviews

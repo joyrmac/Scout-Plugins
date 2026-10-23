@@ -408,6 +408,16 @@ final class Scout_Events_Volunteers {
 			);
 		}
 		self::email( $code );
+		do_action(
+			'scout_events_person',
+			array(
+				'email' => $email,
+				'name'  => $name,
+				'phone' => $phone,
+				'role'  => 'volunteer',
+				'event' => $event,
+			)
+		);
 		wp_safe_redirect( add_query_arg( array( 'se_vol' => $code, 'volunteer' => 'thanks' ), $page ) . '#se-volunteer' );
 		exit;
 	}
