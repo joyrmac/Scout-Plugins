@@ -42,6 +42,8 @@ overview lists what each upcoming and draft event still needs.
 - Event, session and speaker pages fill themselves in. Turn that off with the
   `scout_events_auto_content` filter when a theme template places the pieces.
 - `[scout_events]` upcoming events; `show="past"` or `show="all"`, `limit="6"`.
+  Lists longer than eight fall under month headings; `group="month"` or
+  `group="none"` chooses. Speaker cards carry `id="their-slug"` for links.
 - `[scout_event id="12"]` one event's details panel and ticket button.
 - `[scout_schedule event="12"]` the schedule by day and time;
   `layout="grid"` puts rooms side by side and scrolls sideways on phones.

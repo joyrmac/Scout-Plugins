@@ -1,5 +1,10 @@
 # Scout Events changelog
 
+## 0.7.1 (2026-10-23)
+
+- Speaker cards answer to their address word, so a link to `/summit-speakers#nick-blum` lands on that card (the first time a speaker appears on the page).
+- Event lists longer than eight fall under month headings, and on phones those lists show name, date, place and price without the summary line. `[scout_events group="month"]` or `group="none"` sets it either way.
+
 ## 0.7.0 (2026-10-23)
 
 - **Sign-ups and check-in.** Tick "Take sign-ups on this site" on an event and its page takes sign-ups: name, email and any guests allowed. Each person gets an email with their ticket and a QR code (an image attachment and a ticket page link). At the door, anyone who can edit the site scans the code with a phone camera and taps Check in; no app needed. When the event reaches its capacity, new sign-ups join a waitlist.

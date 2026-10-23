@@ -4,6 +4,7 @@
  *
  *   [scout_events]                          upcoming events as a list
  *   [scout_events show="past" limit="6"]    past events, newest first
+ *   [scout_events group="month"]            under month headings (the default for lists over 8)
  *   [scout_event id="12"]                   one event's details panel
  *   [scout_schedule event="12"]             the schedule, day by day
  *   [scout_schedule event="12" layout="grid"]  rooms across, times down
@@ -390,10 +391,15 @@ final class Scout_Events_Front {
 		if ( ! $ids ) {
 			return '';
 		}
+		// Each card answers to its speaker's address word (#nick-blum) the first time it appears on a page.
+		static $anchored = array();
 		$out = '<ul class="se-speakers">';
 		foreach ( $ids as $pid ) {
-			$p    = Scout_Events::speaker( $pid );
-			$out .= '<li class="se-speaker"><a href="' . esc_url( get_permalink( $pid ) ) . '">';
+			$p      = Scout_Events::speaker( $pid );
+			$anchor = sanitize_title( (string) get_post_field( 'post_name', $pid ) );
+			$id_att = '' !== $anchor && ! isset( $anchored[ $anchor ] ) ? ' id="' . esc_attr( $anchor ) . '"' : '';
+			$anchored[ $anchor ] = true;
+			$out .= '<li class="se-speaker"' . $id_att . '><a href="' . esc_url( get_permalink( $pid ) ) . '">';
 			$out .= has_post_thumbnail( $pid )
 				? get_the_post_thumbnail( $pid, 'medium', array( 'class' => 'se-speaker-photo', 'alt' => '' ) )
 				: '<span class="se-speaker-photo is-empty" aria-hidden="true">' . esc_html( self::initials( get_the_title( $pid ) ) ) . '</span>';
@@ -406,12 +412,35 @@ final class Scout_Events_Front {
 		return $out . '</ul>';
 	}
 
-	/** Event cards. */
-	public static function events( array $ids ): string {
+	/** A long list gets month headings on its own. */
+	const GROUP_AFTER = 8;
+
+	/**
+	 * Event cards. $group is 'month' for month headings, 'none' for one list,
+	 * or 'auto' for month headings once the list is longer than GROUP_AFTER.
+	 */
+	public static function events( array $ids, string $group = 'none' ): string {
 		self::styles();
 		if ( ! $ids ) {
 			return '<p class="se-empty">' . esc_html__( 'New events are on the way. Check back soon.', 'scout-events' ) . '</p>';
 		}
+		if ( 'month' === $group || ( 'auto' === $group && count( $ids ) > self::GROUP_AFTER ) ) {
+			$months = array();
+			foreach ( $ids as $id ) {
+				$start = Scout_Events::start( Scout_Events::event( $id ) );
+				$key   = $start ? wp_date( 'F Y', $start->getTimestamp() ) : __( 'Date to be announced', 'scout-events' );
+				$months[ $key ][] = $id;
+			}
+			$out = '<div class="se-events-by-month">';
+			foreach ( $months as $month => $list ) {
+				$out .= '<section class="se-month"><h3 class="se-month-title">' . esc_html( $month ) . '</h3>' . self::cards( $list ) . '</section>';
+			}
+			return $out . '</div>';
+		}
+		return self::cards( $ids );
+	}
+
+	private static function cards( array $ids ): string {
 		$out = '<ul class="se-events">';
 		foreach ( $ids as $id ) {
 			$e     = Scout_Events::event( $id );
@@ -460,12 +489,14 @@ final class Scout_Events_Front {
 			array(
 				'show'  => 'upcoming',
 				'limit' => 0,
+				'group' => 'auto',
 			),
 			(array) $atts,
 			'scout_events'
 		);
-		$show = in_array( $a['show'], array( 'upcoming', 'past', 'all' ), true ) ? $a['show'] : 'upcoming';
-		return self::events( Scout_Events::event_ids( $show, absint( $a['limit'] ) ) );
+		$show  = in_array( $a['show'], array( 'upcoming', 'past', 'all' ), true ) ? $a['show'] : 'upcoming';
+		$group = in_array( $a['group'], array( 'auto', 'month', 'none' ), true ) ? $a['group'] : 'auto';
+		return self::events( Scout_Events::event_ids( $show, absint( $a['limit'] ) ), $group );
 	}
 
 	public static function event_shortcode( $atts ): string {

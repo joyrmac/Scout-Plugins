@@ -157,3 +157,15 @@
 .se-vendor-link { margin: .4em 0 0; font-size: .9em; overflow-wrap: anywhere; }
 .se-p-label { font-weight: 600; font-size: .95em; }
 .se-p-choice { display: flex; gap: .6em; align-items: center; font-weight: 400; }
+
+/* Long event lists: month headings, and tighter cards on phones. */
+.se-events-by-month { display: grid; gap: 1.75em; }
+.se-month-title { margin: 0 0 .6em; font-size: 1.1em; letter-spacing: .02em; }
+@media (max-width: 30em) {
+	.se-event-card { grid-template-columns: 3.4em minmax(0, 1fr); gap: .8em; padding: .85em .9em; }
+	.se-date-d { font-size: 1.3em; }
+	.se-summary { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+	/* Under month headings, a phone shows the essentials: name, when, where, price. */
+	.se-events-by-month .se-summary { display: none; }
+	.se-events-by-month .se-events { gap: .6em; }
+}
