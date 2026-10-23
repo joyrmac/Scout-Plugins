@@ -4,6 +4,13 @@
 
 - Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
 
+## 0.14.0 (2026-10-23)
+
+- **Topic pages, for search.** A topic can have its own public page listing every class, speaker and vendor on it, so someone searching "water purification class" or "solar vendors" lands on a page about exactly that. Events, Topics: tick "Make a draft page for this topic", or tick several and use **Make topic pages**. Pages start as drafts (under a "Topics" page when there is one), with the topic's description as the introduction and search description, so a person reads each before it goes live. A Page column shows Draft or Live.
+- `[scout_topic topic="water"]` lists the topic's classes, speakers and vendors with an ItemList in structured data; `show`, `region`, and `classes`/`speakers`/`vendors` headings (such as `speakers="Instructors"`) adjust it. `[scout_topics]` shows a card for every topic with a live page, busiest first.
+- Speaker and class pages link to the live pages of their topics.
+- A class taught by two speaker entries with the same name lists the name once.
+
 ## 0.13.0 (2026-10-23)
 
 - **Tickets from a WooCommerce shop.** A Tickets from the shop box on each event picks its ticket products. The event page lists them with price, "N left", Sold out and Add to cart; the event's price and on sale / sold out state, cards and Google listing follow the products; product pages name their event; the events list gets Tickets sold. Paid orders fire `scout_events_ticket_bought` once per ticket line. Only active when WooCommerce is.

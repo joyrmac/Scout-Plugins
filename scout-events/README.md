@@ -151,6 +151,22 @@ region buttons next to the topics.
 - `[scout_events region="midwest"]`: one region's events.
 - The event's details show its region, linked to the region's page.
 
+## Topic pages
+
+A public page per topic, for search: everything on "Water" or "Solar" in one
+place. **Events, Topics**: write the topic's description, then tick **Make a
+draft page for this topic** (or tick several topics and use **Make topic
+pages**). Each page starts as a draft under a page with the slug `topics`
+when there is one, with the description as its introduction and search
+description. Read it, then publish it from Pages. The Page column shows Draft
+or Live. Skip topics with only one or two entries: thin pages do not help.
+
+- `[scout_topic topic="water"]`: the topic's classes, speakers and vendors,
+  with an ItemList in structured data. `show="classes,vendors"`,
+  `region="midwest"`, and headings such as `speakers="Instructors"`.
+- `[scout_topics]`: a card for every topic with a live page, busiest first.
+- Speaker and class pages link to their topics' live pages.
+
 ## Volunteers
 
 Fill in the **Volunteer shifts** box on an event (job, day, from, to, how many

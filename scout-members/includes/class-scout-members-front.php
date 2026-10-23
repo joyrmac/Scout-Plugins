@@ -42,6 +42,7 @@ final class Scout_Members_Front {
 		add_filter( 'render_block_core/navigation-link', array( __CLASS__, 'block_link' ), 10, 2 );
 		add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'sitemap' ), 10, 2 );
 		add_filter( 'get_post_metadata', array( __CLASS__, 'seo_meta' ), 10, 3 );
+		add_filter( 'scout_core_needs_description', array( __CLASS__, 'needs_description' ), 10, 2 );
 		add_action( 'login_enqueue_scripts', array( __CLASS__, 'login_style' ) );
 		add_filter( 'login_headerurl', static fn() => home_url( '/' ) );
 		add_filter( 'login_headertext', static fn() => wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) );
@@ -273,6 +274,11 @@ final class Scout_Members_Front {
 			return is_admin() ? $value : array( '1' );
 		}
 		return is_admin() || Scout_Members::can_see( $id ) ? $value : array( __( 'A page for members.', 'scout-members' ) );
+	}
+
+	/** Scout Core's page-description check leaves members-only pages out: search never sees them. */
+	public static function needs_description( $needs, $post_id ): bool {
+		return (bool) $needs && ! Scout_Members::locked( (int) $post_id );
 	}
 
 	/* ---------- the members home ---------- */

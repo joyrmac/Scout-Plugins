@@ -266,6 +266,23 @@ final class Scout_Events_Directory {
 	}
 
 	/**
+	 * What one topic holds, for a topic page: every speaker, class or vendor
+	 * with that topic, in directory order.
+	 *
+	 * @return array<int,array> items as items() returns them
+	 */
+	public static function on_topic( string $type, string $topic, string $region = '' ): array {
+		$type = in_array( $type, array( 'speakers', 'classes', 'vendors' ), true ) ? $type : 'speakers';
+		return array_values( array_filter( self::items( $type, 0, sanitize_title( $region ) ), static fn( $it ) => isset( $it['topics'][ $topic ] ) ) );
+	}
+
+	/** Directory cards with no search or buttons, all showing. */
+	public static function cards( array $items ): string {
+		wp_enqueue_style( 'scout-events' );
+		return '<ul class="se-dir-list">' . implode( '', array_map( static fn( $it ) => self::card( $it, true ), $items ) ) . '</ul>';
+	}
+
+	/**
 	 * What the directory lists, as cards: title, link, photo, a few lines,
 	 * topics, regions and the text a search looks through.
 	 *
@@ -346,7 +363,7 @@ final class Scout_Events_Directory {
 		foreach ( $groups as $list ) {
 			$first    = $list[0];
 			$s        = Scout_Events::session( $first );
-			$teachers = array_filter( array_map( static fn( $p ) => 'publish' === get_post_status( $p ) ? get_the_title( $p ) : '', $s['speakers'] ) );
+			$teachers = array_unique( array_filter( array_map( static fn( $p ) => 'publish' === get_post_status( $p ) ? get_the_title( $p ) : '', $s['speakers'] ) ) );
 			$when     = array();
 			foreach ( $list as $sid ) {
 				$x      = Scout_Events::session( $sid );

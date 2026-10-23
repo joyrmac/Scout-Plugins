@@ -1,5 +1,9 @@
 # Scout Members changelog
 
+## 0.3.1 (2026-10-23)
+
+- Members-only pages no longer count as missing a description in Site health (needs the Scout Core release after 1.4.1; harmless before it).
+
 ## 0.3.0 (2026-10-23)
 
 - **Member invitations.** `[scout_invitations]` on a members page shows the invitations the owner has published, each member's own with Take it down, and a form to post a new one. The questions are the owner's own (Settings, Invitation questions; same format as the application). New invitations wait under Members, Invitations, with a count in the menu and in Events, Needs you. Publish puts one up and emails the member; Move to Trash sends nothing. An optional "show until" date takes it down by itself. Only administrators see invitations in the dashboard, and the privacy tools export and erase them with the member's record.
