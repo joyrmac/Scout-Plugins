@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Events
  * Description:       Events, sessions and speakers the owner edits in plain forms: event pages with dates, venue, ticket button and what to know, a day-by-day schedule, speaker pages, and Event schema so the event can appear in Google. Works with any ticket link today and is built to sit in front of a WooCommerce ticket engine later.
- * Version:           0.13.0
+ * Version:           0.14.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_EVENTS_VERSION', '0.13.0' );
+define( 'SCOUT_EVENTS_VERSION', '0.14.0' );
 define( 'SCOUT_EVENTS_FILE', __FILE__ );
 define( 'SCOUT_EVENTS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_EVENTS_DIR', plugin_dir_path( __FILE__ ) );
@@ -48,6 +48,7 @@ require_once __DIR__ . '/includes/class-scout-events-volunteers.php';
 require_once __DIR__ . '/includes/class-scout-events-photos.php';
 require_once __DIR__ . '/includes/class-scout-events-directory.php';
 require_once __DIR__ . '/includes/class-scout-events-regions.php';
+require_once __DIR__ . '/includes/class-scout-events-topics.php';
 require_once __DIR__ . '/includes/class-scout-events-woo.php';
 require_once __DIR__ . '/includes/class-scout-events-rsvp-admin.php';
 require_once __DIR__ . '/includes/class-scout-events-admin.php';
@@ -66,6 +67,7 @@ Scout_Events_Volunteers::boot();
 Scout_Events_Photos::boot();
 Scout_Events_Directory::boot();
 Scout_Events_Regions::boot();
+Scout_Events_Topics::boot();
 Scout_Events_RSVP_Admin::boot();
 // The shop's tickets need WooCommerce, which loads after Scout Events.
 add_action( 'plugins_loaded', array( 'Scout_Events_Woo', 'boot' ), 20 );

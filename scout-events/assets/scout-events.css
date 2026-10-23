@@ -4,7 +4,7 @@
    --scout-events-accent, --scout-events-on-accent, --scout-events-line,
    --scout-events-muted, --scout-events-inset, --scout-events-radius. */
 
-.se-details, .se-schedule, .se-speakers, .se-directory, .se-regions, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts {
+.se-details, .se-schedule, .se-speakers, .se-directory, .se-regions, .se-topic, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts {
 	--se-accent: var(--scout-events-accent, #1D1D1F);
 	--se-on-accent: var(--scout-events-on-accent, #fff);
 	--se-line: var(--scout-events-line, rgba(127, 127, 127, .28));
@@ -263,3 +263,10 @@ a.se-region-link:hover, a.se-region-link:focus-visible { border-color: currentCo
 .se-ticket-buy :where(input) { width: 4.2em; padding: .55em .5em; font: inherit; color: inherit; background: transparent; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 8px; }
 .se-ticket > .se-soldout { margin-left: auto; order: 4; }
 .se-tickets-cart { margin: .75em 0 0; font-size: .92em; }
+
+/* Topic pages: [scout_topic] and the topic links on speaker and class pages */
+.se-topic-intro { max-width: 46rem; text-wrap: pretty; }
+.se-topic-part { margin-top: 2em; }
+.se-topic-part > h2 { margin: 0 0 .75em; text-wrap: balance; }
+.se-topic-links { margin-top: 1.5em; font-size: .92em; }
+.se-topic-links span { font-weight: 600; }
