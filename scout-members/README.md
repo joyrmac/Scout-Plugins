@@ -34,14 +34,29 @@ in the Events toolbar menu, so one screen shows everything waiting.
 
 - `[scout_membership]` the membership page: the application for new people,
   and for members their status, plan, renewal date and members-only events.
+- **Members home** (Settings): where members land after signing in. It and
+  every page under it are members only, and it lists the pages under it that
+  the member can open (title and excerpt), then the members-only events. Add a
+  perk by adding a page under it. `[scout_members_home]` moves the list.
+- **Plan locks**: the Members only box can limit a page to some plans (VIP).
+  Pages under it follow. `[scout_members_only plan="VIP Member"]` for part of
+  a page.
+- `[scout_member_signin]` the sign-in form. The members-only note and the
+  membership page already carry it.
+- `[scout_member_link]`, or a menu custom link to `#scout-member-link`: reads
+  "Member sign in", then "Members home" once a member is signed in.
 - `[scout_members_only] … [/scout_members_only]` hides the part in between.
 - The **Members only** box on any page or post hides the whole page (search
   engines are told to skip it). On an event (with Scout Events) the event
   stays on the calendar with a Members only tag, and only members get the
   ticket button. events.csv takes a `members_only` column (yes or no).
 
-Members sign in on the normal WordPress sign-in page, land on the membership
-page, and never see the dashboard.
+Members sign in on the site, land on the members home (or the membership
+page when there is none), and never see the dashboard. The WordPress password
+page carries the site's logo or name.
+
+Members pages stay out of sitemaps and llms.txt, and Scout Core's description
+and share tags say "A page for members." to anyone who cannot open them.
 
 ## Application questions
 
@@ -70,6 +85,8 @@ person's membership record. Deleting the plugin keeps member accounts.
 
 Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-field`, `.sm-statement`, `.sm-check`, `.sm-button`, `.sm-account`,
-`.sm-badge`, `.sm-facts`, `.sm-gate`. Colors are custom properties:
+`.sm-badge`, `.sm-facts`, `.sm-gate`, `.sm-signin-form`, `.sm-signin-more`,
+`.sm-home`, `.sm-perks`, `.sm-perk`, `.sm-perk-title`, `.sm-perk-tag`,
+`.sm-perk-text`, `.sm-member-link`. Colors are custom properties:
 `--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
 `--scout-members-inset`, `--scout-members-radius`.

@@ -30,6 +30,7 @@ final class Scout_Members_Admin {
 		add_action( 'admin_bar_menu', array( __CLASS__, 'toolbar' ), 92 );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'box' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_box' ), 10, 2 );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'new_page_parent' ), 10, 2 );
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'exporter' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'eraser' ) );
 	}
@@ -140,9 +141,32 @@ final class Scout_Members_Admin {
 	}
 
 	public static function render_box( $post ): void {
-		wp_nonce_field( 'scout_members_only_' . $post->ID, '_sm_only' );
-		echo '<p><label><input type="checkbox" name="sm_members_only" value="1" ' . checked( Scout_Members::is_members_only( (int) $post->ID ), true, false ) . '> ' . esc_html__( 'Only members can read this', 'scout-members' ) . '</label></p>';
-		echo '<p class="description">' . esc_html__( 'Everyone else sees a short note with a link to become a member, and search engines leave it out.', 'scout-members' ) . '</p>';
+		$id = (int) $post->ID;
+		wp_nonce_field( 'scout_members_only_' . $id, '_sm_only' );
+		$by = Scout_Members::locked_by( $id );
+		if ( Scout_Members::home_id() === $id ) {
+			echo '<p><strong>' . esc_html__( 'This is the members home.', 'scout-members' ) . '</strong> ' . esc_html__( 'It and every page under it are for members only.', 'scout-members' ) . '</p>';
+		} elseif ( $by ) {
+			/* translators: %s: the parent page's title. */
+			echo '<p>' . esc_html( sprintf( __( 'Members only, because it sits under "%s".', 'scout-members' ), get_the_title( $by ) ) ) . '</p>';
+		} else {
+			echo '<p><label><input type="checkbox" name="sm_members_only" value="1" ' . checked( Scout_Members::is_members_only( $id ), true, false ) . '> ' . esc_html__( 'Only members can read this', 'scout-members' ) . '</label></p>';
+		}
+		$plans = Scout_Members::plans();
+		if ( count( $plans ) > 1 ) {
+			$own = Scout_Members::own_plans( $id );
+			echo '<fieldset class="sm-box-plans"><legend>' . esc_html__( 'Only for these plans (optional)', 'scout-members' ) . '</legend>';
+			foreach ( $plans as $slug => $plan ) {
+				echo '<label style="display:block"><input type="checkbox" name="sm_plans[]" value="' . esc_attr( $slug ) . '" ' . checked( in_array( $slug, $own, true ), true, false ) . '> ' . esc_html( $plan['name'] ) . '</label>';
+			}
+			echo '</fieldset>';
+			$inherited = $own ? array() : Scout_Members::plans_for( $id );
+			if ( $inherited ) {
+				/* translators: %s: plan names. */
+				echo '<p class="description">' . esc_html( sprintf( __( 'Now: %s only, from a parent page.', 'scout-members' ), Scout_Members::plan_names( $inherited ) ) ) . '</p>';
+			}
+		}
+		echo '<p class="description">' . esc_html__( 'Everyone else sees a short note with the sign-in form and a link to join, and search engines leave it out. Tick no plans and every member can read it.', 'scout-members' ) . '</p>';
 	}
 
 	public static function save_box( $post_id, $post ): void {
@@ -152,7 +176,15 @@ final class Scout_Members_Admin {
 		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_sm_only'] ) ), 'scout_members_only_' . $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		Scout_Members::set_members_only( (int) $post_id, ! empty( $_POST['sm_members_only'] ) );
+		if ( ! Scout_Members::locked_by( (int) $post_id ) && Scout_Members::home_id() !== (int) $post_id ) {
+			Scout_Members::set_members_only( (int) $post_id, ! empty( $_POST['sm_members_only'] ) );
+		}
+		$plans = isset( $_POST['sm_plans'] ) ? array_map( 'sanitize_title', (array) wp_unslash( $_POST['sm_plans'] ) ) : array();
+		Scout_Members::set_plans( (int) $post_id, $plans );
+		// A plan limit on a page nobody locked would do nothing, so it locks the page too.
+		if ( $plans && ! Scout_Members::locked( (int) $post_id ) ) {
+			Scout_Members::set_members_only( (int) $post_id, true );
+		}
 	}
 
 	/* ---------- actions ---------- */
@@ -391,6 +423,8 @@ final class Scout_Members_Admin {
 			</div>
 		</section>
 
+		<?php self::area(); ?>
+
 		<?php if ( ! Scout_Members::plans() || ! Scout_Members::settings()['page'] ) : ?>
 			<section class="sh-box sm-setup">
 				<h2 class="sh-title"><?php esc_html_e( 'Two steps to open the membership', 'scout-members' ); ?></h2>
@@ -431,6 +465,55 @@ final class Scout_Members_Admin {
 		</section>
 		<?php
 		unset( $waiting );
+	}
+
+	/**
+	 * What members can open: the members home, each page under it, and any
+	 * other members-only page, with who each one is for. Kai's map of the
+	 * members area, and the place to start a new members page.
+	 */
+	private static function area(): void {
+		$home = Scout_Members::home_id();
+		$ids  = Scout_Members::locked_ids();
+		?>
+		<section class="sh-box" id="sm-area">
+			<div class="sm-box-head">
+				<h2 class="sh-title"><?php esc_html_e( 'The members area', 'scout-members' ); ?></h2>
+				<?php if ( $home ) : ?>
+					<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=page&sm_parent=' . $home ) ); ?>"><?php esc_html_e( 'Add a members page', 'scout-members' ); ?></a>
+				<?php endif; ?>
+			</div>
+			<?php if ( ! $home ) : ?>
+				<p><?php esc_html_e( 'Choose a members home in Settings: the page members land on after signing in. Every page under it is members only and shows up on it as a link.', 'scout-members' ); ?> <a href="<?php echo esc_url( self::url( 'settings' ) ); ?>"><?php esc_html_e( 'Open Settings', 'scout-members' ); ?></a></p>
+			<?php endif; ?>
+			<?php if ( $ids ) : ?>
+				<table class="sh-table sm-area">
+					<thead><tr><th><?php esc_html_e( 'Page', 'scout-members' ); ?></th><th><?php esc_html_e( 'Who can open it', 'scout-members' ); ?></th><th></th></tr></thead>
+					<tbody>
+						<?php foreach ( $ids as $id ) : ?>
+							<?php $plans = Scout_Members::plans_for( $id ); ?>
+							<tr>
+								<td><?php echo $id === $home ? '<strong>' . esc_html( get_the_title( $id ) ) . '</strong> <span class="sh-note">' . esc_html__( '(members home)', 'scout-members' ) . '</span>' : esc_html( ( wp_get_post_parent_id( $id ) ? '↳ ' : '' ) . get_the_title( $id ) ); ?></td>
+								<td><?php echo esc_html( $plans ? Scout_Members::plan_names( $plans ) : __( 'Every member', 'scout-members' ) ); ?></td>
+								<td><a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php esc_html_e( 'Edit', 'scout-members' ); ?></a> &middot; <a href="<?php echo esc_url( (string) get_permalink( $id ) ); ?>"><?php esc_html_e( 'View', 'scout-members' ); ?></a></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php elseif ( $home ) : ?>
+				<p class="sm-allclear"><?php esc_html_e( 'No members pages yet. Add one and it shows up on the members home.', 'scout-members' ); ?></p>
+			<?php endif; ?>
+		</section>
+		<?php
+	}
+
+	/** "Add a members page" starts a page with the members home as its parent. */
+	public static function new_page_parent( $data, $postarr ) {
+		$parent = isset( $_GET['sm_parent'] ) ? absint( $_GET['sm_parent'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only sets the default parent of a new draft.
+		if ( $parent && 'page' === ( $data['post_type'] ?? '' ) && 'auto-draft' === ( $data['post_status'] ?? '' ) && empty( $postarr['ID'] ) && Scout_Members::home_id() === $parent && current_user_can( 'edit_pages' ) ) {
+			$data['post_parent'] = $parent;
+		}
+		return $data;
 	}
 
 	/** One application: who, when, their answers, and the decision. */
@@ -648,6 +731,21 @@ final class Scout_Members_Admin {
 							<span class="sh-note"><?php esc_html_e( 'The page with [scout_membership] on it. Join links and emails point here.', 'scout-members' ); ?></span>
 						</p>
 						<p class="sm-field">
+							<label for="sm-set-home"><?php esc_html_e( 'Members home', 'scout-members' ); ?></label>
+							<?php
+							wp_dropdown_pages(
+								array(
+									'name'              => 'scout_members[home]',
+									'id'                => 'sm-set-home',
+									'selected'          => (int) $s['home'],
+									'show_option_none'  => esc_html__( 'None yet', 'scout-members' ),
+									'option_none_value' => '0',
+								)
+							);
+							?>
+							<span class="sh-note"><?php esc_html_e( 'Where members land after signing in. It and every page under it are members only, and it lists those pages for each member. Use a different page from the membership page.', 'scout-members' ); ?></span>
+						</p>
+						<p class="sm-field">
 							<label for="sm-set-plans"><?php esc_html_e( 'Plans, one per line', 'scout-members' ); ?></label>
 							<textarea id="sm-set-plans" name="scout_members[plans]" rows="4" class="large-text code" placeholder="Club Member | 120 | year"><?php echo esc_textarea( $s['plans'] ); ?></textarea>
 							<span class="sh-note"><?php esc_html_e( 'Name | price | month, year or once. People choose one when they apply, and you can change it when you approve them.', 'scout-members' ); ?></span>
@@ -685,10 +783,13 @@ final class Scout_Members_Admin {
 				<h2 class="sh-title"><?php esc_html_e( 'Using it on the site', 'scout-members' ); ?></h2>
 				<table class="sh-table">
 					<tr><td>[scout_membership]</td><td><?php esc_html_e( 'The membership page: the application for new people, the account for members.', 'scout-members' ); ?></td></tr>
-					<tr><td>[scout_members_only] … [/scout_members_only]</td><td><?php esc_html_e( 'Hides the part in between from everyone but members.', 'scout-members' ); ?></td></tr>
-					<tr><td><?php esc_html_e( 'Members only box', 'scout-members' ); ?></td><td><?php esc_html_e( 'On any page, post or event. Ticked, only members can read it or buy tickets.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_members_only] … [/scout_members_only]</td><td><?php esc_html_e( 'Hides the part in between from everyone but members. Add plan="VIP Member" to limit it to a plan.', 'scout-members' ); ?></td></tr>
+					<tr><td><?php esc_html_e( 'Members only box', 'scout-members' ); ?></td><td><?php esc_html_e( 'On any page, post or event. Ticked, only members can read it or buy tickets. Tick plans to limit a page to them.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_member_signin]</td><td><?php esc_html_e( 'The sign-in form, anywhere on the site.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_member_link]</td><td><?php esc_html_e( 'A link that reads "Member sign in", or "Members home" once a member is signed in. In a menu, add a custom link to #scout-member-link.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_members_home]</td><td><?php esc_html_e( 'The list of members pages and events. The members home adds it under its own words by itself; place it to put the list somewhere else on the page.', 'scout-members' ); ?></td></tr>
 				</table>
-				<p class="sh-note"><?php esc_html_e( 'Members sign in on the normal WordPress sign-in page and land back on the membership page. They never see the dashboard.', 'scout-members' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Members sign in on the site, land on the members home and never see the dashboard. The WordPress password page carries the site\'s logo.', 'scout-members' ); ?></p>
 			</section>
 		</div>
 		<?php

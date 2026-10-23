@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Members
  * Description:       A membership the owner runs from the dashboard: people apply on the site, the owner approves each one, and members sign in to see members-only pages and events. Works alongside Scout Events, which marks events as members only. Card billing for dues is planned for a later version.
- * Version:           0.1.1
+ * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_MEMBERS_VERSION', '0.1.1' );
+define( 'SCOUT_MEMBERS_VERSION', '0.2.0' );
 define( 'SCOUT_MEMBERS_FILE', __FILE__ );
 define( 'SCOUT_MEMBERS_URL', plugin_dir_url( __FILE__ ) );
 

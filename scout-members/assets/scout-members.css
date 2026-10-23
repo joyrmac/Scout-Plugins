@@ -4,7 +4,7 @@
    --scout-members-accent, --scout-members-on-accent, --scout-members-line,
    --scout-members-inset, --scout-members-radius. */
 
-.sm-portal, .sm-gate {
+.sm-portal, .sm-gate, .sm-home, .sm-signin-form {
 	--sm-accent: var(--scout-members-accent, #1D1D1F);
 	--sm-on-accent: var(--scout-members-on-accent, #fff);
 	--sm-line: var(--scout-members-line, rgba(127, 127, 127, .28));
@@ -60,3 +60,20 @@
 .sm-gate p:last-child { margin-bottom: 0; }
 .sm-gate-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75em 1.25em; }
 .sm-cta .se-soon { margin-right: .75em; }
+
+/* Signing in on the site. */
+.sm-signin-form { display: grid; gap: .25em; margin: 1em 0 .5em; max-width: 26rem; }
+.sm-signin-form .sm-field { margin-bottom: .6em; }
+.sm-gate .sm-signin-form { margin-top: .5em; }
+
+/* The members home: one link per members page. */
+.sm-home { margin-top: 2em; }
+.sm-perks { list-style: none; margin: 0 0 1.5em; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1em; }
+.sm-perk a { display: flex; flex-direction: column; gap: .4em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); color: inherit; text-decoration: none; }
+.sm-perk a:hover, .sm-perk a:focus-visible { border-color: var(--scout-members-accent, currentColor); }
+.sm-perk-title { font-weight: 600; text-wrap: balance; }
+.sm-perk-tag { justify-self: start; align-self: flex-start; font-size: .75em; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.sm-perk-text { font-size: .92em; opacity: .85; text-wrap: pretty; }
+.sm-member-link { white-space: nowrap; }
+.sm-signin-more { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); }
+.sm-signin-more summary { cursor: pointer; font-weight: 600; }

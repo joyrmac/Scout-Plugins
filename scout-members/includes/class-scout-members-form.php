@@ -141,9 +141,6 @@ final class Scout_Members_Form {
 			<?php endif; ?>
 			<p><button type="submit" class="sm-button wp-element-button"><?php esc_html_e( 'Send my application', 'scout-members' ); ?></button></p>
 			<p class="sm-help"><?php esc_html_e( 'A person reads every application. Your answers are private and only the people who review applications see them.', 'scout-members' ); ?></p>
-			<?php if ( ! is_user_logged_in() ) : ?>
-				<p class="sm-help"><?php esc_html_e( 'Already a member?', 'scout-members' ); ?> <a href="<?php echo esc_url( wp_login_url( Scout_Members::page_url() ) ); ?>"><?php esc_html_e( 'Sign in', 'scout-members' ); ?></a></p>
-			<?php endif; ?>
 		</form>
 		<?php
 		return (string) ob_get_clean();
