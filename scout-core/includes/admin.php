@@ -266,11 +266,7 @@ final class Scout_Core_Admin {
 		return (array) apply_filters( 'scout_core_dashboard_checks', $checks );
 	}
 
-	/**
-	 * @return int[] Published pages and posts with no SEO description and no excerpt.
-	 * A page hidden from search needs none, and the scout_core_needs_description
-	 * filter ( true, $post_id ) lets a plugin rule out others, such as members-only pages.
-	 */
+	/** @return int[] Published pages and posts with no SEO description and no excerpt. */
 	private static function pages_missing_description() {
 		$ids = get_posts( array(
 			'post_type'      => array( 'page', 'post' ),
@@ -281,9 +277,6 @@ final class Scout_Core_Admin {
 		) );
 		$out = array();
 		foreach ( $ids as $id ) {
-			if ( '1' === (string) get_post_meta( $id, SCOUT_SEO_META_NOINDEX, true ) || ! apply_filters( 'scout_core_needs_description', true, (int) $id ) ) {
-				continue;
-			}
 			$desc = get_post_meta( $id, SCOUT_SEO_META_DESC, true );
 			if ( '' === $desc && ! has_excerpt( $id ) ) {
 				$out[] = (int) $id;
