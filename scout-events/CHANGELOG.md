@@ -1,8 +1,9 @@
 # Scout Events changelog
 
-## Next
+## 0.14.1 (2026-10-23)
 
-- Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
+- **Easier for themes to restyle.** Rules that reach inside a block now count only their outer class (`.se-facts :where(dt)`, `.se-addcal :where(span)`; 53 rules), so a theme's own `.entry-content dt` or `.se-addcal span` wins without `!important` or a longer selector. Rules that hide something keep their strength. Checked on 11 pages at 1440 and 390 with the Bliss theme: no layout change (theme session, 2026-10-23).
+- The vendor form's Yes/No buttons sit next to their words. Field styling had stretched each radio button across the form, and made the choices bold.
 
 ## 0.14.0 (2026-10-23)
 
