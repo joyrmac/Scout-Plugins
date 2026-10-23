@@ -87,6 +87,15 @@ Sign-ups live in their own table (`wp_scout_event_signups`), created on
 activation and on update. Deleting the plugin keeps it, like every other
 piece of the client's content. Paid tickets will write into the same table.
 
+## Speaker photos
+
+Each speaker can have several photos. The **Photos** box on their edit screen
+shows them all: tick **Main photo** to choose the one on their card and page,
+**Add photos** from the Media Library, and tick **Show the other photos on
+their public page** for a small strip under their bio. Replacing the main
+photo keeps the old one as an option. Presenters can add up to four from
+their profile, approved like any other change.
+
 ## Volunteers
 
 Fill in the **Volunteer shifts** box on an event (job, day, from, to, how many

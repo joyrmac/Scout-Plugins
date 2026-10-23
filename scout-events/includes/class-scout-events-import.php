@@ -14,7 +14,7 @@
  *                 capacity, know, schema_type, excerpt, description, photo,
  *                 post_status
  *   speakers.csv  name, slug, role, short_bio, bio, website, links, photo,
- *                 order, post_status
+ *                 photos (more to choose from, "|" between), order, post_status
  *   sessions.csv  title, slug, event, date, start, end, room, track, kind,
  *                 speakers, capacity, description, post_status
  *   vendors.csv   name, slug, city, website, about, products, events, photo,
@@ -245,6 +245,16 @@ final class Scout_Events_Import {
 			);
 		}
 		$this->photo( $id, $r['photo'] ?? '', 'speakers', $line );
+		// More photos to choose from: file names separated by "|".
+		foreach ( array_filter( array_map( 'trim', explode( '|', $r['photos'] ?? '' ) ) ) as $file ) {
+			$att = self::attachment_by_file( $file );
+			if ( $att ) {
+				Scout_Events_Photos::add( $id, $att );
+			} else {
+				/* translators: %s: file name. */
+				$this->note( 'speakers', $line, sprintf( __( 'Photo %s is not in the Media Library yet. Upload it, then run the import again.', 'scout-events' ), $file ) );
+			}
+		}
 	}
 
 	private function row_sessions( array $r, int $line ): void {

@@ -4,6 +4,10 @@
 
 - Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
 
+## 0.10.0 (2026-10-23)
+
+- **More than one photo per speaker** (Joy asked). A Photos box on each speaker shows every photo of them: tick **Main photo** to choose the one on their card and page, add more from the Media Library, and turn on a small strip of the others on their public page. Swapping the main photo by any route (the Featured image box, an approved presenter change, an import) keeps the old one as an option. Presenters can send up to four more photos from their profile, and they wait for approval like any other change. speakers.csv takes a `photos` column (file names separated by `|`).
+
 ## 0.9.0 (2026-10-23)
 
 - **Volunteer shifts.** A Volunteer shifts box on each event lists the jobs it needs (job, day, from, to, how many people, a note). `[scout_volunteer event="..."]` shows them by day with spots left, and volunteers pick one or more with their name, email and phone. They get a confirmation listing every shift, a link to see or drop their shifts, and a reminder the day before. **Events, Volunteers** is the roster: each shift with who is on it, what is still open, Take off shift, and a spreadsheet download. Open spots in the next two weeks show in Needs you. Volunteers live in their own table and are in the privacy export and erase tools.

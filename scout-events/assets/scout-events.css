@@ -187,3 +187,8 @@
 .se-shift.is-full label { opacity: .55; cursor: default; }
 .se-shift.is-dropped { opacity: .55; }
 .se-shift-list.is-mine form { margin: 0; }
+
+/* More photos on a speaker's page. */
+.se-speaker-photos { list-style: none; margin: 1.5em 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: .6em; }
+.se-speaker-photos li { margin: 0; }
+.se-speaker-photos img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--scout-events-radius, 14px); }

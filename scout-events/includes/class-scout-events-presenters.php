@@ -188,6 +188,7 @@ final class Scout_Events_Presenters {
 				echo self::field( 'p[links]', __( 'Social profiles, one link per line', 'scout-events' ), '', 'textarea' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				?>
 				<p class="se-p-field"><label for="se-p-photo"><?php esc_html_e( 'A photo of you (JPG or PNG)', 'scout-events' ); ?></label><input type="file" id="se-p-photo" name="se_photo" accept="image/jpeg,image/png,image/webp"></p>
+				<p class="se-p-field"><label for="se-p-photos"><?php esc_html_e( 'More photos we can choose from (optional, up to 4)', 'scout-events' ); ?></label><input type="file" id="se-p-photos" name="se_photos[]" accept="image/jpeg,image/png,image/webp" multiple></p>
 			</fieldset>
 			<fieldset class="se-p-group">
 				<legend><?php esc_html_e( 'What you would like to teach', 'scout-events' ); ?></legend>
@@ -267,7 +268,8 @@ final class Scout_Events_Presenters {
 				echo self::field( 'p[website]', __( 'Website', 'scout-events' ), (string) $view['website'], 'url' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo self::field( 'p[links]', __( 'Social profiles, one link per line', 'scout-events' ), $links, 'textarea' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				?>
-				<p class="se-p-field"><label for="se-p-photo"><?php esc_html_e( 'A new photo (optional)', 'scout-events' ); ?></label><input type="file" id="se-p-photo" name="se_photo" accept="image/jpeg,image/png,image/webp"></p>
+				<p class="se-p-field"><label for="se-p-photo"><?php esc_html_e( 'A new main photo (optional)', 'scout-events' ); ?></label><input type="file" id="se-p-photo" name="se_photo" accept="image/jpeg,image/png,image/webp"></p>
+				<p class="se-p-field"><label for="se-p-photos"><?php esc_html_e( 'More photos (optional, up to 4)', 'scout-events' ); ?></label><input type="file" id="se-p-photos" name="se_photos[]" accept="image/jpeg,image/png,image/webp" multiple><span class="se-p-help"><?php esc_html_e( 'Your current photos stay. New ones are added once they are approved.', 'scout-events' ); ?></span></p>
 			</fieldset>
 			<fieldset class="se-p-group">
 				<legend><?php esc_html_e( 'Just for the organizers', 'scout-events' ); ?></legend>
@@ -409,6 +411,13 @@ final class Scout_Events_Presenters {
 		if ( $photo > 0 ) {
 			set_post_thumbnail( $speaker, $photo );
 		}
+		$more = Scout_Events_Photos::upload( 'se_photos', (int) $speaker );
+		foreach ( $more['ids'] as $att ) {
+			Scout_Events_Photos::add( (int) $speaker, $att );
+		}
+		if ( $more['failed'] && $photo >= 0 ) {
+			$photo = -1;
+		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked in guard().
 		$event_word = isset( $_POST['se_event'] ) ? sanitize_title( wp_unslash( $_POST['se_event'] ) ) : '';
@@ -470,6 +479,13 @@ final class Scout_Events_Presenters {
 		if ( $photo > 0 ) {
 			$pending['photo'] = $photo;
 		}
+		$more = Scout_Events_Photos::upload( 'se_photos', $speaker );
+		if ( $more['ids'] ) {
+			$pending['photos'] = $more['ids'];
+		}
+		if ( $more['failed'] && $photo >= 0 ) {
+			$photo = -1;
+		}
 		update_post_meta( $speaker, self::PENDING, $pending );
 		// Private details are for the organizers only, so they save straight away.
 		$priv          = self::private_info( $speaker );
@@ -499,6 +515,9 @@ final class Scout_Events_Presenters {
 			update_post_meta( $speaker, '_scout_speaker', Scout_Events::sanitize_speaker( array_merge( $p, array_intersect_key( $pending, array_flip( array( 'role', 'short', 'website', 'links' ) ) ) ) ) );
 			if ( ! empty( $pending['photo'] ) ) {
 				set_post_thumbnail( $speaker, (int) $pending['photo'] );
+			}
+			foreach ( (array) ( $pending['photos'] ?? array() ) as $att ) {
+				Scout_Events_Photos::add( $speaker, (int) $att );
 			}
 			$user = get_userdata( (int) get_post_meta( $speaker, self::USER, true ) );
 			if ( $user ) {
@@ -608,7 +627,14 @@ final class Scout_Events_Presenters {
 				echo '<dt>' . esc_html__( 'Full bio', 'scout-events' ) . '</dt><dd>' . esc_html__( 'Changed.', 'scout-events' ) . '</dd>';
 			}
 			if ( ! empty( $pending['photo'] ) ) {
-				echo '<dt>' . esc_html__( 'New photo', 'scout-events' ) . '</dt><dd>' . wp_get_attachment_image( (int) $pending['photo'], array( 80, 80 ) ) . '</dd>';
+				echo '<dt>' . esc_html__( 'New main photo', 'scout-events' ) . '</dt><dd>' . wp_get_attachment_image( (int) $pending['photo'], array( 80, 80 ) ) . '</dd>';
+			}
+			if ( ! empty( $pending['photos'] ) ) {
+				echo '<dt>' . esc_html__( 'More photos', 'scout-events' ) . '</dt><dd class="se-pending-photos">';
+				foreach ( (array) $pending['photos'] as $att ) {
+					echo wp_get_attachment_image( (int) $att, array( 64, 64 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup.
+				}
+				echo '</dd>';
 			}
 			echo '</dl>';
 			$action = esc_url( admin_url( 'admin-post.php' ) );

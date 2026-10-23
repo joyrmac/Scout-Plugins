@@ -145,7 +145,7 @@ final class Scout_Events_Front {
 		if ( $links ) {
 			$out .= '<p class="se-links">' . implode( ' <span aria-hidden="true">·</span> ', $links ) . '</p>';
 		}
-		$out .= '</div>' . $content;
+		$out .= '</div>' . $content . Scout_Events_Photos::strip( $id );
 
 		$sessions = Scout_Events::sessions_for_speaker( $id );
 		if ( $sessions ) {
