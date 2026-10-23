@@ -96,7 +96,7 @@ their public page** for a small strip under their bio. Replacing the main
 photo keeps the old one as an option. Presenters can add up to four from
 their profile, approved like any other change.
 
-## Speaker directory
+## Directories: speakers, classes, vendors
 
 `[scout_directory]` lists every published speaker as a card (photo, name,
 role, short bio, topics) with a search box and topic buttons. People type a
@@ -105,12 +105,29 @@ address keeps the choice (`?se_topic=yoga&se_q=breath`) so it can be shared.
 Without JavaScript the same search and buttons reload the page filtered.
 On a phone the cards turn into a compact list.
 
-Topics are tags on each speaker (the **Topics** box on the speaker, or
-**Events, Topics**), or a `topics` column in speakers.csv (`Yoga|Breath`).
-
-- `topic="yoga"` starts on one topic; `event="summit-2026"` lists only that
-  event's speakers; `search="no"` leaves out the search box.
+- `type="classes"`: every class, talk, keynote, performance and activity (not
+  breaks). A class taught more than once is one card with each time and room.
+  `show="upcoming"` keeps only classes at events still to come.
+- `type="vendors"`: vendors with their logo, town and what they sell.
+- `topic="yoga"` starts on one topic; `event="summit-2026"` keeps one event;
+  `region="midwest"` keeps one region; `search="no"` leaves out the search box.
 - On a members-only page (Scout Members) it is a private directory.
+
+Topics are tags on speakers, sessions and vendors (the **Topics** box on each,
+or **Events, Topics**), or a `topics` column in the CSV files (`Yoga|Breath`).
+
+## Regions
+
+For events that run in more than one place. Set the region once, on the
+event (**Regions** box, or a `regions` column in events.csv). Its sessions,
+speakers and vendors belong to that region too; any of them can also carry a
+region of its own. When there is more than one region, directories show
+region buttons next to the topics.
+
+- `[scout_regions]`: one card per region with its next event, linking to the
+  region's page (Events, Regions, edit a region, Region page).
+- `[scout_events region="midwest"]`: one region's events.
+- The event's details show its region, linked to the region's page.
 
 ## Volunteers
 
@@ -160,11 +177,11 @@ this order so sessions can point at what came before:
 
 | File | Columns |
 |---|---|
-| events | title, slug, start_date, start_time, end_date, end_time, status, mode, venue, street, city, region, postal, country, online_url, availability, ticket_url, ticket_label, price_from, price_to, sales_start, sales_end, min_age, capacity, know, schema_type, excerpt, description, photo, post_status |
-| speakers | name, slug, role, short_bio, bio, website, links, photo, photos, topics, order, post_status |
-| sessions | title, slug, event, date, start, end, room, track, kind, speakers, capacity, description, post_status |
+| events | title, slug, start_date, start_time, end_date, end_time, status, mode, venue, street, city, region, postal, country, online_url, availability, ticket_url, ticket_label, price_from, price_to, sales_start, sales_end, min_age, capacity, know, schema_type, excerpt, description, photo, regions, post_status |
+| speakers | name, slug, role, short_bio, bio, website, links, photo, photos, topics, regions, order, post_status |
+| sessions | title, slug, event, date, start, end, room, track, kind, speakers, capacity, description, topics, regions, post_status |
 
-Dates are `YYYY-MM-DD`, times `HH:MM`. `links`, `speakers`, `know`, `photos` and `topics` take
+`region` on events is the state in the address; `regions` is the event's regions (Midwest, Southeast). Dates are `YYYY-MM-DD`, times `HH:MM`. `links`, `speakers`, `know`, `photos`, `topics` and `regions` take
 several values separated by `|`. `event` and `speakers` match by slug, then by
 title or name. `photo` is a file name already in the Media Library or a web
 address. Unknown columns are ignored.

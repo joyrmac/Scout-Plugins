@@ -487,16 +487,22 @@ final class Scout_Events_Front {
 	public static function events_shortcode( $atts ): string {
 		$a    = shortcode_atts(
 			array(
-				'show'  => 'upcoming',
-				'limit' => 0,
-				'group' => 'auto',
+				'show'   => 'upcoming',
+				'limit'  => 0,
+				'group'  => 'auto',
+				'region' => '',
 			),
 			(array) $atts,
 			'scout_events'
 		);
 		$show  = in_array( $a['show'], array( 'upcoming', 'past', 'all' ), true ) ? $a['show'] : 'upcoming';
 		$group = in_array( $a['group'], array( 'auto', 'month', 'none' ), true ) ? $a['group'] : 'auto';
-		return self::events( Scout_Events::event_ids( $show, absint( $a['limit'] ) ), $group );
+		if ( '' === $a['region'] ) {
+			return self::events( Scout_Events::event_ids( $show, absint( $a['limit'] ) ), $group );
+		}
+		// One region's events: filter the whole list first, then apply the limit.
+		$ids = Scout_Events_Regions::filter( Scout_Events::event_ids( $show ), (string) $a['region'] );
+		return self::events( absint( $a['limit'] ) ? array_slice( $ids, 0, absint( $a['limit'] ) ) : $ids, $group );
 	}
 
 	public static function event_shortcode( $atts ): string {

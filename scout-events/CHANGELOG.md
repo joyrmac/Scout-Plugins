@@ -4,6 +4,13 @@
 
 - Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
 
+## 0.12.0 (2026-10-23)
+
+- **Regions.** For events in more than one place (Prepper Camp Nation's six regions). Set once on the event; sessions, speakers and vendors follow, and can carry their own. `[scout_regions]` region cards linking to each region's page, `[scout_events region=""]`, a Region line in event details, Events → Regions, and a `regions` column on all four CSV files.
+- **One directory for speakers, classes and vendors.** `[scout_directory type="classes"]` (a repeated class is one card with each time) and `type="vendors"`, with `region`, `show="upcoming"` for classes, and region buttons beside the topics when there is more than one region. Topics now work on sessions and vendors too, with `topics` columns in sessions.csv and vendors.csv.
+- More than one directory on a page keeps its own ids.
+- New actions `scout_events_imported_session` and `scout_events_imported_vendor` ( $id, $row ).
+
 ## 0.11.0 (2026-10-23)
 
 - **Speaker directory.** `[scout_directory]`: every speaker as a card with search and topic buttons, filtering as people type or tap, with the choice kept in the address. Works without JavaScript. Compact cards on phones. `topic`, `event` and `search` options.

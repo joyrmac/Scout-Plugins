@@ -4,7 +4,7 @@
    --scout-events-accent, --scout-events-on-accent, --scout-events-line,
    --scout-events-muted, --scout-events-inset, --scout-events-radius. */
 
-.se-details, .se-schedule, .se-speakers, .se-directory, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts {
+.se-details, .se-schedule, .se-speakers, .se-directory, .se-regions, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts {
 	--se-accent: var(--scout-events-accent, #1D1D1F);
 	--se-on-accent: var(--scout-events-on-accent, #fff);
 	--se-line: var(--scout-events-line, rgba(127, 127, 127, .28));
@@ -229,4 +229,21 @@
 	.se-dir-photo.is-empty { font-size: 1.2em; }
 	.se-dir-name, .se-dir-role, .se-dir-short, .se-dir-tags { grid-column: 2; }
 	.se-dir-short { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+/* Region cards: [scout_regions]. */
+.se-regions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 1em; }
+.se-region-link { display: flex; flex-direction: column; gap: .35em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-events-radius, 14px); color: inherit; text-decoration: none; }
+a.se-region-link:hover, a.se-region-link:focus-visible { border-color: currentColor; }
+.se-region-name { font-weight: 600; font-size: 1.1em; text-wrap: balance; }
+.se-region-about { font-size: .92em; text-wrap: pretty; }
+.se-region-next { font-size: .85em; opacity: .75; }
+
+/* Directory: logos sit whole, and classes without photos stay text cards. */
+.se-dir-photo.is-logo { object-fit: contain; aspect-ratio: 3 / 2; padding: .75em; box-sizing: border-box; background: #fff; }
+.se-dir-card.no-photo .se-dir-name { font-size: 1.1em; }
+@media (max-width: 600px) {
+	.se-dir-card.no-photo { grid-template-columns: 1fr; }
+	.se-dir-card.no-photo .se-dir-name, .se-dir-card.no-photo .se-dir-role, .se-dir-card.no-photo .se-dir-short, .se-dir-card.no-photo .se-dir-tags { grid-column: 1; }
+	.se-dir-photo.is-logo { padding: .35em; }
 }

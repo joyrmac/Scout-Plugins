@@ -208,6 +208,7 @@ final class Scout_Events_Import {
 		$v['events'] = array_unique( $v['events'] );
 		Scout_Events_Vendors::save_vendor( $id, $v );
 		$this->photo( $id, $r['photo'] ?? '', 'vendors', $line );
+		do_action( 'scout_events_imported_vendor', $id, $r );
 	}
 
 	private function row_speakers( array $r, int $line ): void {
@@ -302,6 +303,7 @@ final class Scout_Events_Import {
 			$s['speakers'] = array_values( array_unique( array_merge( $s['speakers'], array_filter( $speakers, static fn( $p ) => $p > 0 ) ) ) );
 		}
 		Scout_Events::save_session( $id, $s );
+		do_action( 'scout_events_imported_session', $id, $r );
 	}
 
 	/* ---------- helpers ---------- */
