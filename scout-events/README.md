@@ -96,6 +96,22 @@ their public page** for a small strip under their bio. Replacing the main
 photo keeps the old one as an option. Presenters can add up to four from
 their profile, approved like any other change.
 
+## Speaker directory
+
+`[scout_directory]` lists every published speaker as a card (photo, name,
+role, short bio, topics) with a search box and topic buttons. People type a
+name, practice or word, or tap a topic; the list filters as they go, and the
+address keeps the choice (`?se_topic=yoga&se_q=breath`) so it can be shared.
+Without JavaScript the same search and buttons reload the page filtered.
+On a phone the cards turn into a compact list.
+
+Topics are tags on each speaker (the **Topics** box on the speaker, or
+**Events, Topics**), or a `topics` column in speakers.csv (`Yoga|Breath`).
+
+- `topic="yoga"` starts on one topic; `event="summit-2026"` lists only that
+  event's speakers; `search="no"` leaves out the search box.
+- On a members-only page (Scout Members) it is a private directory.
+
 ## Volunteers
 
 Fill in the **Volunteer shifts** box on an event (job, day, from, to, how many
@@ -145,10 +161,10 @@ this order so sessions can point at what came before:
 | File | Columns |
 |---|---|
 | events | title, slug, start_date, start_time, end_date, end_time, status, mode, venue, street, city, region, postal, country, online_url, availability, ticket_url, ticket_label, price_from, price_to, sales_start, sales_end, min_age, capacity, know, schema_type, excerpt, description, photo, post_status |
-| speakers | name, slug, role, short_bio, bio, website, links, photo, order, post_status |
+| speakers | name, slug, role, short_bio, bio, website, links, photo, photos, topics, order, post_status |
 | sessions | title, slug, event, date, start, end, room, track, kind, speakers, capacity, description, post_status |
 
-Dates are `YYYY-MM-DD`, times `HH:MM`. `links`, `speakers` and `know` take
+Dates are `YYYY-MM-DD`, times `HH:MM`. `links`, `speakers`, `know`, `photos` and `topics` take
 several values separated by `|`. `event` and `speakers` match by slug, then by
 title or name. `photo` is a file name already in the Media Library or a web
 address. Unknown columns are ignored.

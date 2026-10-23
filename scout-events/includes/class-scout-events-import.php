@@ -14,7 +14,8 @@
  *                 capacity, know, schema_type, excerpt, description, photo,
  *                 post_status
  *   speakers.csv  name, slug, role, short_bio, bio, website, links, photo,
- *                 photos (more to choose from, "|" between), order, post_status
+ *                 photos (more to choose from, "|" between), topics ("|"
+ *                 between), order, post_status
  *   sessions.csv  title, slug, event, date, start, end, room, track, kind,
  *                 speakers, capacity, description, post_status
  *   vendors.csv   name, slug, city, website, about, products, events, photo,
@@ -245,6 +246,8 @@ final class Scout_Events_Import {
 			);
 		}
 		$this->photo( $id, $r['photo'] ?? '', 'speakers', $line );
+		/** Other features add their own columns, such as topics (the directory). */
+		do_action( 'scout_events_imported_speaker', $id, $r );
 		// More photos to choose from: file names separated by "|".
 		foreach ( array_filter( array_map( 'trim', explode( '|', $r['photos'] ?? '' ) ) ) as $file ) {
 			$att = self::attachment_by_file( $file );

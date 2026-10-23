@@ -4,6 +4,12 @@
 
 - Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
 
+## 0.11.0 (2026-10-23)
+
+- **Speaker directory.** `[scout_directory]`: every speaker as a card with search and topic buttons, filtering as people type or tap, with the choice kept in the address. Works without JavaScript. Compact cards on phones. `topic`, `event` and `search` options.
+- **Topics** on speakers: a Topics box on each speaker, Events → Topics, and a `topics` column in speakers.csv ("|" between).
+- New action `scout_events_imported_speaker` ( $id, $row ) after each speaker row, so other features can read their own columns.
+
 ## 0.10.1 (2026-10-23)
 
 - Photos box: **No photo for now, on purpose** keeps a speaker out of the "No photo yet" reminder in Needs you, for a speaker whose photo is waiting on approval. Adding a photo clears it.
