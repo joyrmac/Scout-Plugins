@@ -1,0 +1,76 @@
+# Release a client theme so its sites update themselves (Scout Build 0.7.0+).
+#
+# Copy this file to .github/workflows/theme-release.yml in the client's own
+# repo and set the three values marked EDIT. Every push to main that changes
+# the theme's Version: publishes a private release tagged <slug>-v<version>
+# with <slug>.zip, which Scout Build on the client's site finds with its
+# read-only key. Pushing the same version again changes nothing.
+#
+# The theme's style.css needs, in its header:
+#   Version:       2.7.6
+#   Update URI:    https://github.com/OWNER/REPO
+#   Scout Release: <slug>
+#
+# Full steps: tools/theme-release/README.md in the Scout Plugins repo.
+
+name: Release the theme
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wp-theme/blissboogie/style.css'   # EDIT: the theme's style.css, or the built zip below
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      SLUG: blissboogie                    # EDIT: the theme folder name, same as "Scout Release:"
+      THEME_DIR: wp-theme/blissboogie      # EDIT: the folder holding style.css (or leave and set THEME_ZIP)
+      THEME_ZIP: ''                        # Optional: a built zip committed to the repo, used instead of THEME_DIR
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the zip
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          if [ -n "$THEME_ZIP" ]; then
+            cp "$THEME_ZIP" "$SLUG.zip"
+            unzip -q "$SLUG.zip" -d build
+          else
+            cp -R "$THEME_DIR" "build/$SLUG"
+            (cd build && zip -qr "../$SLUG.zip" "$SLUG" -x '*.DS_Store' -x '*/.git/*')
+          fi
+          # WordPress installs the folder inside the zip, so it must be the theme's own name.
+          [ -f "build/$SLUG/style.css" ] || { echo "::error::$SLUG.zip must hold $SLUG/style.css at its top."; exit 1; }
+
+      - name: Read the version and check the header
+        id: v
+        run: |
+          set -euo pipefail
+          css="build/$SLUG/style.css"
+          version="$(sed -n 's/^[[:space:]*]*Version:[[:space:]]*//p' "$css" | head -1 | tr -d '[:space:]')"
+          [ -n "$version" ] || { echo "::error::No Version: line in $css."; exit 1; }
+          grep -qi "Update URI:[[:space:]]*https://github.com/${GITHUB_REPOSITORY}" "$css" || echo "::warning::$css has no 'Update URI: https://github.com/${GITHUB_REPOSITORY}' line, so sites will not look here."
+          grep -qi "Scout Release:[[:space:]]*${SLUG}" "$css" || echo "::warning::$css has no 'Scout Release: ${SLUG}' line."
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish unless this version is out already
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${SLUG}-v${{ steps.v.outputs.version }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "$tag is already released. Bump Version: to publish a new one."
+            exit 0
+          fi
+          gh release create "$tag" "$SLUG.zip" \
+            --title "$SLUG ${{ steps.v.outputs.version }}" \
+            --notes "Theme $SLUG version ${{ steps.v.outputs.version }}, from ${GITHUB_SHA::7}." \
+            --target "$GITHUB_SHA"
