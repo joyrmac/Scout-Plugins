@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## Unreleased (next after 1.4.1)
+
+- **Page descriptions check** skips pages hidden from search, and the new `scout_core_needs_description` filter ( `true`, `$post_id` ) lets a plugin rule out others. Scout Members uses it for members-only pages, which were counted as missing a description (Bliss staging, Oct 23).
+
 ## 1.4.0 (2026-10-22)
 
 - **Site Sync.** One updating system for every Scout site, replacing each theme's own setup and sync screen over time. A theme lists the copy it bundles in a `scout-sync.json` file (page content, page fields, SEO titles and descriptions, shared settings, site title and tagline). Scout compares each item three ways: the theme copy, what WordPress holds, and what was there at the last sync.
