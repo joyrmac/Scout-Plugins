@@ -81,6 +81,20 @@ Sign-ups live in their own table (`wp_scout_event_signups`), created on
 activation and on update. Deleting the plugin keeps it, like every other
 piece of the client's content. Paid tickets will write into the same table.
 
+## Vendors
+
+`[scout_vendor_apply]` (add `event="summit-2027"` to file them under one
+event) is the application for people who want to sell. Each one arrives as a
+pending **Vendor** under Events and in Needs you. The owner fills in or fixes
+the public details (name, description, logo, city, website, events) and clicks
+Publish, which approves them and sends an email. Approved vendors show as a
+Vendors list near the end of every event page they are at, and anywhere with
+`[scout_vendors event="..."]`. Vendors have no pages of their own.
+
+Contact details (name, email, phone, power and setup needs) live in a private
+box on the vendor's edit screen, never on the site, and are in the WordPress
+privacy export and erase tools. vendors.csv imports public details only.
+
 ## Presenters
 
 Put `[scout_presenter_portal event="summit-2027"]` on a page (the event's

@@ -9,6 +9,7 @@
 - Waitlisted people while places are open show in Needs you, and the Coming up table shows how many signed up.
 - events.csv takes `signup` and `signup_guests`. A `scout_events_signup_allowed` filter lets Scout Members keep members-only sign-ups for members.
 - QR codes are drawn on the site by a bundled MIT-licensed library (lib/), so no ticket link is sent to an outside service.
+- **Vendors.** `[scout_vendor_apply]` is an application form for people who want to sell at an event; each one arrives as a pending vendor and in Needs you. Publishing approves them and emails them, naming the events ticked. Approved vendors show as a Vendors list on each event page they are at, and anywhere with `[scout_vendors event="..."]`. Contact details (name, email, phone, power and setup needs) stay in a private box on the edit screen and in the privacy tools; the import takes public details only (vendors.csv).
 
 ## 0.6.0 (2026-10-22)
 

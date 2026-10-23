@@ -4,6 +4,7 @@
 .post-type-scout_event,
 .post-type-scout_session,
 .post-type-scout_speaker,
+.post-type-scout_vendor,
 .se-admin {
 	--se-text: #1D1D1F;
 	--se-text-2: #515154;
@@ -107,3 +108,9 @@
 .se-door-act { display: flex; gap: 6px; flex-wrap: wrap; }
 .se-door-act .button { min-height: 36px; }
 .se-quiet { background: transparent !important; }
+
+/* Vendors: the edit screen. */
+.se-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2px 20px; margin-top: 6px; }
+.se-form .se-check-row { display: block; margin: 4px 0; font-family: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; color: inherit; }
+.se-form fieldset.se-field legend { font-family: var(--se-mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--se-text-2); }
+.post-type-scout_vendor .postbox { border: 1px solid var(--se-line); border-radius: 16px; overflow: hidden; }

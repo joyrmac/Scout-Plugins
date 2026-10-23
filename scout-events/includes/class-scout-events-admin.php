@@ -83,6 +83,7 @@ final class Scout_Events_Admin {
 			Scout_Events::EVENT   => __( 'All events', 'scout-events' ),
 			Scout_Events::SESSION => __( 'Sessions', 'scout-events' ),
 			Scout_Events::SPEAKER => __( 'Speakers', 'scout-events' ),
+			Scout_Events_Vendors::TYPE => __( 'Vendors', 'scout-events' ),
 		);
 		foreach ( $lists as $type => $label ) {
 			$list = 'edit.php?post_type=' . $type;
@@ -218,7 +219,7 @@ final class Scout_Events_Admin {
 		}
 		check_admin_referer( 'scout_events_import' );
 		$paths = array();
-		foreach ( array( 'events', 'speakers', 'sessions' ) as $kind ) {
+		foreach ( array( 'events', 'speakers', 'sessions', 'vendors' ) as $kind ) {
 			$file = $_FILES[ 'se_' . $kind ] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the temp path is used, after is_uploaded_file().
 			if ( is_array( $file ) && UPLOAD_ERR_OK === (int) ( $file['error'] ?? UPLOAD_ERR_NO_FILE ) && is_uploaded_file( (string) $file['tmp_name'] ) ) {
 				$paths[ $kind ] = (string) $file['tmp_name'];
@@ -248,6 +249,7 @@ final class Scout_Events_Admin {
 			'events'   => __( 'events', 'scout-events' ),
 			'speakers' => __( 'speakers', 'scout-events' ),
 			'sessions' => __( 'sessions', 'scout-events' ),
+			'vendors'  => __( 'vendors', 'scout-events' ),
 		);
 		$lines  = array();
 		foreach ( $labels as $kind => $label ) {
@@ -521,6 +523,7 @@ final class Scout_Events_Admin {
 				<p class="se-field"><label for="se-f-events"><?php esc_html_e( 'Events file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-events" name="se_events" accept=".csv,text/csv"></p>
 				<p class="se-field"><label for="se-f-speakers"><?php esc_html_e( 'Speakers file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-speakers" name="se_speakers" accept=".csv,text/csv"></p>
 				<p class="se-field"><label for="se-f-sessions"><?php esc_html_e( 'Sessions file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-sessions" name="se_sessions" accept=".csv,text/csv"></p>
+				<p class="se-field"><label for="se-f-vendors"><?php esc_html_e( 'Vendors file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-vendors" name="se_vendors" accept=".csv,text/csv"></p>
 				<p class="se-field"><label for="se-apply"><input type="checkbox" id="se-apply" name="se_apply" value="1"> <?php esc_html_e( 'Bring them in (leave unticked to preview)', 'scout-events' ); ?></label></p>
 				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-events' ); ?></button></p>
 			</form>

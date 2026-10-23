@@ -17,6 +17,9 @@
  *                 order, post_status
  *   sessions.csv  title, slug, event, date, start, end, room, track, kind,
  *                 speakers, capacity, description, post_status
+ *   vendors.csv   name, slug, city, website, about, products, events, photo,
+ *                 post_status (public details only: contact details stay off
+ *                 spreadsheets and come in through the vendor form)
  *
  * Column names are matched without regard to case; unknown columns are
  * ignored. "links" and "speakers" take several values separated by "|".
@@ -55,11 +58,13 @@ final class Scout_Events_Import {
 			'events'   => 0,
 			'speakers' => 0,
 			'sessions' => 0,
+			'vendors'  => 0,
 		),
 		'updated' => array(
 			'events'   => 0,
 			'speakers' => 0,
 			'sessions' => 0,
+			'vendors'  => 0,
 		),
 		'notes'   => array(),
 	);
@@ -78,7 +83,7 @@ final class Scout_Events_Import {
 	 * @return array{created:array<string,int>,updated:array<string,int>,notes:string[],dry:bool}
 	 */
 	public function run( array $paths ): array {
-		foreach ( array( 'events', 'speakers', 'sessions' ) as $kind ) {
+		foreach ( array( 'events', 'speakers', 'sessions', 'vendors' ) as $kind ) {
 			if ( empty( $paths[ $kind ] ) ) {
 				continue;
 			}
@@ -170,6 +175,38 @@ final class Scout_Events_Import {
 			/** After an events.csv row is saved, with every column, so other Scout features can read their own. */
 			do_action( 'scout_events_imported_event', $id, $r );
 		}
+	}
+
+	private function row_vendors( array $r, int $line ): void {
+		$name = $r['name'] ?? '';
+		if ( '' === $name ) {
+			$this->note( 'vendors', $line, __( 'No name, skipped.', 'scout-events' ) );
+			return;
+		}
+		$id               = $this->find( Scout_Events_Vendors::TYPE, $r['slug'] ?? '', $name, true );
+		$r['description'] = $r['about'] ?? '';
+		$id               = $this->save_post( Scout_Events_Vendors::TYPE, 'vendors', $id, $r, $name, $line );
+		if ( ! $id || $this->dry ) {
+			return;
+		}
+		$v = Scout_Events_Vendors::vendor( $id );
+		foreach ( array( 'city', 'website', 'products' ) as $k ) {
+			if ( '' !== ( $r[ $k ] ?? '' ) ) {
+				$v[ $k ] = $r[ $k ];
+			}
+		}
+		foreach ( array_filter( array_map( 'trim', explode( '|', $r['events'] ?? '' ) ) ) as $word ) {
+			$event = $this->find( Scout_Events::EVENT, $word, $word );
+			if ( $event > 0 ) {
+				$v['events'][] = $event;
+			} else {
+				/* translators: %s: event as written. */
+				$this->note( 'vendors', $line, sprintf( __( 'Event "%s" not found.', 'scout-events' ), $word ) );
+			}
+		}
+		$v['events'] = array_unique( $v['events'] );
+		Scout_Events_Vendors::save_vendor( $id, $v );
+		$this->photo( $id, $r['photo'] ?? '', 'vendors', $line );
 	}
 
 	private function row_speakers( array $r, int $line ): void {
@@ -476,6 +513,7 @@ final class Scout_Events_Import {
 			'events'   => __( 'Events', 'scout-events' ),
 			'speakers' => __( 'Speakers', 'scout-events' ),
 			'sessions' => __( 'Sessions', 'scout-events' ),
+			'vendors'  => __( 'Vendors', 'scout-events' ),
 		);
 		$where                    = $line > 0
 			/* translators: 1: file label, 2: row number. */

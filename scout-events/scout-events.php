@@ -42,6 +42,7 @@ require_once __DIR__ . '/includes/class-scout-events-schema.php';
 require_once __DIR__ . '/includes/class-scout-events-import.php';
 require_once __DIR__ . '/includes/class-scout-events-presenters.php';
 require_once __DIR__ . '/includes/class-scout-events-rsvp.php';
+require_once __DIR__ . '/includes/class-scout-events-vendors.php';
 require_once __DIR__ . '/includes/class-scout-events-rsvp-admin.php';
 require_once __DIR__ . '/includes/class-scout-events-admin.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -53,6 +54,7 @@ Scout_Events_Schema::boot();
 Scout_Events_Admin::boot();
 Scout_Events_Presenters::boot();
 Scout_Events_RSVP::boot();
+Scout_Events_Vendors::boot();
 Scout_Events_RSVP_Admin::boot();
 
 register_activation_hook(
