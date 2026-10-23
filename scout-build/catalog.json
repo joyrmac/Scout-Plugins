@@ -159,6 +159,14 @@
       "tier": "addon",
       "law": false,
       "requires": []
+    },
+    {
+      "slug": "scout-partners",
+      "name": "Partners and sponsors",
+      "summary": "Partners by level, such as Founding, National and Regional, each with a logo, link and the places they appear. Change a partner once and every placement follows, with monthly click counts to show them.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
     }
   ]
 }
