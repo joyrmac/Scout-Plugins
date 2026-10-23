@@ -49,7 +49,16 @@ final class Scout_Members_Form {
 	 */
 	public static function questions(): array {
 		$src = trim( (string) get_option( 'scout_members_questions', '' ) );
-		$src = '' !== $src ? $src : self::default_questions();
+		return self::parse( '' !== $src ? $src : self::default_questions() );
+	}
+
+	/**
+	 * Questions written one per line as "type | Question | extra". The
+	 * application and member invitations both use it.
+	 *
+	 * @return array<int,array{key:string,type:string,required:bool,label:string,extra:string}>
+	 */
+	public static function parse( string $src ): array {
 		$out = array();
 		$n   = 0;
 		foreach ( preg_split( '/\R/', $src ) as $line ) {
@@ -146,14 +155,14 @@ final class Scout_Members_Form {
 		return (string) ob_get_clean();
 	}
 
-	private static function guard_fields(): string {
+	public static function guard_fields(): string {
 		return wp_nonce_field( 'scout_members_apply', '_sm_nonce', true, false )
 			. '<input type="hidden" name="sm_t" value="' . esc_attr( (string) time() ) . '">'
 			. '<p class="sm-hp" aria-hidden="true"><label for="sm-website2">' . esc_html__( 'Leave this empty', 'scout-members' ) . '</label><input type="text" id="sm-website2" name="sm_website2" tabindex="-1" autocomplete="off"></p>';
 	}
 
 	/** One labelled input. */
-	private static function input( string $key, string $label, string $type = 'text', bool $required = false, string $value = '', string $help = '' ): string {
+	public static function input( string $key, string $label, string $type = 'text', bool $required = false, string $value = '', string $help = '' ): string {
 		$id   = 'sm-' . $key;
 		$auto = array(
 			'first' => 'given-name',
@@ -172,7 +181,7 @@ final class Scout_Members_Form {
 		return $out . '</p>';
 	}
 
-	private static function question( array $q ): string {
+	public static function question( array $q ): string {
 		$k   = $q['key'];
 		$req = $q['required'];
 		switch ( $q['type'] ) {
@@ -217,9 +226,9 @@ final class Scout_Members_Form {
 	 *
 	 * @param array<string,mixed> $m The posted m[] array, unslashed.
 	 */
-	public static function answers( array $m ): ?array {
+	public static function answers( array $m, ?array $questions = null ): ?array {
 		$out = array();
-		foreach ( self::questions() as $q ) {
+		foreach ( $questions ?? self::questions() as $q ) {
 			$k = $q['key'];
 			if ( 'heading' === $q['type'] ) {
 				continue;

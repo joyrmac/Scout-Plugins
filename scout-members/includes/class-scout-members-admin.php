@@ -262,6 +262,7 @@ final class Scout_Members_Admin {
 		Scout_Members::save_settings( $in );
 		update_option( 'scout_members_questions', sanitize_textarea_field( (string) ( $in['questions'] ?? '' ) ), false );
 		update_option( 'scout_members_next_step', sanitize_textarea_field( (string) ( $in['next_step'] ?? '' ) ), false );
+		update_option( Scout_Members_Invitations::OPTION, sanitize_textarea_field( (string) ( $in['invitation_questions'] ?? '' ) ), false );
 		self::back( 'settings' );
 	}
 
@@ -775,6 +776,11 @@ final class Scout_Members_Admin {
 							<textarea id="sm-set-q" name="scout_members[questions]" rows="14" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Form::default_questions() ); ?>"><?php echo esc_textarea( $questions ); ?></textarea>
 							<span class="sh-note"><?php esc_html_e( 'Type | Question | extra. Add * after the type to make it required. Types: heading, text, email, tel, date, url, textarea, yesno, choice (options in extra, separated by ;), agree (a statement; extra is the tick-box words), check, address. First name, last name and email are always asked. Left empty, three short questions are used.', 'scout-members' ); ?></span>
 						</p>
+						<p class="sm-field">
+							<label for="sm-set-iq"><?php esc_html_e( 'Invitation questions, one per line', 'scout-members' ); ?></label>
+							<textarea id="sm-set-iq" name="scout_members[invitation_questions]" rows="8" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Invitations::default_questions() ); ?>"><?php echo esc_textarea( (string) get_option( Scout_Members_Invitations::OPTION, '' ) ); ?></textarea>
+							<span class="sh-note"><?php esc_html_e( 'What members answer when they post an invitation with [scout_invitations]. Same format as the application. The title is always asked. Left empty, four short questions are used.', 'scout-members' ); ?></span>
+						</p>
 						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-members' ); ?></button></p>
 					</form>
 				</section>
@@ -787,6 +793,7 @@ final class Scout_Members_Admin {
 					<tr><td><?php esc_html_e( 'Members only box', 'scout-members' ); ?></td><td><?php esc_html_e( 'On any page, post or event. Ticked, only members can read it or buy tickets. Tick plans to limit a page to them.', 'scout-members' ); ?></td></tr>
 					<tr><td>[scout_member_signin]</td><td><?php esc_html_e( 'The sign-in form, anywhere on the site.', 'scout-members' ); ?></td></tr>
 					<tr><td>[scout_member_link]</td><td><?php esc_html_e( 'A link that reads "Member sign in", or "Members home" once a member is signed in. In a menu, add a custom link to #scout-member-link.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_invitations]</td><td><?php esc_html_e( 'Member invitations: the ones you have published, a form to post one, and each member\'s own with a way to take it down. Put it on a members page. New ones wait under Members, Invitations.', 'scout-members' ); ?></td></tr>
 					<tr><td>[scout_members_home]</td><td><?php esc_html_e( 'The list of members pages and events. The members home adds it under its own words by itself; place it to put the list somewhere else on the page.', 'scout-members' ); ?></td></tr>
 				</table>
 				<p class="sh-note"><?php esc_html_e( 'Members sign in on the site, land on the members home and never see the dashboard. The WordPress password page carries the site\'s logo.', 'scout-members' ); ?></p>

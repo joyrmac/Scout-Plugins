@@ -1,5 +1,10 @@
 # Scout Members changelog
 
+## 0.3.0 (2026-10-23)
+
+- **Member invitations.** `[scout_invitations]` on a members page shows the invitations the owner has published, each member's own with Take it down, and a form to post a new one. The questions are the owner's own (Settings, Invitation questions; same format as the application). New invitations wait under Members, Invitations, with a count in the menu and in Events, Needs you. Publish puts one up and emails the member; Move to Trash sends nothing. An optional "show until" date takes it down by itself. Only administrators see invitations in the dashboard, and the privacy tools export and erase them with the member's record.
+- The application's question tools (`Scout_Members_Form::parse()`, `question()`, `input()`) are shared with invitations.
+
 ## 0.2.0 (2026-10-23)
 
 - **Members home.** Choose a page in Settings. Members land there after signing in. It and every page under it are members only, and it lists the pages under it (title and excerpt) that the member can open, then the members-only events.

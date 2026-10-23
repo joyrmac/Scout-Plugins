@@ -4,7 +4,7 @@
    --scout-members-accent, --scout-members-on-accent, --scout-members-line,
    --scout-members-inset, --scout-members-radius. */
 
-.sm-portal, .sm-gate, .sm-home, .sm-signin-form {
+.sm-portal, .sm-gate, .sm-home, .sm-signin-form, .sm-invitations {
 	--sm-accent: var(--scout-members-accent, #1D1D1F);
 	--sm-on-accent: var(--scout-members-on-accent, #fff);
 	--sm-line: var(--scout-members-line, rgba(127, 127, 127, .28));
@@ -77,3 +77,24 @@
 .sm-member-link { white-space: nowrap; }
 .sm-signin-more { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); }
 .sm-signin-more summary { cursor: pointer; font-weight: 600; }
+
+/* Member invitations. */
+.sm-invite-list { display: grid; gap: 1.25em; margin: 0 0 1.5em; }
+.sm-invite { padding: 1.25em 1.5em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
+.sm-invite-title { margin: 0 0 .2em; text-wrap: balance; }
+.sm-invite-meta { margin: 0 0 1em; font-size: .85em; opacity: .75; }
+.sm-invite-answers { margin: 0; display: grid; gap: .9em; }
+.sm-invite-answers dt { font-size: .8em; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+.sm-invite-answers dd { margin: .25em 0 0; }
+.sm-invite-answers dd p { margin: 0 0 .6em; text-wrap: pretty; overflow-wrap: anywhere; }
+.sm-invite-answers dd p:last-child { margin: 0; }
+.sm-mine { list-style: none; margin: 0 0 1.5em; padding: 0; display: grid; gap: .5em; }
+.sm-mine li { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1em; padding: .7em 1em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: 10px; }
+.sm-mine-title { font-weight: 600; }
+.sm-mine-status { font-size: .85em; opacity: .75; }
+.sm-mine-drop { margin: 0 0 0 auto; }
+.sm-link-button { background: none; border: 0; padding: 0; font: inherit; font-size: .9em; color: inherit; text-decoration: underline; cursor: pointer; }
+.sm-invite-new { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
+.sm-invite-new summary { cursor: pointer; font-weight: 600; }
+.sm-invite-form { margin-top: 1em; }
+.sm-invite-heading { margin: .5em 0 0; }

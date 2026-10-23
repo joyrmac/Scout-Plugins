@@ -41,6 +41,10 @@ in the Events toolbar menu, so one screen shows everything waiting.
 - **Plan locks**: the Members only box can limit a page to some plans (VIP).
   Pages under it follow. `[scout_members_only plan="VIP Member"]` for part of
   a page.
+- `[scout_invitations]` member invitations, on a members page: the ones the
+  owner has published, a form to post one, and each member's own with a way
+  to take it down. New ones wait under **Members, Invitations** until the
+  owner publishes them. Questions: Settings, Invitation questions.
 - `[scout_member_signin]` the sign-in form. The members-only note and the
   membership page already carry it.
 - `[scout_member_link]`, or a menu custom link to `#scout-member-link`: reads
@@ -87,7 +91,9 @@ Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-field`, `.sm-statement`, `.sm-check`, `.sm-button`, `.sm-account`,
 `.sm-badge`, `.sm-facts`, `.sm-gate`, `.sm-signin-form`, `.sm-signin-more`,
 `.sm-home`, `.sm-perks`, `.sm-perk`, `.sm-perk-title`, `.sm-perk-tag`,
-`.sm-perk-text`, `.sm-member-link`. Colors are custom properties:
+`.sm-perk-text`, `.sm-member-link`, `.sm-invitations`, `.sm-invite`,
+`.sm-invite-title`, `.sm-invite-meta`, `.sm-invite-answers`, `.sm-mine`,
+`.sm-invite-new`, `.sm-invite-form`. Colors are custom properties:
 `--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
 `--scout-members-inset`, `--scout-members-radius`.
 
