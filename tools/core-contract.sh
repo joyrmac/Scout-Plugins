@@ -38,6 +38,8 @@ scout-core/includes/business.php | public static function get() | scout-aeo (/ll
 scout-core/scout-core.php | define( 'SCOUT_SEO_META_NOINDEX' | scout-aeo (noindexed pages stay out of /llms.txt)
 scout-core/includes/admin.php | public static function checks() | scout-build (Site health: search listing checks)
 scout-core/includes/admin.php | public static function render_checks( array $checks ) | scout-build (Site health: same check cards)
+scout-core/includes/schema/class-scout-schema.php | apply_filters( 'scout_schema_graph' | scout-events (adds Event and Person nodes to the graph)
+scout-core/includes/schema/class-scout-schema.php | home_url( '/#business' ) | scout-events (Event organizer points at the business)
 CONTRACT
 
 exit "$fail"
