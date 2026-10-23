@@ -91,3 +91,19 @@
 .se-pending del { color: var(--se-text-3); }
 .se-pending ins { text-decoration: none; background: #E3F4EE; }
 .se-pending-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Sign-ups: the door list. Works at a phone's width. */
+.se-door-pick select { max-width: 100%; font-size: 15px; }
+.se-door .sh-stats { margin-top: 12px; }
+.se-door-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; margin-top: 16px; }
+.se-door-find { display: flex; gap: 6px; flex: 1 1 260px; }
+.se-door-find input { flex: 1; min-width: 0; }
+.se-door-list { margin: 0; padding: 0; list-style: none; }
+.se-door-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--se-line); margin: 0; scroll-margin-top: 80px; }
+.se-door-row:last-child { border-bottom: 0; }
+.se-door-row.is-in strong { color: var(--se-text-2); }
+.se-door-who { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.se-door-who .se-chip { margin-left: 6px; }
+.se-door-act { display: flex; gap: 6px; flex-wrap: wrap; }
+.se-door-act .button { min-height: 36px; }
+.se-quiet { background: transparent !important; }

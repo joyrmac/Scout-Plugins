@@ -250,6 +250,8 @@ final class Scout_Events {
 			'sales_end'    => '',
 			'min_age'      => 0,
 			'capacity'     => 0,
+			'signup'       => 0,
+			'signup_guests' => 0,
 			'know'         => '',
 			'schema_type'  => 'Event',
 		);
@@ -286,6 +288,8 @@ final class Scout_Events {
 		$out['schema_type']  = self::pick( $in['schema_type'] ?? '', self::schema_types(), $e['schema_type'] );
 		$out['min_age']      = min( 99, absint( $in['min_age'] ?? 0 ) );
 		$out['capacity']     = absint( $in['capacity'] ?? 0 );
+		$out['signup']        = empty( $in['signup'] ) ? 0 : 1;
+		$out['signup_guests'] = min( 9, absint( $in['signup_guests'] ?? 0 ) );
 		$out['know']         = sanitize_textarea_field( (string) ( $in['know'] ?? '' ) );
 
 		// An end before the start is a typo; drop it rather than publish it.
@@ -476,7 +480,7 @@ final class Scout_Events {
 	public static function checks( int $post_id ): array {
 		$e     = self::event( $post_id );
 		$place = 'online' === $e['mode'] ? '' !== $e['online_url'] : ( '' !== $e['venue'] && '' !== $e['city'] );
-		$sell  = in_array( $e['availability'], array( 'onsale', 'free' ), true );
+		$sell  = in_array( $e['availability'], array( 'onsale', 'free' ), true ) && ! $e['signup'];
 		return array(
 			array( __( 'Start date and time', 'scout-events' ), '' !== $e['start_date'] && '' !== $e['start_time'] ),
 			array( __( 'Where it happens', 'scout-events' ), $place ),

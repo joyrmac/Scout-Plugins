@@ -20,7 +20,7 @@
 .sm-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12em), 1fr)); gap: 0 1em; }
 .sm-field { display: flex; flex-direction: column; gap: .35em; margin: 0 0 1em; }
 .sm-field label, .sm-label { font-weight: 600; font-size: .95em; text-wrap: pretty; }
-.sm-field input:not([type="radio"]):not([type="checkbox"]), .sm-field textarea, .sm-field select { width: 100%; max-width: 100%; box-sizing: border-box; padding: .6em .75em; font: inherit; border: 1px solid var(--sm-line); border-radius: 8px; background: transparent; color: inherit; }
+.sm-field :where(input:not([type="radio"]):not([type="checkbox"]), textarea, select) { width: 100%; max-width: 100%; box-sizing: border-box; padding: .6em .75em; font: inherit; border: 1px solid var(--sm-line); border-radius: 8px; background: transparent; color: inherit; }
 .sm-choice { display: flex; gap: .6em; align-items: flex-start; font-weight: 400; }
 .sm-choice input { margin-top: .3em; }
 .sm-statement { margin: 0 0 .6em; padding: .8em 1em; border-left: 3px solid var(--sm-line); background: var(--sm-inset); border-radius: 0 8px 8px 0; text-wrap: pretty; }

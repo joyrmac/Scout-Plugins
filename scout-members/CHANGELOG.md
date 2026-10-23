@@ -1,8 +1,9 @@
 # Scout Members changelog
 
-## Next
+## 0.1.1 (2026-10-23)
 
-- Lower the field style to `:where()` so themes can restyle inputs without fighting specificity (theme session, 2026-10-22).
+- Members-only events take sign-ups from members only, when Scout Events 0.7.0 sign-ups are on.
+- Field styles use `:where()`, so a theme can restyle inputs without fighting specificity (theme session, 2026-10-22).
 
 ## 0.1.0 (2026-10-22)
 

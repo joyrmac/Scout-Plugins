@@ -146,7 +146,7 @@ final class Scout_Events_Import {
 		}
 		$id    = $this->find( Scout_Events::EVENT, $r['slug'] ?? '', $title, true );
 		$merge = array();
-		$map   = array( 'start_date', 'start_time', 'end_date', 'end_time', 'status', 'mode', 'venue', 'street', 'city', 'region', 'postal', 'country', 'online_url', 'availability', 'ticket_url', 'ticket_label', 'price_from', 'price_to', 'sales_start', 'sales_end', 'min_age', 'capacity', 'schema_type' );
+		$map   = array( 'start_date', 'start_time', 'end_date', 'end_time', 'status', 'mode', 'venue', 'street', 'city', 'region', 'postal', 'country', 'online_url', 'availability', 'ticket_url', 'ticket_label', 'price_from', 'price_to', 'sales_start', 'sales_end', 'min_age', 'capacity', 'schema_type', 'signup', 'signup_guests' );
 		foreach ( $map as $key ) {
 			if ( isset( $r[ $key ] ) && '' !== $r[ $key ] ) {
 				$merge[ $key ] = $r[ $key ];

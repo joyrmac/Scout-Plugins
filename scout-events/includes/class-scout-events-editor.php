@@ -148,6 +148,13 @@ final class Scout_Events_Editor {
 					self::field( 'date', $n, 'sales_end', __( 'Sales close (optional)', 'scout-events' ), $e['sales_end'] );
 					?>
 				</div>
+				<div class="se-signup-set">
+					<p class="se-field se-wide">
+						<label for="se-signup"><input type="checkbox" id="se-signup" name="scout_event[signup]" value="1" <?php checked( (bool) $e['signup'] ); ?>> <?php esc_html_e( 'Take sign-ups on this site', 'scout-events' ); ?></label>
+						<span class="se-help"><?php esc_html_e( 'People sign up on the event page and get a ticket with a QR code by email. Scan it at the door to check them in. Uses Capacity below, and Sales open and close above. For a free event, or one paid at the door.', 'scout-events' ); ?></span>
+					</p>
+					<?php self::field( 'number', $n, 'signup_guests', __( 'Guests each person may bring', 'scout-events' ), (string) $e['signup_guests'], '', __( '0 for none, up to 9.', 'scout-events' ) ); ?>
+				</div>
 			</fieldset>
 
 			<fieldset class="se-group">
@@ -155,7 +162,7 @@ final class Scout_Events_Editor {
 				<div class="se-grid">
 					<?php
 					self::field( 'number', $n, 'min_age', __( 'Minimum age (0 for all ages)', 'scout-events' ), (string) $e['min_age'] );
-					self::field( 'number', $n, 'capacity', __( 'Capacity (optional, not shown)', 'scout-events' ), (string) $e['capacity'] );
+					self::field( 'number', $n, 'capacity', __( 'Capacity (optional)', 'scout-events' ), (string) $e['capacity'], '', __( 'With sign-ups on, people join a waitlist once it is full.', 'scout-events' ) );
 					?>
 				</div>
 				<p class="se-field se-wide">

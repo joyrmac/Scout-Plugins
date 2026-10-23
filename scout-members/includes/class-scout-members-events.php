@@ -25,6 +25,7 @@ final class Scout_Members_Events {
 		add_filter( 'scout_events_card_tags', array( __CLASS__, 'tags' ), 10, 2 );
 		add_action( 'scout_events_imported_event', array( __CLASS__, 'imported' ), 10, 2 );
 		add_filter( 'scout_members_account_extra', array( __CLASS__, 'account' ) );
+		add_filter( 'scout_events_signup_allowed', array( __CLASS__, 'signup_allowed' ), 10, 2 );
 	}
 
 	public static function box(): void {
@@ -68,6 +69,11 @@ final class Scout_Members_Events {
 			$out .= ' <a class="sm-signin" href="' . esc_url( wp_login_url( (string) get_permalink( (int) $id ) ) ) . '">' . esc_html__( 'Sign in', 'scout-members' ) . '</a>';
 		}
 		return $out . '</p>';
+	}
+
+	/** Sign-ups on a members-only event are for members (and the people who run the site). */
+	public static function signup_allowed( $ok, $id ): bool {
+		return (bool) $ok && ( ! Scout_Members::is_members_only( (int) $id ) || Scout_Members::can_see() );
 	}
 
 	public static function tags( $tags, $id ): array {

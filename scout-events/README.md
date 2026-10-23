@@ -64,6 +64,23 @@ row with every column, so a feature can read its own (Scout Members reads
 The ticket button carries `data-scout-track="ticket_click"` and the map link
 `data-scout-track="directions_click"`, which Scout Analytics reports.
 
+## Sign-ups and check-in
+
+Tick **Take sign-ups on this site** under Tickets on an event (with Capacity,
+Sales open and close, and how many guests each person may bring). The event
+page then shows a short form in place of the ticket button. Each person gets
+an email with their ticket: a link to their ticket page and the QR code as an
+image. The QR code holds that same link.
+
+At the door, sign in on a phone and scan each ticket with the camera. The
+link opens the ticket with one big **Check in** button and the running
+count. **Events, Sign-ups** is the door list for anyone without their ticket,
+the waitlist (Move in emails their ticket), and a spreadsheet download.
+
+Sign-ups live in their own table (`wp_scout_event_signups`), created on
+activation and on update. Deleting the plugin keeps it, like every other
+piece of the client's content. Paid tickets will write into the same table.
+
 ## Presenters
 
 Put `[scout_presenter_portal event="summit-2027"]` on a page (the event's

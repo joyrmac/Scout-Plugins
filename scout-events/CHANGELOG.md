@@ -1,5 +1,15 @@
 # Scout Events changelog
 
+## 0.7.0 (2026-10-23)
+
+- **Sign-ups and check-in.** Tick "Take sign-ups on this site" on an event and its page takes sign-ups: name, email and any guests allowed. Each person gets an email with their ticket and a QR code (an image attachment and a ticket page link). At the door, anyone who can edit the site scans the code with a phone camera and taps Check in; no app needed. When the event reaches its capacity, new sign-ups join a waitlist.
+- **Events, Sign-ups**: one event's door list with headcounts, a search box, Check in for people without their ticket, Move in from the waitlist (which emails their ticket), cancel and put back, and a spreadsheet download. Works at a phone's width.
+- People cancel from their ticket page. Signing up twice sends the same ticket again instead of taking a second place.
+- Ticket pages are never cached or indexed. Sign-ups are in the WordPress privacy export and erase tools.
+- Waitlisted people while places are open show in Needs you, and the Coming up table shows how many signed up.
+- events.csv takes `signup` and `signup_guests`. A `scout_events_signup_allowed` filter lets Scout Members keep members-only sign-ups for members.
+- QR codes are drawn on the site by a bundled MIT-licensed library (lib/), so no ticket link is sent to an outside service.
+
 ## 0.6.0 (2026-10-22)
 
 - Hooks for Scout Members and other Scout features: `scout_events_detail_rows`, `scout_events_ticket_html` and `scout_events_card_tags` filters on the event panel, ticket button and event cards, and a `scout_events_imported_event` action after each events.csv row, carrying every column. Nothing changes on a site without them.

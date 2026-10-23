@@ -114,3 +114,34 @@
 .se-p-badge { display: inline-block; padding: .4em .9em; border-radius: 980px; background: var(--se-inset); font-weight: 600; margin: 0 0 .5em; }
 
 @media (prefers-reduced-motion: reduce) { .se-button { transition: none; } }
+
+/* Sign-ups: the form in the details panel. */
+.se-signup { margin: 1.25em 0 0; scroll-margin-top: 2em; }
+.se-signup-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12em), 1fr)); gap: .25em 1em; align-items: end; }
+.se-s-field { display: flex; flex-direction: column; gap: .3em; margin: 0 0 .75em; min-width: 0; }
+.se-s-field label { font-weight: 600; font-size: .9em; }
+.se-s-field input, .se-s-field select { width: 100%; max-width: 100%; box-sizing: border-box; padding: .6em .75em; font: inherit; border: 1px solid var(--se-line); border-radius: 8px; background: transparent; color: inherit; }
+.se-s-submit, .se-s-help, .se-signup .se-p-hp { grid-column: 1 / -1; }
+.se-s-submit { margin: .25em 0 0; }
+.se-s-help { font-size: .85em; opacity: .75; margin: .5em 0 0; }
+.se-spots { font-weight: 600; margin: 0 0 .75em; }
+.se-s-note { padding: .7em 1em; border-radius: 8px; background: var(--se-inset); border-left: 3px solid #B42318; font-weight: 600; }
+
+/* The ticket, at the top of the event page. */
+.se-ticket { --se-line: var(--scout-events-line, rgba(127, 127, 127, .28)); --se-inset: var(--scout-events-inset, rgba(127, 127, 127, .08)); --se-accent: var(--scout-events-accent, #1D1D1F); --se-on-accent: var(--scout-events-on-accent, #fff); max-width: 30rem; margin: 0 auto 2em; padding: 1.5em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, 14px); text-align: center; scroll-margin-top: 2em; }
+.se-ticket-kicker { margin: 0; font-size: .75em; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.se-ticket-title { margin: .2em 0 .3em; text-wrap: balance; }
+.se-ticket-who { margin: 0; font-size: 1.15em; font-weight: 600; }
+.se-ticket-when { margin: .3em 0 1em; opacity: .8; text-wrap: pretty; }
+.se-ticket-qr { margin: 0 auto 1em; max-width: 16rem; border-radius: 10px; overflow: hidden; }
+.se-qr { display: block; width: 100%; height: auto; }
+.se-ticket-note { margin: 0 0 1em; text-wrap: pretty; }
+.se-ticket.is-in .se-ticket-title::before, .se-ticket-ok::before { content: ""; display: inline-block; width: .55em; height: .9em; margin-right: .45em; border: solid #0B7F5D; border-width: 0 .18em .18em 0; transform: translateY(-.1em) rotate(45deg); }
+.se-ticket-ok { color: #0B7F5D; font-weight: 600; }
+.se-ticket-warn { padding: .7em 1em; border-radius: 8px; background: var(--se-inset); border-left: 3px solid #B42318; font-weight: 600; text-align: left; }
+.se-ticket-door { margin: 1em 0; }
+.se-checkin { width: 100%; min-height: 3.5em; font-size: 1.15em; }
+.se-ticket-count, .se-ticket-staff { font-size: .85em; opacity: .8; margin: .75em 0 0; }
+.se-ticket-cancel { margin: .5em 0 0; }
+.se-linkbutton { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: .9em; text-decoration: underline; cursor: pointer; }
+.se-ticket.is-cancelled { opacity: .85; }
