@@ -6,7 +6,7 @@
 
 ## 0.10.0 (2026-10-23)
 
-- **More than one photo per speaker** (Joy asked). A Photos box on each speaker shows every photo of them: tick **Main photo** to choose the one on their card and page, add more from the Media Library, and turn on a small strip of the others on their public page. Swapping the main photo by any route (the Featured image box, an approved presenter change, an import) keeps the old one as an option. Presenters can send up to four more photos from their profile, and they wait for approval like any other change. speakers.csv takes a `photos` column (file names separated by `|`).
+- **More than one photo per speaker** (Joy asked). A Photos box on each speaker shows every photo of them: tick **Main photo** to choose the one on their card and page, add more from the Media Library, and turn on a small strip of the others on their public page. Swapping the main photo by any route (the Featured image box, an approved presenter change, an import) keeps the old one as an option. Presenters can send up to four more photos from their profile, and they wait for approval like any other change. speakers.csv takes a `photos` column (file names separated by `|`). When a speaker already has a main photo, the import adds a different one from the photo column as an option instead of replacing it.
 
 ## 0.9.0 (2026-10-23)
 

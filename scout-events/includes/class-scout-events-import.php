@@ -469,7 +469,18 @@ final class Scout_Events_Import {
 
 	/** Set the featured image from a Media Library file name or a web address, once. */
 	private function photo( int $post_id, string $photo, string $kind, int $line ): void {
-		if ( '' === $photo || has_post_thumbnail( $post_id ) ) {
+		if ( '' === $photo ) {
+			return;
+		}
+		// The main photo is never replaced, so a choice made on the site stands. A speaker's
+		// different photo joins their Photos box as an option instead.
+		if ( has_post_thumbnail( $post_id ) ) {
+			if ( 'speakers' === $kind && ! preg_match( '#^https?://#i', $photo ) ) {
+				$att = self::attachment_by_file( $photo );
+				if ( $att ) {
+					Scout_Events_Photos::add( $post_id, $att );
+				}
+			}
 			return;
 		}
 		$attachment = 0;
