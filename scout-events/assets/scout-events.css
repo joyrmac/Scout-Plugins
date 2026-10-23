@@ -173,3 +173,17 @@
 /* Add to calendar, under the ticket button. */
 .se-addcal { margin: .75em 0 0; font-size: .9em; }
 .se-addcal span { opacity: .75; margin-right: .25em; }
+
+/* Volunteer shifts. */
+.se-shift-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .5em; }
+.se-shift-day { margin: .75em 0 .1em; font-weight: 600; font-size: .9em; letter-spacing: .04em; }
+.se-shift-day:first-child { margin-top: 0; }
+.se-shift { margin: 0; }
+.se-shift label, .se-shift-list.is-mine .se-shift { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .4em .8em; padding: .75em .9em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 10px; cursor: pointer; }
+.se-shift label input { margin-top: .3em; flex: none; }
+.se-shift-what { flex: 1 1 12em; min-width: 0; display: flex; flex-direction: column; gap: .15em; }
+.se-shift-time, .se-shift-note { font-size: .9em; opacity: .8; }
+.se-shift-left { font-size: .85em; font-weight: 600; white-space: nowrap; }
+.se-shift.is-full label { opacity: .55; cursor: default; }
+.se-shift.is-dropped { opacity: .55; }
+.se-shift-list.is-mine form { margin: 0; }

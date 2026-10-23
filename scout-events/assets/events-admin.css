@@ -114,3 +114,11 @@
 .se-form .se-check-row { display: block; margin: 4px 0; font-family: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; color: inherit; }
 .se-form fieldset.se-field legend { font-family: var(--se-mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--se-text-2); }
 .post-type-scout_vendor .postbox { border: 1px solid var(--se-line); border-radius: 16px; overflow: hidden; }
+
+/* Volunteer shifts on the event screen. */
+.se-shifts-wrap { overflow-x: auto; }
+.se-shifts { width: 100%; border-collapse: collapse; min-width: 760px; }
+.se-shifts th { text-align: left; font-family: var(--se-mono); font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--se-text-2); padding: 6px 6px 4px 0; }
+.se-shifts td { padding: 4px 6px 4px 0; vertical-align: middle; }
+.se-shifts input[type="text"] { width: 100%; }
+.se-shift-taken { font-family: var(--se-mono); font-size: 12px; white-space: nowrap; color: var(--se-text-2); }

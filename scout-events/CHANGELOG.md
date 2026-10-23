@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.9.0 (2026-10-23)
+
+- **Volunteer shifts.** A Volunteer shifts box on each event lists the jobs it needs (job, day, from, to, how many people, a note). `[scout_volunteer event="..."]` shows them by day with spots left, and volunteers pick one or more with their name, email and phone. They get a confirmation listing every shift, a link to see or drop their shifts, and a reminder the day before. **Events, Volunteers** is the roster: each shift with who is on it, what is still open, Take off shift, and a spreadsheet download. Open spots in the next two weeks show in Needs you. Volunteers live in their own table and are in the privacy export and erase tools.
+
 ## 0.8.0 (2026-10-23)
 
 - **Add to calendar.** Every upcoming event shows "Add to calendar: Google · Apple or Outlook" under its ticket button or sign-up form. The .ics file (`?se_ics=1` on the event address) also rides along with each ticket email. Events without a start time go in as all-day.

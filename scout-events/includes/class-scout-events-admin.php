@@ -45,7 +45,7 @@ final class Scout_Events_Admin {
 	public static function url( array $args = array() ): string {
 		$view = $args['view'] ?? '';
 		unset( $args['view'] );
-		$base = admin_url( 'admin.php?page=' . self::SLUG . ( in_array( $view, array( 'import', 'settings', 'signups' ), true ) ? '-' . $view : '' ) );
+		$base = admin_url( 'admin.php?page=' . self::SLUG . ( in_array( $view, array( 'import', 'settings', 'signups', 'volunteers' ), true ) ? '-' . $view : '' ) );
 		return $args ? add_query_arg( $args, $base ) : $base;
 	}
 
@@ -92,6 +92,7 @@ final class Scout_Events_Admin {
 			add_submenu_page( self::SLUG, $label, $label, 'edit_posts', $list );
 		}
 		add_submenu_page( self::SLUG, __( 'Sign-ups and check-in', 'scout-events' ), __( 'Sign-ups', 'scout-events' ), 'edit_posts', self::SLUG . '-signups', array( __CLASS__, 'render_signups' ) );
+		add_submenu_page( self::SLUG, __( 'Volunteer shifts', 'scout-events' ), __( 'Volunteers', 'scout-events' ), 'edit_posts', self::SLUG . '-volunteers', array( __CLASS__, 'render_volunteers' ) );
 		add_submenu_page( self::SLUG, __( 'Bring in a spreadsheet', 'scout-events' ), __( 'Import', 'scout-events' ), 'edit_posts', self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
 		add_submenu_page( self::SLUG, __( 'Showing events and settings', 'scout-events' ), __( 'Settings', 'scout-events' ), 'edit_posts', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
 		// Tickets, members and applications add their screens here, before Import.
@@ -413,11 +414,15 @@ final class Scout_Events_Admin {
 		self::render( 'signups' );
 	}
 
+	public static function render_volunteers(): void {
+		self::render( 'volunteers' );
+	}
+
 	public static function render( string $view = 'overview' ): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
-		$view = in_array( $view, array( 'overview', 'import', 'settings', 'signups' ), true ) ? $view : 'overview';
+		$view = in_array( $view, array( 'overview', 'import', 'settings', 'signups', 'volunteers' ), true ) ? $view : 'overview';
 
 		Scout_Admin_UI::open(
 			__( 'Your events', 'scout-events' ),
@@ -428,6 +433,8 @@ final class Scout_Events_Admin {
 		echo '<div class="se-admin">';
 		if ( 'signups' === $view ) {
 			Scout_Events_RSVP_Admin::view();
+		} elseif ( 'volunteers' === $view ) {
+			Scout_Events_Volunteers::view();
 		} elseif ( 'import' === $view ) {
 			self::view_import();
 		} elseif ( 'settings' === $view ) {

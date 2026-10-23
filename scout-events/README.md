@@ -87,6 +87,14 @@ Sign-ups live in their own table (`wp_scout_event_signups`), created on
 activation and on update. Deleting the plugin keeps it, like every other
 piece of the client's content. Paid tickets will write into the same table.
 
+## Volunteers
+
+Fill in the **Volunteer shifts** box on an event (job, day, from, to, how many
+people, a note for volunteers) and put `[scout_volunteer event="..."]` on a
+page. Volunteers pick shifts and get a confirmation, a link to see or drop
+their shifts, and a reminder the day before. **Events, Volunteers** is the
+roster, with open spots and a spreadsheet download.
+
 ## Vendors
 
 `[scout_vendor_apply]` (add `event="summit-2027"` to file them under one
