@@ -247,3 +247,19 @@ a.se-region-link:hover, a.se-region-link:focus-visible { border-color: currentCo
 	.se-dir-card.no-photo .se-dir-name, .se-dir-card.no-photo .se-dir-role, .se-dir-card.no-photo .se-dir-short, .se-dir-card.no-photo .se-dir-tags { grid-column: 1; }
 	.se-dir-photo.is-logo { padding: .35em; }
 }
+
+/* Tickets from the shop: a ticket list in place of the single button.
+   Wraps by itself, so it fits a narrow details panel as well as a wide page. */
+.se-tickets { margin: 1.25em 0 0; text-align: start; }
+.se-tickets-title { margin: 0 0 .6em; font-size: 1.1em; }
+.se-ticket-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .6em; }
+.se-ticket-list > .se-ticket { display: flex; flex-wrap: wrap; align-items: center; text-align: start; gap: .5em 1em; width: 100%; max-width: none; box-sizing: border-box; margin: 0; padding: .9em 1em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-events-radius, 14px); }
+.se-ticket-what { display: flex; flex-direction: column; gap: .2em; flex: 1 1 11em; min-width: 0; }
+.se-ticket-name { font-weight: 600; text-wrap: balance; }
+.se-ticket-about { font-size: .9em; opacity: .8; text-wrap: pretty; }
+.se-ticket-price { font-weight: 600; white-space: nowrap; }
+.se-ticket-left { flex-basis: 100%; order: 3; font-size: .85em; opacity: .8; }
+.se-ticket-buy { display: flex; align-items: center; gap: .5em; margin: 0 0 0 auto; order: 4; }
+.se-ticket-buy :where(input) { width: 4.2em; padding: .55em .5em; font: inherit; color: inherit; background: transparent; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 8px; }
+.se-ticket > .se-soldout { margin-left: auto; order: 4; }
+.se-tickets-cart { margin: .75em 0 0; font-size: .92em; }

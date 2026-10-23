@@ -116,6 +116,28 @@ On a phone the cards turn into a compact list.
 Topics are tags on speakers, sessions and vendors (the **Topics** box on each,
 or **Events, Topics**), or a `topics` column in the CSV files (`Yoga|Breath`).
 
+## Tickets from a WooCommerce shop
+
+When the site runs WooCommerce, each event has a **Tickets from the shop**
+box. Tick the products that are its tickets, one per ticket type (Weekend
+pass, Day pass, VIP, a camping spot), each with its own price and stock.
+
+- The event page lists them in place of the single ticket button: price,
+  "12 left" when stock runs low, **Sold out**, and **Add to cart** (it works
+  without JavaScript too). Products with choices link to their own page.
+- The event's price, and whether it is on sale or sold out, come from the
+  products, so event cards, the details panel and Google's event listing
+  follow the shop. "Not on sale yet" on the event still holds the list back
+  until the owner opens sales; Cancelled always wins.
+- Each product page says which event it is for, and the events list has a
+  **Tickets sold** column.
+- Every paid order fires `scout_events_ticket_bought` ( $order, $event_id,
+  $product_id, $qty ) once per ticket line.
+
+QR tickets and gate scanning come from a WooCommerce ticket plugin such as
+FooEvents, working on the same products. Free sign-ups with QR check-in stay
+with **Sign-ups** above.
+
 ## Regions
 
 For events that run in more than one place. Set the region once, on the

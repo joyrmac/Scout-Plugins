@@ -259,7 +259,13 @@ final class Scout_Events {
 
 	public static function event( int $post_id ): array {
 		$raw = get_post_meta( $post_id, '_scout_event', true );
-		return self::sanitize_event( is_array( $raw ) ? $raw : array() );
+		$e   = self::sanitize_event( is_array( $raw ) ? $raw : array() );
+		if ( is_admin() && ! wp_doing_ajax() ) {
+			// Edit screens show and save what was typed, never a stand-in.
+			return $e;
+		}
+		/** Other features can stand in for fields on the site, such as a shop's live price and stock. */
+		return (array) apply_filters( 'scout_events_event', $e, $post_id );
 	}
 
 	public static function sanitize_event( array $in ): array {

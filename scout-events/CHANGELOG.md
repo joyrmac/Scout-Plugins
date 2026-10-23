@@ -4,6 +4,11 @@
 
 - Lower the front-end defaults (starting with `.se-addcal`) to `:where()` so themes restyle them without raising specificity (theme session, 2026-10-23).
 
+## 0.13.0 (2026-10-23)
+
+- **Tickets from a WooCommerce shop.** A Tickets from the shop box on each event picks its ticket products. The event page lists them with price, "N left", Sold out and Add to cart; the event's price and on sale / sold out state, cards and Google listing follow the products; product pages name their event; the events list gets Tickets sold. Paid orders fire `scout_events_ticket_bought` once per ticket line. Only active when WooCommerce is.
+- New filter `scout_events_event` ( $event, $id ) on the site side, so other features can stand in for fields. Edit screens still show what was typed.
+
 ## 0.12.0 (2026-10-23)
 
 - **Regions.** For events in more than one place (Prepper Camp Nation's six regions). Set once on the event; sessions, speakers and vendors follow, and can carry their own. `[scout_regions]` region cards linking to each region's page, `[scout_events region=""]`, a Region line in event details, Events → Regions, and a `regions` column on all four CSV files.
