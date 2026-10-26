@@ -1,5 +1,13 @@
 # Scout Core — Changelog
 
+## 1.4.1 (2026-10-22)
+
+Two Site Sync fixes found testing the Hair by Patrick pilot, before any theme ships a manifest.
+
+- **Fix: automatic updates after adopting Site Sync.** A page that already matched the theme when a site adopted Site Sync got no starting record, so every later copy change read "Needs a decision" instead of updating on its own. Matching rows now get their record on the next sync pass (automatic or "Sync these now"), and a kept copy the repo has caught up with stops being kept.
+- **Fix: a missing theme file can no longer blank a page.** When a manifest names a file the theme does not ship, that row is reported and left out, so neither the automatic run nor "Use the theme copy" writes an empty page.
+- Integration test: 36 checks (was 30), including both cases.
+
 ## 1.4.0 (2026-10-22)
 
 - **Site Sync.** One updating system for every Scout site, replacing each theme's own setup and sync screen over time. A theme lists the copy it bundles in a `scout-sync.json` file (page content, page fields, SEO titles and descriptions, shared settings, site title and tagline). Scout compares each item three ways: the theme copy, what WordPress holds, and what was there at the last sync.

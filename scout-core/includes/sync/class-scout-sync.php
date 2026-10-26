@@ -158,14 +158,16 @@ final class Scout_Sync {
 			if ( ! empty( $item['image'] ) ) {
 				$file = self::source( $item['image'] );
 				if ( ! $file ) {
-					$errors[] = 'Image missing from the theme: ' . $item['image'];
+					$errors[]       = 'Image missing from the theme: ' . $item['image'];
+					$item['broken'] = true;
 				}
 				$item['file']  = $file;
 				$item['theme'] = $file ? 'img:' . hash_file( 'sha256', $file ) : '';
 			} elseif ( null !== ( $item['source'] ?? null ) ) {
 				$file = self::source( $item['source'] );
 				if ( ! $file ) {
-					$errors[] = 'File missing from the theme: ' . $item['source'];
+					$errors[]       = 'File missing from the theme: ' . $item['source'];
+					$item['broken'] = true;
 				}
 				$item['theme'] = $file ? (string) file_get_contents( $file ) : '';
 			} else {
@@ -173,6 +175,16 @@ final class Scout_Sync {
 			}
 		}
 		unset( $item );
+		// An item whose file is missing has no theme copy to compare or write. It
+		// is reported as an error and left out, so it can never blank a page.
+		$items = array_values(
+			array_filter(
+				$items,
+				static function ( $item ) {
+					return empty( $item['broken'] );
+				}
+			)
+		);
 		return array( 'items' => $items, 'errors' => $errors );
 	}
 
@@ -427,12 +439,16 @@ final class Scout_Sync {
 					$pick[] = $row;
 				}
 			}
+			$bases = get_option( self::BASES, array() );
+			$bases = is_array( $bases ) ? $bases : array();
+
+			if ( 'safe' === $mode && self::adopt_current( $plan['rows'], $bases ) ) {
+				update_option( self::BASES, $bases, false );
+			}
+
 			if ( ! $pick ) {
 				return array( 'written' => 0 );
 			}
-
-			$bases = get_option( self::BASES, array() );
-			$bases = is_array( $bases ) ? $bases : array();
 
 			if ( 'keep' === $mode ) {
 				foreach ( $pick as $row ) {
@@ -493,6 +509,33 @@ final class Scout_Sync {
 		} finally {
 			delete_option( self::LOCK );
 		}
+	}
+
+	/**
+	 * Record a base for every row that already matches the theme but has no
+	 * base, or an outdated one. Without it, a site that adopts Site Sync while
+	 * already matching would see every later theme change as "needs a
+	 * decision" instead of a safe update. A kept copy the repo has since
+	 * caught up with stops being kept.
+	 *
+	 * @param array<int,array<string,mixed>> $rows  Plan rows.
+	 * @param array<string,array>            $bases Bases, updated in place.
+	 * @return bool True when any base changed.
+	 */
+	private static function adopt_current( array $rows, array &$bases ) {
+		$changed = false;
+		foreach ( $rows as $row ) {
+			if ( self::CURRENT !== $row['state'] || ! isset( $row['t'], $row['d'] ) || $row['t'] !== $row['d'] ) {
+				continue; // Only identical copies; a kept WordPress copy keeps its base.
+			}
+			$base = $bases[ $row['id'] ] ?? null;
+			if ( is_array( $base ) && $row['t'] === ( $base['t'] ?? '' ) && $row['d'] === ( $base['d'] ?? '' ) && empty( $base['kept'] ) ) {
+				continue;
+			}
+			$bases[ $row['id'] ] = array( 't' => $row['t'], 'd' => $row['d'] );
+			$changed             = true;
+		}
+		return $changed;
 	}
 
 	/**
