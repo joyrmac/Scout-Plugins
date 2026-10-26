@@ -52,6 +52,9 @@ final class Scout_Hub_Catalog {
 		}
 
 		$out = array();
+		// A theme listed in not_with_themes can still offer a feature by declaring
+		// add_theme_support( '<slug>' ), e.g. Scout Media and Recon opt in to
+		// scout-core for Site Sync once they turn off its duplicate tags.
 		foreach ( (array) ( $data['features'] ?? array() ) as $row ) {
 			$slug = sanitize_key( (string) ( $row['slug'] ?? '' ) );
 			if ( '' === $slug || 'scout-build' === $slug ) {
@@ -65,7 +68,7 @@ final class Scout_Hub_Catalog {
 				'law'      => ! empty( $row['law'] ),
 				'requires' => array_map( 'sanitize_key', (array) ( $row['requires'] ?? array() ) ),
 				'hidden'   => ! empty( $row['client_specific'] ),
-				'blocked'  => in_array( get_template(), array_map( 'sanitize_key', (array) ( $row['not_with_themes'] ?? array() ) ), true ),
+				'blocked'  => in_array( get_template(), array_map( 'sanitize_key', (array) ( $row['not_with_themes'] ?? array() ) ), true ) && ! current_theme_supports( $slug ),
 				'block_note' => sanitize_text_field( (string) ( $row['not_with_note'] ?? '' ) ),
 			);
 		}
