@@ -1,5 +1,16 @@
 # Scout Core — Changelog
 
+## 1.5.0 (2026-10-26)
+
+Site Sync reaches four more places, so a theme update can carry them instead of one-time code in the theme. Joy asked why Sean's bio update needed theme code at all.
+
+- **Business info, one field at a time.** A manifest can set a single Business info field (`scout_business`), leaving the others as typed.
+- **Theme options, one key at a time.** A theme can let Site Sync set keys in its own array options (filter `scout_sync_option_keys`), such as one person's title on the business cards. A list item is found by its slug.
+- **Team profiles, one field at a time.** A manifest can set one key inside an array meta value, such as a Team profile's role, and leave the rest of the profile alone.
+- **Author bios.** A manifest can set an author's Biographical Info, matched by email.
+- **A Core update re-runs the automatic sync,** so rows a new Core understands apply on the first admin load after it updates.
+- Every new row has the same states, review, journal and undo as before. Spec: `docs/site-sync-spec.md`. 52 checks pass.
+
 ## 1.4.1 (2026-10-22)
 
 Two Site Sync fixes found testing the Hair by Patrick pilot, before any theme ships a manifest.

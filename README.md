@@ -22,7 +22,7 @@ instead of a data-loss event.
 
 | Plugin | Version | What it does | Requires |
 |---|---|---|---|
-| [`scout-core`](scout-core/) | 1.1.3 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
+| [`scout-core`](scout-core/) | 1.5.0 | The engine: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap. One plugin, one Scout dashboard. | WP 6.5+, PHP 8.0+ |
 | [`scout-events`](scout-events/) | 0.13.0 | Events, sessions and speakers edited in plain forms: event pages with the ticket button, a day-by-day schedule, speaker pages, searchable directories of speakers, classes and vendors with topics and regions, tickets from a WooCommerce shop, and Event schema for Google, plus a spreadsheet import. Works with any ticket link. | WP 6.5+, PHP 8.0+ (Scout Core optional) |
 | [`scout-members`](scout-members/) | 0.3.0 | A membership run from the dashboard: applications with the owner's own questions, approval, sign-in on the site, a members home that lists every members page, pages locked to all members or to some plans, member invitations the owner approves, plans and renewal dates, members-only events, and a CSV import for members moving from another system. | WP 6.5+, PHP 8.0+ (Scout Events optional) |
 | [`scout-partners`](scout-partners/) | 0.1.0 | Partners and sponsors by level, each with a logo, link, regions and the places they appear, with monthly click counts. Optional partners on each event page with Scout Events. | WP 6.5+, PHP 8.0+ (Scout Events optional) |
