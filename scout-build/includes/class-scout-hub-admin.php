@@ -342,6 +342,25 @@ final class Scout_Hub_Admin {
 							echo esc_html( sprintf( __( 'Checked %s ago', 'scout-build' ), human_time_diff( $checked ) ) );
 							?>
 						<?php endif; ?>
+						<?php
+						// Scout Build updates itself from the Plugins screen, so its own version sits here.
+						$updates   = get_site_transient( 'update_plugins' );
+						$build_new = $updates->response[ plugin_basename( SCOUT_HUB_FILE ) ]->new_version ?? '';
+						?>
+						<span class="sh-build-ver">
+							<?php
+							/* translators: %s: Scout Build version */
+							echo esc_html( sprintf( __( 'Scout Build %s', 'scout-build' ), SCOUT_HUB_VERSION ) );
+							?>
+							<?php if ( $build_new && version_compare( $build_new, SCOUT_HUB_VERSION, '>' ) ) : ?>
+								<a href="<?php echo esc_url( admin_url( 'plugins.php?plugin_status=upgrade' ) ); ?>">
+									<?php
+									/* translators: %s: newer Scout Build version */
+									echo esc_html( sprintf( __( '%s ready on the Plugins screen', 'scout-build' ), $build_new ) );
+									?>
+								</a>
+							<?php endif; ?>
+						</span>
 					</p>
 				</div>
 				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
@@ -374,7 +393,7 @@ final class Scout_Hub_Admin {
 				<?php endforeach; ?>
 			</div>
 		<?php endforeach; ?>
-		<style>.sh-skip .sh-card{opacity:.55}.sh-skip .sh-card:hover,.sh-skip .sh-card:focus-within{opacity:1}.sh-step{font-weight:600}</style>
+		<style>.sh-skip .sh-card{opacity:.55}.sh-skip .sh-card:hover,.sh-skip .sh-card:focus-within{opacity:1}.sh-step{font-weight:600}.sh-build-ver{margin-left:12px;white-space:nowrap}</style>
 
 		<?php if ( $groups['unused'] ) : ?>
 			<section class="sh-box sh-unused">
