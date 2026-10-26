@@ -1,13 +1,17 @@
 # Scout Build changelog
 
-## 0.7.2 (2026-10-26)
+## 0.7.3 (2026-10-26)
 
-The 0.6.7 changes, renumbered to follow 0.7.0 and 0.7.1 (released while they waited for a staging test).
+The 0.6.7 changes, renumbered to follow 0.7.0, 0.7.1 and 0.7.2 (released while they waited for a staging test).
 
 - **Form emails in the site's own colors.** Gravity Forms notifications now arrive in the same card as the Email test: the site's color bar, its Site Icon, the site name, and the subject as the headline, with the form answers below. When the message has a phone number, it gets Call and Text buttons; when it has an email address, an Email back button. Confirmations sent to the person who filled in the form get the card without those buttons. Light colors like Carolina blue get dark button text so it stays readable. Only HTML notifications, only while Scout Email is set up. Joy, on Andy's request email: "can these be branded?" Off switch: the `scout_mail_brand_forms` filter.
 - **Other Scout plugins can use the site's brand color.** `Scout_Hub_Mail::brand_color()` returns the Email screen's pick or the detected color; Scout Analytics 0.1.15 colors the cookie notice's OK button with it.
 - **The headline leaves out the phone number.** It already has its Call button, and mail apps turned the number in the headline into a large link (Joy's test on Andy's staging).
 - **Email back finds plain addresses.** Gravity Forms sends the visitor's email as plain text, so the button now reads the first address in the message that is not the site's own (Joy's second test showed Call and Text but no Email back).
+
+## 0.7.2 (2026-10-26)
+
+- **The theme says which features a client needs.** A `features` section in the client theme's `scout-setup.json` lists the features to use, in install order, and the ones this client doesn't need. Features shows "Recommended for this site, in install order" with numbered cards first, then "Also available" sorted by name, then "Not needed for this site" grayed out (still one click to turn on). Without the section, "Ready to turn on" now sorts by name. Joy asked for it so a new site's setup reads like a checklist.
 
 ## 0.7.1 (2026-10-26)
 

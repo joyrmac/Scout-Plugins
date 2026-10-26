@@ -257,6 +257,26 @@ final class Scout_Hub_Admin {
 			$key                    = 'on' === $st['state'] ? 'on' : ( $f['blocked'] ? 'unused' : 'ready' );
 			$groups[ $key ][ $slug ] = array( 'f' => $f, 's' => $st );
 		}
+		// The theme's setup file can say which features this client needs, in install
+		// order, and which it doesn't. Everything else ready to add sorts by name.
+		$fplan   = Scout_Hub_Setup::feature_plan();
+		$picked  = array();
+		$skipped = array();
+		foreach ( $fplan['use'] as $slug ) {
+			if ( isset( $groups['ready'][ $slug ] ) ) {
+				$picked[ $slug ] = $groups['ready'][ $slug ];
+				unset( $groups['ready'][ $slug ] );
+			}
+		}
+		foreach ( $fplan['skip'] as $slug ) {
+			if ( isset( $groups['ready'][ $slug ] ) ) {
+				$skipped[ $slug ] = $groups['ready'][ $slug ];
+				unset( $groups['ready'][ $slug ] );
+			}
+		}
+		uasort( $groups['ready'], static fn( $a, $b ) => strcasecmp( $a['f']['name'], $b['f']['name'] ) );
+		uasort( $skipped, static fn( $a, $b ) => strcasecmp( $a['f']['name'], $b['f']['name'] ) );
+		$groups = array( 'on' => $groups['on'], 'picked' => $picked, 'ready' => $groups['ready'], 'skip' => $skipped, 'unused' => $groups['unused'] );
 		$ai    = Scout_Hub_Health::ai_checks();
 		$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
 		?>
@@ -267,7 +287,7 @@ final class Scout_Hub_Admin {
 					<p class="sh-note"><?php esc_html_e( 'features on', 'scout-build' ); ?></p>
 				</div>
 				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) count( $groups['ready'] ); ?></p>
+					<p class="sh-num"><?php echo (int) ( count( $groups['picked'] ) + count( $groups['ready'] ) ); ?></p>
 					<p class="sh-note"><?php esc_html_e( 'ready to add', 'scout-build' ); ?></p>
 				</div>
 				<div class="sh-stat">
@@ -334,23 +354,27 @@ final class Scout_Hub_Admin {
 
 		<?php
 		$titles = array(
-			'on'    => __( 'On this site', 'scout-build' ),
-			'ready' => $operator ? __( 'Ready to turn on', 'scout-build' ) : __( 'Available to add', 'scout-build' ),
+			'on'     => __( 'On this site', 'scout-build' ),
+			'picked' => __( 'Recommended for this site, in install order', 'scout-build' ),
+			'ready'  => $groups['picked'] ? __( 'Also available', 'scout-build' ) : ( $operator ? __( 'Ready to turn on', 'scout-build' ) : __( 'Available to add', 'scout-build' ) ),
+			'skip'   => __( 'Not needed for this site', 'scout-build' ),
 		);
 		foreach ( $titles as $key => $title ) :
 			if ( ! $groups[ $key ] ) {
 				continue;
 			}
+			$step = 0;
 			?>
 			<div class="sh-section-head">
 				<p class="sh-eyebrow"><?php echo esc_html( $title . ' · ' . count( $groups[ $key ] ) ); ?></p>
 			</div>
-			<div class="sh-grid">
+			<div class="sh-grid<?php echo 'skip' === $key ? ' sh-skip' : ''; ?>">
 				<?php foreach ( $groups[ $key ] as $slug => $row ) : ?>
-					<?php self::card( $slug, $row['f'], $row['s'], $operator ); ?>
+					<?php self::card( $slug, $row['f'], $row['s'], $operator, 'picked' === $key ? ++$step : 0 ); ?>
 				<?php endforeach; ?>
 			</div>
 		<?php endforeach; ?>
+		<style>.sh-skip .sh-card{opacity:.55}.sh-skip .sh-card:hover,.sh-skip .sh-card:focus-within{opacity:1}.sh-step{font-weight:600}</style>
 
 		<?php if ( $groups['unused'] ) : ?>
 			<section class="sh-box sh-unused">
@@ -389,7 +413,7 @@ final class Scout_Hub_Admin {
 
 
 	/** One feature card. */
-	private static function card( string $slug, array $f, array $s, bool $operator ): void {
+	private static function card( string $slug, array $f, array $s, bool $operator, int $step = 0 ): void {
 		$states   = array(
 			'missing' => __( 'Not installed', 'scout-build' ),
 			'off'     => __( 'Off', 'scout-build' ),
@@ -399,7 +423,7 @@ final class Scout_Hub_Admin {
 		?>
 		<article class="sh-card is-<?php echo esc_attr( $s['state'] ); ?>">
 			<div class="sh-cardhead">
-				<h2><?php echo esc_html( $f['name'] ); ?></h2>
+				<h2><?php if ( $step ) : ?><span class="sh-step"><?php echo esc_html( $step . '. ' ); ?></span><?php endif; ?><?php echo esc_html( $f['name'] ); ?></h2>
 				<span class="sh-pill is-<?php echo esc_attr( $s['state'] ); ?>"><?php echo esc_html( $states[ $s['state'] ] ); ?></span>
 			</div>
 			<p class="sh-summary"><?php echo esc_html( $f['summary'] ); ?></p>
