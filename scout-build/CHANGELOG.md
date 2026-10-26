@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.2 (2026-10-26)
+
+- **The theme says which features a client needs.** A `features` section in the client theme's `scout-setup.json` lists the features to use, in install order, and the ones this client doesn't need. Features shows "Recommended for this site, in install order" with numbered cards first, then "Also available" sorted by name, then "Not needed for this site" grayed out (still one click to turn on). Without the section, "Ready to turn on" now sorts by name. Joy asked for it so a new site's setup reads like a checklist.
+
 ## 0.7.1 (2026-10-26)
 
 - **A theme can opt in to a feature its catalog row rules out.** Business info (Scout Core) shows as "Not used on this site" on the Scout Media and Recon themes, because they print their own SEO tags. Site Sync lives in Scout Core, so a theme that turns off Core's duplicate tags now declares `add_theme_support( 'scout-core' )` and the Turn on button comes back. Works for any feature slug in `not_with_themes`.

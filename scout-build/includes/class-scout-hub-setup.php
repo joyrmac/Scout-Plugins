@@ -16,6 +16,7 @@
  *   "chat":    { "name", "team", "notify", "book_url", "work_url", "photo_1", "photo_2" },
  *   "hours":   { "confirmed": true, "days": { "tuesday": [ ["09:00", "17:00"] ] } },
  *   "analytics": { "gtm": "GTM-XXXXXXX" },
+ *   "features":  { "use": [ "scout-core", "scout-forms-guard" ], "skip": [ "scout-chat" ] },
  *   "cards":   { "mode", "accent", "font", "name", "phone", "email", "city", "region", "postal",
  *                "footer", "note", "team_intro", "links_intro", "photo", "spot_heading", "spot_text",
  *                "pick_heading", "spot_label", "spot_sub", "spot_url", "logo", "share_card", "share_links",
@@ -51,6 +52,20 @@ final class Scout_Hub_Setup {
 			}
 		}
 		return array();
+	}
+
+	/**
+	 * Which features this client needs, from the setup file's "features" section:
+	 * "use" in install order, "skip" for ones this client doesn't need. Features
+	 * the file doesn't name are neither.
+	 *
+	 * @return array{use: string[], skip: string[]}
+	 */
+	public static function feature_plan(): array {
+		$f    = (array) ( self::data()['features'] ?? array() );
+		$use  = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) ( $f['use'] ?? array() ) ) ) ) );
+		$skip = array_values( array_diff( array_unique( array_filter( array_map( 'sanitize_key', (array) ( $f['skip'] ?? array() ) ) ) ), $use ) );
+		return array( 'use' => $use, 'skip' => $skip );
 	}
 
 	public static function run(): void {
