@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.3 (2026-10-26)
+
+- **Features shows which Scout Build is on the site.** "Scout Build 0.7.3" sits beside "Checked … ago", and when a newer Build is waiting it says so, with a link to the Plugins screen. Scout Build updates itself from the Plugins screen, so "Everything is up to date" never covered it. Joy asked for the version "somewhere up here".
+
 ## 0.7.2 (2026-10-26)
 
 - **The theme says which features a client needs.** A `features` section in the client theme's `scout-setup.json` lists the features to use, in install order, and the ones this client doesn't need. Features shows "Recommended for this site, in install order" with numbered cards first, then "Also available" sorted by name, then "Not needed for this site" grayed out (still one click to turn on). Without the section, "Ready to turn on" now sorts by name. Joy asked for it so a new site's setup reads like a checklist.
