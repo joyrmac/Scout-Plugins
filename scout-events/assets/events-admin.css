@@ -1,0 +1,132 @@
+/* Scout Events: the event, session and speaker edit screens, their lists,
+   and the Events overview. Light Scout Build look, scoped to these screens. */
+
+.post-type-scout_event,
+.post-type-scout_session,
+.post-type-scout_speaker,
+.post-type-scout_vendor,
+.se-admin {
+	--se-text: #1D1D1F;
+	--se-text-2: #515154;
+	--se-text-3: #6E6E73;
+	--se-line: rgba(0, 0, 0, .08);
+	--se-inset: #F5F5F7;
+	--se-accent-text: #0A6FB4;
+	--se-good: #0B7F5D;
+	--se-warn: #8A5A00;
+	--se-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Boxes: rounded white cards like the rest of Scout Build. */
+.post-type-scout_event .postbox,
+.post-type-scout_session .postbox,
+.post-type-scout_speaker .postbox { border: 1px solid var(--se-line); border-radius: 16px; overflow: hidden; }
+.post-type-scout_event .postbox .hndle,
+.post-type-scout_session .postbox .hndle,
+.post-type-scout_speaker .postbox .hndle { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.se-top { margin-top: 20px; }
+.se-top .postbox { margin-bottom: 8px; }
+.se-editor-head { margin: 22px 0 8px; padding: 0; font-size: 15px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.se-editor-head span { font-size: 13px; font-weight: 400; color: var(--se-text-2); }
+
+/* The details form. */
+.se-form { padding: 4px 2px 6px; }
+.se-group { border: 0; margin: 4px 0 16px; padding: 16px 18px 4px; background: var(--se-inset); border-radius: 14px; min-width: 0; }
+.se-group legend { float: left; width: 100%; padding: 0; margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--se-text); }
+.se-group legend + * { clear: both; }
+.se-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 18px; }
+.se-field { margin: 0 0 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.se-wide { grid-column: 1 / -1; }
+.se-field label { font-family: var(--se-mono); font-size: 11px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--se-text-2); }
+.se-field input, .se-field select, .se-field textarea { width: 100%; max-width: 100%; min-height: 44px; font-size: 15px; }
+.se-field textarea { min-height: 0; }
+.se-field input[type="checkbox"] { width: auto; min-height: 0; margin: 0; }
+.se-help, .se-note { font-size: 13px; color: var(--se-text-2); }
+.se-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 18px; padding-bottom: 12px; }
+.se-people label { display: flex; align-items: center; gap: 8px; min-height: 40px; font-size: 14px; }
+
+/* Ready to share. */
+.se-checks { margin: 0; display: grid; gap: 8px; }
+.se-checks li { display: flex; gap: 10px; align-items: center; margin: 0; font-size: 13px; }
+.se-tick { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #C5C5CA; flex: none; }
+.se-checks .is-done .se-tick { background: var(--se-good); border-color: var(--se-good); box-shadow: inset 0 0 0 3px #fff; }
+.se-checks .is-done { color: var(--se-text-2); }
+
+/* Lists and the overview. */
+.se-chip { display: inline-block; font-family: var(--se-mono); font-size: 11px; letter-spacing: .4px; padding: 2px 8px; border-radius: 980px; background: var(--se-inset); color: var(--se-text-2); white-space: nowrap; }
+.se-chip.is-done { background: #E3F4EE; color: var(--se-good); }
+.se-chip.is-warn { background: #FBF0DC; color: var(--se-warn); }
+.se-chip.is-past { color: var(--se-text-3); }
+.se-thumb { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.column-se_photo { width: 56px; }
+.se-box-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.se-box-head .sh-title { margin: 0; }
+.se-overview td, .se-overview th { padding: 12px; vertical-align: top; }
+.se-row-title { font-weight: 600; margin-right: 6px; }
+.se-empty-admin { color: var(--se-text-2); }
+.se-admin-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-top: 18px; align-items: start; }
+.se-settings .se-field label { display: flex; gap: 8px; align-items: center; }
+.se-slug { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; font-family: var(--se-mono); font-size: 12px; color: var(--se-text-3); }
+.se-slug input { width: 140px; min-height: 36px; font-size: 14px; }
+.se-short-input { max-width: 100px; }
+.se-import .se-field input[type="file"] { min-height: 0; font-size: 14px; }
+.se-report { margin: 0 0 16px; padding: 14px 16px; border-radius: 12px; background: var(--se-inset); }
+.se-report.is-done { background: #E3F4EE; }
+.se-report p { margin: 0 0 6px; }
+.se-report-head { font-weight: 600; }
+.se-report ul { margin: 8px 0 0 18px; list-style: disc; }
+.se-report li { margin: 0 0 4px; font-size: 13px; }
+.se-admin > .sh-box + .sh-box { margin-top: 18px; }
+.se-needs { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
+.se-needs li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--se-line); margin: 0; }
+.se-needs li:last-child { border-bottom: 0; }
+.se-needs li span { flex: 1 1 320px; font-size: 14px; }
+.se-allclear { color: var(--se-good); font-weight: 500; }
+.se-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.se-private { margin: 0 0 8px; display: grid; gap: 2px; }
+.se-private dt { font-family: var(--se-mono); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--se-text-2); margin-top: 8px; }
+.se-private dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.se-pending { margin-top: 12px; padding: 12px; border-radius: 12px; background: #FBF0DC; }
+.se-pending dt { font-weight: 600; font-size: 12px; margin-top: 8px; }
+.se-pending dd { margin: 2px 0 0; font-size: 13px; }
+.se-pending del { color: var(--se-text-3); }
+.se-pending ins { text-decoration: none; background: #E3F4EE; }
+.se-pending-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Sign-ups: the door list. Works at a phone's width. */
+.se-door-pick select { max-width: 100%; font-size: 15px; }
+.se-door .sh-stats { margin-top: 12px; }
+.se-door-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; margin-top: 16px; }
+.se-door-find { display: flex; gap: 6px; flex: 1 1 260px; }
+.se-door-find input { flex: 1; min-width: 0; }
+.se-door-list { margin: 0; padding: 0; list-style: none; }
+.se-door-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--se-line); margin: 0; scroll-margin-top: 80px; }
+.se-door-row:last-child { border-bottom: 0; }
+.se-door-row.is-in strong { color: var(--se-text-2); }
+.se-door-who { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.se-door-who .se-chip { margin-left: 6px; }
+.se-door-act { display: flex; gap: 6px; flex-wrap: wrap; }
+.se-door-act .button { min-height: 36px; }
+.se-quiet { background: transparent !important; }
+
+/* Vendors: the edit screen. */
+.se-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2px 20px; margin-top: 6px; }
+.se-form .se-check-row { display: block; margin: 4px 0; font-family: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; color: inherit; }
+.se-form fieldset.se-field legend { font-family: var(--se-mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--se-text-2); }
+.post-type-scout_vendor .postbox { border: 1px solid var(--se-line); border-radius: 16px; overflow: hidden; }
+
+/* Volunteer shifts on the event screen. */
+.se-shifts-wrap { overflow-x: auto; }
+.se-shifts { width: 100%; border-collapse: collapse; min-width: 760px; }
+.se-shifts th { text-align: left; font-family: var(--se-mono); font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--se-text-2); padding: 6px 6px 4px 0; }
+.se-shifts td { padding: 4px 6px 4px 0; vertical-align: middle; }
+.se-shifts input[type="text"] { width: 100%; }
+.se-shift-taken { font-family: var(--se-mono); font-size: 12px; white-space: nowrap; color: var(--se-text-2); }
+
+/* Speaker photos: every photo, the main one marked. */
+.se-photos { list-style: none; margin: 8px 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+.se-photo { margin: 0; padding: 8px; border: 1px solid var(--se-line); border-radius: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.se-photo img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+.se-photo.is-main { border-color: #0E8FE6; box-shadow: 0 0 0 1px #0E8FE6; }
+.se-photo label { display: flex; align-items: center; gap: 4px; }
+.se-pending-photos img { margin: 0 4px 4px 0; border-radius: 6px; }

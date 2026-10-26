@@ -110,6 +110,10 @@ final class Scout_Hub_Features {
 			require_once ABSPATH . WPINC . '/update.php';
 		}
 		wp_update_plugins();
+		// The theme too, when it updates itself from its own repo (Scout_Hub_Themes).
+		Scout_Hub_Themes::forget();
+		delete_site_transient( 'update_themes' );
+		wp_update_themes();
 	}
 
 	/** How old the last version check may get before the Features screen asks again by itself. */

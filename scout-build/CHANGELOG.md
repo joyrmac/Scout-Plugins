@@ -1,11 +1,17 @@
 # Scout Build changelog
 
-## 0.6.7 (2026-10-22)
+## 0.7.1 (2026-10-26)
+
+The 0.6.7 changes, renumbered to follow 0.7.0 (released Oct 23 while they waited for a staging test).
 
 - **Form emails in the site's own colors.** Gravity Forms notifications now arrive in the same card as the Email test: the site's color bar, its Site Icon, the site name, and the subject as the headline, with the form answers below. When the message has a phone number, it gets Call and Text buttons; when it has an email address, an Email back button. Confirmations sent to the person who filled in the form get the card without those buttons. Light colors like Carolina blue get dark button text so it stays readable. Only HTML notifications, only while Scout Email is set up. Joy, on Andy's request email: "can these be branded?" Off switch: the `scout_mail_brand_forms` filter.
 - **Other Scout plugins can use the site's brand color.** `Scout_Hub_Mail::brand_color()` returns the Email screen's pick or the detected color; Scout Analytics 0.1.15 colors the cookie notice's OK button with it.
 - **The headline leaves out the phone number.** It already has its Call button, and mail apps turned the number in the headline into a large link (Joy's test on Andy's staging).
 - **Email back finds plain addresses.** Gravity Forms sends the visitor's email as plain text, so the button now reads the first address in the message that is not the site's own (Joy's second test showed Call and Text but no Email back).
+
+## 0.7.0 (2026-10-23)
+
+- **Themes update themselves too.** A client theme that names its own repo (`Update URI` and `Scout Release` in `style.css`) now updates like the Scout plugins: a **Theme** box on the Features screen shows its version and "Up to date" or the version ready, with **Update the theme now**, and it auto-updates within a few hours of each release. Client repos stay private: an operator pastes a read-only key once, stored encrypted, sent to GitHub's API only. **Check for new versions** checks the theme as well. The release workflow for client repos is in `tools/theme-release/`. Joy asked for themes and plugins to update "so this is all cohesive and works together".
 
 ## 0.6.6 (2026-10-16)
 

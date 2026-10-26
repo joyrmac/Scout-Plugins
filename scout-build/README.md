@@ -22,7 +22,25 @@ false).
 | `SCOUT_HUB_OPERATORS` | `sean@scoutraleigh.com, joy@scoutraleigh.com` | Who can turn features on and off, go back a version, set the plan, and change request statuses. Must also be a WordPress admin. |
 | `SCOUT_HUB_REQUEST_EMAIL` | `team@scoutraleigh.com` | Where change requests are emailed. **Set this on partner-side sites** so nothing routes to a Scout address. |
 | `SCOUT_HUB_BRAND` | `true` | Labels the menu **Scout** with the bolt and shows the "Built and looked after by Scout Media" sign-off. **Set to `false` on partner-side or white-label sites**: the menu then says Site Build and nothing mentions Scout. |
+| `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Build. See "Theme updates" below. |
 | `DISALLOW_FILE_MODS` | (WordPress) | When true, features that are not installed must be uploaded by hand; on and off still work. |
+
+## Theme updates
+
+A client theme can update itself like the Scout plugins, from the client's
+own private repo. The theme adds `Update URI: https://github.com/OWNER/REPO`
+and `Scout Release: <folder name>` to its `style.css` header, and its repo
+publishes each version with the workflow in `tools/theme-release/`. On the
+site, an operator pastes a read-only key (a fine-grained GitHub token with
+Contents read access to that one repo) into the **Theme** box on the Features
+screen. The key is stored encrypted and sent to api.github.com only; the zip
+itself is fetched from GitHub's signed address without it.
+
+The Theme box then shows the installed version, "Up to date" or the version
+ready, **Update the theme now**, and the theme auto-updates within a few hours
+of each release. **Check for new versions** checks the theme too. A theme
+without `Update URI` keeps updating by upload. Steps for each client:
+`tools/theme-release/README.md`.
 
 ## The feature list
 

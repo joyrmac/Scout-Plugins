@@ -186,6 +186,8 @@ WordPress-side edit.
 - Each item takes `value`, `source` (a file inside the theme) or `image` (a file inside the theme, imported once).
 - `previous` lists copies an earlier release shipped. On a site never synced before, a saved value that matches one counts as untouched. That is how a live site adopts Site Sync without a full reset.
 - `options` accepts only `blogname` and `blogdescription`.
+- A page that already matches when a site adopts Site Sync gets its base on the first sync pass, so later copy changes update on their own (1.4.1).
+- An item whose `source` or `image` file is missing is reported and left out; it is never compared or written (1.4.1).
 - Pages are never created. A page the manifest names but the site lacks is reported as "Page not found"; the theme's setup or a companion creates it.
 
 ### States
@@ -210,4 +212,4 @@ On the first admin page load by an administrator after the theme, its version or
 
 ### Tests
 
-An integration script (30 checks) runs against a real WordPress: safe fills, known earlier copies, missing pages, unknown values, refused options, stale reviews, automatic runs, kept copies, take, undo, racing edits and status-only mode. It lives at `tools/tests/site-sync.php` (outside the plugin, so it never ships) and runs against a disposable WordPress.
+An integration script (36 checks) runs against a real WordPress: safe fills, adoption of already-matching pages, a missing source file, known earlier copies, missing pages, unknown values, refused options, stale reviews, automatic runs, kept copies, take, undo, racing edits and status-only mode. It lives at `tools/tests/site-sync.php` (outside the plugin, so it never ships) and runs against a disposable WordPress.

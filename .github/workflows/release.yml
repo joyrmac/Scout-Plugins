@@ -32,6 +32,10 @@ on:
           - scout-cards
           - scout-chat
           - scout-core
+          - scout-events
+          - scout-members
+          - scout-partners
+          - scout-crm
           - scout-forms-guard
           - scout-optimize
           - scout-reviews

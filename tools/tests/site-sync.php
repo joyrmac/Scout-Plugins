@@ -114,6 +114,27 @@ $r = Scout_Sync::apply($plan['hash'], 'safe');
 ok(is_wp_error($r) && 'stale'===$r->get_error_code(), 'an edit after review makes the review stale');
 ok(get_post($about)->post_content==='Racing edit', 'and nothing was written');
 
+// Adoption: a page that already matches gets a base, so the next theme copy is a safe update.
+$faq = wp_insert_post(array('post_type'=>'page','post_name'=>'faq','post_title'=>'FAQ','post_status'=>'publish','post_content'=>'FAQ copy v1'));
+$m['pages'][] = array('slug'=>'faq','content'=>'FAQ copy v1'); manifest($m); bump('1.0.5');
+ok(states()['page/faq#content']==='current', 'a page that already matches reads current');
+Scout_Sync::maybe_auto_run();
+$m['pages'][count($m['pages'])-1]['content']='FAQ copy v2'; manifest($m); bump('1.0.6');
+ok(states()['page/faq#content']==='update', 'after adoption, new theme copy on a matching page is a safe update');
+Scout_Sync::maybe_auto_run();
+ok(get_post($faq)->post_content==='FAQ copy v2', 'and the automatic run applies it');
+
+// A source file missing from a theme release never blanks a page.
+file_put_contents($theme.'/sync/pages/faq.html', 'FAQ copy v2');
+$m['pages'][count($m['pages'])-1] = array('slug'=>'faq','source'=>'sync/pages/faq.html'); manifest($m); bump('1.0.7');
+Scout_Sync::maybe_auto_run();
+unlink($theme.'/sync/pages/faq.html'); bump('1.0.8');
+ok(!isset(states()['page/faq#content']), 'a row whose file is missing is left out');
+ok(in_array('File missing from the theme: sync/pages/faq.html', Scout_Sync::plan()['errors'], true), 'and reported');
+Scout_Sync::maybe_auto_run();
+$r = Scout_Sync::apply(Scout_Sync::plan()['hash'], 'take', array('page/faq#content'));
+ok(get_post($faq)->post_content==='FAQ copy v2', 'neither the automatic run nor "Use the theme copy" blanked it');
+
 // No manifest: status only.
 unlink($theme.'/scout-sync.json');
 ok(Scout_Sync::plan()['manifest']===false && Scout_Sync::summary(true)['review']===0, 'no manifest means status only, nothing to review');

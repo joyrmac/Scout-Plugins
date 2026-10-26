@@ -1,0 +1,100 @@
+/* Scout Members on the site: the membership page (application and account)
+   and the members-only note. Fonts and text color come from the theme. Every
+   color that matters is a custom property a theme can retune:
+   --scout-members-accent, --scout-members-on-accent, --scout-members-line,
+   --scout-members-inset, --scout-members-radius. */
+
+.sm-portal, .sm-gate, .sm-home, .sm-signin-form, .sm-invitations {
+	--sm-accent: var(--scout-members-accent, #1D1D1F);
+	--sm-on-accent: var(--scout-members-on-accent, #fff);
+	--sm-line: var(--scout-members-line, rgba(127, 127, 127, .28));
+	--sm-inset: var(--scout-members-inset, rgba(127, 127, 127, .08));
+	--sm-radius: var(--scout-members-radius, 14px);
+	scroll-margin-top: 2em;
+}
+
+/* The application. */
+.sm-form { display: grid; gap: 1.25em; }
+.sm-group { border: 1px solid var(--sm-line); border-radius: var(--sm-radius); padding: 1.1em 1.25em .4em; margin: 0; min-width: 0; }
+.sm-group legend { font-weight: 600; padding: 0 .4em; }
+.sm-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12em), 1fr)); gap: 0 1em; }
+.sm-field { display: flex; flex-direction: column; gap: .35em; margin: 0 0 1em; }
+.sm-field label, .sm-label { font-weight: 600; font-size: .95em; text-wrap: pretty; }
+.sm-field :where(input:not([type="radio"]):not([type="checkbox"]), textarea, select) { width: 100%; max-width: 100%; box-sizing: border-box; padding: .6em .75em; font: inherit; border: 1px solid var(--sm-line); border-radius: 8px; background: transparent; color: inherit; }
+.sm-choice { display: flex; gap: .6em; align-items: flex-start; font-weight: 400; }
+.sm-choice input { margin-top: .3em; }
+.sm-statement { margin: 0 0 .6em; padding: .8em 1em; border-left: 3px solid var(--sm-line); background: var(--sm-inset); border-radius: 0 8px 8px 0; text-wrap: pretty; }
+.sm-agree { margin-bottom: 1.25em; }
+.sm-address { border: 0; padding: 0; margin: 0 0 .5em; min-width: 0; }
+.sm-address legend { padding: 0; margin-bottom: .5em; }
+.sm-check label { display: flex; gap: .6em; align-items: flex-start; }
+.sm-check input { margin-top: .3em; flex: none; }
+.sm-req { opacity: .7; }
+.sm-help { font-size: .85em; opacity: .75; text-wrap: pretty; }
+.sm-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.sm-note { padding: .8em 1em; border-radius: calc(var(--sm-radius) - 4px); background: var(--sm-inset); font-weight: 600; }
+.sm-note.is-bad { border-left: 3px solid #B42318; }
+.sm-note.is-good { border-left: 3px solid #0B7F5D; }
+
+/* Buttons. */
+.sm-button { display: inline-block; padding: .8em 1.6em; border: 0; border-radius: 980px; background: var(--sm-accent); color: var(--sm-on-accent); text-decoration: none; font: inherit; font-weight: 600; line-height: 1.2; cursor: pointer; }
+.sm-button:hover, .sm-button:focus-visible { filter: brightness(1.1); color: var(--sm-on-accent); text-decoration: none; }
+.sm-button:focus-visible { outline: 2px solid var(--sm-accent); outline-offset: 3px; }
+
+/* The member's account. */
+.sm-account { display: grid; gap: .25em; }
+.sm-badge { justify-self: start; display: inline-block; padding: .4em .9em; border-radius: 980px; background: var(--sm-inset); font-weight: 600; margin: 0; }
+.sm-account.is-active .sm-badge { background: rgba(11, 127, 93, .12); }
+.sm-lede { margin: .5em 0 1em; text-wrap: pretty; }
+.sm-next { padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); margin: 0 0 1em; }
+.sm-next p { margin: 0 0 .5em; }
+.sm-next p:last-child { margin: 0; }
+.sm-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10em, 1fr)); gap: .75em 1.5em; margin: 0 0 1.25em; padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); }
+.sm-facts dt { font-size: .8em; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+.sm-facts dd { margin: .2em 0 0; }
+.sm-sub { margin: 1em 0 .5em; }
+
+/* The members-only note. */
+.sm-gate { max-width: 42rem; margin: 2em auto; box-sizing: border-box; padding: 1.5em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); background: var(--sm-inset); }
+.sm-gate-title { margin: 0 0 .4em; font-weight: 600; }
+.sm-gate p:last-child { margin-bottom: 0; }
+.sm-gate-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75em 1.25em; }
+.sm-cta .se-soon { margin-right: .75em; }
+
+/* Signing in on the site. */
+.sm-signin-form { display: grid; gap: .25em; margin: 1em 0 .5em; max-width: 26rem; }
+.sm-signin-form .sm-field { margin-bottom: .6em; }
+.sm-gate .sm-signin-form { margin-top: .5em; }
+
+/* The members home: one link per members page. */
+.sm-home { margin-top: 2em; }
+.sm-perks { list-style: none; margin: 0 0 1.5em; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1em; }
+.sm-perk a { display: flex; flex-direction: column; gap: .4em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); color: inherit; text-decoration: none; }
+.sm-perk a:hover, .sm-perk a:focus-visible { border-color: var(--scout-members-accent, currentColor); }
+.sm-perk-title { font-weight: 600; text-wrap: balance; }
+.sm-perk-tag { justify-self: start; align-self: flex-start; font-size: .75em; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.sm-perk-text { font-size: .92em; opacity: .85; text-wrap: pretty; }
+.sm-member-link { white-space: nowrap; }
+.sm-signin-more { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); }
+.sm-signin-more summary { cursor: pointer; font-weight: 600; }
+
+/* Member invitations. */
+.sm-invite-list { display: grid; gap: 1.25em; margin: 0 0 1.5em; }
+.sm-invite { padding: 1.25em 1.5em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
+.sm-invite-title { margin: 0 0 .2em; text-wrap: balance; }
+.sm-invite-meta { margin: 0 0 1em; font-size: .85em; opacity: .75; }
+.sm-invite-answers { margin: 0; display: grid; gap: .9em; }
+.sm-invite-answers dt { font-size: .8em; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+.sm-invite-answers dd { margin: .25em 0 0; }
+.sm-invite-answers dd p { margin: 0 0 .6em; text-wrap: pretty; overflow-wrap: anywhere; }
+.sm-invite-answers dd p:last-child { margin: 0; }
+.sm-mine { list-style: none; margin: 0 0 1.5em; padding: 0; display: grid; gap: .5em; }
+.sm-mine li { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1em; padding: .7em 1em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: 10px; }
+.sm-mine-title { font-weight: 600; }
+.sm-mine-status { font-size: .85em; opacity: .75; }
+.sm-mine-drop { margin: 0 0 0 auto; }
+.sm-link-button { background: none; border: 0; padding: 0; font: inherit; font-size: .9em; color: inherit; text-decoration: underline; cursor: pointer; }
+.sm-invite-new { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
+.sm-invite-new summary { cursor: pointer; font-weight: 600; }
+.sm-invite-form { margin-top: 1em; }
+.sm-invite-heading { margin: .5em 0 0; }

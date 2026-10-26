@@ -330,6 +330,8 @@ final class Scout_Hub_Admin {
 			<?php endif; ?>
 		</section>
 
+		<?php Scout_Hub_Themes::panel( $operator ); ?>
+
 		<?php
 		$titles = array(
 			'on'    => __( 'On this site', 'scout-build' ),

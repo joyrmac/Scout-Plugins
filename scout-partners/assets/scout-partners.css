@@ -1,0 +1,30 @@
+/* Scout Partners on the site: the partners block, a logo rail, logos only.
+   Fonts and text color come from the theme. Colors a theme can retune:
+   --scout-partners-line, --scout-partners-logo-bg, --scout-partners-radius. */
+
+.sp-partners {
+	--sp-line: var(--scout-partners-line, rgba(127, 127, 127, .28));
+	--sp-logo-bg: var(--scout-partners-logo-bg, #fff);
+	--sp-radius: var(--scout-partners-radius, 14px);
+	margin: 2em 0;
+}
+.sp-title { margin: 0 0 .75em; text-wrap: balance; }
+.sp-level + .sp-level { margin-top: 1.5em; }
+.sp-level-name { margin: 0 0 .6em; font-size: 1em; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.sp-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); gap: 1em; }
+.sp-link { display: flex; flex-direction: column; gap: .4em; height: 100%; box-sizing: border-box; padding: .9em; border: 1px solid var(--sp-line); border-radius: var(--sp-radius); color: inherit; text-decoration: none; }
+a.sp-link:hover, a.sp-link:focus-visible { border-color: currentColor; }
+.sp-logo { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: contain; box-sizing: border-box; padding: .6em; background: var(--sp-logo-bg); border-radius: calc(var(--sp-radius) - 4px); }
+.sp-logo.is-text { display: grid; place-items: center; text-align: center; font-weight: 600; color: #1D1D1F; text-wrap: balance; }
+.sp-name { font-weight: 600; text-wrap: balance; }
+.sp-line { font-size: .9em; opacity: .8; text-wrap: pretty; }
+
+/* The first level gets more room. */
+.sp-grid .sp-level:first-child .sp-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+
+/* A single row of logos, for a header strip or sidebar. */
+.sp-rail .sp-list { display: flex; flex-wrap: wrap; align-items: center; gap: .75em; }
+.sp-rail .sp-link, .sp-logos .sp-link { padding: 0; border: 0; }
+.sp-rail .sp-logo { width: auto; height: 3.5rem; aspect-ratio: auto; max-width: 10rem; }
+.sp-rail .sp-logo.is-text { padding: 0 1em; height: 3.5rem; }
+.sp-logos .sp-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); }

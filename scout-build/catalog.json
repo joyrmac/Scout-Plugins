@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-13",
+  "updated": "2026-10-22",
   "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers: build, partnership, whole, addon. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there.",
   "features": [
     {
@@ -143,6 +143,38 @@
       "law": false,
       "requires": [],
       "client_specific": true
+    },
+    {
+      "slug": "scout-events",
+      "name": "Events and schedule",
+      "summary": "Event pages with dates, venue, ticket button and what to know, a day-by-day schedule, speaker pages, and event listings Google can show. Edit a date or mark an event sold out and the site follows.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-members",
+      "name": "Membership",
+      "summary": "People apply on the site, you approve each one, and members sign in to see members-only pages and events. Plans, renewal dates and a members list you run from the dashboard.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-partners",
+      "name": "Partners and sponsors",
+      "summary": "Partners by level, such as Founding, National and Regional, each with a logo, link and the places they appear. Change a partner once and every placement follows, with monthly click counts to show them.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
+    },
+    {
+      "slug": "scout-crm",
+      "name": "Customer list sync",
+      "summary": "Everyone who buys a ticket, signs up, volunteers, applies or joins goes into one customer list in FluentCRM on your own site, tagged by what they did, the event and its region.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
     }
   ]
 }
