@@ -209,7 +209,11 @@ final class Scout_Core_Admin {
 		);
 
 		// 3. Pages missing a written description. Name them, so nobody has to hunt.
-		$missing_ids = self::pages_missing_description();
+		// A theme that writes its own head (scout_head, recon_head) sets each
+		// page's description in its templates and never reads the SEO box, so
+		// an empty box there is not a gap and filling it would change nothing.
+		$theme_head  = class_exists( 'Scout_SEO_Head' ) && Scout_SEO_Head::theme_handles_head();
+		$missing_ids = $theme_head ? array() : self::pages_missing_description();
 		$missing     = count( $missing_ids );
 		$checks[]    = array(
 			'label'        => 'Page descriptions',
@@ -224,7 +228,7 @@ final class Scout_Core_Admin {
 					),
 					$missing
 				)
-				: 'Every published page has a description written for search.',
+				: ( $theme_head ? 'Your theme writes each page\'s description for search.' : 'Every published page has a description written for search.' ),
 			'items'        => array_slice( $missing_ids, 0, 10 ),
 			'action'       => $missing > 10 ? admin_url( 'edit.php?post_type=page' ) : '',
 			'action_label' => $missing > 10 ? 'See all pages' : '',

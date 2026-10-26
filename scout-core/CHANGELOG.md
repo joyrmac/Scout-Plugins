@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.5.1 (2026-10-26)
+
+- **Fix: no false "Page descriptions" warning on themes that write their own.** Scout Media and Recon set every page's description in their templates and never read the SEO box, so Recon's health check listed 16 pages that were fine and told Joy to fill a box that changes nothing. When the theme writes its own head, the check now reads "Your theme writes each page's description for search."
+
 ## 1.5.0 (2026-10-26)
 
 Site Sync reaches four more places, so a theme update can carry them instead of one-time code in the theme. Joy asked why Sean's bio update needed theme code at all.
