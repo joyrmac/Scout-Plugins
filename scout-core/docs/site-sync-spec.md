@@ -213,3 +213,28 @@ On the first admin page load by an administrator after the theme, its version or
 ### Tests
 
 An integration script (36 checks) runs against a real WordPress: safe fills, adoption of already-matching pages, a missing source file, known earlier copies, missing pages, unknown values, refused options, stale reviews, automatic runs, kept copies, take, undo, racing edits and status-only mode. It lives at `tools/tests/site-sync.php` (outside the plugin, so it never ships) and runs against a disposable WordPress.
+
+## Added in Scout Core 1.5.0
+
+Four things a theme update could not reach before, each one key at a time so nothing around it is touched:
+
+```json
+{
+  "options": [
+    { "option": "scout_business", "key": "email", "value": "team@example.com" },
+    { "option": "scout_cards", "key": "people.sean.title", "value": "Co-Founder", "previous": ["Old title"] }
+  ],
+  "fields": [
+    { "post_type": "scout_team", "slug": "sean-mcnamara", "meta": "_scout_team", "key": "role", "value": "Co-Founder" }
+  ],
+  "users": [
+    { "email": "sean@example.com", "field": "description", "value": "Author bio", "previous": ["Old bio"] }
+  ]
+}
+```
+
+- **Option keys.** `options` with `key` sets one key inside an array option. `scout_business` (Business info) is allowed; a theme allows its own array options with the `scout_sync_option_keys` filter. A whole array option is still refused. Keys are dotted paths; on a list, a part matches the item whose `slug` equals it, so `people.sean.title` survives reordering.
+- **Meta keys.** `fields` with `meta` and `key` sets one key inside an array meta value (a Team profile's role or bio) and leaves the rest of the profile alone.
+- **Users.** `users` sets an author's Biographical Info (`description`, the only field allowed), matched by email. A user the site lacks is reported as missing.
+- **Core updates re-run.** The automatic run's key includes the Core version, so the first admin load after a Core update syncs rows that version newly understands.
+- Same states, previous copies, journal and undo as every other row. Tests: 52 checks in `tools/tests/site-sync.php`.

@@ -135,6 +135,58 @@ Scout_Sync::maybe_auto_run();
 $r = Scout_Sync::apply(Scout_Sync::plan()['hash'], 'take', array('page/faq#content'));
 ok(get_post($faq)->post_content==='FAQ copy v2', 'neither the automatic run nor "Use the theme copy" blanked it');
 
+// 1.5: one key inside an array option, a list item matched by slug, a key inside array meta, an author bio.
+add_filter('scout_sync_option_keys', function($k){ $k[]='synctest_cards'; return $k; });
+update_option('scout_business', array('name'=>'Typed by hand','phone'=>'(555) 000-0000'));
+update_option('synctest_cards', array('people'=>array(array('slug'=>'joy','title'=>'Joy title'), array('slug'=>'sean','title'=>'Old Sean title','pick'=>'Kept pick'))));
+$team = wp_insert_post(array('post_type'=>'page','post_name'=>'team-sean','post_title'=>'Sean','post_status'=>'publish','post_content'=>'x'));
+update_post_meta($team, '_synctest_team', array('role'=>'Co-Founder','bio'=>'Hand bio','email'=>'sean@example.com'));
+if ($old = get_user_by('email','sean-sync@example.com')) { require_once ABSPATH.'wp-admin/includes/user.php'; wp_delete_user($old->ID); }
+$uid = wp_insert_user(array('user_login'=>'synctest_sean','user_email'=>'sean-sync@example.com','user_pass'=>wp_generate_password()));
+update_user_meta($uid, 'description', 'Old author bio');
+$m = array('sync_version'=>1,
+  'fields'=>array(
+    array('slug'=>'team-sean','meta'=>'_synctest_team','key'=>'role','value'=>'Co-Founder, Strategy & Technology','previous'=>array('Co-Founder')),
+    array('slug'=>'team-sean','meta'=>'_synctest_team','key'=>'bio','value'=>'Theme bio'),
+  ),
+  'options'=>array(
+    array('option'=>'scout_business','key'=>'name','value'=>'Scout Recon'),
+    array('option'=>'scout_business','key'=>'email','value'=>'team@example.com'),
+    array('option'=>'synctest_cards','key'=>'people.sean.title','value'=>'New Sean title','previous'=>array('Old Sean title')),
+    array('option'=>'scout_business'),
+    array('option'=>'synctest_other','key'=>'x','value'=>'nope'),
+  ),
+  'users'=>array(
+    array('email'=>'sean-sync@example.com','field'=>'description','value'=>'New author bio','previous'=>array('Old author bio')),
+    array('email'=>'nobody@example.com','field'=>'description','value'=>'Nobody'),
+    array('email'=>'sean-sync@example.com','field'=>'user_pass','value'=>'nope'),
+  ),
+);
+manifest($m); bump('1.5.0');
+$s = states();
+ok($s['option#scout_business.name']==='conflict', 'a hand-typed business name is not overwritten');
+ok($s['option#scout_business.email']==='update', 'an empty business field is safe to fill');
+ok($s['option#synctest_cards.people.sean.title']==='update', 'a list item is found by its slug');
+ok($s['page/team-sean#meta:_synctest_team.role']==='update', 'a known earlier value inside array meta is safe');
+ok($s['page/team-sean#meta:_synctest_team.bio']==='conflict', 'an unknown value inside array meta waits for a person');
+ok($s['user/sean-sync@example.com#description']==='update', 'an earlier author bio is safe to replace');
+ok($s['user/nobody@example.com#description']==='missing', 'an unknown author is reported missing');
+$errs = Scout_Sync::plan()['errors'];
+ok(in_array('Option "scout_business" is not one Site Sync may set.', $errs, true), 'a whole array option is refused');
+ok(in_array('Option "synctest_other.x" is not one Site Sync may set.', $errs, true), 'an option nobody allowed is refused');
+ok((bool) preg_grep('/needs an email and a field/', $errs), 'a user field outside the list is refused');
+Scout_Sync::maybe_auto_run();
+$biz = get_option('scout_business'); $cards = get_option('synctest_cards'); $tm = get_post_meta($team,'_synctest_team',true);
+ok($biz['email']==='team@example.com' && $biz['name']==='Typed by hand' && $biz['phone']==='(555) 000-0000', 'business: filled the empty key, kept the rest');
+ok($cards['people'][1]['title']==='New Sean title' && $cards['people'][1]['pick']==='Kept pick' && $cards['people'][0]['title']==='Joy title', 'cards: only that person\'s title changed');
+ok($tm['role']==='Co-Founder, Strategy & Technology' && $tm['bio']==='Hand bio' && $tm['email']==='sean@example.com', 'team meta: only the role changed');
+ok(get_user_meta($uid,'description',true)==='New author bio', 'author bio synced');
+$r = Scout_Sync::undo();
+$biz = get_option('scout_business'); $cards = get_option('synctest_cards'); $tm = get_post_meta($team,'_synctest_team',true);
+ok(!is_wp_error($r) && 4===$r['restored'] && ''===($biz['email']??''), 'undo puts back the business field');
+ok($cards['people'][1]['title']==='Old Sean title' && $tm['role']==='Co-Founder' && get_user_meta($uid,'description',true)==='Old author bio', 'undo puts back card, team role and author bio');
+require_once ABSPATH.'wp-admin/includes/user.php'; wp_delete_user($uid); wp_delete_post($team, true); delete_option('scout_business'); delete_option('synctest_cards');
+
 // No manifest: status only.
 unlink($theme.'/scout-sync.json');
 ok(Scout_Sync::plan()['manifest']===false && Scout_Sync::summary(true)['review']===0, 'no manifest means status only, nothing to review');

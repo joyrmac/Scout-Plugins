@@ -40,6 +40,12 @@ final class Scout_Sync {
 	/** Options a manifest may set. Anything else is ignored. */
 	const ALLOWED_OPTIONS = array( 'blogname', 'blogdescription' );
 
+	/** Array options a manifest may set one key of (themes add theirs with `scout_sync_option_keys`). */
+	const ALLOWED_OPTION_KEYS = array( 'scout_business' );
+
+	/** User fields a manifest may set, matched to a user by email. */
+	const ALLOWED_USER_FIELDS = array( 'description' );
+
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'maybe_auto_run' ), 20 );
 		add_action( 'after_switch_theme', array( __CLASS__, 'forget_seen' ) );
@@ -121,7 +127,8 @@ final class Scout_Sync {
 			} elseif ( isset( $f['seo'] ) ) {
 				$field = 'seo:' . ( 'title' === $f['seo'] ? 'title' : 'desc' );
 			} elseif ( isset( $f['meta'] ) ) {
-				$field = 'meta:' . (string) $f['meta'];
+				// With "key", one key inside an array meta value, so the rest is left alone.
+				$field = 'meta:' . (string) $f['meta'] . ( isset( $f['key'] ) ? '.' . sanitize_key( $f['key'] ) : '' );
 			} elseif ( isset( $f['post_field'] ) && in_array( $f['post_field'], array( 'title', 'content', 'excerpt' ), true ) ) {
 				$field = $f['post_field'];
 			}
@@ -145,11 +152,22 @@ final class Scout_Sync {
 		}
 		foreach ( (array) ( $manifest['options'] ?? array() ) as $o ) {
 			$name = (string) ( $o['option'] ?? '' );
-			if ( ! in_array( $name, self::ALLOWED_OPTIONS, true ) ) {
-				$errors[] = 'Option "' . $name . '" is not one Site Sync may set.';
+			$path = isset( $o['key'] ) ? self::path( (string) $o['key'] ) : '';
+			$ok   = '' === $path ? in_array( $name, self::ALLOWED_OPTIONS, true ) : in_array( $name, self::option_keys(), true );
+			if ( ! $ok || ( isset( $o['key'] ) && '' === $path ) ) {
+				$errors[] = 'Option "' . $name . ( isset( $o['key'] ) ? '.' . $o['key'] : '' ) . '" is not one Site Sync may set.';
 				continue;
 			}
-			$items[] = array( 'kind' => 'option', 'option' => $name, 'value' => $o['value'] ?? null, 'previous' => $o['previous'] ?? array() );
+			$items[] = array( 'kind' => 'option', 'option' => $name, 'key' => $path, 'value' => $o['value'] ?? null, 'source' => $o['source'] ?? null, 'previous' => $o['previous'] ?? array() );
+		}
+		foreach ( (array) ( $manifest['users'] ?? array() ) as $u ) {
+			$email = sanitize_email( (string) ( $u['email'] ?? '' ) );
+			$field = (string) ( $u['field'] ?? 'description' );
+			if ( ! is_email( $email ) || ! in_array( $field, self::ALLOWED_USER_FIELDS, true ) ) {
+				$errors[] = 'User entry "' . ( $u['email'] ?? '' ) . '" needs an email and a field Site Sync may set (description).';
+				continue;
+			}
+			$items[] = array( 'kind' => 'user', 'email' => strtolower( $email ), 'field' => $field, 'value' => $u['value'] ?? null, 'source' => $u['source'] ?? null, 'previous' => $u['previous'] ?? array() );
 		}
 
 		foreach ( $items as &$item ) {
@@ -194,7 +212,10 @@ final class Scout_Sync {
 			return 'setting/' . $item['group'] . '#' . $item['key'];
 		}
 		if ( 'option' === $item['kind'] ) {
-			return 'option#' . $item['option'];
+			return 'option#' . $item['option'] . ( '' !== ( $item['key'] ?? '' ) ? '.' . $item['key'] : '' );
+		}
+		if ( 'user' === $item['kind'] ) {
+			return 'user/' . $item['email'] . '#' . $item['field'];
 		}
 		return $item['post_type'] . '/' . $item['slug'] . '#' . $item['field'];
 	}
@@ -206,7 +227,14 @@ final class Scout_Sync {
 			return 'Site setting: ' . $item['key'];
 		}
 		if ( 'option' === $item['kind'] ) {
+			if ( '' !== ( $item['key'] ?? '' ) ) {
+				$names = array( 'scout_business' => 'Business info' );
+				return ( $names[ $item['option'] ] ?? $item['option'] ) . ': ' . str_replace( array( '.', '_' ), array( ' ', ' ' ), $item['key'] );
+			}
 			return 'blogname' === $item['option'] ? 'Site title' : 'Tagline';
+		}
+		if ( 'user' === $item['kind'] ) {
+			return 'Author bio: ' . $item['email'];
 		}
 		$prefix = 0 === strpos( (string) $item['field'], 'seo:' ) ? 'SEO ' : '';
 		return $item['slug'] . ': ' . $prefix . str_replace( '_', ' ', (string) $field );
@@ -246,7 +274,14 @@ final class Scout_Sync {
 			return (string) ( is_array( $values ) ? ( $values[ $item['key'] ] ?? '' ) : '' );
 		}
 		if ( 'option' === $item['kind'] ) {
+			if ( '' !== ( $item['key'] ?? '' ) ) {
+				$value = self::dig( get_option( $item['option'], array() ), $item['key'] );
+				return is_scalar( $value ) ? (string) $value : '';
+			}
 			return (string) get_option( $item['option'], '' );
+		}
+		if ( 'user' === $item['kind'] ) {
+			return (string) get_user_meta( (int) $item['user_id'], $item['field'], true );
 		}
 		$id    = (int) $item['post_id'];
 		$field = $item['field'];
@@ -254,7 +289,91 @@ final class Scout_Sync {
 			$post = get_post( $id );
 			return $post ? (string) $post->{'post_' . $field} : '';
 		}
+		$sub = self::meta_sub( $field );
+		if ( '' !== $sub ) {
+			$value = self::dig( get_post_meta( $id, self::meta_key( $field ), true ), $sub );
+			return is_scalar( $value ) ? (string) $value : '';
+		}
 		return (string) get_post_meta( $id, self::meta_key( $field ), true );
+	}
+
+	/** Themes may let Site Sync set keys inside their own array options. */
+	private static function option_keys() {
+		return array_values( array_unique( array_merge( self::ALLOWED_OPTION_KEYS, (array) apply_filters( 'scout_sync_option_keys', array() ) ) ) );
+	}
+
+	/** A dotted key path, each part a plain key. '' when it is not one. */
+	private static function path( $key ) {
+		$parts = array_map( 'sanitize_key', explode( '.', $key ) );
+		return in_array( '', $parts, true ) ? '' : implode( '.', $parts );
+	}
+
+	/**
+	 * Find the slot a dotted path names. On a list, a part matches the item
+	 * whose "slug" equals it, so "people.sean.title" survives reordering.
+	 *
+	 * @return array{0:array<int,string|int>,1:bool} Concrete keys, and whether every part was found.
+	 */
+	private static function locate( $data, $path ) {
+		$keys = array();
+		foreach ( explode( '.', $path ) as $part ) {
+			if ( ! is_array( $data ) ) {
+				return array( $keys, false );
+			}
+			if ( ! array_key_exists( $part, $data ) && array_is_list( $data ) ) {
+				foreach ( $data as $i => $entry ) {
+					if ( is_array( $entry ) && ( $entry['slug'] ?? null ) === $part ) {
+						$part = $i;
+						break;
+					}
+				}
+			}
+			$keys[] = $part;
+			if ( ! array_key_exists( $part, $data ) ) {
+				return array( $keys, false );
+			}
+			$data = $data[ $part ];
+		}
+		return array( $keys, true );
+	}
+
+	/** The value at a dotted path, or null. */
+	private static function dig( $data, $path ) {
+		list( $keys, $found ) = self::locate( $data, $path );
+		if ( ! $found ) {
+			return null;
+		}
+		foreach ( $keys as $k ) {
+			$data = $data[ $k ];
+		}
+		return $data;
+	}
+
+	/** Set the value at a dotted path. Missing parents are created as keys. */
+	private static function plant( $data, $path, $value ) {
+		$data         = is_array( $data ) ? $data : array();
+		list( $keys ) = self::locate( $data, $path );
+		$keys         = array_merge( $keys, array_slice( explode( '.', $path ), count( $keys ) ) );
+		$last         = count( $keys ) - 1;
+		$ref          = &$data;
+		foreach ( $keys as $i => $k ) {
+			if ( $i < $last && ( ! isset( $ref[ $k ] ) || ! is_array( $ref[ $k ] ) ) ) {
+				$ref[ $k ] = array();
+			}
+			$ref = &$ref[ $k ];
+		}
+		$ref = $value;
+		unset( $ref );
+		return $data;
+	}
+
+	/** The key path inside an array meta field ("meta:_scout_team.role" gives "role"). */
+	private static function meta_sub( $field ) {
+		if ( 0 !== strpos( $field, 'meta:' ) ) {
+			return '';
+		}
+		$dot = strpos( $field, '.' );
+		return false === $dot ? '' : substr( $field, $dot + 1 );
 	}
 
 	private static function meta_key( $field ) {
@@ -267,7 +386,9 @@ final class Scout_Sync {
 		if ( 'seo:desc' === $field ) {
 			return SCOUT_SEO_META_DESC;
 		}
-		return substr( $field, 5 );
+		$key = substr( $field, 5 );
+		$dot = strpos( $key, '.' );
+		return false === $dot ? $key : substr( $key, 0, $dot );
 	}
 
 	/** What the saved value means for comparison: text as is, images by file. */
@@ -314,6 +435,15 @@ final class Scout_Sync {
 			if ( 'post' === $item['kind'] ) {
 				$item['post_id'] = self::post_id( $item, $cache );
 				if ( ! $item['post_id'] ) {
+					$item['state'] = self::MISSING;
+					$rows[]        = $item;
+					continue;
+				}
+			}
+			if ( 'user' === $item['kind'] ) {
+				$user            = get_user_by( 'email', $item['email'] );
+				$item['user_id'] = $user ? (int) $user->ID : 0;
+				if ( ! $item['user_id'] ) {
 					$item['state'] = self::MISSING;
 					$rows[]        = $item;
 					continue;
@@ -480,7 +610,7 @@ final class Scout_Sync {
 				'theme' => self::theme_key(),
 				'rows'  => array_map(
 					static function ( $r ) {
-						return array_intersect_key( $r, array_flip( array( 'id', 'kind', 'post_type', 'slug', 'field', 'group', 'key', 'option', 'post_id', 'image', 'raw', 'write' ) ) );
+						return array_intersect_key( $r, array_flip( array( 'id', 'kind', 'post_type', 'slug', 'field', 'group', 'key', 'option', 'post_id', 'email', 'user_id', 'image', 'raw', 'write' ) ) );
 					},
 					$pick
 				),
@@ -593,8 +723,12 @@ final class Scout_Sync {
 			$values = is_array( $values ) ? $values : array();
 			$values[ $row['key'] ] = $value;
 			update_option( $name, $values );
+		} elseif ( 'option' === $row['kind'] && '' !== ( $row['key'] ?? '' ) ) {
+			update_option( $row['option'], self::plant( get_option( $row['option'], array() ), $row['key'], $value ) );
 		} elseif ( 'option' === $row['kind'] ) {
 			update_option( $row['option'], $value );
+		} elseif ( 'user' === $row['kind'] ) {
+			update_user_meta( (int) $row['user_id'], $row['field'], wp_slash( $value ) );
 		} elseif ( in_array( $row['field'], array( 'title', 'content', 'excerpt' ), true ) ) {
 			$result = wp_update_post(
 				array(
@@ -606,6 +740,9 @@ final class Scout_Sync {
 			if ( is_wp_error( $result ) ) {
 				return false;
 			}
+		} elseif ( '' !== self::meta_sub( $row['field'] ) ) {
+			$key = self::meta_key( $row['field'] );
+			update_post_meta( (int) $row['post_id'], $key, wp_slash( self::plant( get_post_meta( (int) $row['post_id'], $key, true ), self::meta_sub( $row['field'] ), $value ) ) );
 		} else {
 			update_post_meta( (int) $row['post_id'], self::meta_key( $row['field'] ), wp_slash( $value ) );
 		}
@@ -660,11 +797,14 @@ final class Scout_Sync {
 
 	/* ---------- Automatic runs ---------- */
 
-	/** The active theme, its version and its manifest, as one key. */
+	/**
+	 * The active theme, its version, its manifest and this engine's version, as
+	 * one key. A Core update that reads more of the manifest runs again too.
+	 */
 	public static function theme_key() {
 		$theme = wp_get_theme();
 		$path  = self::manifest_path();
-		return get_stylesheet() . '@' . $theme->get( 'Version' ) . '#' . ( is_readable( $path ) ? md5_file( $path ) : 'none' );
+		return get_stylesheet() . '@' . $theme->get( 'Version' ) . '#' . ( is_readable( $path ) ? md5_file( $path ) : 'none' ) . '/core-' . ( defined( 'SCOUT_CORE_VERSION' ) ? SCOUT_CORE_VERSION : '0' );
 	}
 
 	public static function forget_summary() {
@@ -672,7 +812,7 @@ final class Scout_Sync {
 	}
 
 	public static function forget_summary_option( $option ) {
-		if ( in_array( $option, self::ALLOWED_OPTIONS, true ) || 0 === strpos( (string) $option, 'scout_group_' ) ) {
+		if ( in_array( $option, self::ALLOWED_OPTIONS, true ) || in_array( $option, self::option_keys(), true ) || 0 === strpos( (string) $option, 'scout_group_' ) ) {
 			delete_transient( self::SUMMARY );
 		}
 	}
