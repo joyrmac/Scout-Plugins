@@ -271,3 +271,30 @@
 .se-topic-part > :where(h2) { margin: 0 0 .75em; text-wrap: balance; }
 .se-topic-links { margin-top: 1.5em; font-size: .92em; }
 .se-topic-links :where(span) { font-weight: 600; }
+
+/* 0.15.0 the list with options: series chips, List / Month switch, month grids, and the photo gallery for past events */
+.se-explore { display: grid; gap: 1.4em; }
+.se-explore [hidden] { display: none !important; }
+.se-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8em 1.5em; }
+.se-chips, .se-views { display: flex; flex-wrap: wrap; gap: .5em; }
+.se-chip, .se-viewbtn { font: inherit; font-size: .88em; line-height: 1.2; padding: .55em 1.05em; border-radius: 999px; border: 1px solid var(--se-line); background: transparent; color: inherit; cursor: pointer; min-height: 40px; }
+.se-chip[aria-pressed="true"], .se-viewbtn[aria-pressed="true"] { background: var(--scout-events-accent, currentColor); border-color: var(--scout-events-accent, currentColor); color: var(--scout-events-on-accent, #fff); }
+.se-views { padding: .25em; border: 1px solid var(--se-line); border-radius: 999px; gap: .2em; }
+.se-views .se-viewbtn { border: 0; }
+.se-months { display: grid; gap: 2em; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.se-cal-title { margin: 0 0 .6em; }
+.se-cal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.se-cal-dow { font-size: .72em; text-transform: uppercase; letter-spacing: .12em; text-align: center; opacity: .7; padding-bottom: .3em; }
+.se-cal-day { min-height: 3.2em; padding: .3em; border-radius: 8px; border: 1px solid transparent; font-size: .85em; display: grid; align-content: start; gap: .2em; }
+.se-cal-day.is-blank { visibility: hidden; }
+.se-cal-day.has-events { border-color: var(--se-line); background: var(--se-inset); }
+.se-cal-day.is-quiet { background: transparent; }
+.se-cal-n { opacity: .75; }
+.se-cal-event { display: block; font-size: .82em; line-height: 1.25; text-decoration: none; padding-left: .7em; position: relative; }
+.se-cal-event::before { content: ""; position: absolute; left: 0; top: .45em; width: .4em; height: .4em; border-radius: 50%; background: var(--scout-events-accent, currentColor); }
+.se-events.is-gallery { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 1.4em; }
+.se-events.is-gallery .se-event-card { grid-template-columns: 1fr; padding: 0; overflow: hidden; align-content: start; }
+.se-events.is-gallery .se-card-photo { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.se-events.is-gallery .se-date { display: none; }
+.se-events.is-gallery .se-event-body { padding: 1em 1.1em 1.2em; }
+@media (max-width: 600px) { .se-cal-event { font-size: 0; width: .6em; height: .6em; padding: 0; } .se-cal-event::before { top: 0; width: .6em; height: .6em; } }

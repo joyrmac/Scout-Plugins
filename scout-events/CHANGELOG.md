@@ -1,5 +1,10 @@
 # Scout Events changelog
 
+## 0.15.0 (2026-10-27)
+
+- **The calendar gets options.** `[scout_events views="list,month"]` adds a List / Month switch; Month draws a calendar for every month with an event, each event a dot and a link on its day (dots only on phones). `filter="series"` adds chips to show one kind of event at a time ("Pause & Play", "Practice Lab"). Events that repeat share a title, so the title is the series; the `scout_events_series` filter names one otherwise. Every event stays in the page, so it all works without the script, which only shows and hides.
+- **Past events as a photo gallery.** `layout="gallery"` shows each event's photo on its card and groups by year (`group="year"` works on any list). Built for Bliss Boogie's "Where we have gathered" (Joy, 2026-10-26: "it needs way better design and dynamicness").
+
 ## 0.14.1 (2026-10-23)
 
 - **Easier for themes to restyle.** Rules that reach inside a block now count only their outer class (`.se-facts :where(dt)`, `.se-addcal :where(span)`; 53 rules), so a theme's own `.entry-content dt` or `.se-addcal span` wins without `!important` or a longer selector. Rules that hide something keep their strength. Checked on 11 pages at 1440 and 390 with the Bliss theme: no layout change (theme session, 2026-10-23).
