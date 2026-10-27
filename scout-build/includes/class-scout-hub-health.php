@@ -17,6 +17,9 @@ final class Scout_Hub_Health {
 	const SCAN_HOOK = 'scout_hub_answer_scan';
 	const SEEN_KEY  = 'scout_hub_answer_seen';
 
+	/** Host suffixes that only ever serve a host's staging or temporary copy of a site. */
+	const STAGING_HOSTS = array( '.wpenginepowered.com', '.wpengine.com', '.kinsta.cloud', '.flywheelsites.com', '.pantheonsite.io', '.cloudwaysapps.com' );
+
 	public static function boot(): void {
 		add_action( self::SCAN_HOOK, array( __CLASS__, 'run_scan' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'watch_page' ), 99 );
@@ -217,6 +220,48 @@ final class Scout_Hub_Health {
 	}
 
 	/**
+	 * A staging copy: the site's own address (home_url, never the request's host,
+	 * so a live site reached through its host's alias still reads as live) is a
+	 * host staging address, or WordPress says the environment is not production.
+	 */
+	public static function is_staging(): bool {
+		if ( in_array( wp_get_environment_type(), array( 'staging', 'development', 'local' ), true ) ) {
+			return true;
+		}
+		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		foreach ( self::STAGING_HOSTS as $suffix ) {
+			if ( '' !== $host && str_ends_with( $host, $suffix ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Search engines allowed is right for a live site and wrong for a staging copy,
+	 * which can end up in Google beside the real site. A staging site that already
+	 * asks search engines to stay away reads as it always has.
+	 */
+	public static function search_engines(): array {
+		$public  = '1' === (string) get_option( 'blog_public' );
+		$staging = $public && self::is_staging();
+		if ( $staging ) {
+			return array(
+				'label' => __( 'Search engines', 'scout-build' ),
+				'value' => __( 'Allowed on staging', 'scout-build' ),
+				'state' => 'warn',
+				'note'  => __( 'This is a staging copy, and search engines are allowed to index it. Turn on your host\'s password protection for staging. Leave Search engine visibility alone in WordPress: that setting can travel to the live site with the next copy.', 'scout-build' ),
+			);
+		}
+		return array(
+			'label' => __( 'Search engines', 'scout-build' ),
+			'value' => $public ? __( 'Allowed', 'scout-build' ) : __( 'Hidden', 'scout-build' ),
+			'state' => $public ? 'good' : 'warn',
+			'note'  => $public ? __( 'Google can find the site.', 'scout-build' ) : __( 'Settings, Reading asks search engines to stay away. Right for staging, wrong for a live site.', 'scout-build' ),
+		);
+	}
+
+	/**
 	 * @return array<int, array{label:string, value:string, state:string, note:string}>
 	 *         state is good | warn | bad.
 	 */
@@ -265,13 +310,7 @@ final class Scout_Hub_Health {
 			'state' => $https ? 'good' : 'bad',
 			'note'  => $https ? __( 'The site loads over HTTPS.', 'scout-build' ) : __( 'The site address is not HTTPS.', 'scout-build' ),
 		);
-		$public = '1' === (string) get_option( 'blog_public' );
-		$out[]  = array(
-			'label' => __( 'Search engines', 'scout-build' ),
-			'value' => $public ? __( 'Allowed', 'scout-build' ) : __( 'Hidden', 'scout-build' ),
-			'state' => $public ? 'good' : 'warn',
-			'note'  => $public ? __( 'Google can find the site.', 'scout-build' ) : __( 'Settings, Reading asks search engines to stay away. Right for staging, wrong for a live site.', 'scout-build' ),
-		);
+		$out[] = self::search_engines();
 
 		if ( class_exists( 'Scout_Hub_Mail' ) ) {
 			$out[] = Scout_Hub_Mail::check();

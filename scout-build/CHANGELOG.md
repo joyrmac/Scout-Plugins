@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.4 (2026-10-27)
+
+- **Site health flags a staging copy that search engines can index.** A staging site said "Search engines: Allowed, Google can find the site" with a green tick, which is the right answer for a live site and the wrong one for a copy that can end up in Google beside it. On a host staging address (WP Engine, Kinsta, Flywheel, Pantheon, Cloudways) or when WordPress's environment type is staging, development or local, it now reads "Allowed on staging" and points to the host's password protection, not the Search engine visibility box, since that setting can travel to the live site with the next copy. The check reads the site's own address, so a live site reached through its host's alias still counts as live. Live sites read exactly as before.
+
 ## 0.7.3 (2026-10-26)
 
 - **Features shows which Scout Build is on the site.** "Scout Build 0.7.3" sits beside "Checked … ago", and when a newer Build is waiting it says so, with a link to the Plugins screen. Scout Build updates itself from the Plugins screen, so "Everything is up to date" never covered it. Joy asked for the version "somewhere up here".
