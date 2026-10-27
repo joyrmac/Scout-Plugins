@@ -21,8 +21,10 @@
  *                "footer", "note", "team_intro", "links_intro", "photo", "spot_heading", "spot_text",
  *                "pick_heading", "spot_label", "spot_sub", "spot_url", "logo", "share_card", "share_links",
  *                "people": [ { "name", "slug", "title", "email", "intro", "pick", "tags", "photo", "share" } ],
- *                "links": [ { "label", "sub", "url" } ] }
+ *                "links": [ { "label", "sub", "url" } ] },
+ *   "brand":   { "logo", "logo_width", "color", "background", "text", "message", "hide_menus", "off" }
  * }
+ * "brand" is read live by Scout_Hub_Brand (login screen, admin bar, footer, menus, Dashboard note).
  * "photo" values are a path inside the theme (assets/img/joy.webp) or a full https:// address.
  *
  * @package Scout_Build

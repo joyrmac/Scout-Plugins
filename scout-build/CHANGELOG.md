@@ -1,5 +1,16 @@
 # Scout Build changelog
 
+## 0.8.0 (2026-10-27)
+
+- **Scout Build does the white-labeling, so sites can drop Branda Pro.** Five parts, on by default, matching the five Branda modules the sites actually use:
+  - **Login screen:** the client's logo (the setup file's `brand.logo`, else the Customizer logo, else the Site Icon) and brand color on the button and focus rings. The logo links to the site, and the tab title is the site name. With no logo anywhere, the site name shows as text instead of the WordPress mark.
+  - **Admin bar:** no WordPress logo menu, "Hi, Name" instead of "Howdy," and the updates counter only for operators.
+  - **Admin footer:** "Built and looked after by Scout Media" with a Request a change link ("Need something changed?" on white-label sites). The WordPress version shows only for operators.
+  - **Admin menu:** menus listed in `brand.hide_menus` are hidden from everyone but operators (`parent.php>child.php` hides one submenu item).
+  - **Admin message:** `brand.message` shows once at the top of the Dashboard until each person dismisses it; a new message shows again.
+- Settings come from a new `brand` section in the theme's `scout-setup.json`, then a `scout_brand` option, then the defaults. `"off": ["admin_bar"]` turns one part off; `define( 'SCOUT_BRAND_OFF', true );` turns the whole layer off.
+- To switch a site: update Scout Build, check the login screen, admin bar and footer, then deactivate Branda. Branda's settings are not imported; anything custom (a hidden menu, a message) goes in the setup file first.
+
 ## 0.7.3 (2026-10-26)
 
 - **Features shows which Scout Build is on the site.** "Scout Build 0.7.3" sits beside "Checked … ago", and when a newer Build is waiting it says so, with a link to the Plugins screen. Scout Build updates itself from the Plugins screen, so "Everything is up to date" never covered it. Joy asked for the version "somewhere up here".
