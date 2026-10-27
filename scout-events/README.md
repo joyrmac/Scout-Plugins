@@ -43,7 +43,9 @@ overview lists what each upcoming and draft event still needs.
   `scout_events_auto_content` filter when a theme template places the pieces.
 - `[scout_events]` upcoming events; `show="past"` or `show="all"`, `limit="6"`.
   Lists longer than eight fall under month headings; `group="month"` or
-  `group="none"` chooses. Speaker cards carry `id="their-slug"` for links.
+  `group="none"` chooses (`group="year"` too). Speaker cards carry `id="their-slug"` for links.
+  `views="list,month"` adds a List / Month switch, `filter="series"` adds chips for each kind of
+  event, and `layout="gallery"` shows each event's photo (grouped by year), made for past events.
 - `[scout_event id="12"]` one event's details panel and ticket button.
 - `[scout_schedule event="12"]` the schedule by day and time;
   `layout="grid"` puts rooms side by side and scrolls sideways on phones.
