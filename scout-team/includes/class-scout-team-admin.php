@@ -38,7 +38,7 @@ final class Scout_Team_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Team', 'scout-team' ), __( 'Team', 'scout-team' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Team settings', 'scout-team' ), __( 'Team settings', 'scout-team' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 		// The list sits in the Build menu too, so the sidebar keeps one Scout section.
 		if ( 'options-general.php' !== self::parent() ) {
 			$list = 'edit.php?post_type=' . Scout_Team::POST_TYPE;

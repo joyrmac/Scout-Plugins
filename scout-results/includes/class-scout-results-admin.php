@@ -38,7 +38,7 @@ final class Scout_Results_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Case results', 'scout-results' ), __( 'Case results', 'scout-results' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Case results settings', 'scout-results' ), __( 'Case results settings', 'scout-results' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 		// The list sits in the Build menu too, so the sidebar keeps one Scout section.
 		if ( 'options-general.php' !== self::parent() ) {
 			$list = 'edit.php?post_type=' . Scout_Results::POST_TYPE;

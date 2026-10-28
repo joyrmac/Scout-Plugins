@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.5 (2026-10-28)
+
+- **Fix: every screen that holds items has the section nav.** Plugins load the Scout styles on their list screens (chat questions, reviews, case results, site checks, team members), which made the shared kit skip its tab row there, so there was no way back to the plugin's settings. The kit now prints the tab row on WordPress's own list and edit screens too. Shared admin kit 1.5.1.
+
 ## 0.7.4 (2026-10-27)
 
 - **Site health flags a staging copy that search engines can index.** A staging site said "Search engines: Allowed, Google can find the site" with a green tick, which is the right answer for a live site and the wrong one for a copy that can end up in Google beside it. On a host staging address (WP Engine, Kinsta, Flywheel, Pantheon, Cloudways) or when WordPress's environment type is staging, development or local, it now reads "Allowed on staging" and points to the host's password protection, not the Search engine visibility box, since that setting can travel to the live site with the next copy. The check reads the site's own address, so a live site reached through its host's alias still counts as live. Live sites read exactly as before.

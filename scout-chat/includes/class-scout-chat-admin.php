@@ -60,7 +60,7 @@ final class Scout_Chat_Admin {
 		$n      = self::unanswered();
 		$bubble = $n ? ' <span class="awaiting-mod">' . (int) $n . '</span>' : '';
 		add_submenu_page( $parent, __( 'Chat questions', 'scout-chat' ), __( 'Chat questions', 'scout-chat' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Chat::CPT );
-		add_submenu_page( $parent, __( 'Chat', 'scout-chat' ), __( 'Chat', 'scout-chat' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Chat settings', 'scout-chat' ), __( 'Chat settings', 'scout-chat' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	/** Keep the Build section open while reading a question. */

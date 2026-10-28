@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Accessibility
  * Description:       A plain, honest accessibility statement page, a footer link to it, and weekly checks for missing image descriptions, skipped headings and unlabeled form fields, plus an at-launch checklist for the checks that need a person.
- * Version:           0.1.10
+ * Version:           0.1.11
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_ACCESSIBILITY_VERSION', '0.1.10' );
+define( 'SCOUT_ACCESSIBILITY_VERSION', '0.1.11' );
 define( 'SCOUT_ACCESSIBILITY_FILE', __FILE__ );
 define( 'SCOUT_ACCESSIBILITY_URL', plugin_dir_url( __FILE__ ) );
 
