@@ -167,7 +167,9 @@ final class Scout_Hub_Health {
 		$posts = (int) get_option( 'page_for_posts' );
 		$out   = array();
 		foreach ( array_unique( $order ) as $id ) {
-			if ( isset( $byid[ $id ] ) && $id !== $posts && ! preg_match( $skip, $byid[ $id ]->post_name ) ) {
+			// A password-protected page (a private partner page) is read by no
+			// visitor and no AI tool, so it never counts against the site.
+			if ( isset( $byid[ $id ] ) && $id !== $posts && ! preg_match( $skip, $byid[ $id ]->post_name ) && '' === (string) $byid[ $id ]->post_password ) {
 				$out[] = $byid[ $id ];
 			}
 		}
