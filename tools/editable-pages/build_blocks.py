@@ -128,6 +128,12 @@ def gap_texts(src, n):
     return out
 
 
+def words(html):
+    """Source line breaks and indentation inside text become one space. The block
+    editor shows a stored newline as a line break and saves it back as <br>."""
+    return re.sub(r"[ \t]*\n\s*", " ", html)
+
+
 def ws(text):
     if not text:
         return ""
@@ -157,8 +163,10 @@ class Converter:
         photo = self.has_photo(n)
         if not photo and (not words_anywhere(s, n) or 'aria-hidden="true"' in n.raw_attrs):
             return self.freeze(raw(s, n))
-        if n.tag not in VOID and all(inline_pure(s, c) for c in n.children) and has_words(s, n):
-            return {"name": "scout/text", "attrs": {"tag": n.tag, "attrs": n.raw_attrs, "content": inner(s, n)}}
+        loose = re.sub(r"&nbsp;|&#160;|\s", "", "".join(gap_texts(s, n)))
+        element_row = len(n.children) >= 2 and not loose
+        if n.tag not in VOID and not element_row and all(inline_pure(s, c) for c in n.children) and has_words(s, n):
+            return {"name": "scout/text", "attrs": {"tag": n.tag, "attrs": n.raw_attrs, "content": words(inner(s, n))}}
         return {"name": "scout/box", "attrs": {"tag": n.tag, "attrs": n.raw_attrs},
                 "children": self.children(n)}
 
@@ -196,7 +204,7 @@ class Converter:
                 prev = run_start
                 for el in run:
                     if has_words(s, el):
-                        blk = {"name": "scout/text", "attrs": {"tag": el.tag, "attrs": el.raw_attrs, "content": inner(s, el)}}
+                        blk = {"name": "scout/text", "attrs": {"tag": el.tag, "attrs": el.raw_attrs, "content": words(inner(s, el))}}
                     else:
                         blk = self.freeze(raw(s, el))
                     blk["attrs"]["ws"] = ws(s[prev:el.start])
@@ -204,7 +212,7 @@ class Converter:
                     prev = el.end
             elif body:
                 if re.sub(r"<[^>]*>|&nbsp;|&#160;|\s", "", body):
-                    blk = {"name": "scout/text", "attrs": {"tag": "", "attrs": "", "content": body}}
+                    blk = {"name": "scout/text", "attrs": {"tag": "", "attrs": "", "content": words(body)}}
                 else:
                     blk = self.freeze(body)
                 blk["attrs"]["ws"] = ws(text[:lead])
@@ -363,9 +371,11 @@ def split_top(selectors):
 
 def scope_selector(sel, body_classes):
     sel = sel.strip()
-    m = re.match(r"(body(?:\.[\w-]+)*|:root|html)(?![\w-])", sel)
+    # body.quiet .x -> ROOT.quiet .x: body classes stay as conditions on the page
+    # wrapper, which carries the page's body classes (body.review stays off).
+    m = re.match(r"(body|:root|html)((?:\.[\w-]+)*)(?![\w-])", sel)
     if m:
-        return [ROOT + sel[m.end():]]
+        return [ROOT + m.group(2) + sel[m.end():]]
     if body_classes and sel.startswith(tuple(body_classes)):
         return [ROOT + sel, ROOT + " " + sel]
     return [ROOT + " " + sel]
