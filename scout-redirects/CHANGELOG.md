@@ -1,5 +1,9 @@
 # Scout Redirects changelog
 
+## 0.1.8 (2026-10-28)
+
+- **Fix: a new redirect works the moment it is saved.** Saving a redirect checked the old address first, which cached "no redirect here", and the cache clear that followed did nothing on hosts whose object cache cannot clear one group (WP Engine among them). New and imported redirects returned 404 for up to an hour. Lookups now use a generation number that every change bumps, which works on every object cache.
+
 ## 0.1.7 (2026-10-28)
 
 - **Fix: every screen that holds items has the section nav.** Plugins load the Scout styles on their list screens (chat questions, reviews, case results, site checks, team members), which made the shared kit skip its tab row there, so there was no way back to the plugin's settings. The kit now prints the tab row on WordPress's own list and edit screens too. Shared admin kit 1.5.1.
