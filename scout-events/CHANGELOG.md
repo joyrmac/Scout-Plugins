@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.14.2 (2026-10-28)
+
+- **Fix: every screen that holds items has the section nav.** Plugins load the Scout styles on their list screens (chat questions, reviews, case results, site checks, team members), which made the shared kit skip its tab row there, so there was no way back to the plugin's settings. The kit now prints the tab row on WordPress's own list and edit screens too. Shared admin kit 1.5.1.
+
 ## 0.14.1 (2026-10-23)
 
 - **Easier for themes to restyle.** Rules that reach inside a block now count only their outer class (`.se-facts :where(dt)`, `.se-addcal :where(span)`; 53 rules), so a theme's own `.entry-content dt` or `.se-addcal span` wins without `!important` or a longer selector. Rules that hide something keep their strength. Checked on 11 pages at 1440 and 390 with the Bliss theme: no layout change (theme session, 2026-10-23).

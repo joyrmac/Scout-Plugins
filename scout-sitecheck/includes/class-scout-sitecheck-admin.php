@@ -65,7 +65,7 @@ final class Scout_Sitecheck_Admin {
 		$n      = self::waiting();
 		$bubble = $n ? ' <span class="awaiting-mod">' . (int) $n . '</span>' : '';
 		add_submenu_page( $parent, __( 'Site checks', 'scout-sitecheck' ), __( 'Site checks', 'scout-sitecheck' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Sitecheck::CPT );
-		add_submenu_page( $parent, __( 'Site check', 'scout-sitecheck' ), __( 'Site check', 'scout-sitecheck' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Site check settings', 'scout-sitecheck' ), __( 'Site check settings', 'scout-sitecheck' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	/** Site checks are leads, so they sit with the business screens. */

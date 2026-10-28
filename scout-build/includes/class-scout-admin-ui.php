@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.5.0';
+		const VERSION = '1.5.1';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -238,7 +238,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		 * same nav on top, so no screen is a dead end.
 		 */
 		public static function screen_nav_prepare(): void {
-			if ( self::$kit || ! self::$leaders ) {
+			// WordPress's own screens (a post list, an edit screen) load the kit styles
+			// but never print the kit nav; only admin.php?page= screens do.
+			if ( ! self::$leaders || ( self::$kit && ! empty( $_GET['page'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the screen address only.
 				return;
 			}
 			global $typenow, $pagenow;
