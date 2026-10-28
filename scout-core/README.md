@@ -104,6 +104,67 @@ Keep fieldsets to what actually changes. A page of forty fields is still
 better than a page builder, but a paragraph nobody will ever edit can stay in
 the template.
 
+## Editable pages: words and photos on the page, layout locked (1.2.0+)
+
+The default for designed pages. The client opens a page in the block editor
+and sees it as it looks on the site; they change words and photos, and nobody
+can move, delete or restyle a section. Icons and other wordless markup stay
+in the theme. Page fieldsets (above) stay for site-wide content.
+
+**Opt in from the theme:**
+
+```php
+add_theme_support( 'scout-editable-pages', array(
+    'content_dir' => get_template_directory() . '/content',   // index.php + <page>.php
+    'editor_css'  => array( get_template_directory_uri() . '/assets/css/editor.css' ),
+) );
+```
+
+In each page template, where the body goes:
+
+```php
+<?php if ( ! scout_core_render_editable() ) : ?>
+    ... the approved markup (shown until the content is imported) ...
+<?php endif; ?>
+```
+
+Theme parts (a form, a widget) render through a filter:
+
+```php
+add_filter( 'scout_core_editable_part', function ( $html, $name ) {
+    return 'contact-form' === $name ? my_theme_contact_form() : $html;
+}, 10, 2 );
+```
+
+**Build the content** with `tools/editable-pages/build_blocks.py` in this repo:
+`page` turns an approved page body into `content/<key>.php` (and refuses one
+that does not render back to the approved page); `editor-css` scopes the site
+stylesheets to the editor canvas. Mark theme parts in the body as
+`<scout-part name="contact-form" label="Contact form"></scout-part>`.
+
+**What it does:**
+
+- Five blocks: `scout/box` (layout, locked), `scout/text` (words, editable),
+  `scout/image` (photos, replaceable, keeps the approved image's class and
+  loading behavior), `scout/frozen` (icons and marks, kept in the theme) and
+  `scout/part` (theme parts).
+- The lock: the page sits in one root block with WordPress's content-only
+  lock. Administrators can rearrange with WordPress's "Edit pattern" button;
+  everyone else gets the lock on the whole editor and no unlock button.
+- A "Page photos" panel in the page sidebar lists every photo, background
+  photos included, with Replace and Use original.
+- Import: theme activation and every new theme or Scout Core version fill
+  empty pages and refresh pages nobody has edited (`_scout_editable_hash`).
+  An edited page is never overwritten. `scout_core_import_editable()` runs it
+  on demand.
+- FAQ schema: on an editable page, the Scout schema graph's FAQPage comes
+  from the visible questions (`<details><summary>`), so edits never leave the
+  search markup behind. `scout_core_editable_faq()` returns the entries for
+  themes that print their own schema.
+- Review notes (`<span class="confirm">`) print for people who can edit pages
+  only; set `'review_class'` to use another class.
+- Content files are PHP, so opening one in a browser prints nothing.
+
 ## Adding a client's own types (the companion pattern)
 
 Never fork `scout-core`. Each client gets a small companion plugin that

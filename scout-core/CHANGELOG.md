@@ -1,5 +1,27 @@
 # Scout Core — Changelog
 
+## 1.2.0
+Editable pages. Additive; a theme opts in, nothing changes for themes that
+do not.
+
+- **Editable pages.** A designed page's words and photos are edited on the
+  page in the block editor while the layout, icons and theme parts stay
+  locked (WordPress's content-only lock). Themes opt in with
+  `add_theme_support( 'scout-editable-pages' )` and call
+  `scout_core_render_editable()`. Five blocks (`scout/box`, `scout/text`,
+  `scout/image`, `scout/frozen`, `scout/part`), a Page photos panel, import
+  that refreshes untouched pages and never overwrites edited ones, and FAQ
+  schema rebuilt from the visible questions.
+- **Who can unlock.** Administrators rearrange a page with WordPress's "Edit
+  pattern" button; clients and editors get the lock on the whole editor.
+- **Build tool.** `tools/editable-pages/build_blocks.py` (repo only) turns
+  approved static pages into the theme's content files and scopes the site
+  stylesheets to the editor.
+- Tested in a local WordPress 7.1.3 on three designed pages: visitors see the
+  approved pages unchanged (pixel check within 0.015%), words and photos
+  edit and save, sections cannot be moved, removed or added, the unlock
+  button shows for administrators only, and the FAQ graph follows the page.
+
 ## 1.1.0
 Pages become forms. Additive, nothing existing changes shape.
 
