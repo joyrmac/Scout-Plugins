@@ -240,6 +240,28 @@ final class Scout_Hub_Health {
 	}
 
 	/**
+	 * Whether a staging copy is already kept out of search without touching
+	 * WordPress's own setting: the host's password protection (the site's own
+	 * front page answers 401 to a visitor with no login), or a noindex robots
+	 * directive from the theme or a plugin. The password probe is cached for
+	 * an hour so the health screen never waits on it twice.
+	 */
+	public static function staging_shielded(): bool {
+		$robots = (array) apply_filters( 'wp_robots', array() );
+		if ( ! empty( $robots['noindex'] ) ) {
+			return true;
+		}
+		$cached = get_transient( 'scout_hub_staging_auth' );
+		if ( false !== $cached ) {
+			return 'yes' === $cached;
+		}
+		$r      = wp_remote_head( home_url( '/' ), array( 'timeout' => 5, 'redirection' => 0, 'sslverify' => false ) );
+		$locked = ! is_wp_error( $r ) && 401 === (int) wp_remote_retrieve_response_code( $r );
+		set_transient( 'scout_hub_staging_auth', $locked ? 'yes' : 'no', HOUR_IN_SECONDS );
+		return $locked;
+	}
+
+	/**
 	 * Search engines allowed is right for a live site and wrong for a staging copy,
 	 * which can end up in Google beside the real site. A staging site that already
 	 * asks search engines to stay away reads as it always has.
@@ -247,6 +269,14 @@ final class Scout_Hub_Health {
 	public static function search_engines(): array {
 		$public  = '1' === (string) get_option( 'blog_public' );
 		$staging = $public && self::is_staging();
+		if ( $staging && self::staging_shielded() ) {
+			return array(
+				'label' => __( 'Search engines', 'scout-build' ),
+				'value' => __( 'Kept out on staging', 'scout-build' ),
+				'state' => 'good',
+				'note'  => __( 'This staging copy is behind the host\'s password or tells search engines not to index it, so it stays out of Google. Search engine visibility in WordPress stays on, ready for the live site.', 'scout-build' ),
+			);
+		}
 		if ( $staging ) {
 			return array(
 				'label' => __( 'Search engines', 'scout-build' ),

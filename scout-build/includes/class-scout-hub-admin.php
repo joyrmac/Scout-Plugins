@@ -393,7 +393,7 @@ final class Scout_Hub_Admin {
 				<?php endforeach; ?>
 			</div>
 		<?php endforeach; ?>
-		<style>.sh-skip .sh-card{opacity:.55}.sh-skip .sh-card:hover,.sh-skip .sh-card:focus-within{opacity:1}.sh-step{font-weight:600}.sh-build-ver{margin-left:12px;white-space:nowrap}</style>
+		<style>.sh-skip .sh-card{opacity:.55}.sh-skip .sh-card:hover,.sh-skip .sh-card:focus-within{opacity:1}.sh-order{font-weight:600}.sh-build-ver{margin-left:12px;white-space:nowrap}</style>
 
 		<?php if ( $groups['unused'] ) : ?>
 			<section class="sh-box sh-unused">
@@ -442,7 +442,7 @@ final class Scout_Hub_Admin {
 		?>
 		<article class="sh-card is-<?php echo esc_attr( $s['state'] ); ?>">
 			<div class="sh-cardhead">
-				<h2><?php if ( $step ) : ?><span class="sh-step"><?php echo esc_html( $step . '. ' ); ?></span><?php endif; ?><?php echo esc_html( $f['name'] ); ?></h2>
+				<h2><?php if ( $step ) : ?><span class="sh-order"><?php echo esc_html( $step . '. ' ); ?></span><?php endif; ?><?php echo esc_html( $f['name'] ); ?></h2>
 				<span class="sh-pill is-<?php echo esc_attr( $s['state'] ); ?>"><?php echo esc_html( $states[ $s['state'] ] ); ?></span>
 			</div>
 			<p class="sh-summary"><?php echo esc_html( $f['summary'] ); ?></p>
