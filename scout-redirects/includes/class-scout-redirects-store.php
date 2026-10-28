@@ -106,21 +106,44 @@ final class Scout_Redirects_Store {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$n = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 		update_option( self::COUNT_OPTION, $n, true );
-		wp_cache_flush_group( self::CACHE_GROUP );
+		self::flush_cache();
+	}
+
+	/**
+	 * Lookup cache keys carry a generation number, and clearing the cache
+	 * starts a new generation. Many hosts' object caches (WP Engine's among
+	 * them) cannot flush a single group, so a group flush left "no redirect
+	 * here" answers in place for an hour: a redirect added on those sites did
+	 * nothing until the hour ran out.
+	 */
+	private static function cache_key( string $hash ): string {
+		$gen = wp_cache_get( 'gen', self::CACHE_GROUP );
+		if ( false === $gen ) {
+			$gen = self::flush_cache();
+		}
+		return $gen . ':' . $hash;
+	}
+
+	/** Forget every cached lookup. Returns the new generation. */
+	private static function flush_cache(): string {
+		$gen = str_replace( '.', '', uniqid( '', true ) );
+		wp_cache_set( 'gen', $gen, self::CACHE_GROUP );
+		return $gen;
 	}
 
 	/** The redirect for a normalized old path, or null. */
 	public static function find( string $source ): ?object {
 		global $wpdb;
 		$hash  = self::hash( $source );
-		$found = wp_cache_get( $hash, self::CACHE_GROUP, false, $hit );
+		$key   = self::cache_key( $hash );
+		$found = wp_cache_get( $key, self::CACHE_GROUP, false, $hit );
 		if ( $hit ) {
 			return $found ? $found : null;
 		}
 		$table = self::table();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE source_hash = %s", $hash ) );
-		wp_cache_set( $hash, $row ? $row : 0, self::CACHE_GROUP, HOUR_IN_SECONDS );
+		wp_cache_set( $key, $row ? $row : 0, self::CACHE_GROUP, HOUR_IN_SECONDS );
 		return $row ? $row : null;
 	}
 
@@ -227,7 +250,7 @@ final class Scout_Redirects_Store {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->update( $table, array( 'target' => $to_path ), array( 'target' => $old ) );
 		}
-		wp_cache_flush_group( self::CACHE_GROUP );
+		self::flush_cache();
 	}
 
 	/** Count one use of a redirect. */
@@ -236,7 +259,7 @@ final class Scout_Redirects_Store {
 		$table = self::table();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET hits = hits + 1, last_hit = %s WHERE id = %d", self::now(), (int) $row->id ) );
-		wp_cache_delete( $row->source_hash, self::CACHE_GROUP );
+		wp_cache_delete( self::cache_key( (string) $row->source_hash ), self::CACHE_GROUP );
 	}
 
 	/* ---------------------------------------------------------------- */
