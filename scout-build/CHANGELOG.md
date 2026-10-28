@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.7.7 (2026-10-28)
+
+- **Site health, Search engines: "Kept out on staging".** A staging copy behind the host's password protection (its front page answers 401), or one the theme or a plugin already marks noindex, now reads as kept out of Google instead of asking for a password that is already on. The password probe is cached for an hour.
+- **Features screen: no stray "01" on recommended cards.** The order number on a recommended card used the class of the numbered setup steps, so it picked up their counter. It has its own class now.
+
 ## 0.7.6 (2026-10-28)
 
 - **Fix: Direct answers no longer counts password-protected pages.** A private partner page (WordPress page password) is read by no visitor and no AI tool, but it was checked as a main page and counted as one without answers. It is skipped like the legal pages. The count catches up at the next scan (within 12 hours).
