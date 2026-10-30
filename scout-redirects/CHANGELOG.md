@@ -1,5 +1,9 @@
 # Scout Redirects changelog
 
+## 0.1.9 (2026-10-30)
+
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+
 ## 0.1.8 (2026-10-28)
 
 - **Fix: a new redirect works the moment it is saved.** Saving a redirect checked the old address first, which cached "no redirect here", and the cache clear that followed did nothing on hosts whose object cache cannot clear one group (WP Engine among them). New and imported redirects returned 404 for up to an hour. Lookups now use a generation number that every change bumps, which works on every object cache.

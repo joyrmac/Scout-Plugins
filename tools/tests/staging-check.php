@@ -11,6 +11,8 @@ function get_option( $k, $d = false ) { return 'blog_public' === $k ? $GLOBALS['
 function home_url( $p = '' ) { return $GLOBALS['t_home'] . $p; }
 function wp_parse_url( $u, $c = -1 ) { return parse_url( $u, $c ); }
 function wp_get_environment_type() { return $GLOBALS['t_env']; }
+function apply_filters( $h, $v ) { return $v; }
+function get_transient( $k ) { return 'no'; } // The 0.7.7 password probe: not behind a password.
 require dirname( __DIR__, 2 ) . '/scout-build/includes/class-scout-hub-health.php';
 
 $fail = 0;

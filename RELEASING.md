@@ -82,6 +82,32 @@ purpose if it does not.
 
 ---
 
+## Test builds for staging
+
+A zip built from an unmerged branch with a normal version number causes two
+problems. If its number is already released, or lower than the next release,
+that release overwrites it and the branch's unreleased work disappears. If its
+number is higher than any release, it never updates at all. Both happened on
+Andy's site in October 2026 (Scout Build 0.6.7 and Forms Guard 0.3.0 test zips).
+
+Build staging zips with the script instead:
+
+```bash
+bash tools/test-build.sh scout-build      # scout-build-0.7.8-test.1.zip
+bash tools/test-build.sh scout-build 2    # pick the test number yourself
+```
+
+The zip's `Version:` header (and the `SCOUT_*_VERSION` constant) reads
+`<version>-test.<n>`. Only the copy in the zip changes; never commit a `-test`
+version. PHP's `version_compare()` sorts `0.7.8-test.1` below `0.7.8`, so the
+real release of that version replaces the test build on the next update check.
+Until then Scout Build's **Site health** lists it under **Test builds**, along
+with any Scout plugin running a version newer than its newest release.
+
+Install test zips on staging only.
+
+---
+
 ## Checking it worked
 
 The release shows up at

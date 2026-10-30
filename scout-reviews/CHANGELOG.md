@@ -1,5 +1,10 @@
 # Scout Reviews: Changelog
 
+## 0.5.5 (2026-10-30)
+
+- **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+- **The site notes when the review totals were last updated.** Saving Review settings, or a Google sync, records the time. Scout Build 0.7.8 shows it in Site health as "Review totals" and asks for a look after 30 days, so the counts on the site keep up with the platforms. Andy's site said 17 Google reviews when Google showed 20.
+
 ## 0.5.4 (2026-10-28)
 
 - **Fix: every screen that holds items has the section nav.** Plugins load the Scout styles on their list screens (chat questions, reviews, case results, site checks, team members), which made the shared kit skip its tab row there, so there was no way back to the plugin's settings. The kit now prints the tab row on WordPress's own list and edit screens too. Shared admin kit 1.5.1.

@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Core
  * Plugin URI:        https://scoutraleigh.com/platform/scout-core
  * Description:       The Scout engine for a client site: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard. The Yoast replacement, built to survive any future redesign.
- * Version:           1.5.2
+ * Version:           1.6.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CORE_VERSION', '1.5.2' );
+define( 'SCOUT_CORE_VERSION', '1.6.0' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CORE_FILE', __FILE__ );
 
@@ -44,6 +44,10 @@ require_once SCOUT_CORE_DIR . 'includes/meta-box.php';
 require_once SCOUT_CORE_DIR . 'includes/block-bindings.php';
 require_once SCOUT_CORE_DIR . 'includes/business.php';
 require_once SCOUT_CORE_DIR . 'includes/universal-types.php';
+
+/* ---- Spam protection: email guard, comments and pingbacks closed (both on by default) ---- */
+require_once SCOUT_CORE_DIR . 'includes/protection.php';
+Scout_Core_Protection::init();
 
 /* ---- Schema module (was scout-schema) ---- */
 require_once SCOUT_CORE_DIR . 'includes/schema/class-scout-schema.php';

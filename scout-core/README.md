@@ -56,6 +56,16 @@ BlogPosting on posts. Stable `@id`s throughout.
 robots control, an editor snippet preview with live character counts, global
 defaults, and tuning of WordPress core's own XML sitemap. The Yoast replacement.
 
+**Spam protection (1.6.0+).** Both on by default, switched under **Scout →
+Spam protection**. The email guard codes every email address on the finished
+page (one output buffer, so theme, bindings, plugins and schema are all
+covered); visitors see and click it as usual, and the JSON-LD keeps the same
+value with `@` written as `\u0040`. Closing comments makes `comments_open` and
+`pings_open` false outside wp-admin, drops the `X-Pingback` header and the
+pingback XML-RPC methods, and deletes nothing. Filters:
+`scout_core_email_guard`, `scout_core_close_comments`. Test:
+`php tools/tests/email-guard.php`.
+
 ---
 
 ## Page fieldsets: every headline and picture in its own field (1.1.0+)

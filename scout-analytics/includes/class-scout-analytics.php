@@ -165,7 +165,7 @@ if(d.readyState==='complete'){idle();}else{w.addEventListener('load',idle);}
 		<button type="button" class="scout-consent-yes" data-scout-consent="granted"><?php echo esc_html( $yes ); ?></button>
 	</div>
 </div>
-<style id="scout-consent-css"><?php echo self::css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static CSS. ?></style>
+<style id="scout-consent-css"><?php echo self::css( self::accent() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static CSS, the color is a validated hex. ?></style>
 <script id="scout-consent-js"><?php echo self::js(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static JS. ?></script>
 		<?php
 	}
@@ -176,15 +176,45 @@ if(d.readyState==='complete'){idle();}else{w.addEventListener('load',idle);}
 		return '<a href="#privacy-choices" data-scout-privacy>' . esc_html( $atts['text'] ) . '</a>';
 	}
 
-	private static function css(): string {
-		return '.scout-consent{position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:420px;padding:12px 14px;border-radius:18px;'
-			. 'background:var(--surface,#161616);color:var(--text,#F5F5F7);border:1px solid var(--line,rgba(255,255,255,.1));'
-			. 'box-shadow:0 18px 50px -12px rgba(0,0,0,.55);font:14px/1.45 var(--font-sans,"Hanken Grotesk",-apple-system,Helvetica,Arial,sans-serif)}'
-			. '.scout-consent[hidden]{display:none}.scout-consent p{margin:0 0 10px;color:var(--text-2,#B5B5B8);text-wrap:pretty}'
-			. '.scout-consent a{color:var(--accent-text,#5FB8F2)}.scout-consent-actions{display:flex;gap:8px;justify-content:flex-end}'
-			. '.scout-consent button{font:inherit;font-weight:500;min-height:44px;padding:0 18px;border-radius:980px;cursor:pointer;border:1px solid var(--line,rgba(255,255,255,.1));background:transparent;color:var(--text,#F5F5F7)}'
-			. '.scout-consent .scout-consent-yes{background:var(--accent,#0A78C2);border-color:var(--accent,#0A78C2);color:var(--on-accent,#fff)}'
-			. '.scout-consent button:focus-visible{outline:2px solid var(--accent,#0E8FE6);outline-offset:2px}'
+	/**
+	 * The button color: the site's brand color from Scout Build (the Email
+	 * screen's pick or the detected one), else the scout_brand_accent filter,
+	 * else Scout's darker cerulean.
+	 */
+	private static function accent(): string {
+		$hex = class_exists( 'Scout_Hub_Mail' ) && method_exists( 'Scout_Hub_Mail', 'brand_color' )
+			? Scout_Hub_Mail::brand_color()
+			: (string) apply_filters( 'scout_brand_accent', '' );
+		return preg_match( '/^#[0-9a-fA-F]{6}$/', $hex ) ? $hex : '#0A78C2';
+	}
+
+	/** White text on the brand color when it reads at 4.5:1 (WCAG AA), else near-black. */
+	private static function ink( string $hex ): string {
+		$lum = 0.0;
+		foreach ( array( 0.2126, 0.7152, 0.0722 ) as $i => $w ) {
+			$c    = hexdec( substr( ltrim( $hex, '#' ), $i * 2, 2 ) ) / 255;
+			$lum += $w * ( $c <= 0.03928 ? $c / 12.92 : ( ( $c + 0.055 ) / 1.055 ) ** 2.4 );
+		}
+		return 1.05 / ( $lum + 0.05 ) >= 4.5 ? '#FFFFFF' : '#1D1D1F';
+	}
+
+	/**
+	 * The notice keeps its own colors instead of borrowing the theme's: a site
+	 * that defines --surface but not --text (Andy's) got a white panel with
+	 * light gray text and an invisible "No thanks". Light by default, dark when
+	 * the page sets data-theme="dark", and the button in the site's color.
+	 */
+	private static function css( string $accent ): string {
+		return '.scout-consent{--sc-bg:#FFFFFF;--sc-text:#1D1D1F;--sc-muted:#515154;--sc-line:rgba(0,0,0,.16);--sc-accent:' . $accent . ';--sc-on:' . self::ink( $accent ) . ';'
+			. 'position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:420px;padding:12px 14px;border-radius:18px;'
+			. 'background:var(--sc-bg);color:var(--sc-text);border:1px solid var(--sc-line);'
+			. 'box-shadow:0 18px 50px -12px rgba(0,0,0,.35);font-size:14px;line-height:1.45;font-family:inherit}'
+			. ':root[data-theme="dark"] .scout-consent{--sc-bg:#161616;--sc-text:#F5F5F7;--sc-muted:#B5B5B8;--sc-line:rgba(255,255,255,.16)}'
+			. '.scout-consent[hidden]{display:none}.scout-consent p{margin:0 0 10px;color:var(--sc-muted);text-wrap:pretty}'
+			. '.scout-consent a{color:var(--sc-text);text-decoration:underline}.scout-consent-actions{display:flex;gap:8px;justify-content:flex-end}'
+			. '.scout-consent button{font:inherit;font-weight:500;min-height:44px;padding:0 18px;border-radius:980px;cursor:pointer;border:1px solid var(--sc-line);background:transparent;color:var(--sc-text)}'
+			. '.scout-consent .scout-consent-yes{background:var(--sc-accent);border-color:var(--sc-accent);color:var(--sc-on)}'
+			. '.scout-consent button:focus-visible{outline:2px solid var(--sc-accent);outline-offset:2px}'
 			. '@media (min-width:600px){.scout-consent{right:auto;left:24px;bottom:24px;padding:16px 18px;font-size:15px}}';
 	}
 
