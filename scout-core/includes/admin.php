@@ -69,6 +69,7 @@ final class Scout_Core_Admin {
 		}
 		add_submenu_page( $parent, 'SEO', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, 'Site Sync', 'Site Sync', 'manage_options', 'scout&tab=sync', array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, 'Spam protection', 'Spam protection', 'manage_options', 'scout&tab=protect', array( __CLASS__, 'render' ) );
 		foreach ( self::groups() as $slug => $group ) {
 			add_submenu_page( $parent, $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
 		}
@@ -84,7 +85,8 @@ final class Scout_Core_Admin {
 		$tabs = self::hub()
 			? array( 'business' => 'Business info', 'seo' => 'SEO' )
 			: array( 'dashboard' => 'Search health', 'business' => 'Business info', 'seo' => 'SEO' );
-		$tabs['sync'] = 'Site Sync';
+		$tabs['sync']    = 'Site Sync';
+		$tabs['protect'] = 'Spam protection';
 		foreach ( self::groups() as $slug => $group ) {
 			$tabs[ $slug ] = $group['label'];
 		}
@@ -107,6 +109,7 @@ final class Scout_Core_Admin {
 			'dashboard' => 'A quick check that search engines and AI tools can find the business and read it correctly.',
 			'business'  => 'Your name, address, phone and profiles, entered once. They feed your search listing and every page that shows them. Keep them identical to your Google Business Profile.',
 			'sync'      => 'Keeps each page in step with the copy the theme ships. Pages nobody has edited update on their own after a theme update; anything changed in WordPress waits for you.',
+			'protect'   => 'Two switches that keep spam away from the business. Both are on unless you turn them off.',
 			'seo'       => 'Site-wide search settings. Each page can set its own title and description in its SEO box, and your sitemap is built automatically at /wp-sitemap.xml.',
 		);
 		self::styles();
@@ -119,6 +122,8 @@ final class Scout_Core_Admin {
 			self::tab_seo();
 		} elseif ( 'sync' === $tab ) {
 			Scout_Sync_Admin::render();
+		} elseif ( 'protect' === $tab ) {
+			Scout_Core_Protection::render_tab();
 		} elseif ( array_key_exists( $tab, self::groups() ) ) {
 			Scout_Core_Settings_Groups::render_tab( $tab );
 		} else {

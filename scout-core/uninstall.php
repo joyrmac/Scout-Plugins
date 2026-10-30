@@ -37,6 +37,7 @@ if ( ! $scout_core_purge ) {
 
 delete_option( 'scout_business' );
 delete_option( 'scout_seo_defaults' );
+delete_option( 'scout_core_protection' );
 delete_option( 'scout_seo_sitemap_found' );
 wp_clear_scheduled_hook( 'scout_seo_sitemap_check' );
 

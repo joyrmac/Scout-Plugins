@@ -1,8 +1,13 @@
 # Scout Core — Changelog
 
-## 1.5.3 (2026-10-30)
+## 1.6.0 (2026-10-30)
 
+Two spam switches, both on for every site unless someone turns them off under **Scout → Spam protection**.
+
+- **Email addresses are hidden from spam bots.** Client sites printed their contact email in plain text (email links, visible text, the business details for search), and bots collected it, so clients got SEO spam. Scout Core now codes every address on the finished page before it is sent. Visitors see and click it as usual, and a page cache stores the coded copy. Inside the search data (JSON-LD) only the "@" is written as `\u0040`, so Google reads the same email. Scripts, styles, text boxes, form values and comments are left alone, and if anything goes wrong the page is sent unchanged. Filter `scout_core_email_guard` (true or false).
+- **Comments and pingbacks are closed.** New comments and pingbacks on client sites mostly brought spam. With the switch on, pages and posts take no new comments or pingbacks, the `X-Pingback` header is gone, and the pingback XML-RPC methods are removed. Comments already saved stay in WordPress. Turn it off and the site works exactly as before. Filter `scout_core_close_comments` (true or false).
 - **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.
+- Test: `php tools/tests/email-guard.php`.
 
 ## 1.5.2 (2026-10-28)
 
