@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Partners
  * Description:       Partners and sponsors by level (such as Founding, National, Regional), each with a logo, a link, the regions they back and the places on the site they appear. Change a partner once and every placement follows, with a count of clicks each month to show them.
- * Version:           0.1.1
+ * Version:           0.1.2
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_PARTNERS_VERSION', '0.1.1' );
+define( 'SCOUT_PARTNERS_VERSION', '0.1.2' );
 define( 'SCOUT_PARTNERS_FILE', __FILE__ );
 define( 'SCOUT_PARTNERS_URL', plugin_dir_url( __FILE__ ) );
 

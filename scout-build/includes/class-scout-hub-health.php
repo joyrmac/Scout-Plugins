@@ -348,6 +348,11 @@ final class Scout_Hub_Health {
 			$out[] = Scout_Hub_Mail::check();
 		}
 
+		// Hidden upload fields, from Scout Forms Guard 0.3.0+.
+		if ( class_exists( 'Scout_Forms_Guard' ) && method_exists( 'Scout_Forms_Guard', 'upload_check' ) ) {
+			$out[] = Scout_Forms_Guard::upload_check();
+		}
+
 		$health = json_decode( (string) get_transient( 'health-check-site-status-result' ), true );
 		if ( is_array( $health ) ) {
 			$critical = (int) ( $health['critical'] ?? 0 );
