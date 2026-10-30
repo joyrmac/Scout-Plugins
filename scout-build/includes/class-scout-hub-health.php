@@ -293,6 +293,267 @@ final class Scout_Hub_Health {
 		);
 	}
 
+	/** The repo every Scout plugin updates from (its Update URI). */
+	const REPO = 'joyrmac/Scout-Plugins';
+
+	/** Host names that only ever serve a copy on someone's own computer. */
+	const LOCAL_HOSTS = array( '.local', '.test', '.localhost', '.invalid', '.example', '.lndo.site', '.ddev.site' );
+
+	/**
+	 * The live site: not a staging copy (see is_staging()) and not a copy on
+	 * someone's own computer (localhost, *.local, *.test, a private IP).
+	 */
+	public static function is_live(): bool {
+		if ( self::is_staging() ) {
+			return false;
+		}
+		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		if ( '' === $host || 'localhost' === $host ) {
+			return false;
+		}
+		foreach ( self::LOCAL_HOSTS as $suffix ) {
+			if ( str_ends_with( $host, $suffix ) ) {
+				return false;
+			}
+		}
+		if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+			return false !== filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+		}
+		return true;
+	}
+
+	/**
+	 * The newest release the updater already knows about for one Scout plugin,
+	 * read only from what it has cached (never a new call to GitHub).
+	 *
+	 * @return string|false|null The version; false when the release list was
+	 *                           read and has no release for this plugin; null
+	 *                           when nothing is cached yet.
+	 */
+	public static function known_release( string $slug, string $file ) {
+		// 1. The updater's own answer for this plugin (6 hours).
+		$cached = get_transient( 'scout_updater_' . $slug );
+		if ( is_array( $cached ) ) {
+			return array() === $cached ? false : (string) ( $cached['version'] ?? '' );
+		}
+		// 2. The shared release list every Scout plugin reads (6 hours).
+		$feed = get_transient( 'scout_updater_feed' );
+		if ( is_array( $feed ) && ! empty( $feed['ok'] ) && isset( $feed['releases'] ) ) {
+			$best   = false;
+			$prefix = $slug . '-v';
+			foreach ( (array) $feed['releases'] as $r ) {
+				if ( ! is_array( $r ) || ! empty( $r['draft'] ) || ! empty( $r['prerelease'] ) || 0 !== strpos( (string) ( $r['tag_name'] ?? '' ), $prefix ) ) {
+					continue;
+				}
+				$zip = false;
+				foreach ( (array) ( $r['assets'] ?? array() ) as $a ) {
+					$zip = $zip || ( $slug . '.zip' === ( $a['name'] ?? '' ) );
+				}
+				$v = substr( (string) $r['tag_name'], strlen( $prefix ) );
+				if ( $zip && ( false === $best || version_compare( $v, $best, '>' ) ) ) {
+					$best = $v;
+				}
+			}
+			return $best;
+		}
+		// 3. WordPress's own update check, which the updater answers for every Scout plugin.
+		$plugins = get_site_transient( 'update_plugins' );
+		foreach ( array( 'response', 'no_update' ) as $list ) {
+			$item = is_object( $plugins ) && isset( $plugins->{$list}[ $file ] ) ? (object) $plugins->{$list}[ $file ] : null;
+			if ( $item && ! empty( $item->new_version ) && false !== strpos( (string) ( $item->id ?? '' ), 'github.com/' . self::REPO . '/' ) ) {
+				return (string) $item->new_version;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Scout plugins running a test build: a version with a pre-release label
+	 * (0.6.7-test.1), or one newer than any published release. Neither updates
+	 * the normal way. Andy's site, Oct 2026: a test zip of Scout Build was
+	 * replaced by the next release and its unmerged features vanished, and a
+	 * Forms Guard test build had no release to update to.
+	 */
+	public static function test_builds(): array {
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$notes = array();
+		foreach ( get_plugins() as $file => $data ) {
+			$uri    = (string) ( $data['UpdateURI'] ?? '' );
+			$ours   = 0 === strpos( $uri, 'https://github.com/' . self::REPO . '/' ) || false !== stripos( (string) ( $data['Author'] ?? '' ), 'Scout Media' );
+			$active = is_plugin_active( $file );
+			$v      = (string) ( $data['Version'] ?? '' );
+			if ( ! $ours || ! $active || '' === $v ) {
+				continue;
+			}
+			$slug = '' !== $uri ? basename( untrailingslashit( $uri ) ) : dirname( $file );
+			$name = (string) $data['Name'];
+			if ( preg_match( '/^([0-9.]+)[-+]/', $v, $m ) ) {
+				/* translators: 1: plugin name, 2: installed version, 3: release version */
+				$notes[] = sprintf( __( '%1$s %2$s is a test build. It updates the normal way once %3$s is released.', 'scout-build' ), $name, $v, $m[1] );
+				continue;
+			}
+			$known = self::known_release( $slug, $file );
+			if ( false === $known ) {
+				/* translators: 1: plugin name, 2: installed version */
+				$notes[] = sprintf( __( '%1$s %2$s has no release yet, so it is a test build. It will not update until a release comes out.', 'scout-build' ), $name, $v );
+			} elseif ( is_string( $known ) && '' !== $known && version_compare( $v, $known, '>' ) ) {
+				/* translators: 1: plugin name, 2: installed version, 3: newest release */
+				$notes[] = sprintf( __( '%1$s %2$s is newer than the newest release (%3$s), so it is a test build. It will not update the normal way until %2$s or newer is released.', 'scout-build' ), $name, $v, $known );
+			}
+		}
+		if ( ! $notes ) {
+			return array(
+				'label' => __( 'Test builds', 'scout-build' ),
+				'value' => __( 'None', 'scout-build' ),
+				'state' => 'good',
+				'note'  => __( 'Every Scout plugin is a released version, so each one updates itself.', 'scout-build' ),
+			);
+		}
+		return array(
+			'label'     => __( 'Test builds', 'scout-build' ),
+			/* translators: %d: number of plugins */
+			'value'     => sprintf( _n( '%d plugin', '%d plugins', count( $notes ), 'scout-build' ), count( $notes ) ),
+			'state'     => 'warn',
+			'note'      => implode( ' ', $notes ),
+			'link'      => admin_url( 'plugins.php' ),
+			'link_text' => __( 'Plugins', 'scout-build' ),
+		);
+	}
+
+	/**
+	 * Where each active Gravity Forms form sends its emails. Null when Gravity
+	 * Forms is not running.
+	 *
+	 * Assumes GFAPI::get_forms() returns the active forms, each with a
+	 * 'notifications' array whose items carry isActive, toType (email, field
+	 * or routing) and to (addresses, merge tags, or a field id).
+	 */
+	public static function form_emails(): ?array {
+		if ( ! class_exists( 'GFAPI' ) || ! method_exists( 'GFAPI', 'get_forms' ) ) {
+			return null;
+		}
+		$forms   = (array) GFAPI::get_forms();
+		$agency  = array_map( 'strtolower', (array) apply_filters( 'scout_build_agency_domains', array( 'scoutraleigh.com' ) ) );
+		$live    = self::is_live();
+		$admin   = (string) get_option( 'admin_email' );
+		$lines   = array();
+		$silent  = array();
+		$ours    = array();
+		foreach ( $forms as $form ) {
+			if ( ! is_array( $form ) ) {
+				continue;
+			}
+			$title = (string) ( $form['title'] ?? '' );
+			/* translators: 1: form title, 2: form id */
+			$label = sprintf( __( '%1$s (form %2$d)', 'scout-build' ), $title, (int) ( $form['id'] ?? 0 ) );
+			$to    = array();
+			foreach ( (array) ( $form['notifications'] ?? array() ) as $n ) {
+				if ( ! is_array( $n ) || ( isset( $n['isActive'] ) && ! $n['isActive'] ) ) {
+					continue;
+				}
+				$type = (string) ( $n['toType'] ?? 'email' );
+				$raw  = trim( (string) ( $n['to'] ?? '' ) );
+				$who  = array();
+				if ( 'routing' === $type ) {
+					$who[] = __( 'routing rules', 'scout-build' );
+				} elseif ( 'field' === $type ) {
+					/* translators: %s: field id */
+					$who[] = sprintf( __( 'the address in field %s', 'scout-build' ), $raw );
+				} else {
+					foreach ( array_filter( array_map( 'trim', explode( ',', str_replace( '{admin_email}', $admin, $raw ) ) ) ) as $addr ) {
+						// A merge tag such as {Email:3} sends to what the visitor typed in field 3.
+						/* translators: %s: field id */
+						$who[] = preg_match( '/^\{[^:}]*:(\d+)[^}]*\}$/', $addr, $m ) ? sprintf( __( 'the address in field %s', 'scout-build' ), $m[1] ) : $addr;
+					}
+				}
+				if ( ! $who ) {
+					continue;
+				}
+				$agency_only = true;
+				foreach ( $who as $addr ) {
+					$domain      = strtolower( (string) substr( (string) strrchr( $addr, '@' ), 1 ) );
+					$agency_only = $agency_only && '' !== $domain && in_array( $domain, $agency, true );
+				}
+				if ( $agency_only ) {
+					$ours[ $label ] = true;
+				}
+				$to = array_merge( $to, $who );
+			}
+			if ( $to ) {
+				$lines[] = $label . ': ' . implode( ', ', array_unique( $to ) ) . '.';
+			} else {
+				$silent[] = $label;
+				/* translators: %s: form title and id */
+				$lines[] = sprintf( __( '%s: no email is sent.', 'scout-build' ), $label );
+			}
+		}
+		if ( ! $lines ) {
+			return array(
+				'label' => __( 'Form emails go to', 'scout-build' ),
+				'value' => __( 'No forms', 'scout-build' ),
+				'state' => 'good',
+				'note'  => __( 'Gravity Forms has no active forms.', 'scout-build' ),
+			);
+		}
+		$problem = $live && ( $silent || $ours );
+		$intro   = '';
+		if ( $live && $silent ) {
+			$intro .= __( 'A form on this live site sends no email, so new requests can sit unseen.', 'scout-build' ) . ' ';
+		}
+		if ( $live && $ours ) {
+			$intro .= __( 'A form on this live site emails only Scout, not the business.', 'scout-build' ) . ' ';
+		}
+		return array(
+			'label'     => __( 'Form emails go to', 'scout-build' ),
+			'value'     => $problem ? __( 'Check the forms', 'scout-build' ) : sprintf( _n( '%d form', '%d forms', count( $lines ), 'scout-build' ), count( $lines ) ),
+			'state'     => $problem ? 'warn' : 'good',
+			'note'      => $intro . implode( ' ', $lines ),
+			'link'      => admin_url( 'admin.php?page=gf_edit_forms' ),
+			'link_text' => __( 'Forms', 'scout-build' ),
+		);
+	}
+
+	/**
+	 * How long ago the review totals (each platform's rating and count, typed
+	 * in on Review settings) were last saved. Scout Reviews 0.5.5 stamps each
+	 * save. Andy's site showed 17 Google reviews while Google showed 20. Null
+	 * when Scout Reviews is not running or no totals are entered.
+	 */
+	public static function review_totals(): ?array {
+		if ( ! class_exists( 'Scout_Reviews_Settings' ) ) {
+			return null;
+		}
+		$profiles = (array) ( Scout_Reviews_Settings::get()['profiles'] ?? array() );
+		$counted  = array_filter( $profiles, static fn( $p ) => is_array( $p ) && (int) ( $p['count'] ?? 0 ) > 0 );
+		if ( ! $counted ) {
+			return null;
+		}
+		$link  = array(
+			'link'      => admin_url( 'admin.php?page=scout-reviews-settings' ),
+			'link_text' => __( 'Review settings', 'scout-build' ),
+		);
+		$stamp = (int) get_option( 'scout_reviews_totals_updated', 0 );
+		if ( ! $stamp ) {
+			return array(
+				'label' => __( 'Review totals', 'scout-build' ),
+				'value' => __( 'Not known', 'scout-build' ),
+				'state' => 'warn',
+				'note'  => __( 'The site does not know when the review counts were last checked. Update the totals once to start tracking.', 'scout-build' ),
+			) + $link;
+		}
+		$days = (int) floor( ( time() - $stamp ) / DAY_IN_SECONDS );
+		$old  = $days > 30;
+		return array(
+			'label' => __( 'Review totals', 'scout-build' ),
+			/* translators: %d: days */
+			'value' => 0 === $days ? __( 'Today', 'scout-build' ) : sprintf( _n( '%d day ago', '%d days ago', $days, 'scout-build' ), $days ),
+			'state' => $old ? 'warn' : 'good',
+			'note'  => $old ? __( 'The review counts on the site have not been updated in over a month. Check each platform and type in its current rating and count.', 'scout-build' ) : __( 'The review counts on the site were updated in the last month.', 'scout-build' ),
+		) + ( $old ? $link : array() );
+	}
+
 	/**
 	 * @return array<int, array{label:string, value:string, state:string, note:string}>
 	 *         state is good | warn | bad.
@@ -351,6 +612,16 @@ final class Scout_Hub_Health {
 		// Hidden upload fields, from Scout Forms Guard 0.3.0+.
 		if ( class_exists( 'Scout_Forms_Guard' ) && method_exists( 'Scout_Forms_Guard', 'upload_check' ) ) {
 			$out[] = Scout_Forms_Guard::upload_check();
+		}
+
+		$forms = self::form_emails();
+		if ( $forms ) {
+			$out[] = $forms;
+		}
+		$out[]   = self::test_builds();
+		$reviews = self::review_totals();
+		if ( $reviews ) {
+			$out[] = $reviews;
 		}
 
 		$health = json_decode( (string) get_transient( 'health-check-site-status-result' ), true );

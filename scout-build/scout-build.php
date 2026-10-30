@@ -50,6 +50,7 @@ require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-admin.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-mail.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-dashboard.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-themes.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-watch.php';
 
 Scout_Hub_Features::boot();
 Scout_Hub_Requests::boot();
@@ -60,3 +61,6 @@ Scout_Hub_Setup::boot();
 Scout_Hub_Mail::boot();
 Scout_Hub_Dashboard::boot();
 Scout_Hub_Themes::boot();
+Scout_Hub_Watch::boot();
+
+register_deactivation_hook( __FILE__, array( 'Scout_Hub_Watch', 'unschedule' ) );

@@ -15,6 +15,8 @@ delete_option( 'scout_hub_update_holds' );
 delete_option( 'scout_hub_log' );
 delete_option( 'scout_hub_answer_seen' );
 delete_option( 'scout_hub_page' );
+delete_option( 'scout_hub_hidden_alert_sent' );
+wp_clear_scheduled_hook( 'scout_hub_daily_watch' );
 delete_transient( 'scout_hub_catalog' );
 delete_transient( 'scout_hub_releases' );
 delete_transient( 'scout_updater_scout-build' );
