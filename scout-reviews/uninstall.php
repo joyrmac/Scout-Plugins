@@ -54,4 +54,5 @@ if ( is_array( $scout_reviews_terms ) ) {
 }
 
 delete_option( 'scout_reviews_settings' );
+delete_option( 'scout_reviews_totals_updated' );
 delete_option( 'scout_reviews_seen_slots' );
