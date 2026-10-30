@@ -1,6 +1,8 @@
 # Scout Forms Guard — Changelog
 
-## 0.3.0 (2026-10-30)
+## 0.3.1 (2026-10-30)
+
+- **Released as 0.3.1, not 0.3.0.** Test copies of 0.3.0 went onto staging and one live site before release. A release with the same number would never replace them, so the first release is 0.3.1. Everything below ships in it.
 
 - **Refuses files sent to hidden upload fields.** A reported critical Gravity Forms flaw (CVE-2026-84434, reported 9.8) lets a stranger upload a file that runs code through any File Upload field whose Visibility is Hidden. Gravity Forms has no fix yet. Scout Forms Guard now drops any file sent to a File Upload field set to Hidden or Administrative, on a normal submit and on drag-and-drop uploads (those get a 403). A visitor never sees those fields, so real visitors lose nothing. Logged-in staff who can edit entries are let through. Each refusal adds to the monthly blocked count. Turn it off with the `scout_forms_guard_block_hidden_uploads` filter.
 - **Names the fields to fix.** Site admins see a red notice listing each form and field, with a link to the form and what to change (set Visibility to Visible, or delete the field). `Scout_Forms_Guard::upload_check()` gives Scout Build the same answer as a Site health row; `Scout_Forms_Guard::hidden_uploads()` returns the list.
