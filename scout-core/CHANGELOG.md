@@ -1,5 +1,13 @@
 # Scout Core — Changelog
 
+## 1.7.0 (2026-10-31)
+
+- **Change log.** When someone who isn't Scout edits the site, Scout Core records who, when and what changed, so the change can be folded into the repo and the next theme update keeps it (Joy, 2026-10-27). It covers pages, posts and Site Editor templates (title, text, excerpt, status, with a link to the WordPress revision), the Scout SEO fields, menus, photos (uploads, details, alt text, deletions), key settings (site title, tagline, home page, permalinks, Business info, SEO and spam settings), plugins and themes (turned on or off, installed, updated, deleted, switched), users and roles (never passwords), the Customizer and Gravity Forms. Several saves of the same thing by one person within five minutes become one entry. Scout's own edits (Scout Build operators), cron, WP-CLI, plugin auto-updates and Site Sync's writes are not logged; theme setup code can call `Scout_Changelog::pause()` and `resume()`.
+- **Scout → Change log**, for Scout only (clients don't see the tab, the health row or the actions). New entries wait until someone marks them as in the repo, then move to the Archive, which is kept. Each entry shows before and after, trimmed to the part that changed. **Copy for Claude** copies every new entry as plain text.
+- **Weekly email** on Mondays at 8:00 site time to `SCOUT_HUB_REQUEST_EMAIL` (team@scoutraleigh.com by default), only when there are new entries. Filters: `scout_change_log_enabled`, `scout_change_log_is_scout`, `scout_change_log_options`, `scout_change_log_skip`, `scout_change_log_email`. Off switch on the screen.
+- Stored in its own table, `{prefix}scout_change_log`. Deleting Scout Core keeps it unless the full wipe setting is on.
+- Test: `php tools/tests/change-log.php /path/to/wordpress`.
+
 ## 1.6.0 (2026-10-30)
 
 Two spam switches, both on for every site unless someone turns them off under **Scout → Spam protection**.

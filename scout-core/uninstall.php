@@ -41,6 +41,14 @@ delete_option( 'scout_core_protection' );
 delete_option( 'scout_seo_sitemap_found' );
 wp_clear_scheduled_hook( 'scout_seo_sitemap_check' );
 
+// The Change log: its table, the menu snapshots and the weekly email.
+global $wpdb;
+$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}scout_change_log" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+foreach ( array( 'scout_change_log_db', 'scout_change_log_menus', 'scout_change_log_last_digest', 'scout_change_log_switch' ) as $scout_core_opt ) {
+	delete_option( $scout_core_opt );
+}
+wp_clear_scheduled_hook( 'scout_change_log_digest' );
+
 foreach ( array( '_scout_seo_title', '_scout_seo_desc', '_scout_seo_canonical', '_scout_seo_noindex' ) as $scout_core_meta_key ) {
 	delete_post_meta_by_key( $scout_core_meta_key );
 }

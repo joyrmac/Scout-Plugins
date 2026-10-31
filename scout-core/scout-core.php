@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Core
  * Plugin URI:        https://scoutraleigh.com/platform/scout-core
  * Description:       The Scout engine for a client site: business identity, content model (post types, fields, Block Bindings), the JSON-LD schema graph, and the in-house SEO head tags and sitemap tuning. One plugin, one Scout dashboard. The Yoast replacement, built to survive any future redesign.
- * Version:           1.6.0
+ * Version:           1.7.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CORE_VERSION', '1.6.0' );
+define( 'SCOUT_CORE_VERSION', '1.7.0' );
 define( 'SCOUT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CORE_FILE', __FILE__ );
 
@@ -66,6 +66,12 @@ require_once SCOUT_CORE_DIR . 'includes/admin.php';
 /* ---- Site Sync: theme copy in, hand edits kept (docs/site-sync-spec.md) ---- */
 require_once SCOUT_CORE_DIR . 'includes/sync/class-scout-sync.php';
 require_once SCOUT_CORE_DIR . 'includes/sync/class-scout-sync-admin.php';
+
+/* Change log: who changed what, when it wasn't Scout (Joy, 2026-10-27). */
+require_once SCOUT_CORE_DIR . 'includes/changelog/class-scout-changelog.php';
+require_once SCOUT_CORE_DIR . 'includes/changelog/class-scout-changelog-admin.php';
+Scout_Changelog::init();
+Scout_Changelog_Admin::init();
 Scout_Sync::init();
 Scout_Sync_Admin::init();
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
