@@ -4,6 +4,7 @@
 Editable pages. Additive; a theme opts in, nothing changes for themes that
 do not.
 
+- Editable pages take over page text that came from an old site (a staging copy of a live site). That text never shows, because the template prints the approved design, but the import only filled empty pages, so editors changed text nobody could see. The old text is kept in the page's revisions and in `_scout_editable_legacy`. Edited pages are never overwritten.
 - **Editable pages.** A designed page's words and photos are edited on the
   page in the block editor while the layout, icons and theme parts stay
   locked (WordPress's content-only lock). Themes opt in with

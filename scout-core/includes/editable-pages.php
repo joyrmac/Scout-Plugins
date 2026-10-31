@@ -37,6 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Scout_Core_Editable_Pages {
 
 	const HASH_META = '_scout_editable_hash';
+	const LEGACY_META = '_scout_editable_legacy';
 	const VERSION_OPTION = 'scout_editable_version';
 	const MARK = '<!-- wp:scout/box';
 
@@ -290,9 +291,16 @@ final class Scout_Core_Editable_Pages {
 			}
 			$current   = (string) $page->post_content;
 			$stored    = (string) get_post_meta( $page->ID, self::HASH_META, true );
-			$untouched = '' === trim( $current ) || ( $stored && md5( $current ) === $stored );
+			// Content from before the theme opted in (an old site copied to staging)
+			// never shows: the template prints the approved design instead. Adopt
+			// it, keeping the old text in a meta field and the page's revisions.
+			$legacy    = '' !== trim( $current ) && false === strpos( $current, self::MARK );
+			$untouched = '' === trim( $current ) || ( $stored && md5( $current ) === $stored ) || $legacy;
 			if ( ! $untouched || $current === $blocks ) {
 				continue;
+			}
+			if ( $legacy ) {
+				add_post_meta( $page->ID, self::LEGACY_META, wp_slash( $current ), true );
 			}
 			$saved = wp_update_post( array( 'ID' => $page->ID, 'post_content' => wp_slash( $blocks ) ), true );
 			if ( ! is_wp_error( $saved ) ) {
