@@ -8,6 +8,7 @@ third-party calls. Three layers, all invisible to real visitors:
    later than a day (a stale/replayed page).
 3. **Signed token** — a hidden field signed with the site's secret key, so a
    forged or copied submission fails the check.
+4. **What the message says:** an entry that links to another website or uses a known pitch ("search index", "backlink") is marked as spam. The visitor sees the normal confirmation, no email goes out, and the entry waits in the form's Spam folder.
 
 ## Hidden upload guard
 
@@ -42,6 +43,7 @@ this plugin does nothing.
 
 - `scout_forms_guard_min_seconds` (default 3)
 - `scout_forms_guard_max_seconds` (default 1 day)
+- `scout_forms_guard_content_check` (default true), `scout_forms_guard_spam_phrases` (array)
 - `scout_forms_guard_blocked`: action fired when a submission or a hidden
   upload is blocked (log it if you want).
 - `scout_forms_guard_block_hidden_uploads` (default true): return false to stop

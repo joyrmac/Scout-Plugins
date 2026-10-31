@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Forms Guard
  * Description:       In-house spam protection for Gravity Forms: a hidden honeypot, a time trap, and a signed token. Also refuses files sent to File Upload fields set to Hidden (a reported Gravity Forms security flaw) and names those fields for you to fix. No reCAPTCHA, no Akismet, no third-party calls.
- * Version:           0.3.1
+ * Version:           0.3.2
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  gravityforms
@@ -49,6 +49,7 @@ final class Scout_Forms_Guard {
 		add_filter( 'gform_get_form_filter', array( __CLASS__, 'inject' ), 10, 2 );
 		add_filter( 'gform_validation', array( __CLASS__, 'validate' ) );
 		add_filter( 'gform_validation_message', array( __CLASS__, 'message' ), 10, 2 );
+		add_filter( 'gform_entry_is_spam', array( __CLASS__, 'content_spam' ), 10, 3 );
 	}
 
 	/**
@@ -112,6 +113,57 @@ final class Scout_Forms_Guard {
 		}
 
 		return $validation_result;
+	}
+
+	/**
+	 * Layer 4: what the message says. Some bots wait, skip the honeypot and
+	 * send a valid token, then pitch "add your site to Google's search index"
+	 * with a link to their own site. Real customers asking for a quote don't
+	 * paste links to other websites. A match marks the entry as spam instead
+	 * of refusing it: the visitor sees the normal confirmation, no
+	 * notification goes out, and the entry waits in the form's Spam folder in
+	 * case a real person was caught. Off with the
+	 * scout_forms_guard_content_check filter.
+	 */
+	public static function content_spam( $is_spam, $form, $entry ) {
+		if ( $is_spam || ! apply_filters( 'scout_forms_guard_content_check', true, $form ) ) {
+			return $is_spam;
+		}
+		$text = '';
+		foreach ( (array) $entry as $key => $value ) {
+			if ( is_string( $value ) && preg_match( '/^\d+(\.\d+)?$/', (string) $key ) ) {
+				$text .= ' ' . $value;
+			}
+		}
+		if ( self::looks_like_spam( $text ) ) {
+			self::record_block( $form );
+			return true;
+		}
+		return $is_spam;
+	}
+
+	/** True when the text links to another website or uses a known spam pitch. */
+	public static function looks_like_spam( string $text ): bool {
+		$text = strtolower( $text );
+		foreach ( (array) apply_filters( 'scout_forms_guard_spam_phrases', array( 'search index', 'search results today', 'backlink', 'domainsubmit', 'searchindex', 'seo services', 'rank your website', 'guest post' ) ) as $phrase ) {
+			if ( '' !== $phrase && false !== strpos( $text, strtolower( (string) $phrase ) ) ) {
+				return true;
+			}
+		}
+		// Email addresses are fine (a customer may type theirs), so drop them first.
+		$text = preg_replace( '/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/', ' ', $text );
+		if ( ! preg_match_all( '#(?:https?://|www\.)?((?:[a-z0-9-]+\.)+(?:com|net|org|pro|io|co|info|biz|xyz|site|online|top|us|ru|cn|shop|store|link|click|app|dev|ai))\b#', $text, $m ) ) {
+			return false;
+		}
+		$own = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$own = preg_replace( '/^www\./', '', $own );
+		foreach ( $m[1] as $host ) {
+			$host = preg_replace( '/^www\./', '', $host );
+			if ( $host !== $own ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static function fail( $validation_result ) {
