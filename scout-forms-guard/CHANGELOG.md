@@ -1,5 +1,9 @@
 # Scout Forms Guard — Changelog
 
+## 0.3.2 (2026-10-31)
+
+- **Catches "add your site to Google" spam.** Two entries on Walter Lutz's live form got past the honeypot, time trap and token: bots that wait like a person, then pitch a search-index service with a link to their own site. Forms Guard now reads the message too. An entry that links to another website (email addresses are fine) or uses a known pitch ("search index", "backlink" and a few more) is marked as spam: the visitor sees the normal confirmation, no notification goes out, and the entry waits in the form's Spam folder in case a real person was caught. It counts toward the monthly blocked total. Turn it off with `scout_forms_guard_content_check`; change the phrases with `scout_forms_guard_spam_phrases`.
+
 ## 0.3.1 (2026-10-30)
 
 - **Released as 0.3.1, not 0.3.0.** Test copies of 0.3.0 went onto staging and one live site before release. A release with the same number would never replace them, so the first release is 0.3.1. Everything below ships in it.
