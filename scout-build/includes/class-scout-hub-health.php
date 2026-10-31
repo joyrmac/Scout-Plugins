@@ -381,7 +381,9 @@ final class Scout_Hub_Health {
 		$notes = array();
 		foreach ( get_plugins() as $file => $data ) {
 			$uri    = (string) ( $data['UpdateURI'] ?? '' );
-			$ours   = 0 === strpos( $uri, 'https://github.com/' . self::REPO . '/' ) || false !== stripos( (string) ( $data['Author'] ?? '' ), 'Scout Media' );
+			// Only plugins that update from this repo. Client companion plugins (Scout Media
+			// author, no Update URI here) live in the client's own repo and never get a release.
+			$ours   = 0 === strpos( $uri, 'https://github.com/' . self::REPO . '/' );
 			$active = is_plugin_active( $file );
 			$v      = (string) ( $data['Version'] ?? '' );
 			if ( ! $ours || ! $active || '' === $v ) {

@@ -126,6 +126,14 @@ plugin( 'scout-build', '0.6.7-test.1', false );
 $r = Scout_Hub_Health::test_builds();
 ok( 'good' === $r['state'], 'inactive plugins are skipped' );
 
+t_reset();
+plugin( 'scout-build', '0.7.9' );
+$GLOBALS['t']['plugins']['scout-andysgolfcarts/scout-andysgolfcarts.php'] = array( 'Name' => "Scout - Andy's Golf Car Garage", 'Version' => '0.6.0', 'Author' => 'Scout Media & Consulting', 'UpdateURI' => '' );
+$GLOBALS['t']['active'][] = 'scout-andysgolfcarts/scout-andysgolfcarts.php';
+feed( array( 'scout-build-v0.7.9' ) );
+$r = Scout_Hub_Health::test_builds();
+ok( 'good' === $r['state'], 'client companion plugin (no Scout Plugins Update URI) is not a test build' );
+
 // Form emails go to.
 class GFAPI {
 	public static $forms = array();

@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.9 (2026-10-30)
+
+- **"Test builds" no longer flags a client's own plugin.** On Andy's live site the row named his companion plugin (Scout — Andy's Golf Car Garage), which lives in his repo and never gets a Scout Plugins release. The row now looks only at plugins that update from this repo.
+
 ## 0.7.8 (2026-10-30)
 
 - **Form emails in the site's own colors.** Gravity Forms notifications now arrive in the same card as the Email test: the site's color bar, its Site Icon, the site name, and the subject as the headline, with the form answers below. When the message has a phone number, it gets Call and Text buttons; when it has an email address, an Email back button that reads plain-text addresses too (the first one that is not the site's own). The headline leaves out the phone number, since it already has its Call button. Confirmations sent to the person who filled in the form get the card without those buttons. Light colors like Carolina blue get dark button text so it stays readable. Only HTML notifications, only while Scout Email is set up. Joy, on Andy's request email: "can these be branded?" Off switch: the `scout_mail_brand_forms` filter.
