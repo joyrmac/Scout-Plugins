@@ -8,7 +8,7 @@ third-party calls. Three layers, all invisible to real visitors:
    later than a day (a stale/replayed page).
 3. **Signed token** — a hidden field signed with the site's secret key, so a
    forged or copied submission fails the check.
-4. **What the message says** — an entry that links to another website or uses a known pitch ("search index", "backlink") is marked as spam. The visitor sees the normal confirmation, no email goes out, and the entry waits in the form's Spam folder.
+4. **What the message says:** an entry that links to another website or uses a known pitch ("search index", "backlink") is marked as spam. The visitor sees the normal confirmation, no email goes out, and the entry waits in the form's Spam folder.
 
 ## Hidden upload guard
 
