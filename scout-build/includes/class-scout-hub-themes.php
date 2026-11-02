@@ -220,7 +220,9 @@ final class Scout_Hub_Themes {
 	 */
 	public static function download( $reply, $package, $upgrader ) {
 		$src = self::source();
-		if ( false !== $reply || ! $src || ! is_string( $package ) || 0 !== strpos( $package, 'https://api.github.com/repos/' . $src['repo'] . '/releases/assets/' ) ) {
+		// GitHub names are not case-sensitive, and the API spells the repo the way GitHub
+		// stores it (joyrmac/Maravelas) while a theme's Update URI may not (joyrmac/maravelas).
+		if ( false !== $reply || ! $src || ! is_string( $package ) || 0 !== stripos( $package, 'https://api.github.com/repos/' . $src['repo'] . '/releases/assets/' ) ) {
 			return $reply;
 		}
 		$token = self::token();
