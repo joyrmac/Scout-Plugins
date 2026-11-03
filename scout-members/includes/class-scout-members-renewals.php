@@ -1,15 +1,18 @@
 <?php
 /**
  * Renewals without saved cards. Once a day, members whose renewal date is 30
- * days away (yearly plans) and 7 days away (every plan) get a reminder email.
- * With dues through the checkout, it carries a Renew now link; without one,
- * it carries the owner's next-step note and the membership page. Each
- * reminder goes once per renewal date, and a missed day catches up the next.
+ * days away (yearly plans) and 7 days away (every plan) get a reminder email
+ * with a Renew now link. By default only members whose plan has a dues
+ * product get one, so a site without a checkout sends nothing new; Settings
+ * can send them to every member (with the next-step note in place of the
+ * link) or to nobody. Each reminder goes once per renewal date, and a missed
+ * day catches up the next.
  *
- * After the renewal date the grace period (Settings, 14 days unless changed)
- * keeps members-only pages open while the member renews; then access ends by
- * itself and the membership waits, still marked active, for a payment or the
- * owner. Nothing is charged automatically.
+ * After the renewal date the grace period (Settings: 14 days on a fresh
+ * install, 0 on a site upgraded from before 0.4.0) keeps members-only pages
+ * open while the member renews; then access ends by itself and the
+ * membership waits, still marked active, for a payment or the owner. Nothing
+ * is charged automatically.
  *
  * @package Scout_Members
  */
@@ -37,9 +40,23 @@ final class Scout_Members_Renewals {
 		wp_clear_scheduled_hook( self::HOOK );
 	}
 
+	/**
+	 * Whether this member gets reminders: by default only when their plan has
+	 * a dues product, so every email has a way to pay; "all" in Settings sends
+	 * them to everyone; "off" to nobody.
+	 */
+	public static function reminds( int $user_id ): bool {
+		$mode = Scout_Members::settings()['reminders'];
+		if ( 'all' === $mode ) {
+			return true;
+		}
+		// A pay link, not only a product: a member with a payment under review gets none until it is settled.
+		return 'checkout' === $mode && class_exists( 'Scout_Members_Woo' ) && '' !== Scout_Members_Woo::pay_url( $user_id );
+	}
+
 	/** Send whatever reminders are due today. Returns how many went out. */
 	public static function run(): int {
-		if ( ! Scout_Members::settings()['reminders'] ) {
+		if ( 'off' === Scout_Members::settings()['reminders'] ) {
 			return 0;
 		}
 		$sent  = 0;
@@ -47,7 +64,7 @@ final class Scout_Members_Renewals {
 		foreach ( Scout_Members::ids( 'active' ) as $id ) {
 			$m      = Scout_Members::member( $id );
 			$period = Scout_Members::plans()[ $m['plan'] ]['period'] ?? 'year';
-			if ( '' === $m['renews'] || 'once' === $period || $m['renews'] < $today ) {
+			if ( '' === $m['renews'] || 'once' === $period || $m['renews'] < $today || ! self::reminds( $id ) ) {
 				continue;
 			}
 			$days = (int) round( ( strtotime( $m['renews'] . ' 12:00:00' ) - strtotime( $today . ' 12:00:00' ) ) / DAY_IN_SECONDS );

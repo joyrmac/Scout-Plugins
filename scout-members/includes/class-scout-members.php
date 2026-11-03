@@ -40,11 +40,51 @@ final class Scout_Members {
 	/** User meta: a payment the owner should look at (a refund, a payment from a declined applicant). */
 	const REVIEW = '_scout_member_review';
 
-	/** Days of access after the renewal date when no grace period is set. */
+	/** Days of access after the renewal date on a fresh install. Sites upgrading from before 0.4.0 start at 0. */
 	const GRACE = 14;
 
+	/** Option: the plugin version whose upgrade steps have run. */
+	const VERSION = 'scout_members_version';
+
+	/** Renewal reminders: to members whose plan has a dues product (the default), to every member, or none. */
+	const REMINDERS = array( 'checkout', 'all', 'off' );
+
 	public static function boot(): void {
+		add_action( 'init', array( __CLASS__, 'upgrade' ), 5 );
 		add_action( 'init', array( __CLASS__, 'role' ), 6 );
+	}
+
+	/**
+	 * Once per version. A site that already had Scout Members before 0.4.0
+	 * keeps its old behaviour: access ends the day after the renewal date
+	 * (grace 0) until the owner sets a grace period. Fresh installs get 14.
+	 */
+	public static function upgrade(): void {
+		$done = (string) get_option( self::VERSION, '' );
+		if ( SCOUT_MEMBERS_VERSION === $done ) {
+			return;
+		}
+		if ( '' === $done || version_compare( $done, '0.4.0', '<' ) ) {
+			$s   = get_option( self::OPTION, null );
+			$had = is_array( $s ) || self::has_records();
+			$s   = is_array( $s ) ? $s : array();
+			if ( $had && ! isset( $s['grace'] ) ) {
+				$s['grace'] = 0;
+				update_option( self::OPTION, $s, false );
+			}
+		}
+		update_option( self::VERSION, SCOUT_MEMBERS_VERSION, false );
+	}
+
+	/** Anyone with a membership record at all. */
+	private static function has_records(): bool {
+		return (bool) get_users(
+			array(
+				'meta_key' => self::STATUS, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one row, once per version.
+				'fields'   => 'ID',
+				'number'   => 1,
+			)
+		);
 	}
 
 	/** Members read the site and nothing else; the dashboard stays closed to them. */
@@ -69,12 +109,14 @@ final class Scout_Members {
 	/* ---------- settings ---------- */
 
 	/**
-	 * grace: days members keep access after their renewal date. reminders:
-	 * email members 30 and 7 days before it. pay_when: with a checkout,
-	 * "approval" (pay once approved) or "apply" (pay with the application).
-	 * receipt: the words that start each dues product's name on receipts.
+	 * grace: days members keep access after their renewal date (14 on a fresh
+	 * install, 0 on a site upgraded from before 0.4.0). reminders: emails 30
+	 * and 7 days before it, "checkout" (only members whose plan has a dues
+	 * product, so every email has a pay link), "all" or "off". pay_when: with
+	 * a checkout, "approval" (pay once approved) or "apply" (pay with the
+	 * application). receipt: the words that start each dues product's name.
 	 *
-	 * @return array{page:int,home:int,agreements_url:string,notify:string,min_age:int,plans:string,grace:int,reminders:bool,pay_when:string,receipt:string}
+	 * @return array{page:int,home:int,agreements_url:string,notify:string,min_age:int,plans:string,grace:int,reminders:string,pay_when:string,receipt:string}
 	 */
 	public static function settings(): array {
 		$s = get_option( self::OPTION, array() );
@@ -87,13 +129,14 @@ final class Scout_Members {
 			'min_age'        => max( 0, (int) ( $s['min_age'] ?? 0 ) ),
 			'plans'          => (string) ( $s['plans'] ?? '' ),
 			'grace'          => isset( $s['grace'] ) ? max( 0, (int) $s['grace'] ) : self::GRACE,
-			'reminders'      => ! isset( $s['reminders'] ) || ! empty( $s['reminders'] ),
+			'reminders'      => in_array( $s['reminders'] ?? '', self::REMINDERS, true ) ? (string) $s['reminders'] : 'checkout',
 			'pay_when'       => 'apply' === ( $s['pay_when'] ?? '' ) ? 'apply' : 'approval',
 			'receipt'        => (string) ( $s['receipt'] ?? '' ),
 		);
 	}
 
 	public static function save_settings( array $in ): void {
+		$now = self::settings();
 		update_option(
 			self::OPTION,
 			array(
@@ -103,8 +146,9 @@ final class Scout_Members {
 				'notify'         => sanitize_email( (string) ( $in['notify'] ?? '' ) ),
 				'min_age'        => min( 99, absint( $in['min_age'] ?? 0 ) ),
 				'plans'          => sanitize_textarea_field( (string) ( $in['plans'] ?? '' ) ),
-				'grace'          => isset( $in['grace'] ) && '' !== (string) $in['grace'] ? min( 90, absint( $in['grace'] ) ) : self::GRACE,
-				'reminders'      => empty( $in['reminders'] ) ? 0 : 1,
+				// Left out, both keep what the site has: an upgraded site's 0 never turns into 14 by a save.
+				'grace'          => isset( $in['grace'] ) && '' !== (string) $in['grace'] ? min( 90, absint( $in['grace'] ) ) : $now['grace'],
+				'reminders'      => in_array( $in['reminders'] ?? '', self::REMINDERS, true ) ? (string) $in['reminders'] : $now['reminders'],
 				'pay_when'       => 'apply' === ( $in['pay_when'] ?? '' ) ? 'apply' : 'approval',
 				'receipt'        => sanitize_text_field( (string) ( $in['receipt'] ?? '' ) ),
 			),

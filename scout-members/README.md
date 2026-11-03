@@ -69,13 +69,18 @@ ever saved: every payment, renewals included, is a fresh checkout.
 ## Renewals
 
 - **Reminder emails** 30 days (yearly plans) and 7 days before the renewal
-  date, once each, with **Renew now** and the amount when the plan has a
-  product, else the next-step note and the membership page. Renewing early
-  adds a year from the renewal date, not from the day paid. Settings can turn
-  reminders off.
-- **Grace period** (Settings, 14 days unless changed): members keep access
-  that long after their renewal date while they renew; their page says by
-  when. Then access closes by itself and the membership waits for a payment.
+  date, once each, with **Renew now** and the amount. **Default: only members
+  whose plan has a dues product get them**, so every email has a way to pay
+  and a site without a checkout sends nothing new. Settings can send them to
+  every member (without a product, the email carries the next-step note and
+  the membership page) or turn them off. Renewing early adds a year from the
+  renewal date, not from the day paid.
+- **Grace period** (Settings): members keep access that long after their
+  renewal date while they renew; their page says by when. Then access closes
+  by itself and the membership waits for a payment. **Default: 14 days on a
+  fresh install, 0 on a site that already had Scout Members before 0.4.0**,
+  so an update keeps access ending the day after the renewal date, as
+  before, until the owner sets a grace period.
 - **Renewal price** (All members): empty is the plan price, 0 renews free
   (the member confirms with a $0 checkout), any other amount is that
   member's own price. Members brought in from a file on a $0 order are marked

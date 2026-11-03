@@ -929,17 +929,19 @@ final class Scout_Members_Admin {
 			</div>
 			<p>
 				<?php
-				echo esc_html(
-					$woo
-						? __( 'Members renew with a fresh checkout; no cards are saved. Reminders with a Renew now link go 30 days (yearly plans) and 7 days before each renewal date.', 'scout-members' )
-						: __( 'Reminders go 30 days (yearly plans) and 7 days before each renewal date, with your next-step note from Settings. Record payments with Paid today on All members.', 'scout-members' )
-				);
+				if ( 'off' === $s['reminders'] ) {
+					echo '<strong>' . esc_html__( 'Reminder emails are off in Settings.', 'scout-members' ) . '</strong> ';
+				} elseif ( 'all' === $s['reminders'] ) {
+					echo esc_html__( 'Every member gets a reminder 30 days (yearly plans) and 7 days before their renewal date: with a Renew now link when their plan has a dues product, else with your next-step note.', 'scout-members' ) . ' ';
+				} else {
+					echo esc_html__( 'Members whose plan has a dues product get a reminder with a Renew now link 30 days (yearly plans) and 7 days before their renewal date. Others get none; Settings can change that.', 'scout-members' ) . ' ';
+				}
+				echo esc_html( $woo ? __( 'Members renew with a fresh checkout; no cards are saved.', 'scout-members' ) : __( 'Record payments with Paid today on All members.', 'scout-members' ) );
 				if ( $s['grace'] > 0 ) {
 					/* translators: %d: days. */
 					echo ' ' . esc_html( sprintf( _n( 'Members keep access for %d day after their renewal date.', 'Members keep access for %d days after their renewal date.', $s['grace'], 'scout-members' ), $s['grace'] ) );
-				}
-				if ( ! $s['reminders'] ) {
-					echo ' <strong>' . esc_html__( 'Reminder emails are off in Settings.', 'scout-members' ) . '</strong>';
+				} else {
+					echo ' ' . esc_html__( 'Access closes the day after the renewal date (no grace period).', 'scout-members' );
 				}
 				?>
 			</p>
@@ -1137,10 +1139,13 @@ final class Scout_Members_Admin {
 			<p class="sm-field">
 				<label for="sm-set-grace"><?php esc_html_e( 'Grace period (days)', 'scout-members' ); ?></label>
 				<input type="number" id="sm-set-grace" name="scout_members[grace]" value="<?php echo (int) $s['grace']; ?>" min="0" max="90" class="small-text">
-				<span class="sh-note"><?php esc_html_e( 'How long members keep access after their renewal date while they renew. 0 closes it the day after.', 'scout-members' ); ?></span>
+				<span class="sh-note"><?php esc_html_e( 'How long members keep access after their renewal date while they renew. 0 closes it the day after. New sites start at 14; sites that had memberships before this version start at 0, as before.', 'scout-members' ); ?></span>
 			</p>
 			<p class="sm-field">
-				<label><input type="checkbox" name="scout_members[reminders]" value="1" <?php checked( $s['reminders'] ); ?>> <?php esc_html_e( 'Email renewal reminders 30 days (yearly plans) and 7 days before the renewal date', 'scout-members' ); ?></label>
+				<span class="sm-label"><?php esc_html_e( 'Renewal reminders (30 days before for yearly plans, and 7 days before)', 'scout-members' ); ?></span>
+				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="checkout" <?php checked( $s['reminders'], 'checkout' ); ?>> <?php esc_html_e( 'To members whose plan has a dues product, with a Renew now link', 'scout-members' ); ?></label>
+				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="all" <?php checked( $s['reminders'], 'all' ); ?>> <?php esc_html_e( 'To every member (without a dues product, the email carries your next-step note)', 'scout-members' ); ?></label>
+				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="off" <?php checked( $s['reminders'], 'off' ); ?>> <?php esc_html_e( 'Off', 'scout-members' ); ?></label>
 			</p>
 		</fieldset>
 		<?php
