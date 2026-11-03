@@ -258,6 +258,12 @@
 .se-dir-short { font-size: .9em; text-wrap: pretty; }
 .se-dir-tags { font-size: .78em; letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .se-dir-none { margin: 0; }
+/* Members directory contact ([scout_directory contact="yes"]): where, then the ways to reach them. */
+.se-dir-contact { display: flex; flex-direction: column; gap: .3em; margin-top: auto; padding-top: .6em; border-top: 1px solid var(--se-line); font-size: .88em; }
+.se-dir-where { opacity: .8; }
+.se-dir-reach { line-height: 1.7; overflow-wrap: anywhere; }
+.se-dir-reach :where(a) { color: var(--se-accent); text-underline-offset: .2em; }
+.se-dir-reach .screen-reader-text { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 600px) {
 	/* On a phone, a small photo beside the name keeps a long directory scrollable. */
 	.se-dir-list { gap: .75em; }
@@ -265,8 +271,52 @@
 	.se-dir-link { display: contents; }
 	.se-dir-photo { grid-row: 1 / span 4; width: 4.5rem; aspect-ratio: 1; }
 	.se-dir-photo.is-empty { font-size: 1.2em; }
-	.se-dir-name, .se-dir-role, .se-dir-short, .se-dir-tags { grid-column: 2; }
+	.se-dir-name, .se-dir-role, .se-dir-short, .se-dir-tags, .se-dir-contact { grid-column: 2; }
 	.se-dir-short { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+/* List layout: [scout_directory layout="list"]. A contact list: search, two choices, letters A to Z, one entry per name. */
+.se-dir-picks { display: flex; flex-wrap: wrap; gap: .75em 1.25em; align-items: end; margin-top: .75em; }
+.se-dir-pick { display: flex; flex-direction: column; gap: .35em; margin: 0; flex: 1 1 12em; min-width: 0; }
+.se-dir-pick :where(label) { font-size: .8em; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+.se-dir-pick :where(select) { font: inherit; color: inherit; background: transparent; border: 1px solid var(--se-line); border-radius: 12px; padding: .6em .9em; min-height: 44px; max-width: 100%; }
+.se-dir-check { display: inline-flex; align-items: center; gap: .5em; min-height: 44px; cursor: pointer; }
+.se-dir-check :where(input) { width: 1.1em; height: 1.1em; margin: 0; }
+.se-dir-rail { display: flex; flex-wrap: wrap; gap: .1em .5em; margin: .75em 0 0; font-size: .95em; }
+.se-dir-rail :where(a) { text-decoration: none; padding: .2em .25em; min-width: 1.6em; text-align: center; color: var(--se-accent); }
+.se-dir-rail :where(a).is-dim { opacity: .35; pointer-events: none; }
+.se-dir-letters { display: block; }
+.se-dir-letter { padding-top: 1.25em; }
+.se-dir-letter[hidden] { display: none; }
+.se-dir-lh { display: flex; align-items: center; gap: .75em; margin: 0; font-size: 1.5em; scroll-margin-top: 6em; }
+.se-dir-lh::after { content: ""; flex: 1; height: 1px; background: var(--se-line); }
+.se-dir-rows { list-style: none; margin: 0; padding: 0; }
+.se-dir-row { border-bottom: 1px solid var(--se-line); }
+.se-dir-row[hidden] { display: none; }
+.se-dir-entry { margin: 0; }
+.se-dir-head { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) 1.5rem; gap: 0 1em; align-items: center; padding: .9em .25em; cursor: pointer; list-style: none; border-radius: 12px; }
+.se-dir-head::-webkit-details-marker { display: none; }
+.se-dir-head:hover { background: var(--se-inset); }
+.se-dir-head :where(.se-dir-photo) { width: 3.5rem; height: 3.5rem; aspect-ratio: 1; border-radius: 50%; object-fit: cover; }
+.se-dir-head :where(.se-dir-photo.is-empty) { font-size: 1.1em; }
+.se-dir-who { display: grid; gap: .15em; min-width: 0; }
+.se-dir-head :where(.se-dir-name) { font-size: 1.1em; }
+.se-dir-line { font-size: .92em; opacity: .85; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.se-dir-meta { font-size: .75em; letter-spacing: .06em; text-transform: uppercase; opacity: .7; display: flex; flex-wrap: wrap; align-items: center; gap: .25em .6em; }
+.se-dir-sep { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.se-dir-open { position: relative; width: 1.5rem; height: 1.5rem; }
+.se-dir-open::before, .se-dir-open::after { content: ""; position: absolute; left: 50%; top: 50%; background: var(--se-accent); transform: translate(-50%, -50%); }
+.se-dir-open::before { width: 14px; height: 2px; }
+.se-dir-open::after { width: 2px; height: 14px; transition: transform .25s; }
+.se-dir-entry[open] .se-dir-open::after { transform: translate(-50%, -50%) rotate(90deg); }
+.se-dir-sheet { display: grid; gap: .6em; padding: 0 .25em 1.25em calc(3.5rem + 1em); }
+.se-dir-sheet :where(.se-dir-contact) { margin-top: 0; padding-top: 0; border-top: 0; }
+.se-dir-profile { justify-self: start; }
+@media (max-width: 600px) {
+	.se-dir-head { grid-template-columns: 3rem minmax(0, 1fr) 1.25rem; gap: 0 .75em; padding: .75em 0; }
+	.se-dir-head :where(.se-dir-photo) { width: 3rem; height: 3rem; }
+	.se-dir-sheet { padding-left: 0; }
+	.se-dir-lh { scroll-margin-top: 4em; }
 }
 
 /* Region cards: [scout_regions]. */
@@ -282,7 +332,7 @@
 .se-dir-card.no-photo :where(.se-dir-name) { font-size: 1.1em; }
 @media (max-width: 600px) {
 	.se-dir-card.no-photo { grid-template-columns: 1fr; }
-	.se-dir-card.no-photo :where(.se-dir-name), .se-dir-card.no-photo :where(.se-dir-role), .se-dir-card.no-photo :where(.se-dir-short), .se-dir-card.no-photo :where(.se-dir-tags) { grid-column: 1; }
+	.se-dir-card.no-photo :where(.se-dir-name), .se-dir-card.no-photo :where(.se-dir-role), .se-dir-card.no-photo :where(.se-dir-short), .se-dir-card.no-photo :where(.se-dir-tags), .se-dir-card.no-photo :where(.se-dir-contact) { grid-column: 1; }
 	.se-dir-photo.is-logo { padding: .35em; }
 }
 

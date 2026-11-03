@@ -355,6 +355,15 @@ final class Scout_Events_Editor {
 				self::field( 'url', $n, 'website', __( 'Website', 'scout-events' ), $p['website'], 'se-wide' );
 				?>
 			</div>
+			<p class="se-help"><?php esc_html_e( 'Public contact. Shown only in a members directory ([scout_directory contact="yes"]), never on the public speaker page. Use only what they publish for clients.', 'scout-events' ); ?></p>
+			<div class="se-grid">
+				<?php
+				self::field( 'text', $n, 'city', __( 'Where they work (city, state or Online)', 'scout-events' ), $p['city'] );
+				self::field( 'url', $n, 'booking', __( 'Booking or services link', 'scout-events' ), $p['booking'] );
+				self::field( 'email', $n, 'email', __( 'Business email', 'scout-events' ), $p['email'] );
+				self::field( 'text', $n, 'phone', __( 'Business phone', 'scout-events' ), $p['phone'] );
+				?>
+			</div>
 			<p class="se-field se-wide">
 				<label for="se-short"><?php esc_html_e( 'Short bio (two or three sentences)', 'scout-events' ); ?></label>
 				<textarea id="se-short" name="scout_speaker[short]" rows="4"><?php echo esc_textarea( $p['short'] ); ?></textarea>
