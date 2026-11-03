@@ -1,0 +1,117 @@
+/* Scout Booking on the site: the [scout_booking] steps and a client's booking
+   page. Fonts and text color come from the theme. Every color that matters is
+   a custom property a theme can retune:
+   --scout-booking-accent, --scout-booking-on-accent, --scout-booking-line,
+   --scout-booking-inset, --scout-booking-radius, --scout-booking-danger. */
+
+.sb {
+	--sb-accent: var(--scout-booking-accent, #1D1D1F);
+	--sb-on-accent: var(--scout-booking-on-accent, #fff);
+	--sb-line: var(--scout-booking-line, rgba(127, 127, 127, .3));
+	--sb-inset: var(--scout-booking-inset, rgba(127, 127, 127, .08));
+	--sb-radius: var(--scout-booking-radius, 14px);
+	--sb-danger: var(--scout-booking-danger, #B42318);
+	max-width: 46rem;
+	scroll-margin-top: 2em;
+	text-align: left;
+}
+.sb *, .sb *::before, .sb *::after { box-sizing: border-box; }
+.sb-h { margin: 0 0 .4em; font-size: 1.35em; line-height: 1.25; text-wrap: balance; }
+.sb-h3 { margin: 1.4em 0 .6em; font-size: 1.05em; text-wrap: balance; }
+.sb-help { margin: 0 0 1em; font-size: .92em; opacity: .8; text-wrap: pretty; }
+.sb p { text-wrap: pretty; }
+
+/* Steps. */
+.sb-steps { display: flex; flex-wrap: wrap; gap: .4em 1.4em; margin: 0 0 1.4em; padding: 0; list-style: none; font-size: .92em; }
+.sb-step { display: flex; align-items: center; gap: .45em; opacity: .6; margin: 0; }
+.sb-step.is-on { opacity: 1; font-weight: 600; }
+.sb-step.is-done { opacity: .85; }
+.sb-step-n { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; border-radius: 50%; border: 1px solid var(--sb-line); font-size: .85em; }
+.sb-step.is-on .sb-step-n { background: var(--sb-accent); border-color: var(--sb-accent); color: var(--sb-on-accent); }
+
+/* Sessions. */
+.sb-types { display: grid; gap: .75em; margin: 0; padding: 0; list-style: none; }
+.sb-types li { margin: 0; }
+.sb-type { display: grid; gap: .3em; padding: 1em 1.2em; border: 1px solid var(--sb-line); border-radius: var(--sb-radius); color: inherit; text-decoration: none; transition: border-color .15s, background .15s; }
+.sb-type:hover, .sb-type:focus-visible { border-color: var(--sb-accent); background: var(--sb-inset); color: inherit; text-decoration: none; }
+.sb-type:focus-visible { outline: 2px solid var(--sb-accent); outline-offset: 2px; }
+.sb-type-name { font-weight: 600; font-size: 1.05em; }
+.sb-type-meta { font-size: .92em; opacity: .85; }
+.sb-type-note { font-size: .9em; opacity: .75; }
+.sb-tag { justify-self: start; padding: .2em .7em; border-radius: 980px; background: var(--sb-inset); font-size: .8em; font-weight: 600; }
+
+/* The chosen session. */
+.sb-chosen { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .6em 1.2em; align-items: flex-start; padding: 1em 1.2em; margin: 0 0 1.2em; border: 1px solid var(--sb-line); border-radius: var(--sb-radius); background: var(--sb-inset); }
+.sb-chosen p { margin: 0; }
+.sb-chosen-name { font-weight: 600; }
+.sb-chosen-meta { font-size: .92em; opacity: .85; }
+.sb-chosen-when { margin-top: .3em !important; font-weight: 600; }
+.sb-chosen-links { display: flex; flex-wrap: wrap; gap: .4em 1em; font-size: .92em; }
+
+/* Days and times. */
+.sb-week { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .6em; margin: 0 0 .6em; }
+.sb-week-label { margin: 0; text-align: center; font-weight: 600; font-size: .95em; }
+.sb-week-nav { font-size: .92em; min-width: 3.5em; }
+.sb-week-nav:last-child { text-align: right; }
+.sb-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .45em; margin: 0 0 .4em; padding: 0; list-style: none; }
+.sb-days li { margin: 0; }
+.sb-day { display: grid; justify-items: center; gap: .1em; padding: .6em .3em; border: 1px solid var(--sb-line); border-radius: 10px; color: inherit; text-decoration: none; line-height: 1.2; }
+a.sb-day:hover, a.sb-day:focus-visible { border-color: var(--sb-accent); color: inherit; text-decoration: none; }
+a.sb-day:focus-visible, .sb-time:focus-visible { outline: 2px solid var(--sb-accent); outline-offset: 2px; }
+.sb-day.is-on { background: var(--sb-accent); border-color: var(--sb-accent); color: var(--sb-on-accent); }
+.sb-day.is-on:hover { color: var(--sb-on-accent); }
+.sb-day.is-full { opacity: .45; }
+.sb-dow { font-size: .78em; text-transform: uppercase; letter-spacing: .06em; }
+.sb-date { font-weight: 600; }
+.sb-count { font-size: .75em; opacity: .85; }
+.sb-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5em, 1fr)); gap: .5em; margin: 0; padding: 0; list-style: none; }
+.sb-times li { margin: 0; }
+.sb-time { display: block; padding: .75em .5em; border: 1px solid var(--sb-line); border-radius: 10px; text-align: center; color: inherit; text-decoration: none; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sb-time:hover, .sb-time:focus-visible { background: var(--sb-accent); border-color: var(--sb-accent); color: var(--sb-on-accent); text-decoration: none; }
+
+/* Details form. */
+.sb-form { display: grid; gap: 1.1em; }
+.sb-group { border: 1px solid var(--sb-line); border-radius: var(--sb-radius); padding: 1em 1.2em .3em; margin: 0; min-width: 0; }
+.sb-group legend { font-weight: 600; padding: 0 .4em; }
+.sb-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13em), 1fr)); gap: 0 1em; }
+.sb-field { display: flex; flex-direction: column; gap: .35em; margin: 0 0 1em; }
+.sb-field label { font-weight: 600; font-size: .95em; }
+.sb-field :where(input, textarea, select) { width: 100%; max-width: 100%; padding: .65em .75em; font: inherit; border: 1px solid var(--sb-line); border-radius: 8px; background: transparent; color: inherit; }
+.sb-field :where(input, textarea):focus-visible { outline: 2px solid var(--sb-accent); outline-offset: 1px; }
+.sb-req { font-weight: 400; opacity: .7; font-size: .9em; }
+.sb-check { margin: 0; }
+.sb-check label { display: flex; gap: .6em; align-items: flex-start; }
+.sb-check input { margin-top: .3em; flex: none; width: 1.1em; height: 1.1em; }
+.sb-statement { margin: 0 0 1em; padding: .8em 1em; border-left: 3px solid var(--sb-line); background: var(--sb-inset); border-radius: 0 8px 8px 0; }
+.sb-statement p { margin: 0 0 .5em; }
+.sb-statement p:last-child { margin: 0; }
+.sb-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Buttons and notes. */
+.sb-button { display: inline-block; padding: .85em 1.6em; border: 1px solid var(--sb-accent); border-radius: 980px; background: var(--sb-accent); color: var(--sb-on-accent); text-decoration: none; font: inherit; font-weight: 600; line-height: 1.2; cursor: pointer; text-align: center; }
+.sb-button:hover, .sb-button:focus-visible { filter: brightness(1.12); color: var(--sb-on-accent); text-decoration: none; }
+.sb-button:focus-visible { outline: 2px solid var(--sb-accent); outline-offset: 3px; }
+.sb-button.is-quiet { background: transparent; color: inherit; border-color: var(--sb-line); }
+.sb-button.is-quiet:hover { border-color: var(--sb-accent); filter: none; color: inherit; }
+.sb-button.is-danger { background: transparent; color: var(--sb-danger); border-color: currentColor; }
+.sb-button.is-danger:hover { color: var(--sb-danger); }
+.sb-actions { display: flex; flex-wrap: wrap; gap: .6em; }
+.sb-inline { margin: 0 0 1em; }
+.sb-note { padding: .8em 1em; border-radius: calc(var(--sb-radius) - 4px); background: var(--sb-inset); font-weight: 600; margin: 0 0 1.2em; }
+.sb-note.is-bad { border-left: 3px solid var(--sb-danger); }
+.sb-note.is-good { border-left: 3px solid #0B7F5D; }
+
+/* A booking. */
+.sb-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11em), 1fr)); gap: .8em 1.5em; margin: 0 0 1.2em; padding: 1em 1.2em; border: 1px solid var(--sb-line); border-radius: var(--sb-radius); }
+.sb-facts div { min-width: 0; }
+.sb-facts dt { font-size: .78em; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+.sb-facts dd { margin: .2em 0 0; }
+.sb-change { margin-top: 1.4em; padding-top: .2em; border-top: 1px solid var(--sb-line); }
+.sb-back { margin: 0 0 .8em; font-size: .92em; }
+
+@media (max-width: 480px) {
+	.sb-days { grid-template-columns: repeat(4, 1fr); }
+	.sb-times { grid-template-columns: repeat(3, 1fr); }
+	.sb-button { display: block; width: 100%; }
+	.sb-actions { flex-direction: column; }
+}

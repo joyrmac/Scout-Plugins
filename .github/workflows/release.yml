@@ -29,6 +29,7 @@ on:
           - scout-aeo
           - scout-analytics
           - scout-build
+          - scout-booking
           - scout-cards
           - scout-chat
           - scout-core
