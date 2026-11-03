@@ -161,10 +161,11 @@ requests unpaid after the pay window, and sends reminders.
 
 ## For other features
 
-- `do_action( 'scout_newsletter_optin', $email, $first_name, 'scout-booking', $tags )`
-  fires when the newsletter box is ticked, or the function
-  `scout_newsletter_optin()` is called when a connector defines it. Tags:
-  `booking` and `session: <name>`.
+- `do_action( 'scout_newsletter_optin', $email, $first_name, 'scout-booking', $tags, $context )`
+  fires when the newsletter box is ticked (Scout Newsletter listens on it).
+  Tags: `booking` and `session: <name>`. `$context` is
+  `array( 'wording' => <the exact words beside the box>, 'page' => <the page the form was on> )`,
+  kept as the record of what the person agreed to.
 - `scout_booking_created` ( `$row`, `$type` ) after a booking or request is made.
 - `scout_booking_status` ( `$row`, `$status` ) after any status change.
 - `scout_booking_types_saved` after session types change.

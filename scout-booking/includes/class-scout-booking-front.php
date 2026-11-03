@@ -690,7 +690,7 @@ final class Scout_Booking_Front {
 		}
 
 		if ( '1' === $typed['optin'] ) {
-			self::newsletter( $row, $type );
+			self::newsletter( $row, $type, (string) strtok( $back, '?#' ) );
 		}
 		/**
 		 * A booking or request was made on the site.
@@ -713,16 +713,24 @@ final class Scout_Booking_Front {
 	}
 
 	/**
-	 * Hand the opt-in to the newsletter connector. A connector either defines
-	 * scout_newsletter_optin() or listens on the action of the same name.
+	 * Hand the opt-in to the newsletter connector (Scout Newsletter listens on
+	 * this action). The context carries the exact words beside the box and the
+	 * page the form was on, as the record of what the person agreed to.
+	 *
+	 * @param string $page The page the booking form was on.
 	 */
-	private static function newsletter( array $row, array $type ): void {
-		$tags = array( 'booking', 'session: ' . $type['name'] );
-		if ( function_exists( 'scout_newsletter_optin' ) ) {
-			scout_newsletter_optin( $row['email'], $row['first_name'], 'scout-booking', $tags );
-			return;
-		}
-		do_action( 'scout_newsletter_optin', $row['email'], $row['first_name'], 'scout-booking', $tags );
+	private static function newsletter( array $row, array $type, string $page ): void {
+		do_action(
+			'scout_newsletter_optin',
+			$row['email'],
+			$row['first_name'],
+			'scout-booking',
+			array( 'booking', 'session: ' . $type['name'] ),
+			array(
+				'wording' => Scout_Booking::optin_label(),
+				'page'    => $page,
+			)
+		);
 	}
 
 	public static function manage(): void {
