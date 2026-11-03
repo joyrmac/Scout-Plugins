@@ -8,7 +8,7 @@
  *   scout_session  One class, talk or performance inside an event.
  *                  _scout_session: event, day, times, room, track, speakers.
  *   scout_speaker  A presenter. Name, full bio (editor), photo, and
- *                  _scout_speaker: role, short bio, links.
+ *                  _scout_speaker: role, short bio, links, public contact.
  *
  * A few values are copied to their own meta keys only so lists can be
  * sorted and filtered in the database: _scout_event_start, _scout_event_end,
@@ -669,6 +669,10 @@ final class Scout_Events {
 			'short'   => '',
 			'website' => '',
 			'links'   => array(),
+			'city'    => '',
+			'booking' => '',
+			'email'   => '',
+			'phone'   => '',
 		);
 	}
 
@@ -694,6 +698,11 @@ final class Scout_Events {
 			'short'   => sanitize_textarea_field( (string) ( $in['short'] ?? '' ) ),
 			'website' => esc_url_raw( trim( (string) ( $in['website'] ?? '' ) ), array( 'http', 'https' ) ),
 			'links'   => array_values( array_unique( $clean ) ),
+			// Public contact, shown only by [scout_directory contact="yes"].
+			'city'    => sanitize_text_field( (string) ( $in['city'] ?? '' ) ),
+			'booking' => esc_url_raw( trim( (string) ( $in['booking'] ?? '' ) ), array( 'http', 'https' ) ),
+			'email'   => sanitize_email( (string) ( $in['email'] ?? '' ) ),
+			'phone'   => sanitize_text_field( (string) ( $in['phone'] ?? '' ) ),
 		);
 	}
 

@@ -115,6 +115,12 @@ On a phone the cards turn into a compact list.
 - `topic="yoga"` starts on one topic; `event="summit-2026"` keeps one event;
   `region="midwest"` keeps one region; `search="no"` leaves out the search box.
 - On a members-only page (Scout Members) it is a private directory.
+- `contact="yes"` turns it into a contact list for members: each speaker or
+  vendor card adds where they work and how to reach them (Website, Book,
+  Email, phone, and social or shop links named by site). Fill these under
+  **Public contact** on the speaker or vendor, or with the `city`, `booking`,
+  `email`, `phone` and `links` CSV columns. Off by default, and the public
+  speaker page never shows email or phone, so use it on members-only pages.
 
 Topics are tags on speakers, sessions and vendors (the **Topics** box on each,
 or **Events, Topics**), or a `topics` column in the CSV files (`Yoga|Breath`).

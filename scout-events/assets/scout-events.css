@@ -258,6 +258,12 @@
 .se-dir-short { font-size: .9em; text-wrap: pretty; }
 .se-dir-tags { font-size: .78em; letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .se-dir-none { margin: 0; }
+/* Members directory contact ([scout_directory contact="yes"]): where, then the ways to reach them. */
+.se-dir-contact { display: flex; flex-direction: column; gap: .3em; margin-top: auto; padding-top: .6em; border-top: 1px solid var(--se-line); font-size: .88em; }
+.se-dir-where { opacity: .8; }
+.se-dir-reach { line-height: 1.7; overflow-wrap: anywhere; }
+.se-dir-reach :where(a) { color: var(--se-accent); text-underline-offset: .2em; }
+.se-dir-reach .screen-reader-text { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 600px) {
 	/* On a phone, a small photo beside the name keeps a long directory scrollable. */
 	.se-dir-list { gap: .75em; }
@@ -265,7 +271,7 @@
 	.se-dir-link { display: contents; }
 	.se-dir-photo { grid-row: 1 / span 4; width: 4.5rem; aspect-ratio: 1; }
 	.se-dir-photo.is-empty { font-size: 1.2em; }
-	.se-dir-name, .se-dir-role, .se-dir-short, .se-dir-tags { grid-column: 2; }
+	.se-dir-name, .se-dir-role, .se-dir-short, .se-dir-tags, .se-dir-contact { grid-column: 2; }
 	.se-dir-short { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
@@ -282,7 +288,7 @@
 .se-dir-card.no-photo :where(.se-dir-name) { font-size: 1.1em; }
 @media (max-width: 600px) {
 	.se-dir-card.no-photo { grid-template-columns: 1fr; }
-	.se-dir-card.no-photo :where(.se-dir-name), .se-dir-card.no-photo :where(.se-dir-role), .se-dir-card.no-photo :where(.se-dir-short), .se-dir-card.no-photo :where(.se-dir-tags) { grid-column: 1; }
+	.se-dir-card.no-photo :where(.se-dir-name), .se-dir-card.no-photo :where(.se-dir-role), .se-dir-card.no-photo :where(.se-dir-short), .se-dir-card.no-photo :where(.se-dir-tags), .se-dir-card.no-photo :where(.se-dir-contact) { grid-column: 1; }
 	.se-dir-photo.is-logo { padding: .35em; }
 }
 

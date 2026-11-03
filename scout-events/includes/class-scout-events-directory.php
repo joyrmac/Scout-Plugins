@@ -21,6 +21,10 @@
  *   [scout_directory event="summit-2026"]     only one event's speakers or classes
  *   [scout_directory type="classes" show="upcoming"]  only classes at events still to come
  *   [scout_directory search="no"]             buttons only
+ *   [scout_directory contact="yes"]           cards also show where they work and how to
+ *                                             reach them: website, booking, email, phone,
+ *                                             social links (speakers and vendors). For a
+ *                                             members-only page; a public directory leaves it off.
  *
  * Put it on a members-only page (Scout Members) for a private directory, or
  * on any page for a public one.
@@ -137,8 +141,9 @@ final class Scout_Events_Directory {
 				'topic'  => '',
 				'region' => '',
 				'event'  => '',
-				'search' => 'yes',
-				'show'   => 'all',
+				'search'  => 'yes',
+				'show'    => 'all',
+				'contact' => 'no',
 			),
 			(array) $atts
 		);
@@ -150,7 +155,8 @@ final class Scout_Events_Directory {
 			$event = $found ? (int) $found->ID : -1;
 		}
 		$fixed = sanitize_title( $atts['region'] );
-		$items = -1 === $event ? array() : self::items( $type, $event, $fixed, 'upcoming' === $atts['show'] );
+		$items   = -1 === $event ? array() : self::items( $type, $event, $fixed, 'upcoming' === $atts['show'] );
+		$contact = 'yes' === $atts['contact'] && 'classes' !== $type;
 		if ( ! $items ) {
 			return '<p class="se-empty">' . esc_html__( 'The directory is being put together. Check back soon.', 'scout-events' ) . '</p>';
 		}
@@ -192,7 +198,7 @@ final class Scout_Events_Directory {
 				$hit = $hit && false !== strpos( $it['text'], $w );
 			}
 			$shown += $hit ? 1 : 0;
-			$list  .= self::card( $it, $hit );
+			$list  .= self::card( $it, $hit, $contact );
 		}
 
 		// More than one directory on a page keeps its own ids.
@@ -294,7 +300,7 @@ final class Scout_Events_Directory {
 			foreach ( Scout_Events_Vendors::ids( $event ) as $id ) {
 				$v     = Scout_Events_Vendors::vendor( $id );
 				$about = wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) );
-				$out[] = self::item( $id, $v['website'], true, has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'medium', array( 'class' => 'se-dir-photo is-logo', 'alt' => '', 'loading' => 'lazy' ) ) : '', array_filter( array( $v['city'], wp_trim_words( '' !== $about ? $about : $v['products'], 24 ) ) ), $v['products'] . ' ' . $about );
+				$out[] = self::item( $id, $v['website'], true, has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'medium', array( 'class' => 'se-dir-photo is-logo', 'alt' => '', 'loading' => 'lazy' ) ) : '', array_filter( array( $v['city'], wp_trim_words( '' !== $about ? $about : $v['products'], 24 ) ) ), $v['products'] . ' ' . $about, array( 'website' => $v['website'], 'email' => $v['email'], 'phone' => $v['phone'], 'links' => $v['links'] ) );
 			}
 		} elseif ( 'classes' === $type ) {
 			$out = self::classes( $event, $upcoming );
@@ -306,13 +312,13 @@ final class Scout_Events_Directory {
 			foreach ( $ids as $id ) {
 				$p     = Scout_Events::speaker( $id );
 				$bio   = wp_trim_words( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ), 80, '' );
-				$out[] = self::item( $id, (string) get_permalink( $id ), false, self::photo( $id ), array_filter( array( $p['role'], wp_trim_words( $p['short'], 28 ) ) ), $p['short'] . ' ' . $bio );
+				$out[] = self::item( $id, (string) get_permalink( $id ), false, self::photo( $id ), array_filter( array( $p['role'], wp_trim_words( $p['short'], 28 ) ) ), $p['short'] . ' ' . $bio, array_intersect_key( $p, array_flip( array( 'city', 'website', 'booking', 'email', 'phone', 'links' ) ) ) );
 			}
 		}
 		return '' === $region ? $out : array_values( array_filter( $out, static fn( $it ) => isset( $it['regions'][ $region ] ) ) );
 	}
 
-	private static function item( int $id, string $url, bool $external, string $photo, array $lines, string $more ): array {
+	private static function item( int $id, string $url, bool $external, string $photo, array $lines, string $more, array $contact = array() ): array {
 		$topics  = self::topics_of( $id );
 		$regions = Scout_Events_Regions::of( $id );
 		return array(
@@ -323,7 +329,8 @@ final class Scout_Events_Directory {
 			'lines'    => array_values( $lines ),
 			'topics'   => $topics,
 			'regions'  => $regions,
-			'text'     => self::fold( implode( ' ', array_merge( array( get_the_title( $id ) ), $lines, $topics, $regions, array( $more ) ) ) ),
+			'text'     => self::fold( implode( ' ', array_merge( array( get_the_title( $id ) ), $lines, $topics, $regions, array( $more, (string) ( $contact['city'] ?? '' ) ) ) ) ),
+			'contact'  => $contact,
 		);
 	}
 
@@ -407,7 +414,7 @@ final class Scout_Events_Directory {
 		return strtolower( remove_accents( $t ) );
 	}
 
-	private static function card( array $it, bool $hit ): string {
+	private static function card( array $it, bool $hit, bool $contact = false ): string {
 		$out  = '<li class="se-dir-card' . ( '' === $it['photo'] ? ' no-photo' : '' ) . '" data-se-text="' . esc_attr( $it['text'] ) . '" data-se-topics="' . esc_attr( implode( ' ', array_keys( $it['topics'] ) ) ) . '" data-se-regions="' . esc_attr( implode( ' ', array_keys( $it['regions'] ) ) ) . '"' . ( $hit ? '' : ' hidden' ) . '>';
 		$name = '<span class="se-dir-name">' . esc_html( $it['title'] ) . '</span>';
 		if ( '' !== $it['url'] ) {
@@ -423,7 +430,77 @@ final class Scout_Events_Directory {
 			$more = count( $it['topics'] ) - self::CARD_TOPICS;
 			$out .= '<span class="se-dir-tags">' . esc_html( implode( ' · ', array_slice( $it['topics'], 0, self::CARD_TOPICS ) ) . ( $more > 0 ? ' · +' . $more : '' ) ) . '</span>';
 		}
+		if ( $contact ) {
+			$out .= self::contact( (array) ( $it['contact'] ?? array() ), $it['title'] );
+		}
 		return $out . '</li>';
+	}
+
+	/** Where they work and how to reach them, for a members directory. */
+	private static function contact( array $c, string $name ): string {
+		$links = array();
+		// "Website Kai Baylis" to a screen reader, so a list of cards is not a list of identical links.
+		$sr    = '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span>';
+		if ( '' !== (string) ( $c['website'] ?? '' ) ) {
+			$links[] = '<a href="' . esc_url( $c['website'] ) . '" rel="noopener">' . esc_html__( 'Website', 'scout-events' ) . $sr . '</a>';
+		}
+		if ( '' !== (string) ( $c['booking'] ?? '' ) && ( $c['booking'] ?? '' ) !== ( $c['website'] ?? '' ) ) {
+			$links[] = '<a href="' . esc_url( $c['booking'] ) . '" rel="noopener">' . esc_html__( 'Book', 'scout-events' ) . $sr . '</a>';
+		}
+		if ( '' !== (string) ( $c['email'] ?? '' ) && is_email( $c['email'] ) ) {
+			$mail    = antispambot( $c['email'] );
+			$links[] = '<a href="mailto:' . $mail . '">' . esc_html__( 'Email', 'scout-events' ) . $sr . '</a>';
+		}
+		if ( '' !== (string) ( $c['phone'] ?? '' ) ) {
+			$tel     = preg_replace( '/[^0-9+]/', '', (string) $c['phone'] );
+			$links[] = '<a href="tel:' . esc_attr( $tel ) . '">' . esc_html( $c['phone'] ) . '</a>';
+		}
+		foreach ( (array) ( $c['links'] ?? array() ) as $url ) {
+			$links[] = '<a href="' . esc_url( $url ) . '" rel="noopener">' . esc_html( self::site_name( (string) $url ) ) . '</a>';
+		}
+		$city = trim( (string) ( $c['city'] ?? '' ) );
+		if ( ! $links && '' === $city ) {
+			return '';
+		}
+		$out = '<span class="se-dir-contact">';
+		if ( '' !== $city ) {
+			$out .= '<span class="se-dir-where">' . esc_html( $city ) . '</span>';
+		}
+		if ( $links ) {
+			$out .= '<span class="se-dir-reach">' . implode( ' <span aria-hidden="true">·</span> ', $links ) . '</span>';
+		}
+		return $out . '</span>';
+	}
+
+	/** "Instagram" for instagram.com, the bare host for anything else. */
+	private static function site_name( string $url ): string {
+		$host  = strtolower( (string) preg_replace( '/^(www|m)\./', '', (string) wp_parse_url( $url, PHP_URL_HOST ) ) );
+		$names = array(
+			'instagram.com'  => 'Instagram',
+			'facebook.com'   => 'Facebook',
+			'fb.com'         => 'Facebook',
+			'linkedin.com'   => 'LinkedIn',
+			'youtube.com'    => 'YouTube',
+			'youtu.be'       => 'YouTube',
+			'tiktok.com'     => 'TikTok',
+			'linktr.ee'      => 'Linktree',
+			'x.com'          => 'X',
+			'twitter.com'    => 'X',
+			'threads.net'    => 'Threads',
+			'bsky.app'       => 'Bluesky',
+			'etsy.com'       => 'Etsy',
+			'patreon.com'    => 'Patreon',
+			'substack.com'   => 'Substack',
+			'podcasts.apple.com' => 'Podcast',
+			'open.spotify.com' => 'Spotify',
+			'amazon.com'     => 'Amazon',
+		);
+		foreach ( $names as $h => $n ) {
+			if ( $host === $h || str_ends_with( $host, '.' . $h ) ) {
+				return $n;
+			}
+		}
+		return '' !== $host ? $host : $url;
 	}
 
 	private static function initials( string $name ): string {

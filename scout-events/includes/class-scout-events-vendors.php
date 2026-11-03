@@ -98,7 +98,7 @@ final class Scout_Events_Vendors {
 
 	/* ---------- the data ---------- */
 
-	/** @return array{city:string,website:string,products:string,events:int[]} */
+	/** @return array{city:string,website:string,products:string,events:int[],email:string,phone:string,links:string[]} */
 	public static function vendor( int $id ): array {
 		$v = get_post_meta( $id, self::META, true );
 		$v = is_array( $v ) ? $v : array();
@@ -107,6 +107,9 @@ final class Scout_Events_Vendors {
 			'website'  => (string) ( $v['website'] ?? '' ),
 			'products' => (string) ( $v['products'] ?? '' ),
 			'events'   => array_values( array_filter( array_map( 'intval', (array) ( $v['events'] ?? array() ) ) ) ),
+			'email'    => (string) ( $v['email'] ?? '' ),
+			'phone'    => (string) ( $v['phone'] ?? '' ),
+			'links'    => array_values( array_filter( (array) ( $v['links'] ?? array() ) ) ),
 		);
 	}
 
@@ -119,6 +122,10 @@ final class Scout_Events_Vendors {
 				'website'  => esc_url_raw( trim( (string) ( $in['website'] ?? '' ) ), array( 'http', 'https' ) ),
 				'products' => sanitize_textarea_field( (string) ( $in['products'] ?? '' ) ),
 				'events'   => array_values( array_filter( array_map( 'intval', (array) ( $in['events'] ?? array() ) ) ) ),
+				// Public business contact, shown only by [scout_directory type="vendors" contact="yes"].
+				'email'    => sanitize_email( (string) ( $in['email'] ?? '' ) ),
+				'phone'    => sanitize_text_field( (string) ( $in['phone'] ?? '' ) ),
+				'links'    => Scout_Events::sanitize_speaker( array( 'links' => $in['links'] ?? array() ) )['links'],
 			)
 		);
 	}
@@ -415,6 +422,9 @@ final class Scout_Events_Vendors {
 		<div class="se-form">
 			<p class="se-field"><label for="se-vendor-city"><?php esc_html_e( 'City and state', 'scout-events' ); ?></label><input type="text" id="se-vendor-city" name="scout_vendor[city]" value="<?php echo esc_attr( $v['city'] ); ?>"></p>
 			<p class="se-field"><label for="se-vendor-website"><?php esc_html_e( 'Website or shop link', 'scout-events' ); ?></label><input type="url" id="se-vendor-website" name="scout_vendor[website]" value="<?php echo esc_attr( $v['website'] ); ?>"></p>
+			<p class="se-field"><label for="se-vendor-email"><?php esc_html_e( 'Business email (shown to members in the directory)', 'scout-events' ); ?></label><input type="email" id="se-vendor-email" name="scout_vendor[email]" value="<?php echo esc_attr( $v['email'] ); ?>"></p>
+			<p class="se-field"><label for="se-vendor-phone"><?php esc_html_e( 'Business phone (shown to members in the directory)', 'scout-events' ); ?></label><input type="text" id="se-vendor-phone" name="scout_vendor[phone]" value="<?php echo esc_attr( $v['phone'] ); ?>"></p>
+			<p class="se-field"><label for="se-vendor-links"><?php esc_html_e( 'Social profiles and shop pages, one link per line', 'scout-events' ); ?></label><textarea id="se-vendor-links" name="scout_vendor[links]" rows="3"><?php echo esc_textarea( implode( "\n", $v['links'] ) ); ?></textarea></p>
 			<p class="se-field"><label for="se-vendor-products"><?php esc_html_e( 'What they sell (for you; not shown on the site)', 'scout-events' ); ?></label><textarea id="se-vendor-products" name="scout_vendor[products]" rows="3"><?php echo esc_textarea( $v['products'] ); ?></textarea></p>
 			<fieldset class="se-field">
 				<legend><?php esc_html_e( 'At these events', 'scout-events' ); ?></legend>

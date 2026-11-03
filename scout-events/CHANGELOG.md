@@ -1,5 +1,11 @@
 # Scout Events changelog
 
+## 0.16.0 (2026-11-03)
+
+- **A members directory people can contact from.** `[scout_directory contact="yes"]` adds where each speaker or vendor works and how to reach them to their card: Website, Book, Email, phone, and their social and shop links named by site (Instagram, Facebook, Linktree, Etsy and so on). Search also finds them by city. Off by default, so a public directory shows what it showed before. Built for Bliss Boogie's members Portal; it turns on there once each educator has approved what members see.
+- **Public contact fields.** Speakers gain Where they work, Booking or services link, Business email and Business phone; vendors gain Business email, Business phone and social links. They show only in a `contact="yes"` directory, never on the public speaker page, and stay separate from the private presenter and vendor details. The CSV import takes `city`, `booking`, `email`, `phone` (speakers) and `email`, `phone`, `links` (vendors).
+- Email links are encoded against address harvesters; each link carries the person's name for screen readers.
+
 ## 0.15.0 (2026-11-03)
 
 - **Paid tickets, end to end, up to the payment step.** "Create a ticket" on an event makes a simple, virtual WooCommerce product (name, price, how many, sales open and close, the name on receipts, what it includes) already ticked as the event's ticket. Checkout asks for each ticket holder's name. When the order is paid, each ticket becomes an attendee in the sign-ups table: the same QR ticket, door list, check-in and day-before reminder as free sign-ups, counted in places left. The buyer gets one email with every ticket and the calendar file; a holder with their own email gets a copy. Tested with WooCommerce's offline method renamed "Test payment"; a real payment service is a WooCommerce setting.
