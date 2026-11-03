@@ -183,6 +183,14 @@
       "tier": "partnership",
       "law": false,
       "requires": []
+    },
+    {
+      "slug": "scout-booking",
+      "name": "Booking with deposits",
+      "summary": "Clients pick a session and a time on your site, answer a few short questions, and pay a deposit or the full price at checkout. Sessions you screen first come in as requests you approve, and every booking gets change and cancel links, a reminder, and a spot in your phone calendar.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
     }
   ]
 }
