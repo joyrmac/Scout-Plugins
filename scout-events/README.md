@@ -213,11 +213,14 @@ An unticked **Send me the newsletter** box on the sign-up form and at checkout
 `scout_events_offer_newsletter` filter. When ticked, the time is stored on the
 ticket (and on the order), and once the sign-up is made or the order is paid:
 
-`do_action( 'scout_newsletter_optin', $email, $first_name, $source, $tags )`
+`do_action( 'scout_newsletter_optin', $email, $first_name, $source, $tags, $context )`
 
 `$source` is `event-signup` or `event-checkout`; `$tags` is "Event sign-up" or
 "Ticket buyer" followed by the event names (`scout_events_newsletter_tags`
-filter). Scout Events never calls a newsletter service itself.
+filter). `$context` holds `wording` (the exact words on the box they ticked)
+and `page` and `url` (the event's address), so the consent record keeps them;
+a listener that takes four arguments still works. Scout Events never calls a
+newsletter service itself.
 
 ## Regions
 
@@ -318,7 +321,7 @@ nothing. Notes list rows that could not be matched or read.
   when known. Scout CRM Sync uses it.
 - `scout_events_ticket_bought` ( $order, $event_id, $product_id, $qty ):
   a paid shop ticket line.
-- `scout_newsletter_optin` ( $email, $first_name, $source, $tags ): someone
+- `scout_newsletter_optin` ( $email, $first_name, $source, $tags, $context ): someone
   ticked "Send me the newsletter" (above).
 - Filters: `scout_events_paid_attendees` (paid tickets become attendees),
   `scout_events_classic_checkout` (swap a block checkout while tickets are in

@@ -277,11 +277,16 @@ final class Scout_Events_Agreements {
 		return (bool) apply_filters( 'scout_events_offer_newsletter', (bool) has_action( 'scout_newsletter_optin' ) );
 	}
 
+	/** The words on the box, shown to people and saved with their consent. */
+	public static function newsletter_label(): string {
+		return __( 'Send me the newsletter', 'scout-events' );
+	}
+
 	public static function newsletter_field( string $name, string $id, bool $checked = false ): string {
 		if ( ! self::offer_newsletter() ) {
 			return '';
 		}
-		return '<p class="se-newsletter"><label for="' . esc_attr( $id ) . '"><input type="checkbox" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="1"' . checked( $checked, true, false ) . '> ' . esc_html__( 'Send me the newsletter', 'scout-events' ) . '</label></p>';
+		return '<p class="se-newsletter"><label for="' . esc_attr( $id ) . '"><input type="checkbox" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="1"' . checked( $checked, true, false ) . '> ' . esc_html( self::newsletter_label() ) . '</label></p>';
 	}
 
 	/**
@@ -306,7 +311,16 @@ final class Scout_Events_Agreements {
 		 * @param string   $first_name First name, may be empty.
 		 * @param string   $source     "event-signup" or "event-checkout".
 		 * @param string[] $tags       "Ticket buyer" or "Event sign-up", then the event names.
+		 * @param array    $context    wording (the exact box label they ticked), page and url (the
+		 *                             event's address). Listeners that take four arguments never see it.
 		 */
-		do_action( 'scout_newsletter_optin', strtolower( $email ), $first, $source, array_values( array_filter( array_map( 'strval', $tags ) ) ) );
+		$events = array_values( array_unique( array_map( 'intval', $events ) ) );
+		$page   = $events ? (string) get_permalink( $events[0] ) : '';
+		$context = array(
+			'wording' => self::newsletter_label(),
+			'page'    => $page,
+			'url'     => $page,
+		);
+		do_action( 'scout_newsletter_optin', strtolower( $email ), $first, $source, array_values( array_filter( array_map( 'strval', $tags ) ) ), $context );
 	}
 }
