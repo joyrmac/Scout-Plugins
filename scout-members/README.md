@@ -5,10 +5,11 @@ owner reads each application and approves it, and members sign in to see
 members-only pages and events. Built for Bliss Boogie Connections first and
 kept general, so any client with a members' club can use it.
 
-Card billing for dues is planned for a later version. Until then the owner
-records payments with one click and each renewal date moves forward a period.
-The model already has the plan, renewal date and `Scout_Members::paid()` that
-billing will call.
+With WooCommerce active, members pay their dues and renew through the site's
+own checkout (see Dues through the checkout). Without it, everything else works
+as before and the owner records payments with Paid today. Either way each
+payment moves the renewal date forward one period through
+`Scout_Members::paid()`.
 
 ## Where it lives
 
@@ -19,13 +20,68 @@ list users (administrators) see it, because member records are personal.
 - **Overview**: members, applications to read, renewals in the next 30 days,
   each application with its answers and **Approve and welcome** or **Not
   accepted**, and the memberships renewing soon.
-- **All members**: status, plan and renewal date, each editable in place, and
-  **Paid today**.
+- **All members**: status, plan, renewal date and renewal price, each
+  editable in place, and **Paid today**.
+- **Renewals**: payments to review (refunds, cancellations, a payment from
+  someone declined, a dues order no member matched), then everyone renewing
+  in the next 30 days, past due or lapsed, approved but not paid yet, and who
+  paid in the last 30 days, with the latest line of each member's history.
 - **Import**: bring current members in from a CSV, such as a Squarespace
   orders export. Preview first; running the same file twice changes nothing.
 - **Settings**: the membership page, plans, the next-step note sent after
-  approval, the community agreements link, a minimum age, where application
-  emails go, and the application questions.
+  approval, Dues and renewals, the community agreements link, a minimum age,
+  where application emails go, and the application questions.
+
+## Dues through the checkout (WooCommerce)
+
+Only when WooCommerce is active. No WooCommerce Subscriptions, and no card is
+ever saved: every payment, renewals included, is a fresh checkout.
+
+- **Each plan links to a product** (Settings, Dues and renewals). **Create the
+  product for this plan** makes a simple, virtual product hidden from the
+  shop, sold one at a time, at the plan price, named "Name on receipts, plan,
+  1 year" (for example "Bliss Boogie Connections membership, Club Member, 1
+  year") so receipts and card statements read plainly. A warning shows when
+  the product's price and the plan's differ; the checkout charges the
+  product's.
+- **When new members pay**: after approval (the default) or with the
+  application. After approval, approving puts them on **Approved, dues to
+  pay**; the welcome email and their membership page carry **Pay your
+  dues**, and members-only pages open the moment they pay. With the
+  application, applicants go straight to the checkout after applying; the
+  payment is held, their year starts the day they are approved, and anyone not
+  accepted is listed under Renewals to refund.
+- **The pay link** carries the member and a signed key, so it works signed in
+  or not, and ties the order to the member in the order's own meta. It stops
+  working once used. Dues products cannot go in the cart any other way for
+  people who have not applied.
+- **A paid order** (processing or completed) makes the member active, moves
+  the renewal date forward one period, sets the plan to the one paid for,
+  shows the order under the member's account, and adds a note to the order
+  and the member's history. Orders of dues alone complete themselves when a
+  card gateway reports payment. A dues order with no pay link falls back to
+  the buyer's account, then their email; one that matches nobody waits under
+  Renewals.
+- **Refunds and cancellations** never take a membership away: the member is
+  flagged under Renewals and the owner chooses Keep the membership or End the
+  membership.
+
+## Renewals
+
+- **Reminder emails** 30 days (yearly plans) and 7 days before the renewal
+  date, once each, with **Renew now** and the amount when the plan has a
+  product, else the next-step note and the membership page. Renewing early
+  adds a year from the renewal date, not from the day paid. Settings can turn
+  reminders off.
+- **Grace period** (Settings, 14 days unless changed): members keep access
+  that long after their renewal date while they renew; their page says by
+  when. Then access closes by itself and the membership waits for a payment.
+- **Renewal price** (All members): empty is the plan price, 0 renews free
+  (the member confirms with a $0 checkout), any other amount is that
+  member's own price. Members brought in from a file on a $0 order are marked
+  "Joined on a $0 order", so the owner can decide each one.
+- **Imported members** keep their real end dates as renewal dates, so their
+  first renewal goes through this flow.
 
 Applications to read and renewals due also show in **Events, Needs you**, and
 in the Events toolbar menu, so one screen shows everything waiting.
@@ -33,7 +89,9 @@ in the Events toolbar menu, so one screen shows everything waiting.
 ## On the site
 
 - `[scout_membership]` the membership page: the application for new people,
-  and for members their status, plan, renewal date and members-only events.
+  and for members their status, plan, renewal date, Pay your dues or Renew
+  now when it is time, and members-only events. Its section headings are H2,
+  so they follow the page's H1; `level="3"` moves them down a level.
 - **Members home** (Settings): where members land after signing in. It and
   every page under it are members only, and it lists the pages under it that
   the member can open (title and excerpt), then the members-only events. Add a
@@ -79,7 +137,11 @@ person's membership record. Deleting the plugin keeps member accounts.
 
 ## Hooks
 
-- `scout_members_status_changed` ( $user_id, $new, $old )
+- `scout_members_status_changed` ( $user_id, $new, $old ). Statuses:
+  applied, approved (dues to pay), active, paused, ended, declined.
+- `scout_members_paid` ( $user_id, $paid_on, $new_renewal_date )
+- `scout_members_heading_level` filter: the level of the top headings the
+  shortcodes print (2). A shortcode's `level=""` wins.
 - `scout_members_account_extra` filter: more for the member's account page.
 - Uses Scout Events' `scout_events_needs_you`, `scout_events_detail_rows`,
   `scout_events_ticket_html`, `scout_events_card_tags` and
@@ -93,7 +155,8 @@ Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-home`, `.sm-perks`, `.sm-perk`, `.sm-perk-title`, `.sm-perk-tag`,
 `.sm-perk-text`, `.sm-member-link`, `.sm-invitations`, `.sm-invite`,
 `.sm-invite-title`, `.sm-invite-meta`, `.sm-invite-answers`, `.sm-mine`,
-`.sm-invite-new`, `.sm-invite-form`. Colors are custom properties:
+`.sm-invite-new`, `.sm-invite-form`, `.sm-pay`, `.sm-pay-note`,
+`.sm-thanks` (the order received note). Colors are custom properties:
 `--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
 `--scout-members-inset`, `--scout-members-radius`.
 

@@ -47,13 +47,18 @@ final class Scout_Members_Import {
 	);
 
 	/**
-	 * @return array{dry:bool,created:int,updated:int,notes:string[]}
+	 * free counts people whose latest order was $0 (a full-value code); they
+	 * are marked "Joined on a $0 order" so the owner can set their renewal
+	 * price. Real end dates come through as their renewal dates.
+	 *
+	 * @return array{dry:bool,created:int,updated:int,free:int,notes:string[]}
 	 */
 	public static function run( string $file, bool $dry, bool $welcome ): array {
 		$report = array(
 			'dry'     => $dry,
 			'created' => 0,
 			'updated' => 0,
+			'free'    => 0,
 			'notes'   => array(),
 		);
 		$people = self::people( $file, $report['notes'] );
@@ -69,6 +74,9 @@ final class Scout_Members_Import {
 				++$report['updated'];
 			} else {
 				++$report['created'];
+			}
+			if ( $p['free'] ) {
+				++$report['free'];
 			}
 			if ( $dry ) {
 				continue;
@@ -119,6 +127,10 @@ final class Scout_Members_Import {
 					static fn( $v ) => '' !== $v
 				)
 			);
+			Scout_Members::save( $user_id, array( 'free_join' => $p['free'] ) );
+			if ( ! $user || $current['renews'] !== Scout_Members::member( $user_id )['renews'] ) {
+				Scout_Members::log( $user_id, '' !== $renews ? sprintf( /* translators: %s: date. */ __( 'Brought in from a members file. Renews %s.', 'scout-members' ), Scout_Members::date_label( $renews ) ) : __( 'Brought in from a members file.', 'scout-members' ) );
+			}
 			if ( 'active' !== $current['status'] ) {
 				Scout_Members::set_status( $user_id, 'active' );
 			}
@@ -194,6 +206,8 @@ final class Scout_Members_Import {
 				'date'       => $date,
 				'first_date' => $prev && '' !== $prev['first_date'] && $prev['first_date'] < $date ? $prev['first_date'] : $date,
 				'paid'       => $amount > 0 ? $date : ( $prev['paid'] ?? '' ),
+				// A $0 latest order: a full-value code. The owner decides their renewal price.
+				'free'       => '' !== trim( (string) ( $r['total'] ?? '' ) ) && $amount <= 0,
 				'renews'     => self::date( $r['renews'] ?? '' ),
 				'since'      => self::date( $r['since'] ?? '' ),
 			);

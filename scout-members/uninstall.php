@@ -14,3 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'scout_members' );
 delete_option( 'scout_members_questions' );
 delete_option( 'scout_members_next_step' );
+// The plan-to-product links. The WooCommerce products and orders stay: they are the shop's records.
+delete_option( 'scout_members_products' );
+delete_option( 'scout_members_unmatched' );
+wp_clear_scheduled_hook( 'scout_members_daily' );

@@ -144,7 +144,7 @@ final class Scout_Members_Invitations {
 	private static function card( int $id ): string {
 		$author = get_userdata( (int) get_post_field( 'post_author', $id ) );
 		$first  = $author ? ( '' !== (string) $author->first_name ? (string) $author->first_name : (string) $author->display_name ) : '';
-		$out    = '<article class="sm-invite" id="sm-invite-' . $id . '"><h3 class="sm-invite-title">' . esc_html( get_the_title( $id ) ) . '</h3>';
+		$out    = '<article class="sm-invite" id="sm-invite-' . $id . '">' . Scout_Members::heading( get_the_title( $id ), 'sm-invite-title' );
 		$meta   = array_filter(
 			array(
 				/* translators: %s: the member's first name. */
@@ -171,7 +171,16 @@ final class Scout_Members_Invitations {
 		return $out . '</dl></article>';
 	}
 
-	public static function board(): string {
+	/** [scout_invitations level="2"]: level sets the heading level of the invitation titles (2 unless set). */
+	public static function board( $atts = array() ): string {
+		$atts                 = shortcode_atts( array( 'level' => 0 ), (array) $atts );
+		Scout_Members::$level = absint( $atts['level'] );
+		$out                  = self::render_board();
+		Scout_Members::$level = 0;
+		return $out;
+	}
+
+	private static function render_board(): string {
 		wp_enqueue_style( 'scout-members' );
 		$page = (int) get_the_ID();
 		if ( is_singular() && $page && (int) get_option( self::PAGE, 0 ) !== $page ) {
@@ -204,7 +213,7 @@ final class Scout_Members_Invitations {
 			)
 		);
 		if ( $mine ) {
-			$out .= '<h3 class="sm-sub">' . esc_html__( 'Your invitations', 'scout-members' ) . '</h3><ul class="sm-mine">';
+			$out .= Scout_Members::heading( __( 'Your invitations', 'scout-members' ), 'sm-sub' ) . '<ul class="sm-mine">';
 			foreach ( $mine as $id ) {
 				$status = 'pending' === get_post_status( $id ) ? __( 'Waiting to be read', 'scout-members' ) : __( 'Up on this page', 'scout-members' );
 				$out   .= '<li><span class="sm-mine-title">' . esc_html( get_the_title( $id ) ) . '</span> <span class="sm-mine-status">' . esc_html( $status ) . '</span>'
@@ -242,7 +251,7 @@ final class Scout_Members_Invitations {
 		$out .= Scout_Members_Form::input( 'title', __( 'Title of your invitation', 'scout-members' ), 'text', true );
 		foreach ( self::questions() as $q ) {
 			if ( 'heading' === $q['type'] ) {
-				$out .= ( '' !== $q['label'] ? '<h4 class="sm-invite-heading">' . esc_html( $q['label'] ) . '</h4>' : '' ) . ( '' !== $q['extra'] ? '<p class="sm-statement">' . esc_html( $q['extra'] ) . '</p>' : '' );
+				$out .= ( '' !== $q['label'] ? Scout_Members::heading( $q['label'], 'sm-invite-heading', true ) : '' ) . ( '' !== $q['extra'] ? '<p class="sm-statement">' . esc_html( $q['extra'] ) . '</p>' : '' );
 				continue;
 			}
 			$out .= Scout_Members_Form::question( $q );

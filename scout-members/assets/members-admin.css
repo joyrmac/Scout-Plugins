@@ -51,4 +51,25 @@
 .sm-field > label { font-weight: 600; }
 .sm-admin-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 0 20px; align-items: start; }
 .sm-admin-cols > .sh-box { margin-top: 20px; }
+/* Dues and renewals. */
+.sm-chip.is-good { background: #E3F4EC; color: var(--sm-good); }
+.sm-comp { display: block; margin-top: 8px; font-size: 12px; color: var(--sm-text-2); }
+.sm-comp-input { width: 7em; }
+.sm-dues { margin: 4px 0 20px; padding: 16px; border: 1px solid var(--sm-line); border-radius: 12px; min-width: 0; }
+.sm-dues legend { padding: 0 6px; margin: 0; }
+.sm-dues .sm-label { font-weight: 600; }
+.sm-field > label.sm-radio { font-weight: 400; }
+.sm-plan-products { margin-bottom: 8px; }
+.sm-plan-products select { width: 100%; max-width: 100%; }
+@media (max-width: 782px) {
+	.sm-plan-products thead { display: none; }
+	.sm-plan-products td { display: block; width: auto; }
+	.sm-plan-products td + td { padding-top: 0; }
+	.sm-dues { padding: 12px; }
+}
+.sm-review-list { margin: 0; padding: 0; list-style: none; }
+.sm-review-list li { padding: 12px 0; border-bottom: 1px solid var(--sm-line); }
+.sm-review-list li:last-child { border-bottom: 0; }
+.sm-review-list p { margin: 0 0 8px; }
+
 @media (max-width: 1100px) { .sm-admin-cols { grid-template-columns: 1fr; } .sm-answers > div { grid-template-columns: 1fr; } }
