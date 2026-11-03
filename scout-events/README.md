@@ -115,6 +115,11 @@ On a phone the cards turn into a compact list.
 - `topic="yoga"` starts on one topic; `event="summit-2026"` keeps one event;
   `region="midwest"` keeps one region; `search="no"` leaves out the search box.
 - On a members-only page (Scout Members) it is a private directory.
+- `layout="list"` shows speakers or vendors as a contact list: a search box,
+  a Kind of work choice, a Where choice (when there is more than one region),
+  everyone A to Z under letter headings with a letter rail, and a name that
+  opens to its sheet in place (contact, topics, the link to their page). The
+  form works without JavaScript; with it the list filters as people type.
 - `contact="yes"` turns it into a contact list for members: each speaker or
   vendor card adds where they work and how to reach them (Website, Book,
   Email, phone, and social or shop links named by site). Fill these under
