@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Scout Events
- * Description:       Events, sessions and speakers the owner edits in plain forms: event pages with dates, venue, ticket button and what to know, a day-by-day schedule, speaker pages, and Event schema so the event can appear in Google. Works with any ticket link today and is built to sit in front of a WooCommerce ticket engine later.
- * Version:           0.14.3
+ * Description:       Events, sessions and speakers the owner edits in plain forms: event pages with dates, venue, tickets and what to know, a day-by-day schedule, speaker pages, and Event schema so the event can appear in Google. Free sign-ups and paid WooCommerce tickets both get QR tickets, door check-in and per-person agreements.
+ * Version:           0.15.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_EVENTS_VERSION', '0.14.3' );
+define( 'SCOUT_EVENTS_VERSION', '0.15.0' );
 define( 'SCOUT_EVENTS_FILE', __FILE__ );
 define( 'SCOUT_EVENTS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_EVENTS_DIR', plugin_dir_path( __FILE__ ) );
@@ -42,6 +42,7 @@ require_once __DIR__ . '/includes/class-scout-events-schema.php';
 require_once __DIR__ . '/includes/class-scout-events-import.php';
 require_once __DIR__ . '/includes/class-scout-events-presenters.php';
 require_once __DIR__ . '/includes/class-scout-events-rsvp.php';
+require_once __DIR__ . '/includes/class-scout-events-agreements.php';
 require_once __DIR__ . '/includes/class-scout-events-calendar.php';
 require_once __DIR__ . '/includes/class-scout-events-vendors.php';
 require_once __DIR__ . '/includes/class-scout-events-volunteers.php';
@@ -50,6 +51,7 @@ require_once __DIR__ . '/includes/class-scout-events-directory.php';
 require_once __DIR__ . '/includes/class-scout-events-regions.php';
 require_once __DIR__ . '/includes/class-scout-events-topics.php';
 require_once __DIR__ . '/includes/class-scout-events-woo.php';
+require_once __DIR__ . '/includes/class-scout-events-tickets.php';
 require_once __DIR__ . '/includes/class-scout-events-rsvp-admin.php';
 require_once __DIR__ . '/includes/class-scout-events-admin.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -61,6 +63,7 @@ Scout_Events_Schema::boot();
 Scout_Events_Admin::boot();
 Scout_Events_Presenters::boot();
 Scout_Events_RSVP::boot();
+Scout_Events_Agreements::boot();
 Scout_Events_Calendar::boot();
 Scout_Events_Vendors::boot();
 Scout_Events_Volunteers::boot();

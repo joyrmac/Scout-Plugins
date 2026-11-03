@@ -1,5 +1,16 @@
 # Scout Events changelog
 
+## 0.15.0 (2026-11-03)
+
+- **Paid tickets, end to end, up to the payment step.** "Create a ticket" on an event makes a simple, virtual WooCommerce product (name, price, how many, sales open and close, the name on receipts, what it includes) already ticked as the event's ticket. Checkout asks for each ticket holder's name. When the order is paid, each ticket becomes an attendee in the sign-ups table: the same QR ticket, door list, check-in and day-before reminder as free sign-ups, counted in places left. The buyer gets one email with every ticket and the calendar file; a holder with their own email gets a copy. Tested with WooCommerce's offline method renamed "Test payment"; a real payment service is a WooCommerce setting.
+- **Refunds void tickets.** A full refund, a cancelled order or a partial refund turns the refunded tickets void ("This ticket was refunded"; they never check in). Partial refunds void tickets not yet checked in first.
+- **Name on receipts.** A ticket can carry a plain name for the order, the WooCommerce emails and the payment service (such as "Workshop registration"), while the event page shows its own name.
+- **Sales window and capacity for shop tickets.** Each ticket has its own sales open and close dates ("On sale December 1", "Sales closed"). The event's Capacity caps free and paid tickets together, in the quantity box, the cart and Sold out.
+- **Agreements per person.** An event can ask each ticket holder to agree to the site's community agreements (one link under Settings) and a waiver the owner writes, confirm their age when the event has a minimum age, and choose yes or no for photos, then type their name to sign. Asked on the sign-up form and once per ticket at checkout. The ticket keeps the signature, the time and the version of the words; every version's words stay on the event. The door list and a scanned ticket show "Agreed" or "Has not agreed yet" and "No photos", and the ticket page asks anyone who still owes an answer. The spreadsheet download gains Ticket, Order, Agreed at, Signature, Agreement version, Age confirmed, Photos and Newsletter requested.
+- **Newsletter opt-in.** An unticked "Send me the newsletter" box on sign-ups and checkout, shown when a newsletter connector listens. Consent is stored with its time, and `scout_newsletter_optin` ( $email, $first_name, $source, $tags ) fires for the connector. Nothing is sent to a newsletter service from here.
+- While the cart holds tickets, a block checkout page shows the classic checkout form, which has room for per-ticket fields (`scout_events_classic_checkout` to keep the block one). Paid attendees stay off on sites running FooEvents (`scout_events_paid_attendees`).
+- The sign-ups table gains columns for the source, order, agreements, photo choice and newsletter time (it updates itself). events.csv takes `agree`, `waiver` and `photo_ask`. The Ready to share list counts shop tickets as the ticket link and price.
+
 ## 0.14.3 (2026-10-30)
 
 - **The Plugins screen shows auto-updates as on.** The updater now reports the newest release even when the plugin is already on it, so WordPress lists Scout plugins as up to date and shows "Auto-updates enabled" instead of a blank column and an "Auto-updates Disabled" count. Scout plugins were already updating themselves; only the label was wrong.

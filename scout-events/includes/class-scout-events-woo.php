@@ -16,8 +16,8 @@
  *
  * A paid order fires scout_events_ticket_bought ( $order, $event_id,
  * $product_id, $qty ) once per ticket line, so other features (the customer
- * list) can tag buyers by event and region. QR tickets and gate scanning come
- * from a WooCommerce ticket plugin such as FooEvents, on the same products.
+ * list) can tag buyers by event and region. "Create a ticket", the checkout
+ * fields, QR tickets, check-in and refunds live in Scout_Events_Tickets.
  *
  * @package Scout_Events
  */
@@ -50,7 +50,12 @@ final class Scout_Events_Woo {
 		add_action( 'woocommerce_order_status_completed', array( __CLASS__, 'paid' ) );
 		add_filter( 'manage_' . Scout_Events::EVENT . '_posts_columns', array( __CLASS__, 'columns' ), 20 );
 		add_action( 'manage_' . Scout_Events::EVENT . '_posts_custom_column', array( __CLASS__, 'column' ), 10, 2 );
+		add_filter( 'redirect_post_location', array( __CLASS__, 'after_create' ), 10, 2 );
+		Scout_Events_Tickets::boot();
 	}
+
+	/** What "Create a ticket" did on this save, for the screen that follows. */
+	private static string $made = '';
 
 	/* ---------- which products ---------- */
 
@@ -81,6 +86,16 @@ final class Scout_Events_Woo {
 	public static function render_box( $post ): void {
 		wp_nonce_field( 'scout_event_woo_' . $post->ID, '_se_woo' );
 		$chosen = self::product_ids( (int) $post->ID );
+		$made   = isset( $_GET['se_made'] ) ? sanitize_key( wp_unslash( $_GET['se_made'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+		if ( 'ok' === $made ) {
+			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Ticket created and ticked below. It is on sale on the event page now.', 'scout-events' ) . '</p></div>';
+		} elseif ( '' !== $made ) {
+			$why = array(
+				'name'  => __( 'The ticket was not created: give it a name, such as Weekend pass.', 'scout-events' ),
+				'price' => __( 'The ticket was not created: give it a price (0 for a free ticket).', 'scout-events' ),
+			);
+			echo '<div class="notice notice-error inline"><p>' . esc_html( $why[ $made ] ?? __( 'The ticket could not be created. Try again.', 'scout-events' ) ) . '</p></div>';
+		}
 		$all    = wc_get_products(
 			array(
 				'status'  => array( 'publish', 'private', 'draft' ),
@@ -90,8 +105,8 @@ final class Scout_Events_Woo {
 			)
 		);
 		echo '<p class="description">' . esc_html__( 'Tick the shop products that are tickets for this event: one per ticket type, each with its own price and stock. The event page then lists them with Add to cart, and the event shows as sold out on its own when they are all gone. Leave all unticked to use the ticket link above instead.', 'scout-events' ) . '</p>';
+		self::create_form( $post, ! $all );
 		if ( ! $all ) {
-			echo '<p>' . esc_html__( 'No products yet.', 'scout-events' ) . ' <a href="' . esc_url( admin_url( 'post-new.php?post_type=product' ) ) . '">' . esc_html__( 'Add a ticket product', 'scout-events' ) . '</a></p>';
 			return;
 		}
 		echo '<p><input type="search" class="widefat se-woo-find" placeholder="' . esc_attr__( 'Find a product', 'scout-events' ) . '" aria-label="' . esc_attr__( 'Find a product', 'scout-events' ) . '"></p><div class="se-woo-list" style="max-height:16em;overflow:auto">';
@@ -105,6 +120,35 @@ final class Scout_Events_Woo {
 		}
 		echo '</div>';
 		echo '<script>document.querySelectorAll(".se-woo-find").forEach(function(f){f.addEventListener("input",function(){var q=f.value.toLowerCase();f.closest(".inside").querySelectorAll(".se-woo-list label").forEach(function(l){l.hidden=q&&l.textContent.toLowerCase().indexOf(q)<0;});});});</script>';
+	}
+
+	/** "Create a ticket": a few fields that make the product on Update. */
+	private static function create_form( $post, bool $open ): void {
+		$e = Scout_Events::event( (int) $post->ID );
+		echo '<details class="se-woo-new"' . ( $open ? ' open' : '' ) . '><summary><strong>' . esc_html__( 'Create a ticket', 'scout-events' ) . '</strong></summary>';
+		echo '<p class="description">' . esc_html__( 'Makes a ticket in the shop for this event and ticks it here. Each buyer names every ticket holder at checkout and gets a QR ticket for each by email.', 'scout-events' ) . '</p>';
+		echo '<div class="se-grid">';
+		$f = static function ( string $key, string $label, string $type = 'text', string $value = '', string $help = '', string $extra = '' ): void {
+			$id = 'se-new-' . $key;
+			echo '<p class="se-field"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label><input type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="se_new[' . esc_attr( $key ) . ']" value="' . esc_attr( $value ) . '"' . $extra . ( '' !== $help ? ' aria-describedby="' . esc_attr( $id ) . '-help"' : '' ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $extra is a fixed string.
+			if ( '' !== $help ) {
+				echo '<span class="se-help" id="' . esc_attr( $id ) . '-help">' . esc_html( $help ) . '</span>';
+			}
+			echo '</p>';
+		};
+		$f( 'name', __( 'Ticket name', 'scout-events' ), 'text', '', __( 'What people see on the event page, such as Weekend pass.', 'scout-events' ) );
+		$f( 'price', __( 'Price', 'scout-events' ), 'text', '', __( 'In dollars, such as 150 or 150.00. 0 for free.', 'scout-events' ), ' inputmode="decimal"' );
+		$f( 'stock', __( 'How many to sell (optional)', 'scout-events' ), 'number', $e['capacity'] > 0 ? (string) $e['capacity'] : '', __( 'Leave empty for no limit on this ticket. The event’s Capacity still caps all tickets together.', 'scout-events' ), ' min="0" step="1"' );
+		$f( 'receipt', __( 'Name on receipts (optional)', 'scout-events' ), 'text', '', __( 'What the order, receipt and payment service show, such as "Workshop registration". Empty uses the ticket name.', 'scout-events' ) );
+		$f( 'from', __( 'Sales open (optional)', 'scout-events' ), 'date', $e['sales_start'] );
+		$f( 'to', __( 'Sales close (optional)', 'scout-events' ), 'date', $e['sales_end'] );
+		echo '</div><p class="se-field se-wide"><label for="se-new-about">' . esc_html__( 'What it includes (optional)', 'scout-events' ) . '</label><textarea id="se-new-about" name="se_new[about]" rows="2"></textarea></p>';
+		echo '<p><button type="submit" name="se_new_go" value="1" class="button button-primary">' . esc_html__( 'Create ticket', 'scout-events' ) . '</button> <span class="description">' . esc_html__( 'Saves the event too.', 'scout-events' ) . '</span></p></details>';
+	}
+
+	/** Back on the edit screen, say what "Create a ticket" did. */
+	public static function after_create( $location, $post_id ) {
+		return '' !== self::$made ? add_query_arg( 'se_made', self::$made, $location ) : $location;
 	}
 
 	public static function save( $post_id ): void {
@@ -130,6 +174,12 @@ final class Scout_Events_Woo {
 		} else {
 			delete_post_meta( $post_id, self::META );
 		}
+		if ( ! empty( $_POST['se_new_go'] ) && 'auto-draft' !== get_post_status( $post_id ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is cleaned in create().
+			$in   = isset( $_POST['se_new'] ) ? (array) wp_unslash( $_POST['se_new'] ) : array();
+			$made = Scout_Events_Tickets::create( (int) $post_id, $in );
+			self::$made = is_wp_error( $made ) ? $made->get_error_code() : 'ok';
+		}
 	}
 
 	/* ---------- the event follows the shop ---------- */
@@ -142,6 +192,7 @@ final class Scout_Events_Woo {
 			return $e;
 		}
 		$prices = array_map( static fn( $p ) => (float) wc_get_price_to_display( $p ), $products );
+		// Purchasable also covers each ticket's sales window and the event's places left.
 		$open   = array_filter( $products, static fn( $p ) => $p->is_in_stock() && $p->is_purchasable() );
 		$low    = min( $prices );
 		$high   = max( $prices );
@@ -172,15 +223,24 @@ final class Scout_Events_Woo {
 				$out .= '<span class="se-ticket-about">' . esc_html( wp_trim_words( $about, 30 ) ) . '</span>';
 			}
 			$out .= '</div><span class="se-ticket-price">' . wp_kses_post( $p->get_price_html() ) . '</span>';
-			if ( ! $p->is_in_stock() || ! $p->is_purchasable() ) {
+			$window = Scout_Events_Tickets::window_note( $p );
+			if ( '' !== $window ) {
+				$out .= '<span class="se-soldout">' . esc_html( $window ) . '</span>';
+			} elseif ( ! $p->is_in_stock() || ! $p->is_purchasable() ) {
 				$out .= '<span class="se-soldout">' . esc_html__( 'Sold out', 'scout-events' ) . '</span>';
 			} elseif ( ! $p->is_type( 'simple' ) ) {
 				// Sizes, dates or other choices are picked on the product's own page.
 				$out .= '<a class="se-button wp-element-button" href="' . esc_url( $p->get_permalink() ) . '">' . esc_html__( 'Choose', 'scout-events' ) . '</a>';
 			} else {
-				$left = $p->managing_stock() ? (int) $p->get_stock_quantity() : 0;
-				$max  = $p->managing_stock() && ! $p->backorders_allowed() ? max( 1, $left ) : 20;
-				if ( $p->managing_stock() && $left > 0 && $left <= self::LOW ) {
+				$left  = $p->managing_stock() ? (int) $p->get_stock_quantity() : 0;
+				$max   = $p->managing_stock() && ! $p->backorders_allowed() ? max( 1, $left ) : 20;
+				$event = Scout_Events_Tickets::left( $id );
+				if ( null !== $event ) {
+					// The event's places left cap every ticket type together.
+					$max  = min( $max, max( 1, $event ) );
+					$left = $p->managing_stock() ? min( $left, $event ) : $event;
+				}
+				if ( ( $p->managing_stock() || null !== $event ) && $left > 0 && $left <= self::LOW ) {
 					/* translators: %d: tickets left. */
 					$out .= '<span class="se-ticket-left">' . esc_html( sprintf( _n( '%d left', '%d left', $left, 'scout-events' ), $left ) ) . '</span>';
 				}
@@ -192,7 +252,7 @@ final class Scout_Events_Woo {
 			}
 			$out .= '</li>';
 		}
-		$out .= '</ul><p class="se-tickets-cart"><a href="' . esc_url( $cart ) . '">' . esc_html__( 'View cart and check out', 'scout-events' ) . '</a></p></div>';
+		$out .= '</ul>' . Scout_Events_Agreements::notice( $e ) . '<p class="se-tickets-cart"><a href="' . esc_url( $cart ) . '">' . esc_html__( 'View cart and check out', 'scout-events' ) . '</a></p></div>';
 		return $out;
 	}
 

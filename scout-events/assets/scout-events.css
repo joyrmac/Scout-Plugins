@@ -4,7 +4,7 @@
    --scout-events-accent, --scout-events-on-accent, --scout-events-line,
    --scout-events-muted, --scout-events-inset, --scout-events-radius. */
 
-.se-details, .se-schedule, .se-speakers, .se-directory, .se-regions, .se-topic, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts {
+.se-details, .se-schedule, .se-speakers, .se-directory, .se-regions, .se-topic, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts, .se-attendees {
 	--se-accent: var(--scout-events-accent, #1D1D1F);
 	--se-on-accent: var(--scout-events-on-accent, #fff);
 	--se-line: var(--scout-events-line, rgba(127, 127, 127, .28));
@@ -127,6 +127,36 @@
 .se-spots { font-weight: 600; margin: 0 0 .75em; }
 .se-s-note { padding: .7em 1em; border-radius: 8px; background: var(--se-inset); border-left: 3px solid #B42318; font-weight: 600; }
 
+/* Agreements: the waiver box, tick boxes, photo choice and signature (sign-up form, checkout, ticket page). */
+.se-s-agree, .se-signup-form :where(.se-newsletter) { grid-column: 1 / -1; }
+.se-waiver { max-height: 14em; overflow: auto; margin: 0 0 1em; padding: .9em 1.1em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 10px; background: var(--se-inset, rgba(127, 127, 127, .08)); font-size: .92em; text-align: start; }
+.se-waiver:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.se-waiver :where(p) { margin: 0 0 .7em; text-wrap: pretty; }
+.se-waiver :where(.se-waiver-title) { font-weight: 600; margin-bottom: .4em; }
+.se-agree { text-align: start; }
+.se-agree-row, .se-newsletter { margin: 0 0 .6em; }
+.se-agree-row :where(label), .se-newsletter :where(label) { display: flex; align-items: flex-start; gap: .55em; cursor: pointer; text-wrap: pretty; }
+.se-agree-row :where(input), .se-newsletter :where(input) { flex: none; width: 1.15em; height: 1.15em; margin: .2em 0 0; }
+.se-agree-photo { margin: .4em 0 .8em; padding: 0; border: 0; }
+.se-agree-photo :where(legend) { padding: 0; margin: 0 0 .4em; font-weight: 600; font-size: .95em; text-wrap: pretty; }
+.se-agree-photo :where(label) { display: inline-flex; align-items: center; gap: .4em; margin: 0 1.25em .3em 0; cursor: pointer; }
+.se-agree-sign { max-width: 26em; }
+.se-agree-notice { margin: .75em 0 0; font-size: .88em; opacity: .85; text-wrap: pretty; }
+
+/* Checkout: one box per ticket holder. */
+.se-attendees { clear: both; margin: 1.5em 0; }
+.se-attendees-help, .se-attendees-event { margin: 0 0 1em; }
+.se-attendees-event { font-weight: 600; }
+.se-attendee { margin: 0 0 1em; padding: 1em 1.1em .4em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, 14px); }
+.se-attendee :where(legend) { padding: 0 .4em; font-weight: 600; }
+.se-attendee::after { content: ""; display: table; clear: both; }
+.se-attendee :where(.se-agree) { clear: both; }
+.se-attendee :where(.description) { display: block; font-size: .85em; opacity: .75; margin-top: .3em; }
+@media (max-width: 600px) {
+	/* Beats WooCommerce's own two-column rule for these fields. */
+	.se-attendees .se-attendee .form-row-first, .se-attendees .se-attendee .form-row-last { float: none; width: 100%; }
+}
+
 /* The ticket, at the top of the event page. */
 .se-ticket { --se-line: var(--scout-events-line, rgba(127, 127, 127, .28)); --se-inset: var(--scout-events-inset, rgba(127, 127, 127, .08)); --se-accent: var(--scout-events-accent, #1D1D1F); --se-on-accent: var(--scout-events-on-accent, #fff); max-width: 30rem; margin: 0 auto 2em; padding: 1.5em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, 14px); text-align: center; scroll-margin-top: 2em; }
 .se-ticket-kicker { margin: 0; font-size: .75em; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
@@ -143,6 +173,13 @@
 .se-checkin { width: 100%; min-height: 3.5em; font-size: 1.15em; }
 .se-ticket-count, .se-ticket-staff { font-size: .85em; opacity: .8; margin: .75em 0 0; }
 .se-ticket-cancel { margin: .5em 0 0; }
+.se-ticket-type { margin: .2em 0 0; font-size: .9em; opacity: .8; }
+.se-ticket-small { font-size: .88em; opacity: .85; }
+.se-ticket-agree { margin: 1em 0 0; text-align: start; }
+.se-ticket-answers { margin: .75em 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .35em; }
+.se-ticket-answers :where(.se-chip) { display: inline-block; padding: .2em .7em; border-radius: 980px; font-size: .8em; font-weight: 600; background: var(--se-inset); }
+.se-ticket-answers :where(.se-chip.is-done) { background: #E3F4EE; color: #0B5F45; }
+.se-ticket-answers :where(.se-chip.is-warn) { background: #FBF0DC; color: #7A4B00; }
 .se-linkbutton { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: .9em; text-decoration: underline; cursor: pointer; }
 .se-ticket.is-cancelled { opacity: .85; }
 

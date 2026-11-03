@@ -1,9 +1,10 @@
 <?php
 /**
  * The Sign-ups screen: one event's door list. Headcounts at the top, then
- * everyone signed up with a Check in button for people without their phone,
- * the waitlist with Move in, and a spreadsheet download. Built to work on a
- * phone at the door as well as on a laptop.
+ * everyone signed up or holding a paid ticket, with a Check in button for
+ * people without their phone, what each person agreed to and their photo
+ * choice, the waitlist with Move in, and a spreadsheet download. Built to
+ * work on a phone at the door as well as on a laptop.
  *
  * @package Scout_Events
  */
@@ -20,7 +21,7 @@ final class Scout_Events_RSVP_Admin {
 		add_filter( 'scout_events_needs_you', array( __CLASS__, 'needs_you' ) );
 	}
 
-	/** Events that take sign-ups, upcoming first, then past. */
+	/** Events that take sign-ups or sell shop tickets, upcoming first, then past. */
 	public static function events(): array {
 		$ids = get_posts(
 			array(
@@ -33,7 +34,7 @@ final class Scout_Events_RSVP_Admin {
 				'order'          => 'ASC',
 			)
 		);
-		$ids      = array_values( array_filter( array_map( 'intval', $ids ), static fn( $id ) => ! empty( Scout_Events::event( $id )['signup'] ) ) );
+		$ids      = array_values( array_filter( array_map( 'intval', $ids ), static fn( $id ) => Scout_Events_RSVP::has_tickets( $id ) ) );
 		$upcoming = array_values( array_filter( $ids, static fn( $id ) => ! Scout_Events::is_past( Scout_Events::event( $id ) ) ) );
 		$past     = array_reverse( array_values( array_diff( $ids, $upcoming ) ) );
 		return array_merge( $upcoming, $past );
@@ -75,7 +76,8 @@ final class Scout_Events_RSVP_Admin {
 		} elseif ( 'move' === $op && 'waitlist' === $row['status'] ) {
 			Scout_Events_RSVP::set_status( $id, 'going' );
 			Scout_Events_RSVP::email( Scout_Events_RSVP::get( $id ) );
-		} elseif ( 'cancel' === $op ) {
+		} elseif ( 'cancel' === $op && 'shop' !== $row['source'] ) {
+			// Paid tickets are cancelled by refunding the order, which voids them.
 			Scout_Events_RSVP::set_status( $id, 'cancelled' );
 		} elseif ( 'restore' === $op && 'cancelled' === $row['status'] ) {
 			Scout_Events_RSVP::set_status( $id, 'going' );
@@ -96,11 +98,33 @@ final class Scout_Events_RSVP_Admin {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( get_post_field( 'post_name', $event ) . '-signups.csv' ) . '"' );
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming the download.
-		fputcsv( $out, array( 'Name', 'Email', 'Guests', 'Status', 'Signed up', 'Checked in' ), ',', '"', '\\' );
+		fputcsv( $out, array( 'Name', 'Email', 'Guests', 'Status', 'Ticket', 'Order', 'Signed up', 'Checked in', 'Agreed at', 'Signature', 'Agreement version', 'Age confirmed', 'Photos', 'Newsletter requested' ), ',', '"', '\\' );
+		// A leading = + - @ would run as a formula in a spreadsheet.
+		$safe = static fn( $v ) => preg_match( '/^[=+\-@]/', (string) $v ) ? "'" . $v : $v;
 		foreach ( Scout_Events_RSVP::for_event( $event ) as $r ) {
-			// A leading = + - @ would run as a formula in a spreadsheet.
-			$safe = static fn( $v ) => preg_match( '/^[=+\-@]/', (string) $v ) ? "'" . $v : $v;
-			fputcsv( $out, array( $safe( $r['name'] ), $safe( $r['email'] ), $r['guests'], Scout_Events_RSVP::statuses()[ $r['status'] ] ?? $r['status'], $r['created'], (string) $r['checked_in'] ), ',', '"', '\\' );
+			$ticket = 'shop' === $r['source'] && (int) $r['product_id'] ? get_the_title( (int) $r['product_id'] ) : __( 'Sign-up', 'scout-events' );
+			fputcsv(
+				$out,
+				array(
+					$safe( $r['name'] ),
+					$safe( $r['email'] ),
+					$r['guests'],
+					Scout_Events_RSVP::statuses()[ $r['status'] ] ?? $r['status'],
+					$safe( $ticket ),
+					(int) $r['order_id'] ? (int) $r['order_id'] : '',
+					$r['created'],
+					(string) $r['checked_in'],
+					(string) $r['agreed'],
+					$safe( $r['signature'] ),
+					Scout_Events_Agreements::version_label( $event, (string) $r['waiver_version'] ),
+					! empty( $r['agreed'] ) ? ( $r['age_ok'] ? 'Yes' : 'Not asked' ) : '',
+					$r['photo'],
+					(string) $r['newsletter'],
+				),
+				',',
+				'"',
+				'\\'
+			);
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		exit;
@@ -114,7 +138,7 @@ final class Scout_Events_RSVP_Admin {
 			?>
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Sign-ups', 'scout-events' ); ?></h2>
-				<p><?php esc_html_e( 'No event takes sign-ups yet. Open an event, tick "Take sign-ups on this site" under Tickets, and save. People then sign up on the event page and get a ticket with a QR code.', 'scout-events' ); ?></p>
+				<p><?php esc_html_e( 'No event takes sign-ups or sells tickets yet. Open an event, tick "Take sign-ups on this site" under Tickets (or create a ticket in "Tickets from the shop"), and save. People then get a ticket with a QR code.', 'scout-events' ); ?></p>
 			</section>
 			<?php
 			return;
@@ -132,6 +156,9 @@ final class Scout_Events_RSVP_Admin {
 		$going   = array_values( array_filter( $rows, static fn( $r ) => 'going' === $r['status'] ) );
 		$waiting = array_values( array_filter( $rows, static fn( $r ) => 'waitlist' === $r['status'] ) );
 		$gone    = array_values( array_filter( $rows, static fn( $r ) => 'cancelled' === $r['status'] ) );
+		$void    = array_values( array_filter( $rows, static fn( $r ) => 'void' === $r['status'] ) );
+		$owed    = count( array_filter( $going, static fn( $r ) => Scout_Events_Agreements::owed( $r, $e ) ) );
+		$nophoto = count( array_filter( $going, static fn( $r ) => 'no' === $r['photo'] ) );
 		?>
 		<section class="sh-box se-door">
 			<form method="get" class="se-door-pick">
@@ -164,6 +191,14 @@ final class Scout_Events_RSVP_Admin {
 				</span>
 			</div>
 			<p class="sh-note"><?php esc_html_e( 'At the door, scan each ticket with your phone camera while signed in here, and tap Check in. Use this list for anyone without their ticket.', 'scout-events' ); ?></p>
+			<?php if ( $owed ) : ?>
+				<?php /* translators: %d: number of people. */ ?>
+				<p class="se-door-flag"><?php echo esc_html( sprintf( _n( '%d person going has not agreed yet. Their ticket page asks them; at the door, ask them to open it.', '%d people going have not agreed yet. Their ticket pages ask them; at the door, ask them to open it.', $owed, 'scout-events' ), $owed ) ); ?></p>
+			<?php endif; ?>
+			<?php if ( $nophoto ) : ?>
+				<?php /* translators: %d: number of people. */ ?>
+				<p class="se-door-flag"><?php echo esc_html( sprintf( _n( '%d person asked not to be in photos. They are marked "No photos" below.', '%d people asked not to be in photos. They are marked "No photos" below.', $nophoto, 'scout-events' ), $nophoto ) ); ?></p>
+			<?php endif; ?>
 		</section>
 
 		<?php
@@ -173,6 +208,9 @@ final class Scout_Events_RSVP_Admin {
 		}
 		if ( $gone ) {
 			self::block( __( 'Cancelled', 'scout-events' ), $gone, '', true );
+		}
+		if ( $void ) {
+			self::block( __( 'Refunded', 'scout-events' ), $void, '', true );
 		}
 	}
 
@@ -201,7 +239,9 @@ final class Scout_Events_RSVP_Admin {
 	}
 
 	private static function row( array $r ): void {
-		$in = ! empty( $r['checked_in'] );
+		$in    = ! empty( $r['checked_in'] );
+		$paid  = 'shop' === $r['source'];
+		$order = $paid && (int) $r['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( (int) $r['order_id'] ) : null;
 		?>
 		<li class="se-door-row<?php echo $in ? ' is-in' : ''; ?>" id="se-s-<?php echo (int) $r['id']; ?>">
 			<div class="se-door-who">
@@ -214,7 +254,20 @@ final class Scout_Events_RSVP_Admin {
 					<?php /* translators: %s: time. */ ?>
 					<span class="se-chip is-done"><?php echo esc_html( sprintf( __( 'In at %s', 'scout-events' ), mysql2date( (string) get_option( 'time_format' ), (string) $r['checked_in'] ) ) ); ?></span>
 				<?php endif; ?>
-				<br><span class="sh-note"><?php echo esc_html( $r['email'] ); ?></span>
+				<?php if ( $paid ) : ?>
+					<span class="se-chip"><?php echo esc_html( (int) $r['product_id'] ? get_the_title( (int) $r['product_id'] ) : __( 'Paid', 'scout-events' ) ); ?></span>
+				<?php endif; ?>
+				<?php echo wp_kses_post( Scout_Events_RSVP::answers( $r, Scout_Events::event( (int) $r['event_id'] ) ) ); ?>
+				<br><span class="sh-note"><?php echo esc_html( $r['email'] ); ?>
+				<?php if ( $order ) : ?>
+					<?php /* translators: %s: order number. */ ?>
+					· <a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>"><?php echo esc_html( sprintf( __( 'Order %s', 'scout-events' ), $order->get_order_number() ) ); ?></a>
+				<?php endif; ?>
+				<?php if ( ! empty( $r['signature'] ) ) : ?>
+					<?php /* translators: %s: the typed signature. */ ?>
+					· <?php echo esc_html( sprintf( __( 'Signed "%s"', 'scout-events' ), $r['signature'] ) ); ?>
+				<?php endif; ?>
+				</span>
 			</div>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-door-act">
 				<input type="hidden" name="action" value="scout_events_signup_admin">
@@ -225,12 +278,14 @@ final class Scout_Events_RSVP_Admin {
 						<button type="submit" name="op" value="undo" class="button"><?php esc_html_e( 'Undo', 'scout-events' ); ?></button>
 					<?php else : ?>
 						<button type="submit" name="op" value="in" class="button button-primary"><?php esc_html_e( 'Check in', 'scout-events' ); ?></button>
-						<button type="submit" name="op" value="cancel" class="button se-quiet"><?php esc_html_e( 'Cancel', 'scout-events' ); ?></button>
+						<?php if ( ! $paid ) : ?>
+							<button type="submit" name="op" value="cancel" class="button se-quiet"><?php esc_html_e( 'Cancel', 'scout-events' ); ?></button>
+						<?php endif; ?>
 					<?php endif; ?>
 				<?php elseif ( 'waitlist' === $r['status'] ) : ?>
 					<button type="submit" name="op" value="move" class="button button-primary"><?php esc_html_e( 'Move in and email ticket', 'scout-events' ); ?></button>
 					<button type="submit" name="op" value="cancel" class="button se-quiet"><?php esc_html_e( 'Remove', 'scout-events' ); ?></button>
-				<?php else : ?>
+				<?php elseif ( 'cancelled' === $r['status'] ) : ?>
 					<button type="submit" name="op" value="restore" class="button"><?php esc_html_e( 'Put back', 'scout-events' ); ?></button>
 				<?php endif; ?>
 			</form>
