@@ -34,6 +34,7 @@ on:
           - scout-core
           - scout-events
           - scout-members
+          - scout-newsletter
           - scout-partners
           - scout-crm
           - scout-forms-guard

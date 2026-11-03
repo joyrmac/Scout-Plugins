@@ -1,0 +1,11 @@
+/* Scout Newsletter sign-up box. Plain on purpose: it takes the theme's fonts and
+   colours, and :where() keeps every rule easy for a theme to override. */
+:where(.scout-newsletter) { max-width: 30rem; margin-block: 1.5rem; }
+:where(.scout-newsletter__heading) { margin: 0 0 .75rem; text-wrap: balance; }
+:where(.scout-newsletter__form) { display: grid; gap: .75rem; margin: 0; }
+:where(.scout-newsletter__field) { display: grid; gap: .3rem; margin: 0; }
+:where(.scout-newsletter__field input) { box-sizing: border-box; width: 100%; min-height: 2.75rem; padding: .55rem .75rem; font: inherit; border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; }
+:where(.scout-newsletter__submit) { margin: 0; }
+:where(.scout-newsletter__submit button) { min-height: 2.75rem; padding: .6rem 1.4rem; font: inherit; cursor: pointer; }
+:where(.scout-newsletter__consent) { margin: 0; font-size: .875em; opacity: .85; text-wrap: pretty; }
+:where(.scout-newsletter__done, .scout-newsletter__error) { margin: 0 0 .75rem; }

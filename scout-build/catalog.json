@@ -175,6 +175,14 @@
       "tier": "addon",
       "law": false,
       "requires": []
+    },
+    {
+      "slug": "scout-newsletter",
+      "name": "Newsletter",
+      "summary": "People who tick the newsletter box on a form, at checkout or when they sign up for an event go to your email list in Beehiiv, tagged by where they joined. Every agreement is saved with the date and the words they saw.",
+      "tier": "partnership",
+      "law": false,
+      "requires": []
     }
   ]
 }
