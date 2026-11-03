@@ -506,7 +506,7 @@ final class Scout_Events_Tickets {
 		if ( '' !== $optin && $made && ! $order->get_meta( self::OPTIN_SENT ) ) {
 			$order->update_meta_data( self::OPTIN_SENT, current_time( 'mysql' ) );
 			$order->save();
-			Scout_Events_Agreements::optin( $email, $buyer, 'event-checkout', array_keys( $made ) );
+			Scout_Events_Agreements::optin( $email, $buyer, 'ticket', array_keys( $made ) );
 		}
 	}
 

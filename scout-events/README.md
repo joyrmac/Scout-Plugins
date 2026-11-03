@@ -215,12 +215,14 @@ ticket (and on the order), and once the sign-up is made or the order is paid:
 
 `do_action( 'scout_newsletter_optin', $email, $first_name, $source, $tags, $context )`
 
-`$source` is `event-signup` or `event-checkout`; `$tags` is "Event sign-up" or
-"Ticket buyer" followed by the event names (`scout_events_newsletter_tags`
-filter). `$context` holds `wording` (the exact words on the box they ticked)
-and `page` and `url` (the event's address), so the consent record keeps them;
-a listener that takes four arguments still works. Scout Events never calls a
-newsletter service itself.
+`$source` is `event` for a free sign-up and `ticket` for a paid checkout.
+`$tags` is empty unless the `scout_events_newsletter_tags` filter adds some:
+the connector tags by source, never one tag per event, because Beehiiv caps a
+publication at 100 tags. `$context` holds `wording` (the exact words on the box
+they ticked), `page` and `url` (the event's address) and `campaign` (the
+event's slug; the first event in the cart at checkout), so the consent record
+keeps them. A listener that takes four arguments still works. Scout Events
+never calls a newsletter service itself.
 
 ## Regions
 

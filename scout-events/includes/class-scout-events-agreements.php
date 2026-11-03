@@ -293,34 +293,36 @@ final class Scout_Events_Agreements {
 	 * Someone ticked "Send me the newsletter". Fires scout_newsletter_optin for
 	 * a connector (such as the Beehiiv one) to pass on; nothing is sent from here.
 	 *
-	 * @param string   $source "event-signup" or "event-checkout".
-	 * @param int[]    $events The events it came from, for the tags.
+	 * @param string $source "event" for a free sign-up, "ticket" for a paid checkout.
+	 * @param int[]  $events The events it came from; the first one's slug is the campaign.
 	 */
 	public static function optin( string $email, string $name, string $source, array $events ): void {
-		$first = trim( (string) strtok( trim( $name ), ' ' ) );
-		$tags  = array( 'event-checkout' === $source ? __( 'Ticket buyer', 'scout-events' ) : __( 'Event sign-up', 'scout-events' ) );
-		foreach ( array_unique( array_map( 'intval', $events ) ) as $event ) {
-			$tags[] = wp_specialchars_decode( get_the_title( $event ), ENT_QUOTES );
-		}
-		/** The tags sent with an opt-in: who they are, and the event names. */
-		$tags = (array) apply_filters( 'scout_events_newsletter_tags', $tags, $source, $events );
+		$first  = trim( (string) strtok( trim( $name ), ' ' ) );
+		$events = array_values( array_unique( array_map( 'intval', $events ) ) );
+		/**
+		 * Extra tags sent with an opt-in. None by default: the connector tags by
+		 * source, never one tag per event, because a newsletter service caps how
+		 * many tags a list may have.
+		 */
+		$tags = (array) apply_filters( 'scout_events_newsletter_tags', array(), $source, $events );
+		$page = $events ? (string) get_permalink( $events[0] ) : '';
+		$context = array(
+			'wording'  => self::newsletter_label(),
+			'page'     => $page,
+			'url'      => $page,
+			'campaign' => $events ? (string) get_post_field( 'post_name', $events[0] ) : '',
+		);
 		/**
 		 * A person opted in to the newsletter, with consent stored on their ticket or order.
 		 *
 		 * @param string   $email      Their email.
 		 * @param string   $first_name First name, may be empty.
-		 * @param string   $source     "event-signup" or "event-checkout".
-		 * @param string[] $tags       "Ticket buyer" or "Event sign-up", then the event names.
+		 * @param string   $source     "event" (free sign-up) or "ticket" (paid checkout).
+		 * @param string[] $tags       Extra tags, empty unless a filter adds some.
 		 * @param array    $context    wording (the exact box label they ticked), page and url (the
-		 *                             event's address). Listeners that take four arguments never see it.
+		 *                             event's address), campaign (the event's slug). Listeners that
+		 *                             take four arguments never see it.
 		 */
-		$events = array_values( array_unique( array_map( 'intval', $events ) ) );
-		$page   = $events ? (string) get_permalink( $events[0] ) : '';
-		$context = array(
-			'wording' => self::newsletter_label(),
-			'page'    => $page,
-			'url'     => $page,
-		);
 		do_action( 'scout_newsletter_optin', strtolower( $email ), $first, $source, array_values( array_filter( array_map( 'strval', $tags ) ) ), $context );
 	}
 }

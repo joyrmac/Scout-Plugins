@@ -576,7 +576,7 @@ final class Scout_Events_RSVP {
 			self::back_to( $page, 'missing' );
 		}
 		if ( $optin ) {
-			Scout_Events_Agreements::optin( $email, $name, 'event-signup', array( $event_id ) );
+			Scout_Events_Agreements::optin( $email, $name, 'event', array( $event_id ) );
 		}
 		self::email( $row );
 		wp_safe_redirect( add_query_arg( 'se_new', 1, self::ticket_url( $row ) ) . '#se-ticket' );
