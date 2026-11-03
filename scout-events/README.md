@@ -5,10 +5,12 @@ gets a page with its details, ticket button, schedule and speakers, and Event
 schema so it can appear in Google's event results.
 
 Built for Bliss Boogie first and shaped for larger multi-day events (several
-rooms or tents a day, dozens of speakers). It works with any ticket link
-today: a partner's checkout, Acuity, Eventbrite or the site's own shop. Sales,
-QR tickets and check-in are planned for a WooCommerce ticket engine later;
-this plugin stays the content and display layer in front of it.
+rooms or tents a day, dozens of speakers). It works with any ticket link (a
+partner's checkout, Acuity, Eventbrite), with free sign-ups on the site, and
+with paid tickets through the site's own WooCommerce checkout. Free and paid
+tickets get the same QR ticket, door check-in and per-person agreements.
+Taking the money is WooCommerce's job, through whichever payment service the
+site turns on; this plugin never sees card details.
 
 ## Where it lives
 
@@ -85,7 +87,8 @@ everyone going gets one reminder with their ticket.
 
 Sign-ups live in their own table (`wp_scout_event_signups`), created on
 activation and on update. Deleting the plugin keeps it, like every other
-piece of the client's content. Paid tickets will write into the same table.
+piece of the client's content. Paid shop tickets write into the same table,
+one row per ticket (see below), so the door list and check-in are one list.
 
 ## Speaker photos
 
@@ -134,9 +137,92 @@ pass, Day pass, VIP, a camping spot), each with its own price and stock.
 - Every paid order fires `scout_events_ticket_bought` ( $order, $event_id,
   $product_id, $qty ) once per ticket line.
 
-QR tickets and gate scanning come from a WooCommerce ticket plugin such as
-FooEvents, working on the same products. Free sign-ups with QR check-in stay
-with **Sign-ups** above.
+### Paid tickets, end to end
+
+- **Create a ticket** (in the Tickets from the shop box): ticket name, price,
+  how many to sell, sales open and close, the **name on receipts**, and what
+  it includes. It makes a simple, virtual WooCommerce product, already ticked
+  as this event's ticket. Receipt name, sales open and close can be changed
+  later on the product's General tab.
+- **Name on receipts.** The order, the WooCommerce emails and the payment
+  service see this name (such as "Workshop registration"); the event page
+  and the cart show the ticket name. The order screen shows both.
+- **Sales window and places left.** A ticket outside its sales dates shows
+  "On sale December 1" or "Sales closed" instead of Add to cart. The event's
+  Capacity caps free and paid tickets together: the quantity box stops at the
+  places left, the cart refuses more, and the event shows Sold out at zero.
+- **Checkout** asks for each ticket holder's name (and, optionally, their own
+  email for a copy of their ticket), and their agreements when the event asks
+  (below). While the cart holds tickets, a block checkout page shows the
+  classic checkout form instead, because the block checkout has no place for
+  fields repeated per ticket (`scout_events_classic_checkout` filter to keep
+  the block one).
+- **When the order is paid** (Processing or Completed), each ticket becomes an
+  attendee: the same QR ticket page, door list, check-in and day-before
+  reminder as a free sign-up, counted in places left. The buyer gets one email
+  with every ticket (a link and a QR image each) and the calendar file; a
+  holder with their own email gets their own copy. An order paid by a method
+  that waits (such as a cheque) makes its tickets when the owner marks it
+  Processing.
+- **Refunds.** A full refund, a cancelled order, or a partial refund turns the
+  refunded tickets void: they show "This ticket was refunded" and never check
+  in. A partial refund voids tickets not yet checked in first. Paid tickets are
+  cancelled by refunding the order, not from the door list.
+- Orders made another way (in the dashboard, or by a route that skips the
+  checkout form) still make one ticket per seat, named for the buyer. When the
+  event asks for agreements, the ticket page asks the holder to agree there,
+  and the door list marks them "Has not agreed yet".
+- Off on a site running FooEvents, which makes its own tickets from the same
+  products, or with the `scout_events_paid_attendees` filter returning false.
+
+To test without a payment service: turn on WooCommerce's **Cash on delivery**
+method (with "Accept for virtual orders"), call it "Test payment", and buy a
+ticket. The order goes straight to Processing and the tickets arrive.
+
+## Agreements and waivers
+
+Under **Agreements** on an event, tick **Each person agrees before they get a
+ticket**, and write an optional **Waiver**. Set the link to the site's
+community agreements once, under Events, Settings. Tick **Ask each person
+whether they can be in photos and video** for a yes or no.
+
+- On the sign-up form and at checkout (once per ticket holder), people read the
+  waiver in a box, tick that they agree to the community agreements and the
+  waiver, confirm their age when the event has a Minimum age, choose yes or no
+  for photos, and type their full name to sign. The signature has to match the
+  name on the ticket. One person signing up with guests confirms the age for
+  the group.
+- The ticket keeps the signature, the date and time, the age confirmation, the
+  photo choice and the **agreement version**: a short id for the exact waiver
+  words, agreements link, minimum age and photo question at that moment. The
+  words of every version are kept on the event (`_scout_event_waivers`), so an
+  edit later never changes what someone signed.
+- The door list shows "Agreed" or "Has not agreed yet" and "No photos" per
+  person, with a count of each at the top. Scanning a ticket shows the same.
+  The spreadsheet download adds Ticket, Order, Agreed at, Signature,
+  Agreement version, Age confirmed, Photos and Newsletter requested.
+- The event page says each ticket holder agrees when they get their ticket.
+- Answers are in the privacy export. The waiver itself is the owner's words;
+  have a lawyer read it.
+
+## Newsletter opt-in
+
+An unticked **Send me the newsletter** box on the sign-up form and at checkout
+(when the cart holds tickets). It shows only when something listens to
+`scout_newsletter_optin` (a newsletter connector plugin), or with the
+`scout_events_offer_newsletter` filter. When ticked, the time is stored on the
+ticket (and on the order), and once the sign-up is made or the order is paid:
+
+`do_action( 'scout_newsletter_optin', $email, $first_name, $source, $tags, $context )`
+
+`$source` is `event` for a free sign-up and `ticket` for a paid checkout.
+`$tags` is empty unless the `scout_events_newsletter_tags` filter adds some:
+the connector tags by source, never one tag per event, because Beehiiv caps a
+publication at 100 tags. `$context` holds `wording` (the exact words on the box
+they ticked), `page` and `url` (the event's address) and `campaign` (the
+event's slug; the first event in the cart at checkout), so the consent record
+keeps them. A listener that takes four arguments still works. Scout Events
+never calls a newsletter service itself.
 
 ## Regions
 
@@ -215,7 +301,7 @@ this order so sessions can point at what came before:
 
 | File | Columns |
 |---|---|
-| events | title, slug, start_date, start_time, end_date, end_time, status, mode, venue, street, city, region, postal, country, online_url, availability, ticket_url, ticket_label, price_from, price_to, sales_start, sales_end, min_age, capacity, know, schema_type, excerpt, description, photo, regions, post_status |
+| events | title, slug, start_date, start_time, end_date, end_time, status, mode, venue, street, city, region, postal, country, online_url, availability, ticket_url, ticket_label, price_from, price_to, sales_start, sales_end, min_age, capacity, signup, signup_guests, agree, waiver, photo_ask, know, schema_type, excerpt, description, photo, regions, post_status |
 | speakers | name, slug, role, short_bio, bio, website, links, photo, photos, topics, regions, order, post_status |
 | sessions | title, slug, event, date, start, end, room, track, kind, speakers, capacity, description, topics, regions, post_status |
 
@@ -237,6 +323,11 @@ nothing. Notes list rows that could not be matched or read.
   when known. Scout CRM Sync uses it.
 - `scout_events_ticket_bought` ( $order, $event_id, $product_id, $qty ):
   a paid shop ticket line.
+- `scout_newsletter_optin` ( $email, $first_name, $source, $tags, $context ): someone
+  ticked "Send me the newsletter" (above).
+- Filters: `scout_events_paid_attendees` (paid tickets become attendees),
+  `scout_events_classic_checkout` (swap a block checkout while tickets are in
+  the cart), `scout_events_offer_newsletter`, `scout_events_newsletter_tags`.
 - `scout_events_event` filter ( $event, $id ): stand in for event fields on
   the site (the shop's price and stock use it).
 - `scout_events_imported_event`, `_session`, `_speaker`, `_vendor`
@@ -267,6 +358,7 @@ plugin removes its settings only; the content stays.
 
 ## Not in this release
 
-Ticket sales and QR check-in (WooCommerce engine), per-attendee waivers,
-ticket transfers, vendor and presenter applications, and filling events from
-`scout-setup.json` (Scout Build needs an `events` section first).
+A real payment service (turned on in WooCommerce when the merchant account
+exists), ticket transfers between people, per-ticket fields in the block
+checkout, holding places for orders that wait for payment, and filling events
+from `scout-setup.json` (Scout Build needs an `events` section first).

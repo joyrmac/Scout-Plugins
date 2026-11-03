@@ -10,7 +10,13 @@
  *
  * When the event is full, new sign-ups join a waitlist; the owner moves people
  * in from the Sign-ups screen. Sign-ups live in their own table, so a large
- * event stays fast. Paid tickets will write into the same table later.
+ * event stays fast. Paid shop tickets write into the same table, one row per
+ * ticket (source "shop", with the order and line), so the QR code, door list
+ * and check-in work the same for both. A refund turns a paid row "void".
+ *
+ * Each row also keeps the person's answers when the event asks for them
+ * (agreed, signature, waiver_version, age_ok, photo) and the time they asked
+ * for the newsletter (newsletter).
  *
  * @package Scout_Events
  */
@@ -21,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Events_RSVP {
 
-	const DB_VERSION  = '2';
+	const DB_VERSION  = '3';
 	const CRON        = 'scout_events_reminders';
 	const DB_OPTION   = 'scout_events_db';
 	const MIN_SECONDS = 3;
@@ -70,10 +76,21 @@ final class Scout_Events_RSVP {
 				checked_in datetime NULL,
 				checked_in_by bigint(20) unsigned NOT NULL DEFAULT 0,
 				reminded datetime NULL,
+				source varchar(10) NOT NULL DEFAULT 'signup',
+				order_id bigint(20) unsigned NOT NULL DEFAULT 0,
+				item_id bigint(20) unsigned NOT NULL DEFAULT 0,
+				product_id bigint(20) unsigned NOT NULL DEFAULT 0,
+				agreed datetime NULL,
+				signature varchar(190) NOT NULL DEFAULT '',
+				waiver_version varchar(20) NOT NULL DEFAULT '',
+				age_ok tinyint(1) unsigned NOT NULL DEFAULT 0,
+				photo varchar(3) NOT NULL DEFAULT '',
+				newsletter datetime NULL,
 				PRIMARY KEY  (id),
 				UNIQUE KEY code (code),
 				KEY event_status (event_id,status),
-				KEY email (email)
+				KEY email (email),
+				KEY order_id (order_id)
 			) $charset;"
 		);
 		update_option( self::DB_OPTION, self::DB_VERSION, false );
@@ -125,7 +142,7 @@ final class Scout_Events_RSVP {
 		$cutoff = $now->modify( '-24 hours' )->format( 'Y-m-d H:i:s' );
 		foreach ( array_map( 'intval', $events ) as $id ) {
 			$e = Scout_Events::event( $id );
-			if ( empty( $e['signup'] ) || 'cancelled' === $e['status'] ) {
+			if ( ! self::has_tickets( $id, $e ) || 'cancelled' === $e['status'] ) {
 				continue;
 			}
 			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table() . " WHERE event_id = %d AND status = 'going' AND reminded IS NULL AND created < %s", $id, $cutoff ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
@@ -145,7 +162,14 @@ final class Scout_Events_RSVP {
 			'going'     => __( 'Going', 'scout-events' ),
 			'waitlist'  => __( 'Waitlist', 'scout-events' ),
 			'cancelled' => __( 'Cancelled', 'scout-events' ),
+			'void'      => __( 'Refunded', 'scout-events' ),
 		);
+	}
+
+	/** Does this event hand out tickets on the site: free sign-ups, or paid shop tickets? */
+	public static function has_tickets( int $event_id, ?array $e = null ): bool {
+		$e = $e ?? Scout_Events::event( $event_id );
+		return ! empty( $e['signup'] ) || ( class_exists( 'Scout_Events_Tickets' ) && Scout_Events_Tickets::on() && Scout_Events_Woo::product_ids( $event_id ) );
 	}
 
 	public static function find( string $code ): ?array {
@@ -179,6 +203,12 @@ final class Scout_Events_RSVP {
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . " WHERE event_id = %d AND email = %s AND status <> 'cancelled' ORDER BY id DESC LIMIT 1", $event_id, strtolower( $email ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
 		return $row ? $row : null;
+	}
+
+	/** @return array<int,array<string,string>> the tickets from one shop order, in order */
+	public static function for_order( int $order_id ): array {
+		global $wpdb;
+		return (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE order_id = %d ORDER BY id ASC', $order_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
 	}
 
 	/**
@@ -237,30 +267,68 @@ final class Scout_Events_RSVP {
 	 * Add a sign-up. Going while there is room for them and their guests,
 	 * waitlisted after that.
 	 */
-	public static function add( int $event_id, string $name, string $email, int $guests, int $user_id = 0 ): ?array {
-		global $wpdb;
+	public static function add( int $event_id, string $name, string $email, int $guests, int $user_id = 0, array $extra = array() ): ?array {
 		$e      = Scout_Events::event( $event_id );
 		$guests = min( (int) $e['signup_guests'], max( 0, $guests ) );
 		$left   = self::spots_left( $event_id, $e );
 		$status = null === $left || $left >= 1 + $guests ? 'going' : 'waitlist';
-		$code   = wp_generate_password( 24, false, false );
-		$ok     = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			self::table(),
+		return self::insert(
 			array(
 				'event_id' => $event_id,
 				'user_id'  => $user_id,
-				'name'     => mb_substr( $name, 0, 190 ),
-				'email'    => strtolower( mb_substr( $email, 0, 190 ) ),
+				'name'     => $name,
+				'email'    => $email,
 				'guests'   => $guests,
 				'status'   => $status,
-				'code'     => $code,
-				'created'  => current_time( 'mysql' ),
-			),
-			array( '%d', '%d', '%s', '%s', '%d', '%s', '%s', '%s' )
+			) + $extra
 		);
+	}
+
+	/** The columns a row may be written with, and their formats. */
+	private static function formats(): array {
+		return array(
+			'event_id'       => '%d',
+			'user_id'        => '%d',
+			'name'           => '%s',
+			'email'          => '%s',
+			'guests'         => '%d',
+			'status'         => '%s',
+			'code'           => '%s',
+			'created'        => '%s',
+			'source'         => '%s',
+			'order_id'       => '%d',
+			'item_id'        => '%d',
+			'product_id'     => '%d',
+			'agreed'         => '%s',
+			'signature'      => '%s',
+			'waiver_version' => '%s',
+			'age_ok'         => '%d',
+			'photo'          => '%s',
+			'newsletter'     => '%s',
+		);
+	}
+
+	/**
+	 * Write a ticket row (a sign-up or a paid ticket) and tell other features.
+	 * Takes the table's columns; a code and the time are added.
+	 */
+	public static function insert( array $d ): ?array {
+		global $wpdb;
+		$d['name']    = mb_substr( (string) ( $d['name'] ?? '' ), 0, 190 );
+		$d['email']   = strtolower( mb_substr( (string) ( $d['email'] ?? '' ), 0, 190 ) );
+		$d['code']    = wp_generate_password( 24, false, false );
+		$d['created'] = current_time( 'mysql' );
+		$formats      = self::formats();
+		$d            = array_intersect_key( $d, $formats );
+		$ok           = $wpdb->insert( self::table(), $d, array_values( array_intersect_key( array_replace( $d, $formats ), $d ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		if ( ! $ok ) {
 			return null;
 		}
+		$event_id = (int) $d['event_id'];
+		$status   = (string) ( $d['status'] ?? 'going' );
+		$email    = $d['email'];
+		$name     = $d['name'];
+		$code     = $d['code'];
 		/**
 		 * Someone took part. Fired here, by volunteers, vendors and presenters, with
 		 * email, name, role (attendee, waitlist, volunteer, vendor, presenter), event
@@ -282,6 +350,17 @@ final class Scout_Events_RSVP {
 		global $wpdb;
 		if ( isset( self::statuses()[ $status ] ) ) {
 			$wpdb->update( self::table(), array( 'status' => $status ), array( 'id' => $id ), array( '%s' ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
+	}
+
+	/** Change a row's answers or links (agreed, signature, photo, newsletter...). */
+	public static function update( int $id, array $d ): void {
+		global $wpdb;
+		$formats = self::formats();
+		unset( $formats['code'], $formats['created'], $formats['event_id'] );
+		$d = array_intersect_key( $d, $formats );
+		if ( $d ) {
+			$wpdb->update( self::table(), $d, array( 'id' => $id ), array_values( array_intersect_key( array_replace( $d, $formats ), $d ) ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		}
 	}
 
@@ -337,7 +416,7 @@ final class Scout_Events_RSVP {
 	}
 
 	/** A PNG of the QR code in a temporary file, for the email. Empty when the server has no image library. */
-	private static function qr_png_file( string $text ): string {
+	private static function qr_png_file( string $text, string $name = '' ): string {
 		if ( ! function_exists( 'imagecreate' ) ) {
 			return '';
 		}
@@ -359,7 +438,13 @@ final class Scout_Events_RSVP {
 				}
 			}
 		}
-		$file = trailingslashit( get_temp_dir() ) . 'ticket-' . wp_generate_password( 8, false, false ) . '.png';
+		// A folder of its own, so the attachment keeps a readable name.
+		$dir = trailingslashit( get_temp_dir() ) . 'scout-ticket-' . wp_generate_password( 10, false, false );
+		if ( ! wp_mkdir_p( $dir ) ) {
+			imagedestroy( $im );
+			return '';
+		}
+		$file = $dir . '/' . ( '' !== $name ? sanitize_file_name( $name ) : 'ticket' ) . '.png';
 		imagepng( $im, $file );
 		imagedestroy( $im );
 		return file_exists( $file ) ? $file : '';
@@ -411,6 +496,11 @@ final class Scout_Events_RSVP {
 			}
 			$out .= '</select></p>';
 		}
+		if ( Scout_Events_Agreements::asks( $e ) ) {
+			$out .= '<div class="se-s-agree">' . Scout_Events_Agreements::waiver_box( $e )
+				. Scout_Events_Agreements::fields( $e, 'se_agree', 'se-s', array(), array( 'group' => $e['signup_guests'] > 0 ) ) . '</div>';
+		}
+		$out  .= Scout_Events_Agreements::newsletter_field( 'se_newsletter', 'se-s-newsletter' );
 		$label = $full ? __( 'Join the waitlist', 'scout-events' ) : ( '' !== $e['ticket_label'] ? $e['ticket_label'] : __( 'Save my spot', 'scout-events' ) );
 		$out  .= '<p class="se-s-submit"><button type="submit" class="se-button wp-element-button" data-scout-track="signup_submit" data-scout-event="' . esc_attr( get_the_title( $id ) ) . '">' . esc_html( $label ) . '</button></p>'
 			. '<p class="se-s-help">' . esc_html__( 'Your ticket and its QR code come by email. Show it at the door.', 'scout-events' ) . '</p>'
@@ -424,6 +514,7 @@ final class Scout_Events_RSVP {
 			'missing'  => __( 'Please add your name and a working email address.', 'scout-events' ),
 			'tooquick' => __( 'That was very fast. Please check your details and send it again.', 'scout-events' ),
 			'closed'   => __( 'Sign-ups for this event are closed.', 'scout-events' ),
+			'agree'    => __( 'Please tick each box, choose yes or no for photos if asked, and type your name exactly as you wrote it above to sign.', 'scout-events' ),
 		);
 		return isset( $texts[ $msg ] ) ? '<p class="se-s-note is-bad" role="status">' . esc_html( $texts[ $msg ] ) . '</p>' : '';
 	}
@@ -459,13 +550,33 @@ final class Scout_Events_RSVP {
 		if ( '' === $name || ! is_email( $email ) ) {
 			self::back_to( $page, 'missing' );
 		}
+		$extra = array();
+		if ( Scout_Events_Agreements::asks( $e ) ) {
+			$in  = isset( $_POST['se_agree'] ) ? (array) wp_unslash( $_POST['se_agree'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cleaned in collect().
+			$got = Scout_Events_Agreements::collect( $in, $e, $event_id, $name );
+			if ( $got['errors'] ) {
+				self::back_to( $page, 'agree' );
+			}
+			$extra = $got['data'];
+		}
+		$optin = ! empty( $_POST['se_newsletter'] ) && Scout_Events_Agreements::offer_newsletter();
+		if ( $optin ) {
+			$extra['newsletter'] = current_time( 'mysql' );
+		}
 		// The same person signing up twice gets their ticket again, not a second place.
 		$row = self::for_email( $event_id, $email );
-		if ( ! $row ) {
-			$row = self::add( $event_id, $name, $email, $guests, get_current_user_id() );
+		if ( $row && $extra ) {
+			// Their newest answers replace older ones.
+			self::update( (int) $row['id'], $extra );
+			$row = self::get( (int) $row['id'] );
+		} elseif ( ! $row ) {
+			$row = self::add( $event_id, $name, $email, $guests, get_current_user_id(), $extra );
 		}
 		if ( ! $row ) {
 			self::back_to( $page, 'missing' );
+		}
+		if ( $optin ) {
+			Scout_Events_Agreements::optin( $email, $name, 'event', array( $event_id ) );
 		}
 		self::email( $row );
 		wp_safe_redirect( add_query_arg( 'se_new', 1, self::ticket_url( $row ) ) . '#se-ticket' );
@@ -550,11 +661,16 @@ final class Scout_Events_RSVP {
 			'going'     => $in ? __( 'Checked in', 'scout-events' ) : __( 'You are going', 'scout-events' ),
 			'waitlist'  => __( 'You are on the waitlist', 'scout-events' ),
 			'cancelled' => __( 'This sign-up is cancelled', 'scout-events' ),
+			'void'      => __( 'This ticket was refunded', 'scout-events' ),
 		);
+		$paid = 'shop' === ( $row['source'] ?? '' );
 		$out = '<section class="se-ticket is-' . esc_attr( $in ? 'in' : $status ) . '" id="se-ticket" aria-labelledby="se-ticket-title">';
 		$out .= '<p class="se-ticket-kicker">' . esc_html( $staff ? __( 'Door check-in', 'scout-events' ) : __( 'Your ticket', 'scout-events' ) ) . '</p>';
 		$out .= '<h2 class="se-ticket-title" id="se-ticket-title">' . esc_html( $titles[ $status ] ?? '' ) . '</h2>';
 		$out .= '<p class="se-ticket-who">' . esc_html( $who ) . '</p>';
+		if ( $paid && (int) $row['product_id'] ) {
+			$out .= '<p class="se-ticket-type">' . esc_html( get_the_title( (int) $row['product_id'] ) ) . '</p>';
+		}
 		$when = trim( Scout_Events::dates_label( $e ) . ' · ' . Scout_Events::times_label( $e ), ' ·' );
 		$out .= '<p class="se-ticket-when">' . esc_html( get_the_title( $id ) . ( '' !== $when ? ' · ' . $when : '' ) ) . '</p>';
 
@@ -569,11 +685,19 @@ final class Scout_Events_RSVP {
 				/* translators: %s: time. */
 				$out .= '<p class="se-ticket-note">' . esc_html( sprintf( __( 'Checked in at %s.', 'scout-events' ), mysql2date( (string) get_option( 'time_format' ), (string) $row['checked_in'] ) ) ) . '</p>';
 			}
+			if ( isset( $_GET['se_agree'] ) && 'done' === $_GET['se_agree'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+				$out .= '<p class="se-ticket-ok">' . esc_html__( 'Thank you. Your answers are saved with your ticket.', 'scout-events' ) . '</p>';
+			}
+			$out .= Scout_Events_Agreements::ticket_form( $row, $e );
 		} elseif ( 'waitlist' === $status ) {
 			$out .= '<p class="se-ticket-note">' . esc_html__( 'The event is full right now. If a place opens up, we will email you a ticket.', 'scout-events' ) . '</p>';
+		} elseif ( 'void' === $status ) {
+			$out .= '<p class="se-ticket-note">' . esc_html__( 'This ticket was refunded, so it no longer gets anyone in.', 'scout-events' ) . '</p>';
 		}
 
-		if ( ! $staff && 'cancelled' !== $status && ! $in && ! Scout_Events::is_past( $e ) ) {
+		if ( ! $staff && $paid && 'going' === $status && ! $in && ! Scout_Events::is_past( $e ) ) {
+			$out .= '<p class="se-ticket-note se-ticket-small">' . esc_html__( 'Plans changed? Reply to your order email and we will help.', 'scout-events' ) . '</p>';
+		} elseif ( ! $staff && ! $paid && ! in_array( $status, array( 'cancelled', 'void' ), true ) && ! $in && ! Scout_Events::is_past( $e ) ) {
 			$out .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="se-ticket-cancel">'
 				. '<input type="hidden" name="action" value="scout_events_cancel">'
 				. '<input type="hidden" name="se_code" value="' . esc_attr( $row['code'] ) . '">'
@@ -583,7 +707,7 @@ final class Scout_Events_RSVP {
 		if ( 'cancelled' === $status && self::open( $id, $e ) ) {
 			$out .= '<p class="se-ticket-note"><a href="' . esc_url( (string) get_permalink( $id ) . '#se-signup' ) . '">' . esc_html__( 'Sign up again', 'scout-events' ) . '</a></p>';
 		}
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() && 'going' === $status ) {
 			$out .= '<p class="se-ticket-staff"><a href="' . esc_url( wp_login_url( self::ticket_url( $row ) ) ) . '">' . esc_html__( 'Door staff: sign in to check this ticket in', 'scout-events' ) . '</a></p>';
 		}
 		return $out . '</section>';
@@ -593,8 +717,13 @@ final class Scout_Events_RSVP {
 	private static function staff_controls( array $row ): string {
 		$in   = ! empty( $row['checked_in'] );
 		$out  = '';
+		$warn = array(
+			'waitlist'  => __( 'Not checked in: this person is on the waitlist. Move them in from Sign-ups first.', 'scout-events' ),
+			'cancelled' => __( 'Not checked in: this sign-up was cancelled.', 'scout-events' ),
+			'void'      => __( 'Not valid: this ticket was refunded.', 'scout-events' ),
+		);
 		if ( 'going' !== $row['status'] ) {
-			$out .= '<p class="se-ticket-warn">' . esc_html( 'waitlist' === $row['status'] ? __( 'Not checked in: this person is on the waitlist. Move them in from Sign-ups first.', 'scout-events' ) : __( 'Not checked in: this sign-up was cancelled.', 'scout-events' ) ) . '</p>';
+			$out .= '<p class="se-ticket-warn">' . esc_html( $warn[ $row['status'] ] ?? $warn['cancelled'] ) . '</p>';
 		} elseif ( $in ) {
 			/* translators: %s: time. */
 			$out .= '<p class="se-ticket-ok">' . esc_html( sprintf( __( 'Checked in at %s.', 'scout-events' ), mysql2date( (string) get_option( 'time_format' ), (string) $row['checked_in'] ) ) ) . '</p>';
@@ -609,10 +738,34 @@ final class Scout_Events_RSVP {
 					: '<button type="submit" class="se-button se-checkin wp-element-button">' . esc_html__( 'Check in', 'scout-events' ) . '</button>' )
 				. '</form>';
 		}
+		$out .= self::answers( $row, Scout_Events::event( (int) $row['event_id'] ) );
 		$c    = self::counts( (int) $row['event_id'] );
 		/* translators: 1: people checked in, 2: people going. */
 		$out .= '<p class="se-ticket-count">' . esc_html( sprintf( __( '%1$d of %2$d people checked in', 'scout-events' ), $c['checked_in'], $c['going'] ) ) . ' · <a href="' . esc_url( Scout_Events_Admin::signups_url( (int) $row['event_id'] ) ) . '">' . esc_html__( 'Door list', 'scout-events' ) . '</a></p>';
 		return $out;
+	}
+
+	/**
+	 * What the person answered, for door staff: agreed or not, and photos.
+	 *
+	 * @return string chips, or a warning when an answer is still owed
+	 */
+	public static function answers( array $row, array $e ): string {
+		$chips = array();
+		if ( ! empty( $row['agreed'] ) ) {
+			/* translators: %s: date and time. */
+			$chips[] = '<span class="se-chip is-done">' . esc_html( sprintf( __( 'Agreed %s', 'scout-events' ), mysql2date( 'M j, g:i a', (string) $row['agreed'] ) ) ) . '</span>';
+		} elseif ( Scout_Events_Agreements::required( $e ) ) {
+			$chips[] = '<span class="se-chip is-warn">' . esc_html__( 'Has not agreed yet', 'scout-events' ) . '</span>';
+		}
+		if ( 'no' === ( $row['photo'] ?? '' ) ) {
+			$chips[] = '<span class="se-chip is-warn">' . esc_html__( 'No photos', 'scout-events' ) . '</span>';
+		} elseif ( 'yes' === ( $row['photo'] ?? '' ) ) {
+			$chips[] = '<span class="se-chip">' . esc_html__( 'Photos OK', 'scout-events' ) . '</span>';
+		} elseif ( Scout_Events_Agreements::asks_photo( $e ) ) {
+			$chips[] = '<span class="se-chip is-warn">' . esc_html__( 'Photos: not asked yet', 'scout-events' ) . '</span>';
+		}
+		return $chips ? '<p class="se-ticket-answers">' . implode( ' ', $chips ) . '</p>' : '';
 	}
 
 	/* ---------- email ---------- */
@@ -648,7 +801,9 @@ final class Scout_Events_RSVP {
 				/* translators: %d: number of guests. */
 				$body .= "\n" . sprintf( _n( 'This ticket covers you and %d guest.', 'This ticket covers you and %d guests.', (int) $row['guests'], 'scout-events' ), (int) $row['guests'] ) . "\n";
 			}
-			$body .= "\n" . __( 'Plans changed? Open your ticket page and choose "I can no longer come", so someone else can have your place.', 'scout-events' ) . "\n";
+			$body .= "\n" . ( 'shop' === ( $row['source'] ?? '' )
+				? __( 'Plans changed? Reply to your order email and we will help.', 'scout-events' )
+				: __( 'Plans changed? Open your ticket page and choose "I can no longer come", so someone else can have your place.', 'scout-events' ) ) . "\n";
 			$png   = self::qr_png_file( self::ticket_url( $row ) );
 			if ( '' !== $png ) {
 				$files[] = $png;
@@ -662,9 +817,68 @@ final class Scout_Events_RSVP {
 		}
 		$body .= "\n" . $site . "\n" . home_url( '/' );
 		wp_mail( $row['email'], $subject, $body, array(), $files );
+		self::clean_files( $files );
+	}
+
+	/** Remove the temporary attachments and the folders made for them. */
+	private static function clean_files( array $files ): void {
 		foreach ( $files as $f ) {
 			wp_delete_file( $f );
+			$dir = dirname( $f );
+			if ( 0 === strpos( basename( $dir ), 'scout-ticket-' ) ) {
+				@rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- an empty temp folder.
+			}
 		}
+	}
+
+	/**
+	 * One email to a buyer with every ticket from their order for one event:
+	 * each holder's name and ticket link, a QR code image per ticket, and the
+	 * calendar file.
+	 *
+	 * @param array<int,array> $rows Ticket rows, all for the same event.
+	 */
+	public static function email_order( array $rows, string $to, string $buyer ): void {
+		if ( ! $rows || ! is_email( $to ) ) {
+			return;
+		}
+		$id    = (int) $rows[0]['event_id'];
+		$e     = Scout_Events::event( $id );
+		$site  = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+		$title = wp_specialchars_decode( get_the_title( $id ), ENT_QUOTES );
+		$when  = trim( Scout_Events::dates_label( $e ) . "\n" . Scout_Events::times_label( $e ) );
+		$where = trim( $e['venue'] . "\n" . Scout_Events::address_label( $e ) );
+		$n     = count( $rows );
+		$files = array();
+		$subject = 1 === $n
+			/* translators: %s: event name. */
+			? sprintf( __( 'Your ticket for %s', 'scout-events' ), $title )
+			/* translators: 1: number of tickets, 2: event name. */
+			: sprintf( __( 'Your %1$d tickets for %2$s', 'scout-events' ), $n, $title );
+		$body = sprintf( /* translators: %s: name. */ __( 'Hi %s,', 'scout-events' ), $buyer ) . "\n\n"
+			. _n( 'Thank you for your order. Here is your ticket. Show its QR code at the door, from this email or from the ticket page.', 'Thank you for your order. Here are your tickets, one for each person. Each person shows their own QR code at the door, from this email or from their ticket page.', $n, 'scout-events' ) . "\n\n"
+			. $title . "\n" . ( '' !== $when ? $when . "\n" : '' ) . ( '' !== $where ? $where . "\n" : '' ) . "\n";
+		$owed = false;
+		foreach ( array_values( $rows ) as $i => $row ) {
+			$type  = (int) $row['product_id'] ? wp_specialchars_decode( get_the_title( (int) $row['product_id'] ), ENT_QUOTES ) : '';
+			$body .= sprintf( /* translators: %d: ticket number. */ __( 'Ticket %d', 'scout-events' ), $i + 1 ) . ': ' . $row['name'] . ( '' !== $type ? ' (' . $type . ')' : '' ) . "\n" . self::ticket_url( $row ) . "\n\n";
+			$png   = self::qr_png_file( self::ticket_url( $row ), 'ticket-' . ( $i + 1 ) . '-' . $row['name'] );
+			if ( '' !== $png ) {
+				$files[] = $png;
+			}
+			$owed = $owed || Scout_Events_Agreements::owed( $row, $e );
+		}
+		if ( $owed ) {
+			$body .= __( 'Some tickets still need their holder to read and agree to the event’s terms. Open each ticket link above to do it before the event.', 'scout-events' ) . "\n\n";
+		}
+		$body .= __( 'Plans changed? Reply to your order email and we will help.', 'scout-events' ) . "\n";
+		$ics = Scout_Events_Calendar::ics_file( $id );
+		if ( '' !== $ics ) {
+			$files[] = $ics;
+		}
+		$body .= "\n" . $site . "\n" . home_url( '/' );
+		wp_mail( $to, $subject, $body, array(), $files );
+		self::clean_files( $files );
 	}
 
 	/* ---------- privacy ---------- */
@@ -706,6 +920,22 @@ final class Scout_Events_RSVP {
 					array(
 						'name'  => __( 'Signed up', 'scout-events' ),
 						'value' => $r['created'],
+					),
+					array(
+						'name'  => __( 'Agreed', 'scout-events' ),
+						'value' => (string) $r['agreed'],
+					),
+					array(
+						'name'  => __( 'Signature', 'scout-events' ),
+						'value' => $r['signature'],
+					),
+					array(
+						'name'  => __( 'Photos', 'scout-events' ),
+						'value' => $r['photo'],
+					),
+					array(
+						'name'  => __( 'Newsletter requested', 'scout-events' ),
+						'value' => (string) $r['newsletter'],
 					),
 				),
 			);

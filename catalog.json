@@ -147,7 +147,7 @@
     {
       "slug": "scout-events",
       "name": "Events and schedule",
-      "summary": "Event pages with dates, venue, ticket button and what to know, a day-by-day schedule, speaker pages, and event listings Google can show. Edit a date or mark an event sold out and the site follows.",
+      "summary": "Event pages with dates, venue, tickets and what to know, a day-by-day schedule, speaker pages, and event listings Google can show. Sell tickets or take free sign-ups, with a QR ticket and signed agreements for each person and check-in at the door.",
       "tier": "addon",
       "law": false,
       "requires": []
