@@ -43,6 +43,7 @@ on:
           - scout-reviews
           - scout-rvpark
           - scout-sitecheck
+          - scout-writing
 
 permissions:
   contents: write

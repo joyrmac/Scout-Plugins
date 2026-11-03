@@ -191,6 +191,14 @@
       "tier": "addon",
       "law": false,
       "requires": []
+    },
+    {
+      "slug": "scout-writing",
+      "name": "Writing room",
+      "summary": "A private place in your dashboard to answer your writing prompts, in your own words or a voice memo, and send each piece to Scout when it's ready.",
+      "tier": "addon",
+      "law": false,
+      "requires": []
     }
   ]
 }
