@@ -714,8 +714,10 @@ final class Scout_Booking_Front {
 
 	/**
 	 * Hand the opt-in to the newsletter connector (Scout Newsletter listens on
-	 * this action). The context carries the exact words beside the box and the
-	 * page the form was on, as the record of what the person agreed to.
+	 * this action). The source "booking" is what its tag map reads, so no tags
+	 * are sent. The context carries the exact words beside the box and the page
+	 * the form was on, as the record of what the person agreed to, and the
+	 * session type's id as the campaign.
 	 *
 	 * @param string $page The page the booking form was on.
 	 */
@@ -724,11 +726,13 @@ final class Scout_Booking_Front {
 			'scout_newsletter_optin',
 			$row['email'],
 			$row['first_name'],
-			'scout-booking',
-			array( 'booking', 'session: ' . $type['name'] ),
+			'booking',
+			array(),
 			array(
-				'wording' => Scout_Booking::optin_label(),
-				'page'    => $page,
+				'wording'  => Scout_Booking::optin_label(),
+				'url'      => $page,
+				'page'     => $page,
+				'campaign' => $type['id'],
 			)
 		);
 	}

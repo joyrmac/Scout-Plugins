@@ -39,8 +39,9 @@
 - **Private calendar feed** (`?scout_booking_feed=` with a secret token, new
   address on request) for the owner's phone calendar.
 - **Newsletter opt-in:** an unticked box that hands the email to
-  the `scout_newsletter_optin` action ( `$email`, `$first_name`, `$source`,
-  `$tags`, `$context` ), with the exact box wording and the page in `$context`.
+  the `scout_newsletter_optin` action with source `booking`, no tags, and a
+  context of the exact box wording, the page (`url` and `page`) and the
+  session type's id as `campaign`.
 - **Without WooCommerce** every booking is a request, clearly labelled on the
   site and in the dashboard; approval books it with nothing paid online.
 - Personal data export and erase for bookings.
