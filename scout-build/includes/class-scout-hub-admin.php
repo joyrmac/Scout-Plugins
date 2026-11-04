@@ -1136,11 +1136,16 @@ final class Scout_Hub_Admin {
 		?>
 		<style>
 			/* Compact, so the whole report fits on one screen (and one screenshot). */
-			.sh-health .sh-grid-3{grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px}
-			.sh-health .sh-box{padding:12px 14px; border-radius:12px}
-			.sh-health .sh-label{font-size:10.5px}
-			.sh-health .sh-check .sh-value{font-size:15px; margin-top:4px}
-			.sh-health .sh-note{font-size:12.5px; line-height:1.4; margin-top:4px}
+			/* At most three across (the map's rule), and never smaller than the dashboard's type floor. */
+			.sh-health .sh-grid-3{grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px}
+			.sh-health .sh-box{padding:16px 18px; border-radius:var(--sh-r-control)}
+			.sh-health .sh-label{font-size:var(--sh-fs-label); margin-bottom:6px}
+			.sh-health .sh-check .sh-value{font-size:var(--sh-fs-card); margin-top:2px}
+			.sh-health .sh-note{font-size:var(--sh-fs-note); line-height:1.45; margin-top:4px}
+			.sh-which{margin-top:8px; font-size:var(--sh-fs-note)}
+			.sh-which summary{cursor:pointer; color:var(--sh-accent-text); font-weight:500; min-height:32px; display:flex; align-items:center}
+			.sh-which ul{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:6px}
+			.sh-which li{margin:0; padding:3px 10px; border-radius:var(--sh-r-pill); background:var(--sh-surface-2); color:var(--sh-text-2); font-size:13px}
 			.sh-health .sh-section-head{margin:18px 0 8px}
 			.sh-health .sh-section-head h2{font-size:17px}
 			.sh-health .sh-section-head .sh-note,.sh-health .sh-meter{display:none}
@@ -1208,7 +1213,7 @@ final class Scout_Hub_Admin {
 			'BASICS',
 		);
 		foreach ( $basics as $c ) {
-			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . $c['note'];
+			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . ( $c['details'] ?? $c['note'] );
 		}
 		if ( $search ) {
 			$lines[] = '';
@@ -1222,7 +1227,7 @@ final class Scout_Hub_Admin {
 		$lines[] = '';
 		$lines[] = 'READY FOR AI SEARCH';
 		foreach ( $ai as $c ) {
-			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . $c['note'];
+			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . ( $c['details'] ?? $c['note'] );
 		}
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -1247,6 +1252,11 @@ final class Scout_Hub_Admin {
 					<p class="sh-label"><?php echo esc_html( $c['label'] ); ?></p>
 					<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $c['value'] ); ?></p>
 					<p class="sh-note"><?php echo esc_html( $c['note'] ); ?></p>
+					<?php if ( ! empty( $c['items'] ) ) : ?>
+						<details class="sh-which"><summary><?php esc_html_e( 'Show which', 'scout-build' ); ?></summary>
+							<ul><?php foreach ( (array) $c['items'] as $item ) : ?><li><?php echo esc_html( (string) $item ); ?></li><?php endforeach; ?></ul>
+						</details>
+					<?php endif; ?>
 					<?php if ( ! empty( $c['link'] ) && Scout_Hub_Access::is_operator() ) : ?>
 						<p class="sh-note"><a href="<?php echo esc_url( $c['link'] ); ?>"><?php echo esc_html( $c['link_text'] ?? __( 'Fix this', 'scout-build' ) ); ?> &rsaquo;</a></p>
 					<?php endif; ?>
