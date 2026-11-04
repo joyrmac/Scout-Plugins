@@ -70,6 +70,18 @@ jobs:
           for f in */includes/class-scout-admin-ui.php; do cmp -s "$f" tools/admin-kit/class-scout-admin-ui.php || { echo "::error file=$f::differs from tools/admin-kit/class-scout-admin-ui.php. Copy the kit file over."; status=1; }; done
           exit $status
 
+  design:
+    name: Design module checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+      - name: DESIGN.md parser, token merge, contrast and scout_core_owns (no WordPress needed)
+        run: php tools/tests/design.php
+
   slop-check:
     name: Code slop check
     runs-on: ubuntu-latest

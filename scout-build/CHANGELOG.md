@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.8.1 (2026-11-04)
+
+- **Site health: "Design contrast".** With Scout Core 1.6.3 or newer and a theme that has a DESIGN.md, Site health shows the lowest contrast ratio among the pairs the Site Standard requires (button text on the accent fill, text on the page and on cards) and names any pair under 4.5:1 (rule 10). Muted text under 4.5:1 is a warning, not a failure.
+- **Brand color from DESIGN.md.** The Email screen's detected color (which the cookie notice and form emails use) now reads the theme's `accent_fill` from DESIGN.md before Scout Cards, Scout Reviews or theme.json. Sites without a DESIGN.md are unchanged.
+
 ## 0.8.0 (2026-11-04)
 
 - **Scout → Updates: every update in one place.** A new Updates screen holds everything that brings a new version or new content onto the site (Site Standard rule 12): the Theme box (version, read-only key, Update the theme now), a Plugins table (every installed Scout plugin with its version, Up to date or Update ready, Updates paused, and Update now), Check for new versions, Fill from theme, Site Sync, Import posts (XML), Site settings, the Change log and the Recent changes log. The Features screen keeps the feature cards, the plan and the counts; the Theme box, the version line and the two buttons moved off it. Check for new versions and Fill from theme again now return to Updates. Site Sync and the Change log open their Scout Core screens; the cards say plainly when a tool is not on the site yet (no Scout Core, or Scout Core older than 1.7.0), and Site settings waits for its export tool (`scout_hub_site_settings_url` filter).

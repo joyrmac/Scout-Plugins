@@ -592,6 +592,28 @@ final class Scout_Hub_Health {
 			'state' => $php_ok ? 'good' : 'warn',
 			'note'  => $php_ok ? __( 'Supported.', 'scout-build' ) : __( 'Ask the host to move to PHP 8.1 or newer.', 'scout-build' ),
 		);
+		if ( function_exists( 'scout_design_issues' ) ) {
+			// Site Standard rule 10: the theme's DESIGN.md colors must stay readable.
+			$issues = scout_design_issues();
+			$design = function_exists( 'scout_design' ) ? scout_design() : array();
+			if ( $issues && ! empty( $design['sources'] ) ) {
+				$failing = array_filter( $issues, static fn( $i ) => ! $i['ok'] && 'fail' === $i['level'] );
+				$warning = array_filter( $issues, static fn( $i ) => ! $i['ok'] && 'warn' === $i['level'] );
+				$lowest  = min( array_column( $failing ? $failing : ( $warning ? $warning : $issues ), 'ratio' ) );
+				$out[]   = array(
+					'label' => __( 'Design contrast', 'scout-build' ),
+					'value' => number_format( (float) $lowest, 1 ) . ':1',
+					'state' => $failing ? 'bad' : ( $warning ? 'warn' : 'good' ),
+					'note'  => $failing
+						/* translators: %s: the pairs that fail */
+						? sprintf( __( 'Fails 4.5:1 in DESIGN.md: %s. Darken the fill or the text.', 'scout-build' ), implode( '; ', array_column( $failing, 'pair' ) ) )
+						: ( $warning
+							/* translators: %s: the pairs that fail */
+							? sprintf( __( 'Readable, but muted text is under 4.5:1: %s.', 'scout-build' ), implode( '; ', array_column( $warning, 'pair' ) ) )
+							: __( 'Every DESIGN.md pair passes 4.5:1.', 'scout-build' ) ),
+				);
+			}
+		}
 		$out[] = array(
 			'label' => __( 'Updates waiting', 'scout-build' ),
 			'value' => (string) $updates,

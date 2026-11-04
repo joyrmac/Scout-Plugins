@@ -1,5 +1,11 @@
 # Scout Core — Changelog
 
+## 1.6.3 (2026-11-04)
+
+- **`scout_design()`: every plugin reads the site's design from the theme's `DESIGN.md`** (Scout Site Standard §4, rule 3). The tokens on top of DESIGN.md (mode, colors, fonts, radius, logo, mark) are parsed with a small built-in reader (no YAML extension needed), the child theme over the parent, with gaps filled from the block theme's `theme.json` palette and fonts, then Scout's defaults. `scout_design( 'call buttons' )` lays a `## Feature: call buttons` section over the tokens. `scout_design_css()` prints a `:root` block of `--scout-*` variables, `scout_design_contrast()` and `scout_design_issues()` check the pairs §4 requires (button text on the accent fill, text on the page and on cards, 4.5:1), and the `scout_design` filter adjusts the result. Parsed once per request; forgotten on a theme switch or update.
+- **`scout_core_owns( $job )`: a theme fallback runs only when no plugin does the job** (rule 6). `hours`, `call_bar`, `cards`, `reviews`, `chat`, `redirects`, `analytics`, `team`, `events`, `members`, `head`, `schema`, `sync`, `changelog` and the rest answer from the plugin classes that are loaded; `head` and `schema` say no while Scout Core still stands aside for a theme that prints its own. The `scout_core_owns` filter lets a plugin claim a job. The theme kit carries a stand-in that answers false when Scout Core is off.
+- Test: `php tools/tests/design.php` (runs without WordPress; in the Lint workflow).
+
 ## 1.6.2 (2026-11-04)
 
 - **Updates group in the shared Scout nav, and every group always shows.** Site Sync and the Change log sit under Updates (Scout → Updates holds every way of updating the site), Spam protection under Website, and the Events, Members, Partners, RV Park, Newsletter and CRM screens under Business. The seven groups show on every site; one with nothing on is greyed with a Turn on hint. Shared admin kit 1.6.0 (Scout Site Standard rules 11 and 12).

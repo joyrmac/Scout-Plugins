@@ -40,6 +40,9 @@ scout-core/includes/admin.php | public static function checks() | scout-build (S
 scout-core/includes/admin.php | public static function render_checks( array $checks ) | scout-build (Site health: same check cards)
 scout-core/includes/schema/class-scout-schema.php | apply_filters( 'scout_schema_graph' | scout-events (adds Event and Person nodes to the graph)
 scout-core/includes/schema/class-scout-schema.php | home_url( '/#business' ) | scout-events (Event organizer points at the business)
+scout-core/includes/design.php | function scout_design( string $feature = '' ): array | scout-build and every plugin with a front-end look (DESIGN.md tokens from the theme)
+scout-core/includes/design.php | function scout_design_issues(): array | scout-build (Site health: design contrast)
+scout-core/includes/design.php | function scout_core_owns( string $job ): bool | every Scout theme through the theme kit (fallbacks stand down when a plugin owns the job)
 CONTRACT
 
 exit "$fail"

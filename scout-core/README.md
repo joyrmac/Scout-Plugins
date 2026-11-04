@@ -185,6 +185,28 @@ Plugins screen. See [`../RELEASING.md`](../RELEASING.md).
 
 ---
 
+## The site's design: `scout_design()` (1.6.3+)
+
+The theme's `DESIGN.md` is the one design source for the site, plugins
+included (Scout Site Standard §4). Scout Core reads its front matter and hands
+every plugin the same tokens, so no plugin carries a color picker for what the
+theme already says:
+
+```php
+$d = scout_design();                       // mode, colors, fonts, radius, logo, mark (+ logo_url, mark_url)
+$d = scout_design( 'call buttons' );       // the "## Feature: call buttons" section laid over the tokens
+echo '<style>' . scout_design_css() . '</style>';   // :root{--scout-bg:...;--scout-accent-fill:...;--scout-radius-card:...}
+scout_design_issues();                     // contrast pairs that fail 4.5:1 (Scout Build shows them in Site health)
+```
+
+Order of truth: Scout's defaults, then the active theme's `theme.json`
+palette and fonts, then the parent theme's `DESIGN.md`, then the child's. A
+theme without DESIGN.md still gets sensible tokens.
+
+`scout_core_owns( 'hours' )` tells a theme whether a plugin does a job on this
+site, for the few fallbacks the standard allows (rule 6): the theme's own hours
+line runs only while `! scout_core_owns( 'hours' )`.
+
 ## APIs other plugins depend on
 
 These are a contract. Renaming or removing one breaks the plugin that uses it on
@@ -196,6 +218,8 @@ every client site at the next automatic update. CI checks them
 | `Scout_Core_Business::get()` (keys `name`, `phone`, `email`, `city`, `region`, `postal`, `same_as`) | scout-cards | Business details on the cards and in the saved contact |
 | The `scout` admin menu slug | scout-cards | Puts Cards & Links inside the Scout menu |
 | `Scout_SEO_Head::output` on `wp_head` priority 1 | scout-cards | Removed on card pages, which print their own tags |
+| `scout_design()`, `scout_design_css()`, `scout_design_issues()` | scout-build and every plugin with a front-end look | The site's colors, fonts, corners, logo and mark from the theme's DESIGN.md |
+| `scout_core_owns( $job )` | every Scout theme (via the theme kit) | Whether a plugin does a job here, so a theme fallback stands down |
 
 ## Versioning ritual
 
