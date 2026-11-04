@@ -241,7 +241,8 @@ final class Scout_Hub_Admin {
 	public static function waiting_total(): int {
 		static $total = null;
 		if ( null === $total ) {
-			$total = (int) array_sum( array_column( self::waiting_on_you(), 'count' ) );
+			// Counted from the Inbox list itself, so the bubble always matches what the Inbox shows.
+			$total = class_exists( 'Scout_Hub_Inbox' ) ? Scout_Hub_Inbox::total( Scout_Hub_Inbox::items() ) : (int) array_sum( array_column( self::waiting_on_you(), 'count' ) );
 		}
 		return $total;
 	}

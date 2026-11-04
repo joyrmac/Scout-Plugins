@@ -53,11 +53,15 @@ final class Scout_Hub_Today {
 			);
 		}
 		$minutes = array(
-			'Change requests' => 2,
-			'Chat questions'  => 3,
-			'New reviews'     => 2,
+			'Change requests'     => 2,
+			'Chat questions'      => 3,
+			'New reviews'         => 2,
+			'Booking requests'    => 3,
+			'Site check requests' => 5,
 		);
-		foreach ( Scout_Hub_Admin::waiting_on_you() as $row ) {
+		// The same list the Inbox shows, so Today, the bubble and the Inbox agree.
+		$inbox = class_exists( 'Scout_Hub_Inbox' ) ? Scout_Hub_Inbox::rows( Scout_Hub_Inbox::items() ) : Scout_Hub_Admin::waiting_on_you();
+		foreach ( $inbox as $row ) {
 			$count = (int) ( $row['count'] ?? 0 );
 			if ( ! $count ) {
 				continue;

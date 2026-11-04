@@ -43,6 +43,17 @@ $whens = array_column( $items, 'when' ); $sorted = $whens; rsort( $sorted );
 ok( $whens === $sorted, 'newest first' );
 $w = $I::waiting( $items );
 ok( ! in_array( 'request-2', array_column( $w, 'id' ), true ) && count( $w ) === count( $items ) - 1, 'a finished request never counts as waiting' );
+// The bubble, the All chip and Today count from the same list (a site check request once showed in the list but not the bubble).
+$GLOBALS['extra'][] = array( 'id' => 'sitecheck-9', 'kind' => 'sitecheck', 'label' => 'Site check request', 'from' => 'a@b.co', 'when' => $now - 21 * DAY_IN_SECONDS, 'url' => '/sc' );
+$items = $I::items();
+$w     = $I::waiting( $items );
+ok( 5 === $I::total( $items ), 'the total counts every waiting item, and a count row adds its own number (1 request + 1 law + 2 disclaimers + 1 site check)' );
+ok( count( $w ) === 4 && in_array( 'sitecheck-9', array_column( $w, 'id' ), true ), 'a site check request is in the list and in the count' );
+$rows = $I::rows( $items );
+$byl  = array_column( $rows, 'count', 'label' );
+ok( 1 === ( $byl['Site check requests'] ?? 0 ) && 1 === ( $byl['Change requests'] ?? 0 ), 'Today gets one row per kind, with its count' );
+ok( 2 === ( $byl['Disclaimers to approve'] ?? 0 ) && 1 === ( $byl['Waiting for approval'] ?? 0 ), 'Other items stay their own Today rows' );
+ok( array_sum( array_column( $rows, 'count' ) ) === $I::total( $items ), 'Today rows add up to the bubble' );
 ok( 'never' === $I::pref( 1 ), 'nobody gets Inbox emails until they choose' );
 $GLOBALS['um'][ Scout_Hub_Inbox::PREF ] = 'daily';
 ok( 'daily' === $I::pref( 1 ), 'a person can choose once a day' );
