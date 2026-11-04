@@ -74,7 +74,13 @@ final class Scout_Sitecheck_Admin {
 			return $group;
 		}
 		// Requests from visitors wait in the Inbox; the settings sit with the rest of the website.
-		return false !== strpos( $slug, 'post_type=' ) ? 'inbox' : 'website';
+		// An older admin kit (before 1.8.0) can be the copy loaded first and has no "website"
+		// group, so file the settings under Your business there.
+		$kit = defined( 'Scout_Admin_UI::VERSION' ) ? (string) Scout_Admin_UI::VERSION : '0';
+		if ( false !== strpos( $slug, 'post_type=' ) ) {
+			return 'inbox';
+		}
+		return version_compare( $kit, '1.8.0', '>=' ) ? 'website' : 'business';
 	}
 
 	public static function highlight( $file ) {
