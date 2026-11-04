@@ -99,7 +99,7 @@ final class Scout_Hub_Themes {
 		}
 		self::forget();
 		Scout_Hub_Features::refresh();
-		wp_safe_redirect( admin_url( 'admin.php?page=' . Scout_Hub_Admin::PAGE ) . '#sh-theme' );
+		wp_safe_redirect( Scout_Hub_Admin::url( 'updates' ) . '#sh-theme' );
 		exit;
 	}
 
@@ -290,7 +290,7 @@ final class Scout_Hub_Themes {
 
 	/* ---------- Scout → Build ---------- */
 
-	/** The Theme box on the Features screen. */
+	/** The Theme box on the Updates screen. */
 	public static function panel( bool $operator ): void {
 		$theme = wp_get_theme();
 		$src   = self::source( $theme );

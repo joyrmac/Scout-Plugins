@@ -1,5 +1,12 @@
 # Scout Build changelog
 
+## 0.8.0 (2026-11-04)
+
+- **Scout → Updates: every update in one place.** A new Updates screen holds everything that brings a new version or new content onto the site (Site Standard rule 12): the Theme box (version, read-only key, Update the theme now), a Plugins table (every installed Scout plugin with its version, Up to date or Update ready, Updates paused, and Update now), Check for new versions, Fill from theme, Site Sync, Import posts (XML), Site settings, the Change log and the Recent changes log. The Features screen keeps the feature cards, the plan and the counts; the Theme box, the version line and the two buttons moved off it. Check for new versions and Fill from theme again now return to Updates. Site Sync and the Change log open their Scout Core screens; the cards say plainly when a tool is not on the site yet (no Scout Core, or Scout Core older than 1.7.0), and Site settings waits for its export tool (`scout_hub_site_settings_url` filter).
+- **One menu named Scout on every site** (rule 11). When a theme still registers its own Build menu (scoutraleigh.com's "Scout Build", Recon's "Recon Build"), the hub relabels it Scout (Site Build on partner sites) so every dashboard reads the same until that theme's conversion drops the menu.
+- **Every group shows on every site, even with nothing on** (rule 11). The seven groups (Home, Updates, Search, Website, Business, Reviews, Chat) always appear in the section nav and the sidebar. A group with nothing on is greyed with a Turn on hint and opens the Features screen with a note saying which group it came from. Shared admin kit 1.6.0.
+- **The Updates group in the shared nav.** Site Sync and the Change log sit under Updates; Spam protection under Website; Events, Members, Partners, RV Park, Newsletter and CRM screens under Business. The "N on" hint stays on the Features entry only; Updates shows "N ready" when releases are waiting.
+
 ## 0.7.11 (2026-11-04)
 
 - **Theme updates keep downloading after a repo moves or is renamed.** A theme whose Update URI still names the old owner or repo (`joyrmac/Andres-Borda---Golf-Carts`) gets its file address from GitHub under the new name (`Scout-Media-Raleigh/AndysGolfCarts`). The download check compared the two, skipped the key, and WordPress fetched the private file without it: "Download failed. Not Found." The check now also trusts the exact file address the release lookup returned, whatever owner and name it carries. Each theme picks up its new Update URI at its next release.
