@@ -208,6 +208,9 @@ final class Scout_Reviews_Settings {
 						<td>
 							<textarea id="scout-reviews-disclaimer" class="large-text" rows="3" name="<?php echo esc_attr( $name . '[disclaimer]' ); ?>"><?php echo esc_textarea( $settings['disclaimer'] ); ?></textarea>
 							<p class="description"><?php esc_html_e( 'Shown under every reviews section. Law firms: your state bar may require one with testimonials, for example "Past results do not guarantee a similar outcome." Check your state\'s rules.', 'scout-reviews' ); ?></p>
+							<?php if ( class_exists( 'Scout_Law_Disclaimers' ) && in_array( 'reviews', Scout_Law_Disclaimers::places_for( 'reviews' ), true ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording set on Scout → Policies → Disclaimers prints under the reviews instead of this box.', 'scout-reviews' ); ?></strong></p>
+							<?php endif; ?>
 						</td>
 					</tr>
 					<tr>

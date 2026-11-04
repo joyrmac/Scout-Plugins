@@ -3,6 +3,7 @@
 ## 0.5.9 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
+- **Points to Law firm tools when it's on.** The disclaimer box says the wording set on Scout → Policies → Disclaimers prints under the reviews instead.
 
 ## 0.5.8 (2026-11-04)
 

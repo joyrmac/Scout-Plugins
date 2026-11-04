@@ -37,6 +37,7 @@ $map = array(
 	'scout&tab=protect'                       => array( 'Spam protection', 'health' ),
 	'scout-optimize'                          => array( 'Image optimizer', 'health' ),
 	'scout-accessibility'                     => array( 'Accessibility', 'policies' ),
+	'scout-disclaimers'                       => array( 'Disclaimers', 'policies' ),
 	'scout&tab=seo'                           => array( 'SEO', 'search' ),
 	'scout-ai-search'                         => array( 'AI search', 'search' ),
 	'scout-analytics'                         => array( 'Analytics', 'search' ),

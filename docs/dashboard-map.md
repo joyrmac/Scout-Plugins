@@ -29,7 +29,7 @@ person came to do, and the menu stays the same on every site.
 | `business` | Your business | everyone | Facts typed once that show up everywhere: Business info, Hours, Team, Case results, a companion plugin's own content types | Is this a fact about the business? |
 | `website` | Your website | owner, operator | What visitors see and use: Call buttons, Chat, Reviews on the site, Cards and links, Newsletter, Redirects | Is this something visitors see or use? |
 | `search` | Get found | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, site search and the sitemap | Does this help Google, AI tools or visitors find things? |
-| `policies` | Policies | owner, operator | Trust and legal pages reviewed every year: accessibility statement, privacy policy, terms, law-firm disclaimers | Is this a trust or legal page? |
+| `policies` | Policies | owner, operator | Trust and legal pages reviewed every year: accessibility statement, law-firm disclaimers (Scout Law Firm Tools), and later the privacy policy and terms | Is this a trust or legal page? |
 | `health` | Site health | owner, operator | Reports on whether things are working: the health report, Search health, Spam protection, the image optimizer, accessibility checks | Does this tell us if something is working? |
 | `build` | Scout tools (Build tools on white-label sites) | operators only | Features and plan, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen | Is this only for Sean and Joy? |
 
@@ -95,6 +95,14 @@ people, like a staff list and an operator setting.
 
 Plan features (Reviews and review requests, Newsletter) come with The
 Partnership and up. Friends and family is Core plus anything picked by hand.
+
+Decided by Joy, 2026-11-04:
+
+- **Basic chat is a Bonus.** AI answers come with The Partnership, or as a Plus add-on.
+- **The Whole System does not include Plus modules.** Plus is always added on its own.
+- **Law-firm pieces are Core for law sites**, built in this order: disclaimers
+  (Scout Law Firm Tools 0.1.0), approval before publishing, "Reviewed by"
+  stamps with a six-month review list, then form entries that delete themselves.
 Shape and color always travel together, so the kinds can be told apart without
 color.
 
@@ -213,10 +221,8 @@ often it refreshes.
 
 ## Open items for Sean and Joy
 
-- Is basic chat a Bonus, with AI answers on The Partnership and up?
-- Does The Whole System include Plus modules? (Joy's pick: no.)
 - Which plans see the monthly numbers on Home?
-- Which law-firm pieces go first?
 - Who writes the policy pages? (Pick: we provide templates, the client approves.)
 - Keep or cut Focus mode on Home?
 - How Recon installs on client sites as a viewer.
+- The default number of days before form entries delete themselves (90 proposed).
