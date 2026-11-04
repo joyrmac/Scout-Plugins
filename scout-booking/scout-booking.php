@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Booking
  * Description:       Private sessions booked on the site: session types the owner edits, open times from the working hours, a booking form with short intake questions, requests the owner approves, deposits through the WooCommerce checkout, reschedule and cancel links, and a private calendar feed for the owner's phone. Without WooCommerce every booking is a request.
- * Version:           0.1.1
+ * Version:           0.1.2
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_BOOKING_VERSION', '0.1.1' );
+define( 'SCOUT_BOOKING_VERSION', '0.1.2' );
 define( 'SCOUT_BOOKING_FILE', __FILE__ );
 define( 'SCOUT_BOOKING_URL', plugin_dir_url( __FILE__ ) );
 
