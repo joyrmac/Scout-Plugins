@@ -93,11 +93,12 @@ final class Scout_Sync_Admin {
 			Scout_Sync::EDITED   => array( 'Edited in WordPress', 'warn' ),
 			Scout_Sync::CONFLICT => array( 'Needs a decision', 'warn' ),
 			Scout_Sync::MISSING  => array( 'Page not found', 'bad' ),
+			Scout_Sync::CREATE   => array( 'Will be created', 'good' ),
 		);
 		echo '<div class="sh-grid sh-grid-3">';
 		foreach ( $counts as $key => $meta ) {
 			$n = count( $state[ $key ] ?? array() );
-			if ( ! $n && in_array( $key, array( Scout_Sync::MISSING, Scout_Sync::CONFLICT ), true ) ) {
+			if ( ! $n && in_array( $key, array( Scout_Sync::MISSING, Scout_Sync::CONFLICT, Scout_Sync::CREATE ), true ) ) {
 				continue;
 			}
 			printf(
@@ -113,10 +114,10 @@ final class Scout_Sync_Admin {
 			echo '<div class="notice notice-error inline"><p>' . esc_html( $error ) . '</p></div>';
 		}
 
-		$updates = $state[ Scout_Sync::UPDATE ] ?? array();
+		$updates = array_merge( $state[ Scout_Sync::UPDATE ] ?? array(), $state[ Scout_Sync::CREATE ] ?? array() );
 		if ( $updates ) {
 			echo '<section class="sh-box"><h2>' . esc_html( sprintf( _n( '%d update from the theme', '%d updates from the theme', count( $updates ), 'scout-core' ), count( $updates ) ) ) . '</h2>';
-			echo '<p>Nobody has edited these in WordPress since the last sync, so the theme copy can go straight in. Each page keeps a revision, and you can undo the whole sync below.</p>';
+			echo '<p>Nobody has edited these in WordPress since the last sync, so the theme copy can go straight in. Pages marked "Will be created" are new to the site: pages publish, posts arrive as drafts. Each page keeps a revision, and you can undo the whole sync below.</p>';
 			self::rows( $updates, false );
 			self::form( 'safe', $plan['hash'], 'Sync these now' );
 			echo '</section>';
@@ -135,7 +136,7 @@ final class Scout_Sync_Admin {
 
 		$missing = $state[ Scout_Sync::MISSING ] ?? array();
 		if ( $missing ) {
-			echo '<section class="sh-box"><h2>Pages the theme names but the site does not have</h2><p>Create them, or run the theme\'s setup, then come back.</p><ul class="sh-list">';
+			echo '<section class="sh-box"><h2>Pages the theme names but the site does not have</h2><p>Create them by hand, or add <code>"create": true</code> to the page in scout-sync.json and Site Sync makes them on the next run.</p><ul class="sh-list">';
 			foreach ( $missing as $row ) {
 				echo '<li>' . esc_html( Scout_Sync::label( $row ) ) . '</li>';
 			}
@@ -174,7 +175,7 @@ final class Scout_Sync_Admin {
 			printf(
 				'<td><strong>%s</strong>%s</td><td>%s</td><td>%s</td>',
 				esc_html( Scout_Sync::label( $row ) ),
-				Scout_Sync::CONFLICT === $row['state'] ? '<br><span class="sh-tag">' . esc_html( empty( $row['synced'] ) ? 'Never synced, and different' : 'Changed in both' ) . '</span>' : '',
+				Scout_Sync::CONFLICT === $row['state'] ? '<br><span class="sh-tag">' . esc_html( empty( $row['synced'] ) ? 'Never synced, and different' : 'Changed in both' ) . '</span>' : ( Scout_Sync::CREATE === $row['state'] ? '<br><span class="sh-tag is-update">' . esc_html( 'New: ' . ( 'draft' === ( $row['new']['status'] ?? '' ) ? 'arrives as a draft' : 'will be published' ) ) . '</span>' : '' ),
 				esc_html( self::preview( $row, $row['raw'] ?? '' ) ),
 				esc_html( self::preview( $row, $row['theme'] ) )
 			);

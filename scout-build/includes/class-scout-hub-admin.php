@@ -699,6 +699,7 @@ final class Scout_Hub_Admin {
 		$build_new = $build_new && version_compare( $build_new, SCOUT_HUB_VERSION, '>' ) ? $build_new : '';
 
 		Scout_Hub_Themes::panel( $operator );
+		Scout_Hub_Rings::panel( $operator );
 		?>
 		<section class="sh-box" id="sh-plugins">
 			<h2 class="sh-title"><?php esc_html_e( 'Plugins', 'scout-build' ); ?></h2>
@@ -758,6 +759,8 @@ final class Scout_Hub_Admin {
 							<td>
 								<?php if ( $st['update'] ) : ?>
 									<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $st['update'] ) ); ?></span>
+									<?php $wait = Scout_Hub_Rings::wait_reason( $slug, (string) $st['update'] ); ?>
+									<?php if ( '' !== $wait ) : ?><span class="sh-note" style="display:block;margin-top:4px"><?php echo esc_html( $wait ); ?></span><?php endif; ?>
 								<?php elseif ( $st['checked'] ) : ?>
 									<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
 								<?php endif; ?>

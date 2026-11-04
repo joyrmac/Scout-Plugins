@@ -63,7 +63,7 @@ final class Scout_Sync_CLI {
 		$ready = array_filter(
 			$plan['rows'],
 			static function ( $r ) {
-				return Scout_Sync::UPDATE === $r['state'];
+				return in_array( $r['state'], array( Scout_Sync::UPDATE, Scout_Sync::CREATE ), true );
 			}
 		);
 		foreach ( $ready as $row ) {

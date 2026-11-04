@@ -188,7 +188,7 @@ WordPress-side edit.
 - `options` accepts only `blogname` and `blogdescription`.
 - A page that already matches when a site adopts Site Sync gets its base on the first sync pass, so later copy changes update on their own (1.4.1).
 - An item whose `source` or `image` file is missing is reported and left out; it is never compared or written (1.4.1).
-- Pages are never created. A page the manifest names but the site lacks is reported as "Page not found"; the theme's setup or a companion creates it.
+- A page the manifest names but the site lacks is reported as "Page not found" unless the entry says `"create": true` (1.6.5, below); the theme's setup or a companion used to create it.
 
 ### States
 
@@ -238,3 +238,28 @@ Four things a theme update could not reach before, each one key at a time so not
 - **Users.** `users` sets an author's Biographical Info (`description`, the only field allowed), matched by email. A user the site lacks is reported as missing.
 - **Core updates re-run.** The automatic run's key includes the Core version, so the first admin load after a Core update syncs rows that version newly understands.
 - Same states, previous copies, journal and undo as every other row. Tests: 52 checks in `tools/tests/site-sync.php`.
+
+## Added in Scout Core 1.6.5
+
+Site Sync makes the pages and posts the bundle names (Site Standard §6: the repo is where every page starts, and a theme setup engine is no longer needed for pages), and reads one manifest shape.
+
+```json
+{
+  "sync_version": 1,
+  "create_missing": true,
+  "identity": { "title": "Client Name", "tagline": "One line", "business": { "phone": "(919) 555-0100", "city": "Raleigh" } },
+  "pages": [
+    { "slug": "home", "title": "Home", "file": "sync/pages/home.html", "template": "front-page", "front_page": true },
+    { "slug": "services/weddings", "title": "Weddings", "source": "sync/pages/weddings.html", "seo_title": "Weddings | Client", "description": "One sentence." },
+    { "slug": "privacy", "title": "Privacy", "content": "<p>...</p>", "create": false }
+  ],
+  "posts": [
+    { "slug": "welcome", "title": "Welcome", "source": "sync/posts/welcome.html", "date": "2026-11-01", "excerpt": "A first post." }
+  ]
+}
+```
+
+- **`create`.** `true` creates a page the site lacks as a published page (a post as a draft); `"draft"`, `"publish"`, `"private"` or `"pending"` names the status; `false` keeps "Page not found". `create_missing` at the top is the default for every entry. A created page takes its `title`, `content`, `template` (`_wp_page_template`), `parent` (a slug; a slug with a `/` uses the part before it), `menu_order`, `excerpt` and `date`; `front_page` or `posts_page` sets Settings, Reading to it. The parent must already be on the site, or the run stops and nothing is created.
+- **State `create`** ("Will be created"). A safe write: the automatic run and "Sync these now" make the page; it never waits for review. After the run its rows read `current`. Undo trashes the pages the run created and puts the front-page settings back.
+- **`posts`.** The same entries as `pages`, with `post_type` `post` and `create` defaulting to a draft, so a new post from the repo waits to be published.
+- **Aliases, so every theme's manifest reads the same way:** `file` is `source`; `seo_title` and `description` on a page entry are its `seo` fields; `identity.title` and `identity.tagline` are the `blogname` and `blogdescription` options; `identity.business.<key>` is `scout_business` key by key (empty values are skipped). A companion importer is still needed only for a client's own post types.

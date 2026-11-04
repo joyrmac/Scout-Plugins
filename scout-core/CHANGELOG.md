@@ -1,5 +1,11 @@
 # Scout Core — Changelog
 
+## 1.6.5 (2026-11-04)
+
+- **Site Sync creates the pages the bundle names and brings posts in as drafts** (Site Standard §6 and §12). A page entry with `"create": true` (or `"create_missing": true` at the top of the manifest) that the site lacks is created on the next run: pages publish, with their title, content, template, parent, menu order and front-page or posts-page setting; a new `posts` list works like `pages` with post_type `post` and arrives as drafts. The state reads "Will be created" and counts as a safe update, never as something to review. Undo trashes what the run created and puts the front-page settings back. A page without `create` is still reported as "Page not found", as before.
+- **One manifest shape.** The entry keys the client themes grew on their own are read as aliases: `file` is `source`; `seo_title` and `description` on a page are its SEO fields; `identity` (`title`, `tagline`, `business.*`) sets the site title, tagline and Business info the way `options` does. Andy's and Bliss Boogie's manifests now read without a companion importer for pages, SEO and identity.
+- Tests: `tools/tests/site-sync.php` gains the create, draft, alias and undo checks.
+
 ## 1.6.4 (2026-11-04)
 
 - **Hours live in one place.** With Scout Hours on, Business info no longer shows its free-text hours box; it points at Your business, Hours instead (Site Standard §7 v1.2: one fact, one place; Joy, 2026-11-04). The old text stays saved and untouched until the site's conversion copies it into Scout Hours.

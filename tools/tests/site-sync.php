@@ -187,6 +187,42 @@ ok(!is_wp_error($r) && 4===$r['restored'] && ''===($biz['email']??''), 'undo put
 ok($cards['people'][1]['title']==='Old Sean title' && $tm['role']==='Co-Founder' && get_user_meta($uid,'description',true)==='Old author bio', 'undo puts back card, team role and author bio');
 require_once ABSPATH.'wp-admin/includes/user.php'; wp_delete_user($uid); wp_delete_post($team, true); delete_option('scout_business'); delete_option('synctest_cards');
 
+// 1.6.5: pages the bundle names are created, posts arrive as drafts, aliases read, undo trashes.
+$m = array('sync_version'=>1,
+  'identity'=>array('title'=>'Created Title','business'=>array('city'=>'Raleigh','phone'=>'')),
+  'pages'=>array(
+    array('slug'=>'team','title'=>'Our Team','file'=>'sync/pages/about.html','template'=>'page-team','create'=>true,'seo_title'=>'Team | Test','description'=>'Meet the team.'),
+    array('slug'=>'team/sean','title'=>'Sean','content'=>'<p>Sean</p>','create'=>true),
+    array('slug'=>'ghost','title'=>'Ghost','content'=>'x'),
+  ),
+  'posts'=>array(array('slug'=>'welcome','title'=>'Welcome','content'=>'<p>Hi</p>','date'=>'2026-11-01')),
+);
+manifest($m); bump('1.6.5');
+$s = states();
+ok(($s['page/team#title']??'')==='create' && ($s['page/team#content']??'')==='create' && ($s['page/team#seo:title']??'')==='create', 'a page with create reads create (title, content, the seo_title alias)');
+ok(($s['page/ghost#content']??'')==='missing', 'a page without create still reads missing');
+ok(($s['post/welcome#content']??'')==='create', 'a post from the posts list reads create');
+ok(($s['option#blogname']??'')==='update' && ($s['option#scout_business.city']??'')==='update' && !isset($s['option#scout_business.phone']), 'identity: the title and a filled business key sync, empty keys are skipped');
+ok(Scout_Sync::summary(true)['review']===2, 'create rows are not review items (only the two ghost rows are): '.Scout_Sync::summary(true)['review']);
+Scout_Sync::maybe_auto_run();
+$tp = get_page_by_path('team'); $sp = get_page_by_path('team/sean'); $wp_ = get_posts(array('post_type'=>'post','name'=>'welcome','post_status'=>'draft','numberposts'=>1));
+ok($tp && 'publish'===$tp->post_status && 'Our Team'===$tp->post_title && rtrim($tp->post_content)===rtrim(file_get_contents($theme.'/sync/pages/about.html')), 'the page was created, published, with the theme copy');
+ok($tp && 'page-team'===get_post_meta($tp->ID,'_wp_page_template',true), 'the template was set on the new page');
+ok($tp && 'Team | Test'===get_post_meta($tp->ID, SCOUT_SEO_META_TITLE, true) && 'Meet the team.'===get_post_meta($tp->ID, SCOUT_SEO_META_DESC, true), 'the seo_title and description aliases were written');
+ok($sp && (int)$sp->post_parent===(int)$tp->ID, 'a nested slug gets its parent');
+ok($wp_ && 'draft'===get_post_status($wp_[0]) && '2026-11-01'===substr(get_post($wp_[0])->post_date,0,10), 'the post arrived as a draft on its date');
+ok(get_option('blogname')==='Created Title', 'the identity title synced');
+$s = states();
+ok(($s['page/team#content']??'')==='current' && ($s['post/welcome#content']??'')==='current' && ($s['page/team#seo:title']??'')==='current', 'created rows read current afterwards');
+$r = Scout_Sync::undo();
+ok(!is_wp_error($r) && 'trash'===get_post_status($tp->ID) && 'trash'===get_post_status($sp->ID) && 'trash'===get_post_status($wp_[0]->ID), 'undo trashes what the sync created');
+ok((states()['page/team#content']??'')==='create', 'after undo the page reads create again');
+// A missing parent stops the run before anything is created.
+$m['pages'] = array(array('slug'=>'orphan/child','title'=>'Child','content'=>'x','create'=>true)); manifest($m); bump('1.6.6');
+$r = Scout_Sync::apply('', 'safe', array(), 'auto');
+ok(is_wp_error($r) && 'parent'===$r->get_error_code() && !get_page_by_path('orphan/child'), 'a missing parent stops the run and creates nothing');
+foreach (get_posts(array('post_type'=>array('page','post'),'post_status'=>'any','numberposts'=>-1,'fields'=>'ids')) as $id) wp_delete_post($id, true);
+
 // No manifest: status only.
 unlink($theme.'/scout-sync.json');
 ok(Scout_Sync::plan()['manifest']===false && Scout_Sync::summary(true)['review']===0, 'no manifest means status only, nothing to review');

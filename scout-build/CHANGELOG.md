@@ -1,5 +1,13 @@
 # Scout Build changelog
 
+## 0.11.1 (2026-11-04)
+
+- **Release rings (Site Standard rule 19).** A Scout plugin release now installs itself on scoutraleigh.com and staging copies first (ring 1), on Recon a day later (ring 2) and on client sites two days after it is out (ring 3). Until a site's turn the automatic update waits; Build, Updates says on each plugin's row when it installs, and Update now still works. The ring comes from `SCOUT_HUB_RING` in wp-config.php, the setting on the Updates screen, or the address. A release whose date the version list does not carry is never held, so nothing changes until the Release workflow publishes dates (this release adds them).
+- **Pause switch.** Build, Updates, "Pause automatic updates for 7 days" stops automatic Scout updates on one site; "Turn automatic updates back on" ends it early. Operators only.
+- **Hold a release everywhere.** A `hold` entry in catalog.json (`{"slug": "scout-build", "version": "0.10.0", "note": "Fix coming"}`, or `"version": "*"`) stops that release's automatic update on every site that reads the catalog (within 12 hours, or at once with Check for new versions). The Updates screen shows the hold and its note.
+- The version list (`releases.json` on the feed release) now carries each release's `published_at`.
+- Test: `php tools/tests/release-rings.php <wordpress>` (17 checks).
+
 ## 0.11.0 (2026-11-04)
 
 - **Your site: the client's view of the Site log.** Anyone who is not a Scout operator opens the same screen as **Scout → Your site**: only lines marked "Client sees", in their client wording, with no versions, kinds or internal detail. Four parts: **Waiting on you** (anything Scout needs their OK on, with an Approve button), **This month**, **Your requests** (open ones, with the Request a change button) and **Coming up** (planned lines), then **Earlier this year**. It files under Overview for them (Build stays hidden), and the Overview's "With Scout" box links to it. Operators get a "See it as the client" link on the Site log. Step 3 of the Scout Client Hub.
