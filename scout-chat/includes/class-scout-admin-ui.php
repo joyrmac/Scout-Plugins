@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.9.1';
+		const VERSION = '1.9.2';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {

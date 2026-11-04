@@ -184,8 +184,8 @@ final class Scout_Hub_Admin {
 		}
 		if ( false !== strpos( $slug, 'tab=log' ) ) {
 			$n = Scout_Hub_Log::count_month();
-			/* translators: %d: log lines this month */
-			return $n ? sprintf( __( '%d this month', 'scout-build' ), $n ) : '';
+			// A short number: the list has little room, and the screen says what it counts.
+			return $n ? (string) $n : '';
 		}
 		if ( false !== strpos( $slug, 'tab=requests' ) ) {
 			$open = count( array_filter( Scout_Hub_Requests::all(), static fn( $p ) => 'done' !== get_post_meta( $p->ID, Scout_Hub_Requests::META_STATUS, true ) ) );
@@ -795,8 +795,7 @@ final class Scout_Hub_Admin {
 		$build_new = $updates->response[ plugin_basename( SCOUT_HUB_FILE ) ]->new_version ?? '';
 		$build_new = $build_new && version_compare( $build_new, SCOUT_HUB_VERSION, '>' ) ? $build_new : '';
 
-		Scout_Hub_Themes::panel( $operator );
-		Scout_Hub_Rings::panel( $operator );
+		// Most used first (Joy, 2026-11-04): the plugin list, then when updates install, then the theme.
 		?>
 		<section class="sh-box" id="sh-plugins">
 			<h2 class="sh-title"><?php esc_html_e( 'Plugins', 'scout-build' ); ?></h2>
@@ -877,6 +876,10 @@ final class Scout_Hub_Admin {
 			</table>
 			<p class="sh-note"><?php esc_html_e( 'Scout plugins update themselves within a few hours of each release. Turning a feature on, off or back a version happens on the Features screen.', 'scout-build' ); ?></p>
 		</section>
+		<?php
+		Scout_Hub_Rings::panel( $operator );
+		Scout_Hub_Themes::panel( $operator );
+		?>
 
 		<?php
 		// The other ways content and settings reach the site. Each lands here and nowhere

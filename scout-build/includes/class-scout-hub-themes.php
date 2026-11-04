@@ -294,17 +294,18 @@ final class Scout_Hub_Themes {
 	public static function panel( bool $operator ): void {
 		$theme = wp_get_theme();
 		$src   = self::source( $theme );
-		echo '<section class="sh-box" id="sh-theme"><h2 class="sh-title">' . esc_html__( 'Theme', 'scout-build' ) . '</h2>';
+		// Calm, one line first (Joy, 2026-11-04): Theme · name version · status. The key sits in a closed row.
+		echo '<section class="sh-box sh-theme" id="sh-theme">';
 		if ( ! $src ) {
 			/* translators: 1: theme name, 2: version. */
-			echo '<p>' . esc_html( sprintf( __( '%1$s %2$s. This theme is updated by uploading it; it has not been set up to update itself.', 'scout-build' ), (string) $theme->get( 'Name' ), (string) $theme->get( 'Version' ) ) ) . '</p></section>';
+			echo '<p class="sh-theme-line"><strong>' . esc_html__( 'Theme', 'scout-build' ) . '</strong> · ' . esc_html( sprintf( __( '%1$s %2$s', 'scout-build' ), (string) $theme->get( 'Name' ), (string) $theme->get( 'Version' ) ) ) . '</p><p class="sh-note">' . esc_html__( 'This theme is updated by uploading it; it has not been set up to update itself.', 'scout-build' ) . '</p></section>';
 			return;
 		}
 		$has_key = '' !== self::token();
 		$rel     = $has_key ? self::latest( $src ) : null;
 		$updates = get_site_transient( 'update_themes' );
 		$ready   = is_object( $updates ) && isset( $updates->response[ $src['stylesheet'] ]['new_version'] ) ? (string) $updates->response[ $src['stylesheet'] ]['new_version'] : '';
-		echo '<p><strong>' . esc_html( $src['name'] ) . '</strong> ' . esc_html( $src['version'] ) . ' ';
+		echo '<p class="sh-theme-line"><strong>' . esc_html__( 'Theme', 'scout-build' ) . '</strong> · ' . esc_html( $src['name'] . ' ' . $src['version'] ) . ' · ';
 		if ( ! $has_key ) {
 			echo '<span class="sh-tag is-update">' . esc_html__( 'Needs its key to update itself', 'scout-build' ) . '</span>';
 		} elseif ( $rel && 'key' === $rel['error'] ) {
@@ -324,17 +325,19 @@ final class Scout_Hub_Themes {
 			echo '<p><a class="button button-primary" href="' . esc_url( $url ) . '">' . esc_html__( 'Update the theme now', 'scout-build' ) . '</a> <span class="sh-note">' . esc_html__( 'Or leave it: it updates by itself within a few hours.', 'scout-build' ) . '</span></p>';
 		}
 		if ( $operator && current_user_can( 'update_themes' ) && ! ( defined( 'SCOUT_THEME_TOKEN' ) && '' !== (string) SCOUT_THEME_TOKEN ) ) {
-			// Wraps on a phone: the key box takes the full width and the buttons drop below it.
-			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><input type="hidden" name="action" value="' . esc_attr( self::ACTION ) . '">';
+			// Closed once a key is saved; open while one is needed.
+			echo '<details class="sh-keyrow"' . ( $has_key ? '' : ' open' ) . '><summary><span>' . esc_html__( 'Theme key', 'scout-build' ) . '</span> <span class="sh-tag ' . ( $has_key ? 'is-current">' . esc_html__( 'Saved', 'scout-build' ) : 'is-update">' . esc_html__( 'Not set', 'scout-build' ) ) . '</span></summary>';
+			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="sh-keyform"><input type="hidden" name="action" value="' . esc_attr( self::ACTION ) . '">';
 			wp_nonce_field( self::ACTION );
 			/* translators: %s: owner/repo. */
-			echo '<label for="sh-theme-key" style="flex-basis:100%">' . esc_html( sprintf( __( 'Read-only key for %s', 'scout-build' ), $src['repo'] ) ) . '</label> ';
-			echo '<input type="password" id="sh-theme-key" name="scout_theme_key" autocomplete="off" placeholder="' . esc_attr( $has_key ? __( 'Saved. Paste a new one to replace it.', 'scout-build' ) : 'github_pat_…' ) . '" class="regular-text" style="flex:1 1 16em;min-width:0;max-width:100%"> ';
-			echo '<button type="submit" class="button">' . esc_html__( 'Save key', 'scout-build' ) . '</button>';
+			echo '<label for="sh-theme-key" class="screen-reader-text">' . esc_html( sprintf( __( 'Read-only key for %s', 'scout-build' ), $src['repo'] ) ) . '</label>';
+			echo '<input type="password" id="sh-theme-key" name="scout_theme_key" autocomplete="off" placeholder="' . esc_attr( $has_key ? __( 'Paste a new key to replace it', 'scout-build' ) : 'github_pat_…' ) . '">';
+			echo '<button type="submit" class="button">' . esc_html( $has_key ? __( 'Replace', 'scout-build' ) : __( 'Save key', 'scout-build' ) ) . '</button>';
 			if ( $has_key ) {
-				echo ' <button type="submit" name="forget" value="1" class="button sh-quiet">' . esc_html__( 'Remove key', 'scout-build' ) . '</button>';
+				echo '<button type="submit" name="forget" value="1" class="button sh-quiet sh-danger">' . esc_html__( 'Remove key', 'scout-build' ) . '</button>';
 			}
-			echo '</form><p class="sh-note">' . esc_html__( 'A GitHub fine-grained token with read-only Contents access to this one repository. It is stored encrypted and only ever sent to GitHub.', 'scout-build' ) . '</p>';
+			/* translators: %s: owner/repo. */
+			echo '</form><p class="sh-note">' . esc_html( sprintf( __( 'A GitHub fine-grained token with read-only Contents access to %s. It is stored encrypted and only ever sent to GitHub.', 'scout-build' ), $src['repo'] ) ) . '</p></details>';
 		}
 		echo '</section>';
 	}

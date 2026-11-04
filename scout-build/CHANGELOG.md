@@ -2,6 +2,11 @@
 
 ## 0.12.0 (2026-11-04)
 
+- **A calmer Updates screen (Joy, 2026-11-04).**
+  - The plugin list comes first, then "When updates install" (the ring and the pause), then the theme.
+  - The theme is one line, "Theme · name version · Up to date", with its key in a closed "Theme key" row that has Replace and Remove key.
+  - Ring choices are short: "Ring 1: first", "Ring 2: a day later", "Ring 3: two days later". The suggested ring for the site's address is named under them.
+  - Hints in the left list are short and in plain type: the Site log shows its count, not "31 THIS MONTH".
 - **Site health tiles, at most three across.** Tiles run three across at most (the map's rule), and their type never drops below the dashboard's floor of 12px labels and 14px notes. The Test builds tile says one line and keeps the plugin names behind "Show which". The copied report still has every sentence.
 - **Home order and Scout's own sites.** Home now reads: the sentence headline, then Today, then the health line. The first-week setup list comes first only while it shows. On Scout's own sites (`"scout_own_site": true` in scout-setup.json), the line under the headline says "Everything waiting on Scout's own site." instead of talking about a client.
 - **The screens now match the approved dashboard canvas (admin kit 1.9.0).** Joy saw on staging that the screens didn't look like the design. Every Scout screen now opens with one white bar (breadcrumb, Find anything, and Request a change) and lists its section's screens on the left. The second menu of group pills and tabs across the top is gone, so the sidebar is the only menu. The client logo tile and the mono eyebrow are gone too.
