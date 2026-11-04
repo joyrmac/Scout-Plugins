@@ -145,9 +145,10 @@
 	.sh-page.is-home .sh-pagehead h1 { font-size: 30px; }
 }
 
-.sh-looking { margin: 10px 14px 0; font-size: var(--sh-fs-note); line-height: 1.45; color: var(--sh-text-2); }
-.sh-looking a { font-weight: 500; text-decoration: none; }
-.sh-local.is-row .sh-looking { margin: 0 0 0 8px; align-self: center; }
+.sh .sh-local a.sh-looking { display: block; min-height: 0; margin: 10px 0 0; padding: 8px 14px; border-radius: var(--sh-r-control); font-size: var(--sh-fs-note); line-height: 1.45; color: var(--sh-text-2); text-wrap: pretty; }
+.sh .sh-local a.sh-looking:hover { background: var(--sh-surface-2); color: var(--sh-text); }
+.sh-looking .sh-nowrap { white-space: nowrap; color: var(--sh-accent-text); font-weight: 500; }
+.sh .sh-local.is-row a.sh-looking { margin: 0 0 0 8px; border: 0; background: transparent; align-self: center; }
 .sh-phone-preview { margin: 28px 0 0; }
 .sh-phone-preview + .sh-foot { margin-top: 12px; }
 

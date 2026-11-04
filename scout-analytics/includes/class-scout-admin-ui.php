@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.9.0';
+		const VERSION = '1.9.1';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -226,7 +226,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				);
 			}
 			foreach ( self::looking( $d ) as $line ) {
-				echo '<p class="sh-looking">' . esc_html( $line[0] ) . ' <a href="' . esc_url( $line[2] ) . '">' . esc_html( $line[1] ) . ' &rsaquo;</a></p>';
+				// One link for the whole line, the last words kept together so it never breaks before the group name.
+				echo '<a class="sh-looking" href="' . esc_url( $line[2] ) . '">' . esc_html( $line[0] ) . ' <span class="sh-nowrap">' . esc_html( $line[1] ) . '&nbsp;&rsaquo;</span></a>';
 			}
 			echo '</nav>';
 		}

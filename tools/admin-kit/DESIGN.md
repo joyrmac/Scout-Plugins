@@ -3,7 +3,7 @@ name: Scout dashboard
 scope: ".sh (every Scout screen inside a client's WordPress dashboard)"
 tokens: tools/admin-kit/tokens.json
 css: tools/admin-kit/scout-admin.css
-kit: 1.9.0
+kit: 1.9.1
 design-system-branch: Dashboard (project/tokens/dashboard.css in the Scout design system)
 ---
 
