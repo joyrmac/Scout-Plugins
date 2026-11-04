@@ -427,15 +427,22 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 	}
 
 	/**
-	 * The site's brand color: the scout_brand_accent filter, Scout Cards, Scout
-	 * Reviews, a block theme's accent/primary/brand color, then Scout's own
-	 * darker cerulean.
+	 * The site's brand color: the scout_brand_accent filter, the theme's
+	 * DESIGN.md accent fill, Scout Cards, Scout Reviews, a block theme's
+	 * accent/primary/brand color, then Scout's own darker cerulean.
 	 */
 	private static function detected_accent(): string {
 		$hex      = '/^#[0-9a-fA-F]{6}$/';
 		$filtered = (string) apply_filters( 'scout_brand_accent', '' );
 		if ( preg_match( $hex, $filtered ) ) {
 			return $filtered;
+		}
+		// The theme's DESIGN.md, when it has one: the fill made for white text (Site Standard rule 3).
+		if ( function_exists( 'scout_design' ) ) {
+			$design = scout_design();
+			if ( ! empty( $design['sources'] ) && preg_match( $hex, (string) ( $design['colors']['accent_fill'] ?? '' ) ) ) {
+				return (string) $design['colors']['accent_fill'];
+			}
 		}
 		foreach ( array( 'scout_cards_settings', 'scout_reviews_brand', 'scout_reviews_settings' ) as $opt ) {
 			$o = get_option( $opt );

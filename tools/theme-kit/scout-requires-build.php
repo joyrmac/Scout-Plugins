@@ -109,3 +109,14 @@ if ( ! class_exists( 'Scout_Theme_Requires_Build' ) ) {
 
 	Scout_Theme_Requires_Build::boot();
 }
+
+/**
+ * Stand-in for Scout Core's scout_core_owns() (Site Standard rule 6), so a theme
+ * can write `if ( ! scout_core_owns( 'hours' ) )` around a fallback and never
+ * fatal while Scout Core is off. With no plugin loaded, nothing owns the job.
+ */
+if ( ! function_exists( 'scout_core_owns' ) ) {
+	function scout_core_owns( string $job ): bool {
+		return false;
+	}
+}

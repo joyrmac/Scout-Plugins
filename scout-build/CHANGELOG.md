@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.9.1 (2026-11-04)
+
+- **Site health: "Design contrast".** With Scout Core 1.6.3 or newer and a theme that has a DESIGN.md, Site health shows the lowest contrast ratio among the pairs the Site Standard requires (button text on the accent fill, text on the page and on cards) and names any pair under 4.5:1 (rule 10). Muted text under 4.5:1 is a warning, not a failure.
+- **Brand color from DESIGN.md.** The Email screen's detected color (which the cookie notice and form emails use) now reads the theme's `accent_fill` from DESIGN.md before Scout Cards, Scout Reviews or theme.json. Sites without a DESIGN.md are unchanged.
+
 ## 0.9.0 (2026-11-04)
 
 - **The Site log: one line for every change to the site, written by the plugins that make it.** New screen, Scout, Site log. A Scout plugin updating logs its version and the first line of its changelog; the theme updating logs its version and its changelog headline; a feature turned on, off or sent back logs who did it; Site Sync logs how many pages got new copy; the setup file logs what it filled in; a change request logs when it comes in and when it moves; the hidden-from-Google alert logs when it goes out and when the site is visible again. Each line carries a kind, a topic, a status (done, planned, waiting on you), the version, a measure (before and after) and whether the client sees it. Lines shown to the client carry their own plain wording; the screen flags the ones that have none yet. A done line never changes: only its client wording, measure and client flag can be edited. Operators add notes for work done by hand, filter by month, kind, topic and status, and export the view as CSV. This is step 1 of the Scout Client Hub (spec: `docs/site-log-spec.md`).

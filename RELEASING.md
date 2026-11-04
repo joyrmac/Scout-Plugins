@@ -32,6 +32,10 @@ adds its screen under the Scout menu, and switches off Scout Core's head tags on
 card pages). A Scout Core release reaches every client site automatically, so a
 rename there can break a dependent plugin on every site at once.
 
+- **Themes have their own gate.** `tools/theme-standard-check.sh <theme-dir>` (the Scout Site
+  Standard: required files, nothing a theme never holds) and `php tools/design-build.php
+  <theme-dir>` (theme.json tokens and `design-tokens.css` from DESIGN.md, with the contrast
+  check) run in every client repo's `theme-release.yml`. See `tools/theme-release/README.md`.
 - **CI guards it.** `tools/core-contract.sh` (Lint workflow, "Scout Core contract")
   fails when a Scout Core API a plugin depends on disappears. Fix the dependent
   plugin in the same change, release both, and update the contract list.
