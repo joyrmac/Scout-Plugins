@@ -181,6 +181,7 @@ Every Scout screen follows the same order, so nobody has to relearn a page.
 - Status is always a word plus a shape, never color alone.
 - At most two or three items across. Never four across.
 - No orphans or widows in headings, buttons or list items.
+- A list of names is chips or a bulleted list, never one long line split by dots (Joy, 2026-11-04: it wraps badly and strands the last item).
 - Plain words at about an 8th grade reading level, with contractions. No exclamation points.
 - No dead links for clients: features that are off stay out of their menu.
   Recommended features sit in a closed "More features" dropdown.
