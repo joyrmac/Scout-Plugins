@@ -21,7 +21,7 @@ if ( ! class_exists( 'Scout_Theme_Requires_Build' ) ) {
 	final class Scout_Theme_Requires_Build {
 
 		const FILE   = 'scout-build/scout-build.php';
-		const FEED   = 'https://github.com/joyrmac/Scout-Plugins/releases/download/feed/releases.json';
+		const FEED   = 'https://github.com/Scout-Media-Raleigh/Scout-Plugins/releases/download/feed/releases.json';
 		const ACTION = 'scout_theme_install_build';
 
 		public static function boot(): void {

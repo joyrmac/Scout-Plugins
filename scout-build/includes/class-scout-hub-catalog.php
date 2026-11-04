@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Hub_Catalog {
 
-	const REPO          = 'joyrmac/Scout-Plugins';
-	const CATALOG_URL   = 'https://raw.githubusercontent.com/joyrmac/Scout-Plugins/main/catalog.json';
+	const REPO          = 'Scout-Media-Raleigh/Scout-Plugins';
+	const CATALOG_URL   = 'https://raw.githubusercontent.com/Scout-Media-Raleigh/Scout-Plugins/main/catalog.json';
 	const CATALOG_KEY   = 'scout_hub_catalog';
 	const RELEASES_KEY  = 'scout_hub_releases';
 	const CATALOG_TTL   = 12 * HOUR_IN_SECONDS;

@@ -24,7 +24,7 @@ You need a WordPress to play in. Easiest free option:
 Clone this repo, or download it as a zip from GitHub and unzip it:
 
 ```bash
-git clone https://github.com/joyrmac/Scout-Plugins.git
+git clone https://github.com/Scout-Media-Raleigh/Scout-Plugins.git
 ```
 
 Each top-level folder (`scout-core`, `scout-forms-guard`, and so on) is a complete

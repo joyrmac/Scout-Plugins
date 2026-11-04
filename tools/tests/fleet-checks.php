@@ -55,7 +55,7 @@ function ok( $cond, $msg ) {
 }
 function plugin( $slug, $version, $active = true ) {
 	$file = "$slug/$slug.php";
-	$GLOBALS['t']['plugins'][ $file ] = array( 'Name' => ucwords( str_replace( '-', ' ', $slug ) ), 'Version' => $version, 'Author' => 'Scout Media & Consulting', 'UpdateURI' => "https://github.com/joyrmac/Scout-Plugins/$slug" );
+	$GLOBALS['t']['plugins'][ $file ] = array( 'Name' => ucwords( str_replace( '-', ' ', $slug ) ), 'Version' => $version, 'Author' => 'Scout Media & Consulting', 'UpdateURI' => "https://github.com/Scout-Media-Raleigh/Scout-Plugins/$slug" );
 	if ( $active ) {
 		$GLOBALS['t']['active'][] = $file;
 	}
@@ -112,7 +112,7 @@ ok( 'good' === $r['state'], "the updater's own per-plugin answer wins over the f
 
 t_reset();
 plugin( 'scout-forms-guard', '0.3.0' );
-$GLOBALS['t']['site_tr']['update_plugins'] = (object) array( 'no_update' => array( 'scout-forms-guard/scout-forms-guard.php' => (object) array( 'id' => 'github.com/joyrmac/Scout-Plugins/scout-forms-guard', 'new_version' => '0.2.0' ) ), 'response' => array() );
+$GLOBALS['t']['site_tr']['update_plugins'] = (object) array( 'no_update' => array( 'scout-forms-guard/scout-forms-guard.php' => (object) array( 'id' => 'github.com/Scout-Media-Raleigh/Scout-Plugins/scout-forms-guard', 'new_version' => '0.2.0' ) ), 'response' => array() );
 $r = Scout_Hub_Health::test_builds();
 ok( 'warn' === $r['state'], "falls back to WordPress's update check when the updater cache is empty" );
 

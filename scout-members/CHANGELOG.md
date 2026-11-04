@@ -1,5 +1,9 @@
 # Scout Members changelog
 
+## 0.4.1 (2026-11-04)
+
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 0.4.0 (2026-11-03)
 
 - **Dues through the site's own checkout, when WooCommerce is active.** Each plan links to a WooCommerce product in Settings, Dues and renewals, and **Create the product for this plan** makes one: simple, virtual, hidden from the shop, at the plan price, named from the new **Name on receipts** setting ("Bliss Boogie Connections membership, Club Member, 1 year"). Without WooCommerce the plugin works as before.

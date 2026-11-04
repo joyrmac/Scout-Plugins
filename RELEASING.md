@@ -111,7 +111,7 @@ Install test zips on staging only.
 ## Checking it worked
 
 The release shows up at
-https://github.com/joyrmac/Scout-Plugins/releases with a `<slug>.zip` asset
+https://github.com/Scout-Media-Raleigh/Scout-Plugins/releases with a `<slug>.zip` asset
 attached. That asset is what client sites download, so a release without it
 offers nothing and sites stay on their current version.
 

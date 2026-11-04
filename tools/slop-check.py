@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Code slop check for Scout repos.
 
-Spec: Scout-Media-Raleigh/content/internal/anti-slop-site-playbook.md, Section 8.
+Spec: Scout-Internal/content/internal/anti-slop-site-playbook.md, Section 8.
 Flags the tells that make code read as machine-written: emoji, filler comment
 phrases, placeholder leftovers, debug output, and stray "copy" or backup files.
 

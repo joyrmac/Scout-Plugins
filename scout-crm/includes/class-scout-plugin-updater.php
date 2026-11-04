@@ -40,7 +40,7 @@ final class Scout_Plugin_Updater {
 	 *
 	 * @var string
 	 */
-	const REPO = 'joyrmac/Scout-Plugins';
+	const REPO = 'Scout-Media-Raleigh/Scout-Plugins';
 
 	/**
 	 * How long a release lookup is cached. WordPress checks for updates roughly
@@ -62,7 +62,7 @@ final class Scout_Plugin_Updater {
 	const FEED_KEY = 'scout_updater_feed';
 
 	/** The version list the Release workflow publishes (see .github/workflows/release.yml). */
-	const FEED_URL = 'https://github.com/joyrmac/Scout-Plugins/releases/download/feed/releases.json';
+	const FEED_URL = 'https://github.com/Scout-Media-Raleigh/Scout-Plugins/releases/download/feed/releases.json';
 
 	/**
 	 * The shared list for this request, so each copy reads it at most once.

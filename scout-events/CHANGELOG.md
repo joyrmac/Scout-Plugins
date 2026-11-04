@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.16.1 (2026-11-04)
+
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 0.16.0 (2026-11-03)
 
 - **A members directory people can contact from.** `[scout_directory contact="yes"]` adds where each speaker or vendor works and how to reach them to their card: Website, Book, Email, phone, and their social and shop links named by site (Instagram, Facebook, Linktree, Etsy and so on). Search also finds them by city. Off by default, so a public directory shows what it showed before. Built for Bliss Boogie's members Portal; it turns on there once each educator has approved what members see.

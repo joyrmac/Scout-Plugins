@@ -5,7 +5,7 @@ sends people to book a call, takes change requests from existing clients, and
 saves every other question, with the visitor's name and email, to an inbox.
 Once it is connected to an AI server it answers free-text questions too.
 
-Design: `Scout-Media-Raleigh/content/design/scout-features/DESIGN.md` 5.1
+Design: `Scout-Internal/content/design/scout-features/DESIGN.md` 5.1
 (panel variant).
 
 ## Two modes

@@ -2,7 +2,7 @@
 
 The one place that shows the whole roster: every site, what it runs, how it
 updates today, and who has access. The platform map
-(`Scout-Media-Raleigh/ops/playbook/platform-map.md`) reads from this file;
+(`Scout-Internal/ops/playbook/platform-map.md`) reads from this file;
 update it whenever a site deploys, a plugin updates, or a client joins or
 leaves. Fields marked **TODO** need Joy or Sean to fill from the live installs.
 
@@ -15,13 +15,13 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 
 | Site | Domain | WP Engine install | Repo | Tier |
 |---|---|---|---|---|
-| Scout Media | scoutraleigh.com | **TODO** | `joyrmac/Scout-Media-Raleigh` | own site |
-| Scout Recon | scoutrecon.app | `scoutrecon1` | `joyrmac/Scout-Media-Raleigh` (`wordpress/recon-deploy/`, separation plan in `ops/`) | own product |
+| Scout Media | scoutraleigh.com | **TODO** | `Scout-Media-Raleigh/Scout-Internal` | own site |
+| Scout Recon | scoutrecon.app | `scoutrecon1` | `Scout-Media-Raleigh/Scout-Internal` (`wordpress/scout-recon/`, separation plan in `ops/`) | own product |
 | Hair by Patrick McGuire | **TODO** (live domain not launched; staging at hairbypatrick.wpenginepowered.com) | `hairbypatrick` (staging: indexing blocked in code) | **TODO** | **TODO** |
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
-| Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `joyrmac/Andres-Borda---Golf-Carts` | The Build (favor). **Live since 2026-10-22.** Theme self-updates from the client repo (0.7.14, 2026-10-30). Companion plugin `scout-andysgolfcarts` 0.6.0 lives in the client repo. Runs an unreleased Forms Guard 0.3.0 test build until 0.3.1 ships. |
-| Walter Lutz Electrical (Walter Lutz Services LLC) | walterlutzelectric.com (live 2026-10-19) | **TODO** | `joyrmac/Walter-Lutz-Services` (theme on `main`; repo default branch still `claude/new-client-dzfr0t`) | The Build. Sean signs off for Scout. |
+| Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `Scout-Media-Raleigh/AndysGolfCarts` | The Build (favor). **Live since 2026-10-22.** Theme self-updates from the client repo (0.7.14, 2026-10-30). Companion plugin `scout-andysgolfcarts` 0.6.0 lives in the client repo. Runs an unreleased Forms Guard 0.3.0 test build until 0.3.1 ships. |
+| Walter Lutz Electrical (Walter Lutz Services LLC) | walterlutzelectric.com (live 2026-10-19) | **TODO** | `Scout-Media-Raleigh/WalterLutz` (theme on `main`; repo default branch still `claude/new-client-dzfr0t`) | The Build. Sean signs off for Scout. |
 
 ## Versions
 
@@ -70,7 +70,7 @@ Where credentials live, not what they are. **TODO: fill and confirm 2FA per row.
 | WP Engine account | **TODO** | **TODO** | **TODO** |
 | wp-admin per site | **TODO** | **TODO** | **TODO** |
 | Domains / DNS registrar(s) | **TODO** | **TODO** | **TODO** |
-| GitHub org/repos | Joy, Sean | github.com/joyrmac | **TODO** |
+| GitHub org/repos | Joy, Sean | github.com/Scout-Media-Raleigh (moved from joyrmac 2026-11-04) | **TODO** |
 | Google (GA4, GSC, GBP) per client | **TODO** | **TODO** | **TODO** |
 | Gravity Forms license | **TODO** | **TODO** | **TODO** |
 

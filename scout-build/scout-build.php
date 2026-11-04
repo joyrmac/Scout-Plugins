@@ -3,14 +3,14 @@
  * Plugin Name:       Scout Build
  * Plugin URI:        https://scoutraleigh.com
  * Description:       One screen for the site's features: see what is on, turn features on or off (site operators only), roll one back, request a change, and check the site's health at a glance.
- * Version:           0.7.10
+ * Version:           0.7.11
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
  * Author URI:        https://scoutraleigh.com
  * License:           GPL-2.0-or-later
  * Text Domain:       scout-build
- * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-build
+ * Update URI:        https://github.com/Scout-Media-Raleigh/Scout-Plugins/scout-build
  *
  * @package Scout_Build
  */
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Prefixed SCOUT_HUB_ on purpose: the Scout Media theme already defines a
 // SCOUT_BUILD_MENU constant for its own menu.
-define( 'SCOUT_HUB_VERSION', '0.7.10' );
+define( 'SCOUT_HUB_VERSION', '0.7.11' );
 define( 'SCOUT_HUB_FILE', __FILE__ );
 define( 'SCOUT_HUB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_HUB_URL', plugin_dir_url( __FILE__ ) );

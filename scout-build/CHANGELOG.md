@@ -1,5 +1,11 @@
 # Scout Build changelog
 
+## 0.7.11 (2026-11-04)
+
+- **Theme updates keep downloading after a repo moves or is renamed.** A theme whose Update URI still names the old owner or repo (`joyrmac/Andres-Borda---Golf-Carts`) gets its file address from GitHub under the new name (`Scout-Media-Raleigh/AndysGolfCarts`). The download check compared the two, skipped the key, and WordPress fetched the private file without it: "Download failed. Not Found." The check now also trusts the exact file address the release lookup returned, whatever owner and name it carries. Each theme picks up its new Update URI at its next release.
+- **The feature catalog and Site health read from the new organization** (`Scout-Media-Raleigh/Scout-Plugins`).
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 0.7.10 (2026-11-02)
 
 - **Theme updates download when the repo name's capitals differ.** Maravela's theme says `Update URI: https://github.com/joyrmac/maravelas`, but GitHub hands back the file address as `joyrmac/Maravelas`. The download check compared the two letter for letter, so it skipped the key and WordPress fetched the private file without it: "Download failed. Not Found." The check now ignores capitals, the way GitHub does.

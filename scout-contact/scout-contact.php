@@ -2,13 +2,13 @@
 /**
  * Plugin Name:       Scout Call Buttons
  * Description:       A call, text and "Let's talk" bar pinned to the bottom of the screen on phones, with a sheet that offers calling, texting or booking a time.
- * Version:           0.1.11
+ * Version:           0.1.12
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
  * License:           GPL-2.0-or-later
  * Text Domain:       scout-contact
- * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-contact
+ * Update URI:        https://github.com/Scout-Media-Raleigh/Scout-Plugins/scout-contact
  *
  * @package Scout_Contact
  */
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CONTACT_VERSION', '0.1.11' );
+define( 'SCOUT_CONTACT_VERSION', '0.1.12' );
 define( 'SCOUT_CONTACT_FILE', __FILE__ );
 define( 'SCOUT_CONTACT_URL', plugin_dir_url( __FILE__ ) );
 
