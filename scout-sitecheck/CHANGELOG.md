@@ -4,6 +4,7 @@
 ## 0.2.8 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
+- **Safe with an older admin kit.** If a plugin still on kit 1.7.0 loads first, Site check settings file under Your business instead of asking for a group that kit doesn't have.
 - **Site checks file under Inbox, and Site check settings under Your website.** Requests from visitors now sit with everything else waiting on a person.
 
 ## 0.2.7 (2026-11-04)

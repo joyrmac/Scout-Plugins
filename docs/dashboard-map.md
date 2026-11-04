@@ -74,6 +74,11 @@ people, like a staff list and an operator setting.
   (`$group, $slug, $label`). Prefer a slug pattern in the kit when the rule is general.
 - **Every new screen gets a line in `tools/tests/admin-kit-groups.php`.** The
   Lint workflow fails when the filing drifts from this map.
+- **Plan for an older kit.** The first plugin to load sets the kit for every screen, so
+  during a partial rollout or after "Go back a version" an older kit can be in charge.
+  A `scout_admin_nav_group` filter that returns a group added in a newer kit checks
+  `Scout_Admin_UI::VERSION` and falls back to a group the old kit has (website and
+  policies arrived in 1.8.0; fall back to business and search).
 - **A screen never changes its address.** Only where it is filed changes, so
   bookmarks and links keep working.
 - **The kit ships in every plugin.** After changing `tools/admin-kit/`, copy it
