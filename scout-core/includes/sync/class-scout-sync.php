@@ -36,6 +36,7 @@ final class Scout_Sync {
 	const EDITED   = 'edited';    // Edited in WordPress, theme unchanged.
 	const CONFLICT = 'conflict';  // Both changed, or an unknown saved value.
 	const MISSING  = 'missing';   // The page or post the item names is not there.
+	const CREATE   = 'create';    // Not there, and the manifest says to create it (1.6.5).
 
 	/** Options a manifest may set. Anything else is ignored. */
 	const ALLOWED_OPTIONS = array( 'blogname', 'blogdescription' );
@@ -110,14 +111,58 @@ final class Scout_Sync {
 			return array( 'items' => array(), 'errors' => array( 'scout-sync.json needs "sync_version": 1.' ) );
 		}
 
+		// Pages and posts (1.6.5: `posts` is `pages` with post_type "post" and created as drafts;
+		// `file` is `source`; `seo_title` and `description` are the page's SEO fields; `create`
+		// makes a page the site lacks, as a published page or a draft; `create_missing` at the
+		// top sets the default for every entry).
+		$default_create = $manifest['create_missing'] ?? false;
+		$entries        = array();
 		foreach ( (array) ( $manifest['pages'] ?? array() ) as $page ) {
-			$type = sanitize_key( $page['post_type'] ?? 'page' );
-			$slug = (string) ( $page['slug'] ?? '' );
-			if ( isset( $page['title'] ) ) {
-				$items[] = array( 'kind' => 'post', 'post_type' => $type, 'slug' => $slug, 'field' => 'title', 'value' => (string) $page['title'] );
+			$entries[] = array( 'page', (array) $page );
+		}
+		foreach ( (array) ( $manifest['posts'] ?? array() ) as $post ) {
+			$entries[] = array( 'post', (array) $post );
+		}
+		foreach ( $entries as list( $default_type, $page ) ) {
+			$type   = sanitize_key( $page['post_type'] ?? $default_type );
+			$slug   = (string) ( $page['slug'] ?? '' );
+			$source = $page['source'] ?? ( $page['file'] ?? null );
+			$create = self::create_status( $page['create'] ?? ( 'post' === $default_type ? ( false === $default_create ? true : $default_create ) : $default_create ), 'post' === $type );
+			$new    = '' === $create ? null : array(
+				'status'     => $create,
+				'template'   => (string) ( $page['template'] ?? '' ),
+				'parent'     => (string) ( $page['parent'] ?? '' ),
+				'front_page' => ! empty( $page['front_page'] ),
+				'posts_page' => ! empty( $page['posts_page'] ),
+				'menu_order' => (int) ( $page['menu_order'] ?? 0 ),
+				'excerpt'    => (string) ( $page['excerpt'] ?? '' ),
+				'date'       => (string) ( $page['date'] ?? '' ),
+			);
+			$title = $page['title'] ?? ( null !== $new ? ucwords( str_replace( array( '-', '_', '/' ), ' ', $slug ) ) : null );
+			if ( null !== $title ) {
+				$items[] = array( 'kind' => 'post', 'post_type' => $type, 'slug' => $slug, 'field' => 'title', 'value' => (string) $title, 'new' => $new );
 			}
-			if ( isset( $page['source'] ) || isset( $page['content'] ) ) {
-				$items[] = array( 'kind' => 'post', 'post_type' => $type, 'slug' => $slug, 'field' => 'content', 'source' => $page['source'] ?? null, 'value' => $page['content'] ?? null, 'previous' => $page['previous'] ?? array() );
+			if ( null !== $source || isset( $page['content'] ) ) {
+				$items[] = array( 'kind' => 'post', 'post_type' => $type, 'slug' => $slug, 'field' => 'content', 'source' => $source, 'value' => $page['content'] ?? null, 'previous' => $page['previous'] ?? array(), 'new' => $new );
+			}
+			if ( isset( $page['seo_title'] ) ) {
+				$items[] = array( 'kind' => 'post', 'post_type' => $type, 'slug' => $slug, 'field' => 'seo:title', 'value' => (string) $page['seo_title'], 'new' => $new );
+			}
+			if ( isset( $page['description'] ) ) {
+				$items[] = array( 'kind' => 'post', 'post_type' => $type, 'slug' => $slug, 'field' => 'seo:desc', 'value' => (string) $page['description'], 'new' => $new );
+			}
+		}
+		// Identity (1.6.5): the site title, tagline and Business info, written once from the repo.
+		$identity = (array) ( $manifest['identity'] ?? array() );
+		if ( isset( $identity['title'] ) ) {
+			$manifest['options'][] = array( 'option' => 'blogname', 'value' => (string) $identity['title'] );
+		}
+		if ( isset( $identity['tagline'] ) ) {
+			$manifest['options'][] = array( 'option' => 'blogdescription', 'value' => (string) $identity['tagline'] );
+		}
+		foreach ( (array) ( $identity['business'] ?? array() ) as $key => $value ) {
+			if ( is_scalar( $value ) && '' !== (string) $value ) {
+				$manifest['options'][] = array( 'option' => 'scout_business', 'key' => (string) $key, 'value' => (string) $value );
 			}
 		}
 		foreach ( (array) ( $manifest['fields'] ?? array() ) as $f ) {
@@ -204,6 +249,17 @@ final class Scout_Sync {
 			)
 		);
 		return array( 'items' => $items, 'errors' => $errors );
+	}
+
+	/** "publish", "draft" or "" from a manifest's create value (true, false, or a status). */
+	private static function create_status( $create, $is_post ) {
+		if ( true === $create ) {
+			return $is_post ? 'draft' : 'publish';
+		}
+		if ( is_string( $create ) && in_array( $create, array( 'publish', 'draft', 'private', 'pending' ), true ) ) {
+			return $create;
+		}
+		return '';
 	}
 
 	/** A stable id for an item, e.g. "page/about#content". */
@@ -435,7 +491,10 @@ final class Scout_Sync {
 			if ( 'post' === $item['kind'] ) {
 				$item['post_id'] = self::post_id( $item, $cache );
 				if ( ! $item['post_id'] ) {
-					$item['state'] = self::MISSING;
+					// A page the manifest says to create is a safe write: nothing is overwritten.
+					$item['state'] = empty( $item['new'] ) ? self::MISSING : self::CREATE;
+					$item['t']     = self::hash( empty( $item['image'] ) ? self::normalize( $item['theme'] ) : $item['theme'] );
+					$item['d']     = self::hash( '' );
 					$rows[]        = $item;
 					continue;
 				}
@@ -518,7 +577,7 @@ final class Scout_Sync {
 			return $cached;
 		}
 		$plan   = self::plan();
-		$counts = array_fill_keys( array( self::CURRENT, self::UPDATE, self::EDITED, self::CONFLICT, self::MISSING ), 0 );
+		$counts = array_fill_keys( array( self::CURRENT, self::UPDATE, self::EDITED, self::CONFLICT, self::MISSING, self::CREATE ), 0 );
 		foreach ( $plan['rows'] as $row ) {
 			++$counts[ $row['state'] ];
 		}
@@ -563,9 +622,11 @@ final class Scout_Sync {
 
 			$pick = array();
 			foreach ( $plan['rows'] as $row ) {
-				if ( 'safe' === $mode && self::UPDATE === $row['state'] ) {
+				if ( 'safe' === $mode && in_array( $row['state'], array( self::UPDATE, self::CREATE ), true ) ) {
 					$pick[] = $row;
-				} elseif ( 'safe' !== $mode && in_array( $row['id'], $ids, true ) && self::MISSING !== $row['state'] && self::CURRENT !== $row['state'] ) {
+				} elseif ( 'take' === $mode && self::CREATE === $row['state'] && in_array( $row['id'], $ids, true ) ) {
+					$pick[] = $row;
+				} elseif ( 'safe' !== $mode && in_array( $row['id'], $ids, true ) && ! in_array( $row['state'], array( self::MISSING, self::CURRENT, self::CREATE ), true ) ) {
 					$pick[] = $row;
 				}
 			}
@@ -603,12 +664,14 @@ final class Scout_Sync {
 			unset( $row );
 
 			$journal = array(
-				'state' => 'applying',
-				'time'  => gmdate( 'c' ),
-				'user'  => get_current_user_id(),
-				'who'   => $who,
-				'theme' => self::theme_key(),
-				'rows'  => array_map(
+				'state'   => 'applying',
+				'time'    => gmdate( 'c' ),
+				'user'    => get_current_user_id(),
+				'who'     => $who,
+				'theme'   => self::theme_key(),
+				'created' => array(),
+				'front'   => array(),
+				'rows'    => array_map(
 					static function ( $r ) {
 						return array_intersect_key( $r, array_flip( array( 'id', 'kind', 'post_type', 'slug', 'field', 'group', 'key', 'option', 'post_id', 'email', 'user_id', 'image', 'raw', 'write' ) ) );
 					},
@@ -619,8 +682,29 @@ final class Scout_Sync {
 				return new WP_Error( 'journal', 'Could not save the undo record. Nothing was changed.' );
 			}
 
-			$written = 0;
+			// Pages and posts the manifest says to create (1.6.5): one post each, with its title
+			// and content, before the field writes below fill the rest. Recorded for undo.
+			$created = self::create_posts( $pick, $journal );
+			if ( is_wp_error( $created ) ) {
+				$journal['state'] = 'failed';
+				self::save_journal( $journal );
+				self::summary( true );
+				return $created;
+			}
+			$written = (int) $created;
+			foreach ( $pick as $i => $row ) {
+				if ( self::CREATE === $row['state'] ) {
+					$pick[ $i ]['post_id'] = $journal['created'][ $row['post_type'] . '/' . $row['slug'] ] ?? 0;
+					$pick[ $i ]['raw']     = in_array( $row['field'], array( 'title', 'content' ), true ) ? $row['write'] : '';
+					$journal['rows'][ $i ]['post_id'] = $pick[ $i ]['post_id'];
+				}
+			}
+			self::save_journal( $journal );
 			foreach ( $pick as $row ) {
+				if ( self::CREATE === $row['state'] && in_array( $row['field'], array( 'title', 'content' ), true ) ) {
+					$bases[ $row['id'] ] = array( 't' => $row['t'], 'd' => $row['t'] );
+					continue; // Written by wp_insert_post already.
+				}
 				if ( ! self::write( $row, $row['raw'], $row['write'] ) ) {
 					$journal['state'] = 'failed';
 					self::save_journal( $journal );
@@ -669,6 +753,82 @@ final class Scout_Sync {
 	}
 
 	/**
+	 * Create every page or post the picked rows name (state CREATE), one each, and
+	 * record the ids and the front-page options in the journal.
+	 *
+	 * @return int|WP_Error Posts created.
+	 */
+	private static function create_posts( array $pick, array &$journal ) {
+		$groups = array();
+		foreach ( $pick as $row ) {
+			if ( self::CREATE === $row['state'] ) {
+				$groups[ $row['post_type'] . '/' . $row['slug'] ][] = $row;
+			}
+		}
+		foreach ( $groups as $key => $rows ) {
+			$first = $rows[0];
+			$new   = (array) $first['new'];
+			$data  = array(
+				'post_type'   => $first['post_type'],
+				'post_status' => $new['status'] ?: 'draft',
+				'post_name'   => sanitize_title( wp_basename( $first['slug'] ) ),
+				'post_title'  => '',
+				'post_content' => '',
+				'menu_order'  => (int) ( $new['menu_order'] ?? 0 ),
+			);
+			foreach ( $rows as $row ) {
+				if ( 'title' === $row['field'] ) {
+					$data['post_title'] = wp_slash( (string) $row['write'] );
+				} elseif ( 'content' === $row['field'] ) {
+					$data['post_content'] = wp_slash( (string) $row['write'] );
+				}
+			}
+			if ( '' === $data['post_title'] ) {
+				$data['post_title'] = ucwords( str_replace( array( '-', '_', '/' ), ' ', $first['slug'] ) );
+			}
+			if ( ! empty( $new['excerpt'] ) ) {
+				$data['post_excerpt'] = wp_slash( (string) $new['excerpt'] );
+			}
+			if ( ! empty( $new['date'] ) && strtotime( (string) $new['date'] ) ) {
+				$data['post_date'] = gmdate( 'Y-m-d H:i:s', strtotime( (string) $new['date'] ) );
+			}
+			$parent = '';
+			if ( 'page' === $first['post_type'] && false !== strpos( $first['slug'], '/' ) ) {
+				$parent = dirname( $first['slug'] );
+			} elseif ( ! empty( $new['parent'] ) ) {
+				$parent = (string) $new['parent'];
+			}
+			if ( '' !== $parent ) {
+				$parent_post = get_page_by_path( $parent, OBJECT, $first['post_type'] );
+				if ( ! $parent_post ) {
+					return new WP_Error( 'parent', 'Could not create ' . $first['slug'] . ': its parent "' . $parent . '" is not on the site yet.' );
+				}
+				$data['post_parent'] = (int) $parent_post->ID;
+			}
+			$id = wp_insert_post( $data, true );
+			if ( is_wp_error( $id ) || ! $id ) {
+				return new WP_Error( 'create', 'Could not create ' . $first['slug'] . ( is_wp_error( $id ) ? ': ' . $id->get_error_message() : '.' ) );
+			}
+			if ( ! empty( $new['template'] ) ) {
+				update_post_meta( (int) $id, '_wp_page_template', sanitize_text_field( (string) $new['template'] ) );
+			}
+			if ( ! empty( $new['front_page'] ) ) {
+				$journal['front'] = $journal['front'] ?: array( 'show_on_front' => get_option( 'show_on_front' ), 'page_on_front' => (int) get_option( 'page_on_front' ), 'page_for_posts' => (int) get_option( 'page_for_posts' ) );
+				update_option( 'show_on_front', 'page' );
+				update_option( 'page_on_front', (int) $id );
+			}
+			if ( ! empty( $new['posts_page'] ) ) {
+				$journal['front'] = $journal['front'] ?: array( 'show_on_front' => get_option( 'show_on_front' ), 'page_on_front' => (int) get_option( 'page_on_front' ), 'page_for_posts' => (int) get_option( 'page_for_posts' ) );
+				update_option( 'show_on_front', 'page' );
+				update_option( 'page_for_posts', (int) $id );
+			}
+			$journal['created'][ $key ] = (int) $id;
+			self::save_journal( $journal );
+		}
+		return count( $groups );
+	}
+
+	/**
 	 * Put back what the last sync replaced. A field edited since is left alone.
 	 *
 	 * @return array{restored:int,skipped:string[]}|WP_Error
@@ -690,7 +850,25 @@ final class Scout_Sync {
 			$bases    = get_option( self::BASES, array() );
 			$restored = 0;
 			$skipped  = array();
+			// Pages and posts the sync created go to the trash (nothing is lost), and the
+			// front-page settings go back to what they were. Their fields need no restoring.
+			$created = (array) ( $journal['created'] ?? array() );
+			foreach ( $created as $key => $id ) {
+				if ( get_post( (int) $id ) && 'trash' !== get_post_status( (int) $id ) ) {
+					wp_trash_post( (int) $id );
+					++$restored;
+				}
+			}
+			if ( ! empty( $journal['front'] ) && $created ) {
+				update_option( 'show_on_front', (string) $journal['front']['show_on_front'] );
+				update_option( 'page_on_front', (int) $journal['front']['page_on_front'] );
+				update_option( 'page_for_posts', (int) $journal['front']['page_for_posts'] );
+			}
 			foreach ( $journal['rows'] as $row ) {
+				if ( 'post' === $row['kind'] && isset( $created[ $row['post_type'] . '/' . $row['slug'] ] ) ) {
+					unset( $bases[ $row['id'] ] );
+					continue;
+				}
 				$now = self::read( $row );
 				if ( self::normalize( $now ) === self::normalize( $row['raw'] ) ) {
 					continue; // Never written, or already back.

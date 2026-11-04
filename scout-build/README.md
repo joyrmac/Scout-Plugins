@@ -22,7 +22,7 @@ screen or feature, is in `../docs/dashboard-map.md`.
 
 | Item | Who | What it holds |
 |---|---|---|
-| **Home** | everyone, the first screen | Is the site all right, what needs you, what Scout is doing, the things a client does here, and one line to ask for more. |
+| **Home** | everyone, the first screen | Is the site all right, what needs you, what Scout is doing, the things a client does here, and one line to ask for more. Clients also find **Your site** here (what Scout has done on the site, with Approve). |
 | **Inbox** | everyone | Everything waiting on a person, with one count: change requests and their status, chat questions, new reviews, Ask for reviews, site check requests. Other plugins add a queue with the `scout_hub_inbox` filter. |
 | **Reports** | owner, operator | Recon's numbers, when Recon is on. Empty groups never show to clients. |
 | **Your business** | everyone | Facts typed once: Business info, Hours, Team, Case results, a companion plugin's own types. |
@@ -46,11 +46,25 @@ drifts from the map. A screen never moves its address; only where it is filed.
 | `SCOUT_HUB_OPERATORS` | `sean@scoutraleigh.com, joy@scoutraleigh.com` | Who can turn features on and off, go back a version, set the plan, and change request statuses. Must also be a WordPress admin. |
 | `SCOUT_HUB_REQUEST_EMAIL` | `team@scoutraleigh.com` | Where change requests and the "hidden from Google" alert are emailed (the alert can also be changed with the `scout_build_alert_email` filter). **Set this on partner-side sites** so nothing routes to a Scout address. |
 | `SCOUT_HUB_BRAND` | `true` | Labels the menu **Scout** with the bolt and shows the "Built and looked after by Scout Media" sign-off. **Set to `false` on partner-side or white-label sites**: the menu then says Site Build and nothing mentions Scout. |
-| `SCOUT_HUB_READ_TOKEN` | (none) | A key of 20+ characters that lets the Scout Client Hub read `scout-build/v1/log`, `/requests` and `/site` (Bearer). Off until set. |
+| `SCOUT_HUB_READ_TOKEN` | (none) | Optional. A key of 20+ characters that lets the Scout Client Hub read `scout-build/v1/log`, `/requests` and `/site` (Bearer). Normally operators make the keys on Scout → Site log instead; a constant here wins over those. |
 | `SCOUT_HUB_WRITE_TOKEN` | (none) | Same, plus `POST /log` for note lines (how Claude logs work as it ships). Cannot change anything else. |
 | `SCOUT_HUB_LOG_API` | `false` | On a white-label site (`SCOUT_HUB_BRAND` false) the endpoint stays off unless this is true. |
 | `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Updates. See "Theme updates" below. |
 | `DISALLOW_FILE_MODS` | (WordPress) | When true, features that are not installed must be uploaded by hand; on and off still work. |
+
+## Release rings and the pause switch (0.11.1+)
+
+Site Standard rule 19: a Scout plugin release installs itself on
+scoutraleigh.com and staging first (ring 1), Recon a day later (ring 2),
+client sites two days after it is out (ring 3). Until then the automatic
+update waits and Build, Updates says when it installs; Update now always
+works. Set the ring with `SCOUT_HUB_RING` (1, 2 or 3) in wp-config.php or on
+the Updates screen; otherwise the address decides. Two brakes:
+
+- **One site:** Build, Updates, Pause automatic updates for 7 days.
+- **Every site:** add `{"slug": "...", "version": "..." or "*", "note": "..."}`
+  to `hold` in `catalog.json` (both copies). Sites read it within 12 hours,
+  or at once with Check for new versions. Remove the line to release it.
 
 ## Theme updates
 
@@ -79,6 +93,14 @@ Operators add notes for work done by hand. Each line has a kind, a topic, a
 status (done, planned, waiting on you), a version, a measure and a "client
 sees" flag with its own plain wording, which is what the client's monthly
 update is built from. A done line never changes; corrections are a new line.
+
+**Your site (0.11.0):** everyone who is not an operator sees the log as Scout → Your site: client
+lines only, in client wording, with Waiting on you (Approve button), This month, Your requests and
+Coming up. To put something up for the client's OK, add a note with status "Waiting on you" and
+Client sees on.
+
+**Hub keys:** operators press Make keys on the Site log screen; the read key goes in the Scout
+Client Hub Sheet, the write key is Claude's. Shown once, stored encrypted.
 
 One-time import: upload the site's file from `docs/site-log-import/` on the
 Site log screen. Spec and the hub it feeds: `../docs/site-log-spec.md`.

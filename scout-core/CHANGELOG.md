@@ -1,8 +1,14 @@
 # Scout Core — Changelog
 
-## 1.6.5 (2026-11-04)
+## 1.6.6 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
+
+## 1.6.5 (2026-11-04)
+
+- **Site Sync creates the pages the bundle names and brings posts in as drafts** (Site Standard §6 and §12). A page entry with `"create": true` (or `"create_missing": true` at the top of the manifest) that the site lacks is created on the next run: pages publish, with their title, content, template, parent, menu order and front-page or posts-page setting; a new `posts` list works like `pages` with post_type `post` and arrives as drafts. The state reads "Will be created" and counts as a safe update, never as something to review. Undo trashes what the run created and puts the front-page settings back. A page without `create` is still reported as "Page not found", as before.
+- **One manifest shape.** The entry keys the client themes grew on their own are read as aliases: `file` is `source`; `seo_title` and `description` on a page are its SEO fields; `identity` (`title`, `tagline`, `business.*`) sets the site title, tagline and Business info the way `options` does. Andy's and Bliss Boogie's manifests now read without a companion importer for pages, SEO and identity.
+- Tests: `tools/tests/site-sync.php` gains the create, draft, alias and undo checks.
 
 ## 1.6.4 (2026-11-04)
 

@@ -105,9 +105,9 @@ brief asks for them when a client repo moved and the site log did not.
 
 ### The read endpoint (for the Sheet and for Claude)
 
-Namespace `scout-build/v1`. Bearer token per site. Two tokens, both set in `wp-config.php` so a
-client administrator cannot read or change them from the dashboard, the same reason
-`SCOUT_HUB_OPERATORS` lives there:
+Namespace `scout-build/v1`. Bearer token per site. Two tokens. Since 0.10.0 operators make them on
+the Site log screen (shown once, stored encrypted like the theme key); `wp-config.php` constants are
+an optional override that wins when set:
 
 - `SCOUT_HUB_READ_TOKEN`: read only.
 - `SCOUT_HUB_WRITE_TOKEN`: read, and `POST /log` for `note` lines only. This is Claude's key for
@@ -130,8 +130,9 @@ partner-side sites unless `SCOUT_HUB_LOG_API` is true.
 - **Step 2, the Sheet.** An Apps Script in Scout's Google Workspace calls `/site`, `/log` and
   `/requests` on each listed site nightly and writes the Sites, Log and Requests tabs. The Clients
   tab is typed by Joy and Sean (decision 4).
-- **Step 3, Your site.** Reads lines with Show the client on: This month, Your requests, Coming up
-  (planned and waiting lines). Adds the Approve action.
+- **Step 3, Your site.** Built in 0.11.0: the same screen for non-operators, client lines only.
+  Waiting on you (Approve), This month, Your requests, Coming up, Earlier this year. An operator
+  puts something up for approval by adding a note with status waiting and Show the client on.
 - **Step 4, the monthly message.** Built from `/log?month=…&client=1`, parked for three days as a
   draft, sent through Scout Email as team@scoutraleigh.com after Joy or Sean approve it.
 

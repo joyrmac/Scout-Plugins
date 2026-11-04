@@ -1,13 +1,29 @@
 # Scout Build changelog
 
-## 0.11.0 (2026-11-04)
+## 0.12.0 (2026-11-04)
 
 - **The redesigned Scout menu (dashboard redesign, Joy 2026-11-04).** Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools. Every screen keeps its address; only where it is filed changes. The full map and the rules for filing new screens are in `docs/dashboard-map.md`.
-- **Home replaces Overview** as the first screen's name, in the sidebar and on the screen.
+- **Home replaces Overview** as the first screen's name, in the sidebar and on the screen. Your site stays under Home for clients.
 - **Who sees what.** Operators see everything, including Scout tools (Features, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log). Client owners see everything but Scout tools. Staff (anyone who cannot change site settings) see Home, Inbox and Your business.
 - **Greyed "Turn on" items are for operators only.** Clients only see groups that have something in them.
 - **The sidebar follows the menu order** even when the Scout menu is short enough not to be grouped.
 - **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
+
+## 0.11.1 (2026-11-04)
+
+- **Release rings (Site Standard rule 19).** A Scout plugin release now installs itself on scoutraleigh.com and staging copies first (ring 1), on Recon a day later (ring 2) and on client sites two days after it is out (ring 3). Until a site's turn the automatic update waits; Build, Updates says on each plugin's row when it installs, and Update now still works. The ring comes from `SCOUT_HUB_RING` in wp-config.php, the setting on the Updates screen, or the address. A release whose date the version list does not carry is never held, so nothing changes until the Release workflow publishes dates (this release adds them).
+- **Pause switch.** Build, Updates, "Pause automatic updates for 7 days" stops automatic Scout updates on one site; "Turn automatic updates back on" ends it early. Operators only.
+- **Hold a release everywhere.** A `hold` entry in catalog.json (`{"slug": "scout-build", "version": "0.10.0", "note": "Fix coming"}`, or `"version": "*"`) stops that release's automatic update on every site that reads the catalog (within 12 hours, or at once with Check for new versions). The Updates screen shows the hold and its note.
+- The version list (`releases.json` on the feed release) now carries each release's `published_at`.
+- Test: `php tools/tests/release-rings.php <wordpress>` (17 checks).
+
+## 0.11.0 (2026-11-04)
+
+- **Your site: the client's view of the Site log.** Anyone who is not a Scout operator opens the same screen as **Scout → Your site**: only lines marked "Client sees", in their client wording, with no versions, kinds or internal detail. Four parts: **Waiting on you** (anything Scout needs their OK on, with an Approve button), **This month**, **Your requests** (open ones, with the Request a change button) and **Coming up** (planned lines), then **Earlier this year**. It files under Overview for them (Build stays hidden), and the Overview's "With Scout" box links to it. Operators get a "See it as the client" link on the Site log. Step 3 of the Scout Client Hub.
+- **Approve.** A line an operator marks "Waiting on you" and shows to the client carries an Approve button there. Approving marks it done with the approver's name and date, writes an approval line ("Approved by Patrick McGuire: …") the client also sees, and emails Scout. The Inbox counts "Waiting on your OK" with the other queues. "Ask for a change first" opens the request form with the line filled in. This replaces screenshotting a text into a decisions log.
+- **The Scout box on the Dashboard** says how many updates the site had this month and how many things wait on the client's OK, with a link to Your site.
+
+- **Hub keys made on the site, no wp-config edit.** Joy: "can't I edit wp-config in WordPress?" No, and WP Engine turns the file editors off, so the keys the Scout Client Hub needs no longer require SFTP. On Scout → Site log, operators press **Make keys**: the site makes a read key (for the Sheet) and a write key (for Claude), shows them once, and stores them encrypted the way the theme key is stored. A client administrator never sees them again. **Make new keys** replaces the pair; **Forget the keys** turns the endpoint off. `SCOUT_HUB_READ_TOKEN` and `SCOUT_HUB_WRITE_TOKEN` in wp-config.php still work and win over keys made on the screen. Making keys writes a setup line in the log.
 
 ## 0.10.0 (2026-11-04)
 
