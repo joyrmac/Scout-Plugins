@@ -190,6 +190,7 @@ final class Scout_Hub_Inbox {
 				'when'    => time(),
 				'url'     => (string) $row['url'],
 				'waiting' => true,
+				'count'   => $count,
 			);
 		}
 
@@ -216,10 +217,53 @@ final class Scout_Hub_Inbox {
 				'when'    => (int) ( $item['when'] ?? 0 ),
 				'url'     => (string) $item['url'],
 				'waiting' => ! isset( $item['waiting'] ) || (bool) $item['waiting'],
+				'count'   => max( 1, (int) ( $item['count'] ?? 1 ) ),
 			);
 		}
 		usort( $clean, static fn( $a, $b ) => $b['when'] <=> $a['when'] );
 		return $clean;
+	}
+
+	/**
+	 * How many things wait on a person: the number on the sidebar bubble, the
+	 * menu hint and the All chip. It is counted from the same list the
+	 * Inbox shows, so the list and the bubble always agree. A count row from
+	 * another plugin counts as its own number.
+	 *
+	 * @param array $items Items from items().
+	 */
+	public static function total( array $items ): int {
+		return (int) array_sum( array_column( self::waiting( $items ), 'count' ) );
+	}
+
+	/**
+	 * The waiting items grouped for Today on Home: one row per kind (label,
+	 * count, url to that kind in the Inbox, note), and each Other item on its own.
+	 *
+	 * @param array $items Items from items().
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function rows( array $items ): array {
+		$names = array(
+			'chat'      => array( __( 'Chat questions', 'scout-build' ), __( 'Questions visitors asked the chat that it could not answer.', 'scout-build' ) ),
+			'reviews'   => array( __( 'New reviews', 'scout-build' ), __( 'Reviews that arrived since you last looked. Pick the ones to show.', 'scout-build' ) ),
+			'requests'  => array( __( 'Change requests', 'scout-build' ), __( 'Things you asked Scout for, with where each one stands.', 'scout-build' ) ),
+			'bookings'  => array( __( 'Booking requests', 'scout-build' ), __( 'People waiting to hear if their time works.', 'scout-build' ) ),
+			'sitecheck' => array( __( 'Site check requests', 'scout-build' ), __( 'People who asked for a site check and are waiting on a reply.', 'scout-build' ) ),
+		);
+		$rows = array();
+		foreach ( self::waiting( $items ) as $item ) {
+			$kind = $item['kind'];
+			if ( ! isset( $names[ $kind ] ) ) {
+				$rows[] = array( 'label' => $item['label'], 'count' => $item['count'], 'url' => $item['url'], 'note' => $item['preview'] );
+				continue;
+			}
+			if ( ! isset( $rows[ $kind ] ) ) {
+				$rows[ $kind ] = array( 'label' => $names[ $kind ][0], 'count' => 0, 'url' => Scout_Hub_Admin::url( 'inbox', array( 'show' => $kind ) ), 'note' => $names[ $kind ][1] );
+			}
+			$rows[ $kind ]['count'] += $item['count'];
+		}
+		return array_values( $rows );
 	}
 
 	/** Items still waiting on a person. */
@@ -314,7 +358,10 @@ final class Scout_Hub_Inbox {
 		$items   = self::items();
 		$waiting = self::waiting( $items );
 		$kinds   = self::kinds();
-		$counts  = array_count_values( array_column( $waiting, 'kind' ) );
+		$counts  = array();
+		foreach ( $waiting as $w ) {
+			$counts[ $w['kind'] ] = ( $counts[ $w['kind'] ] ?? 0 ) + $w['count'];
+		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a filter only.
 		$show = isset( $_GET['show'] ) ? sanitize_key( (string) $_GET['show'] ) : 'all';
 		$show = 'all' === $show || isset( $kinds[ $show ] ) ? $show : 'all';
@@ -351,7 +398,7 @@ final class Scout_Hub_Inbox {
 		<?php endif; ?>
 		<div class="sh-inbox-top">
 			<nav class="sh-chips" aria-label="<?php esc_attr_e( 'Show', 'scout-build' ); ?>">
-				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'inbox' ) ); ?>"<?php echo 'all' === $show ? ' aria-current="page"' : ''; ?>><?php echo esc_html( sprintf( /* translators: %d: waiting */ __( 'All · %d', 'scout-build' ), count( $waiting ) ) ); ?></a>
+				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'inbox' ) ); ?>"<?php echo 'all' === $show ? ' aria-current="page"' : ''; ?>><?php echo esc_html( sprintf( /* translators: %d: waiting */ __( 'All · %d', 'scout-build' ), self::total( $items ) ) ); ?></a>
 				<?php foreach ( $kinds as $key => $label ) : ?>
 					<?php
 					$has = (bool) array_filter( $items, static fn( $i ) => $i['kind'] === $key );

@@ -2,6 +2,7 @@
 
 ## 0.12.0 (2026-11-04)
 
+- **The Inbox count matches the list.** The sidebar bubble, the Inbox hint, the All chip and the Inbox rows on Today now count from the same list the Inbox shows, so site check requests and booking requests are counted too (found on the staging test: the list said 2, the bubble said 1).
 - **The redesigned Scout menu (dashboard redesign, Joy 2026-11-04).** Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools. Every screen keeps its address; only where it is filed changes. The full map and the rules for filing new screens are in `docs/dashboard-map.md`.
 - **Home replaces Overview** as the first screen's name, in the sidebar and on the screen. Your site stays under Home for clients.
 - **Who sees what.** Operators see everything, including Scout tools (Features, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log). Client owners see everything but Scout tools. Staff (anyone who cannot change site settings) see Home, Inbox and Your business.
