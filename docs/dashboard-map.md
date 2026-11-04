@@ -163,6 +163,10 @@ A Plus module gets its own sidebar section, directly under the Scout menu
 
 ## Building a screen: the one layout
 
+How it looks (colors, type, spacing, components, contrast) is in
+`tools/admin-kit/DESIGN.md`, with every value in `tools/admin-kit/tokens.json`.
+Use `var(--sh-…)` tokens; never type a hex into plugin CSS.
+
 Every Scout screen follows the same order, so nobody has to relearn a page.
 
 1. `Scout_Admin_UI::open( $title, $lede )`: the title, then one plain sentence

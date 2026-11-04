@@ -83,6 +83,10 @@ jobs:
         run: php tools/tests/design.php
       - name: Admin kit files every Scout screen by the dashboard map (docs/dashboard-map.md)
         run: php tools/tests/admin-kit-groups.php
+      - name: Dashboard tokens match tools/admin-kit/tokens.json, kit copies are current, contrast passes
+        run: |
+          php tools/admin-kit/build-tokens.php --check
+          php tools/tests/admin-tokens.php
       - name: Law firm disclaimer rules (no WordPress needed)
         run: php tools/tests/law-disclaimers.php
       - name: Law firm approval rules (no WordPress needed)

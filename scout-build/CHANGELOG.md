@@ -2,6 +2,7 @@
 
 ## 0.12.0 (2026-11-04)
 
+- **Shared admin kit 1.8.1: one token system for the dashboard.** Every color, size, radius, spacing step and shadow now comes from `tools/admin-kit/tokens.json` (rules in `tools/admin-kit/DESIGN.md`). Primary buttons, the active nav group and the active tab move from #0E8FE6 to the deeper #0A78C2 fill, so their white text passes AA (3.45:1 before, 4.69:1 now). Status dots and notices use the status tokens. Sizes now match the approved dashboard canvas (Recon branch): 16px body text, 34px page titles, 44px buttons, inputs and menu links, 18px card corners, 24px padding inside boxes. Larger text goes to 18px. CI checks the CSS matches the tokens and the contrast passes, including status text on its own tint.
 - **The Inbox count matches the list.** The sidebar bubble, the Inbox hint, the All chip and the Inbox rows on Today now count from the same list the Inbox shows, so site check requests and booking requests are counted too (found on the staging test: the list said 2, the bubble said 1).
 - **The redesigned Scout menu (dashboard redesign, Joy 2026-11-04).** Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools. Every screen keeps its address; only where it is filed changes. The full map and the rules for filing new screens are in `docs/dashboard-map.md`.
 - **Home replaces Overview** as the first screen's name, in the sidebar and on the screen. Your site stays under Home for clients.
