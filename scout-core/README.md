@@ -120,9 +120,11 @@ A theme lists the copy it bundles in `scout-sync.json` at its root: page
 content, page fields, SEO, shared settings, site title and tagline. Scout
 compares each item with what WordPress holds and with what was there at the
 last sync. Pages nobody edited update on their own after a theme update;
-anything changed in WordPress waits on **Scout → Site Sync** for "Keep the
-WordPress copy" or "Use the theme copy". Every sync can be undone. A theme
-without the file gets the screen in status-only mode.
+anything changed in WordPress waits on **Scout → Content → Site Sync** for
+"Keep the WordPress copy" or "Use the theme copy". A page the bundle names
+and the site lacks is created when its entry says `"create": true` (pages
+publish, `posts` arrive as drafts, 1.6.5). Every sync can be undone. A
+theme without the file gets the screen in status-only mode.
 
 Manifest format, states and write safety: `docs/site-sync-spec.md`
 ("As built"). Command line: `wp scout sync status`, `wp scout sync run
