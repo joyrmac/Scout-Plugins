@@ -1,5 +1,14 @@
 # Scout Build changelog
 
+## 0.11.0 (2026-11-04)
+
+- **The redesigned Scout menu (dashboard redesign, Joy 2026-11-04).** Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools. Every screen keeps its address; only where it is filed changes. The full map and the rules for filing new screens are in `docs/dashboard-map.md`.
+- **Home replaces Overview** as the first screen's name, in the sidebar and on the screen.
+- **Who sees what.** Operators see everything, including Scout tools (Features, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log). Client owners see everything but Scout tools. Staff (anyone who cannot change site settings) see Home, Inbox and Your business.
+- **Greyed "Turn on" items are for operators only.** Clients only see groups that have something in them.
+- **The sidebar follows the menu order** even when the Scout menu is short enough not to be grouped.
+- **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
+
 ## 0.10.0 (2026-11-04)
 
 - **The Scout menu is built around who is looking (Site Standard §7, v1.2; Joy, 2026-11-04).** Seven items, the same words in the sidebar and on the screen: **Overview**, **Your business**, **Content**, **Search and AI**, **Site health**, **Inbox**, **Build**. Every existing screen keeps its address; only where it is filed and what the first screen is change. Shared admin kit 1.7.0, with a test (`tools/tests/admin-kit-groups.php`) so the filing never drifts from the map.

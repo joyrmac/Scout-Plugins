@@ -64,10 +64,10 @@ final class Scout_Hub_Admin {
 				? 'data:image/svg+xml;base64,' . base64_encode( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0E8FE6" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>' ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				: 'dashicons-admin-generic';
 			add_menu_page( $label, $label, 'edit_posts', 'site-build', array( __CLASS__, 'render' ), $icon, 3 );
-			add_submenu_page( 'site-build', __( 'Overview', 'scout-build' ), __( 'Overview', 'scout-build' ), 'edit_posts', 'site-build', array( __CLASS__, 'render' ) );
+			add_submenu_page( 'site-build', __( 'Home', 'scout-build' ), __( 'Home', 'scout-build' ), 'edit_posts', 'site-build', array( __CLASS__, 'render' ) );
 		}
 		// Site Standard §7 (v1.2): the first screen is the Overview, for everyone.
-		add_submenu_page( $parent, __( 'Overview', 'scout-build' ), __( 'Overview', 'scout-build' ), 'edit_posts', self::PAGE, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Home', 'scout-build' ), __( 'Home', 'scout-build' ), 'edit_posts', self::PAGE, array( __CLASS__, 'render' ) );
 		if ( 'site-build' === $parent ) {
 			remove_submenu_page( 'site-build', self::PAGE ); // The section's first item already opens this screen.
 		}
@@ -108,9 +108,10 @@ final class Scout_Hub_Admin {
 				}
 			}
 		}
-		// Rule 11 again: every group shows on every site. A group with nothing on gets a
-		// stand-in entry that opens the Features screen, which the admin kit greys out.
-		if ( class_exists( 'Scout_Admin_UI' ) && defined( 'Scout_Admin_UI::GROUPS' ) ) {
+		// Operators see every group on every site: a group with nothing on gets a stand-in entry
+		// that opens the Features screen, which the admin kit greys out. Clients only see groups
+		// that have something in them (dashboard redesign, Joy 2026-11-04).
+		if ( class_exists( 'Scout_Admin_UI' ) && defined( 'Scout_Admin_UI::GROUPS' ) && Scout_Hub_Access::is_operator() ) {
 			$base = 'site-build' === $parent ? 'site-build' : self::PAGE;
 			$seen = array();
 			foreach ( $submenu[ $parent ] as $item ) {
@@ -118,6 +119,7 @@ final class Scout_Hub_Admin {
 			}
 			foreach ( Scout_Admin_UI::GROUPS as $key => $label ) {
 				if ( empty( $seen[ $key ] ) ) {
+					$label = method_exists( 'Scout_Admin_UI', 'label' ) ? Scout_Admin_UI::label( $key ) : $label;
 					add_submenu_page( $parent, $label, $label, 'edit_posts', $base . '&tab=features&group=' . $key, array( __CLASS__, 'render' ) );
 				}
 			}
@@ -156,9 +158,13 @@ final class Scout_Hub_Admin {
 			}
 			return ( $order[ $page ] ?? 1000 ) + $i;
 		};
-		$keyed = array();
+		// Group order first (Home, Inbox, Reports, Your business, Your website, Get found, Policies,
+		// Site health, Scout tools), then the order above inside each group.
+		$groups = class_exists( 'Scout_Admin_UI' ) && defined( 'Scout_Admin_UI::GROUPS' ) ? array_flip( array_keys( Scout_Admin_UI::GROUPS ) ) : array();
+		$keyed  = array();
 		foreach ( $items as $i => $item ) {
-			$keyed[] = array( $rank( $item, $i ), $i, $item );
+			$pos     = $groups ? (int) ( $groups[ Scout_Admin_UI::group( (string) ( $item[2] ?? '' ), wp_strip_all_tags( (string) ( $item[0] ?? '' ) ) ) ] ?? 0 ) : 0;
+			$keyed[] = array( $pos * 100000 + $rank( $item, $i ), $i, $item );
 		}
 		usort( $keyed, static fn( $x, $y ) => $x[0] <=> $y[0] ?: $x[1] <=> $y[1] );
 		$submenu[ $parent ] = array_column( $keyed, 2 ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering only.
@@ -312,7 +318,7 @@ final class Scout_Hub_Admin {
 		}
 		$tab  = sanitize_key( (string) ( $_GET['tab'] ?? 'overview' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$tabs = array(
-			'overview' => __( 'Overview', 'scout-build' ),
+			'overview' => __( 'Home', 'scout-build' ),
 			'inbox'    => __( 'Inbox', 'scout-build' ),
 			'features' => __( 'Features', 'scout-build' ),
 			'updates'  => __( 'Updates', 'scout-build' ),

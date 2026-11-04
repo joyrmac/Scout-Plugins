@@ -13,7 +13,7 @@
  *   Scout_Admin_UI::close();
  *
  * open() also prints the section nav, read live from WordPress's own menu: a
- * short row of groups (Overview, Your business, Content, Search and AI, Site health, Inbox, Build) with the open
+ * short row of groups (Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health, Scout tools) with the open
  * group's screens as tabs underneath. Every Scout screen shows the same nav,
  * and a new plugin lands in the right group without anyone editing a list
  * (scout_admin_nav_group moves a screen to another group).
@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.7.0';
+		const VERSION = '1.8.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -118,28 +118,55 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			echo '</div>';
 		}
 
-		/** The nav groups, in the order they show. */
+		/**
+		 * The nav groups, in the order they show (dashboard redesign, Joy 2026-11-04).
+		 * Keys stay stable so filters keep working: overview is shown as Home, search
+		 * as Get found, build as Scout tools. Plus modules (Bookings, Events, Members,
+		 * Partners, Writing room) keep their own sidebar sections and are not listed here.
+		 */
 		const GROUPS = array(
-			'overview' => 'Overview',
-			'business' => 'Your business',
-			'content'  => 'Content',
-			'search'   => 'Search and AI',
-			'health'   => 'Site health',
+			'overview' => 'Home',
 			'inbox'    => 'Inbox',
-			'build'    => 'Build',
+			'reports'  => 'Reports',
+			'business' => 'Your business',
+			'website'  => 'Your website',
+			'search'   => 'Get found',
+			'policies' => 'Policies',
+			'health'   => 'Site health',
+			'build'    => 'Scout tools',
 		);
 
+		/** Retired group keys, mapped to where their screens live now. */
+		const ALIASES = array( 'content' => 'website' );
+
+		/** A group's label for this site: Scout tools reads Build tools on a white-label site. */
+		public static function label( string $key ): string {
+			if ( 'build' === $key && ! self::branded() ) {
+				return 'Build tools';
+			}
+			return self::GROUPS[ $key ] ?? '';
+		}
+
+		/** Someone who looks after the site for Scout (SCOUT_HUB_OPERATORS). True when the hub is not installed. */
+		public static function is_operator(): bool {
+			return ! class_exists( 'Scout_Hub_Access', false ) || ! method_exists( 'Scout_Hub_Access', 'is_operator' ) || Scout_Hub_Access::is_operator();
+		}
+
 		/**
-		 * Groups this person does not see (Site Standard §7, v1.2). Build holds
-		 * the operator tools: features, updates, the theme key, the Site log.
-		 * Clients see everything else. The scout_admin_hidden_groups filter adjusts it.
+		 * Groups this person does not see. Scout tools is for operators only.
+		 * Staff (anyone who cannot manage the site's settings) see Home, Inbox
+		 * and Your business, plus any Plus section they work in. The
+		 * scout_admin_hidden_groups filter adjusts it.
 		 */
 		public static function hidden(): array {
 			$hidden = array();
-			if ( class_exists( 'Scout_Hub_Access', false ) && method_exists( 'Scout_Hub_Access', 'is_operator' ) && ! Scout_Hub_Access::is_operator() ) {
+			if ( ! self::is_operator() ) {
 				$hidden[] = 'build';
 			}
-			return (array) apply_filters( 'scout_admin_hidden_groups', $hidden );
+			if ( function_exists( 'current_user_can' ) && ! current_user_can( 'manage_options' ) ) {
+				$hidden = array_merge( $hidden, array( 'reports', 'website', 'search', 'policies', 'health' ) );
+			}
+			return array_values( array_unique( (array) apply_filters( 'scout_admin_hidden_groups', $hidden ) ) );
 		}
 
 		/** Scout sidebar menus the kit tidies. */
@@ -164,8 +191,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		private static $screen_slug = '';
 
 		/**
-		 * Shorten a long Scout sidebar menu to one link per group (Overview, Your
-		 * business, Content, Search and AI, Site health, Inbox, Build). Every screen stays registered and
+		 * Shorten a long Scout sidebar menu to one link per group (Home, Inbox,
+		 * Reports, Your business, Your website, Get found, Policies, Site health,
+		 * Scout tools). Every screen stays registered and
 		 * reachable; the others are hidden from the sidebar only, and the
 		 * section nav on each screen leads to them.
 		 */
@@ -212,7 +240,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					}
 					$item[3] = $item[3] ?? self::$labels[ $slug ];
 					if ( $lead[ $group ] === $i ) {
-						$item[0] = esc_html( self::GROUPS[ $group ] ) . ( $bubble[ $group ] ?? '' );
+						$item[0] = esc_html( self::label( $group ) ) . ( $bubble[ $group ] ?? '' );
 						if ( self::is_off( $slug ) ) {
 							$item[4] = trim( ( $item[4] ?? '' ) . ' sh-menu-off' ); // Nothing on in this group yet: greyed, opens Turn on.
 						}
@@ -321,7 +349,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			$page = strtok( $s, '&' );
 			$hub  = in_array( $page, array( 'site-build-features', 'site-build' ), true );
 			if ( $hub && ! preg_match( '/tab=/', $s ) ) {
-				$group = 'overview'; // The hub's first screen.
+				$group = 'overview'; // Home, the hub's first screen.
 			} elseif ( $hub && preg_match( '/tab=(features|updates|log)\b/', $s ) ) {
 				$group = 'build';
 			} elseif ( $hub && preg_match( '/tab=(inbox|requests)\b/', $s ) ) {
@@ -330,24 +358,31 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'health';
 			} elseif ( 'search health' === $l ) {
 				$group = 'health';
-			} elseif ( preg_match( '/tab=(sync|writing)\b/', $s ) || preg_match( '/scout-(redirects|optimize|writing)/', $page ) || false !== strpos( $page, 'writing' ) ) {
-				$group = 'content';
-			} elseif ( preg_match( '/tab=(seo|protect)\b/', $s ) || preg_match( '/scout-(ai-search|analytics|accessibility|sitecheck)|site-build-robots|post_type=scout_sitecheck/', $s ) ) {
-				$group = 'search';
-			} elseif ( preg_match( '/tab=changes\b/', $s ) || preg_match( '/^(scout-mail|scout-chat|scout-events-crm)$/', $page ) || false !== strpos( $l, 'theme' ) || false !== strpos( $l, 'customer list' ) ) {
-				$group = 'build';
-			} elseif ( preg_match( '/scout-reviews-(inbox|ask)|post_type=scout_chat_q|post_type=scout_hub_request/', $s ) || preg_match( '/^(review inbox|ask for reviews|chat questions|request a change|inbox)$/', $l ) ) {
+			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || preg_match( '/^(scout-mail|scout-chat|scout-events-crm)$/', $page ) || false !== strpos( $l, 'theme' ) || false !== strpos( $l, 'customer list' ) ) {
+				$group = 'build'; // Operator tools: Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen.
+			} elseif ( preg_match( '/scout-reviews-(inbox|ask)|post_type=scout_chat_q|post_type=scout_hub_request|post_type=scout_sitecheck/', $s ) || preg_match( '/^(review inbox|ask for reviews|chat questions|request a change|inbox|site checks)$/', $l ) ) {
 				$group = 'inbox';
+			} elseif ( preg_match( '/tab=protect\b/', $s ) || preg_match( '/scout-optimize/', $page ) ) {
+				$group = 'health'; // Spam protection and the image optimizer report on whether things are working.
+			} elseif ( preg_match( '/scout-(accessibility|policies|disclaimers|privacy)/', $page ) ) {
+				$group = 'policies';
+			} elseif ( preg_match( '/tab=seo\b/', $s ) || preg_match( '/scout-(ai-search|analytics|search|sitemap)|site-build-robots/', $page ) ) {
+				$group = 'search';
+			} elseif ( preg_match( '/scout-recon/', $page ) || 'reports' === $l ) {
+				$group = 'reports';
+			} elseif ( preg_match( '/scout-(contact|redirects|cards|newsletter|sitecheck|reviews-settings)|post_type=scout_review\b/', $s ) || false !== strpos( $page, 'writing' ) ) {
+				$group = 'website'; // Call buttons, Redirects, Cards & Links, Newsletter, Site check settings, Reviews.
 			} else {
-				$group = 'business'; // Business info, Call buttons, Hours, Team, Case results, Reviews, Cards, Booking, Events, Members, Partners, Newsletter, a companion's types.
+				$group = 'business'; // Business info, Hours, Team, Case results, a companion's own types, and each Plus section's own screens.
 			}
 			$group = (string) apply_filters( 'scout_admin_nav_group', $group, $slug, $label );
-			return isset( self::GROUPS[ $group ] ) ? $group : 'website';
+			$group = self::ALIASES[ $group ] ?? $group;
+			return isset( self::GROUPS[ $group ] ) ? $group : 'business';
 		}
 
 		/**
 		 * The section nav: every screen in this screen's sidebar menu, sorted into a
-		 * short row of groups (Overview, Your business, Content, Search and AI, Site health, Inbox, Build). The open
+		 * short row of groups (Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health, Scout tools). The open
 		 * group's screens show as tabs underneath. Empty groups never show.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
@@ -396,7 +431,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			$groups   = array_fill_keys( array_keys( self::GROUPS ), array() );
 			$open     = '';
 			$hidden   = self::hidden();
-			$operator = ! class_exists( 'Scout_Hub_Access', false ) || ! method_exists( 'Scout_Hub_Access', 'is_operator' ) || Scout_Hub_Access::is_operator();
+			$operator = self::is_operator();
 			foreach ( $items as $item ) {
 				$slug  = (string) $item[2];
 				$label = self::$labels[ $slug ] ?? self::clean( (string) $item[0] );
@@ -405,6 +440,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					continue;
 				}
 				$off = self::is_off( $slug );
+				if ( $off && ! $operator ) {
+					continue; // A stand-in for a group with nothing on: operators only.
+				}
 				$groups[ $key ][] = array(
 					'url'   => false !== strpos( $slug, '.php' ) ? admin_url( $slug ) : admin_url( 'admin.php?page=' . $slug ),
 					'label' => $label,
@@ -416,9 +454,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					$open = $key;
 				}
 			}
-			// Site Standard rule 11: with the Scout Build hub on the site, every group shows in the
-			// same place on every site. A group with nothing on is greyed; for an operator it opens
-			// the Features screen to turn something on. Without the hub, empty groups stay out.
+			// Operators see every group in the same place on every site: a group with nothing on is
+			// greyed and opens the Features screen to turn something on. Clients only see groups that
+			// have something in them (Joy, 2026-11-04: features that are off stay out of the way).
 			$overview = '';
 			foreach ( $groups['overview'] as $entry ) {
 				if ( preg_match( '#page=(site-build-features|site-build)(&|$)#', $entry['url'] ) ) {
@@ -429,9 +467,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			foreach ( $groups as $key => $entries ) {
 				if ( in_array( $key, $hidden, true ) ) {
 					unset( $groups[ $key ] );
-				} elseif ( ! $entries && '' !== $overview ) {
-					$url = $operator ? add_query_arg( array( 'tab' => 'features', 'group' => $key ), $overview ) : $overview;
-					$groups[ $key ][] = array( 'url' => $url, 'label' => self::GROUPS[ $key ], 'hint' => $operator ? __( 'Turn on', 'scout-build' ) : __( 'Not on', 'scout-build' ), 'on' => false, 'off' => true );
+				} elseif ( ! $entries && '' !== $overview && $operator ) {
+					$url = add_query_arg( array( 'tab' => 'features', 'group' => $key ), $overview );
+					$groups[ $key ][] = array( 'url' => $url, 'label' => self::label( $key ), 'hint' => __( 'Turn on', 'scout-build' ), 'on' => false, 'off' => true );
 				}
 			}
 			$groups = array_filter( $groups );
@@ -455,7 +493,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				foreach ( $groups as $key => $entries ) {
 					// A one-screen group links straight to it and carries its hint.
 					$solo = 1 === count( $entries );
-					$link( $entries[0], self::GROUPS[ $key ], $key === $open, $solo ? $entries[0]['hint'] : '' );
+					$link( $entries[0], self::label( $key ), $key === $open, $solo ? $entries[0]['hint'] : '' );
 				}
 				echo '</div>';
 			}

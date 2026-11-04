@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.6.5 (2026-11-04)
+
+- **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
+
 ## 1.6.4 (2026-11-04)
 
 - **Hours live in one place.** With Scout Hours on, Business info no longer shows its free-text hours box; it points at Your business, Hours instead (Site Standard §7 v1.2: one fact, one place; Joy, 2026-11-04). The old text stays saved and untouched until the site's conversion copies it into Scout Hours.

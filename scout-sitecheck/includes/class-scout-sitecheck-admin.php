@@ -70,7 +70,11 @@ final class Scout_Sitecheck_Admin {
 
 	/** Site checks are leads, so they sit with the business screens. */
 	public static function nav_group( string $group, string $slug ): string {
-		return false !== strpos( $slug, 'sitecheck' ) ? 'business' : $group;
+		if ( false === strpos( $slug, 'sitecheck' ) ) {
+			return $group;
+		}
+		// Requests from visitors wait in the Inbox; the settings sit with the rest of the website.
+		return false !== strpos( $slug, 'post_type=' ) ? 'inbox' : 'website';
 	}
 
 	public static function highlight( $file ) {

@@ -16,21 +16,27 @@ menu, which the hub relabels Scout until that theme's conversion), otherwise
 as its own top-level section with the cerulean bolt. **Site Build** instead
 of Scout when `SCOUT_HUB_BRAND` is false.
 
-Seven items, the same words in the sidebar and on the screen, built around
-who is looking:
+The same words in the sidebar and on the screen, built around who is looking
+(dashboard redesign, Joy 2026-11-04). The full map, and how to file a new
+screen or feature, is in `../docs/dashboard-map.md`.
 
 | Item | Who | What it holds |
 |---|---|---|
-| **Overview** | everyone, the first screen | Is the site all right (from Site health), Needs you (the Inbox counts), With Scout (updates, the theme, the last Site log lines), the things a client does here (change a page, write a post, update hours, ask for a review), and "Want something added? Ask Scout." |
-| **Your business** | client, editor | Business info, Call buttons, Hours, Team, Case results, Reviews and Review settings, Cards & Links, Booking, Events, Members, Partners, Newsletter, a companion plugin's own types. Each fact typed once. |
-| **Content** | editor | Site Sync, Redirects, Image optimizer, Writing. |
-| **Search and AI** | client admin | SEO, AI search, Analytics, Accessibility, Spam protection, Site checks, robots.txt. |
-| **Site health** | everyone | The whole report, Copy for Claude. |
-| **Inbox** | client, operator | Everything waiting on a person with one count: change requests, chat questions, new reviews, Ask for reviews. Other plugins add a queue with the `scout_hub_inbox` filter. |
-| **Build** | operators only | Features (turn on, off, back), Updates (theme and key, plugins, Fill from theme, Site Sync, Import posts, Site settings, Change log), Site log, Email, Chat settings, Customer list, a theme's own screen. Hidden from everyone who is not an operator; every action on it still checks for one. |
+| **Home** | everyone, the first screen | Is the site all right, what needs you, what Scout is doing, the things a client does here, and one line to ask for more. |
+| **Inbox** | everyone | Everything waiting on a person, with one count: change requests and their status, chat questions, new reviews, Ask for reviews, site check requests. Other plugins add a queue with the `scout_hub_inbox` filter. |
+| **Reports** | owner, operator | Recon's numbers, when Recon is on. Empty groups never show to clients. |
+| **Your business** | everyone | Facts typed once: Business info, Hours, Team, Case results, a companion plugin's own types. |
+| **Your website** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & Links, Newsletter, Redirects, Site check settings. |
+| **Get found** | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, and later site search and the sitemap. |
+| **Policies** | owner, operator | Accessibility statement now; privacy policy, terms and law-firm disclaimers as they arrive. |
+| **Site health** | owner, operator | The whole report, Search health, Spam protection, the image optimizer. |
+| **Scout tools** | operators only | Features, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen. Reads **Build tools** when `SCOUT_HUB_BRAND` is false. Every action on it still checks for an operator. |
+
+Plus modules (Bookings, Events, Members, Partners, Writing room) keep their own
+sidebar sections and only appear on sites that have them.
 
 The shared admin kit (`tools/admin-kit/`) files every Scout screen into these
-seven by its slug, and `tools/tests/admin-kit-groups.php` fails when a screen
+groups by its slug, and `tools/tests/admin-kit-groups.php` fails when a screen
 drifts from the map. A screen never moves its address; only where it is filed.
 
 ## Settings in `wp-config.php`
