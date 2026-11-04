@@ -39,7 +39,9 @@ final class Scout_Law_Admin {
 	}
 
 	public static function url( array $args = array() ): string {
-		$base = 'options-general.php' === self::parent() ? admin_url( 'options-general.php?page=' . self::SLUG ) : admin_url( 'admin.php?page=' . self::SLUG );
+		// admin.php?page= opens the screen wherever its menu is. The parent is unknown while a
+		// form saves (admin-post.php builds no menu), and options-general.php?page= then fails.
+		$base = admin_url( 'admin.php?page=' . self::SLUG );
 		return $args ? add_query_arg( $args, $base ) : $base;
 	}
 

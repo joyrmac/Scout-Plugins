@@ -87,6 +87,8 @@ jobs:
         run: php tools/tests/law-disclaimers.php
       - name: Law firm approval rules (no WordPress needed)
         run: php tools/tests/law-approvals.php
+      - name: Law firm "Reviewed by" due dates (no WordPress needed)
+        run: php tools/tests/law-reviews.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)

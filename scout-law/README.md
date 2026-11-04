@@ -64,7 +64,24 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 - Filter `scout_law_approval_types` adjusts the list of post types. Action
   `scout_law_content_approved` runs on each approval.
 
+## "Reviewed by" stamps (0.3.0)
+
+- An attorney on the firm's Team (Team profile with **Attorney** ticked) signs a
+  page as reviewed: the **Reviewed by** panel in the block editor, the classic
+  editor box, or **Scout → Policies → Page reviews**. The name and the date are
+  saved together, only when "Reviewed today" is ticked.
+- The page shows "Reviewed by *attorney*, *role*. Last reviewed *date*." under
+  its words, linked to the profile, and its schema gains `reviewedBy` (the
+  Person node from Scout Team) and `lastReviewed`. Turn the line off in More
+  options; a theme places it itself with `add_theme_support( 'scout-law-reviewed' )`
+  and `scout_law_reviewed()`.
+- Pages not reviewed in the review period (6 months by default) are listed on
+  Page reviews, counted in the Inbox, and put on Home's Today list. The privacy
+  page is left out (it has its own yearly review).
+- Scout team logins never appear: only Team profiles can sign.
+- Filter `scout_law_review_types`; action `scout_law_page_reviewed`. Every
+  review is kept in `scout_law_review_log`.
+
 ## Coming next
 
-In priority order: "Reviewed by" stamps with a six-month review list on Home,
-then form entries that delete themselves after a set time.
+Form entries that delete themselves after 90 days on law-firm sites (Joy, 2026-11-04).

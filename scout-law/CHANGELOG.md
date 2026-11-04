@@ -1,5 +1,12 @@
 # Scout Law Firm Tools changelog
 
+## 0.3.0 (2026-11-04)
+
+- **"Reviewed by" stamps.** An attorney on the firm's Team (a Team profile with "Attorney" ticked) signs a page as reviewed, from the page's Reviewed by panel in the block editor, the classic editor box, or Scout → Policies → Page reviews. The page then shows "Reviewed by <attorney>, <role>. Last reviewed <date>." under its words, linked to the attorney's profile, and its schema gains `reviewedBy` (the attorney's Person node from Scout Team) and `lastReviewed`. The name and the date are always saved together. Reviewing a page does not change its words, so it needs no new approval.
+- **Pages due for a review.** Pages no attorney has reviewed in the review period (6 months by default; 3 or 12 in More options) are listed on Page reviews with a "Reviewed today" button each, counted in the Inbox, and put on Home's Today list (`scout_hub_today`) with about five minutes each. The privacy page is left out; it gets its own yearly review under Policies. Pages are the default; posts and other kinds can be added.
+- **Fix: saving Disclaimers or Approvals returned to a "not allowed" page** on sites with the Scout menu. While a form saves, WordPress builds no menu, so the plugin thought it lived under Settings and sent people to `options-general.php?page=…`, which WordPress refuses for a screen in the Scout menu. Every Scout Law screen now links to `admin.php?page=…`, which opens wherever its menu is.
+- Themes place the line themselves with `add_theme_support( 'scout-law-reviewed' )` and `scout_law_reviewed()`. Filter `scout_law_review_types`; action `scout_law_page_reviewed`. Every review is kept in `scout_law_review_log`.
+
 ## 0.2.1 (2026-11-04)
 
 - **Fix: the approval record points at the version the attorney approved.** In the block editor, when the words changed in the same save as the approval, the record named the revision before it (the words the firm had not seen). The record now finds the revision by its exact words, after WordPress has saved it. Found testing 0.2.0 in a live block editor.
