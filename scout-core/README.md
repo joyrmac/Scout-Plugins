@@ -209,7 +209,7 @@ theme without DESIGN.md still gets sensible tokens.
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.
 
-## Breadcrumbs, verification, thank-you pages and hardening (1.7.0+)
+## Breadcrumbs, verification, thank-you pages, hardening and cache purge (1.7.0+)
 
 - **Breadcrumbs:** a theme declares `add_theme_support( 'scout-breadcrumbs' )` and calls
   `scout_core_breadcrumbs()` where the links go. Core then adds the matching
@@ -224,6 +224,9 @@ line runs only while `! scout_core_owns( 'hours' )`.
 - **Hardening:** switches under spam protection (`hide_users`, `xmlrpc_off`,
   `browser_headers`). Filters: `scout_core_hide_users`, `scout_core_xmlrpc_needed`,
   `scout_core_browser_headers`. Themes and companions stop doing this themselves.
+- **Cache purge:** after the active theme or a Scout plugin updates, WP Engine and WP
+  Rocket caches purge by themselves (`scout_core_purge_after_update`). Cloudflare is
+  still purged by hand.
 
 ## APIs other plugins depend on
 

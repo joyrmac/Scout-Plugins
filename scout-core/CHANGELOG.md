@@ -2,7 +2,7 @@
 
 ## 1.7.0 (2026-11-04)
 
-Four Site Standard gaps close in Core, so themes can drop their own copies.
+Five Site Standard gaps close in Core, so themes can drop their own copies.
 
 - **Breadcrumbs (gap 3).** One trail feeds both the `BreadcrumbList` schema and the visible links. The trail runs Home, then a page's parent pages, the blog page for a post, or a content type's archive. A theme turns it on with `add_theme_support( 'scout-breadcrumbs' )` and shows the links with `scout_core_breadcrumbs()`. It is off until a theme asks, because many themes still print their own and two would disagree (rule 20). It is skipped when something else already added a `BreadcrumbList`. Filter `scout_core_breadcrumb_trail`.
 - **Search engine verification (gap 1).** Scout → Get found → SEO has fields for the Google Search Console and Bing Webmaster Tools codes. Paste the code or the whole meta tag, and only the code is kept. The tags print on the front page. Google's HTML file name is refused, because it is a file check and not a code.
@@ -12,6 +12,7 @@ Four Site Standard gaps close in Core, so themes can drop their own copies.
   - XML-RPC is off, unless Jetpack is installed.
   - Every page sends `nosniff`, `SAMEORIGIN` framing and a referrer policy, plus HSTS on SSL, and the WordPress version is hidden. A header the host already sets is kept.
   - This is the same code Bliss Boogie's companion and Maravela's theme run, so both can drop theirs. Until they do, the filters run twice with the same result.
+- **Caches purge themselves after an update (gap 5).** When the active theme or any Scout plugin is updated or replaced, Core purges WP Engine's caches (and WP Rocket's, where a site runs it), so pages stop pointing at old styles. Cloudflare still needs a hand purge, because that takes the site's Cloudflare key. Filter `scout_core_purge_after_update`; action `scout_core_caches_purged`. Bliss Boogie's theme can drop its own purge.
 - Fix: saving the SEO screen kept only the fields it shows, which wiped `purge_on_uninstall`. Keys the screen doesn't show are now kept.
 - Tests: `tools/tests/core-seo-gaps.php` (23 checks).
 

@@ -46,6 +46,7 @@ require __DIR__ . '/../../scout-core/includes/seo/seo-settings.php';
 require __DIR__ . '/../../scout-core/includes/seo/class-seo-head.php';
 require __DIR__ . '/../../scout-core/includes/seo/class-seo-breadcrumbs.php';
 require __DIR__ . '/../../scout-core/includes/protection.php';
+require __DIR__ . '/../../scout-core/includes/cache-purge.php';
 
 // Verification codes.
 $S = 'Scout_Core_SEO_Settings';
@@ -89,6 +90,16 @@ $f = $P::fields();
 ok( isset( $f['hide_users'], $f['xmlrpc_off'], $f['browser_headers'] ), 'the three hardening switches are listed' );
 $GLOBALS['opts']['scout_core_protection'] = array( 'email_guard' => '1', 'close_comments' => '0' );
 ok( $P::on( 'hide_users' ) && $P::on( 'xmlrpc_off' ) && ! $P::on( 'close_comments' ), 'a site that saved the old switches gets the new ones on, and keeps its own choices' );
+
+// Cache purge after an update.
+$C = 'Scout_Core_Cache';
+ok( 'theme' === $C::reason( array( 'type' => 'theme', 'action' => 'update', 'themes' => array( 'scout-media' ) ), '', 'scout-media', 'scout-media' ), 'the active theme updating purges' );
+ok( 'theme' === $C::reason( array( 'type' => 'theme', 'action' => 'install' ), 'scout-base', 'firm-child', 'scout-base' ), 'replacing the parent theme by upload purges' );
+ok( '' === $C::reason( array( 'type' => 'theme', 'action' => 'update', 'themes' => array( 'twentytwentyfive' ) ), '', 'scout-media', 'scout-media' ), 'an inactive theme updating does not purge' );
+ok( 'plugin' === $C::reason( array( 'type' => 'plugin', 'action' => 'update', 'plugins' => array( 'akismet/akismet.php', 'scout-core/scout-core.php' ) ), '', 'x', 'x' ), 'a bulk update that includes a Scout plugin purges once' );
+ok( '' === $C::reason( array( 'type' => 'plugin', 'action' => 'update', 'plugins' => array( 'akismet/akismet.php' ) ), '', 'x', 'x' ), 'another plugin updating does not purge' );
+ok( 'plugin' === $C::reason( array( 'type' => 'plugin', 'action' => 'install' ), 'scout-law', 'x', 'x' ), 'uploading a Scout plugin zip purges' );
+ok( '' === $C::reason( array( 'type' => 'translation' ), '', 'x', 'x' ), 'a translation update does not purge' );
 
 echo $fail ? "\n$fail FAILED\n" : "\nAll Core 1.7.0 checks passed\n";
 exit( $fail ? 1 : 0 );

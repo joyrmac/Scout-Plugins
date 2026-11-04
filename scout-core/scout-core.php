@@ -49,6 +49,8 @@ require_once SCOUT_CORE_DIR . 'includes/universal-types.php';
 /* ---- Spam protection: email guard, comments and pingbacks closed (both on by default) ---- */
 require_once SCOUT_CORE_DIR . 'includes/protection.php';
 Scout_Core_Protection::init();
+require_once SCOUT_CORE_DIR . 'includes/cache-purge.php';
+Scout_Core_Cache::init();
 
 /* ---- Schema module (was scout-schema) ---- */
 require_once SCOUT_CORE_DIR . 'includes/schema/class-scout-schema.php';
