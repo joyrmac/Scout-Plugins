@@ -253,6 +253,11 @@ final class Scout_Hub_Mail {
 	 * @param array  $buttons Each [ label, url ]; the first is filled, the rest outlined.
 	 * @param string $footer  Plain text for the footer line.
 	 */
+	/** The branded card, for other parts of Scout Build (the monthly update). Same arguments as card(). */
+	public static function branded_card( string $eyebrow, string $title, string $body, array $buttons, string $footer ): string {
+		return self::card( $eyebrow, $title, $body, $buttons, $footer );
+	}
+
 	private static function card( string $eyebrow, string $title, string $body, array $buttons, string $footer ): string {
 		$accent = self::accent();
 		$ink    = self::ink( $accent );

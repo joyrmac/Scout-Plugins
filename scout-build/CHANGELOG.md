@@ -1,5 +1,10 @@
 # Scout Build changelog
 
+## 0.12.0 (2026-11-04)
+
+- **The monthly update to the client, built from the Site log.** On Scout → Build → Site log, a new **Monthly update to the client** box. Early each month the site drafts "Your website this month" from last month's lines marked Client sees, in their client wording with the measure beside any result, then what waits on the client's OK and what is coming up. Nothing sends by itself: an operator reads the draft, changes the opening if they want, and presses **Send** (or **Skip**). Team@ hears when a draft is ready and again after three days if it is still waiting. The draft warns when a line has no client wording yet. Sent in the site's branded email card through Scout Email, reply-to team@. Step 4 of the Scout Client Hub.
+- **Who gets it and how often**, per site: off (the default), monthly, or quarterly for The Partnership (drafted in January, April, July and October for the quarter before). **Text, sent by hand** for clients who read texts (Patrick): the box shows a short text to copy, and **I texted it** marks it sent. **Make a draft** builds one now for any of the last six months. Sending writes a line in the log.
+
 ## 0.11.0 (2026-11-04)
 
 - **Your site: the client's view of the Site log.** Anyone who is not a Scout operator opens the same screen as **Scout → Your site**: only lines marked "Client sees", in their client wording, with no versions, kinds or internal detail. Four parts: **Waiting on you** (anything Scout needs their OK on, with an Approve button), **This month**, **Your requests** (open ones, with the Request a change button) and **Coming up** (planned lines), then **Earlier this year**. It files under Overview for them (Build stays hidden), and the Overview's "With Scout" box links to it. Operators get a "See it as the client" link on the Site log. Step 3 of the Scout Client Hub.

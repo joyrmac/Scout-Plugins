@@ -1317,6 +1317,7 @@ final class Scout_Hub_Admin {
 		</section>
 
 		<?php if ( $operator ) : ?>
+			<?php Scout_Hub_Report::panel(); ?>
 			<div class="sh-grid sh-grid-2">
 				<section class="sh-box sh-log-note" id="sh-log-note">
 					<p class="sh-label"><?php esc_html_e( 'Add a note', 'scout-build' ); ?></p>

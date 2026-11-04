@@ -133,8 +133,10 @@ partner-side sites unless `SCOUT_HUB_LOG_API` is true.
 - **Step 3, Your site.** Built in 0.11.0: the same screen for non-operators, client lines only.
   Waiting on you (Approve), This month, Your requests, Coming up, Earlier this year. An operator
   puts something up for approval by adding a note with status waiting and Show the client on.
-- **Step 4, the monthly message.** Built from `/log?month=…&client=1`, parked for three days as a
-  draft, sent through Scout Email as team@scoutraleigh.com after Joy or Sean approve it.
+- **Step 4, the monthly message.** Built in 0.12.0 (`class-scout-hub-report.php`): drafted from the
+  month's client lines on the site itself, never sent without an operator pressing Send, team@ reminded
+  after three days. Email through Scout Email, or a short text to send by hand. Quarterly option for
+  The Partnership.
 
 ## Importing the history
 
