@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Law Firm Tools
  * Description:       The pieces a law firm's website needs to stay careful: the firm's disclaimer lines set once and shown everywhere they belong, and approval before publishing for chosen pages and posts, with every approval kept as the firm's advertising record.
- * Version:           0.2.0
+ * Version:           0.2.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_LAW_VERSION', '0.2.0' );
+define( 'SCOUT_LAW_VERSION', '0.2.1' );
 define( 'SCOUT_LAW_FILE', __FILE__ );
 define( 'SCOUT_LAW_URL', plugin_dir_url( __FILE__ ) );
 

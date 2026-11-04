@@ -1,5 +1,10 @@
 # Scout Law Firm Tools changelog
 
+## 0.2.1 (2026-11-04)
+
+- **Fix: the approval record points at the version the attorney approved.** In the block editor, when the words changed in the same save as the approval, the record named the revision before it (the words the firm had not seen). The record now finds the revision by its exact words, after WordPress has saved it. Found testing 0.2.0 in a live block editor.
+- **Fix: a held publish says so.** Publishing without an approval in the block editor showed WordPress's "Draft saved". It now says "Saved as Pending review, not published" and points at the Firm approval panel.
+
 ## 0.2.0 (2026-11-04)
 
 - **Approval before publishing (Scout → Policies → Approvals).** Blog posts and team bios need the firm's approval before they go live, and the firm can add pages or other content. Publishing without an approval saves the item as Pending review, from the block editor, the classic editor, quick edit or code.

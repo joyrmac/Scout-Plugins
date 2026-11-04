@@ -67,6 +67,41 @@
 		);
 	}
 
+	// A publish held for the firm's approval comes back as Pending review. Say so
+	// in place of WordPress's "Draft saved", so nobody thinks it went live or got lost.
+	( function () {
+		var wanted = '';
+		var saving = false;
+		wp.data.subscribe( function () {
+			var ed = wp.data.select( 'core/editor' );
+			if ( ! ed || ! ed.isSavingPost ) {
+				return;
+			}
+			// Saving finishes when both the post and any old-style boxes are saved.
+			var now = ( ed.isSavingPost() && ! ed.isAutosavingPost() ) || !! ( wp.data.select( 'core/edit-post' ) && wp.data.select( 'core/edit-post' ).isSavingMetaBoxes && wp.data.select( 'core/edit-post' ).isSavingMetaBoxes() );
+			if ( now && ! saving ) {
+				wanted = ed.getEditedPostAttribute( 'status' );
+			}
+			var finished = ! now && saving;
+			saving = now; // Set before dispatching: a notice changes the store and calls this again.
+			if ( finished && 'pending' !== ed.getCurrentPostAttribute( 'status' ) ) {
+				wp.data.dispatch( 'core/notices' ).removeNotice( 'scout-law-held' ); // Published now: the warning no longer applies.
+			}
+			if ( finished && ( 'publish' === wanted || 'future' === wanted ) && 'pending' === ed.getCurrentPostAttribute( 'status' ) ) {
+				wanted = '';
+				// Run after WordPress adds its own "saved" snackbar, then replace it.
+				setTimeout( function () {
+					var notices = wp.data.dispatch( 'core/notices' );
+					notices.removeNotice( 'editor-save' );
+					notices.createWarningNotice(
+						__( 'Saved as Pending review, not published. It goes live once an attorney\'s approval is recorded in the Firm approval panel.', 'scout-law' ),
+						{ id: 'scout-law-held', isDismissible: true }
+					);
+				}, 0 );
+			}
+		} );
+	} )();
+
 	wp.plugins.registerPlugin( 'scout-law-approval', {
 		render: function () {
 			return el(

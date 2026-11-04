@@ -43,6 +43,7 @@ final class Scout_Law_Approvals {
 		add_action( 'transition_post_status', array( __CLASS__, 'guard_transition' ), 10, 3 );
 		add_filter( 'redirect_post_location', array( __CLASS__, 'redirect' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'notice' ) );
+		add_action( 'wp_after_insert_post', array( __CLASS__, 'pin_revision' ), 20, 1 );
 		add_filter( 'scout_hub_inbox', array( __CLASS__, 'inbox' ) );
 		foreach ( self::types() as $type ) {
 			add_filter( 'rest_pre_insert_' . $type, array( __CLASS__, 'rest_gate' ), 10, 2 );
@@ -112,10 +113,9 @@ final class Scout_Law_Approvals {
 		update_post_meta( $post_id, self::AT, $now );
 		update_post_meta( $post_id, self::HASH, $hash );
 
-		$revisions = wp_get_post_revisions( $post_id, array( 'numberposts' => 1 ) );
-		$log       = get_option( self::LOG, array() );
-		$log       = is_array( $log ) ? $log : array();
-		$log[]     = array(
+		$log   = get_option( self::LOG, array() );
+		$log   = is_array( $log ) ? $log : array();
+		$log[] = array(
 			'post'     => $post_id,
 			'type'     => $post->post_type,
 			'title'    => $post->post_title,
@@ -123,11 +123,52 @@ final class Scout_Law_Approvals {
 			'at'       => $now,
 			'user'     => get_current_user_id(),
 			'hash'     => $hash,
-			'revision' => $revisions ? (int) array_key_first( $revisions ) : 0,
+			'revision' => self::revision_for( $post_id, $hash ),
 		);
 		update_option( self::LOG, $log, false );
+		// The block editor records the approval before WordPress saves the new
+		// revision, so the exact version may not exist yet. Point the record at
+		// it once WordPress has saved it (after wp_save_post_revision_on_insert, priority 9).
+		if ( 0 === (int) end( $log )['revision'] ) {
+			self::$unpinned[ $post_id ] = $hash;
+		}
 		/** The firm's approval of an item was recorded. The Site log can listen. */
 		do_action( 'scout_law_content_approved', $post_id, $by );
+	}
+
+	/** @var array<int,string> Approvals recorded on this request whose revision did not exist yet: post id => fingerprint. */
+	private static $unpinned = array();
+
+	/** The newest revision holding exactly these words, or 0. Matched by the words, never by position. */
+	public static function revision_for( int $post_id, string $hash ): int {
+		foreach ( wp_get_post_revisions( $post_id, array( 'numberposts' => 10 ) ) as $id => $rev ) {
+			if ( hash_equals( $hash, self::fingerprint( $rev->post_title, $rev->post_content ) ) ) {
+				return (int) $id;
+			}
+		}
+		return 0;
+	}
+
+	/** Once the post and its revision are saved, point fresh approvals at the version the firm approved. */
+	public static function pin_revision( int $post_id ): void {
+		if ( empty( self::$unpinned[ $post_id ] ) ) {
+			return;
+		}
+		$hash = self::$unpinned[ $post_id ];
+		unset( self::$unpinned[ $post_id ] );
+		$rev = self::revision_for( $post_id, $hash );
+		if ( ! $rev ) {
+			return;
+		}
+		$log = get_option( self::LOG, array() );
+		$log = is_array( $log ) ? $log : array();
+		for ( $i = count( $log ) - 1; $i >= 0; $i-- ) {
+			if ( (int) ( $log[ $i ]['post'] ?? 0 ) === $post_id && ( $log[ $i ]['hash'] ?? '' ) === $hash ) {
+				$log[ $i ]['revision'] = $rev;
+				update_option( self::LOG, $log, false );
+				return;
+			}
+		}
 	}
 
 	/** Every approval on record, newest first. */
