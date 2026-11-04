@@ -3,7 +3,7 @@
   "source": "Scout-Internal/ops/site-updates.md as of 2026-11-02",
   "entries": [
     {
-      "import_id": "site-updates-2026-11-02-02",
+      "import_id": "site-updates-2026-11-02-02@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Theme speed copies removed; Scout Optimize does them",
       "detail": "Folded into 0.7.13 (rebuilt zip in chat). Tested locally: nothing blocking in the head. After upload, send one test request.",
@@ -18,7 +18,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-04",
+      "import_id": "site-updates-2026-11-02-04@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Theme 0.7.13: link preview card reaches Scout Core's share tags",
       "detail": "0.7.12 hooked a filter Scout Core never runs. Upload to staging, purge WP Engine.",
@@ -33,7 +33,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-08",
+      "import_id": "site-updates-2026-11-02-08@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Show auto-update state on the Plugins screen",
       "detail": "PR joyrmac/Scout-Plugins#88, held for Joy's OK. Cosmetic: the plugins already update themselves.",
@@ -48,7 +48,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-09",
+      "import_id": "site-updates-2026-11-02-09@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Client logo beside the Scout mark on every Scout screen",
       "detail": "Joy: on Features she could not tell whose site she was on. Logo from the theme's custom logo, else Site Icon. Sites update themselves. Sites with no logo or icon show the name only. PR joyrmac/Scout-Plugins#87.",
@@ -63,7 +63,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-11",
+      "import_id": "site-updates-2026-11-02-11@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Email color picker on the Email screen",
       "detail": "Maravela's test email came out in Scout blue. Email screen now has a color picker; detection also reads a block theme's accent/primary/brand color. PR joyrmac/Scout-Plugins#85.",
@@ -78,7 +78,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-12",
+      "import_id": "site-updates-2026-11-02-12@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Spam blocked count on the Scout Dashboard",
       "detail": "Forms Guard counts blocked spam by month; the Scout Dashboard box shows this month and the last year. Counts start at 0 on update. PR joyrmac/Scout-Plugins#84. Sites with auto-updates off (Maravela's, Patrick) need it by hand.",
@@ -93,7 +93,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-17",
+      "import_id": "site-updates-2026-11-02-17@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Review totals entered (Google 5.0, 17)",
       "detail": "Still to add: the Google leave-a-review link.",
@@ -108,7 +108,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-18",
+      "import_id": "site-updates-2026-11-02-18@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Hand edits: visit-total FAQ sentence [figure left out], lithium FAQ, Custom work text",
       "detail": "The theme only fills blanks, so existing FAQ and Service posts are edited by hand. Exact text in docs/status.md.",
@@ -123,7 +123,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-20",
+      "import_id": "site-updates-2026-11-02-20@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Content true to his own site and reviews; free advice and a call line added",
       "detail": "Removed the visit total [figure left out], lift kits, an unsourced battery FAQ, 'quoted before the work starts'. Added lithium from a named review.",
@@ -138,7 +138,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-21",
+      "import_id": "site-updates-2026-11-02-21@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Scout Build 0.6.1: branded test email; fix &#039; in Copy for Claude",
       "detail": "Joy asked for a cuter test email. Merged with CI green.",
@@ -153,7 +153,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-23",
+      "import_id": "site-updates-2026-11-02-23@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Scout Email on (form email through Google)",
       "detail": "Staging sends as team@. At launch switch to Andy's Gmail and set Send to Andy back to his address.",
@@ -168,7 +168,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-24",
+      "import_id": "site-updates-2026-11-02-24@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Gravity Forms styles and jQuery stop holding up the page",
       "detail": "",
@@ -183,7 +183,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-25",
+      "import_id": "site-updates-2026-11-02-25@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Text Andy: pricing questions, site OK, domain and hosting logins",
       "detail": "Blocks launch. Draft text in chat 10-16: under-an-hour cost, 2-hour minimum, what the added labor line is [figure left out].",
@@ -198,7 +198,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-26",
+      "import_id": "site-updates-2026-11-02-26@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Scout Optimize: Gravity Forms and jQuery speed fix for every site",
       "detail": "Approved by Joy 10-16, merged with CI green. Auto-installs on sites with plugin auto-updates on; Maravela's has them off, so update it there by hand or turn them on.",
@@ -213,7 +213,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-27",
+      "import_id": "site-updates-2026-11-02-27@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Speed: hero sized to its frame, small thumbnails, fonts inline",
       "detail": "Phone PageSpeed 85 to 88, largest paint 4.1s to 3.3s, layout shift 0.",
@@ -228,7 +228,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-29",
+      "import_id": "site-updates-2026-11-02-29@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Scout Build 0.6.0: Scout Email screen and the Scout box on the Dashboard",
       "detail": "Auto-updates to every site. Released before Joy reviewed it; future plugin releases wait for her OK.",
@@ -243,7 +243,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-32",
+      "import_id": "site-updates-2026-11-02-32@andysgolfcarts",
       "date": "2026-10-16",
       "title": "New link preview card, one heading font, review fonts matched",
       "detail": "0.7.12 live on staging (Copy for Claude 12:10). Review fonts still need setting by hand in Reviews settings.",
@@ -258,7 +258,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-35",
+      "import_id": "site-updates-2026-11-02-35@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Form sending spinner sized to the button",
       "detail": "",
@@ -273,7 +273,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-36",
+      "import_id": "site-updates-2026-11-02-36@andysgolfcarts",
       "date": "2026-10-16",
       "title": "team@ Gmail: never send WordPress email to spam",
       "detail": "Still to do: Report not spam on the old WordPress emails and read the scoutraleigh.com chat questions in Spam; add a 'New chat' filter to Primary.",
@@ -288,7 +288,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-37",
+      "import_id": "site-updates-2026-11-02-37@andysgolfcarts",
       "date": "2026-10-16",
       "title": "Launch day list",
       "detail": "Scout Email to his Gmail, Send to Andy back to him, delete test entry, search engines on, Facebook re-scrape, fix Yelp (Moncure, wrong website).",

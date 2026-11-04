@@ -3,7 +3,7 @@
   "source": "Scout-Internal/ops/site-updates.md as of 2026-11-02",
   "entries": [
     {
-      "import_id": "site-updates-2026-11-02-01",
+      "import_id": "site-updates-2026-11-02-01@maravelas",
       "date": "2026-10-16",
       "title": "Repo cleanup: site/ re-synced from the newer _static-source pages",
       "detail": "64 pages had drifted since August (old mobile menu, no Espanol link). _static-source feeds live, so it won. Repo only; live unchanged.",
@@ -18,7 +18,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-03",
+      "import_id": "site-updates-2026-11-02-03@maravelas",
       "date": "2026-10-16",
       "title": "Theme 0.9.109: WebP hero with preload, accessibility link via plugin, 1200x630 preview, cards setup",
       "detail": "Built, not deployed. Zip in chat (maravelas-theme-0.9.109.zip). Team left out: Adolfo, Lorenzo, Maria roles unconfirmed.",
@@ -33,7 +33,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-08",
+      "import_id": "site-updates-2026-11-02-08@maravelas",
       "date": "2026-10-16",
       "title": "Show auto-update state on the Plugins screen",
       "detail": "PR joyrmac/Scout-Plugins#88, held for Joy's OK. Cosmetic: the plugins already update themselves.",
@@ -48,7 +48,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-09",
+      "import_id": "site-updates-2026-11-02-09@maravelas",
       "date": "2026-10-16",
       "title": "Client logo beside the Scout mark on every Scout screen",
       "detail": "Joy: on Features she could not tell whose site she was on. Logo from the theme's custom logo, else Site Icon. Sites update themselves. Sites with no logo or icon show the name only. PR joyrmac/Scout-Plugins#87.",
@@ -63,7 +63,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-10",
+      "import_id": "site-updates-2026-11-02-10@maravelas",
       "date": "2026-10-16",
       "title": "Set Email color to rust #A04E10 and send a test",
       "detail": "Rust set; test arrived in Maravela's rust at 12:33. Scout Build 0.6.4 replaces the Mac color grid with a hex box and the site's own swatches.",
@@ -78,7 +78,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-11",
+      "import_id": "site-updates-2026-11-02-11@maravelas",
       "date": "2026-10-16",
       "title": "Email color picker on the Email screen",
       "detail": "Maravela's test email came out in Scout blue. Email screen now has a color picker; detection also reads a block theme's accent/primary/brand color. PR joyrmac/Scout-Plugins#85.",
@@ -93,7 +93,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-12",
+      "import_id": "site-updates-2026-11-02-12@maravelas",
       "date": "2026-10-16",
       "title": "Spam blocked count on the Scout Dashboard",
       "detail": "Forms Guard counts blocked spam by month; the Scout Dashboard box shows this month and the last year. Counts start at 0 on update. PR joyrmac/Scout-Plugins#84. Sites with auto-updates off (Maravela's, Patrick) need it by hand.",
@@ -108,7 +108,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-16",
+      "import_id": "site-updates-2026-11-02-16@maravelas",
       "date": "2026-10-16",
       "title": "Turn on auto-updates for the Scout plugins",
       "detail": "Scout plugins updated by hand to current (Build 0.6.2, Forms Guard 0.2.0, Optimize 0.9.0). Scout plugins install their own updates once WordPress sees them; no toggle needed.",
@@ -123,7 +123,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-21",
+      "import_id": "site-updates-2026-11-02-21@maravelas",
       "date": "2026-10-16",
       "title": "Scout Build 0.6.1: branded test email; fix &#039; in Copy for Claude",
       "detail": "Joy asked for a cuter test email. Merged with CI green.",
@@ -138,7 +138,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-26",
+      "import_id": "site-updates-2026-11-02-26@maravelas",
       "date": "2026-10-16",
       "title": "Scout Optimize: Gravity Forms and jQuery speed fix for every site",
       "detail": "Approved by Joy 10-16, merged with CI green. Auto-installs on sites with plugin auto-updates on; Maravela's has them off, so update it there by hand or turn them on.",
@@ -153,7 +153,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-28",
+      "import_id": "site-updates-2026-11-02-28@maravelas",
       "date": "2026-10-16",
       "title": "Scout Email on",
       "detail": "Through Google as team@scoutraleigh.com. Test reached the inbox; Site health reads Through Google.",
@@ -168,7 +168,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-29",
+      "import_id": "site-updates-2026-11-02-29@maravelas",
       "date": "2026-10-16",
       "title": "Scout Build 0.6.0: Scout Email screen and the Scout box on the Dashboard",
       "detail": "Auto-updates to every site. Released before Joy reviewed it; future plugin releases wait for her OK.",
@@ -183,7 +183,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-34",
+      "import_id": "site-updates-2026-11-02-34@maravelas",
       "date": "2026-10-16",
       "title": "Version log brought up to date",
       "detail": "Confirmed live 0.9.108 from Site Health 10-16 10:39. docs/version-log.md updated with the live plugin list.",
@@ -198,7 +198,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-36",
+      "import_id": "site-updates-2026-11-02-36@maravelas",
       "date": "2026-10-16",
       "title": "team@ Gmail: never send WordPress email to spam",
       "detail": "Still to do: Report not spam on the old WordPress emails and read the scoutraleigh.com chat questions in Spam; add a 'New chat' filter to Primary.",
@@ -213,7 +213,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-38",
+      "import_id": "site-updates-2026-11-02-38@maravelas",
       "date": "2026-10-16",
       "title": "Accessibility statement link in footer; link preview card; team and cards in setup",
       "detail": "",
@@ -228,7 +228,7 @@
       "ref": ""
     },
     {
-      "import_id": "site-updates-2026-11-02-40",
+      "import_id": "site-updates-2026-11-02-40@maravelas",
       "date": "2026-10-16",
       "title": "Hero image: phone sizes and preload (biggest speed win)",
       "detail": "The hero is a 2000px JPG with no srcset; 800w and 1400w webp files exist unused.",

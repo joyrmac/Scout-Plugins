@@ -1,5 +1,8 @@
 # Scout Chat changelog
 
+## 0.3.0 (2026-11-04)
+
+- **Change requests from the chat join the site's request list.** When a visitor asks for a change in the chat and Scout Build is on the site, the ask is also saved as a change request under Scout, Request a change, with the person's name and how to reach them, so one list holds every request however it came in and the Site log records it. The chat inbox keeps its own copy as before. Sites without Scout Build change nothing.
 
 ## 0.2.5 (2026-11-04)
 

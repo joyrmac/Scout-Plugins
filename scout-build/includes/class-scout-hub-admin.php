@@ -74,6 +74,7 @@ final class Scout_Hub_Admin {
 		$base = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		add_submenu_page( $parent, __( 'Request a change', 'scout-build' ), __( 'Request a change', 'scout-build' ), 'edit_posts', $base . '&tab=requests', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Site health', 'scout-build' ), __( 'Site health', 'scout-build' ), 'edit_posts', $base . '&tab=health', array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Site log', 'scout-build' ), __( 'Site log', 'scout-build' ), 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
 			update_option( 'scout_hub_page', $slug, false );
@@ -101,6 +102,9 @@ final class Scout_Hub_Admin {
 			if ( false !== strpos( $slug, 'tab=health' ) ) {
 				return 100;
 			}
+			if ( false !== strpos( $slug, 'tab=log' ) ) {
+				return 150;
+			}
 			if ( self::PAGE === $page || 'site-build' === $page ) {
 				return 0;
 			}
@@ -127,6 +131,11 @@ final class Scout_Hub_Admin {
 			$ai = Scout_Hub_Health::ai_checks();
 			/* translators: 1: checks passed, 2: total */
 			return sprintf( __( 'AI %1$d/%2$d', 'scout-build' ), count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) ), count( $ai ) );
+		}
+		if ( false !== strpos( $slug, 'tab=log' ) ) {
+			$n = Scout_Hub_Log::count_month();
+			/* translators: %d: log lines this month */
+			return $n ? sprintf( __( '%d this month', 'scout-build' ), $n ) : '';
 		}
 		if ( false !== strpos( $slug, 'tab=requests' ) ) {
 			$open = count( array_filter( Scout_Hub_Requests::all(), static fn( $p ) => 'done' !== get_post_meta( $p->ID, Scout_Hub_Requests::META_STATUS, true ) ) );
@@ -196,6 +205,7 @@ final class Scout_Hub_Admin {
 			'features' => __( 'Your features', 'scout-build' ),
 			'requests' => __( 'Request a change', 'scout-build' ),
 			'health'   => __( 'Site health', 'scout-build' ),
+			'log'      => __( 'Site log', 'scout-build' ),
 		);
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'features';
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
@@ -208,6 +218,8 @@ final class Scout_Hub_Admin {
 				self::requests();
 			} elseif ( 'health' === $tab ) {
 				self::health();
+			} elseif ( 'log' === $tab ) {
+				self::log();
 			} else {
 				self::features();
 			}
@@ -706,6 +718,275 @@ final class Scout_Hub_Admin {
 				</section>
 			<?php endforeach; ?>
 		</div>
+		<?php
+	}
+
+	/* ------------------------------------------------------------------ */
+
+	/**
+	 * Site log: every change to this site, newest first. Operators add notes,
+	 * set the client wording and the measure on a line, import the history
+	 * file once, and export the current view as CSV.
+	 */
+	private static function log(): void {
+		$operator = Scout_Hub_Access::is_operator();
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- filters only.
+		$filter = array(
+			'month'  => isset( $_GET['month'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['month'] ) ) : '',
+			'kind'   => isset( $_GET['kind'] ) ? sanitize_key( wp_unslash( (string) $_GET['kind'] ) ) : '',
+			'topic'  => isset( $_GET['topic'] ) ? sanitize_key( wp_unslash( (string) $_GET['topic'] ) ) : '',
+			'status' => isset( $_GET['status'] ) ? sanitize_key( wp_unslash( (string) $_GET['status'] ) ) : '',
+			'client' => ! empty( $_GET['client'] ),
+			'page'   => max( 1, (int) ( $_GET['paged'] ?? 1 ) ),
+		);
+		$show_import = $operator && ( ! get_option( Scout_Hub_Log::IMPORTED ) || ! empty( $_GET['import'] ) );
+		// phpcs:enable
+		$page    = Scout_Hub_Log::query( $filter + array( 'per_page' => 50 ) );
+		$months  = array();
+		for ( $i = 0; $i < 12; $i++ ) {
+			$m            = gmdate( 'Y-m', strtotime( "-$i months", current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$months[ $m ] = date_i18n( 'F Y', strtotime( $m . '-01' ) );
+		}
+		$no_wording = 0;
+		?>
+		<style>
+			.sh-log-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+			.sh-log-filters select{min-width:120px}
+			.sh-log-filters .sh-note{margin:0 0 0 auto}
+			.sh-log-table{width:100%;border-collapse:collapse;font-size:13.5px}
+			.sh-log-table th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sh-text-3);padding:6px 10px 6px 0;border-bottom:1px solid var(--sh-border)}
+			.sh-log-table td{padding:10px 10px 10px 0;border-bottom:1px solid var(--sh-border);vertical-align:top}
+			.sh-log-table td.sh-log-date{font-family:var(--sh-mono);font-size:12px;color:var(--sh-text-3);white-space:nowrap}
+			.sh-log-table .sh-pill{font-size:11px;padding:2px 8px;margin-right:4px}
+			.sh-log-table .sh-pill.is-planned{background:var(--sh-glow);color:var(--sh-accent-text)}
+			.sh-log-table .sh-pill.is-waiting{background:rgba(251,176,36,.18);color:var(--sh-warn)}
+			.sh-log-table .sh-pill.is-client{background:rgba(14,158,115,.14);color:var(--sh-good)}
+			.sh-log-meta{font-size:12px;color:var(--sh-text-3);margin:2px 0 0}
+			.sh-log-flag{font-size:12px;color:var(--sh-warn);margin:2px 0 0}
+			.sh-log-edit{display:none;margin-top:8px;gap:6px}
+			.sh-log-edit.is-open{display:grid}
+			.sh-log-edit input[type="text"]{width:100%;border-radius:8px}
+			.sh-log-row .sh-quiet{padding:0 6px;min-height:0;font-size:12px}
+			.sh-log-note .sh-form{grid-template-columns:1fr 1fr;gap:6px 14px}
+			.sh-log-note .sh-form .sh-wide{grid-column:1/-1}
+			.sh-log-note .sh-form label{margin-top:4px}
+			.sh-log-note .sh-form input[type="text"],.sh-log-note .sh-form input[type="date"]{width:100%;border-radius:8px;border-color:var(--sh-border-strong)}
+			@media (max-width:700px){.sh-log-note .sh-form{grid-template-columns:1fr}.sh-log-table td.sh-log-date{white-space:normal}}
+		</style>
+
+		<section class="sh-box">
+			<div class="sh-section-head">
+				<div>
+					<p class="sh-label"><?php esc_html_e( 'Every change to this site', 'scout-build' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'Updates, features, copy, requests and notes, written by the plugins as they happen. Lines marked "Client sees" make up the monthly update.', 'scout-build' ); ?></p>
+				</div>
+			</div>
+			<form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="sh-log-filters">
+				<input type="hidden" name="page" value="<?php echo esc_attr( self::page_slug() ); ?>">
+				<input type="hidden" name="tab" value="log">
+				<select name="month" aria-label="<?php esc_attr_e( 'Month', 'scout-build' ); ?>">
+					<option value=""><?php esc_html_e( 'Any month', 'scout-build' ); ?></option>
+					<?php foreach ( $months as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $filter['month'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<select name="kind" aria-label="<?php esc_attr_e( 'Kind', 'scout-build' ); ?>">
+					<option value=""><?php esc_html_e( 'Any kind', 'scout-build' ); ?></option>
+					<?php foreach ( Scout_Hub_Log::KINDS as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $filter['kind'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<select name="topic" aria-label="<?php esc_attr_e( 'Topic', 'scout-build' ); ?>">
+					<option value=""><?php esc_html_e( 'Any topic', 'scout-build' ); ?></option>
+					<?php foreach ( Scout_Hub_Log::TOPICS as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $filter['topic'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<select name="status" aria-label="<?php esc_attr_e( 'Status', 'scout-build' ); ?>">
+					<option value=""><?php esc_html_e( 'Any status', 'scout-build' ); ?></option>
+					<?php foreach ( Scout_Hub_Log::STATUSES as $key => $label ) : ?>
+						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $filter['status'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<label><input type="checkbox" name="client" value="1" <?php checked( $filter['client'] ); ?>> <?php esc_html_e( 'Client sees', 'scout-build' ); ?></label>
+				<button type="submit" class="button"><?php esc_html_e( 'Filter', 'scout-build' ); ?></button>
+				<?php if ( $operator ) : ?>
+					<p class="sh-note"><a href="#sh-log-note"><?php esc_html_e( 'Add a note', 'scout-build' ); ?></a> &middot; <a href="#sh-log-export"><?php esc_html_e( 'Export CSV', 'scout-build' ); ?></a></p>
+				<?php endif; ?>
+			</form>
+
+			<?php if ( ! $page['items'] ) : ?>
+				<p class="sh-note" style="margin-top:14px"><?php esc_html_e( 'Nothing logged yet for this view. Lines appear as plugins, the theme and copy update, when requests come in, and when someone adds a note.', 'scout-build' ); ?></p>
+			<?php else : ?>
+				<table class="sh-log-table" style="margin-top:14px">
+					<thead><tr><th><?php esc_html_e( 'When', 'scout-build' ); ?></th><th><?php esc_html_e( 'What changed', 'scout-build' ); ?></th><th><?php esc_html_e( 'By', 'scout-build' ); ?></th></tr></thead>
+					<tbody>
+					<?php foreach ( $page['items'] as $post ) : ?>
+						<?php
+						$row = Scout_Hub_Log::to_array( $post );
+						if ( $row['show_client'] && '' === $row['client_text'] ) {
+							++$no_wording;
+						}
+						?>
+						<tr class="sh-log-row">
+							<td class="sh-log-date"><?php echo esc_html( get_the_date( 'M j, Y', $post ) ); ?></td>
+							<td>
+								<strong><?php echo esc_html( $row['title'] ); ?></strong>
+								<p class="sh-log-meta">
+									<span class="sh-pill"><?php echo esc_html( Scout_Hub_Log::KINDS[ $row['kind'] ] ?? $row['kind'] ); ?></span>
+									<span class="sh-pill"><?php echo esc_html( Scout_Hub_Log::TOPICS[ $row['topic'] ] ?? $row['topic'] ); ?></span>
+									<?php if ( 'done' !== $row['status'] ) : ?>
+										<span class="sh-pill is-<?php echo esc_attr( $row['status'] ); ?>"><?php echo esc_html( Scout_Hub_Log::STATUSES[ $row['status'] ] ); ?></span>
+									<?php endif; ?>
+									<?php if ( $row['show_client'] ) : ?>
+										<span class="sh-pill is-client"><?php esc_html_e( 'Client sees', 'scout-build' ); ?></span>
+									<?php endif; ?>
+									<?php if ( '' !== $row['version'] ) : ?>
+										<?php echo esc_html( $row['version'] ); ?>
+									<?php endif; ?>
+									<?php if ( '' !== $row['measure'] ) : ?>
+										&middot; <?php echo esc_html( $row['measure'] ); ?>
+									<?php endif; ?>
+								</p>
+								<?php if ( '' !== $row['client_text'] ) : ?>
+									<p class="sh-log-meta"><?php esc_html_e( 'Client wording:', 'scout-build' ); ?> <?php echo esc_html( $row['client_text'] ); ?></p>
+								<?php elseif ( $row['show_client'] ) : ?>
+									<p class="sh-log-flag"><?php esc_html_e( 'No client wording yet; the client sees the line above as written.', 'scout-build' ); ?></p>
+								<?php endif; ?>
+								<?php if ( $operator && '' !== $row['detail'] ) : ?>
+									<p class="sh-log-meta"><?php echo esc_html( $row['detail'] ); ?></p>
+								<?php endif; ?>
+								<?php if ( $operator ) : ?>
+									<button type="button" class="button sh-quiet" data-sh-edit="<?php echo (int) $row['id']; ?>"><?php esc_html_e( 'Edit wording', 'scout-build' ); ?></button>
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-log-edit" id="sh-log-edit-<?php echo (int) $row['id']; ?>">
+										<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+										<input type="hidden" name="do" value="edit">
+										<input type="hidden" name="line" value="<?php echo (int) $row['id']; ?>">
+										<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+										<label for="sh-ct-<?php echo (int) $row['id']; ?>"><?php esc_html_e( 'What the client reads', 'scout-build' ); ?></label>
+										<input type="text" id="sh-ct-<?php echo (int) $row['id']; ?>" name="client_text" value="<?php echo esc_attr( $row['client_text'] ); ?>" maxlength="400" placeholder="<?php esc_attr_e( 'One plain sentence. If it claims a result, put the number in.', 'scout-build' ); ?>">
+										<label for="sh-ms-<?php echo (int) $row['id']; ?>"><?php esc_html_e( 'Measure (before and after)', 'scout-build' ); ?></label>
+										<input type="text" id="sh-ms-<?php echo (int) $row['id']; ?>" name="measure" value="<?php echo esc_attr( $row['measure'] ); ?>" maxlength="200" placeholder="<?php esc_attr_e( 'PageSpeed phone 85 to 88', 'scout-build' ); ?>">
+										<label><input type="checkbox" name="show_client" value="1" <?php checked( $row['show_client'] ); ?>> <?php esc_html_e( 'Client sees this line', 'scout-build' ); ?></label>
+										<?php if ( 'done' !== $row['status'] ) : ?>
+											<label><input type="checkbox" name="status" value="done"> <?php esc_html_e( 'Mark as done', 'scout-build' ); ?></label>
+										<?php endif; ?>
+										<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save', 'scout-build' ); ?></button></p>
+									</form>
+								<?php endif; ?>
+							</td>
+							<td class="sh-log-date"><?php echo esc_html( $row['source'] ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+				<?php if ( $page['pages'] > 1 ) : ?>
+					<p class="sh-note" style="margin-top:10px">
+						<?php
+						$base = self::url( 'log', array_filter( array( 'month' => $filter['month'], 'kind' => $filter['kind'], 'topic' => $filter['topic'], 'status' => $filter['status'], 'client' => $filter['client'] ? '1' : '' ) ) );
+						if ( $filter['page'] > 1 ) {
+							echo '<a href="' . esc_url( add_query_arg( 'paged', $filter['page'] - 1, $base ) ) . '">&lsaquo; ' . esc_html__( 'Newer', 'scout-build' ) . '</a> &middot; ';
+						}
+						/* translators: 1: page, 2: pages */
+						echo esc_html( sprintf( __( 'Page %1$d of %2$d', 'scout-build' ), $filter['page'], $page['pages'] ) );
+						if ( $filter['page'] < $page['pages'] ) {
+							echo ' &middot; <a href="' . esc_url( add_query_arg( 'paged', $filter['page'] + 1, $base ) ) . '">' . esc_html__( 'Older', 'scout-build' ) . ' &rsaquo;</a>';
+						}
+						?>
+					</p>
+				<?php endif; ?>
+				<?php if ( $operator && $no_wording ) : ?>
+					<p class="sh-note" style="margin-top:10px">
+						<?php
+						/* translators: %d: lines */
+						echo esc_html( sprintf( _n( '%d line on this page is shown to the client without its own wording.', '%d lines on this page are shown to the client without their own wording.', $no_wording, 'scout-build' ), $no_wording ) );
+						?>
+					</p>
+				<?php endif; ?>
+			<?php endif; ?>
+		</section>
+
+		<?php if ( $operator ) : ?>
+			<div class="sh-grid sh-grid-2">
+				<section class="sh-box sh-log-note" id="sh-log-note">
+					<p class="sh-label"><?php esc_html_e( 'Add a note', 'scout-build' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'For work done by hand or outside the site: an edit in WordPress, a listing fix, a launch step.', 'scout-build' ); ?></p>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-form">
+						<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+						<input type="hidden" name="do" value="note">
+						<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+						<label class="sh-wide" for="sh-ln-title"><?php esc_html_e( 'What changed', 'scout-build' ); ?></label>
+						<input class="sh-wide" type="text" id="sh-ln-title" name="title" required maxlength="200">
+						<label class="sh-wide" for="sh-ln-client"><?php esc_html_e( 'What the client reads (optional)', 'scout-build' ); ?></label>
+						<input class="sh-wide" type="text" id="sh-ln-client" name="client_text" maxlength="400">
+						<label for="sh-ln-topic"><?php esc_html_e( 'Topic', 'scout-build' ); ?></label>
+						<label for="sh-ln-status"><?php esc_html_e( 'Status', 'scout-build' ); ?></label>
+						<select id="sh-ln-topic" name="topic">
+							<?php foreach ( Scout_Hub_Log::TOPICS as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<select id="sh-ln-status" name="status">
+							<?php foreach ( Scout_Hub_Log::STATUSES as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<label for="sh-ln-version"><?php esc_html_e( 'Version (optional)', 'scout-build' ); ?></label>
+						<label for="sh-ln-measure"><?php esc_html_e( 'Measure (optional)', 'scout-build' ); ?></label>
+						<input type="text" id="sh-ln-version" name="version" maxlength="60" placeholder="1.1.8">
+						<input type="text" id="sh-ln-measure" name="measure" maxlength="200" placeholder="<?php esc_attr_e( 'largest paint 4.1s to 3.3s', 'scout-build' ); ?>">
+						<label for="sh-ln-date"><?php esc_html_e( 'When (blank for today)', 'scout-build' ); ?></label>
+						<label><input type="checkbox" name="show_client" value="1" checked> <?php esc_html_e( 'Client sees this line', 'scout-build' ); ?></label>
+						<input type="date" id="sh-ln-date" name="date">
+						<span></span>
+						<label class="sh-wide" for="sh-ln-detail"><?php esc_html_e( 'Internal detail (optional, never shown to the client)', 'scout-build' ); ?></label>
+						<textarea class="sh-wide" id="sh-ln-detail" name="detail" rows="3"></textarea>
+						<p class="sh-wide"><button type="submit" class="button button-primary"><?php esc_html_e( 'Add to the log', 'scout-build' ); ?></button></p>
+					</form>
+				</section>
+
+				<div>
+					<section class="sh-box" id="sh-log-export">
+						<p class="sh-label"><?php esc_html_e( 'Export', 'scout-build' ); ?></p>
+						<p class="sh-note"><?php esc_html_e( 'The current filter as a CSV file.', 'scout-build' ); ?></p>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+							<input type="hidden" name="do" value="export">
+							<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+							<?php foreach ( array( 'month', 'kind', 'topic', 'status' ) as $key ) : ?>
+								<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( (string) $filter[ $key ] ); ?>">
+							<?php endforeach; ?>
+							<input type="hidden" name="client" value="<?php echo $filter['client'] ? '1' : ''; ?>">
+							<p><button type="submit" class="button"><?php esc_html_e( 'Download CSV', 'scout-build' ); ?></button></p>
+						</form>
+					</section>
+
+					<?php if ( $show_import ) : ?>
+						<section class="sh-box" style="margin-top:14px">
+							<p class="sh-label"><?php esc_html_e( 'Import history', 'scout-build' ); ?></p>
+							<p class="sh-note"><?php esc_html_e( 'One time: the site\'s history file from Scout-Plugins, docs/site-log-import. Lines already in the log are skipped, so running it twice adds nothing.', 'scout-build' ); ?></p>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
+								<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+								<input type="hidden" name="do" value="import">
+								<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+								<p><input type="file" name="history" accept=".json,application/json" required></p>
+								<p><button type="submit" class="button"><?php esc_html_e( 'Import', 'scout-build' ); ?></button></p>
+							</form>
+						</section>
+					<?php else : ?>
+						<p class="sh-note" style="margin-top:10px"><a href="<?php echo esc_url( self::url( 'log', array( 'import' => '1' ) ) ); ?>"><?php esc_html_e( 'Import a history file again', 'scout-build' ); ?></a></p>
+					<?php endif; ?>
+				</div>
+			</div>
+			<script>
+				document.querySelectorAll('[data-sh-edit]').forEach(function (b) {
+					b.addEventListener('click', function () {
+						var f = document.getElementById('sh-log-edit-' + b.getAttribute('data-sh-edit'));
+						if (f) { f.classList.toggle('is-open'); }
+					});
+				});
+			</script>
+		<?php endif; ?>
 		<?php
 	}
 }

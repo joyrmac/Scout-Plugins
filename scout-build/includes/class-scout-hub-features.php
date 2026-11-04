@@ -179,6 +179,14 @@ final class Scout_Hub_Features {
 			self::back( sprintf( __( '%1$s: %2$s', 'scout-build' ), $name, $result->get_error_message() ), 'error' );
 		}
 		self::log( $slug, $do, true, '' );
+		/**
+		 * A feature was turned on or off, or sent back a version. The Site log listens.
+		 *
+		 * @param string $slug Plugin folder.
+		 * @param string $do   on | off | back.
+		 * @param string $name The feature's name.
+		 */
+		do_action( 'scout_hub_feature_done', $slug, $do, $name );
 		$done = array(
 			/* translators: %s: feature name */
 			'on'   => __( '%s is on.', 'scout-build' ),

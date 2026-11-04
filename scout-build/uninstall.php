@@ -1,7 +1,7 @@
 <?php
 /**
- * Scout Build uninstall: settings and caches only. Change requests are the
- * client's own record, so they stay.
+ * Scout Build uninstall: settings and caches only. Change requests and the
+ * Site log are the client's own record, so they stay.
  *
  * @package Scout_Build
  */
@@ -16,6 +16,7 @@ delete_option( 'scout_hub_log' );
 delete_option( 'scout_hub_answer_seen' );
 delete_option( 'scout_hub_page' );
 delete_option( 'scout_hub_hidden_alert_sent' );
+delete_option( 'scout_hub_log_imported' );
 wp_clear_scheduled_hook( 'scout_hub_daily_watch' );
 delete_transient( 'scout_hub_catalog' );
 delete_transient( 'scout_hub_releases' );

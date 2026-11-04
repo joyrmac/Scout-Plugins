@@ -8,7 +8,8 @@ Nothing is typed twice.
 Plan and the four decisions: the Scout Client Hub page (https://claude.ai/artifact/1MnV5zAn1e95noTvzhiNhc)
 and `Scout-Internal/ops/client-hub.md`.
 
-Status: approved direction (Joy, 2026-11-04: yes to all four calls). Nothing built yet. This is step 1
+Status: approved (Joy, 2026-11-04: yes to all four calls). Built as Scout Build 0.8.0 and Scout Chat 0.3.0
+on 2026-11-04, awaiting Joy's OK to release. This is step 1
 of the four-step build; steps 2 to 4 (the Google pull, the "Your site" screen, the monthly message)
 get their own specs once this ships.
 
@@ -78,7 +79,7 @@ work succeeds, so a failed update never logs as done.
 | scout-setup.json run | end of `Scout_Hub_Setup::run()` | `setup` | "Business facts refreshed from the theme: team, hours, reviews" (only the sections that changed) | No |
 | Change request opened | `Scout_Hub_Requests::handle()` after `wp_insert_post` | `request` | "You asked: " + request title. Ref = request ID. | Yes |
 | Request status changed | same, `status` branch | `request` | "In progress: …" / "Done: …" | Yes |
-| Scout Chat change request | Scout Chat saves it as a `scout_hub_request` when Scout Build is active (new in Scout Chat 0.2.0; falls back to its own inbox when Scout Build is absent) | `request` | as above, source "Scout Chat" | Yes |
+| Scout Chat change request | Scout Chat saves it as a `scout_hub_request` when Scout Build is active (Scout Chat 0.3.0; keeps its own inbox copy, and changes nothing when Scout Build is absent) | `request` | as above, source "Scout Chat" | Yes |
 | Hidden from Google alert sent | `Scout_Hub_Watch::check()` when it mails | `alert` | "Site hidden from Google; Scout alerted" | No |
 | Site back in Google | `Scout_Hub_Watch::check()` when `hidden()` turns false after an alert | `alert` | "Site visible to Google again" | No |
 | Approval recorded | the Approve action on Your site (step 3; the entry shape is fixed here) | `approval` | "Approved by Patrick McGuire: home page title wording" | Yes |
@@ -173,9 +174,10 @@ After the import: `ops/site-updates.md` gets a closing line pointing here and st
 1. Branch from `main`, `scout-build` 0.8.0. Files: `includes/class-scout-hub-log.php` (post type,
    write helper `Scout_Hub_Log::add( array $entry ): int`, the hooks above, import), 
    `includes/class-scout-hub-log-api.php` (the endpoint), the Site log tab in
-   `class-scout-hub-admin.php`. `Scout_Hub_Features::log()` and `recent_log()` move onto the post type.
-2. Scout Chat 0.2.0 in the same PR or the next: save change requests as `scout_hub_request` when
-   Scout Build is active.
+   `class-scout-hub-admin.php`. The Features screen keeps its own short switch log (the 30-row option);
+   the Site log gets its line through the `scout_hub_feature_done` action, so nothing on that screen changes.
+2. Scout Chat 0.3.0 in the same PR: save change requests as `scout_hub_request` when Scout Build
+   is active.
 3. `tools/core-contract.sh`: add `scout_sync_applied` (Scout Build listens for it; Scout Core must keep
    firing it with the same two arguments).
 4. Changelog entry in `scout-build/CHANGELOG.md` and `scout-chat/CHANGELOG.md`; the catalog summary

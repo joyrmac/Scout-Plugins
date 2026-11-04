@@ -152,7 +152,17 @@ final class Scout_Hub_Requests {
 			$id     = (int) ( $_POST['request'] ?? 0 );
 			$status = sanitize_key( wp_unslash( (string) ( $_POST['status'] ?? '' ) ) );
 			if ( self::TYPE === get_post_type( $id ) && isset( self::STATUSES[ $status ] ) ) {
+				$was = (string) get_post_meta( $id, self::META_STATUS, true );
 				update_post_meta( $id, self::META_STATUS, $status );
+				if ( $was !== $status ) {
+					/**
+					 * A request moved to another status. The Site log listens.
+					 *
+					 * @param int    $id     Request post ID.
+					 * @param string $status received | progress | done.
+					 */
+					do_action( 'scout_hub_request_status', $id, $status );
+				}
 			}
 			self::back( __( 'Status updated.', 'scout-build' ) );
 		}
@@ -167,22 +177,10 @@ final class Scout_Hub_Requests {
 
 		$user  = wp_get_current_user();
 		$title = wp_trim_words( $what, 10, '…' );
-		$id    = wp_insert_post(
-			array(
-				'post_type'    => self::TYPE,
-				'post_status'  => 'private',
-				'post_title'   => $title,
-				'post_content' => $what,
-				'post_author'  => $user->ID,
-			),
-			true
-		);
-		if ( is_wp_error( $id ) ) {
+		$id    = self::create( $what, $page, $when, $user->ID, $user->display_name );
+		if ( ! $id ) {
 			self::back( __( 'The request could not be saved. Please email us instead.', 'scout-build' ), 'error' );
 		}
-		update_post_meta( $id, self::META_PAGE, $page );
-		update_post_meta( $id, self::META_WHEN, $when );
-		update_post_meta( $id, self::META_STATUS, 'received' );
 
 		$attachments = array();
 		if ( ! empty( $_FILES['file']['name'] ) && current_user_can( 'upload_files' ) ) {
@@ -218,6 +216,52 @@ final class Scout_Hub_Requests {
 			$attachments
 		);
 		self::back( __( 'Sent. We will reply by email, and you can follow it in the list below.', 'scout-build' ) );
+	}
+
+	/**
+	 * Save a request and tell the log. Used by the form above and by Scout
+	 * Chat when a visitor asks for a change there, so one list holds every
+	 * request however it came in. Sends no email: each caller does its own.
+	 *
+	 * @param string $what   The request, in the person's words.
+	 * @param string $page   The page it is about, or ''.
+	 * @param string $when   A key of WHEN.
+	 * @param int    $author WordPress user ID, or 0 for a visitor.
+	 * @param string $by     The person's name, for the log line.
+	 * @return int The request post ID, or 0 when it could not be saved.
+	 */
+	public static function create( string $what, string $page = '', string $when = 'whenever', int $author = 0, string $by = '' ): int {
+		$what = trim( $what );
+		if ( '' === $what ) {
+			return 0;
+		}
+		$when  = isset( self::WHEN[ $when ] ) ? $when : 'whenever';
+		$title = wp_trim_words( $what, 10, '…' );
+		$id    = wp_insert_post(
+			array(
+				'post_type'    => self::TYPE,
+				'post_status'  => 'private',
+				'post_title'   => $title,
+				'post_content' => $what,
+				'post_author'  => $author,
+			),
+			true
+		);
+		if ( is_wp_error( $id ) || ! $id ) {
+			return 0;
+		}
+		update_post_meta( $id, self::META_PAGE, esc_url_raw( $page ) );
+		update_post_meta( $id, self::META_WHEN, $when );
+		update_post_meta( $id, self::META_STATUS, 'received' );
+		/**
+		 * A change request came in. The Site log listens.
+		 *
+		 * @param int    $id    Request post ID.
+		 * @param string $title Short title.
+		 * @param string $by    Who asked.
+		 */
+		do_action( 'scout_hub_request_opened', (int) $id, $title, $by );
+		return (int) $id;
 	}
 
 	private static function back( string $message, string $type = 'success' ): void {
