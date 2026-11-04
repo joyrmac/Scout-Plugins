@@ -124,6 +124,15 @@
 .sh .sh-local a[aria-current="page"] { background: var(--sh-surface); box-shadow: inset 3px 0 0 var(--sh-accent); font-weight: 600; }
 .sh .sh-local a.is-off { color: var(--sh-text-3); }
 .sh .sh-local a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
+.sh .sh-local .sh-nav-hint { flex: none; font-family: inherit; font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; padding: 2px 8px; background: var(--sh-surface-2); color: var(--sh-text-2); }
+.sh .sh-local a[aria-current="page"] .sh-nav-hint { background: var(--sh-glow); color: var(--sh-accent-text); }
+/* A calm one-line status row with a closed settings row under it (Updates → Theme). */
+.sh-theme-line { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: var(--sh-fs-base); }
+.sh-theme-line strong { font-weight: 600; }
+.sh-keyrow { margin-top: 14px; border-top: 1px solid var(--sh-border); padding-top: 10px; }
+.sh-keyrow summary { cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: var(--sh-tap); font-weight: 500; }
+.sh-keyform { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; }
+.sh .sh-keyform input[type="password"] { flex: 1 1 16em; min-width: 0; max-width: 100%; }
 .sh-local.is-row { flex-direction: row; flex-wrap: wrap; max-width: none; position: static; gap: 6px; padding: 12px 32px 0; }
 .sh .sh-local.is-row a { min-height: 40px; padding: 8px 14px; border-radius: var(--sh-r-pill); border: 1px solid var(--sh-border); background: var(--sh-surface); }
 .sh .sh-local.is-row a[aria-current="page"] { box-shadow: none; background: var(--sh-accent-fill); border-color: var(--sh-accent-fill); color: var(--sh-on-accent); }
