@@ -254,6 +254,16 @@ final class Scout_Chat {
 			$short = $name . ': ' . wp_trim_words( '' !== $first ? $first : $kinds[ $kind ], 14 ) . ( '' !== $phone ? ' | ' . __( 'Text', 'scout-chat' ) . ' ' . self::pretty_phone( $phone ) : ( '' !== $email ? ' | ' . $email : '' ) );
 			wp_mail( $alert, __( 'Site chat', 'scout-chat' ), mb_substr( $short, 0, 150 ) );
 		}
+		// A change request from the chat also joins the site's request list in
+		// Scout Build, so one list holds every request however it came in.
+		if ( 'change' === $kind && class_exists( 'Scout_Hub_Requests' ) && method_exists( 'Scout_Hub_Requests', 'create' ) ) {
+			$ask = '' !== $first ? $first : $title;
+			$who = $name . ( '' !== $email ? ' <' . $email . '>' : '' ) . ( '' !== $phone ? ' ' . self::pretty_phone( $phone ) : '' );
+			$rid = Scout_Hub_Requests::create( $ask . "\n\n" . __( 'From the site chat:', 'scout-chat' ) . ' ' . $who, $page, 'whenever', 0, $name );
+			if ( $rid ) {
+				update_post_meta( $id, '_scout_chat_request', $rid );
+			}
+		}
 		do_action( 'scout_chat_lead', $id, $kind, $name, $email );
 		return array( 'ok' => true );
 	}

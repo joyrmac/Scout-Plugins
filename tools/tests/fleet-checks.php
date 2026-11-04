@@ -36,6 +36,7 @@ function admin_url( $p = '' ) { return 'https://example-firm.com/wp-admin/' . $p
 function wp_parse_url( $u, $c = -1 ) { return parse_url( $u, $c ); }
 function wp_get_environment_type() { return $GLOBALS['t']['env']; }
 function apply_filters( $h, $v ) { return $GLOBALS['t']['filters'][ $h ] ?? $v; }
+function do_action( $h, ...$a ) { $GLOBALS['t']['actions'][] = $h; }
 function get_plugins() { return $GLOBALS['t']['plugins']; }
 function is_plugin_active( $f ) { return in_array( $f, $GLOBALS['t']['active'], true ); }
 function untrailingslashit( $s ) { return rtrim( $s, '/\\' ); }

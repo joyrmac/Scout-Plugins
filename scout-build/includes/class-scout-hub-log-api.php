@@ -1,0 +1,302 @@
+<?php
+/**
+ * The read endpoint for the Scout Client Hub: the Site log, the open change
+ * requests and the site's versions and health, for the Google Sheet that
+ * pulls every Scout site nightly, and for Claude to log a note as work ships.
+ *
+ * Two keys, both in wp-config.php so a client administrator cannot read or
+ * change them from the dashboard, the same reason SCOUT_HUB_OPERATORS lives
+ * there:
+ *
+ *   define( 'SCOUT_HUB_READ_TOKEN', '...' );   // read only
+ *   define( 'SCOUT_HUB_WRITE_TOKEN', '...' );  // read, plus POST /log for note lines
+ *
+ * Sent as "Authorization: Bearer <token>". Without a key defined, the
+ * endpoint is off. On a white-label site (SCOUT_HUB_BRAND false) it stays off
+ * unless SCOUT_HUB_LOG_API is true, so a partner's site never answers Scout's
+ * puller by accident.
+ *
+ * Nothing here returns visitor data, form entries, attachments or keys. The
+ * write key can add note lines only: no feature switch, request or setting
+ * changes.
+ *
+ * @package Scout_Build
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+final class Scout_Hub_Log_API {
+
+	const NS    = 'scout-build/v1';
+	const LIMIT = 60; // Calls a minute, per key.
+
+	public static function boot(): void {
+		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
+	}
+
+	/** The endpoint answers only when a key is set and the site allows it. */
+	public static function enabled(): bool {
+		if ( ! Scout_Hub_Admin::branded() && ! ( defined( 'SCOUT_HUB_LOG_API' ) && SCOUT_HUB_LOG_API ) ) {
+			return false;
+		}
+		return '' !== self::token( 'read' ) || '' !== self::token( 'write' );
+	}
+
+	private static function token( string $scope ): string {
+		$c = 'write' === $scope ? 'SCOUT_HUB_WRITE_TOKEN' : 'SCOUT_HUB_READ_TOKEN';
+		$t = defined( $c ) ? trim( (string) constant( $c ) ) : '';
+		return strlen( $t ) >= 20 ? $t : ''; // A short key is no key.
+	}
+
+	public static function routes(): void {
+		if ( ! self::enabled() ) {
+			return;
+		}
+		register_rest_route(
+			self::NS,
+			'/log',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( __CLASS__, 'get_log' ),
+					'permission_callback' => static fn( WP_REST_Request $r ) => self::allow( $r, 'read' ),
+					'args'                => array(
+						'since'    => array( 'type' => 'string', 'pattern' => '^\d{4}-\d{2}-\d{2}$' ),
+						'month'    => array( 'type' => 'string', 'pattern' => '^\d{4}-\d{2}$' ),
+						'client'   => array( 'type' => 'boolean', 'default' => false ),
+						'kind'     => array( 'type' => 'string', 'enum' => array_keys( Scout_Hub_Log::KINDS ) ),
+						'status'   => array( 'type' => 'string', 'enum' => array_keys( Scout_Hub_Log::STATUSES ) ),
+						'page'     => array( 'type' => 'integer', 'default' => 1, 'minimum' => 1 ),
+						'per_page' => array( 'type' => 'integer', 'default' => 200, 'minimum' => 1, 'maximum' => 200 ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( __CLASS__, 'post_log' ),
+					'permission_callback' => static fn( WP_REST_Request $r ) => self::allow( $r, 'write' ),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/requests',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'get_requests' ),
+				'permission_callback' => static fn( WP_REST_Request $r ) => self::allow( $r, 'read' ),
+				'args'                => array(
+					'status' => array( 'type' => 'string', 'default' => 'received,progress' ),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/site',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'get_site' ),
+				'permission_callback' => static fn( WP_REST_Request $r ) => self::allow( $r, 'read' ),
+			)
+		);
+	}
+
+	/* ---------- who may ask ---------- */
+
+	/**
+	 * @param string $scope 'read' or 'write'. The write key also reads.
+	 * @return true|WP_Error
+	 */
+	private static function allow( WP_REST_Request $request, string $scope ) {
+		$given = self::bearer( $request );
+		$write = self::token( 'write' );
+		$read  = self::token( 'read' );
+		$ok    = false;
+		$used  = '';
+		if ( '' !== $given ) {
+			if ( '' !== $write && hash_equals( $write, $given ) ) {
+				$ok   = true;
+				$used = 'write';
+			} elseif ( 'read' === $scope && '' !== $read && hash_equals( $read, $given ) ) {
+				$ok   = true;
+				$used = 'read';
+			}
+		}
+		if ( ! $ok ) {
+			self::note_refusal();
+			return new WP_Error( 'scout_hub_key', __( 'This needs the site\'s log key.', 'scout-build' ), array( 'status' => 401 ) );
+		}
+		$bucket = 'scout_hub_api_' . $used . '_' . gmdate( 'YmdHi' );
+		$n      = (int) get_transient( $bucket ) + 1;
+		set_transient( $bucket, $n, 2 * MINUTE_IN_SECONDS );
+		if ( $n > self::LIMIT ) {
+			return new WP_Error( 'scout_hub_busy', __( 'Too many calls this minute. Try again shortly.', 'scout-build' ), array( 'status' => 429 ) );
+		}
+		$request->set_param( '_scout_scope', $used );
+		return true;
+	}
+
+	private static function bearer( WP_REST_Request $request ): string {
+		$h = (string) $request->get_header( 'authorization' );
+		if ( '' === $h && isset( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
+			$h = (string) wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- compared with hash_equals only.
+		}
+		return preg_match( '/^Bearer\s+(\S+)$/i', trim( $h ), $m ) ? $m[1] : '';
+	}
+
+	/** A refused call is worth one alert line an hour, never the caller's address. */
+	private static function note_refusal(): void {
+		if ( get_transient( 'scout_hub_api_refused' ) ) {
+			return;
+		}
+		set_transient( 'scout_hub_api_refused', 1, HOUR_IN_SECONDS );
+		Scout_Hub_Log::add(
+			array(
+				'title'       => __( 'Someone called the site log endpoint without the right key', 'scout-build' ),
+				'kind'        => 'alert',
+				'topic'       => 'other',
+				'source'      => 'Scout Build',
+				'show_client' => false,
+			)
+		);
+	}
+
+	/* ---------- the answers ---------- */
+
+	public static function get_log( WP_REST_Request $r ): WP_REST_Response {
+		$client = (bool) $r->get_param( 'client' );
+		$args   = array(
+			'since'    => (string) $r->get_param( 'since' ),
+			'month'    => (string) $r->get_param( 'month' ),
+			'client'   => $client,
+			'kind'     => (string) $r->get_param( 'kind' ),
+			'status'   => (string) $r->get_param( 'status' ),
+			'page'     => (int) $r->get_param( 'page' ),
+			'per_page' => (int) $r->get_param( 'per_page' ),
+		);
+		$page   = Scout_Hub_Log::query( $args );
+		$items  = array();
+		foreach ( $page['items'] as $post ) {
+			$items[] = Scout_Hub_Log::to_array( $post, $client );
+		}
+		return new WP_REST_Response(
+			array(
+				'site'  => self::site_name(),
+				'home'  => home_url( '/' ),
+				'total' => $page['total'],
+				'pages' => $page['pages'],
+				'page'  => $args['page'],
+				'items' => $items,
+			)
+		);
+	}
+
+	public static function post_log( WP_REST_Request $r ) {
+		$in     = (array) $r->get_json_params();
+		$fields = array();
+		foreach ( array( 'title', 'client_text', 'topic', 'version', 'measure', 'status', 'detail', 'date' ) as $key ) {
+			$fields[ $key ] = sanitize_textarea_field( (string) ( $in[ $key ] ?? '' ) );
+		}
+		$fields['kind']        = 'note';
+		$fields['show_client'] = array_key_exists( 'show_client', $in ) ? (bool) $in['show_client'] : true;
+		$fields['source']      = 'Claude'; // Only the write key gets here.
+		$id                    = Scout_Hub_Log::add( $fields );
+		if ( ! $id ) {
+			return new WP_Error( 'scout_hub_line', __( 'The line needs a title.', 'scout-build' ), array( 'status' => 400 ) );
+		}
+		return new WP_REST_Response( Scout_Hub_Log::to_array( get_post( $id ) ), 201 );
+	}
+
+	public static function get_requests( WP_REST_Request $r ): WP_REST_Response {
+		$want  = array_filter( array_map( 'sanitize_key', explode( ',', (string) $r->get_param( 'status' ) ) ) );
+		$want  = array_values( array_intersect( $want, array_keys( Scout_Hub_Requests::STATUSES ) ) );
+		$items = array();
+		foreach ( Scout_Hub_Requests::all() as $post ) {
+			$status = (string) get_post_meta( $post->ID, Scout_Hub_Requests::META_STATUS, true );
+			$status = isset( Scout_Hub_Requests::STATUSES[ $status ] ) ? $status : 'received';
+			if ( $want && ! in_array( $status, $want, true ) ) {
+				continue;
+			}
+			$when    = (string) get_post_meta( $post->ID, Scout_Hub_Requests::META_WHEN, true );
+			$items[] = array(
+				'id'     => (int) $post->ID,
+				'date'   => get_the_date( 'Y-m-d', $post ),
+				'title'  => (string) $post->post_title,
+				'what'   => (string) $post->post_content,
+				'page'   => (string) get_post_meta( $post->ID, Scout_Hub_Requests::META_PAGE, true ),
+				'when'   => Scout_Hub_Requests::WHEN[ $when ] ?? '',
+				'status' => $status,
+				'by'     => (string) get_the_author_meta( 'display_name', (int) $post->post_author ),
+			);
+		}
+		return new WP_REST_Response( array( 'site' => self::site_name(), 'home' => home_url( '/' ), 'items' => $items ) );
+	}
+
+	public static function get_site( WP_REST_Request $r ): WP_REST_Response {
+		global $wp_version;
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$updates = get_site_transient( 'update_plugins' );
+		$plugins = array();
+		foreach ( get_plugins() as $file => $data ) {
+			if ( ! Scout_Hub_Log::is_scout_plugin( $data ) ) {
+				continue;
+			}
+			$plugins[] = array(
+				'slug'    => dirname( $file ),
+				'name'    => (string) $data['Name'],
+				'version' => (string) $data['Version'],
+				'active'  => is_plugin_active( $file ),
+				'update'  => ( is_object( $updates ) && isset( $updates->response[ $file ]->new_version ) ) ? (string) $updates->response[ $file ]->new_version : '',
+			);
+		}
+		$theme    = wp_get_theme();
+		$t_update = get_site_transient( 'update_themes' );
+		$sheet    = $theme->get_stylesheet();
+		$health   = array();
+		foreach ( Scout_Hub_Health::checks() as $c ) {
+			$health[] = array( 'label' => (string) $c['label'], 'value' => (string) $c['value'], 'state' => (string) $c['state'] );
+		}
+		$ai   = Scout_Hub_Health::ai_checks();
+		$plan = Scout_Hub_Access::plan();
+		$out  = array(
+			'site'       => self::site_name(),
+			'home'       => home_url( '/' ),
+			'live'       => Scout_Hub_Health::is_live(),
+			'plan'       => $plan ? Scout_Hub_Access::PLANS[ $plan ] : '',
+			'wordpress'  => (string) $wp_version,
+			'php'        => PHP_VERSION,
+			'theme'      => array(
+				'name'    => (string) $theme->get( 'Name' ),
+				'version' => (string) $theme->get( 'Version' ),
+				'update'  => ( is_object( $t_update ) && isset( $t_update->response[ $sheet ]['new_version'] ) ) ? (string) $t_update->response[ $sheet ]['new_version'] : '',
+			),
+			'plugins'    => $plugins,
+			'health'     => $health,
+			'ai_ready'   => array( 'good' => count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) ), 'total' => count( $ai ) ),
+			'open_requests' => count( array_filter( Scout_Hub_Requests::all(), static fn( $p ) => 'done' !== get_post_meta( $p->ID, Scout_Hub_Requests::META_STATUS, true ) ) ),
+			'log_this_month' => Scout_Hub_Log::count_month(),
+			'checked_at' => gmdate( 'c' ),
+		);
+		if ( class_exists( 'Scout_Reviews_Settings' ) ) {
+			$totals = array();
+			foreach ( (array) ( Scout_Reviews_Settings::get()['profiles'] ?? array() ) as $key => $p ) {
+				if ( is_array( $p ) && (int) ( $p['count'] ?? 0 ) > 0 ) {
+					$totals[ (string) $key ] = array( 'rating' => (string) ( $p['rating'] ?? '' ), 'count' => (int) $p['count'] );
+				}
+			}
+			$stamp          = (int) get_option( 'scout_reviews_totals_updated', 0 );
+			$out['reviews'] = array( 'totals' => $totals, 'updated' => $stamp ? gmdate( 'Y-m-d', $stamp ) : '' );
+		}
+		if ( class_exists( 'Scout_Forms_Guard' ) && method_exists( 'Scout_Forms_Guard', 'blocked' ) ) {
+			$out['spam_blocked'] = array( 'month' => (int) Scout_Forms_Guard::blocked(), 'year' => (int) Scout_Forms_Guard::blocked( 'all' ) );
+		}
+		return new WP_REST_Response( $out );
+	}
+
+	private static function site_name(): string {
+		return wp_specialchars_decode( (string) get_option( 'blogname' ), ENT_QUOTES );
+	}
+}
