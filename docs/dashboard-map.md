@@ -100,6 +100,14 @@ Decided by Joy, 2026-11-04:
 
 - **Basic chat is a Bonus.** AI answers come with The Partnership, or as a Plus add-on.
 - **The Whole System does not include Plus modules.** Plus is always added on its own.
+- **Monthly numbers on Home:** a small Recon snapshot on The Partnership, full
+  Recon dashboards and monthly reporting on The Whole System. The Build shows no numbers.
+- **Policy pages:** Scout provides privacy policy and terms templates filled from
+  business info, and the client or firm approves each one. They are never legal advice.
+- **Form entries delete themselves after 90 days** by default on law-firm sites.
+- **Focus mode stays on Home.** It hides the numbers on busy days.
+- **Recon on client sites is a viewer.** Accounts, settings and profiles stay on
+  scoutrecon.app; the plugin only pulls that client's reports.
 - **Law-firm pieces are Core for law sites**, built in this order: disclaimers
   (Scout Law Firm Tools 0.1.0), approval before publishing, "Reviewed by"
   stamps with a six-month review list, then form entries that delete themselves.
@@ -243,18 +251,16 @@ Each works on its own branch; merge one, then rebase the other.
 
 **Features chat**
 
-1. Law firm tools: check approval before publishing (0.2.0) in a live block editor, then "Reviewed by" stamps with a six-month review list, then form entries that delete themselves (default waits on Sean).
+1. Law firm tools: check approval before publishing (0.2.0) in a live block editor, then "Reviewed by" stamps with a six-month review list, then form entries that delete themselves (90 days by default).
 2. Search and sitemap: a visitor search box on every site, and a list of searches that found nothing.
 3. One profile per person: Scout Cards, chat photos and "Reviewed by" stamps read from Team.
 4. Nightly form test in Site health.
-5. Policies pages: privacy policy and terms templates filled from business info (waits on Sean).
+5. Policies pages: privacy policy and terms templates filled from business info. The client or firm approves each one.
 6. One screen for every client site, built on the Client Hub sheet.
-7. Recon as a viewer plugin (waits on Sean).
+7. Recon as a viewer plugin (the viewer approach is decided; the connection details wait on Sean).
 
-## Open items for Sean and Joy
+## Open items for Sean
 
-- Which plans see the monthly numbers on Home?
-- Who writes the policy pages? (Pick: we provide templates, the client approves.)
-- Keep or cut Focus mode on Home?
-- How Recon installs on client sites as a viewer.
-- The default number of days before form entries delete themselves (90 proposed).
+- How Recon installs as a viewer: how a site proves which Recon account it
+  belongs to, what Recon sends (a summary or full report pages), and how often
+  it refreshes. Joy decided the viewer approach on 2026-11-04.
