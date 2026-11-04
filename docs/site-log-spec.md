@@ -8,7 +8,7 @@ Nothing is typed twice.
 Plan and the four decisions: the Scout Client Hub page (https://claude.ai/artifact/1MnV5zAn1e95noTvzhiNhc)
 and `Scout-Internal/ops/client-hub.md`.
 
-Status: approved (Joy, 2026-11-04: yes to all four calls). Built as Scout Build 0.8.0 and Scout Chat 0.3.0
+Status: approved (Joy, 2026-11-04: yes to all four calls). Built as Scout Build 0.9.0 and Scout Chat 0.3.0
 on 2026-11-04, awaiting Joy's OK to release. This is step 1
 of the four-step build; steps 2 to 4 (the Google pull, the "Your site" screen, the monthly message)
 get their own specs once this ships.
@@ -27,7 +27,7 @@ the activity log is this log, and the monthly email is step 4 of the hub plan.
 
 ## Where it lives
 
-- Plugin: **Scout Build** (`scout-build`), release **0.8.0** (minor: new feature). Standalone, as
+- Plugin: **Scout Build** (`scout-build`), release **0.9.0** (minor: new feature; main took 0.8.0 for the Updates screen the same day). Standalone, as
   Scout Build is today. Lines from Scout Core (Site Sync) arrive through an action Scout Core already
   fires, so Scout Build never requires Scout Core.
 - Post type `scout_hub_log`, private, no public UI (`show_ui` false), like `scout_hub_request`.
@@ -171,7 +171,7 @@ After the import: `ops/site-updates.md` gets a closing line pointing here and st
 
 ## Build and release
 
-1. Branch from `main`, `scout-build` 0.8.0. Files: `includes/class-scout-hub-log.php` (post type,
+1. Branch from `main`, `scout-build` 0.9.0. Files: `includes/class-scout-hub-log.php` (post type,
    write helper `Scout_Hub_Log::add( array $entry ): int`, the hooks above, import), 
    `includes/class-scout-hub-log-api.php` (the endpoint), the Site log tab in
    `class-scout-hub-admin.php`. The Features screen keeps its own short switch log (the 30-row option);
@@ -186,7 +186,7 @@ After the import: `ops/site-updates.md` gets a closing line pointing here and st
    On each site: run Import history once with that site's file, add the two tokens to `wp-config.php`,
    open Scout → Site log and check the imported lines, then make one plugin update and confirm it
    logged itself.
-6. Sites with auto-updates off get 0.8.0 by hand. Check which ones on the Sites tab once it exists;
+6. Sites with auto-updates off get 0.9.0 by hand. Check which ones on the Sites tab once it exists;
    until then, Maravela's and Patrick were off on 2026-10-16.
 
 ## Verify before building
@@ -202,6 +202,6 @@ After the import: `ops/site-updates.md` gets a closing line pointing here and st
 ## Left out on purpose
 
 - WordPress logins, admin user changes and page edits by the client. Useful for security, noisy for a
-  change log, and Scout Build 0.8.0 is about what Scout did. If wanted later, it is its own kind.
+  change log, and Scout Build 0.9.0 is about what Scout did. If wanted later, it is its own kind.
 - Pushing to a Worker or any endpoint of ours. Sites answer when asked and send nothing.
 - Anything about money. The hub has no money in it anywhere (decision 4 and `CLAUDE.md`).

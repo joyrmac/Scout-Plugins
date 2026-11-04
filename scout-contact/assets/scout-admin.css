@@ -64,6 +64,8 @@
 .sh .sh-nav a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
 .sh-nav-hint { font-family: var(--sh-mono); font-size: 10px; letter-spacing: .6px; text-transform: uppercase; padding: 2px 7px; border-radius: 980px; background: var(--sh-surface-2); color: var(--sh-text-3); }
 .sh .sh-nav-groups a.is-active .sh-nav-hint { background: rgba(255, 255, 255, .2); color: #fff; }
+.sh .sh-nav-groups a.is-off { color: var(--sh-text-3); }
+.sh .sh-nav-groups a.is-off .sh-nav-hint { background: var(--sh-glow); color: var(--sh-accent-text); }
 @media (max-width: 782px) {
 	.sh-nav-groups { width: 100%; }
 	.sh-nav-groups { gap: 2px; padding: 4px; }
@@ -117,6 +119,8 @@
 .sh-table { width: 100%; border-collapse: collapse; }
 .sh-table td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--sh-border); vertical-align: top; }
 .sh-table td:first-child { font-family: var(--sh-mono); font-size: 12px; color: var(--sh-text-3); white-space: nowrap; }
+.sh-table th { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--sh-border); text-align: left; font-size: 12px; font-weight: 500; color: var(--sh-text-3); }
+.sh-table.sh-table-plain td:first-child { font-family: inherit; font-size: 13px; color: var(--sh-text); white-space: normal; }
 
 .sh-form { display: grid; gap: 6px; }
 .sh-form label { font-weight: 600; margin-top: 8px; }

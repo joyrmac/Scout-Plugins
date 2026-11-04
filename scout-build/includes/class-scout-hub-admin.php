@@ -1,6 +1,6 @@
 <?php
 /**
- * The dashboard screens: Features, Requests and Health.
+ * The dashboard screens: Features, Updates, Requests, Health and the Site log.
  *
  * Placement follows the dashboard standard (one Build section per site): the
  * screens go inside the site's existing Build menu when there is one (the
@@ -74,6 +74,8 @@ final class Scout_Hub_Admin {
 		$base = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		add_submenu_page( $parent, __( 'Request a change', 'scout-build' ), __( 'Request a change', 'scout-build' ), 'edit_posts', $base . '&tab=requests', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Site health', 'scout-build' ), __( 'Site health', 'scout-build' ), 'edit_posts', $base . '&tab=health', array( __CLASS__, 'render' ) );
+		// Site Standard rule 12: every way of updating the site lives under Scout → Updates.
+		add_submenu_page( $parent, __( 'Updates', 'scout-build' ), __( 'Updates', 'scout-build' ), 'edit_posts', $base . '&tab=updates', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Site log', 'scout-build' ), __( 'Site log', 'scout-build' ), 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
@@ -83,14 +85,39 @@ final class Scout_Hub_Admin {
 
 	/**
 	 * One order for the Scout menu on every site, which the shared section nav
-	 * follows too: Features and Site health first, then the settings screens
+	 * follows too: Features, Site health and Updates first, then the settings screens
 	 * (Business info, SEO, AI search, images), then the rest, Request a change last.
 	 */
 	public static function first(): void {
-		global $submenu;
+		global $submenu, $menu;
 		$parent = self::parent();
 		if ( empty( $submenu[ $parent ] ) ) {
 			return;
+		}
+		// Site Standard rule 11: one menu, named Scout (Site Build on partner sites), whatever
+		// registered it. A theme's own Build menu keeps its slug until its conversion, but
+		// shows the standard name so every site reads the same.
+		if ( in_array( $parent, array( 'scout-build', 'recon-build' ), true ) && is_array( $menu ) ) {
+			$label = self::branded() ? __( 'Scout', 'scout-build' ) : __( 'Site Build', 'scout-build' );
+			foreach ( $menu as $i => $entry ) {
+				if ( ( $entry[2] ?? '' ) === $parent ) {
+					$menu[ $i ][0] = $label; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- relabel only.
+				}
+			}
+		}
+		// Rule 11 again: every group shows on every site. A group with nothing on gets a
+		// stand-in entry that opens the Features screen, which the admin kit greys out.
+		if ( class_exists( 'Scout_Admin_UI' ) && defined( 'Scout_Admin_UI::GROUPS' ) ) {
+			$base = 'site-build' === $parent ? 'site-build' : self::PAGE;
+			$seen = array();
+			foreach ( $submenu[ $parent ] as $item ) {
+				$seen[ Scout_Admin_UI::group( (string) ( $item[2] ?? '' ), wp_strip_all_tags( (string) ( $item[0] ?? '' ) ) ) ] = true;
+			}
+			foreach ( Scout_Admin_UI::GROUPS as $key => $label ) {
+				if ( empty( $seen[ $key ] ) ) {
+					add_submenu_page( $parent, $label, $label, 'edit_posts', $base . '&tab=features&group=' . $key, array( __CLASS__, 'render' ) );
+				}
+			}
 		}
 		$items = array_values( $submenu[ $parent ] );
 		$rank  = static function ( array $item, int $i ): int {
@@ -99,11 +126,17 @@ final class Scout_Hub_Admin {
 			if ( false !== strpos( $slug, 'tab=requests' ) ) {
 				return 9000;
 			}
+			if ( false !== strpos( $slug, '&group=' ) ) {
+				return 8000 + $i; // Stand-ins for groups with nothing on, before Request a change.
+			}
 			if ( false !== strpos( $slug, 'tab=health' ) ) {
 				return 100;
 			}
-			if ( false !== strpos( $slug, 'tab=log' ) ) {
+			if ( false !== strpos( $slug, 'tab=updates' ) ) {
 				return 150;
+			}
+			if ( false !== strpos( $slug, 'tab=log' ) ) {
+				return 160;
 			}
 			if ( self::PAGE === $page || 'site-build' === $page ) {
 				return 0;
@@ -142,12 +175,37 @@ final class Scout_Hub_Admin {
 			/* translators: %d: open requests */
 			return $open ? sprintf( __( '%d open', 'scout-build' ), $open ) : '';
 		}
+		if ( false !== strpos( $slug, 'tab=updates' ) ) {
+			$waiting = self::waiting();
+			/* translators: %d: plugins with an update */
+			return $waiting ? sprintf( __( '%d ready', 'scout-build' ), $waiting ) : '';
+		}
+		if ( false !== strpos( $slug, 'tab=' ) || false !== strpos( $slug, '&group=' ) ) {
+			return $hint; // Only the Features entry itself carries the "on" count.
+		}
 		$on = 0;
 		foreach ( array_keys( Scout_Hub_Catalog::features() ) as $f ) {
 			$on += 'on' === Scout_Hub_Features::status( $f )['state'] ? 1 : 0;
 		}
 		/* translators: %d: features on */
 		return sprintf( __( '%d on', 'scout-build' ), $on );
+	}
+
+	/** Installed Scout features, slug => status, newest check included. */
+	private static function installed(): array {
+		$rows = array();
+		foreach ( array_keys( Scout_Hub_Catalog::features() ) as $slug ) {
+			$st = Scout_Hub_Features::status( $slug );
+			if ( '' !== $st['version'] ) {
+				$rows[ $slug ] = $st;
+			}
+		}
+		return $rows;
+	}
+
+	/** How many installed features have a newer release waiting. */
+	private static function waiting(): int {
+		return count( array_filter( self::installed(), static fn( $st ) => '' !== $st['update'] ) );
 	}
 
 	/** Where each feature's own settings live, when it has a screen. */
@@ -203,14 +261,16 @@ final class Scout_Hub_Admin {
 		$tab  = sanitize_key( (string) ( $_GET['tab'] ?? 'features' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$tabs = array(
 			'features' => __( 'Your features', 'scout-build' ),
+			'updates'  => __( 'Updates', 'scout-build' ),
 			'requests' => __( 'Request a change', 'scout-build' ),
 			'health'   => __( 'Site health', 'scout-build' ),
 			'log'      => __( 'Site log', 'scout-build' ),
 		);
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'features';
+		$lede = 'updates' === $tab ? __( 'Everything that brings a new version or new content onto this site, in one place: the theme, the plugins, the setup file, Site Sync, imports and the change log.', 'scout-build' ) : '';
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
 		$site = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
-		Scout_Admin_UI::open( $tabs[ $tab ], '', $site );
+		Scout_Admin_UI::open( $tabs[ $tab ], $lede, $site );
 		?>
 			<?php self::notice(); ?>
 			<?php
@@ -218,6 +278,8 @@ final class Scout_Hub_Admin {
 				self::requests();
 			} elseif ( 'health' === $tab ) {
 				self::health();
+			} elseif ( 'updates' === $tab ) {
+				self::updates();
 			} elseif ( 'log' === $tab ) {
 				self::log();
 			} else {
@@ -252,6 +314,12 @@ final class Scout_Hub_Admin {
 		$operator = Scout_Hub_Access::is_operator();
 		$features = Scout_Hub_Catalog::features();
 		$plan     = Scout_Hub_Access::plan();
+		// Opened from a greyed group in the nav: say so, then show the features as usual.
+		$group = sanitize_key( (string) ( $_GET['group'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( '' !== $group && class_exists( 'Scout_Admin_UI' ) && isset( Scout_Admin_UI::GROUPS[ $group ] ) ) {
+			/* translators: %s: nav group name, e.g. Reviews */
+			printf( '<div class="notice notice-info"><p>%s</p></div>', esc_html( sprintf( __( 'Nothing in %s is on yet. Turn on a feature below and the group fills in.', 'scout-build' ), Scout_Admin_UI::GROUPS[ $group ] ) ) );
+		}
 		$states   = array(
 			'missing' => __( 'Not installed', 'scout-build' ),
 			'off'     => __( 'Off', 'scout-build' ),
@@ -325,63 +393,12 @@ final class Scout_Hub_Admin {
 						</select>
 						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
 					</form>
-					<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check for new versions', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
-					<?php if ( Scout_Hub_Setup::data() ) : ?>
-						<?php echo Scout_Hub_Features::button( '', 'refill', __( 'Fill from theme again', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
-					<?php endif; ?>
-					<?php
-					$installed = array_filter( array_map( array( 'Scout_Hub_Features', 'status' ), array_keys( Scout_Hub_Catalog::features() ) ), static fn( $st ) => '' !== $st['version'] );
-					$waiting   = count( array_filter( $installed, static fn( $st ) => '' !== $st['update'] ) );
-					$checked   = $installed ? max( array_column( $installed, 'checked' ) ) : 0;
-					Scout_Hub_Features::refresh_if_stale( $checked );
-					?>
-					<p class="sh-inline sh-note">
-						<?php $offline = ! $waiting && Scout_Hub_Catalog::unreachable(); ?>
-						<span class="sh-tag <?php echo ( $waiting || $offline ) ? 'is-update' : 'is-current'; ?>"><?php
-							echo esc_html(
-								$waiting
-									/* translators: %d: features with an update */
-									? sprintf( _n( '%d update ready', '%d updates ready', $waiting, 'scout-build' ), $waiting )
-									: ( $offline
-										// The check failed, so "up to date" would be a guess.
-										? __( 'Could not reach GitHub. Try again in 15 minutes.', 'scout-build' )
-										: __( 'Everything is up to date', 'scout-build' ) )
-							);
-						?></span>
-						<?php if ( $checked ) : ?>
-							<?php
-							/* translators: %s: time since, e.g. "5 minutes" */
-							echo esc_html( sprintf( __( 'Checked %s ago', 'scout-build' ), human_time_diff( $checked ) ) );
-							?>
-						<?php endif; ?>
-						<?php
-						// Scout Build updates itself from the Plugins screen, so its own version sits here.
-						$updates   = get_site_transient( 'update_plugins' );
-						$build_new = $updates->response[ plugin_basename( SCOUT_HUB_FILE ) ]->new_version ?? '';
-						?>
-						<span class="sh-build-ver">
-							<?php
-							/* translators: %s: Scout Build version */
-							echo esc_html( sprintf( __( 'Scout Build %s', 'scout-build' ), SCOUT_HUB_VERSION ) );
-							?>
-							<?php if ( $build_new && version_compare( $build_new, SCOUT_HUB_VERSION, '>' ) ) : ?>
-								<a href="<?php echo esc_url( admin_url( 'plugins.php?plugin_status=upgrade' ) ); ?>">
-									<?php
-									/* translators: %s: newer Scout Build version */
-									echo esc_html( sprintf( __( '%s ready on the Plugins screen', 'scout-build' ), $build_new ) );
-									?>
-								</a>
-							<?php endif; ?>
-						</span>
-					</p>
 				</div>
 				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
 					<p class="sh-note"><?php esc_html_e( 'This site blocks plugin installs from the dashboard, so features that are not installed yet need to be uploaded by hand.', 'scout-build' ); ?></p>
 				<?php endif; ?>
 			<?php endif; ?>
 		</section>
-
-		<?php Scout_Hub_Themes::panel( $operator ); ?>
 
 		<?php
 		$titles = array(
@@ -417,6 +434,154 @@ final class Scout_Hub_Admin {
 				</ul>
 			</section>
 		<?php endif; ?>
+		<?php
+	}
+
+	/* ------------------------------------------------------------------ */
+
+	/**
+	 * Scout → Updates (Site Standard rule 12): the theme, the plugins, the
+	 * setup file, Site Sync, the post importer, site settings and the change
+	 * log. Nothing elsewhere brings a new version or new content onto the site.
+	 */
+	private static function updates(): void {
+		$operator  = Scout_Hub_Access::is_operator();
+		$features  = Scout_Hub_Catalog::features();
+		$installed = self::installed();
+		uksort( $installed, static fn( $a, $b ) => strcasecmp( $features[ $a ]['name'] ?? $a, $features[ $b ]['name'] ?? $b ) );
+		$waiting = count( array_filter( $installed, static fn( $st ) => '' !== $st['update'] ) );
+		$checked = $installed ? max( array_column( $installed, 'checked' ) ) : 0;
+		Scout_Hub_Features::refresh_if_stale( $checked );
+		$offline = ! $waiting && Scout_Hub_Catalog::unreachable();
+		// Scout Build updates itself from the Plugins screen, so its own version sits first.
+		$updates   = get_site_transient( 'update_plugins' );
+		$build_new = $updates->response[ plugin_basename( SCOUT_HUB_FILE ) ]->new_version ?? '';
+		$build_new = $build_new && version_compare( $build_new, SCOUT_HUB_VERSION, '>' ) ? $build_new : '';
+
+		Scout_Hub_Themes::panel( $operator );
+		?>
+		<section class="sh-box" id="sh-plugins">
+			<h2 class="sh-title"><?php esc_html_e( 'Plugins', 'scout-build' ); ?></h2>
+			<p class="sh-inline sh-note">
+				<span class="sh-tag <?php echo ( $waiting || $build_new || $offline ) ? 'is-update' : 'is-current'; ?>"><?php
+					$ready = $waiting + ( $build_new ? 1 : 0 );
+					echo esc_html(
+						$ready
+							/* translators: %d: plugins with an update */
+							? sprintf( _n( '%d update ready', '%d updates ready', $ready, 'scout-build' ), $ready )
+							: ( $offline
+								// The check failed, so "up to date" would be a guess.
+								? __( 'Could not reach GitHub. Try again in 15 minutes.', 'scout-build' )
+								: __( 'Everything is up to date', 'scout-build' ) )
+					);
+				?></span>
+				<?php if ( $checked ) : ?>
+					<?php
+					/* translators: %s: time since, e.g. "5 minutes" */
+					echo esc_html( sprintf( __( 'Checked %s ago', 'scout-build' ), human_time_diff( $checked ) ) );
+					?>
+				<?php endif; ?>
+				<?php if ( $operator ) : ?>
+					<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check for new versions', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+				<?php endif; ?>
+			</p>
+			<table class="sh-table sh-table-plain">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Plugin', 'scout-build' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Version', 'scout-build' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Status', 'scout-build' ); ?></th>
+						<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Action', 'scout-build' ); ?></span></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><?php esc_html_e( 'Scout Build', 'scout-build' ); ?></td>
+						<td><?php echo esc_html( 'v' . SCOUT_HUB_VERSION ); ?></td>
+						<td>
+							<?php if ( $build_new ) : ?>
+								<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $build_new ) ); ?></span>
+							<?php else : ?>
+								<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
+							<?php endif; ?>
+						</td>
+						<td>
+							<?php if ( $build_new && current_user_can( 'update_plugins' ) ) : ?>
+								<a class="button button-primary" href="<?php echo esc_url( admin_url( 'plugins.php?plugin_status=upgrade' ) ); ?>"><?php esc_html_e( 'Update now', 'scout-build' ); ?></a>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<?php foreach ( $installed as $slug => $st ) : ?>
+						<tr>
+							<td><?php echo esc_html( $features[ $slug ]['name'] ?? $slug ); ?><?php if ( 'on' !== $st['state'] ) : ?> <span class="sh-pill is-off"><?php esc_html_e( 'Off', 'scout-build' ); ?></span><?php endif; ?></td>
+							<td><?php echo esc_html( 'v' . $st['version'] ); ?></td>
+							<td>
+								<?php if ( $st['update'] ) : ?>
+									<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $st['update'] ) ); ?></span>
+								<?php elseif ( $st['checked'] ) : ?>
+									<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
+								<?php endif; ?>
+								<?php if ( Scout_Hub_Features::held( $slug ) ) : ?><span class="sh-tag is-held"><?php esc_html_e( 'Updates paused', 'scout-build' ); ?></span><?php endif; ?>
+							</td>
+							<td>
+								<?php
+								$update = $operator && $st['update'] ? Scout_Hub_Features::update_url( $slug ) : '';
+								if ( '' !== $update ) {
+									echo '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
+								}
+								?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p class="sh-note"><?php esc_html_e( 'Scout plugins update themselves within a few hours of each release. Turning a feature on, off or back a version happens on the Features screen.', 'scout-build' ); ?></p>
+		</section>
+
+		<?php
+		// The other ways content and settings reach the site. Each lands here and nowhere
+		// else; a card says plainly when its tool is not on this site yet.
+		$sync    = class_exists( 'Scout_Sync_Admin' ) ? admin_url( 'admin.php?page=scout&tab=sync' ) : '';
+		$changes = class_exists( 'Scout_Changelog_Admin' ) ? admin_url( 'admin.php?page=scout&tab=changes' ) : '';
+		$settings = (string) apply_filters( 'scout_hub_site_settings_url', '' );
+		$cards   = array(
+			array(
+				'title' => __( 'Fill from theme', 'scout-build' ),
+				'text'  => __( 'Copies the business facts in the theme\'s setup file into the features that use them. Fills blanks only; anything already set stays as it is.', 'scout-build' ),
+				'go'    => Scout_Hub_Setup::data() ? ( $operator ? Scout_Hub_Features::button( '', 'refill', __( 'Fill from theme again', 'scout-build' ), 'button' ) : '' ) : '<span class="sh-note">' . esc_html__( 'This theme has no setup file.', 'scout-build' ) . '</span>',
+			),
+			array(
+				'title' => __( 'Site Sync', 'scout-build' ),
+				'text'  => __( 'Pulls page copy from the theme\'s bundle, the way it left the repo. Untouched pages update on their own; anything edited here waits for review.', 'scout-build' ),
+				'go'    => '' !== $sync ? '<a class="button" href="' . esc_url( $sync ) . '">' . esc_html__( 'Open Site Sync', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Needs Scout Core.', 'scout-build' ) . '</span>',
+			),
+			array(
+				'title' => __( 'Import posts (XML)', 'scout-build' ),
+				'text'  => __( 'Brings posts in from a WordPress export file, through WordPress\'s own importer.', 'scout-build' ),
+				'go'    => current_user_can( 'import' ) ? '<a class="button" href="' . esc_url( admin_url( 'import.php' ) ) . '">' . esc_html__( 'Open the importer', 'scout-build' ) . '</a>' : '',
+			),
+			array(
+				'title' => __( 'Site settings', 'scout-build' ),
+				'text'  => __( 'Export this site\'s Scout settings to a file, or import one from another site.', 'scout-build' ),
+				'go'    => '' !== $settings ? '<a class="button" href="' . esc_url( $settings ) . '">' . esc_html__( 'Export or import', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Not available on this site yet.', 'scout-build' ) . '</span>',
+			),
+			array(
+				'title' => __( 'Change log', 'scout-build' ),
+				'text'  => __( 'What was changed on this site, by whom and when, with a copy you can hand to Scout so the repo catches up.', 'scout-build' ),
+				'go'    => '' !== $changes ? '<a class="button" href="' . esc_url( $changes ) . '">' . esc_html__( 'Open the change log', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Needs Scout Core 1.7.0 or newer.', 'scout-build' ) . '</span>',
+			),
+		);
+		?>
+		<div class="sh-section-head"><p class="sh-eyebrow"><?php esc_html_e( 'Content and settings', 'scout-build' ); ?></p></div>
+		<div class="sh-grid">
+			<?php foreach ( $cards as $card ) : ?>
+				<article class="sh-card">
+					<div class="sh-cardhead"><h2><?php echo esc_html( $card['title'] ); ?></h2></div>
+					<p class="sh-summary"><?php echo esc_html( $card['text'] ); ?></p>
+					<div class="sh-actions"><?php echo $card['go']; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?></div>
+				</article>
+			<?php endforeach; ?>
+		</div>
 
 		<?php
 		$log = Scout_Hub_Features::recent_log();

@@ -1,5 +1,5 @@
 <?php
-// Scout Build 0.8.0's Site log: the entry cleaner, the changelog headline
+// Scout Build 0.9.0's Site log: the entry cleaner, the changelog headline
 // reader, and the history import. No WordPress needed:
 //   php tools/tests/site-log.php
 define( 'ABSPATH', __DIR__ . '/' );

@@ -9,11 +9,31 @@ Standalone: does not need Scout Core.
 
 ## Where it shows up
 
-Inside the site's existing Build menu when there is one (the Scout Media
-theme's **Scout Build**, Recon's **Recon Build**, or Scout Core's **Scout**
-menu), as **Features**. Otherwise it adds its own top-level section, labeled
-**Scout** with the cerulean bolt (or **Site Build** when `SCOUT_HUB_BRAND` is
-false).
+One menu, **Scout**, on every site (the Scout Site Standard, rule 11:
+`Scout-Internal/ops/playbook/site-standard.md`). Inside the site's existing
+Build menu when there is one (Scout Core's **Scout** menu, or a theme's own
+menu, which the hub relabels Scout until that theme's conversion), otherwise
+as its own top-level section with the cerulean bolt. **Site Build** instead
+of Scout when `SCOUT_HUB_BRAND` is false.
+
+The hub adds four screens: **Features** (the cards, the plan, the counts),
+**Updates**, **Request a change** and **Site health**. The shared admin kit
+sorts every Scout screen into seven groups in the same order everywhere:
+Home, Updates, Search, Website, Business, Reviews, Chat. A group with nothing
+on still shows, greyed, and opens Features to turn something on.
+
+## Scout → Updates
+
+Everything that brings a new version or new content onto the site, and
+nothing else does (rule 12): the **Theme** box (version, read-only key,
+Update the theme now), the **Plugins** table (each installed Scout plugin,
+its version, Up to date or Update ready, Update now) with **Check for new
+versions**, **Fill from theme**, **Site Sync** (Scout Core), **Import posts
+(XML)** (WordPress's importer), **Site settings** (export and import; a
+plugin provides the screen through the `scout_hub_site_settings_url`
+filter), the **Change log** (Scout Core 1.7.0 or newer) and the Recent
+changes log of feature actions. Check for new versions and Fill from theme
+again return to this screen.
 
 ## Settings in `wp-config.php`
 
@@ -25,7 +45,7 @@ false).
 | `SCOUT_HUB_READ_TOKEN` | (none) | A key of 20+ characters that lets the Scout Client Hub read `scout-build/v1/log`, `/requests` and `/site` (Bearer). Off until set. |
 | `SCOUT_HUB_WRITE_TOKEN` | (none) | Same, plus `POST /log` for note lines (how Claude logs work as it ships). Cannot change anything else. |
 | `SCOUT_HUB_LOG_API` | `false` | On a white-label site (`SCOUT_HUB_BRAND` false) the endpoint stays off unless this is true. |
-| `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Build. See "Theme updates" below. |
+| `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Updates. See "Theme updates" below. |
 | `DISALLOW_FILE_MODS` | (WordPress) | When true, features that are not installed must be uploaded by hand; on and off still work. |
 
 ## Theme updates
@@ -35,8 +55,8 @@ own private repo. The theme adds `Update URI: https://github.com/OWNER/REPO`
 and `Scout Release: <folder name>` to its `style.css` header, and its repo
 publishes each version with the workflow in `tools/theme-release/`. On the
 site, an operator pastes a read-only key (a fine-grained GitHub token with
-Contents read access to that one repo) into the **Theme** box on the Features
-screen. The key is stored encrypted and sent to api.github.com only; the zip
+Contents read access to that one repo) into the **Theme** box on Scout →
+Updates. The key is stored encrypted and sent to api.github.com only; the zip
 itself is fetched from GitHub's signed address without it.
 
 The Theme box then shows the installed version, "Up to date" or the version
