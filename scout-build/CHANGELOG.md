@@ -1,5 +1,13 @@
 # Scout Build changelog
 
+## 0.10.0 (2026-11-04)
+
+- **The Scout menu is built around who is looking (Site Standard §7, v1.2; Joy, 2026-11-04).** Seven items, the same words in the sidebar and on the screen: **Overview**, **Your business**, **Content**, **Search and AI**, **Site health**, **Inbox**, **Build**. Every existing screen keeps its address; only where it is filed and what the first screen is change. Shared admin kit 1.7.0, with a test (`tools/tests/admin-kit-groups.php`) so the filing never drifts from the map.
+- **Overview, the first screen for everyone.** One line that says whether the site is all right (from Site health), "Needs you" with the Inbox counts, "With Scout" (updates waiting, the theme, the last three Site log lines), the four things a client comes here to do (change a page, write a post, update hours, ask for a review), and one line to ask for more: "Want something added or changed? Ask Scout."
+- **Inbox: everything waiting on a person, one count.** Change requests, unanswered chat questions and new reviews, each with its count and a button, plus Ask for reviews. The sidebar shows the total as a bubble. Other plugins add a queue with the `scout_hub_inbox` filter.
+- **Build is for operators.** Features, Updates and the Site log file under Build, and the admin kit hides the group from everyone who is not an operator (`SCOUT_HUB_OPERATORS`), so a client never sees a turn-on button. The screens stay reachable by address for admins who know them; every action on them still checks for an operator.
+- **Your business holds every fact once.** Business info, Call buttons, Hours, Team, Case results, Reviews and Review settings, Cards & Links, Booking, Events, Members, Partners and Newsletter file together. Content holds Site Sync, Redirects, Image optimizer and Writing. Search and AI holds SEO, AI search, Analytics, Accessibility, Spam protection and Site checks. Email, Chat settings, Customer list, the Change log and a theme's own screen sit under Build.
+
 ## 0.9.1 (2026-11-04)
 
 - **Site health: "Design contrast".** With Scout Core 1.6.3 or newer and a theme that has a DESIGN.md, Site health shows the lowest contrast ratio among the pairs the Site Standard requires (button text on the accent fill, text on the page and on cards) and names any pair under 4.5:1 (rule 10). Muted text under 4.5:1 is a warning, not a failure.

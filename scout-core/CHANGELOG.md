@@ -1,5 +1,10 @@
 # Scout Core — Changelog
 
+## 1.6.4 (2026-11-04)
+
+- **Hours live in one place.** With Scout Hours on, Business info no longer shows its free-text hours box; it points at Your business, Hours instead (Site Standard §7 v1.2: one fact, one place; Joy, 2026-11-04). The old text stays saved and untouched until the site's conversion copies it into Scout Hours.
+- **Business info, SEO, Site Sync and Spam protection file by the new map.** Business info under Your business, Site Sync under Content, SEO and Spam protection under Search and AI, the Change log under Build. Shared admin kit 1.7.0.
+
 ## 1.6.3 (2026-11-04)
 
 - **`scout_design()`: every plugin reads the site's design from the theme's `DESIGN.md`** (Scout Site Standard §4, rule 3). The tokens on top of DESIGN.md (mode, colors, fonts, radius, logo, mark) are parsed with a small built-in reader (no YAML extension needed), the child theme over the parent, with gaps filled from the block theme's `theme.json` palette and fonts, then Scout's defaults. `scout_design( 'call buttons' )` lays a `## Feature: call buttons` section over the tokens. `scout_design_css()` prints a `:root` block of `--scout-*` variables, `scout_design_contrast()` and `scout_design_issues()` check the pairs §4 requires (button text on the accent fill, text on the page and on cards, 4.5:1), and the `scout_design` filter adjusts the result. Parsed once per request; forgotten on a theme switch or update.
