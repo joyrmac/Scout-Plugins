@@ -32,8 +32,24 @@ jobs:
       SLUG: blissboogie                    # EDIT: the theme folder name, same as "Scout Release:"
       THEME_DIR: wp-theme/blissboogie      # EDIT: the folder holding style.css (or leave and set THEME_ZIP)
       THEME_ZIP: ''                        # Optional: a built zip committed to the repo, used instead of THEME_DIR
+      SCOUT_STANDARD: warn                 # EDIT: 'strict' once the site is on the Scout Site Standard; 'warn' reports only
     steps:
       - uses: actions/checkout@v4
+
+      # The Scout Site Standard check (Scout-Internal ops/playbook/site-standard.md §3, rule 7):
+      # the files a theme must have, and the things it must never hold. 'warn' reports;
+      # 'strict' fails the release (rule 17 to 19: a release never ships a theme that broke the standard).
+      - uses: actions/checkout@v4
+        with:
+          repository: Scout-Media-Raleigh/Scout-Plugins
+          path: .scout-plugins
+      - name: Scout Site Standard check
+        run: |
+          set -euo pipefail
+          dir="$THEME_DIR"
+          if [ -n "$THEME_ZIP" ]; then mkdir -p .standard && unzip -q "$THEME_ZIP" -d .standard && dir=".standard/$SLUG"; fi
+          flag=""; [ "$SCOUT_STANDARD" = "strict" ] || flag="--warn"
+          bash .scout-plugins/tools/theme-standard-check.sh "$dir" $flag
 
       - name: Build the zip
         run: |
