@@ -142,6 +142,8 @@ Scout team logins never appear on a client's Team page or as a blog author.
 A Plus module gets its own sidebar section, directly under the Scout menu
 (menu position `3.x`), and only on sites that have it.
 
+- The kit tags the section with a small "+ Plus" label. Add the module's menu slug to
+  `Scout_Admin_UI::PLUS_MENUS`, or use the `scout_admin_plus_menus` filter for a client's own module.
 - The section's first screen is its own overview: what's waiting, what's coming
   up, and the one thing to do next.
 - Its screens use the admin kit, so they look and behave like the rest of Scout.
@@ -260,7 +262,7 @@ Each works on its own branch; merge one, then rebase the other.
 2. Home: the Today list (a `scout_hub_today` filter), all caught up, the first-week setup list. Built in Scout Build 0.12.0.
 3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting. Built in Scout Build 0.12.0.
 4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and More features on Home. Built in Scout Build 0.12.0.
-5. Plus sections: the Plus tag and each module's own overview screen.
+5. Plus sections: the Plus tag (admin kit 1.8.0, `scout_admin_plus_menus`). Each module already opens on its own overview screen.
 6. Team and My profile screens.
 7. Bonus: "Not today" on Today items, comfort settings (larger text, less motion, dark mode), "Preview on a phone," and the "What's new on your site" card.
 

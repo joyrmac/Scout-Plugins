@@ -15,6 +15,7 @@
 - **Operators add features to a site's plan and recommend them,** with two small buttons on each feature card.
 - **More features on Home.** Site owners see a closed "More features" section listing what Scout recommends for the site and isn't on yet, each with "Ask us to add this." Clients no longer see every feature Scout makes; the Features screen stays with Scout tools.
 - **The first-week setup list.** Site owners see five steps above Today until they're done: business name, address and phone, weekly hours, logo and site icon, the team, and the Google Business Profile link. Steps for features the site doesn't run are left out. Operators can hide the list on a site. Filter: `scout_hub_setup_steps`.
+- **Plus modules are tagged.** Bookings, Events, Members, Partners and the Writing room keep their own sidebar sections, now with a small purple "+ Plus" tag. The `scout_admin_plus_menus` filter adds a client's own module.
 - **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
 
 ## 0.11.1 (2026-11-04)

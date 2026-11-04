@@ -73,6 +73,7 @@ ok( 'Home' === Scout_Admin_UI::label( 'overview' ) && 'Get found' === Scout_Admi
 ok( array() === Scout_Admin_UI::hidden(), 'with no hub loaded and full rights, nothing is hidden' );
 eval( 'class Scout_Hub_Access { public static function is_operator() { return false; } }' );
 ok( array( 'build' ) === Scout_Admin_UI::hidden(), 'a client owner does not see Scout tools' );
+ok( in_array( 'scout-writing', Scout_Admin_UI::PLUS_MENUS, true ) && in_array( 'scout-events', Scout_Admin_UI::PLUS_MENUS, true ), 'Plus modules get the Plus tag in the sidebar' );
 $GLOBALS['scout_test_can'] = false;
 ok( array( 'build', 'reports', 'website', 'search', 'policies', 'health' ) === Scout_Admin_UI::hidden(), 'staff see Home, Inbox and Your business only' );
 echo $fail ? "\n$fail FAILED\n" : "\nAll grouping checks passed\n";

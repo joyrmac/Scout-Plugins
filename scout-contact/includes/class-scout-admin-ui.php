@@ -169,6 +169,33 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			return array_values( array_unique( (array) apply_filters( 'scout_admin_hidden_groups', $hidden ) ) );
 		}
 
+		/**
+		 * Plus modules: paid modules with their own sidebar section. Each gets a small
+		 * "Plus" tag beside its name (Joy, 2026-11-04). The scout_admin_plus_menus
+		 * filter adds a client's own module.
+		 */
+		const PLUS_MENUS = array( 'scout-booking', 'scout-events', 'scout-members', 'scout-partners', 'scout-writing' );
+
+		/** @var bool A Plus tag is in the sidebar on this screen. */
+		private static $plus = false;
+
+		/** Tag each Plus module's sidebar section. */
+		public static function plus_tags(): void {
+			global $menu;
+			if ( ! is_array( $menu ) ) {
+				return;
+			}
+			$plus = (array) apply_filters( 'scout_admin_plus_menus', self::PLUS_MENUS );
+			foreach ( $menu as $i => $entry ) {
+				$slug = (string) ( $entry[2] ?? '' );
+				if ( '' === $slug || ! in_array( $slug, $plus, true ) || false !== strpos( (string) $entry[0], 'sh-plus-tag' ) ) {
+					continue;
+				}
+				$menu[ $i ][0] = $entry[0] . ' <span class="sh-plus-tag">+ Plus</span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- relabel only.
+				self::$plus    = true;
+			}
+		}
+
 		/** Scout sidebar menus the kit tidies. */
 		const MENUS = array( 'scout-build', 'recon-build', 'site-build', 'scout' );
 
@@ -274,6 +301,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		public static function menu_css(): void {
 			if ( self::$leaders ) {
 				echo '<style>#adminmenu .sh-menu-hidden{display:none}#adminmenu .sh-menu-off a{opacity:.55}</style>';
+			}
+			if ( self::$plus ) {
+				echo '<style>#adminmenu .sh-plus-tag{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;background:rgba(123,108,240,.28);color:#D9D4FF;font-size:10px;font-weight:600;letter-spacing:.6px;line-height:16px;vertical-align:1px;white-space:nowrap}</style>';
 			}
 		}
 
@@ -518,6 +548,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	// After every plugin and the hub's own ordering (999) have built the menu.
 	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'compact_menu' ), 1000 );
+	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'plus_tags' ), 1001 );
 	add_filter( 'submenu_file', array( 'Scout_Admin_UI', 'current_link' ), 20 );
 	add_action( 'admin_head', array( 'Scout_Admin_UI', 'menu_css' ) );
 	add_action( 'admin_enqueue_scripts', array( 'Scout_Admin_UI', 'screen_nav_prepare' ), 99 );
