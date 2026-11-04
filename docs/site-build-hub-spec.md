@@ -53,6 +53,10 @@ Status: draft for Sean and Joy. Nothing built yet.
 
 ## Phase 2: keeping an eye on every site (about 3 days)
 
+> **Superseded 2026-11-04.** Items 7 to 9 are replaced by the Site log (`site-log-spec.md`) and
+> the Scout Client Hub plan: sites keep their own log, a Google Sheet pulls it nightly, and the
+> monthly message is built from it. No Worker.
+
 7. **Fleet check-in.** Once a day each site sends its versions (WordPress, PHP, theme, every
    plugin) and health flags to a small Scout endpoint (a Cloudflare Worker, like Bliss Compass).
    Signed with a per-site key. No visitor or client data is sent. The fleet list in `fleet.md`

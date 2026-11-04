@@ -59,7 +59,11 @@ final class Scout_Hub_Watch {
 	 */
 	public static function check(): bool {
 		if ( ! self::hidden() ) {
-			delete_option( self::SENT );
+			if ( get_option( self::SENT ) ) {
+				delete_option( self::SENT );
+				/** The site is visible to search engines again after an alert. The Site log listens. */
+				do_action( 'scout_hub_watch_cleared' );
+			}
 			return false;
 		}
 		$last = (int) get_option( self::SENT, 0 );
@@ -86,6 +90,8 @@ final class Scout_Hub_Watch {
 		$sent = wp_mail( $to, $subject, $body );
 		if ( $sent ) {
 			update_option( self::SENT, time(), false );
+			/** The hidden-from-Google alert went out. The Site log listens. */
+			do_action( 'scout_hub_watch_alert' );
 		}
 		return (bool) $sent;
 	}
