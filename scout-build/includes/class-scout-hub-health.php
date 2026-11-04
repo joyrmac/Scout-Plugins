@@ -379,6 +379,7 @@ final class Scout_Hub_Health {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 		$notes = array();
+		$names = array();
 		foreach ( get_plugins() as $file => $data ) {
 			$uri    = (string) ( $data['UpdateURI'] ?? '' );
 			// Only plugins that update from this repo. Client companion plugins (Scout Media
@@ -391,9 +392,11 @@ final class Scout_Hub_Health {
 			}
 			$slug = '' !== $uri ? basename( untrailingslashit( $uri ) ) : dirname( $file );
 			$name = (string) $data['Name'];
+			$was  = count( $notes );
 			if ( preg_match( '/^([0-9.]+)[-+]/', $v, $m ) ) {
 				/* translators: 1: plugin name, 2: installed version, 3: release version */
 				$notes[] = sprintf( __( '%1$s %2$s is a test build. It updates the normal way once %3$s is released.', 'scout-build' ), $name, $v, $m[1] );
+				$names[] = $name . ' ' . $v;
 				continue;
 			}
 			$known = self::known_release( $slug, $file );
@@ -403,6 +406,9 @@ final class Scout_Hub_Health {
 			} elseif ( is_string( $known ) && '' !== $known && version_compare( $v, $known, '>' ) ) {
 				/* translators: 1: plugin name, 2: installed version, 3: newest release */
 				$notes[] = sprintf( __( '%1$s %2$s is newer than the newest release (%3$s), so it is a test build. It will not update the normal way until %2$s or newer is released.', 'scout-build' ), $name, $v, $known );
+			}
+			if ( count( $notes ) > $was ) {
+				$names[] = $name . ' ' . $v;
 			}
 		}
 		if ( ! $notes ) {
@@ -418,7 +424,10 @@ final class Scout_Hub_Health {
 			/* translators: %d: number of plugins */
 			'value'     => sprintf( _n( '%d plugin', '%d plugins', count( $notes ), 'scout-build' ), count( $notes ) ),
 			'state'     => 'warn',
-			'note'      => implode( ' ', $notes ),
+			// One line on the tile, the names behind "Show which"; the full sentences go in the copied report.
+			'note'      => _n( 'One plugin is on a test build. It updates the normal way once its release is out.', 'These plugins are on test builds. Each updates the normal way once its release is out.', count( $notes ), 'scout-build' ),
+			'items'     => $names,
+			'details'   => implode( ' ', $notes ),
 			'link'      => admin_url( 'plugins.php' ),
 			'link_text' => __( 'Plugins', 'scout-build' ),
 		);
