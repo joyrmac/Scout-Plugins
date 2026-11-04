@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Newsletter
  * Description:       Sends people who tick the newsletter box on your site to your email list in Beehiiv, tagged by where they joined: an event sign-up, a paid ticket, a membership, a booking or a form. Every agreement is saved with the date, the page and the words the person saw. Nobody is added without a ticked box, someone who unsubscribed is never added back, and an email service hiccup never stops a checkout or a form.
- * Version:           0.1.2
+ * Version:           0.1.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_NEWSLETTER_VERSION', '0.1.2' );
+define( 'SCOUT_NEWSLETTER_VERSION', '0.1.3' );
 define( 'SCOUT_NEWSLETTER_FILE', __FILE__ );
 define( 'SCOUT_NEWSLETTER_URL', plugin_dir_url( __FILE__ ) );
 
