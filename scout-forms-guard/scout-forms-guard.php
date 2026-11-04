@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Forms Guard
  * Description:       In-house spam protection for Gravity Forms: a hidden honeypot, a time trap, and a signed token. Also refuses files sent to File Upload fields set to Hidden (a reported Gravity Forms security flaw) and names those fields for you to fix. No reCAPTCHA, no Akismet, no third-party calls.
- * Version:           0.3.2
+ * Version:           0.3.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  gravityforms
@@ -50,6 +50,26 @@ final class Scout_Forms_Guard {
 		add_filter( 'gform_validation', array( __CLASS__, 'validate' ) );
 		add_filter( 'gform_validation_message', array( __CLASS__, 'message' ), 10, 2 );
 		add_filter( 'gform_entry_is_spam', array( __CLASS__, 'content_spam' ), 10, 3 );
+		add_filter( 'gform_pre_validation', array( __CLASS__, 'fix_website_urls' ) );
+	}
+
+	/**
+	 * Website fields accept "www.example.com" or "example.com". Gravity Forms
+	 * rejects an address without http(s)://, which real visitors never type,
+	 * so the scheme is added before Gravity Forms checks the field.
+	 */
+	public static function fix_website_urls( $form ) {
+		foreach ( (array) rgar( $form, 'fields' ) as $field ) {
+			if ( ! is_object( $field ) || 'website' !== $field->type ) {
+				continue;
+			}
+			$key   = 'input_' . $field->id;
+			$value = isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? trim( wp_unslash( $_POST[ $key ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( '' !== $value && ! preg_match( '#^[a-z][a-z0-9+.-]*://#i', $value ) && preg_match( '#^[^\s/]+\.[a-z]{2,}#i', $value ) ) {
+				$_POST[ $key ] = 'https://' . $value; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			}
+		}
+		return $form;
 	}
 
 	/**
@@ -129,9 +149,16 @@ final class Scout_Forms_Guard {
 		if ( $is_spam || ! apply_filters( 'scout_forms_guard_content_check', true, $form ) ) {
 			return $is_spam;
 		}
+		// A Website field is the visitor's own site, which they are asked for.
+		$skip = array();
+		foreach ( (array) rgar( $form, 'fields' ) as $field ) {
+			if ( is_object( $field ) && 'website' === $field->type ) {
+				$skip[] = (string) $field->id;
+			}
+		}
 		$text = '';
 		foreach ( (array) $entry as $key => $value ) {
-			if ( is_string( $value ) && preg_match( '/^\d+(\.\d+)?$/', (string) $key ) ) {
+			if ( is_string( $value ) && preg_match( '/^\d+(\.\d+)?$/', (string) $key ) && ! in_array( (string) $key, $skip, true ) ) {
 				$text .= ' ' . $value;
 			}
 		}

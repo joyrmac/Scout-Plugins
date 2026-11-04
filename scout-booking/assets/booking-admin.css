@@ -1,0 +1,69 @@
+/* Scout Booking screens, on top of the shared Scout admin kit. */
+
+.sbk-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 0 16px; align-items: start; }
+@media (max-width: 1100px) { .sbk-layout { grid-template-columns: minmax(0, 1fr); } }
+.sbk-note p { margin: 0; font-weight: 500; }
+
+.sbk-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sbk-nav { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sbk-toggle { display: inline-flex; gap: 4px; margin-left: 6px; }
+.sbk-day { margin: 18px 0 6px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--sh-text-2); }
+.sbk-empty { color: var(--sh-text-3); margin: 6px 0 0; }
+
+.sbk-list { margin: 0; padding: 0; list-style: none; }
+.sbk-item { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 16px; padding: 12px 0; border-top: 1px solid var(--sh-border); margin: 0; }
+.sbk-item:first-child { border-top: 0; }
+.sbk-item.is-cancelled { opacity: .55; }
+.sbk-item.is-blocked .sbk-what { color: var(--sh-text-2); }
+.sbk-time { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sbk-body p { margin: 0 0 3px; }
+.sbk-what { font-weight: 600; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sbk-who a, .sbk-money a { color: var(--sh-accent-text); text-decoration: none; }
+.sbk-money { color: var(--sh-text-2); }
+.sbk-answers, .sbk-more { margin-top: 6px; }
+.sbk-answers summary, .sbk-more summary { cursor: pointer; color: var(--sh-accent-text); font-weight: 500; }
+.sbk-answers dl { margin: 8px 0 0; padding: 10px 12px; background: var(--sh-surface-2); border-radius: 10px; }
+.sbk-answers dt { font-weight: 600; margin-top: 6px; }
+.sbk-answers dt:first-child { margin-top: 0; }
+.sbk-answers dd { margin: 2px 0 0; }
+.sbk-actions { display: flex; gap: 8px; margin-top: 8px; }
+.sbk-actions form { margin: 0; }
+.sbk-more form { margin-top: 8px; }
+@media (max-width: 600px) { .sbk-item { grid-template-columns: minmax(0, 1fr); } }
+
+.sbk-form .sbk-field, .sbk-settings .sbk-field, .sbk-typeform .sbk-field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 14px; border: 0; padding: 0; }
+.sbk-field label, .sbk-field legend { font-weight: 600; }
+.sbk-field fieldset label, fieldset.sbk-field label { font-weight: 400; }
+.sbk-field .description { font-size: 13px; color: var(--sh-text-3); }
+.sbk-field input[type="text"], .sbk-field input[type="email"], .sbk-field input[type="date"], .sbk-field input[type="time"] { max-width: 100%; }
+.sbk-form .sbk-field input { width: 100%; }
+.sbk-check { margin: 0 0 12px; }
+.sbk-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0 12px; }
+
+.sbk-week { display: grid; gap: 6px; margin-top: 8px; }
+.sbk-weekday { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; padding: 6px 0; border: 0; border-top: 1px solid var(--sh-border); }
+.sbk-weekday-name { width: 130px; font-weight: 600; }
+
+.sbk-types { margin: 0; padding: 0; list-style: none; }
+.sbk-type { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--sh-border); margin: 0; }
+.sbk-type:first-child { border-top: 0; }
+.sbk-type.is-off { opacity: .7; }
+.sbk-type p { margin: 0 0 3px; }
+.sbk-questions { display: grid; gap: 8px; }
+.sbk-question { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.sbk-question input[type="text"] { flex: 1 1 280px; }
+.sbk-back { margin: 12px 0 0; }
+.sbk-back a { color: var(--sh-accent-text); text-decoration: none; }
+.sbk-delete { margin-top: 16px; }
+.sbk-delete summary { cursor: pointer; color: var(--sh-text-3); }
+.sbk-codes { margin: 0; }
+.sbk-codes dt { margin-top: 10px; }
+.sbk-codes dt:first-child { margin-top: 0; }
+.sbk-codes code { font-size: 12px; background: var(--sh-surface-2); padding: 2px 6px; border-radius: 6px; }
+.sbk-codes dd { margin: 4px 0 0; color: var(--sh-text-2); }
+.sbk-field input[type="number"] { width: 8em; }
+.sbk-typeform fieldset.sbk-field, .sbk-settings fieldset.sbk-field { display: block; }
+fieldset.sbk-field legend { margin-bottom: 4px; }
+fieldset.sbk-field label { display: inline-block; margin: 4px 0; }
+fieldset.sbk-field .description { display: inline; }
+fieldset.sbk-field input[type="number"] { vertical-align: middle; }

@@ -8,7 +8,7 @@
  *   scout_session  One class, talk or performance inside an event.
  *                  _scout_session: event, day, times, room, track, speakers.
  *   scout_speaker  A presenter. Name, full bio (editor), photo, and
- *                  _scout_speaker: role, short bio, links.
+ *                  _scout_speaker: role, short bio, links, public contact.
  *
  * A few values are copied to their own meta keys only so lists can be
  * sorted and filtered in the database: _scout_event_start, _scout_event_end,
@@ -54,6 +54,8 @@ final class Scout_Events {
 				'session_slug' => 'session',
 				'currency'     => 'USD',
 				'schema'       => 1,
+				'agreements_url'   => '',
+				'agreements_label' => '',
 			)
 		);
 		foreach ( array( 'event_slug', 'speaker_slug', 'session_slug' ) as $key ) {
@@ -61,6 +63,11 @@ final class Scout_Events {
 		}
 		$s['currency'] = preg_match( '/^[A-Z]{3}$/', (string) $s['currency'] ) ? $s['currency'] : 'USD';
 		$s['schema']   = ! empty( $s['schema'] ) ? 1 : 0;
+		$s['agreements_url']   = esc_url_raw( (string) $s['agreements_url'], array( 'http', 'https' ) );
+		$s['agreements_label'] = sanitize_text_field( (string) $s['agreements_label'] );
+		if ( '' === $s['agreements_label'] ) {
+			$s['agreements_label'] = __( 'Community Agreements', 'scout-events' );
+		}
 		return $s;
 	}
 
@@ -252,6 +259,9 @@ final class Scout_Events {
 			'capacity'     => 0,
 			'signup'       => 0,
 			'signup_guests' => 0,
+			'agree'        => 0,
+			'waiver'       => '',
+			'photo_ask'    => 0,
 			'know'         => '',
 			'schema_type'  => 'Event',
 		);
@@ -297,6 +307,9 @@ final class Scout_Events {
 		$out['signup']        = empty( $in['signup'] ) ? 0 : 1;
 		$out['signup_guests'] = min( 9, absint( $in['signup_guests'] ?? 0 ) );
 		$out['know']         = sanitize_textarea_field( (string) ( $in['know'] ?? '' ) );
+		$out['agree']        = empty( $in['agree'] ) ? 0 : 1;
+		$out['waiver']       = mb_substr( str_replace( "\r\n", "\n", sanitize_textarea_field( (string) ( $in['waiver'] ?? '' ) ) ), 0, 20000 );
+		$out['photo_ask']    = empty( $in['photo_ask'] ) ? 0 : 1;
 
 		// An end before the start is a typo; drop it rather than publish it.
 		if ( '' !== $out['end_date'] && '' !== $out['start_date'] && $out['end_date'] < $out['start_date'] ) {
@@ -487,13 +500,15 @@ final class Scout_Events {
 		$e     = self::event( $post_id );
 		$place = 'online' === $e['mode'] ? '' !== $e['online_url'] : ( '' !== $e['venue'] && '' !== $e['city'] );
 		$sell  = in_array( $e['availability'], array( 'onsale', 'free' ), true ) && ! $e['signup'];
+		// Shop tickets bring their own Add to cart and price.
+		$shop  = class_exists( 'Scout_Events_Woo' ) && class_exists( 'WooCommerce' ) && Scout_Events_Woo::products( $post_id );
 		return array(
 			array( __( 'Start date and time', 'scout-events' ), '' !== $e['start_date'] && '' !== $e['start_time'] ),
 			array( __( 'Where it happens', 'scout-events' ), $place ),
 			array( __( 'A description', 'scout-events' ), '' !== trim( wp_strip_all_tags( (string) get_post_field( 'post_content', $post_id ) ) ) ),
 			array( __( 'An event photo', 'scout-events' ), has_post_thumbnail( $post_id ) ),
-			array( __( 'Ticket link while on sale', 'scout-events' ), ! $sell || '' !== $e['ticket_url'] ),
-			array( __( 'Price, for Google', 'scout-events' ), 'free' === $e['availability'] || 'none' === $e['availability'] || '' !== $e['price_from'] ),
+			array( __( 'Ticket link while on sale', 'scout-events' ), $shop || ! $sell || '' !== $e['ticket_url'] ),
+			array( __( 'Price, for Google', 'scout-events' ), $shop || 'free' === $e['availability'] || 'none' === $e['availability'] || '' !== $e['price_from'] ),
 		);
 	}
 
@@ -654,6 +669,10 @@ final class Scout_Events {
 			'short'   => '',
 			'website' => '',
 			'links'   => array(),
+			'city'    => '',
+			'booking' => '',
+			'email'   => '',
+			'phone'   => '',
 		);
 	}
 
@@ -679,6 +698,11 @@ final class Scout_Events {
 			'short'   => sanitize_textarea_field( (string) ( $in['short'] ?? '' ) ),
 			'website' => esc_url_raw( trim( (string) ( $in['website'] ?? '' ) ), array( 'http', 'https' ) ),
 			'links'   => array_values( array_unique( $clean ) ),
+			// Public contact, shown only by [scout_directory contact="yes"].
+			'city'    => sanitize_text_field( (string) ( $in['city'] ?? '' ) ),
+			'booking' => esc_url_raw( trim( (string) ( $in['booking'] ?? '' ) ), array( 'http', 'https' ) ),
+			'email'   => sanitize_email( (string) ( $in['email'] ?? '' ) ),
+			'phone'   => sanitize_text_field( (string) ( $in['phone'] ?? '' ) ),
 		);
 	}
 

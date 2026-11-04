@@ -1,5 +1,10 @@
 # Scout Forms Guard — Changelog
 
+## 0.3.3 (2026-11-02)
+
+- **Website fields take "www.example.com".** Gravity Forms refused any address without https:// ("Please enter a valid Website URL"), which real visitors never type (Joy, Nov 2, on the Law Firm Inquiry form). Forms Guard now adds https:// before Gravity Forms checks the field, so www.example.com and example.com both go through.
+- **Fix: a visitor's own website no longer marks the entry as spam.** 0.3.2's link check read every field, so a law firm that filled in the "Current website" field would have landed in Spam. Website fields are now left out of that check; links typed in the message still count.
+
 ## 0.3.2 (2026-10-31)
 
 - **Catches "add your site to Google" spam.** Two entries on Walter Lutz's live form got past the honeypot, time trap and token: bots that wait like a person, then pitch a search-index service with a link to their own site. Forms Guard now reads the message too. An entry that links to another website (email addresses are fine) or uses a known pitch ("search index", "backlink" and a few more) is marked as spam: the visitor sees the normal confirmation, no notification goes out, and the entry waits in the form's Spam folder in case a real person was caught. It counts toward the monthly blocked total. Turn it off with `scout_forms_guard_content_check`; change the phrases with `scout_forms_guard_spam_phrases`.

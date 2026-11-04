@@ -4,7 +4,7 @@
    --scout-members-accent, --scout-members-on-accent, --scout-members-line,
    --scout-members-inset, --scout-members-radius. */
 
-.sm-portal, .sm-gate, .sm-home, .sm-signin-form, .sm-invitations {
+.sm-portal, .sm-gate, .sm-home, .sm-signin-form, .sm-invitations, .sm-thanks {
 	--sm-accent: var(--scout-members-accent, #1D1D1F);
 	--sm-on-accent: var(--scout-members-on-accent, #fff);
 	--sm-line: var(--scout-members-line, rgba(127, 127, 127, .28));
@@ -46,13 +46,17 @@
 .sm-badge { justify-self: start; display: inline-block; padding: .4em .9em; border-radius: 980px; background: var(--sm-inset); font-weight: 600; margin: 0; }
 .sm-account.is-active .sm-badge { background: rgba(11, 127, 93, .12); }
 .sm-lede { margin: .5em 0 1em; text-wrap: pretty; }
+.sm-pay-note { margin: 0 0 .75em; text-wrap: pretty; }
+.sm-pay { margin: 0 0 1em; }
+.sm-thanks { padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); text-wrap: pretty; }
 .sm-next { padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); margin: 0 0 1em; }
 .sm-next p { margin: 0 0 .5em; }
 .sm-next p:last-child { margin: 0; }
 .sm-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10em, 1fr)); gap: .75em 1.5em; margin: 0 0 1.25em; padding: 1em 1.25em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); }
 .sm-facts dt { font-size: .8em; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
 .sm-facts dd { margin: .2em 0 0; }
-.sm-sub { margin: 1em 0 .5em; }
+/* Section headings are H2 now (they follow the page's H1); the size stays what it was as an H3. */
+.sm-sub { margin: 1em 0 .5em; font-size: 1.17em; }
 
 /* The members-only note. */
 .sm-gate { max-width: 42rem; margin: 2em auto; box-sizing: border-box; padding: 1.5em; border: 1px solid var(--sm-line); border-radius: var(--sm-radius); background: var(--sm-inset); }
@@ -81,7 +85,7 @@
 /* Member invitations. */
 .sm-invite-list { display: grid; gap: 1.25em; margin: 0 0 1.5em; }
 .sm-invite { padding: 1.25em 1.5em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
-.sm-invite-title { margin: 0 0 .2em; text-wrap: balance; }
+.sm-invite-title { margin: 0 0 .2em; font-size: 1.17em; text-wrap: balance; }
 .sm-invite-meta { margin: 0 0 1em; font-size: .85em; opacity: .75; }
 .sm-invite-answers { margin: 0; display: grid; gap: .9em; }
 .sm-invite-answers dt { font-size: .8em; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }

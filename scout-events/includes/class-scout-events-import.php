@@ -15,12 +15,15 @@
  *                 post_status
  *   speakers.csv  name, slug, role, short_bio, bio, website, links, photo,
  *                 photos (more to choose from, "|" between), topics ("|"
- *                 between), order, post_status
+ *                 between), order, post_status, and the public contact a
+ *                 members directory shows: city, booking, email, phone
  *   sessions.csv  title, slug, event, date, start, end, room, track, kind,
  *                 speakers, capacity, description, post_status
  *   vendors.csv   name, slug, city, website, about, products, events, photo,
- *                 post_status (public details only: contact details stay off
- *                 spreadsheets and come in through the vendor form)
+ *                 post_status, and the public business contact a members
+ *                 directory shows: email, phone, links ("|" between). The
+ *                 organizer-only details (contact person, power, space)
+ *                 stay off spreadsheets and come in through the vendor form.
  *
  * Column names are matched without regard to case; unknown columns are
  * ignored. "links" and "speakers" take several values separated by "|".
@@ -152,7 +155,7 @@ final class Scout_Events_Import {
 		}
 		$id    = $this->find( Scout_Events::EVENT, $r['slug'] ?? '', $title, true );
 		$merge = array();
-		$map   = array( 'start_date', 'start_time', 'end_date', 'end_time', 'status', 'mode', 'venue', 'street', 'city', 'region', 'postal', 'country', 'online_url', 'availability', 'ticket_url', 'ticket_label', 'price_from', 'price_to', 'sales_start', 'sales_end', 'min_age', 'capacity', 'schema_type', 'signup', 'signup_guests' );
+		$map   = array( 'start_date', 'start_time', 'end_date', 'end_time', 'status', 'mode', 'venue', 'street', 'city', 'region', 'postal', 'country', 'online_url', 'availability', 'ticket_url', 'ticket_label', 'price_from', 'price_to', 'sales_start', 'sales_end', 'min_age', 'capacity', 'schema_type', 'signup', 'signup_guests', 'agree', 'waiver', 'photo_ask' );
 		foreach ( $map as $key ) {
 			if ( isset( $r[ $key ] ) && '' !== $r[ $key ] ) {
 				$merge[ $key ] = $r[ $key ];
@@ -191,10 +194,13 @@ final class Scout_Events_Import {
 			return;
 		}
 		$v = Scout_Events_Vendors::vendor( $id );
-		foreach ( array( 'city', 'website', 'products' ) as $k ) {
+		foreach ( array( 'city', 'website', 'products', 'email', 'phone' ) as $k ) {
 			if ( '' !== ( $r[ $k ] ?? '' ) ) {
 				$v[ $k ] = $r[ $k ];
 			}
+		}
+		if ( '' !== ( $r['links'] ?? '' ) ) {
+			$v['links'] = array_merge( $v['links'], array_map( 'trim', explode( '|', $r['links'] ) ) );
 		}
 		foreach ( array_filter( array_map( 'trim', explode( '|', $r['events'] ?? '' ) ) ) as $word ) {
 			$event = $this->find( Scout_Events::EVENT, $word, $word );
@@ -236,6 +242,11 @@ final class Scout_Events_Import {
 		}
 		if ( '' !== ( $r['links'] ?? '' ) ) {
 			$merge['links'] = array_merge( $current['links'], array_map( 'trim', explode( '|', $r['links'] ) ) );
+		}
+		foreach ( array( 'city', 'booking', 'email', 'phone' ) as $k ) {
+			if ( '' !== ( $r[ $k ] ?? '' ) ) {
+				$merge[ $k ] = $r[ $k ];
+			}
 		}
 		update_post_meta( $id, '_scout_speaker', Scout_Events::sanitize_speaker( array_merge( $current, $merge ) ) );
 		if ( '' !== ( $r['order'] ?? '' ) ) {

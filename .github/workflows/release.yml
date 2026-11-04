@@ -29,11 +29,13 @@ on:
           - scout-aeo
           - scout-analytics
           - scout-build
+          - scout-booking
           - scout-cards
           - scout-chat
           - scout-core
           - scout-events
           - scout-members
+          - scout-newsletter
           - scout-partners
           - scout-crm
           - scout-forms-guard
@@ -41,6 +43,7 @@ on:
           - scout-reviews
           - scout-rvpark
           - scout-sitecheck
+          - scout-writing
 
 permissions:
   contents: write

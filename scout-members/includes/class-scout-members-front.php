@@ -68,7 +68,19 @@ final class Scout_Members_Front {
 
 	/* ---------- the membership page ---------- */
 
-	public static function membership(): string {
+	/**
+	 * [scout_membership level="2"]: level sets the heading level of the
+	 * sections it prints (2 unless set), so they follow the page's H1.
+	 */
+	public static function membership( $atts = array() ): string {
+		$atts                 = shortcode_atts( array( 'level' => 0 ), (array) $atts );
+		Scout_Members::$level = absint( $atts['level'] );
+		$out                  = self::render_membership();
+		Scout_Members::$level = 0;
+		return $out;
+	}
+
+	private static function render_membership(): string {
 		wp_enqueue_style( 'scout-members' );
 		// The first page that shows the membership becomes "the" membership page until Settings says otherwise.
 		if ( is_singular() && ! Scout_Members::settings()['page'] ) {
@@ -98,11 +110,29 @@ final class Scout_Members_Front {
 			'exists'   => __( 'That email already has an account here. Sign in first, then send the application.', 'scout-members' ),
 			'missing'  => __( 'A few required answers are missing. Please check the form and send it again.', 'scout-members' ),
 			'tooquick' => __( 'That was very fast. Please check your answers and send the form again.', 'scout-members' ),
+			'paylink'  => __( 'That pay link has already been used or is out of date. Sign in to see where your membership stands.', 'scout-members' ),
 		);
 		if ( ! isset( $texts[ $msg ] ) ) {
 			return '';
 		}
 		return '<p class="sm-note ' . ( 'applied' === $msg ? 'is-good' : 'is-bad' ) . '" role="status">' . esc_html( $texts[ $msg ] ) . '</p>';
+	}
+
+	/** "Pay your dues ($120)" or "Renew now ($120)", linked to the checkout. Empty when there is nothing to pay. */
+	private static function pay_button( int $user_id ): string {
+		$url = Scout_Members_Woo::pay_url( $user_id );
+		if ( '' === $url ) {
+			return '';
+		}
+		$amount = Scout_Members_Woo::amount( $user_id );
+		$renew  = 'renew' === Scout_Members_Woo::pay_kind( $user_id );
+		if ( '' !== $amount && 0.0 === (float) $amount ) {
+			$label = __( 'Renew for free', 'scout-members' );
+		} else {
+			$label = $renew ? __( 'Renew now', 'scout-members' ) : __( 'Pay your dues', 'scout-members' );
+			$label = '' !== $amount ? $label . ' (' . Scout_Members::money( $amount ) . ')' : $label;
+		}
+		return '<p class="sm-pay"><a class="sm-button wp-element-button" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></p>';
 	}
 
 	private static function account( WP_User $user, array $m ): string {
@@ -112,6 +142,7 @@ final class Scout_Members_Front {
 		}
 		$titles = array(
 			'applied'  => __( 'Your application is being read', 'scout-members' ),
+			'approved' => __( 'You are approved', 'scout-members' ),
 			'active'   => __( 'You are a member', 'scout-members' ),
 			'lapsed'   => __( 'Your membership is due for renewal', 'scout-members' ),
 			'paused'   => __( 'Your membership is paused', 'scout-members' ),
@@ -120,6 +151,7 @@ final class Scout_Members_Front {
 		);
 		$lines = array(
 			'applied'  => __( 'We will write to you by email once it has been read. Nothing else is needed from you for now.', 'scout-members' ),
+			'approved' => __( 'Welcome. Pay your dues and members-only pages and events open for you right away.', 'scout-members' ),
 			'active'   => __( 'Welcome. Members-only pages and events open for you whenever you are signed in.', 'scout-members' ),
 			'lapsed'   => __( 'Renew to keep members-only pages and events open. Get in touch if you have questions.', 'scout-members' ),
 			'paused'   => __( 'Members-only pages and events are closed while it is paused. Get in touch to pick it back up.', 'scout-members' ),
@@ -127,7 +159,20 @@ final class Scout_Members_Front {
 			'declined' => __( 'This membership is not the right fit at the moment. Thank you for the care you put into your answers.', 'scout-members' ),
 		);
 		$facts = array();
-		if ( '' !== $m['plan'] && '' !== Scout_Members::plan_label( $m['plan'] ) && in_array( $status, array( 'active', 'lapsed', 'paused' ), true ) ) {
+		$pay  = self::pay_button( (int) $user->ID );
+		$note = '';
+		if ( 'applied' === $status && $m['prepaid'] ) {
+			$note = __( 'Your dues are paid. Your membership starts the day your application is approved.', 'scout-members' );
+		} elseif ( 'applied' === $status && '' !== $pay ) {
+			$note = __( 'You can pay your dues now. Your membership starts the day your application is approved, and if it is not the right fit, your payment is refunded.', 'scout-members' );
+		} elseif ( 'active' === $status && Scout_Members::in_grace( (int) $user->ID ) ) {
+			/* translators: %s: date. */
+			$note = sprintf( __( 'Your renewal date has passed. Renew by %s to keep members-only pages and events open.', 'scout-members' ), Scout_Members::date_label( Scout_Members::access_until( (int) $user->ID ) ) );
+		} elseif ( 'active' === $status && '' !== $pay ) {
+			/* translators: %s: date. */
+			$note = sprintf( __( 'Your membership renews on %s. Renew any time before then; your new year starts from that date.', 'scout-members' ), Scout_Members::date_label( $m['renews'] ) );
+		}
+		if ( '' !== $m['plan'] && '' !== Scout_Members::plan_label( $m['plan'] ) && in_array( $status, array( 'approved', 'active', 'lapsed', 'paused' ), true ) ) {
 			$facts[ __( 'Plan', 'scout-members' ) ] = Scout_Members::plan_label( $m['plan'] );
 		}
 		if ( '' !== $m['since'] && 'declined' !== $status ) {
@@ -141,7 +186,11 @@ final class Scout_Members_Front {
 		<div class="sm-account is-<?php echo esc_attr( $status ); ?>">
 			<p class="sm-badge"><?php echo esc_html( $titles[ $status ] ); ?></p>
 			<p class="sm-lede"><?php echo esc_html( $lines[ $status ] ); ?></p>
-			<?php if ( ( 'active' === $status && '' === $m['paid'] ) || 'lapsed' === $status ) : ?>
+			<?php if ( '' !== $note ) : ?>
+				<p class="sm-pay-note"><?php echo esc_html( $note ); ?></p>
+			<?php endif; ?>
+			<?php echo $pay; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_url and esc_html in pay_button(). ?>
+			<?php if ( '' === $pay && ( ( 'active' === $status && '' === $m['paid'] ) || in_array( $status, array( 'lapsed', 'approved' ), true ) ) ) : ?>
 				<?php $next = (string) get_option( 'scout_members_next_step', '' ); ?>
 				<?php if ( '' !== trim( $next ) ) : ?>
 					<div class="sm-next"><?php echo wp_kses_post( wpautop( make_clickable( esc_html( $next ) ) ) ); ?></div>
@@ -183,11 +232,13 @@ final class Scout_Members_Front {
 		$out  = '<div class="sm-gate"><p class="sm-gate-title">' . esc_html__( 'For members', 'scout-members' ) . '</p>';
 		if ( $m && 'applied' === $m['status'] ) {
 			$out .= '<p>' . esc_html__( 'This opens once your membership application is approved.', 'scout-members' ) . '</p>';
+		} elseif ( $m && 'approved' === $m['status'] ) {
+			$out .= '<p>' . esc_html__( 'This opens as soon as your dues are paid.', 'scout-members' ) . '</p>' . self::pay_button( (int) $user->ID ) . '<p><a href="' . esc_url( Scout_Members::page_url() ) . '">' . esc_html__( 'See your membership', 'scout-members' ) . '</a></p>';
 		} elseif ( $plans && Scout_Members::is_member() ) {
 			/* translators: %s: plan names, such as "VIP Member". */
 			$out .= '<p>' . esc_html( sprintf( __( 'This is part of the %s membership.', 'scout-members' ), Scout_Members::plan_names( $plans ) ) ) . '</p><p><a href="' . esc_url( Scout_Members::page_url() ) . '">' . esc_html__( 'See your membership', 'scout-members' ) . '</a></p>';
 		} elseif ( $m && in_array( $m['status'], array( 'active', 'paused' ), true ) ) {
-			$out .= '<p>' . esc_html__( 'This opens again once your membership is active.', 'scout-members' ) . '</p><p><a href="' . esc_url( Scout_Members::page_url() ) . '">' . esc_html__( 'See your membership', 'scout-members' ) . '</a></p>';
+			$out .= '<p>' . esc_html__( 'This opens again once your membership is active.', 'scout-members' ) . '</p>' . self::pay_button( (int) $user->ID ) . '<p><a href="' . esc_url( Scout_Members::page_url() ) . '">' . esc_html__( 'See your membership', 'scout-members' ) . '</a></p>';
 		} else {
 			$out .= '<p>' . esc_html( '' !== $what ? $what : __( 'This part of the site is for members.', 'scout-members' ) ) . '</p>';
 			if ( $user->exists() ) {
@@ -534,7 +585,7 @@ final class Scout_Members_Front {
 			$new = true;
 		} else {
 			$current = Scout_Members::member( $user_id );
-			if ( in_array( $current['status'], array( 'applied', 'active', 'paused' ), true ) ) {
+			if ( in_array( $current['status'], array( 'applied', 'approved', 'active', 'paused' ), true ) ) {
 				wp_safe_redirect( Scout_Members::page_url() );
 				exit;
 			}
@@ -561,6 +612,12 @@ final class Scout_Members_Front {
 		// Names only: the answers stay on the site, never in an email.
 		/* translators: %s: applicant name. */
 		wp_mail( Scout_Members::notify_email(), sprintf( __( 'New membership application: %s', 'scout-members' ), trim( $first . ' ' . $last ) ), __( "A new membership application is waiting. Read it and decide here:\n", 'scout-members' ) . Scout_Members_Admin::url() );
+		// When people pay with the application, they go straight to the checkout.
+		$pay = Scout_Members_Woo::pay_url( $user_id );
+		if ( '' !== $pay ) {
+			wp_safe_redirect( $pay );
+			exit;
+		}
 		self::back( 'applied' );
 	}
 

@@ -130,3 +130,12 @@
 .se-photo.is-main { border-color: #0E8FE6; box-shadow: 0 0 0 1px #0E8FE6; }
 .se-photo label { display: flex; align-items: center; gap: 4px; }
 .se-pending-photos img { margin: 0 4px 4px 0; border-radius: 6px; }
+
+/* Door list flags and the shop box's Create a ticket. */
+.se-door-flag { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--se-warn); background: #FBF0DC; border-radius: 6px; font-weight: 600; }
+.se-door-who .se-ticket-answers { display: inline; margin: 0; }
+.se-door-who .se-ticket-answers .se-chip { margin-left: 6px; }
+.se-woo-new { margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--se-line, #dcdcde); border-radius: 8px; }
+.se-woo-new summary { cursor: pointer; }
+.se-woo-new .se-grid { margin-top: 8px; }
+.se-woo-new textarea { width: 100%; }

@@ -64,6 +64,9 @@ final class Scout_Members_Events {
 		if ( $m && 'applied' === $m['status'] ) {
 			return '<p class="se-cta sm-cta"><span class="se-soon">' . esc_html__( 'Members only. This opens once your membership application is approved.', 'scout-members' ) . '</span></p>';
 		}
+		if ( $m && 'approved' === $m['status'] ) {
+			return '<p class="se-cta sm-cta"><span class="se-soon">' . esc_html__( 'Members only. This opens as soon as your dues are paid.', 'scout-members' ) . '</span> <a class="se-button sm-button wp-element-button" href="' . esc_url( Scout_Members::page_url() ) . '">' . esc_html__( 'See your membership', 'scout-members' ) . '</a></p>';
+		}
 		$out = '<p class="se-cta sm-cta"><span class="se-soon">' . esc_html__( 'This event is for members.', 'scout-members' ) . '</span> <a class="se-button sm-button wp-element-button" href="' . esc_url( Scout_Members::page_url() ) . '">' . esc_html__( 'Become a member', 'scout-members' ) . '</a>';
 		if ( ! is_user_logged_in() ) {
 			$out .= ' <a class="sm-signin" href="' . esc_url( wp_login_url( (string) get_permalink( (int) $id ) ) ) . '">' . esc_html__( 'Sign in', 'scout-members' ) . '</a>';
@@ -100,6 +103,7 @@ final class Scout_Members_Events {
 		if ( ! $ids || ! class_exists( 'Scout_Events_Front' ) ) {
 			return (string) $html;
 		}
-		return (string) $html . '<h3 class="sm-sub">' . esc_html__( 'Members-only events coming up', 'scout-members' ) . '</h3>' . Scout_Events_Front::events( array_slice( $ids, 0, 6 ) );
+		// An H2 by default, so the event cards' own H3 titles sit right under it.
+		return (string) $html . Scout_Members::heading( __( 'Members-only events coming up', 'scout-members' ), 'sm-sub' ) . Scout_Events_Front::events( array_slice( $ids, 0, 6 ) );
 	}
 }

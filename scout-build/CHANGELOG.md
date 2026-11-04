@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.7.10 (2026-11-02)
+
+- **Theme updates download when the repo name's capitals differ.** Maravela's theme says `Update URI: https://github.com/joyrmac/maravelas`, but GitHub hands back the file address as `joyrmac/Maravelas`. The download check compared the two letter for letter, so it skipped the key and WordPress fetched the private file without it: "Download failed. Not Found." The check now ignores capitals, the way GitHub does.
+
 ## 0.7.9 (2026-10-30)
 
 - **"Test builds" no longer flags a client's own plugin.** On Andy's live site the row named his companion plugin (Scout — Andy's Golf Car Garage), which lives in his repo and never gets a Scout Plugins release. The row now looks only at plugins that update from this repo.

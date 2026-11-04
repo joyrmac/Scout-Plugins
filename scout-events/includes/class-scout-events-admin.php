@@ -195,6 +195,8 @@ final class Scout_Events_Admin {
 			'speaker_slug' => sanitize_title( (string) ( $in['speaker_slug'] ?? '' ) ),
 			'currency'     => strtoupper( sanitize_text_field( (string) ( $in['currency'] ?? '' ) ) ),
 			'schema'       => ! empty( $in['schema'] ) ? 1 : 0,
+			'agreements_url'   => esc_url_raw( trim( (string) ( $in['agreements_url'] ?? '' ) ), array( 'http', 'https' ) ),
+			'agreements_label' => sanitize_text_field( (string) ( $in['agreements_label'] ?? '' ) ),
 		);
 		foreach ( array( 'event_slug', 'session_slug', 'speaker_slug' ) as $key ) {
 			if ( '' === $new[ $key ] ) {
@@ -581,6 +583,15 @@ final class Scout_Events_Admin {
 							<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Add event schema for Google', 'scout-events' ); ?></label>
 							<span class="sh-note"><?php esc_html_e( 'Turn off only if the theme already prints its own event schema.', 'scout-events' ); ?></span>
 						</p>
+						<p class="se-field">
+							<label for="se-set-agree-url"><?php esc_html_e( 'Link to your community agreements', 'scout-events' ); ?></label>
+							<input type="url" id="se-set-agree-url" name="scout_events[agreements_url]" value="<?php echo esc_attr( $s['agreements_url'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( home_url( '/community-agreements/' ) ); ?>">
+							<span class="sh-note"><?php esc_html_e( 'Events that ask people to agree link to this page next to the tick box.', 'scout-events' ); ?></span>
+						</p>
+						<p class="se-field">
+							<label for="se-set-agree-label"><?php esc_html_e( 'What that page is called', 'scout-events' ); ?></label>
+							<input type="text" id="se-set-agree-label" name="scout_events[agreements_label]" value="<?php echo esc_attr( $s['agreements_label'] ); ?>" class="regular-text">
+						</p>
 						<p><button type="submit" class="button"><?php esc_html_e( 'Save settings', 'scout-events' ); ?></button></p>
 					</form>
 				</section>
@@ -629,10 +640,10 @@ final class Scout_Events_Admin {
 						</td>
 						<td><?php echo esc_html( Scout_Events::dates_label( $e ) ); ?></td>
 						<td>
-							<?php if ( $e['signup'] ) : ?>
+							<?php if ( Scout_Events_RSVP::has_tickets( $id, $e ) ) : ?>
 								<?php $sc = Scout_Events_RSVP::counts( $id ); ?>
-								<?php /* translators: %d: people signed up. */ ?>
-								<a href="<?php echo esc_url( self::signups_url( $id ) ); ?>"><?php echo esc_html( sprintf( _n( '%d signed up', '%d signed up', $sc['going'], 'scout-events' ), $sc['going'] ) ); ?></a><br>
+								<?php /* translators: %d: people with a ticket. */ ?>
+								<a href="<?php echo esc_url( self::signups_url( $id ) ); ?>"><?php echo esc_html( sprintf( _n( '%d going', '%d going', $sc['going'], 'scout-events' ), $sc['going'] ) ); ?></a><br>
 							<?php endif; ?>
 							<?php echo esc_html( Scout_Events::availabilities()[ $e['availability'] ] ); ?>
 							<?php $price = Scout_Events::price_label( $e ); ?>

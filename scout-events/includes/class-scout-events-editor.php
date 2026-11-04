@@ -157,6 +157,35 @@ final class Scout_Events_Editor {
 				</div>
 			</fieldset>
 
+			<?php $set = Scout_Events::settings(); ?>
+			<fieldset class="se-group">
+				<legend><?php esc_html_e( 'Agreements', 'scout-events' ); ?></legend>
+				<p class="se-field se-wide">
+					<label for="se-agree"><input type="checkbox" id="se-agree" name="scout_event[agree]" value="1" <?php checked( (bool) $e['agree'] ); ?>> <?php esc_html_e( 'Each person agrees before they get a ticket', 'scout-events' ); ?></label>
+					<span class="se-help">
+						<?php
+						if ( '' !== $set['agreements_url'] ) {
+							/* translators: %s: name of the site's agreements page. */
+							echo esc_html( sprintf( __( 'On the sign-up form and at checkout, each ticket holder ticks that they agree to the %s and the waiver below, and types their name to sign. The date, time and the exact words they agreed to are kept with their ticket.', 'scout-events' ), $set['agreements_label'] ) );
+						} else {
+							esc_html_e( 'On the sign-up form and at checkout, each ticket holder ticks that they agree to the waiver below and types their name to sign. The date, time and the exact words are kept with their ticket. Add the link to your community agreements under Events, Settings.', 'scout-events' );
+						}
+						echo ' ';
+						esc_html_e( 'With a Minimum age set below, they also confirm their age.', 'scout-events' );
+						?>
+					</span>
+				</p>
+				<p class="se-field se-wide">
+					<label for="se-waiver"><?php esc_html_e( 'Waiver (optional)', 'scout-events' ); ?></label>
+					<textarea id="se-waiver" name="scout_event[waiver]" rows="6" aria-describedby="se-waiver-help"><?php echo esc_textarea( $e['waiver'] ); ?></textarea>
+					<span class="se-help" id="se-waiver-help"><?php esc_html_e( 'Write it in your own words, or paste the one your lawyer gave you. People read it in a box above the tick box. Changing it later starts a new version; everyone keeps the version they signed.', 'scout-events' ); ?></span>
+				</p>
+				<p class="se-field se-wide">
+					<label for="se-photo-ask"><input type="checkbox" id="se-photo-ask" name="scout_event[photo_ask]" value="1" <?php checked( (bool) $e['photo_ask'] ); ?>> <?php esc_html_e( 'Ask each person whether they can be in photos and video', 'scout-events' ); ?></label>
+					<span class="se-help"><?php esc_html_e( 'They choose yes or no. Their choice shows on the door list, so whoever takes photos knows.', 'scout-events' ); ?></span>
+				</p>
+			</fieldset>
+
 			<fieldset class="se-group">
 				<legend><?php esc_html_e( 'What to know', 'scout-events' ); ?></legend>
 				<div class="se-grid">
@@ -324,6 +353,15 @@ final class Scout_Events_Editor {
 				<?php
 				self::field( 'text', $n, 'role', __( 'What they do', 'scout-events' ), $p['role'], 'se-wide', __( 'For example, Somatic educator and author.', 'scout-events' ) );
 				self::field( 'url', $n, 'website', __( 'Website', 'scout-events' ), $p['website'], 'se-wide' );
+				?>
+			</div>
+			<p class="se-help"><?php esc_html_e( 'Public contact. Shown only in a members directory ([scout_directory contact="yes"]), never on the public speaker page. Use only what they publish for clients.', 'scout-events' ); ?></p>
+			<div class="se-grid">
+				<?php
+				self::field( 'text', $n, 'city', __( 'Where they work (city, state or Online)', 'scout-events' ), $p['city'] );
+				self::field( 'url', $n, 'booking', __( 'Booking or services link', 'scout-events' ), $p['booking'] );
+				self::field( 'email', $n, 'email', __( 'Business email', 'scout-events' ), $p['email'] );
+				self::field( 'text', $n, 'phone', __( 'Business phone', 'scout-events' ), $p['phone'] );
 				?>
 			</div>
 			<p class="se-field se-wide">

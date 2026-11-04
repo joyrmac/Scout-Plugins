@@ -25,6 +25,7 @@ final class Scout_Members_Admin {
 		add_action( 'admin_post_scout_members_update', array( __CLASS__, 'update' ) );
 		add_action( 'admin_post_scout_members_settings', array( __CLASS__, 'save_settings' ) );
 		add_action( 'admin_post_scout_members_import', array( __CLASS__, 'import' ) );
+		add_action( 'admin_post_scout_members_review', array( __CLASS__, 'review' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_MEMBERS_FILE ), array( __CLASS__, 'action_link' ) );
 		add_filter( 'scout_events_needs_you', array( __CLASS__, 'needs_you' ) );
 		add_action( 'admin_bar_menu', array( __CLASS__, 'toolbar' ), 92 );
@@ -35,9 +36,9 @@ final class Scout_Members_Admin {
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'eraser' ) );
 	}
 
-	/** The hub, or one of its views ('members', 'import', 'settings'). */
+	/** The hub, or one of its views ('members', 'renewals', 'import', 'settings'). */
 	public static function url( string $view = '', array $args = array() ): string {
-		$base = admin_url( 'admin.php?page=' . self::SLUG . ( in_array( $view, array( 'members', 'import', 'settings' ), true ) ? '-' . $view : '' ) );
+		$base = admin_url( 'admin.php?page=' . self::SLUG . ( in_array( $view, array( 'members', 'renewals', 'import', 'settings' ), true ) ? '-' . $view : '' ) );
 		return $args ? add_query_arg( $args, $base ) : $base;
 	}
 
@@ -53,6 +54,9 @@ final class Scout_Members_Admin {
 		add_menu_page( __( 'Scout Members', 'scout-members' ), __( 'Members', 'scout-members' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.2' );
 		add_submenu_page( self::SLUG, __( 'Scout Members', 'scout-members' ), __( 'Overview', 'scout-members' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ) );
 		add_submenu_page( self::SLUG, __( 'All members', 'scout-members' ), __( 'All members', 'scout-members' ), self::CAP, self::SLUG . '-members', array( __CLASS__, 'render_members' ) );
+		$review = count( self::to_review() );
+		$label  = __( 'Renewals', 'scout-members' ) . ( $review ? ' <span class="awaiting-mod">' . (int) $review . '</span>' : '' );
+		add_submenu_page( self::SLUG, __( 'Renewals due', 'scout-members' ), $label, self::CAP, self::SLUG . '-renewals', array( __CLASS__, 'render_renewals' ) );
 		add_submenu_page( self::SLUG, __( 'Bring members in', 'scout-members' ), __( 'Import', 'scout-members' ), self::CAP, self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
 		add_submenu_page( self::SLUG, __( 'Membership settings', 'scout-members' ), __( 'Settings', 'scout-members' ), self::CAP, self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
 	}
@@ -95,16 +99,97 @@ final class Scout_Members_Admin {
 				'action' => __( 'Read applications', 'scout-members' ),
 			);
 		}
+		$review = count( self::to_review() );
+		if ( $review ) {
+			$items[] = array(
+				/* translators: %d: number of payments. */
+				'text'   => sprintf( _n( '%d membership payment to review (a refund, or a payment nobody matched).', '%d membership payments to review (refunds, or payments nobody matched).', $review, 'scout-members' ), $review ),
+				'url'    => self::url( 'renewals' ) . '#sm-review',
+				'action' => __( 'Review payments', 'scout-members' ),
+			);
+		}
 		$due = count( Scout_Members::renewals_due() );
 		if ( $due ) {
 			$items[] = array(
 				/* translators: %d: number of members. */
 				'text'   => sprintf( _n( '%d membership renews within 30 days or is past due.', '%d memberships renew within 30 days or are past due.', $due, 'scout-members' ), $due ),
-				'url'    => self::url() . '#sm-renewals',
+				'url'    => self::url( 'renewals' ),
 				'action' => __( 'See renewals', 'scout-members' ),
 			);
 		}
 		return $items;
+	}
+
+	/**
+	 * Payments waiting for the owner: members flagged by a refund or an odd
+	 * payment, and dues orders that matched nobody.
+	 *
+	 * @return array<int,array{member:int,order:int,reason:string,on:string}>
+	 */
+	public static function to_review(): array {
+		$out = array();
+		foreach ( Scout_Members::flagged_ids() as $id ) {
+			$f = Scout_Members::flagged( $id );
+			if ( $f ) {
+				$out[] = array(
+					'member' => $id,
+					'order'  => $f['order'],
+					'reason' => $f['reason'],
+					'on'     => $f['on'],
+				);
+			}
+		}
+		if ( Scout_Members_Woo::active() ) {
+			foreach ( Scout_Members_Woo::unmatched() as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( ! $order ) {
+					Scout_Members_Woo::clear_unmatched( $order_id );
+					continue;
+				}
+				$out[] = array(
+					'member' => 0,
+					'order'  => $order_id,
+					/* translators: 1: order number, 2: email on the order. */
+					'reason' => sprintf( __( 'Dues order #%1$s from %2$s matched no member.', 'scout-members' ), $order->get_order_number(), $order->get_billing_email() ),
+					'on'     => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '',
+				);
+			}
+		}
+		return $out;
+	}
+
+	/** Keep as is, or end the membership, for a flagged payment; clear an unmatched order. */
+	public static function review(): void {
+		$user_id = isset( $_POST['member'] ) ? absint( $_POST['member'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked next.
+		$order   = isset( $_POST['order'] ) ? absint( $_POST['order'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked next.
+		check_admin_referer( 'scout_members_review_' . $user_id . '_' . $order );
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_die( esc_html__( 'You do not have permission to change members.', 'scout-members' ), 403 );
+		}
+		if ( ! $user_id ) {
+			Scout_Members_Woo::clear_unmatched( $order );
+			self::back( 'cleared', '#sm-review' );
+		}
+		if ( ! get_userdata( $user_id ) ) {
+			wp_die( esc_html__( 'That member no longer exists.', 'scout-members' ), 404 );
+		}
+		delete_user_meta( $user_id, Scout_Members::REVIEW );
+		if ( ! empty( $_POST['end'] ) ) {
+			Scout_Members::set_status( $user_id, 'ended' );
+			Scout_Members::log( $user_id, __( 'Ended by the owner after reviewing a payment.', 'scout-members' ) );
+			self::back( 'ended', '#sm-review' );
+		}
+		Scout_Members::log( $user_id, __( 'Payment reviewed by the owner. Nothing else changed.', 'scout-members' ) );
+		self::back( 'reviewed', '#sm-review' );
+	}
+
+	/** True when this member's approval should wait for dues through the checkout. */
+	private static function dues_first( int $user_id ): bool {
+		if ( ! Scout_Members_Woo::active() || ! Scout_Members_Woo::product( Scout_Members::member( $user_id )['plan'] ) ) {
+			return false;
+		}
+		$amount = Scout_Members_Woo::amount( $user_id );
+		return '' === $amount || (float) $amount > 0;
 	}
 
 	/** Membership items join the Events Needs you list, so one screen shows everything. */
@@ -201,12 +286,34 @@ final class Scout_Members_Admin {
 			if ( isset( Scout_Members::plans()[ $plan ] ) ) {
 				Scout_Members::save( $user_id, array( 'plan' => $plan ) );
 			}
-			Scout_Members::set_status( $user_id, 'active' );
+			Scout_Members::log( $user_id, __( 'Application approved.', 'scout-members' ) );
+			$prepaid = Scout_Members::member( $user_id )['prepaid'];
+			if ( $prepaid ) {
+				// Paid with the application: the first year starts today.
+				Scout_Members::save( $user_id, array( 'prepaid' => 0 ) );
+				Scout_Members::set_status( $user_id, 'active' );
+				/* translators: %d: order number. */
+				Scout_Members::paid( $user_id, Scout_Members::today(), sprintf( __( 'order #%d, paid with the application', 'scout-members' ), $prepaid ) );
+				$msg = 'approved';
+			} elseif ( self::dues_first( $user_id ) ) {
+				Scout_Members::set_status( $user_id, 'approved' );
+				$msg = 'approved_pay';
+			} else {
+				Scout_Members::set_status( $user_id, 'active' );
+				$msg = 'approved';
+			}
 			self::welcome( $user_id );
-			self::back( 'approved', '#sm-applications' );
+			self::back( $msg, '#sm-applications' );
 		}
 		// No email goes out: the owner reaches out personally if they want to.
+		$prepaid = Scout_Members::member( $user_id )['prepaid'];
 		Scout_Members::set_status( $user_id, 'declined' );
+		Scout_Members::log( $user_id, __( 'Application not accepted.', 'scout-members' ) );
+		if ( $prepaid ) {
+			/* translators: %d: order number. */
+			Scout_Members::flag( $user_id, sprintf( __( 'Not accepted after paying with the application (order #%d). Refund it in WooCommerce.', 'scout-members' ), $prepaid ), $prepaid );
+			self::back( 'declined_paid', '#sm-applications' );
+		}
 		self::back( 'declined', '#sm-applications' );
 	}
 
@@ -220,7 +327,20 @@ final class Scout_Members_Admin {
 		/* translators: %s: site name. */
 		$subject = sprintf( __( 'Welcome, you are a member of %s', 'scout-members' ), $site );
 		$body    = __( 'Your membership application has been approved. Welcome.', 'scout-members' ) . "\n\n";
-		if ( '' !== $next ) {
+		$m       = Scout_Members::member( $user_id );
+		$pay     = 'approved' === $m['status'] ? Scout_Members_Woo::pay_url( $user_id ) : '';
+		if ( '' !== $pay ) {
+			/* translators: %s: site name. */
+			$subject = sprintf( __( 'You are approved: welcome to %s', 'scout-members' ), $site );
+			$amount  = Scout_Members_Woo::amount( $user_id );
+			$body   .= ( '' !== $amount
+				/* translators: 1: plan name, 2: amount. */
+				? sprintf( __( 'Pay your dues (%1$s, %2$s) to open members-only pages and events:', 'scout-members' ), Scout_Members::plans()[ $m['plan'] ]['name'] ?? '', Scout_Members::money( $amount ) )
+				: __( 'Pay your dues to open members-only pages and events:', 'scout-members' ) ) . "\n" . $pay . "\n\n";
+		} elseif ( 'active' === $m['status'] && '' !== $m['renews'] && '' !== $m['paid'] ) {
+			/* translators: %s: renewal date. */
+			$body .= sprintf( __( 'Your dues are paid. Your membership renews on %s.', 'scout-members' ), Scout_Members::date_label( $m['renews'] ) ) . "\n\n";
+		} elseif ( '' !== $next ) {
 			$body .= $next . "\n\n";
 		}
 		$body .= __( 'Sign in any time to see members-only pages and events:', 'scout-members' ) . "\n" . Scout_Members::page_url() . "\n\n"
@@ -236,17 +356,32 @@ final class Scout_Members_Admin {
 			wp_die( esc_html__( 'You do not have permission to change members.', 'scout-members' ), 403 );
 		}
 		if ( ! empty( $_POST['paid'] ) ) {
-			Scout_Members::paid( $user_id );
+			Scout_Members::paid( $user_id, '', __( 'Paid today, recorded by hand', 'scout-members' ) );
+			if ( in_array( Scout_Members::member( $user_id )['status'], array( 'approved', 'ended' ), true ) ) {
+				Scout_Members::set_status( $user_id, 'active' );
+			}
 			self::back( 'paid', '#sm-member-' . $user_id );
 		}
-		Scout_Members::save(
-			$user_id,
-			array(
-				'plan'   => isset( $_POST['plan'] ) ? sanitize_title( wp_unslash( $_POST['plan'] ) ) : '',
-				'renews' => isset( $_POST['renews'] ) ? sanitize_text_field( wp_unslash( $_POST['renews'] ) ) : '',
-				'note'   => isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '',
-			)
+		$before  = Scout_Members::member( $user_id );
+		$changes = array(
+			'plan'   => isset( $_POST['plan'] ) ? sanitize_title( wp_unslash( $_POST['plan'] ) ) : '',
+			'renews' => isset( $_POST['renews'] ) ? sanitize_text_field( wp_unslash( $_POST['renews'] ) ) : '',
+			'note'   => isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '',
 		);
+		if ( isset( $_POST['comp'] ) ) {
+			$changes['comp'] = sanitize_text_field( wp_unslash( $_POST['comp'] ) );
+		}
+		Scout_Members::save( $user_id, $changes );
+		$after = Scout_Members::member( $user_id );
+		if ( $before['comp'] !== $after['comp'] ) {
+			Scout_Members::log(
+				$user_id,
+				'' === $after['comp']
+					? __( 'Renewal price back to the plan price.', 'scout-members' )
+					/* translators: %s: amount. */
+					: sprintf( __( 'Renewal price set to %s by the owner.', 'scout-members' ), Scout_Members::money( $after['comp'] ) )
+			);
+		}
 		$status = isset( $_POST['status'] ) ? sanitize_key( wp_unslash( $_POST['status'] ) ) : '';
 		Scout_Members::set_status( $user_id, $status );
 		self::back( 'saved', '#sm-member-' . $user_id );
@@ -260,6 +395,9 @@ final class Scout_Members_Admin {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cleaned in save_settings().
 		$in = isset( $_POST['scout_members'] ) ? (array) wp_unslash( $_POST['scout_members'] ) : array();
 		Scout_Members::save_settings( $in );
+		if ( Scout_Members_Woo::active() && isset( $in['products'] ) && is_array( $in['products'] ) ) {
+			Scout_Members_Woo::save_links( $in['products'] );
+		}
 		update_option( 'scout_members_questions', sanitize_textarea_field( (string) ( $in['questions'] ?? '' ) ), false );
 		update_option( 'scout_members_next_step', sanitize_textarea_field( (string) ( $in['next_step'] ?? '' ) ), false );
 		update_option( Scout_Members_Invitations::OPTION, sanitize_textarea_field( (string) ( $in['invitation_questions'] ?? '' ) ), false );
@@ -302,7 +440,7 @@ final class Scout_Members_Admin {
 						'value' => Scout_Members::statuses()[ $m['status'] ] ?? $m['status'],
 					),
 				);
-				foreach ( array( 'plan', 'applied', 'since', 'renews', 'paid' ) as $k ) {
+				foreach ( array( 'plan', 'applied', 'since', 'renews', 'paid', 'comp' ) as $k ) {
 					if ( '' !== $m[ $k ] ) {
 						$rows[] = array(
 							'name'  => ucfirst( $k ),
@@ -314,6 +452,12 @@ final class Scout_Members_Admin {
 					$rows[] = array(
 						'name'  => $q,
 						'value' => $a,
+					);
+				}
+				foreach ( Scout_Members::history( $user->ID ) as $line ) {
+					$rows[] = array(
+						'name'  => __( 'History', 'scout-members' ) . ' ' . $line['on'],
+						'value' => $line['text'],
 					);
 				}
 				$data[] = array(
@@ -344,6 +488,8 @@ final class Scout_Members_Admin {
 		if ( $user && '' !== Scout_Members::member( $user->ID )['status'] ) {
 			delete_user_meta( $user->ID, Scout_Members::META );
 			delete_user_meta( $user->ID, Scout_Members::STATUS );
+			delete_user_meta( $user->ID, Scout_Members::LOG );
+			delete_user_meta( $user->ID, Scout_Members::REVIEW );
 			$removed = true;
 		}
 		return array(
@@ -364,6 +510,10 @@ final class Scout_Members_Admin {
 		self::render( 'import' );
 	}
 
+	public static function render_renewals(): void {
+		self::render( 'renewals' );
+	}
+
 	public static function render_settings(): void {
 		self::render( 'settings' );
 	}
@@ -372,7 +522,7 @@ final class Scout_Members_Admin {
 		if ( ! current_user_can( self::CAP ) ) {
 			return;
 		}
-		$view = in_array( $view, array( 'overview', 'members', 'import', 'settings' ), true ) ? $view : 'overview';
+		$view = in_array( $view, array( 'overview', 'members', 'renewals', 'import', 'settings' ), true ) ? $view : 'overview';
 		Scout_Admin_UI::open(
 			__( 'Your members', 'scout-members' ),
 			__( 'Who has applied, who is a member and when each membership renews. Approve someone here and members-only pages and events open for them.', 'scout-members' ),
@@ -382,6 +532,8 @@ final class Scout_Members_Admin {
 		echo '<div class="sm-admin">';
 		if ( 'members' === $view ) {
 			self::view_members();
+		} elseif ( 'renewals' === $view ) {
+			self::view_renewals();
 		} elseif ( 'import' === $view ) {
 			self::view_import();
 		} elseif ( 'settings' === $view ) {
@@ -396,12 +548,20 @@ final class Scout_Members_Admin {
 	private static function message(): void {
 		$msg   = isset( $_GET['scout-members'] ) ? sanitize_key( wp_unslash( $_GET['scout-members'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$texts = array(
-			'approved' => __( 'Approved. They have a welcome email with a link to sign in.', 'scout-members' ),
-			'declined' => __( 'Marked not accepted. No email was sent, so reach out yourself if you want to.', 'scout-members' ),
-			'saved'    => __( 'Saved.', 'scout-members' ),
-			'paid'     => __( 'Payment recorded. The renewal date moved forward one period.', 'scout-members' ),
-			'settings' => __( 'Settings saved.', 'scout-members' ),
-			'nofile'   => __( 'Choose a CSV file first.', 'scout-members' ),
+			'approved'      => __( 'Approved. They have a welcome email with a link to sign in.', 'scout-members' ),
+			'approved_pay'  => __( 'Approved. Their welcome email has a Pay your dues link. Members-only pages open for them as soon as they pay.', 'scout-members' ),
+			'declined'      => __( 'Marked not accepted. No email was sent, so reach out yourself if you want to.', 'scout-members' ),
+			'declined_paid' => __( 'Marked not accepted. They paid with their application, so refund that order in WooCommerce. It is listed under Renewals until you do.', 'scout-members' ),
+			'saved'         => __( 'Saved.', 'scout-members' ),
+			'paid'          => __( 'Payment recorded. The renewal date moved forward one period.', 'scout-members' ),
+			'settings'      => __( 'Settings saved.', 'scout-members' ),
+			'nofile'        => __( 'Choose a CSV file first.', 'scout-members' ),
+			'product'       => __( 'The plan has its product. Members pay it through the checkout.', 'scout-members' ),
+			'noproduct'     => __( 'The product could not be made. Add it in Products, then choose it here.', 'scout-members' ),
+			'noplan'        => __( 'That plan is no longer in Settings.', 'scout-members' ),
+			'reviewed'      => __( 'Done. Nothing about the membership changed.', 'scout-members' ),
+			'ended'         => __( 'The membership is ended.', 'scout-members' ),
+			'cleared'       => __( 'Taken off the list. Record the payment on the member with Paid today if it was theirs.', 'scout-members' ),
 		);
 		if ( isset( $texts[ $msg ] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $texts[ $msg ] ) . '</p></div>';
@@ -456,7 +616,7 @@ final class Scout_Members_Admin {
 		<section class="sh-box" id="sm-renewals">
 			<div class="sm-box-head">
 				<h2 class="sh-title"><?php esc_html_e( 'Renewing soon', 'scout-members' ); ?></h2>
-				<a class="button" href="<?php echo esc_url( self::url( 'members' ) ); ?>"><?php esc_html_e( 'All members', 'scout-members' ); ?></a>
+				<a class="button" href="<?php echo esc_url( self::url( 'renewals' ) ); ?>"><?php esc_html_e( 'Renewals and payments', 'scout-members' ); ?></a>
 			</div>
 			<?php if ( $due ) : ?>
 				<?php self::table( $due ); ?>
@@ -563,14 +723,18 @@ final class Scout_Members_Admin {
 					<button type="submit" name="approve" value="1" class="button button-primary"><?php esc_html_e( 'Approve and welcome', 'scout-members' ); ?></button>
 					<button type="submit" name="decline" value="1" class="button sm-quiet"><?php esc_html_e( 'Not accepted', 'scout-members' ); ?></button>
 				</form>
-				<p class="sh-note"><?php esc_html_e( 'Approving sends a welcome email with how to sign in, and your next-step note from Settings. Not accepted sends nothing.', 'scout-members' ); ?></p>
+				<?php if ( $m['prepaid'] ) : ?>
+					<?php /* translators: %d: order number. */ ?>
+					<p class="sm-chip is-good"><?php echo esc_html( sprintf( __( 'Dues paid with the application (order #%d). Approving starts their year today.', 'scout-members' ), $m['prepaid'] ) ); ?></p>
+				<?php endif; ?>
+				<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() && Scout_Members_Woo::links() ? __( 'Approving sends a welcome email with how to sign in. When the plan has a dues product, it carries a Pay your dues link and members-only pages open once they pay. Not accepted sends nothing.', 'scout-members' ) : __( 'Approving sends a welcome email with how to sign in, and your next-step note from Settings. Not accepted sends nothing.', 'scout-members' ) ); ?></p>
 			</details>
 		</li>
 		<?php
 	}
 
 	private static function view_members(): void {
-		$ids = Scout_Members::ids( array( 'active', 'paused', 'ended', 'declined' ) );
+		$ids = Scout_Members::ids( array( 'approved', 'active', 'paused', 'ended', 'declined' ) );
 		?>
 		<section class="sh-box">
 			<div class="sm-box-head">
@@ -610,7 +774,8 @@ final class Scout_Members_Admin {
 						}
 						$m    = Scout_Members::member( $id );
 						$form = 'sm-f-' . $id;
-						$late = 'active' === $m['status'] && '' !== $m['renews'] && $m['renews'] < Scout_Members::today();
+						$late  = 'active' === $m['status'] && '' !== $m['renews'] && $m['renews'] < Scout_Members::today();
+						$grace = $late && Scout_Members::in_grace( $id );
 						?>
 						<tr id="sm-member-<?php echo (int) $id; ?>">
 							<td>
@@ -633,8 +798,14 @@ final class Scout_Members_Admin {
 										<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $m['status'], $key ); ?>><?php echo esc_html( $label ); ?></option>
 									<?php endforeach; ?>
 								</select>
-								<?php if ( $late ) : ?>
-									<br><span class="sm-chip is-warn"><?php esc_html_e( 'Past due', 'scout-members' ); ?></span>
+								<?php if ( $grace ) : ?>
+									<?php /* translators: %s: date. */ ?>
+									<br><span class="sm-chip is-warn"><?php echo esc_html( sprintf( __( 'Past due, open until %s', 'scout-members' ), Scout_Members::date_label( Scout_Members::access_until( $id ) ) ) ); ?></span>
+								<?php elseif ( $late ) : ?>
+									<br><span class="sm-chip is-warn"><?php esc_html_e( 'Lapsed', 'scout-members' ); ?></span>
+								<?php endif; ?>
+								<?php if ( Scout_Members::flagged( $id ) ) : ?>
+									<br><a class="sm-chip is-warn" href="<?php echo esc_url( self::url( 'renewals' ) . '#sm-review' ); ?>"><?php esc_html_e( 'Payment to review', 'scout-members' ); ?></a>
 								<?php endif; ?>
 							</td>
 							<td>
@@ -645,6 +816,13 @@ final class Scout_Members_Admin {
 										<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $m['plan'], $slug ); ?>><?php echo esc_html( $p['name'] ); ?></option>
 									<?php endforeach; ?>
 								</select>
+								<label class="sm-comp" for="sm-c-<?php echo (int) $id; ?>"><?php esc_html_e( 'Renewal price', 'scout-members' ); ?></label>
+								<input type="text" inputmode="decimal" class="sm-comp-input" id="sm-c-<?php echo (int) $id; ?>" name="comp" value="<?php echo esc_attr( $m['comp'] ); ?>" placeholder="<?php echo esc_attr( '' !== ( $plans[ $m['plan'] ]['price'] ?? '' ) ? Scout_Members::money( $plans[ $m['plan'] ]['price'] ) : __( 'plan price', 'scout-members' ) ); ?>" form="<?php echo esc_attr( $form ); ?>">
+								<?php if ( '' !== $m['comp'] ) : ?>
+									<br><span class="sm-chip"><?php echo esc_html( 0.0 === (float) $m['comp'] ? __( 'Comped: renews free', 'scout-members' ) : sprintf( /* translators: %s: amount. */ __( 'Comped: renews at %s', 'scout-members' ), Scout_Members::money( $m['comp'] ) ) ); ?></span>
+								<?php elseif ( $m['free_join'] ) : ?>
+									<br><span class="sm-chip"><?php esc_html_e( 'Joined on a $0 order', 'scout-members' ); ?></span>
+								<?php endif; ?>
 							</td>
 							<td>
 								<label class="screen-reader-text" for="sm-r-<?php echo (int) $id; ?>"><?php esc_html_e( 'Renews', 'scout-members' ); ?></label>
@@ -663,8 +841,178 @@ final class Scout_Members_Admin {
 				</tbody>
 			</table>
 		</div>
-		<p class="sh-note"><?php esc_html_e( 'Paid today moves the renewal date forward one plan period. Until card billing is added, record payments here as they come in.', 'scout-members' ); ?></p>
+		<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() ? __( 'Dues paid through the checkout are recorded by themselves. Paid today records a payment made another way (cash, a check) and moves the renewal date forward one plan period. Renewal price: leave empty for the plan price, 0 to renew free, or another amount for this member only.', 'scout-members' ) : __( 'Paid today records a payment and moves the renewal date forward one plan period. Renewal price: leave empty for the plan price, 0 to renew free, or another amount for this member only.', 'scout-members' ) ); ?></p>
 		<?php
+	}
+
+	/** Where a member's renewal stands, in a few words, with how loud to say it. */
+	private static function renewal_state( int $id ): array {
+		$m     = Scout_Members::member( $id );
+		$today = Scout_Members::today();
+		if ( 'approved' === $m['status'] ) {
+			return array( __( 'Approved, dues not paid yet', 'scout-members' ), 'is-warn' );
+		}
+		if ( '' !== $m['paid'] && $m['paid'] >= gmdate( 'Y-m-d', strtotime( $today . ' -30 days' ) ) && ( '' === $m['renews'] || $m['renews'] > $today ) ) {
+			/* translators: %s: date paid. */
+			return array( sprintf( __( 'Paid %s', 'scout-members' ), Scout_Members::date_label( $m['paid'] ) ), 'is-good' );
+		}
+		if ( '' === $m['renews'] ) {
+			return array( '', '' );
+		}
+		if ( $m['renews'] >= $today ) {
+			$days = (int) round( ( strtotime( $m['renews'] . ' 12:00:00' ) - strtotime( $today . ' 12:00:00' ) ) / DAY_IN_SECONDS );
+			/* translators: %d: days. */
+			return array( 0 === $days ? __( 'Renews today', 'scout-members' ) : sprintf( _n( 'Due in %d day', 'Due in %d days', $days, 'scout-members' ), $days ), '' );
+		}
+		if ( Scout_Members::in_grace( $id ) ) {
+			/* translators: %s: date. */
+			return array( sprintf( __( 'Past due, open until %s', 'scout-members' ), Scout_Members::date_label( Scout_Members::access_until( $id ) ) ), 'is-warn' );
+		}
+		return array( __( 'Lapsed, access closed', 'scout-members' ), 'is-warn' );
+	}
+
+	/**
+	 * Renewals due: everyone renewing in the next 30 days, past due or just
+	 * lapsed, approved members who have not paid, and who paid in the last 30
+	 * days. Payments to review sit on top.
+	 */
+	private static function view_renewals(): void {
+		$review = self::to_review();
+		$ids    = Scout_Members_Renewals::list_ids();
+		$woo    = Scout_Members_Woo::active();
+		$s      = Scout_Members::settings();
+		?>
+		<?php if ( $review ) : ?>
+			<section class="sh-box sm-review" id="sm-review">
+				<h2 class="sh-title"><?php esc_html_e( 'Payments to review', 'scout-members' ); ?></h2>
+				<p><?php esc_html_e( 'Nothing here changed anyone\'s access. Look at each one and decide.', 'scout-members' ); ?></p>
+				<ul class="sm-review-list">
+					<?php foreach ( $review as $r ) : ?>
+						<?php $user = $r['member'] ? get_userdata( $r['member'] ) : null; ?>
+						<li>
+							<p>
+								<?php if ( $user ) : ?>
+									<strong><?php echo esc_html( $user->display_name ); ?></strong> <span class="sh-note"><?php echo esc_html( $user->user_email ); ?></span><br>
+								<?php endif; ?>
+								<?php echo esc_html( $r['reason'] ); ?>
+								<?php if ( '' !== $r['on'] ) : ?>
+									<span class="sh-note">(<?php echo esc_html( Scout_Members::date_label( $r['on'] ) ); ?>)</span>
+								<?php endif; ?>
+							</p>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sm-decide">
+								<input type="hidden" name="action" value="scout_members_review">
+								<input type="hidden" name="member" value="<?php echo (int) $r['member']; ?>">
+								<input type="hidden" name="order" value="<?php echo (int) $r['order']; ?>">
+								<?php wp_nonce_field( 'scout_members_review_' . (int) $r['member'] . '_' . (int) $r['order'] ); ?>
+								<?php if ( $r['order'] && $woo ) : ?>
+									<a class="button" href="<?php echo esc_url( self::order_link( $r['order'] ) ); ?>"><?php esc_html_e( 'Open the order', 'scout-members' ); ?></a>
+								<?php endif; ?>
+								<?php if ( $user && ! in_array( Scout_Members::member( $r['member'] )['status'], array( 'active', 'approved', 'paused' ), true ) ) : ?>
+									<button type="submit" class="button button-primary"><?php esc_html_e( 'Done, take it off the list', 'scout-members' ); ?></button>
+								<?php elseif ( $user ) : ?>
+									<button type="submit" class="button button-primary"><?php esc_html_e( 'Keep the membership', 'scout-members' ); ?></button>
+									<button type="submit" name="end" value="1" class="button sm-quiet"><?php esc_html_e( 'End the membership', 'scout-members' ); ?></button>
+								<?php else : ?>
+									<button type="submit" class="button"><?php esc_html_e( 'Done, take it off the list', 'scout-members' ); ?></button>
+								<?php endif; ?>
+							</form>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</section>
+		<?php endif; ?>
+
+		<section class="sh-box" id="sm-renewals-due">
+			<div class="sm-box-head">
+				<h2 class="sh-title"><?php esc_html_e( 'Renewals due', 'scout-members' ); ?></h2>
+				<a class="button" href="<?php echo esc_url( self::url( 'members' ) ); ?>"><?php esc_html_e( 'All members', 'scout-members' ); ?></a>
+			</div>
+			<p>
+				<?php
+				if ( 'off' === $s['reminders'] ) {
+					echo '<strong>' . esc_html__( 'Reminder emails are off in Settings.', 'scout-members' ) . '</strong> ';
+				} elseif ( 'all' === $s['reminders'] ) {
+					echo esc_html__( 'Every member gets a reminder 30 days (yearly plans) and 7 days before their renewal date: with a Renew now link when their plan has a dues product, else with your next-step note.', 'scout-members' ) . ' ';
+				} else {
+					echo esc_html__( 'Members whose plan has a dues product get a reminder with a Renew now link 30 days (yearly plans) and 7 days before their renewal date. Others get none; Settings can change that.', 'scout-members' ) . ' ';
+				}
+				echo esc_html( $woo ? __( 'Members renew with a fresh checkout; no cards are saved.', 'scout-members' ) : __( 'Record payments with Paid today on All members.', 'scout-members' ) );
+				if ( $s['grace'] > 0 ) {
+					/* translators: %d: days. */
+					echo ' ' . esc_html( sprintf( _n( 'Members keep access for %d day after their renewal date.', 'Members keep access for %d days after their renewal date.', $s['grace'], 'scout-members' ), $s['grace'] ) );
+				} else {
+					echo ' ' . esc_html__( 'Access closes the day after the renewal date (no grace period).', 'scout-members' );
+				}
+				?>
+			</p>
+			<?php if ( $ids ) : ?>
+				<div class="sm-table-wrap">
+					<table class="widefat striped sm-table sm-renewals">
+						<thead>
+							<tr>
+								<th scope="col"><?php esc_html_e( 'Member', 'scout-members' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Renewal', 'scout-members' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Dues', 'scout-members' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Latest', 'scout-members' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php
+							foreach ( $ids as $id ) :
+								$user = get_userdata( $id );
+								if ( ! $user ) {
+									continue;
+								}
+								$m     = Scout_Members::member( $id );
+								$state = self::renewal_state( $id );
+								$dues  = $woo ? Scout_Members_Woo::amount( $id ) : Scout_Members::dues( $id );
+								$log   = Scout_Members::history( $id );
+								$last  = $log ? end( $log ) : null;
+								?>
+								<tr>
+									<td><strong><?php echo esc_html( $user->display_name ); ?></strong><br><span class="sh-note"><?php echo esc_html( $user->user_email ); ?></span></td>
+									<td>
+										<?php if ( '' !== $m['renews'] ) : ?>
+											<?php echo esc_html( Scout_Members::date_label( $m['renews'] ) ); ?><br>
+										<?php endif; ?>
+										<?php if ( '' !== $state[0] ) : ?>
+											<span class="sm-chip <?php echo esc_attr( $state[1] ); ?>"><?php echo esc_html( $state[0] ); ?></span>
+										<?php endif; ?>
+									</td>
+									<td>
+										<?php echo esc_html( '' !== $m['plan'] ? ( Scout_Members::plans()[ $m['plan'] ]['name'] ?? '' ) : __( 'No plan', 'scout-members' ) ); ?>
+										<?php if ( '' !== $dues ) : ?>
+											<br><span class="sh-note"><?php echo esc_html( 0.0 === (float) $dues ? __( 'Free (comped)', 'scout-members' ) : Scout_Members::money( $dues ) . ( '' !== $m['comp'] ? ' ' . __( '(comped)', 'scout-members' ) : '' ) ); ?></span>
+										<?php endif; ?>
+									</td>
+									<td>
+										<?php if ( $last ) : ?>
+											<?php echo esc_html( $last['text'] ); ?><br><span class="sh-note"><?php echo esc_html( Scout_Members::date_label( $last['on'] ) ); ?></span>
+										<?php else : ?>
+											<span class="sh-note"><?php esc_html_e( 'Nothing yet', 'scout-members' ); ?></span>
+										<?php endif; ?>
+										<?php if ( ! empty( $m['reminded']['7'] ) && $m['reminded']['7'] === $m['renews'] ) : ?>
+											<br><span class="sh-note"><?php esc_html_e( '7-day reminder sent', 'scout-members' ); ?></span>
+										<?php elseif ( ! empty( $m['reminded']['30'] ) && $m['reminded']['30'] === $m['renews'] ) : ?>
+											<br><span class="sh-note"><?php esc_html_e( '30-day reminder sent', 'scout-members' ); ?></span>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+				</div>
+			<?php else : ?>
+				<p class="sm-allclear"><?php esc_html_e( 'No renewals in the next 30 days, nobody past due, and no payments in the last 30 days.', 'scout-members' ); ?></p>
+			<?php endif; ?>
+		</section>
+		<?php
+	}
+
+	/** The order's edit screen, wherever WooCommerce keeps orders. */
+	private static function order_link( int $order_id ): string {
+		$order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : null;
+		return $order ? (string) $order->get_edit_order_url() : admin_url( 'post.php?post=' . $order_id . '&action=edit' );
 	}
 
 	private static function view_import(): void {
@@ -679,6 +1027,10 @@ final class Scout_Members_Admin {
 					<p><strong><?php echo esc_html( $report['dry'] ? __( 'Preview. Nothing has changed yet.', 'scout-members' ) : __( 'Import finished.', 'scout-members' ) ); ?></strong></p>
 					<?php /* translators: 1: new members, 2: updated members. */ ?>
 					<p><?php echo esc_html( sprintf( $report['dry'] ? __( '%1$d new and %2$d updated members.', 'scout-members' ) : __( '%1$d added and %2$d updated members.', 'scout-members' ), $report['created'], $report['updated'] ) ); ?></p>
+					<?php if ( ! empty( $report['free'] ) ) : ?>
+						<?php /* translators: %d: number of members. */ ?>
+						<p><?php echo esc_html( sprintf( _n( '%d of them joined on a $0 order (a full-value code). They are marked "Joined on a $0 order" on All members: set a renewal price for each one there (0 renews free), or leave it empty for the plan price.', '%d of them joined on a $0 order (a full-value code). They are marked "Joined on a $0 order" on All members: set a renewal price for each one there (0 renews free), or leave it empty for the plan price.', $report['free'], 'scout-members' ), $report['free'] ) ); ?></p>
+					<?php endif; ?>
 					<?php if ( $report['notes'] ) : ?>
 						<ul>
 							<?php foreach ( $report['notes'] as $n ) : ?>
@@ -701,6 +1053,101 @@ final class Scout_Members_Admin {
 			</form>
 			<p class="sh-note"><?php esc_html_e( 'Columns are matched by name: Email, and First Name and Last Name or Name, Pricing Plan or Plan, Order Date or Date, Total, and an optional Renews. A person who appears on several rows keeps their latest payment. Plans are matched to the plans in Settings by name.', 'scout-members' ); ?></p>
 		</section>
+		<?php
+	}
+
+	/**
+	 * Dues and renewals, inside the settings form: the grace period and
+	 * reminders always; with WooCommerce, when people pay, the receipt name and
+	 * each plan's product.
+	 */
+	private static function dues_settings( array $s ): void {
+		$plans = Scout_Members::plans();
+		$woo   = Scout_Members_Woo::active();
+		?>
+		<fieldset class="sm-dues" id="sm-dues">
+			<legend class="sh-title"><?php esc_html_e( 'Dues and renewals', 'scout-members' ); ?></legend>
+			<?php if ( $woo ) : ?>
+				<p class="sm-field">
+					<span class="sm-label"><?php esc_html_e( 'When new members pay', 'scout-members' ); ?></span>
+					<label class="sm-radio"><input type="radio" name="scout_members[pay_when]" value="approval" <?php checked( $s['pay_when'], 'approval' ); ?>> <?php esc_html_e( 'After you approve them (the welcome email has a Pay your dues link)', 'scout-members' ); ?></label>
+					<label class="sm-radio"><input type="radio" name="scout_members[pay_when]" value="apply" <?php checked( $s['pay_when'], 'apply' ); ?>> <?php esc_html_e( 'With the application (the year starts the day you approve them; refund anyone you do not accept)', 'scout-members' ); ?></label>
+				</p>
+				<p class="sm-field">
+					<label for="sm-set-receipt"><?php esc_html_e( 'Name on receipts', 'scout-members' ); ?></label>
+					<input type="text" id="sm-set-receipt" name="scout_members[receipt]" value="<?php echo esc_attr( $s['receipt'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( Scout_Members::receipt_name() ); ?>">
+					<span class="sh-note"><?php esc_html_e( 'New dues products start with these words, then the plan and how long it lasts, so the card statement and receipt read plainly. Products you already made keep their names; rename them in Products.', 'scout-members' ); ?></span>
+				</p>
+				<?php if ( $plans ) : ?>
+					<?php
+					$products = wc_get_products(
+						array(
+							'type'    => 'simple',
+							'status'  => array( 'publish', 'private', 'draft' ),
+							'limit'   => 300,
+							'orderby' => 'title',
+							'order'   => 'ASC',
+						)
+					);
+					$links    = Scout_Members_Woo::links();
+					?>
+					<div class="sm-table-wrap">
+						<table class="widefat sm-table sm-plan-products">
+							<thead><tr><th scope="col"><?php esc_html_e( 'Plan', 'scout-members' ); ?></th><th scope="col"><?php esc_html_e( 'Paid with this product', 'scout-members' ); ?></th></tr></thead>
+							<tbody>
+								<?php foreach ( $plans as $slug => $plan ) : ?>
+									<?php
+									$linked = $links[ $slug ] ?? 0;
+									$prod   = $linked ? wc_get_product( $linked ) : null;
+									?>
+									<tr>
+										<td><strong><?php echo esc_html( $plan['name'] ); ?></strong><br><span class="sh-note"><?php echo esc_html( Scout_Members::plan_label( $slug ) ); ?></span></td>
+										<td>
+											<label class="screen-reader-text" for="sm-prod-<?php echo esc_attr( $slug ); ?>"><?php esc_html_e( 'Product', 'scout-members' ); ?></label>
+											<select id="sm-prod-<?php echo esc_attr( $slug ); ?>" name="scout_members[products][<?php echo esc_attr( $slug ); ?>]">
+												<option value="0"><?php esc_html_e( 'None: record payments by hand', 'scout-members' ); ?></option>
+												<?php foreach ( $products as $p ) : ?>
+													<option value="<?php echo (int) $p->get_id(); ?>" <?php selected( $linked, $p->get_id() ); ?>><?php echo esc_html( $p->get_name() . ' (' . wp_strip_all_tags( wc_price( (float) $p->get_price() ) ) . ')' ); ?></option>
+												<?php endforeach; ?>
+											</select>
+											<?php if ( $prod ) : ?>
+												<br><a href="<?php echo esc_url( (string) get_edit_post_link( $prod->get_id() ) ); ?>"><?php esc_html_e( 'Edit the product', 'scout-members' ); ?></a>
+												<?php if ( 'publish' !== $prod->get_status() || ! $prod->is_purchasable() ) : ?>
+													<br><span class="sm-chip is-warn"><?php esc_html_e( 'Not for sale yet: publish it and give it a price', 'scout-members' ); ?></span>
+												<?php elseif ( '' !== $plan['price'] && abs( (float) $prod->get_price() - (float) $plan['price'] ) > 0.001 ) : ?>
+													<?php /* translators: 1: product price, 2: plan price. */ ?>
+													<br><span class="sm-chip is-warn"><?php echo esc_html( sprintf( __( 'The checkout charges %1$s; the plan says %2$s', 'scout-members' ), Scout_Members::money( $prod->get_price() ), Scout_Members::money( $plan['price'] ) ) ); ?></span>
+												<?php endif; ?>
+											<?php else : ?>
+												<br><button type="submit" class="button" form="sm-make-<?php echo esc_attr( $slug ); ?>"><?php esc_html_e( 'Create the product for this plan', 'scout-members' ); ?></button>
+												<?php /* translators: %s: product name. */ ?>
+												<span class="sh-note"><?php echo esc_html( sprintf( __( 'Makes "%s": virtual, hidden from the shop, at the plan price.', 'scout-members' ), Scout_Members_Woo::product_name( $slug ) ) ); ?></span>
+											<?php endif; ?>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					</div>
+					<p class="sh-note"><?php esc_html_e( 'Members pay with whatever payment methods the shop has turned on (WooCommerce, Settings, Payments). The checkout ties each payment to the member, makes them active and moves their renewal date forward one period.', 'scout-members' ); ?></p>
+				<?php else : ?>
+					<p class="sh-note"><?php esc_html_e( 'Add your plans above and save, then link each one to a product here.', 'scout-members' ); ?></p>
+				<?php endif; ?>
+			<?php else : ?>
+				<p class="sh-note"><?php esc_html_e( 'Members can pay dues through the site\'s own checkout once WooCommerce is installed and active. Until then, record payments with Paid today on All members.', 'scout-members' ); ?></p>
+			<?php endif; ?>
+			<p class="sm-field">
+				<label for="sm-set-grace"><?php esc_html_e( 'Grace period (days)', 'scout-members' ); ?></label>
+				<input type="number" id="sm-set-grace" name="scout_members[grace]" value="<?php echo (int) $s['grace']; ?>" min="0" max="90" class="small-text">
+				<span class="sh-note"><?php esc_html_e( 'How long members keep access after their renewal date while they renew. 0 closes it the day after. New sites start at 14; sites that had memberships before this version start at 0, as before.', 'scout-members' ); ?></span>
+			</p>
+			<p class="sm-field">
+				<span class="sm-label"><?php esc_html_e( 'Renewal reminders (30 days before for yearly plans, and 7 days before)', 'scout-members' ); ?></span>
+				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="checkout" <?php checked( $s['reminders'], 'checkout' ); ?>> <?php esc_html_e( 'To members whose plan has a dues product, with a Renew now link', 'scout-members' ); ?></label>
+				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="all" <?php checked( $s['reminders'], 'all' ); ?>> <?php esc_html_e( 'To every member (without a dues product, the email carries your next-step note)', 'scout-members' ); ?></label>
+				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="off" <?php checked( $s['reminders'], 'off' ); ?>> <?php esc_html_e( 'Off', 'scout-members' ); ?></label>
+			</p>
+		</fieldset>
 		<?php
 	}
 
@@ -756,6 +1203,7 @@ final class Scout_Members_Admin {
 							<textarea id="sm-set-next" name="scout_members[next_step]" rows="3" class="large-text"><?php echo esc_textarea( $next ); ?></textarea>
 							<span class="sh-note"><?php esc_html_e( 'Goes in the welcome email and on the member page until their first payment is recorded. For example, how and where to pay dues.', 'scout-members' ); ?></span>
 						</p>
+						<?php self::dues_settings( $s ); ?>
 						<p class="sm-field">
 							<label for="sm-set-agree"><?php esc_html_e( 'Community agreements link (optional)', 'scout-members' ); ?></label>
 							<input type="url" id="sm-set-agree" name="scout_members[agreements_url]" value="<?php echo esc_attr( $s['agreements_url'] ); ?>" class="regular-text">
@@ -783,6 +1231,16 @@ final class Scout_Members_Admin {
 						</p>
 						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-members' ); ?></button></p>
 					</form>
+					<?php
+					// "Create the product" buttons sit in the settings form but submit these, since forms cannot nest.
+					if ( Scout_Members_Woo::active() ) {
+						foreach ( array_keys( Scout_Members::plans() ) as $slug ) {
+							echo '<form id="sm-make-' . esc_attr( $slug ) . '" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" hidden><input type="hidden" name="action" value="scout_members_product"><input type="hidden" name="plan" value="' . esc_attr( $slug ) . '">';
+							wp_nonce_field( 'scout_members_product_' . $slug );
+							echo '</form>';
+						}
+					}
+					?>
 				</section>
 			<?php endif; ?>
 			<section class="sh-box">
