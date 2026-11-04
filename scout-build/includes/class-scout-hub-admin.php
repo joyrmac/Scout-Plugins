@@ -404,7 +404,10 @@ final class Scout_Hub_Admin {
 				/* translators: %s: "Three things" */
 				? sprintf( 1 === $n ? __( '%s on this site is waiting.', 'scout-build' ) : __( '%s on this site are waiting.', 'scout-build' ), $count )
 				: __( 'Nothing on this site is waiting.', 'scout-build' );
-			return array( $head, $site . ( '' !== $host ? ' · ' . $host : '' ), __( 'The client sees their own list. Scout tools stay in the sidebar for you and Sean.', 'scout-build' ) );
+			// Scout's own sites (scout-setup.json "scout_own_site": true) have no separate client.
+			$own  = ! empty( Scout_Hub_Setup::data()['scout_own_site'] );
+			$lede = $own ? __( "Everything waiting on Scout's own site. Each one says about how long it takes.", 'scout-build' ) : __( 'The client sees their own list. Scout tools stay in the sidebar for you and Sean.', 'scout-build' );
+			return array( $head, $site . ( '' !== $host ? ' · ' . $host : '' ), $lede );
 		}
 		$hour  = (int) current_time( 'G' );
 		$hello = $hour < 12 ? __( 'Good morning.', 'scout-build' ) : ( $hour < 17 ? __( 'Good afternoon.', 'scout-build' ) : __( 'Good evening.', 'scout-build' ) );
@@ -488,6 +491,14 @@ final class Scout_Hub_Admin {
 			.sh-ov-log li{display:grid;grid-template-columns:auto 1fr;gap:10px;color:var(--sh-text-2)}
 			.sh-ov-log .sh-when{font-family:var(--sh-mono);font-size:12px;color:var(--sh-text-3);padding-top:2px;white-space:nowrap}
 		</style>
+		<?php
+		// The agreed order (Joy, 2026-11-04): the sentence headline, then Today, then health.
+		// The setup list comes first only while it shows (the first week); the Inbox rows feed Today.
+		$setup = Scout_Hub_Today::render_setup();
+		Scout_Hub_Today::render( ! $setup );
+		?>
+		<p class="sh-note" style="margin:8px 0 0"><a href="<?php echo esc_url( self::url( 'inbox' ) ); ?>"><?php esc_html_e( 'Open the Inbox', 'scout-build' ); ?> &rsaquo;</a></p>
+
 		<section class="sh-box">
 			<div class="sh-ov-status">
 				<span class="sh-dot is-<?php echo esc_attr( $state ); ?>" aria-hidden="true"></span>
@@ -502,13 +513,6 @@ final class Scout_Hub_Admin {
 			</p>
 		</section>
 
-		<?php
-		// Today and the first-week setup list (dashboard redesign, Joy 2026-11-04). The Inbox
-		// rows feed Today, so "Needs you" lives there now.
-		$setup = Scout_Hub_Today::render_setup();
-		Scout_Hub_Today::render( ! $setup );
-		?>
-		<p class="sh-note" style="margin:8px 0 0"><a href="<?php echo esc_url( self::url( 'inbox' ) ); ?>"><?php esc_html_e( 'Open the Inbox', 'scout-build' ); ?> &rsaquo;</a></p>
 
 		<div>
 			<section class="sh-box">

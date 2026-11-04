@@ -2,6 +2,7 @@
 
 ## 0.12.0 (2026-11-04)
 
+- **Home order and Scout's own sites.** Home now reads: the sentence headline, then Today, then the health line. The first-week setup list comes first only while it shows. On Scout's own sites (`"scout_own_site": true` in scout-setup.json), the line under the headline says "Everything waiting on Scout's own site." instead of talking about a client.
 - **The screens now match the approved dashboard canvas (admin kit 1.9.0).** Joy saw on staging that the screens didn't look like the design. Every Scout screen now opens with one white bar (breadcrumb, Find anything, and Request a change) and lists its section's screens on the left. The second menu of group pills and tabs across the top is gone, so the sidebar is the only menu. The client logo tile and the mono eyebrow are gone too.
 - **Find anything (Ctrl or Cmd + K)** opens on every Scout screen. It searches every screen the person can open, and lists today's items under "Do it now".
 - **Home leads with a sentence**, for example "Good morning. Two things need you today." It shows the date above, in a centered column. Scout sees "Three things on this site are waiting." with the site's name and address.
