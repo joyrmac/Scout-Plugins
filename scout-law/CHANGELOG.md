@@ -7,6 +7,7 @@
 - **What is always kept:** starred entries, every entry from a form that emails no one (its entry is the only copy), and forms with their own Gravity Forms retention setting, which Gravity Forms handles.
 - A night deletes at most 500 entries per form, so a large backlog spreads over a few nights. Each night that deletes something adds a line to the deletion record: the date and the count, never names.
 - `scout_law_entry_days()` returns the days entries are kept, or 0 when deleting is off, for the privacy policy page to read.
+- **Works with an older admin kit.** Policies arrived in admin kit 1.8.0. When a plugin with an older kit loads first (a partial rollout, or after "Go back a version"), Approvals, Page reviews and Form entries file under Search instead, so the screens still open with no warnings. Test: `tools/tests/law-kit-fallback.php`.
 - Fix: uninstalling now removes the "Reviewed by" settings too. The review record stays, like the approval record.
 
 ## 0.3.0 (2026-11-04)

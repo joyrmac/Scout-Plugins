@@ -38,6 +38,16 @@ final class Scout_Law_Admin {
 		return 'options-general.php';
 	}
 
+	/**
+	 * Policies arrived in admin kit 1.8.0. The first plugin to load sets the kit for every
+	 * screen, so during a partial rollout or after "Go back a version" an older kit can be in
+	 * charge, and it has no Policies group. Then the law screens file under Search, which it has.
+	 */
+	public static function policies_group(): string {
+		$kit = defined( 'Scout_Admin_UI::VERSION' ) ? (string) Scout_Admin_UI::VERSION : '0';
+		return version_compare( $kit, '1.8.0', '>=' ) ? 'policies' : 'search';
+	}
+
 	public static function url( array $args = array() ): string {
 		// admin.php?page= opens the screen wherever its menu is. The parent is unknown while a
 		// form saves (admin-post.php builds no menu), and options-general.php?page= then fails.

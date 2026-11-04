@@ -91,6 +91,8 @@ jobs:
         run: php tools/tests/law-reviews.php
       - name: Law firm form entries that delete themselves (no WordPress needed)
         run: php tools/tests/law-entries.php
+      - name: Law firm screens fall back when an older admin kit loads first (no WordPress needed)
+        run: php tools/tests/law-kit-fallback.php
       - name: Scout Core breadcrumbs, verification, thank-you pages and hardening (no WordPress needed)
         run: php tools/tests/core-seo-gaps.php
       - name: Today list on Home (no WordPress needed)

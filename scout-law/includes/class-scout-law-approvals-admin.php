@@ -25,7 +25,7 @@ final class Scout_Law_Approvals_Admin {
 
 	/** Approvals files under Policies, beside Disclaimers. */
 	public static function nav_group( string $group, string $slug ): string {
-		return self::SLUG === strtok( $slug, '&' ) ? 'policies' : $group;
+		return self::SLUG === strtok( $slug, '&' ) ? Scout_Law_Admin::policies_group() : $group;
 	}
 
 	public static function url( array $args = array() ): string {
