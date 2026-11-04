@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## 1.6.1 (2026-11-04)
+
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 1.6.0 (2026-10-30)
 
 Two spam switches, both on for every site unless someone turns them off under **Scout → Spam protection**.

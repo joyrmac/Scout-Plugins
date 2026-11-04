@@ -3,13 +3,13 @@
  * Plugin Name:       Scout Optimize
  * Plugin URI:        https://scoutraleigh.com
  * Description:       Scout-owned media optimization. Compresses, resizes, and reformats images on upload, with batch optimization for existing libraries. Part of the Scout plugin suite.
- * Version:           0.9.3
+ * Version:           0.9.4
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            Scout Media & Consulting
  * Author URI:        https://scoutraleigh.com
  * License:           Proprietary - Scout client sites only. Not for redistribution.
- * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-optimize
+ * Update URI:        https://github.com/Scout-Media-Raleigh/Scout-Plugins/scout-optimize
  * Text Domain:       scout-optimize
  *
  * @package Scout_Optimize
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_OPTIMIZE_VERSION', '0.9.3' );
+define( 'SCOUT_OPTIMIZE_VERSION', '0.9.4' );
 define( 'SCOUT_OPTIMIZE_FILE', __FILE__ );
 define( 'SCOUT_OPTIMIZE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_OPTIMIZE_URL', plugin_dir_url( __FILE__ ) );

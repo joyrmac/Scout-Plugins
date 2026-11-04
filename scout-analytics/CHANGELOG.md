@@ -1,5 +1,9 @@
 # Scout Analytics changelog
 
+## 0.1.16 (2026-11-04)
+
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 0.1.15 (2026-10-30)
 
 - **The cookie notice is readable on every site.** It borrowed the theme's color names, so a site that defined some of them and not others got a mismatch: on Andy's light site the panel was white with light gray text and a "No thanks" button in white on white (Joy: "contrast is weird"). The notice now carries its own colors: light by default, dark when the page sets `data-theme="dark"` (scoutraleigh.com), and the OK button in the site's brand color from Scout Build 0.7.8, with dark text when that color is too light for white.

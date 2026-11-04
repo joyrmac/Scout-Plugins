@@ -9,7 +9,7 @@ Built for scoutraleigh.com as a way to start conversations with new clients.
 It is listed in the catalog as client-specific, so it only shows on sites that
 have it installed.
 
-Design: `Scout-Media-Raleigh/content/design/scout-features/DESIGN.md` 5.18
+Design: `Scout-Internal/content/design/scout-features/DESIGN.md` 5.18
 (landing) and 5.19 (emailed report).
 
 ## The eight checks

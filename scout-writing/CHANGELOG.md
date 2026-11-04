@@ -1,5 +1,9 @@
 # Scout Writing changelog
 
+## 0.1.1 (2026-11-04)
+
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 0.1.0 (2026-11-03)
 
 - First release. Kai's writing room moves out of the Bliss Boogie client plugin (Scout — Bliss Boogie 0.2.3) into its own Scout plugin, so it updates itself through Scout's release channel and any client can have one. Joy, 2026-11-03: "yes move the writing room into a scout plugin".

@@ -294,7 +294,7 @@ final class Scout_Hub_Health {
 	}
 
 	/** The repo every Scout plugin updates from (its Update URI). */
-	const REPO = 'joyrmac/Scout-Plugins';
+	const REPO = 'Scout-Media-Raleigh/Scout-Plugins';
 
 	/** Host names that only ever serve a copy on someone's own computer. */
 	const LOCAL_HOSTS = array( '.local', '.test', '.localhost', '.invalid', '.example', '.lndo.site', '.ddev.site' );

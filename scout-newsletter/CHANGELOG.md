@@ -1,5 +1,9 @@
 # Scout Newsletter changelog
 
+## 0.1.1 (2026-11-04)
+
+- **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.
+
 ## 0.1.0 (2026-11-03)
 
 - First release. Sends people who tick a newsletter box to Beehiiv, tagged by where they joined: Scout Events sign-ups, paid tickets and shop orders (classic checkout and the checkout block), the Scout Members application, Gravity Forms (a per-form Newsletter consent field), the `[scout_newsletter]` sign-up box and block, and any plugin that fires `scout_newsletter_optin`.

@@ -2,13 +2,13 @@
 /**
  * Plugin Name:       Scout Cards
  * Description:       Digital business cards and a social "link in bio" page, built into the client's own site: a team card, a card per person, Save contact (vCard with photo), share mode with a big QR code, a home-screen icon, and /links/. Reads the business identity from Scout Core; edited in Scout -> Cards & Links.
- * Version:           1.0.21
+ * Version:           1.0.22
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
  * License:           GPL-2.0-or-later
  * Text Domain:       scout-cards
- * Update URI:        https://github.com/joyrmac/Scout-Plugins/scout-cards
+ * Update URI:        https://github.com/Scout-Media-Raleigh/Scout-Plugins/scout-cards
  *
  * @package Scout_Cards
  */
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CARDS_VERSION', '1.0.21' );
+define( 'SCOUT_CARDS_VERSION', '1.0.22' );
 define( 'SCOUT_CARDS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CARDS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_CARDS_FILE', __FILE__ );

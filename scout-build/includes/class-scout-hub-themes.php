@@ -8,7 +8,7 @@
  *
  * A theme opts in with two lines in its style.css header:
  *
- *   Update URI:    https://github.com/joyrmac/BlissBoogie
+ *   Update URI:    https://github.com/Scout-Media-Raleigh/BlissBoogie
  *   Scout Release: blissboogie
  *
  * Its repo publishes each version as a GitHub release tagged
@@ -218,11 +218,31 @@ final class Scout_Hub_Themes {
 	 * redirect to a signed file address; the key goes only to the first, so
 	 * it never leaves for the file host.
 	 */
+	/**
+	 * True when $package is this theme's release file, so the key goes with it.
+	 *
+	 * The repo in the theme's Update URI and the file address GitHub hands back
+	 * can name the repo differently. GitHub ignores capitals (the URI says
+	 * maravelas, the API says Maravelas), and after a repo moves to another owner
+	 * or is renamed, GitHub forwards the old name while the file address carries
+	 * the new one (joyrmac/Andres-Borda---Golf-Carts became
+	 * Scout-Media-Raleigh/AndysGolfCarts). So the exact address the release
+	 * lookup returned counts as well, whatever owner and name it carries.
+	 */
+	private static function is_release_file( array $src, string $package ): bool {
+		if ( 0 === stripos( $package, 'https://api.github.com/repos/' . $src['repo'] . '/releases/assets/' ) ) {
+			return true;
+		}
+		if ( ! preg_match( '#^https://api\.github\.com/repos/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/releases/assets/\d+$#', $package ) ) {
+			return false;
+		}
+		$latest = self::latest( $src );
+		return is_array( $latest ) && '' !== $latest['package'] && hash_equals( $latest['package'], $package );
+	}
+
 	public static function download( $reply, $package, $upgrader ) {
 		$src = self::source();
-		// GitHub names are not case-sensitive, and the API spells the repo the way GitHub
-		// stores it (joyrmac/Maravelas) while a theme's Update URI may not (joyrmac/maravelas).
-		if ( false !== $reply || ! $src || ! is_string( $package ) || 0 !== stripos( $package, 'https://api.github.com/repos/' . $src['repo'] . '/releases/assets/' ) ) {
+		if ( false !== $reply || ! $src || ! is_string( $package ) || ! self::is_release_file( $src, $package ) ) {
 			return $reply;
 		}
 		$token = self::token();

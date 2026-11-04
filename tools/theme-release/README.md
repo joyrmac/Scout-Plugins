@@ -11,7 +11,7 @@ on the site. Scout Build 0.7.0 or later does the checking and installing.
 
    ```
    Version:       2.7.6
-   Update URI:    https://github.com/joyrmac/BlissBoogie
+   Update URI:    https://github.com/Scout-Media-Raleigh/BlissBoogie
    Scout Release: blissboogie
    ```
 
@@ -26,7 +26,7 @@ on the site. Scout Build 0.7.0 or later does the checking and installing.
 ## Once per site (in WordPress)
 
 1. GitHub → Settings → Developer settings → Fine-grained tokens → Generate:
-   - Resource owner: joyrmac. Repository access: only the client's repo.
+   - Resource owner: Scout-Media-Raleigh (the organization). Repository access: only the client's repo.
    - Permissions: **Contents: Read-only**. Nothing else.
    - Expiry: the longest allowed, with a calendar note to renew it.
 2. On the site: **Scout → Build**, Theme box → paste the key → **Save key**.
