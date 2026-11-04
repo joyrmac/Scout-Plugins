@@ -46,6 +46,20 @@ drifts from the map. A screen never moves its address; only where it is filed.
 | `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Updates. See "Theme updates" below. |
 | `DISALLOW_FILE_MODS` | (WordPress) | When true, features that are not installed must be uploaded by hand; on and off still work. |
 
+## Release rings and the pause switch (0.10.1+)
+
+Site Standard rule 19: a Scout plugin release installs itself on
+scoutraleigh.com and staging first (ring 1), Recon a day later (ring 2),
+client sites two days after it is out (ring 3). Until then the automatic
+update waits and Build, Updates says when it installs; Update now always
+works. Set the ring with `SCOUT_HUB_RING` (1, 2 or 3) in wp-config.php or on
+the Updates screen; otherwise the address decides. Two brakes:
+
+- **One site:** Build, Updates, Pause automatic updates for 7 days.
+- **Every site:** add `{"slug": "...", "version": "..." or "*", "note": "..."}`
+  to `hold` in `catalog.json` (both copies). Sites read it within 12 hours,
+  or at once with Check for new versions. Remove the line to release it.
+
 ## Theme updates
 
 A client theme can update itself like the Scout plugins, from the client's

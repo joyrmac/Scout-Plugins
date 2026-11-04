@@ -1,5 +1,13 @@
 # Scout Build changelog
 
+## 0.10.1 (2026-11-04)
+
+- **Release rings (Site Standard rule 19).** A Scout plugin release now installs itself on scoutraleigh.com and staging copies first (ring 1), on Recon a day later (ring 2) and on client sites two days after it is out (ring 3). Until a site's turn the automatic update waits; Build, Updates says on each plugin's row when it installs, and Update now still works. The ring comes from `SCOUT_HUB_RING` in wp-config.php, the setting on the Updates screen, or the address. A release whose date the version list does not carry is never held, so nothing changes until the Release workflow publishes dates (this release adds them).
+- **Pause switch.** Build, Updates, "Pause automatic updates for 7 days" stops automatic Scout updates on one site; "Turn automatic updates back on" ends it early. Operators only.
+- **Hold a release everywhere.** A `hold` entry in catalog.json (`{"slug": "scout-build", "version": "0.10.0", "note": "Fix coming"}`, or `"version": "*"`) stops that release's automatic update on every site that reads the catalog (within 12 hours, or at once with Check for new versions). The Updates screen shows the hold and its note.
+- The version list (`releases.json` on the feed release) now carries each release's `published_at`.
+- Test: `php tools/tests/release-rings.php <wordpress>` (17 checks).
+
 ## 0.10.0 (2026-11-04)
 
 - **The Scout menu is built around who is looking (Site Standard §7, v1.2; Joy, 2026-11-04).** Seven items, the same words in the sidebar and on the screen: **Overview**, **Your business**, **Content**, **Search and AI**, **Site health**, **Inbox**, **Build**. Every existing screen keeps its address; only where it is filed and what the first screen is change. Shared admin kit 1.7.0, with a test (`tools/tests/admin-kit-groups.php`) so the filing never drifts from the map.

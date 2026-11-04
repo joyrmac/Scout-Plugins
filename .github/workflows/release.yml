@@ -189,7 +189,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api --paginate "repos/${GH_REPO}/releases?per_page=100" \
-            | jq -s '[ .[][] | select(.tag_name != "feed") | {tag_name, draft, prerelease, body: ((.body // "")[0:1500]), assets: [ .assets[] | {name, browser_download_url} ]} ]' \
+            | jq -s '[ .[][] | select(.tag_name != "feed") | {tag_name, draft, prerelease, published_at, body: ((.body // "")[0:1500]), assets: [ .assets[] | {name, browser_download_url} ]} ]' \
             > releases.json
           echo "$(jq length releases.json) releases listed."
           if ! gh release view feed >/dev/null 2>&1; then

@@ -85,6 +85,36 @@ final class Scout_Hub_Catalog {
 		return isset( $all[ $slug ] ) && is_array( $all[ $slug ] ) ? $all[ $slug ] : array();
 	}
 
+	/** When a version was released (Unix time), or 0 when the version list does not say. */
+	public static function published( string $slug, string $version ): int {
+		foreach ( self::releases( $slug ) as $release ) {
+			if ( $release['version'] === $version ) {
+				return (int) ( $release['published'] ?? 0 );
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Releases Scout holds back on every site: "hold" in catalog.json, each
+	 * { slug, version ("*" for every version), note }.
+	 *
+	 * @return array<int, array{slug:string, version:string, note:string}>
+	 */
+	public static function holds(): array {
+		self::features(); // Fetches and caches the catalog when it is not cached yet.
+		$data = get_transient( self::CATALOG_KEY );
+		$out  = array();
+		foreach ( (array) ( is_array( $data ) ? ( $data['hold'] ?? array() ) : array() ) as $row ) {
+			$slug = sanitize_key( (string) ( $row['slug'] ?? '' ) );
+			$ver  = (string) ( $row['version'] ?? '' );
+			if ( '' !== $slug && ( '*' === $ver || preg_match( '/^\d[\w.\-]*$/', $ver ) ) ) {
+				$out[] = array( 'slug' => $slug, 'version' => $ver, 'note' => sanitize_text_field( (string) ( $row['note'] ?? '' ) ) );
+			}
+		}
+		return $out;
+	}
+
 	/** True when the last release lookup could not reach GitHub. */
 	public static function unreachable(): bool {
 		return ! empty( self::all_releases()['_unreachable'] );
@@ -148,8 +178,10 @@ final class Scout_Hub_Catalog {
 			foreach ( (array) ( $release['assets'] ?? array() ) as $asset ) {
 				if ( ( $asset['name'] ?? '' ) === $m[1] . '.zip' && ! empty( $asset['browser_download_url'] ) ) {
 					$out[ $m[1] ][] = array(
-						'version' => $m[2],
-						'package' => (string) $asset['browser_download_url'],
+						'version'   => $m[2],
+						'package'   => (string) $asset['browser_download_url'],
+						// The version list carries the date from Scout Build 0.10.1's release workflow on (rings, rule 19).
+						'published' => (int) strtotime( (string) ( $release['published_at'] ?? $release['created_at'] ?? '' ) ),
 					);
 				}
 			}
