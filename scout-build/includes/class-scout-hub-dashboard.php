@@ -152,6 +152,21 @@ final class Scout_Hub_Dashboard {
 			<?php endforeach; ?>
 		</div>
 		<?php self::reviews(); ?>
+		<?php if ( class_exists( 'Scout_Hub_Log' ) ) : ?>
+			<?php $n = Scout_Hub_Log::query( array( 'client' => true, 'status' => 'done', 'month' => current_time( 'Y-m' ), 'per_page' => 1 ) )['total']; ?>
+			<?php $w = Scout_Hub_Log::query( array( 'client' => true, 'status' => 'waiting', 'per_page' => 1 ) )['total']; ?>
+			<p class="sd-ok" style="color:inherit">
+				<?php
+				if ( $w ) {
+					/* translators: %d: items waiting on the client */
+					echo '<strong>' . esc_html( sprintf( _n( '%d thing is waiting on your OK.', '%d things are waiting on your OK.', $w, 'scout-build' ), $w ) ) . '</strong> ';
+				}
+				/* translators: %d: updates this month */
+				echo esc_html( sprintf( _n( '%d update to your site this month.', '%d updates to your site this month.', $n, 'scout-build' ), $n ) );
+				?>
+				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'log' ) ); ?>"><?php echo esc_html( Scout_Hub_Access::is_operator() ? __( 'Site log', 'scout-build' ) : __( 'Your site', 'scout-build' ) ); ?> &rsaquo;</a>
+			</p>
+		<?php endif; ?>
 		<?php if ( $todo ) : ?>
 			<ul class="sd-todo">
 				<?php foreach ( $todo as $c ) : ?>

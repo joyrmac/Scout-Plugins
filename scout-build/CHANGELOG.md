@@ -1,5 +1,11 @@
 # Scout Build changelog
 
+## 0.11.0 (2026-11-04)
+
+- **Your site: the client's view of the Site log.** Anyone who is not a Scout operator opens the same screen as **Scout → Your site**: only lines marked "Client sees", in their client wording, with no versions, kinds or internal detail. Four parts: **Waiting on you** (anything Scout needs their OK on, with an Approve button), **This month**, **Your requests** (open ones, with the Request a change button) and **Coming up** (planned lines), then **Earlier this year**. Operators get a "See it as the client" link on the Site log. Step 3 of the Scout Client Hub.
+- **Approve.** A line an operator marks "Waiting on you" and shows to the client carries an Approve button there. Approving marks it done with the approver's name and date, writes an approval line ("Approved by Patrick McGuire: …") the client also sees, and emails Scout. "Ask for a change first" opens the request form with the line filled in. This replaces screenshotting a text into a decisions log.
+- **The Scout box on the Dashboard** says how many updates the site had this month and how many things wait on the client's OK, with a link to Your site.
+
 ## 0.10.0 (2026-11-04)
 
 - **Hub keys made on the site, no wp-config edit.** Joy: "can't I edit wp-config in WordPress?" No, and WP Engine turns the file editors off, so the keys the Scout Client Hub needs no longer require SFTP. On Scout → Site log, operators press **Make keys**: the site makes a read key (for the Sheet) and a write key (for Claude), shows them once, and stores them encrypted the way the theme key is stored. A client administrator never sees them again. **Make new keys** replaces the pair; **Forget the keys** turns the endpoint off. `SCOUT_HUB_READ_TOKEN` and `SCOUT_HUB_WRITE_TOKEN` in wp-config.php still work and win over keys made on the screen. Making keys writes a setup line in the log.

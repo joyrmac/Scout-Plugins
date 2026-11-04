@@ -130,8 +130,9 @@ partner-side sites unless `SCOUT_HUB_LOG_API` is true.
 - **Step 2, the Sheet.** An Apps Script in Scout's Google Workspace calls `/site`, `/log` and
   `/requests` on each listed site nightly and writes the Sites, Log and Requests tabs. The Clients
   tab is typed by Joy and Sean (decision 4).
-- **Step 3, Your site.** Reads lines with Show the client on: This month, Your requests, Coming up
-  (planned and waiting lines). Adds the Approve action.
+- **Step 3, Your site.** Built in 0.11.0: the same screen for non-operators, client lines only.
+  Waiting on you (Approve), This month, Your requests, Coming up, Earlier this year. An operator
+  puts something up for approval by adding a note with status waiting and Show the client on.
 - **Step 4, the monthly message.** Built from `/log?month=…&client=1`, parked for three days as a
   draft, sent through Scout Email as team@scoutraleigh.com after Joy or Sean approve it.
 

@@ -612,6 +612,76 @@ final class Scout_Hub_Log {
 		return $out;
 	}
 
+	const META_APPROVED_BY = '_scout_log_approved_by';
+	const META_APPROVED_AT = '_scout_log_approved_at';
+
+	/**
+	 * What the client sees on Your site: lines shown to the client, sorted
+	 * into what needs them, what was done this month, what is coming, and
+	 * what was done earlier this year.
+	 *
+	 * @return array{waiting: array[], month: array[], coming: array[], earlier: array[]}
+	 */
+	public static function client_view(): array {
+		$out   = array( 'waiting' => array(), 'month' => array(), 'coming' => array(), 'earlier' => array() );
+		$month = current_time( 'Y-m' );
+		$year  = current_time( 'Y' );
+		$page  = self::query( array( 'client' => true, 'per_page' => 200, 'since' => $year . '-01-01' ) );
+		foreach ( $page['items'] as $post ) {
+			$row = self::to_array( $post, true );
+			if ( 'waiting' === $row['status'] ) {
+				$out['waiting'][] = $row;
+			} elseif ( 'planned' === $row['status'] ) {
+				$out['coming'][] = $row;
+			} elseif ( 0 === strpos( $row['date'], $month ) ) {
+				$out['month'][] = $row;
+			} else {
+				$out['earlier'][] = $row;
+			}
+		}
+		$out['earlier'] = array_slice( $out['earlier'], 0, 20 );
+		return $out;
+	}
+
+	/**
+	 * The client approves a line that was waiting on them. The line becomes
+	 * done with the approver's name and date on it, an approval line is added
+	 * (the record), and Scout hears by email.
+	 */
+	public static function approve( int $id, WP_User $user ): bool {
+		if ( self::TYPE !== get_post_type( $id ) || '1' !== (string) get_post_meta( $id, self::META_SHOW, true ) ) {
+			return false;
+		}
+		if ( 'waiting' !== (string) get_post_meta( $id, self::META_STATUS, true ) ) {
+			return false;
+		}
+		$name = (string) $user->display_name;
+		update_post_meta( $id, self::META_STATUS, 'done' );
+		update_post_meta( $id, self::META_APPROVED_BY, $name );
+		update_post_meta( $id, self::META_APPROVED_AT, current_time( 'mysql' ) );
+		$what = (string) get_post_meta( $id, self::META_CLIENT, true );
+		$what = '' !== $what ? $what : get_the_title( $id );
+		self::add(
+			array(
+				/* translators: 1: person, 2: what was approved */
+				'title'  => sprintf( __( 'Approved by %1$s: %2$s', 'scout-build' ), $name, $what ),
+				'kind'   => 'approval',
+				'topic'  => 'content',
+				'source' => $name,
+				'ref'    => 'line:' . $id,
+			)
+		);
+		$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		wp_mail(
+			Scout_Hub_Requests::recipient(),
+			/* translators: 1: site, 2: what was approved */
+			sprintf( __( '[%1$s] Approved: %2$s', 'scout-build' ), $site, wp_trim_words( $what, 10, '…' ) ),
+			/* translators: 1: person, 2: what, 3: date, 4: admin URL */
+			sprintf( __( "%1\$s approved this on the site:\n\n%2\$s\n\n%3\$s\nSite log: %4\$s", 'scout-build' ), $name, $what, current_time( 'F j, Y g:i a' ), Scout_Hub_Admin::url( 'log' ) )
+		);
+		return true;
+	}
+
 	/** How many lines this month, for the nav pill. */
 	public static function count_month(): int {
 		return self::query( array( 'month' => current_time( 'Y-m' ), 'per_page' => 1 ) )['total'];
@@ -623,10 +693,20 @@ final class Scout_Hub_Log {
 
 	public static function handle(): void {
 		check_admin_referer( self::ACTION );
+		$do = sanitize_key( wp_unslash( (string) ( $_POST['do'] ?? '' ) ) );
+
+		// The one action a client takes: approve something that was waiting on them.
+		if ( 'approve' === $do ) {
+			if ( ! current_user_can( 'edit_posts' ) ) {
+				wp_die( esc_html__( 'You do not have permission to do that.', 'scout-build' ), 403 );
+			}
+			$ok = self::approve( (int) ( $_POST['line'] ?? 0 ), wp_get_current_user() );
+			self::back( $ok ? __( 'Approved. Thank you; Scout has been told.', 'scout-build' ) : __( 'That line is not waiting on an approval.', 'scout-build' ), $ok ? 'success' : 'error' );
+		}
+
 		if ( ! Scout_Hub_Access::is_operator() ) {
 			wp_die( esc_html__( 'Only the people who look after this site can write to its log.', 'scout-build' ), 403 );
 		}
-		$do = sanitize_key( wp_unslash( (string) ( $_POST['do'] ?? '' ) ) );
 
 		if ( 'note' === $do ) {
 			$fields = array();

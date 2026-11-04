@@ -76,6 +76,11 @@ status (done, planned, waiting on you), a version, a measure and a "client
 sees" flag with its own plain wording, which is what the client's monthly
 update is built from. A done line never changes; corrections are a new line.
 
+**Your site (0.11.0):** everyone who is not an operator sees the log as Scout → Your site: client
+lines only, in client wording, with Waiting on you (Approve button), This month, Your requests and
+Coming up. To put something up for the client's OK, add a note with status "Waiting on you" and
+Client sees on.
+
 **Hub keys:** operators press Make keys on the Site log screen; the read key goes in the Scout
 Client Hub Sheet, the write key is Claude's. Shown once, stored encrypted.
 
