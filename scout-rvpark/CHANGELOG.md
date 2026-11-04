@@ -1,5 +1,10 @@
 # Scout — North Crest RV Park — Changelog
 
+## 0.2.0 (2026-11-04)
+
+- **One RV park section.** Amenities and Site Types now sit inside a single RV park section in the sidebar, with a small "+ Plus" tag, instead of two separate menus. Its first screen is an overview: every site type with hookups, nightly and monthly rates and max rig length, and every amenity, each linking to its edit screen. Custom content is a Plus module (dashboard redesign, Joy 2026-11-04).
+- Ships the shared Scout admin kit (1.8.0) for the overview screen.
+
 ## 0.1.8 (2026-11-04)
 
 - **Updates come from the new Scout GitHub organization.** The Scout repos moved from joyrmac to Scout-Media-Raleigh on 2026-11-04. The update check, the release feed and the plugin details now use `Scout-Media-Raleigh/Scout-Plugins`. GitHub still forwards the old address, which is how this release reached the site.

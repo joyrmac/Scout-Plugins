@@ -86,6 +86,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			if ( '' !== $lede ) {
 				echo '<p class="sh-lede">' . esc_html( $lede ) . '</p>';
 			}
+			// Preview on a phone (Joy, 2026-11-04): the live site in a phone-sized window, from any Scout screen.
+			$home = esc_url( home_url( '/' ) );
+			echo '<p class="sh-note sh-phone-preview" style="margin:4px 0 0"><a href="' . $home . '" target="scout-phone" rel="noopener" onclick="window.open(this.href,\'scout-phone\',\'width=390,height=844\');return false;">Preview the site on a phone</a></p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $home is escaped above.
 			// WordPress prints admin notices right after the first heading in .wrap.
 			echo '<hr class="wp-header-end" style="display:none">';
 		}
@@ -167,6 +170,81 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$hidden = array_merge( $hidden, array( 'reports', 'website', 'search', 'policies', 'health' ) );
 			}
 			return array_values( array_unique( (array) apply_filters( 'scout_admin_hidden_groups', $hidden ) ) );
+		}
+
+		/**
+		 * Plus modules: paid modules with their own sidebar section. Each gets a small
+		 * "Plus" tag beside its name (Joy, 2026-11-04). The scout_admin_plus_menus
+		 * filter adds a client's own module.
+		 */
+		const PLUS_MENUS = array( 'scout-booking', 'scout-events', 'scout-members', 'scout-partners', 'scout-writing', 'scout-rvpark' );
+
+		/** @var bool A Plus tag is in the sidebar on this screen. */
+		private static $plus = false;
+
+		/** Tag each Plus module's sidebar section. */
+		public static function plus_tags(): void {
+			global $menu;
+			if ( ! is_array( $menu ) ) {
+				return;
+			}
+			$plus = (array) apply_filters( 'scout_admin_plus_menus', self::PLUS_MENUS );
+			foreach ( $menu as $i => $entry ) {
+				$slug = (string) ( $entry[2] ?? '' );
+				if ( '' === $slug || ! in_array( $slug, $plus, true ) || false !== strpos( (string) $entry[0], 'sh-plus-tag' ) ) {
+					continue;
+				}
+				$menu[ $i ][0] = $entry[0] . ' <span class="sh-plus-tag">+ Plus</span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- relabel only.
+				self::$plus    = true;
+			}
+		}
+
+		/* ---- Comfort settings (Joy, 2026-11-04) ---------------------------- */
+
+		const COMFORT = 'scout_ui_comfort'; // User meta: [ large => bool, calm => bool ].
+
+		/** This person's comfort settings. */
+		public static function comfort( int $user = 0 ): array {
+			$c = function_exists( 'get_user_meta' ) ? get_user_meta( $user ? $user : get_current_user_id(), self::COMFORT, true ) : array();
+			$c = is_array( $c ) ? $c : array();
+			return array(
+				'large' => ! empty( $c['large'] ),
+				'calm'  => ! empty( $c['calm'] ),
+			);
+		}
+
+		/** Larger text and calmer motion on Scout screens, as body classes. */
+		public static function body_class( $classes ): string {
+			$c = self::comfort();
+			return trim( (string) $classes . ( $c['large'] ? ' sh-large-text' : '' ) . ( $c['calm'] ? ' sh-calm' : '' ) );
+		}
+
+		/** Users → Profile: the two comfort settings, for your own account. */
+		public static function profile_fields( $user ): void {
+			$c = self::comfort( (int) $user->ID );
+			echo '<h2 id="scout-comfort">' . esc_html( self::branded() ? 'Scout screens' : 'Site Build screens' ) . '</h2>';
+			echo '<table class="form-table" role="presentation"><tr><th scope="row">Easier to read</th><td>';
+			echo '<label><input type="checkbox" name="scout_comfort[large]" value="1" ' . checked( $c['large'], true, false ) . '> Larger text</label><br>';
+			echo '<label><input type="checkbox" name="scout_comfort[calm]" value="1" ' . checked( $c['calm'], true, false ) . '> Less motion</label>';
+			echo '<p class="description">Only changes how these screens look for you. Your computer\'s reduce-motion setting is followed either way.</p>';
+			echo '</td></tr></table>';
+		}
+
+		/** Save the comfort settings with the profile (WordPress checks the profile form's nonce). */
+		public static function save_profile( $user_id ): void {
+			if ( ! current_user_can( 'edit_user', $user_id ) || get_current_user_id() !== (int) $user_id ) {
+				return;
+			}
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by WordPress before personal_options_update runs.
+			$in = isset( $_POST['scout_comfort'] ) ? (array) wp_unslash( $_POST['scout_comfort'] ) : array();
+			update_user_meta(
+				(int) $user_id,
+				self::COMFORT,
+				array(
+					'large' => ! empty( $in['large'] ),
+					'calm'  => ! empty( $in['calm'] ),
+				)
+			);
 		}
 
 		/** Scout sidebar menus the kit tidies. */
@@ -275,6 +353,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			if ( self::$leaders ) {
 				echo '<style>#adminmenu .sh-menu-hidden{display:none}#adminmenu .sh-menu-off a{opacity:.55}</style>';
 			}
+			if ( self::$plus ) {
+				echo '<style>#adminmenu .sh-plus-tag{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;background:rgba(123,108,240,.28);color:#D9D4FF;font-size:10px;font-weight:600;letter-spacing:.6px;line-height:16px;vertical-align:1px;white-space:nowrap}</style>';
+			}
 		}
 
 		/** A sidebar label without its count bubble. */
@@ -358,8 +439,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'health';
 			} elseif ( 'search health' === $l ) {
 				$group = 'health';
-			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || preg_match( '/^(scout-mail|scout-chat|scout-events-crm)$/', $page ) || false !== strpos( $l, 'theme' ) || false !== strpos( $l, 'customer list' ) ) {
-				$group = 'build'; // Operator tools: Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen.
+			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || preg_match( '/^(scout-mail|scout-chat)$/', $page ) || false !== strpos( $l, 'theme' ) ) {
+				$group = 'build'; // Operator tools: Email, Chat settings, Site Sync, the Change log, a theme's own screen.
 			} elseif ( preg_match( '/scout-reviews-(inbox|ask)|post_type=scout_chat_q|post_type=scout_hub_request|post_type=scout_sitecheck/', $s ) || preg_match( '/^(review inbox|ask for reviews|chat questions|request a change|inbox|site checks)$/', $l ) ) {
 				$group = 'inbox';
 			} elseif ( preg_match( '/tab=protect\b/', $s ) || preg_match( '/scout-optimize/', $page ) ) {
@@ -518,6 +599,10 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	// After every plugin and the hub's own ordering (999) have built the menu.
 	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'compact_menu' ), 1000 );
+	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'plus_tags' ), 1001 );
+	add_filter( 'admin_body_class', array( 'Scout_Admin_UI', 'body_class' ) );
+	add_action( 'show_user_profile', array( 'Scout_Admin_UI', 'profile_fields' ) );
+	add_action( 'personal_options_update', array( 'Scout_Admin_UI', 'save_profile' ) );
 	add_filter( 'submenu_file', array( 'Scout_Admin_UI', 'current_link' ), 20 );
 	add_action( 'admin_head', array( 'Scout_Admin_UI', 'menu_css' ) );
 	add_action( 'admin_enqueue_scripts', array( 'Scout_Admin_UI', 'screen_nav_prepare' ), 99 );
