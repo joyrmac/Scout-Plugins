@@ -102,6 +102,32 @@ final class Scout_Hub_Log {
 		add_action( 'scout_hub_request_status', array( __CLASS__, 'on_request_status' ), 10, 2 );
 		add_action( 'scout_hub_watch_alert', array( __CLASS__, 'on_alert' ) );
 		add_action( 'scout_hub_watch_cleared', array( __CLASS__, 'on_cleared' ) );
+
+		// Approvals wait on the client, so they count in the Inbox; and the client's
+		// "Your site" files under Overview, since Build is hidden from them.
+		add_filter( 'scout_hub_inbox', array( __CLASS__, 'inbox_row' ) );
+		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 2 );
+	}
+
+	/** @param array<int,array<string,mixed>> $rows */
+	public static function inbox_row( $rows ): array {
+		$rows   = (array) $rows;
+		$n      = self::query( array( 'client' => true, 'status' => 'waiting', 'per_page' => 1 ) )['total'];
+		$rows[] = array(
+			'label' => __( 'Waiting on your OK', 'scout-build' ),
+			'count' => (int) $n,
+			'url'   => Scout_Hub_Admin::url( 'log' ),
+			'note'  => __( 'Things Scout has ready that need your approval before they go live.', 'scout-build' ),
+		);
+		return $rows;
+	}
+
+	/** The Site log screen is "Your site" under Overview for everyone who is not an operator. */
+	public static function nav_group( $group, $slug ) {
+		if ( false !== strpos( (string) $slug, 'tab=log' ) && ! Scout_Hub_Access::is_operator() ) {
+			return 'overview';
+		}
+		return $group;
 	}
 
 	public static function register(): void {

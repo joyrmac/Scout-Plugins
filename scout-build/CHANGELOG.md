@@ -1,16 +1,13 @@
 # Scout Build changelog
 
-<<<<<<< HEAD
 ## 0.11.0 (2026-11-04)
 
-- **Your site: the client's view of the Site log.** Anyone who is not a Scout operator opens the same screen as **Scout → Your site**: only lines marked "Client sees", in their client wording, with no versions, kinds or internal detail. Four parts: **Waiting on you** (anything Scout needs their OK on, with an Approve button), **This month**, **Your requests** (open ones, with the Request a change button) and **Coming up** (planned lines), then **Earlier this year**. Operators get a "See it as the client" link on the Site log. Step 3 of the Scout Client Hub.
-- **Approve.** A line an operator marks "Waiting on you" and shows to the client carries an Approve button there. Approving marks it done with the approver's name and date, writes an approval line ("Approved by Patrick McGuire: …") the client also sees, and emails Scout. "Ask for a change first" opens the request form with the line filled in. This replaces screenshotting a text into a decisions log.
+- **Your site: the client's view of the Site log.** Anyone who is not a Scout operator opens the same screen as **Scout → Your site**: only lines marked "Client sees", in their client wording, with no versions, kinds or internal detail. Four parts: **Waiting on you** (anything Scout needs their OK on, with an Approve button), **This month**, **Your requests** (open ones, with the Request a change button) and **Coming up** (planned lines), then **Earlier this year**. It files under Overview for them (Build stays hidden), and the Overview's "With Scout" box links to it. Operators get a "See it as the client" link on the Site log. Step 3 of the Scout Client Hub.
+- **Approve.** A line an operator marks "Waiting on you" and shows to the client carries an Approve button there. Approving marks it done with the approver's name and date, writes an approval line ("Approved by Patrick McGuire: …") the client also sees, and emails Scout. The Inbox counts "Waiting on your OK" with the other queues. "Ask for a change first" opens the request form with the line filled in. This replaces screenshotting a text into a decisions log.
 - **The Scout box on the Dashboard** says how many updates the site had this month and how many things wait on the client's OK, with a link to Your site.
 
-## 0.10.0 (2026-11-04)
-
 - **Hub keys made on the site, no wp-config edit.** Joy: "can't I edit wp-config in WordPress?" No, and WP Engine turns the file editors off, so the keys the Scout Client Hub needs no longer require SFTP. On Scout → Site log, operators press **Make keys**: the site makes a read key (for the Sheet) and a write key (for Claude), shows them once, and stores them encrypted the way the theme key is stored. A client administrator never sees them again. **Make new keys** replaces the pair; **Forget the keys** turns the endpoint off. `SCOUT_HUB_READ_TOKEN` and `SCOUT_HUB_WRITE_TOKEN` in wp-config.php still work and win over keys made on the screen. Making keys writes a setup line in the log.
-=======
+
 ## 0.10.0 (2026-11-04)
 
 - **The Scout menu is built around who is looking (Site Standard §7, v1.2; Joy, 2026-11-04).** Seven items, the same words in the sidebar and on the screen: **Overview**, **Your business**, **Content**, **Search and AI**, **Site health**, **Inbox**, **Build**. Every existing screen keeps its address; only where it is filed and what the first screen is change. Shared admin kit 1.7.0, with a test (`tools/tests/admin-kit-groups.php`) so the filing never drifts from the map.
@@ -18,7 +15,6 @@
 - **Inbox: everything waiting on a person, one count.** Change requests, unanswered chat questions and new reviews, each with its count and a button, plus Ask for reviews. The sidebar shows the total as a bubble. Other plugins add a queue with the `scout_hub_inbox` filter.
 - **Build is for operators.** Features, Updates and the Site log file under Build, and the admin kit hides the group from everyone who is not an operator (`SCOUT_HUB_OPERATORS`), so a client never sees a turn-on button. The screens stay reachable by address for admins who know them; every action on them still checks for an operator.
 - **Your business holds every fact once.** Business info, Call buttons, Hours, Team, Case results, Reviews and Review settings, Cards & Links, Booking, Events, Members, Partners and Newsletter file together. Content holds Site Sync, Redirects, Image optimizer and Writing. Search and AI holds SEO, AI search, Analytics, Accessibility, Spam protection and Site checks. Email, Chat settings, Customer list, the Change log and a theme's own screen sit under Build.
->>>>>>> origin/main
 
 ## 0.9.1 (2026-11-04)
 

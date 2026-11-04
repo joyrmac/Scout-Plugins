@@ -79,7 +79,7 @@ final class Scout_Hub_Admin {
 		// Build (operators): the features, every update (rule 12), and the Site log. The admin kit hides the group from everyone else.
 		add_submenu_page( $parent, __( 'Features', 'scout-build' ), __( 'Features', 'scout-build' ), 'edit_posts', $base . '&tab=features', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Updates', 'scout-build' ), __( 'Updates', 'scout-build' ), 'edit_posts', $base . '&tab=updates', array( __CLASS__, 'render' ) );
-		// Operators see the full Site log; everyone else sees it as "Your site".
+		// Operators see the full Site log under Build; everyone else sees it as "Your site" under Overview.
 		$log_label = Scout_Hub_Access::is_operator() ? __( 'Site log', 'scout-build' ) : __( 'Your site', 'scout-build' );
 		add_submenu_page( $parent, $log_label, $log_label, 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
@@ -471,7 +471,7 @@ final class Scout_Hub_Admin {
 							<li><span class="sh-when"><?php echo esc_html( wp_date( 'M j', strtotime( $row['date'] ) ) ); ?></span><span><?php echo esc_html( ( ! $operator && '' !== $row['client_text'] ) ? $row['client_text'] : $row['title'] ); ?></span></li>
 						<?php endforeach; ?>
 					</ul>
-					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'The whole Site log', 'scout-build' ); ?> &rsaquo;</a></p>
+					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site log', 'scout-build' ) : __( 'Everything Scout has done on your site', 'scout-build' ) ); ?> &rsaquo;</a></p>
 				<?php endif; ?>
 			</section>
 		</div>
