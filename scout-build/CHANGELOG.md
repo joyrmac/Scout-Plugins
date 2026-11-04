@@ -2,6 +2,13 @@
 
 ## 0.12.0 (2026-11-04)
 
+- **Staging first, then live: the approval hold (Joy, 2026-11-04).** A live site now installs a Scout release only after Scout says OK. Staging copies install it by themselves, so it gets checked there first.
+  - On the live site, **Scout tools → Updates → Waiting for your OK** lists each waiting plugin and theme update. Type who said yes ("Client OK by text, Nov 5"), then **Approve** or **Approve all**. It installs on the next update run, or at once with Update now.
+  - Each OK goes in the Site log, and the client sees "checked on staging and approved for your live site" under Your site.
+  - An approved release skips its ring wait. A catalog hold or a pause on the site still stops it. Update now always works.
+  - **Security fixes skip the wait:** a `"security"` entry in catalog.json lets a site still below that version install it at once. Once the site has the fix, later releases wait for an OK again.
+  - Operators get one Inbox row, "Updates waiting for your OK". Clients never see it.
+  - On by default on live sites, off on staging and local copies. One button on the Updates screen switches it for a site; `SCOUT_HUB_APPROVAL` in wp-config.php sets it too.
 - **A calmer Updates screen (Joy, 2026-11-04).**
   - The plugin list comes first, then "When updates install" (the ring and the pause), then the theme.
   - The theme is one line, "Theme · name version · Up to date", with its key in a closed "Theme key" row that has Replace and Remove key.

@@ -877,6 +877,7 @@ final class Scout_Hub_Admin {
 			<p class="sh-note"><?php esc_html_e( 'Scout plugins update themselves within a few hours of each release. Turning a feature on, off or back a version happens on the Features screen.', 'scout-build' ); ?></p>
 		</section>
 		<?php
+		Scout_Hub_Approval::panel( $operator );
 		Scout_Hub_Rings::panel( $operator );
 		Scout_Hub_Themes::panel( $operator );
 		?>

@@ -99,6 +99,8 @@ jobs:
         run: php tools/tests/law-kit-fallback.php
       - name: Scout Core breadcrumbs, verification, thank-you pages and hardening (no WordPress needed)
         run: php tools/tests/core-seo-gaps.php
+      - name: Approval hold, live sites wait for Scout's OK (no WordPress needed)
+        run: php tools/tests/approval-hold.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)

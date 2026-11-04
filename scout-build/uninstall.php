@@ -19,6 +19,8 @@ foreach ( array( 'scout_hub_today_snoozed', 'scout_hub_today_seen', 'scout_hub_i
 	delete_metadata( 'user', 0, $scout_hub_key, '', true );
 }
 delete_option( 'scout_hub_update_holds' );
+delete_option( 'scout_hub_approval' );
+delete_option( 'scout_hub_approved' );
 delete_option( 'scout_hub_log' );
 delete_option( 'scout_hub_answer_seen' );
 delete_option( 'scout_hub_page' );

@@ -107,6 +107,14 @@ final class Scout_Hub_Rings {
 			/* translators: %s: date */
 			return sprintf( __( 'Automatic updates are paused on this site until %s.', 'scout-build' ), wp_date( 'M j', $until ) );
 		}
+		// A live site waits for Scout's OK; an approved version or a security fix skips its ring.
+		$ok = class_exists( 'Scout_Hub_Approval' ) ? Scout_Hub_Approval::reason( $slug, $version ) : '';
+		if ( '' !== $ok ) {
+			return $ok;
+		}
+		if ( class_exists( 'Scout_Hub_Approval' ) && Scout_Hub_Approval::skips_ring( $slug, $version ) ) {
+			return '';
+		}
 		$lands = self::lands_at( $slug, $version );
 		if ( $lands > time() ) {
 			/* translators: 1: date, 2: ring label */

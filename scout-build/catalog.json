@@ -3,6 +3,7 @@
   "updated": "2026-11-04",
   "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers (docs/dashboard-map.md): build is Core, on every plan; partnership and whole come with that plan and up; bonus is a free extra added when it fits and included with The Whole System; plus is a paid module added to a site one at a time and never bundled; addon is the old name for bonus. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there.",
   "hold": [],
+  "security": [],
   "features": [
     {
       "slug": "scout-core",
