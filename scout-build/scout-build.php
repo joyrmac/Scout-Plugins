@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Build
  * Plugin URI:        https://scoutraleigh.com
  * Description:       The Scout menu on every site: see which features are on and turn them on or off (site operators only), every update in one place (theme, plugins, Site Sync, imports, change log), request a change, check the site's health at a glance, and keep the Site log of every change Scout makes.
- * Version:           0.9.1
+ * Version:           0.10.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Prefixed SCOUT_HUB_ on purpose: the Scout Media theme already defines a
 // SCOUT_BUILD_MENU constant for its own menu.
-define( 'SCOUT_HUB_VERSION', '0.9.1' );
+define( 'SCOUT_HUB_VERSION', '0.10.0' );
 define( 'SCOUT_HUB_FILE', __FILE__ );
 define( 'SCOUT_HUB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_HUB_URL', plugin_dir_url( __FILE__ ) );

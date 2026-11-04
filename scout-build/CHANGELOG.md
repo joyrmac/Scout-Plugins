@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.10.0 (2026-11-04)
+
+- **Hub keys made on the site, no wp-config edit.** Joy: "can't I edit wp-config in WordPress?" No, and WP Engine turns the file editors off, so the keys the Scout Client Hub needs no longer require SFTP. On Scout → Site log, operators press **Make keys**: the site makes a read key (for the Sheet) and a write key (for Claude), shows them once, and stores them encrypted the way the theme key is stored. A client administrator never sees them again. **Make new keys** replaces the pair; **Forget the keys** turns the endpoint off. `SCOUT_HUB_READ_TOKEN` and `SCOUT_HUB_WRITE_TOKEN` in wp-config.php still work and win over keys made on the screen. Making keys writes a setup line in the log.
+
 ## 0.9.1 (2026-11-04)
 
 - **Site health: "Design contrast".** With Scout Core 1.6.3 or newer and a theme that has a DESIGN.md, Site health shows the lowest contrast ratio among the pairs the Site Standard requires (button text on the accent fill, text on the page and on cards) and names any pair under 4.5:1 (rule 10). Muted text under 4.5:1 is a warning, not a failure.

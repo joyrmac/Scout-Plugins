@@ -105,9 +105,9 @@ brief asks for them when a client repo moved and the site log did not.
 
 ### The read endpoint (for the Sheet and for Claude)
 
-Namespace `scout-build/v1`. Bearer token per site. Two tokens, both set in `wp-config.php` so a
-client administrator cannot read or change them from the dashboard, the same reason
-`SCOUT_HUB_OPERATORS` lives there:
+Namespace `scout-build/v1`. Bearer token per site. Two tokens. Since 0.10.0 operators make them on
+the Site log screen (shown once, stored encrypted like the theme key); `wp-config.php` constants are
+an optional override that wins when set:
 
 - `SCOUT_HUB_READ_TOKEN`: read only.
 - `SCOUT_HUB_WRITE_TOKEN`: read, and `POST /log` for `note` lines only. This is Claude's key for

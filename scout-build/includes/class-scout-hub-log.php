@@ -666,6 +666,26 @@ final class Scout_Hub_Log {
 		if ( 'export' === $do ) {
 			self::export_csv();
 		}
+
+		if ( 'keys' === $do ) {
+			$keys = Scout_Hub_Log_API::make_keys();
+			// Shown once, to this person, for five minutes. Never stored readable.
+			set_transient( 'scout_hub_keys_show_' . get_current_user_id(), $keys, 5 * MINUTE_IN_SECONDS );
+			self::add(
+				array(
+					'title'       => __( 'Hub keys made on the Site log screen', 'scout-build' ),
+					'kind'        => 'setup',
+					'topic'       => 'setup',
+					'show_client' => false,
+				)
+			);
+			self::back( __( 'Keys made. Copy both into the password manager now; they are shown once.', 'scout-build' ) );
+		}
+
+		if ( 'forget_keys' === $do ) {
+			Scout_Hub_Log_API::forget_keys();
+			self::back( __( 'Keys forgotten. The hub endpoint is off until new keys are made.', 'scout-build' ) );
+		}
 		self::back( __( 'Nothing to do.', 'scout-build' ), 'error' );
 	}
 

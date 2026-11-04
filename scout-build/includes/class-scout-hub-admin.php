@@ -1126,6 +1126,55 @@ final class Scout_Hub_Admin {
 						</form>
 					</section>
 
+					<?php
+					$fresh  = get_transient( 'scout_hub_keys_show_' . get_current_user_id() );
+					$source = Scout_Hub_Log_API::keys_source();
+					if ( is_array( $fresh ) ) {
+						delete_transient( 'scout_hub_keys_show_' . get_current_user_id() );
+					}
+					?>
+					<section class="sh-box" id="sh-hub-keys" style="margin-top:14px">
+						<p class="sh-label"><?php esc_html_e( 'Hub keys', 'scout-build' ); ?></p>
+						<p class="sh-note"><?php esc_html_e( 'Two keys let the Scout Client Hub read this site\'s log, requests and versions. The read key goes in the Sheet; the write key lets Claude add note lines. They are shown once and kept encrypted.', 'scout-build' ); ?></p>
+						<?php if ( is_array( $fresh ) ) : ?>
+							<p class="sh-note" style="color:var(--sh-warn)"><strong><?php esc_html_e( 'Copy both into the password manager now. They are not shown again.', 'scout-build' ); ?></strong></p>
+							<p class="sh-note"><?php esc_html_e( 'Read key (for the Sheet):', 'scout-build' ); ?></p>
+							<p><code style="user-select:all;word-break:break-all"><?php echo esc_html( $fresh['read'] ); ?></code></p>
+							<p class="sh-note"><?php esc_html_e( 'Write key (for Claude):', 'scout-build' ); ?></p>
+							<p><code style="user-select:all;word-break:break-all"><?php echo esc_html( $fresh['write'] ); ?></code></p>
+						<?php elseif ( 'config' === $source ) : ?>
+							<p class="sh-note"><?php esc_html_e( 'Set in wp-config.php. Those win over any keys made here.', 'scout-build' ); ?></p>
+						<?php elseif ( 'site' === $source ) : ?>
+							<p class="sh-note">
+								<?php
+								/* translators: %s: date */
+								echo esc_html( sprintf( __( 'Keys made here on %s. The endpoint is on.', 'scout-build' ), date_i18n( get_option( 'date_format' ), Scout_Hub_Log_API::keys_made() ) ) );
+								?>
+							</p>
+						<?php else : ?>
+							<p class="sh-note"><?php esc_html_e( 'No keys yet, so the endpoint is off.', 'scout-build' ); ?></p>
+						<?php endif; ?>
+						<?php if ( 'config' !== $source ) : ?>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
+								<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+								<input type="hidden" name="do" value="keys">
+								<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+								<button type="submit" class="button <?php echo 'site' === $source ? '' : 'button-primary'; ?>"><?php echo 'site' === $source ? esc_html__( 'Make new keys', 'scout-build' ) : esc_html__( 'Make keys', 'scout-build' ); ?></button>
+								<?php if ( 'site' === $source ) : ?>
+									<span class="sh-note"><?php esc_html_e( 'New keys replace the old ones; the Sheet will need the new read key.', 'scout-build' ); ?></span>
+								<?php endif; ?>
+							</form>
+							<?php if ( 'site' === $source ) : ?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline" style="margin-top:6px">
+									<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+									<input type="hidden" name="do" value="forget_keys">
+									<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+									<button type="submit" class="button sh-quiet"><?php esc_html_e( 'Forget the keys', 'scout-build' ); ?></button>
+								</form>
+							<?php endif; ?>
+						<?php endif; ?>
+					</section>
+
 					<?php if ( $show_import ) : ?>
 						<section class="sh-box" style="margin-top:14px">
 							<p class="sh-label"><?php esc_html_e( 'Import history', 'scout-build' ); ?></p>
