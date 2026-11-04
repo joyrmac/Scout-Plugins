@@ -27,6 +27,7 @@ final class Scout_Hub_Today {
 	const SETUP   = 'scout_hub_setup_hidden';  // Option: an operator hid the first-week list.
 
 	public static function boot(): void {
+		add_filter( 'scout_admin_finder_items', array( __CLASS__, 'finder' ) );
 		add_action( 'admin_post_' . self::ACTION, array( __CLASS__, 'handle' ) );
 	}
 
@@ -230,6 +231,22 @@ final class Scout_Hub_Today {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Today's items under "Do it now" in Find anything (Ctrl or Cmd + K).
+	 *
+	 * @param array $items Items of label, url, note.
+	 */
+	public static function finder( $items ): array {
+		$items = (array) $items;
+		if ( ! function_exists( 'get_current_user_id' ) || ! get_current_user_id() ) {
+			return $items;
+		}
+		foreach ( self::for_user( get_current_user_id() )['items'] as $i ) {
+			$items[] = array( 'label' => wp_strip_all_tags( (string) $i['label'] ), 'url' => (string) $i['url'], 'note' => __( "From today's list", 'scout-build' ) );
+		}
+		return $items;
 	}
 
 	/* ---- Actions ------------------------------------------------------ */

@@ -24,13 +24,13 @@ $map = array(
 	'scout&tab=sync'                          => array( 'Site Sync', 'build' ),
 	'scout-mail'                              => array( 'Email', 'build' ),
 	'scout-events-crm'                        => array( 'Customer list', 'business' ), // Lives in the Events (Plus) section, for the owner too.
-	'scout-chat'                              => array( 'Chat settings', 'build' ),
+	'scout-chat'                              => array( 'Chat settings', 'website' ),
 	'northcrest-theme'                        => array( 'Theme', 'build' ),
 	'site-build-features&tab=inbox'           => array( 'Inbox', 'inbox' ),
 	'site-build-features&tab=requests'        => array( 'Request a change', 'inbox' ),
 	'edit.php?post_type=scout_chat_q'         => array( 'Chat questions', 'inbox' ),
 	'scout-reviews-inbox'                     => array( 'Review inbox', 'inbox' ),
-	'scout-reviews-ask'                       => array( 'Ask for reviews', 'inbox' ),
+	'scout-reviews-ask'                       => array( 'Ask for reviews', 'website' ),
 	'edit.php?post_type=scout_sitecheck'      => array( 'Site checks', 'inbox' ),
 	'site-build-features&tab=health'          => array( 'Site health', 'health' ),
 	'scout'                                   => array( 'Search health', 'health' ),
@@ -50,7 +50,9 @@ $map = array(
 	'scout-reviews-settings'                  => array( 'Review settings', 'website' ),
 	'edit.php?post_type=scout_review'         => array( 'Reviews', 'website' ),
 	'scout-sitecheck'                         => array( 'Site check settings', 'website' ),
-	'scout-writing'                           => array( 'Write', 'website' ),
+	'scout-writing'                           => array( 'Write', 'business' ), // only in its own Plus section; the group never shows there
+	'scout-accessibility-checks'              => array( 'Accessibility checks', 'health' ),
+	'scout-accessibility'                     => array( 'Accessibility', 'policies' ),
 	'scout&tab=business'                      => array( 'Business info', 'business' ),
 	'scout-hours'                             => array( 'Hours', 'business' ),
 	'scout-team'                              => array( 'Team settings', 'business' ),
@@ -74,6 +76,9 @@ ok( 'Home' === Scout_Admin_UI::label( 'overview' ) && 'Get found' === Scout_Admi
 ok( array() === Scout_Admin_UI::hidden(), 'with no hub loaded and full rights, nothing is hidden' );
 eval( 'class Scout_Hub_Access { public static function is_operator() { return false; } }' );
 ok( array( 'build' ) === Scout_Admin_UI::hidden(), 'a client owner does not see Scout tools' );
+ok( 'overview' === Scout_Admin_UI::group( 'site-build-features&tab=log', 'Your site' ), "a client's What's new on your site sits under Home, where they can reach it" );
+ok( ! array_filter( Scout_Admin_UI::LOOKING, static fn( $l ) => count( $l ) > 2 ), 'no group carries more than two Looking for links' );
+ok( ! array_diff( array_keys( Scout_Admin_UI::LOOKING ), array_keys( Scout_Admin_UI::GROUPS ) ), 'Looking for links belong to real groups' );
 ok( in_array( 'scout-writing', Scout_Admin_UI::PLUS_MENUS, true ) && in_array( 'scout-events', Scout_Admin_UI::PLUS_MENUS, true ), 'Plus modules get the Plus tag in the sidebar' );
 $GLOBALS['scout_test_can'] = false;
 ok( array( 'build', 'reports', 'website', 'search', 'policies', 'health' ) === Scout_Admin_UI::hidden(), 'staff see Home, Inbox and Your business only' );

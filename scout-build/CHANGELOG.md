@@ -2,6 +2,15 @@
 
 ## 0.12.0 (2026-11-04)
 
+- **The screens now match the approved dashboard canvas (admin kit 1.9.0).** Joy saw on staging that the screens didn't look like the design. Every Scout screen now opens with one white bar (breadcrumb, Find anything, and Request a change) and lists its section's screens on the left. The second menu of group pills and tabs across the top is gone, so the sidebar is the only menu. The client logo tile and the mono eyebrow are gone too.
+- **Find anything (Ctrl or Cmd + K)** opens on every Scout screen. It searches every screen the person can open, and lists today's items under "Do it now".
+- **Home leads with a sentence**, for example "Good morning. Two things need you today." It shows the date above, in a centered column. Scout sees "Three things on this site are waiting." with the site's name and address.
+- **The Inbox is two panes.** The list is on the left. The open message is on the right, with Send reply (it emails the address the person left and marks the message done), Mark done (chat questions and site check requests) and Remind me tomorrow (back at 8 am the next day, for that person only). Request a change is the button in the bar.
+- **Joy's placements (Nov 4):**
+  - Chat settings and Ask for reviews move to Your website.
+  - The client's "What's new on your site" moves under Home, so clients can reach it.
+  - Plus sections sit right under the Scout menu. The sidebar shows "Scout team" above Scout tools, and Scout's count badges are amber.
+  - "Looking for" links point to screens that live in another group.
 - **Shared admin kit 1.8.1: one token system for the dashboard.** Every color, size, radius, spacing step and shadow now comes from `tools/admin-kit/tokens.json` (rules in `tools/admin-kit/DESIGN.md`). Primary buttons, the active nav group and the active tab move from #0E8FE6 to the deeper #0A78C2 fill, so their white text passes AA (3.45:1 before, 4.69:1 now). Status dots and notices use the status tokens. Sizes now match the approved dashboard canvas (Recon branch): 16px body text, 34px page titles, 44px buttons, inputs and menu links, 18px card corners, 24px padding inside boxes. Larger text goes to 18px. CI checks the CSS matches the tokens and the contrast passes, including status text on its own tint.
 - **The Inbox count matches the list.** The sidebar bubble, the Inbox hint, the All chip and the Inbox rows on Today now count from the same list the Inbox shows, so site check requests and booking requests are counted too (found on the staging test: the list said 2, the bubble said 1).
 - **The redesigned Scout menu (dashboard redesign, Joy 2026-11-04).** Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools. Every screen keeps its address; only where it is filed changes. The full map and the rules for filing new screens are in `docs/dashboard-map.md`.

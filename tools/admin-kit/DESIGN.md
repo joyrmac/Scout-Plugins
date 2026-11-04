@@ -3,7 +3,7 @@ name: Scout dashboard
 scope: ".sh (every Scout screen inside a client's WordPress dashboard)"
 tokens: tools/admin-kit/tokens.json
 css: tools/admin-kit/scout-admin.css
-kit: 1.8.1
+kit: 1.9.0
 design-system-branch: Dashboard (project/tokens/dashboard.css in the Scout design system)
 ---
 
@@ -139,8 +139,11 @@ Text uses the text token, and CI checks it passes 4.5:1 on its own tint. A dot u
 | Part | Class | Notes |
 |---|---|---|
 | Screen wrapper | `.sh` | Holds the tokens. Every Scout screen prints it. `Scout_Admin_UI::open()` and `close()` do it for you. |
-| Page head | `.sh-head`, `.sh-eyebrow`, `h1`, `.sh-lede` | Eyebrow names the menu place, h1 names the job, lede is one sentence. |
-| Section nav | `.sh-nav-groups` (pill bar), `.sh-nav-sub` (tabs with underline) | The active group uses the fill. A count goes in `.sh-nav-hint`. |
+| Header bar | `.sh-bar`, `.sh-crumb`, `.sh-find` | One white bar, edge to edge: breadcrumb (Scout › section › screen), Find anything (Ctrl or Cmd + K), one button. The button is Request a change unless the screen sets its own with `bar_action()`. |
+| Section list | `.sh-local` | The section's screens on the left, current one with a cerulean inset bar. Shows when the section has more than one screen or a "Looking for" link. On WordPress's own list screens it becomes a row of pills (`.is-row`). The WordPress sidebar is the only menu: no tab rows across the top. |
+| Looking for | `.sh-looking` | One quiet line at the bottom of the section list that opens a screen in its home group ("Looking for the cookie notice? It's in Get found ›"). At most two per group, set in `Scout_Admin_UI::LOOKING`. |
+| Page head | `.sh-pagehead`, `h1`, `.sh-lede`, `.sh-eyebrow` | The screen name as the h1, one sentence under it. Home sets a sentence headline with `page_head()` ("Good morning. Two things need you today.") in a 1040px column. |
+| Find anything | `.sh-finder` | Ctrl or Cmd + K: "Do it now" (Today's items, the `scout_admin_finder_items` filter) and "Go to" (every screen this person can open). Arrow keys, Enter, Esc. |
 | Big tabs | `.sh-tabs` | Two to four choices, each with a live hint. One column on phones. |
 | Box | `.sh-box` | One topic. Title `h2.sh-title`, then a sentence, then the fields. |
 | Card grid | `.sh-grid`, `.sh-grid-2`, `.sh-card` | Cards line up their buttons at the bottom (`.sh-actions`). `.is-on` gets the cerulean border. |

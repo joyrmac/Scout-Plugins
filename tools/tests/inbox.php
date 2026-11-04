@@ -21,6 +21,8 @@ function get_post_time( $f, $g, $p ) { return $p->t; }
 function get_the_title( $p ) { return $p->post_title; }
 function post_type_exists() { return false; }
 function get_user_meta( $u, $k ) { return $GLOBALS['um'][ $k ] ?? ''; }
+function is_email( $e ) { return (bool) filter_var( $e, FILTER_VALIDATE_EMAIL ); }
+function get_current_user_id() { return $GLOBALS['uid'] ?? 0; }
 class Scout_Hub_Requests { const META_STATUS = 's'; const STATUSES = array( 'received' => 'Received', 'progress' => 'In progress', 'done' => 'Done' ); static function all() { return $GLOBALS['reqs']; } }
 class Scout_Hub_Admin { static function url( $t, $a = array() ) { return '/hub/' . $t; } static function waiting_on_you() { return $GLOBALS['rows']; } }
 require __DIR__ . '/../../scout-build/includes/class-scout-hub-inbox.php';
@@ -54,6 +56,20 @@ $byl  = array_column( $rows, 'count', 'label' );
 ok( 1 === ( $byl['Site check requests'] ?? 0 ) && 1 === ( $byl['Change requests'] ?? 0 ), 'Today gets one row per kind, with its count' );
 ok( 2 === ( $byl['Disclaimers to approve'] ?? 0 ) && 1 === ( $byl['Waiting for approval'] ?? 0 ), 'Other items stay their own Today rows' );
 ok( array_sum( array_column( $rows, 'count' ) ) === $I::total( $items ), 'Today rows add up to the bubble' );
+// The open message: full text and a reply address come through; a bad address does not.
+$GLOBALS['extra'][] = array( 'id' => 'chat-7', 'kind' => 'chat', 'label' => 'Chat question', 'from' => 'Dana', 'preview' => 'Do you take…', 'body' => 'Do you take walk-ins on Saturday?', 'email' => 'dana@example.com', 'done' => true, 'when' => $now - 120, 'url' => '/c' );
+$GLOBALS['extra'][] = array( 'id' => 'chat-8', 'kind' => 'chat', 'label' => 'Chat question', 'from' => 'Lee', 'email' => 'not an email', 'when' => $now - 180, 'url' => '/c' );
+$byid = array_column( $I::items(), null, 'id' );
+ok( 'Do you take walk-ins on Saturday?' === $byid['chat-7']['body'] && 'dana@example.com' === $byid['chat-7']['email'] && $byid['chat-7']['done'], 'an item carries its full text, reply address and whether it can be marked done' );
+ok( '' === $byid['chat-8']['email'] && false === $byid['chat-8']['done'], 'a bad address is dropped, and items cannot be marked done unless they say so' );
+// Remind me tomorrow hides an item from that person until then; the digest (no one signed in) still sees it.
+$GLOBALS['uid'] = 5;
+$GLOBALS['um'][ Scout_Hub_Inbox::LATER ] = array( 'chat-7' => $now + 3600, 'sitecheck-9' => $now - 60 );
+$ids = array_column( $I::items(), 'id' );
+ok( ! in_array( 'chat-7', $ids, true ) && in_array( 'sitecheck-9', $ids, true ), 'a snoozed item hides until its time, then comes back' );
+$GLOBALS['uid'] = 0;
+ok( in_array( 'chat-7', array_column( $I::items(), 'id' ), true ), 'the email digest still sees snoozed items' );
+unset( $GLOBALS['um'][ Scout_Hub_Inbox::LATER ] );
 ok( 'never' === $I::pref( 1 ), 'nobody gets Inbox emails until they choose' );
 $GLOBALS['um'][ Scout_Hub_Inbox::PREF ] = 'daily';
 ok( 'daily' === $I::pref( 1 ), 'a person can choose once a day' );
