@@ -19,6 +19,7 @@
 - **Easier to read.** Users → Profile has two settings for the Scout screens: larger text and less motion. Home links to them. The computer's reduce-motion setting is followed either way. Dark mode is left out on purpose: WordPress's own buttons, notices and forms on these screens don't support it, and a half-dark screen reads worse.
 - **Preview the site on a phone** from any Scout screen: the live site opens in a phone-sized window.
 - **What's new on your site.** For clients, the card on Home is titled "What's new on your site" with this month's count of changes from the Site log. Operators still see "With Scout."
+- **Customer list stays visible inside Events** for site owners; it no longer files as a Scout-tools screen. RV park joins the Plus sections.
 - **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
 
 ## 0.11.1 (2026-11-04)

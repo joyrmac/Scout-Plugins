@@ -23,7 +23,7 @@ $map = array(
 	'scout&tab=changes'                       => array( 'Change log', 'build' ),
 	'scout&tab=sync'                          => array( 'Site Sync', 'build' ),
 	'scout-mail'                              => array( 'Email', 'build' ),
-	'scout-events-crm'                        => array( 'Customer list', 'build' ),
+	'scout-events-crm'                        => array( 'Customer list', 'business' ), // Lives in the Events (Plus) section, for the owner too.
 	'scout-chat'                              => array( 'Chat settings', 'build' ),
 	'northcrest-theme'                        => array( 'Theme', 'build' ),
 	'site-build-features&tab=inbox'           => array( 'Inbox', 'inbox' ),
@@ -61,6 +61,7 @@ $map = array(
 	'scout-members'                           => array( 'Overview', 'business' ),
 	'scout-partners'                          => array( 'Overview', 'business' ),
 	'scout&tab=rvpark'                        => array( 'RV park', 'business' ),
+	'scout-rvpark'                            => array( 'Overview', 'business' ),
 	'site-build-features&tab=features&group=inbox' => array( 'Inbox', 'inbox' ),
 	'site-build-features&tab=features&group=policies' => array( 'Policies', 'policies' ),
 );

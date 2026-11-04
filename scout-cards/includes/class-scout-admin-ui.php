@@ -177,7 +177,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		 * "Plus" tag beside its name (Joy, 2026-11-04). The scout_admin_plus_menus
 		 * filter adds a client's own module.
 		 */
-		const PLUS_MENUS = array( 'scout-booking', 'scout-events', 'scout-members', 'scout-partners', 'scout-writing' );
+		const PLUS_MENUS = array( 'scout-booking', 'scout-events', 'scout-members', 'scout-partners', 'scout-writing', 'scout-rvpark' );
 
 		/** @var bool A Plus tag is in the sidebar on this screen. */
 		private static $plus = false;
@@ -439,8 +439,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'health';
 			} elseif ( 'search health' === $l ) {
 				$group = 'health';
-			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || preg_match( '/^(scout-mail|scout-chat|scout-events-crm)$/', $page ) || false !== strpos( $l, 'theme' ) || false !== strpos( $l, 'customer list' ) ) {
-				$group = 'build'; // Operator tools: Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen.
+			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || preg_match( '/^(scout-mail|scout-chat)$/', $page ) || false !== strpos( $l, 'theme' ) ) {
+				$group = 'build'; // Operator tools: Email, Chat settings, Site Sync, the Change log, a theme's own screen.
 			} elseif ( preg_match( '/scout-reviews-(inbox|ask)|post_type=scout_chat_q|post_type=scout_hub_request|post_type=scout_sitecheck/', $s ) || preg_match( '/^(review inbox|ask for reviews|chat questions|request a change|inbox|site checks)$/', $l ) ) {
 				$group = 'inbox';
 			} elseif ( preg_match( '/tab=protect\b/', $s ) || preg_match( '/scout-optimize/', $page ) ) {

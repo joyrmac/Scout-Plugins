@@ -151,7 +151,8 @@ A Plus module gets its own sidebar section, directly under the Scout menu
   adds a count to the Inbox with `scout_hub_inbox`.
 - The customer list goes with the Plus module that collects people.
 - References: `scout-events`, `scout-members`, `scout-booking`, `scout-partners`,
-  `scout-writing`.
+  `scout-writing`, and `scout-rvpark` for a client's own content types (it nests them
+  with `register_post_type_args`, so Scout Core needs no change).
 
 ---
 
@@ -266,6 +267,9 @@ Each works on its own branch; merge one, then rebase the other.
 5. Plus sections: the Plus tag (admin kit 1.8.0, `scout_admin_plus_menus`). Each module already opens on its own overview screen.
 6. Team and My profile screens moved to the features chat (they live in Scout Team, which it is rewiring).
 7. Bonus: "Not today" on Today items, comfort settings (larger text and less motion; dark mode left out because WordPress's own screen parts don't support it), "Preview on a phone," and the "What's new on your site" card. Built in Scout Build 0.12.0 and admin kit 1.8.0.
+
+8. RV park as one Plus section with an overview (Scout RV Park 0.2.0), and the Customer list visible to owners inside Events. Built.
+9. Cleanup pass: bring older screens onto the one layout, most-used first (Hours, Call buttons, Review settings, then the rest). Skip Scout Core, Team, Cards, Chat and Law screens while the features chat is in them.
 
 **Features chat**
 

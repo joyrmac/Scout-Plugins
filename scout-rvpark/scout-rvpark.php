@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout — North Crest RV Park
  * Description:       Per-client content types for the North Crest RV Park build. The worked example of the Scout Core companion pattern: register a client's specific types without ever forking Scout Core.
- * Version:           0.1.8
+ * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  scout-core
@@ -17,6 +17,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+define( 'SCOUT_RVPARK_FILE', __FILE__ );
 
 // Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).
 // Loaded on plugins_loaded, after every plugin's own file, so older Scout
@@ -91,3 +93,8 @@ add_action( 'init', function () {
 		update_option( 'scout_rvpark_rewrite', '0.1.3', false );
 	}
 }, 99 );
+
+// One RV park section with an overview first (Plus module; dashboard redesign, Joy 2026-11-04).
+require_once __DIR__ . '/includes/class-scout-admin-ui.php';
+require_once __DIR__ . '/includes/class-scout-rvpark-admin.php';
+Scout_RVPark_Admin::boot();
