@@ -4,15 +4,15 @@
  * requests and the site's versions and health, for the Google Sheet that
  * pulls every Scout site nightly, and for Claude to log a note as work ships.
  *
- * Two keys, both in wp-config.php so a client administrator cannot read or
- * change them from the dashboard, the same reason SCOUT_HUB_OPERATORS lives
- * there:
+ * Two keys. Operators make them on Scout → Site log (Hub keys), where they
+ * are shown once and stored encrypted, the way the theme key is; a client
+ * administrator never sees them again. A site can instead define them in
+ * wp-config.php, which wins over the stored pair:
  *
  *   define( 'SCOUT_HUB_READ_TOKEN', '...' );   // read only
  *   define( 'SCOUT_HUB_WRITE_TOKEN', '...' );  // read, plus POST /log for note lines
  *
- * Sent as "Authorization: Bearer <token>". Without a key defined, the
- * endpoint is off. On a white-label site (SCOUT_HUB_BRAND false) it stays off
+ * Sent as "Authorization: Bearer <token>". Without a key, the endpoint is off. On a white-label site (SCOUT_HUB_BRAND false) it stays off
  * unless SCOUT_HUB_LOG_API is true, so a partner's site never answers Scout's
  * puller by accident.
  *
@@ -44,10 +44,98 @@ final class Scout_Hub_Log_API {
 		return '' !== self::token( 'read' ) || '' !== self::token( 'write' );
 	}
 
+	const OPTION = 'scout_hub_log_keys'; // Keys made on the site, stored encrypted.
+
+	/**
+	 * The key for a scope. A constant in wp-config.php wins; otherwise the
+	 * keys made on the Site log screen (stored encrypted, like the theme key).
+	 */
 	private static function token( string $scope ): string {
 		$c = 'write' === $scope ? 'SCOUT_HUB_WRITE_TOKEN' : 'SCOUT_HUB_READ_TOKEN';
 		$t = defined( $c ) ? trim( (string) constant( $c ) ) : '';
+		if ( '' === $t ) {
+			$t = (string) ( self::site_keys()[ $scope ] ?? '' );
+		}
 		return strlen( $t ) >= 20 ? $t : ''; // A short key is no key.
+	}
+
+	/** Where the keys come from: 'config' (wp-config.php), 'site' (made on the screen), or ''. */
+	public static function keys_source(): string {
+		if ( ( defined( 'SCOUT_HUB_READ_TOKEN' ) && '' !== trim( (string) SCOUT_HUB_READ_TOKEN ) ) || ( defined( 'SCOUT_HUB_WRITE_TOKEN' ) && '' !== trim( (string) SCOUT_HUB_WRITE_TOKEN ) ) ) {
+			return 'config';
+		}
+		return self::site_keys() ? 'site' : '';
+	}
+
+	/** When the site's own keys were made, or 0. */
+	public static function keys_made(): int {
+		return (int) ( self::site_keys()['made'] ?? 0 );
+	}
+
+	/** @return array{read?:string, write?:string, made?:int} */
+	private static function site_keys(): array {
+		$stored = (string) get_option( self::OPTION, '' );
+		if ( '' === $stored ) {
+			return array();
+		}
+		$plain = self::decrypt( $stored );
+		$keys  = json_decode( $plain, true );
+		return is_array( $keys ) ? $keys : array();
+	}
+
+	/**
+	 * Make a fresh pair and store it encrypted. Returns the plain keys once,
+	 * for the screen to show; they are not readable from the dashboard after.
+	 *
+	 * @return array{read:string, write:string}
+	 */
+	public static function make_keys(): array {
+		$keys = array( 'read' => self::random_key(), 'write' => self::random_key(), 'made' => time() );
+		update_option( self::OPTION, self::encrypt( (string) wp_json_encode( $keys ) ), false );
+		return array( 'read' => $keys['read'], 'write' => $keys['write'] );
+	}
+
+	public static function forget_keys(): void {
+		delete_option( self::OPTION );
+	}
+
+	/** 40 characters, letters and digits, from the system's random source. */
+	private static function random_key(): string {
+		$alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+		$out      = '';
+		for ( $i = 0; $i < 40; $i++ ) {
+			$out .= $alphabet[ random_int( 0, strlen( $alphabet ) - 1 ) ];
+		}
+		return $out;
+	}
+
+	/* ---------- storing the keys (the same scheme as the theme key) ---------- */
+
+	private static function cipher_key(): string {
+		return hash( 'sha256', wp_salt( 'auth' ) . 'scout-hub-keys', true );
+	}
+
+	private static function encrypt( string $plain ): string {
+		if ( ! function_exists( 'openssl_encrypt' ) ) {
+			return 'p:' . base64_encode( $plain ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		}
+		$iv = random_bytes( 16 );
+		return 'e:' . base64_encode( $iv . openssl_encrypt( $plain, 'aes-256-cbc', self::cipher_key(), OPENSSL_RAW_DATA, $iv ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+	}
+
+	private static function decrypt( string $stored ): string {
+		$raw = base64_decode( substr( $stored, 2 ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		if ( false === $raw ) {
+			return '';
+		}
+		if ( 0 === strpos( $stored, 'p:' ) ) {
+			return $raw;
+		}
+		if ( ! function_exists( 'openssl_decrypt' ) || strlen( $raw ) < 17 ) {
+			return '';
+		}
+		$out = openssl_decrypt( substr( $raw, 16 ), 'aes-256-cbc', self::cipher_key(), OPENSSL_RAW_DATA, substr( $raw, 0, 16 ) );
+		return false === $out ? '' : $out;
 	}
 
 	public static function routes(): void {

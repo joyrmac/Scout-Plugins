@@ -180,7 +180,7 @@ final class Scout_Hub_Catalog {
 					$out[ $m[1] ][] = array(
 						'version'   => $m[2],
 						'package'   => (string) $asset['browser_download_url'],
-						// The version list carries the date from Scout Build 0.10.1's release workflow on (rings, rule 19).
+						// The version list carries the date from Scout Build 0.11.1's release workflow on (rings, rule 19).
 						'published' => (int) strtotime( (string) ( $release['published_at'] ?? $release['created_at'] ?? '' ) ),
 					);
 				}
