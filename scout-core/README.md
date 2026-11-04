@@ -224,6 +224,9 @@ line runs only while `! scout_core_owns( 'hours' )`.
 - **Hardening:** switches under spam protection (`hide_users`, `xmlrpc_off`,
   `browser_headers`). Filters: `scout_core_hide_users`, `scout_core_xmlrpc_needed`,
   `scout_core_browser_headers`. Themes and companions stop doing this themselves.
+- **Staging guard:** on a staging copy, email goes only to Scout and calls to newsletter,
+  texting and payment services are refused (`scout_core_staging_mail_to`,
+  `scout_core_staging_blocked_hosts`, `SCOUT_STAGING`).
 - **Cache purge:** after the active theme or a Scout plugin updates, WP Engine and WP
   Rocket caches purge by themselves (`scout_core_purge_after_update`). Cloudflare is
   still purged by hand.

@@ -47,6 +47,9 @@ require __DIR__ . '/../../scout-core/includes/seo/class-seo-head.php';
 require __DIR__ . '/../../scout-core/includes/seo/class-seo-breadcrumbs.php';
 require __DIR__ . '/../../scout-core/includes/protection.php';
 require __DIR__ . '/../../scout-core/includes/cache-purge.php';
+require __DIR__ . '/../../scout-core/includes/staging-guard.php';
+if ( ! class_exists( 'WP_Error' ) ) { class WP_Error { public function __construct( $c = '', $m = '' ) {} } }
+function update_option( $k, $v, $a = null ) { $GLOBALS['opts'][ $k ] = $v; }
 
 // Verification codes.
 $S = 'Scout_Core_SEO_Settings';
@@ -100,6 +103,18 @@ ok( 'plugin' === $C::reason( array( 'type' => 'plugin', 'action' => 'update', 'p
 ok( '' === $C::reason( array( 'type' => 'plugin', 'action' => 'update', 'plugins' => array( 'akismet/akismet.php' ) ), '', 'x', 'x' ), 'another plugin updating does not purge' );
 ok( 'plugin' === $C::reason( array( 'type' => 'plugin', 'action' => 'install' ), 'scout-law', 'x', 'x' ), 'uploading a Scout plugin zip purges' );
 ok( '' === $C::reason( array( 'type' => 'translation' ), '', 'x', 'x' ), 'a translation update does not purge' );
+
+// Staging guard.
+$G = 'Scout_Core_Staging';
+ok( $G::is_staging( 'production', 'scoutmediastg.wpenginepowered.com' ) && $G::is_staging( 'staging', 'example.com' ), 'a WP Engine staging address, or WordPress set to staging, is staging' );
+ok( ! $G::is_staging( 'production', 'scoutraleigh.com' ), 'the live address is not staging' );
+ok( $G::allowed( 'Joy <joy@scoutraleigh.com>' ) && ! $G::allowed( 'client@gmail.com' ) && ! $G::allowed( 'x@notscoutraleigh.com' ), 'only Scout addresses may get mail from staging' );
+$a = $G::mail_args( array( 'to' => 'client@gmail.com, team@scoutraleigh.com', 'headers' => array( 'Bcc: member@yahoo.com', 'Cc: sean@scoutraleigh.com, kai@example.com', 'Reply-To: client@gmail.com' ) ) );
+ok( array( 'team@scoutraleigh.com' ) === $a['to'] && array( 'Cc: sean@scoutraleigh.com', 'Reply-To: client@gmail.com' ) === $a['headers'], 'customers are dropped from To, Cc and Bcc; Scout stays' );
+$a = $G::mail_args( array( 'to' => array( 'member@yahoo.com' ), 'headers' => '' ) );
+ok( false === $G::stop_empty_mail( null, $a ), 'a booking reminder to a customer is not sent at all' );
+ok( $G::stop_calls( false, array(), 'https://api.beehiiv.com/v2/publications/x/subscriptions' ) instanceof WP_Error && $G::stop_calls( false, array(), 'https://us21.api.mailchimp.com/3.0/lists' ) instanceof WP_Error && $G::stop_calls( false, array(), 'https://api.stripe.com/v1/charges' ) instanceof WP_Error, 'newsletter, email marketing and payment calls are refused' );
+ok( false === $G::stop_calls( false, array(), 'https://api.github.com/repos/x' ) && false === $G::stop_calls( false, array(), 'https://notapi.stripe.com.evil.test/' ), 'updates from GitHub still work, and a look-alike host is not matched' );
 
 echo $fail ? "\n$fail FAILED\n" : "\nAll Core 1.8.0 checks passed\n";
 exit( $fail ? 1 : 0 );
