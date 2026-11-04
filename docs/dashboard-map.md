@@ -173,6 +173,7 @@ Every Scout screen follows the same order, so nobody has to relearn a page.
 ## UX rules (built for ADHD and autistic brains, good for everyone)
 
 - At most seven groups in the menu. Never tabs inside tabs.
+- Each person can turn on larger text and less motion (Users → Profile); body classes `sh-large-text` and `sh-calm` scale the kit.
 - One primary action per screen. Everything else is secondary or a link.
 - Every task on Home shows about how long it takes ("About 3 min").
 - Show progress and finish lines: "1 of 4 done," and a designed "All caught up" screen.
@@ -263,14 +264,14 @@ Each works on its own branch; merge one, then rebase the other.
 3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting. Built in Scout Build 0.12.0.
 4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and More features on Home. Built in Scout Build 0.12.0.
 5. Plus sections: the Plus tag (admin kit 1.8.0, `scout_admin_plus_menus`). Each module already opens on its own overview screen.
-6. Team and My profile screens.
-7. Bonus: "Not today" on Today items, comfort settings (larger text, less motion, dark mode), "Preview on a phone," and the "What's new on your site" card.
+6. Team and My profile screens moved to the features chat (they live in Scout Team, which it is rewiring).
+7. Bonus: "Not today" on Today items, comfort settings (larger text and less motion; dark mode left out because WordPress's own screen parts don't support it), "Preview on a phone," and the "What's new on your site" card. Built in Scout Build 0.12.0 and admin kit 1.8.0.
 
 **Features chat**
 
 1. Law firm tools: check approval before publishing (0.2.0) in a live block editor, then "Reviewed by" stamps with a six-month review list, then form entries that delete themselves (90 days by default).
 2. Search and sitemap: a visitor search box on every site, and a list of searches that found nothing.
-3. One profile per person: Scout Cards, chat photos and "Reviewed by" stamps read from Team.
+3. One profile per person: Scout Cards, chat photos and "Reviewed by" stamps read from Team. Includes the Team screen (where each person shows up, login status) and My profile (each person edits their own photo, bio, public contact and credentials), as designed on the canvas.
 4. Nightly form test in Site health.
 5. Policies pages: privacy policy and terms templates filled from business info. The client or firm approves each one.
 6. One screen for every client site, built on the Client Hub sheet.

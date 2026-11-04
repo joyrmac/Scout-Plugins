@@ -463,7 +463,19 @@ final class Scout_Hub_Admin {
 
 		<div>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php echo esc_html( self::branded() ? __( 'With Scout', 'scout-build' ) : __( 'Behind the scenes', 'scout-build' ) ); ?></h2>
+				<?php
+				// Clients see "What's new on your site" with this month's count (Joy, 2026-11-04).
+				$month_new = $operator ? 0 : (int) Scout_Hub_Log::query( array( 'month' => current_time( 'Y-m' ), 'per_page' => 1, 'client' => true ) )['total'];
+				if ( $operator ) {
+					$card_title = self::branded() ? __( 'With Scout', 'scout-build' ) : __( 'Behind the scenes', 'scout-build' );
+				} elseif ( $month_new ) {
+					/* translators: %d: changes this month */
+					$card_title = sprintf( _n( 'What\'s new on your site: %d change this month', 'What\'s new on your site: %d changes this month', $month_new, 'scout-build' ), $month_new );
+				} else {
+					$card_title = __( 'What\'s new on your site', 'scout-build' );
+				}
+				?>
+				<h2 class="sh-title"><?php echo esc_html( $card_title ); ?></h2>
 				<p class="sh-note">
 					<?php
 					echo esc_html(
@@ -513,6 +525,7 @@ final class Scout_Hub_Admin {
 				<?php echo esc_html( self::branded() ? __( 'Want something added or changed? Ask Scout.', 'scout-build' ) : __( 'Want something added or changed? Ask us.', 'scout-build' ) ); ?>
 				<a class="button" style="margin-left:8px" href="<?php echo esc_url( self::url( 'requests' ) ); ?>"><?php esc_html_e( 'Request a change', 'scout-build' ); ?></a>
 			</p>
+			<p class="sh-note" style="margin:10px 0 0"><a href="<?php echo esc_url( admin_url( 'profile.php#scout-comfort' ) ); ?>"><?php esc_html_e( 'Make these screens easier to read: larger text, less motion', 'scout-build' ); ?> &rsaquo;</a></p>
 		</section>
 		<?php if ( $operator ) : ?>
 			<p class="sh-note" style="margin-top:14px">

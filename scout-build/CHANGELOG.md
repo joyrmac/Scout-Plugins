@@ -16,6 +16,9 @@
 - **More features on Home.** Site owners see a closed "More features" section listing what Scout recommends for the site and isn't on yet, each with "Ask us to add this." Clients no longer see every feature Scout makes; the Features screen stays with Scout tools.
 - **The first-week setup list.** Site owners see five steps above Today until they're done: business name, address and phone, weekly hours, logo and site icon, the team, and the Google Business Profile link. Steps for features the site doesn't run are left out. Operators can hide the list on a site. Filter: `scout_hub_setup_steps`.
 - **Plus modules are tagged.** Bookings, Events, Members, Partners and the Writing room keep their own sidebar sections, now with a small purple "+ Plus" tag. The `scout_admin_plus_menus` filter adds a client's own module.
+- **Easier to read.** Users → Profile has two settings for the Scout screens: larger text and less motion. Home links to them. The computer's reduce-motion setting is followed either way. Dark mode is left out on purpose: WordPress's own buttons, notices and forms on these screens don't support it, and a half-dark screen reads worse.
+- **Preview the site on a phone** from any Scout screen: the live site opens in a phone-sized window.
+- **What's new on your site.** For clients, the card on Home is titled "What's new on your site" with this month's count of changes from the Site log. Operators still see "With Scout."
 - **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
 
 ## 0.11.1 (2026-11-04)
