@@ -1,0 +1,51 @@
+# Scout Repo Standard rules 23 and 24: no file over 10 MB, no zips, in any pull request.
+# Copy to .github/workflows/large-file-gate.yml in every Scout repo. Checks only the files a
+# pull request adds or changes, so repos with older large files still pass until they are
+# cleaned up. Raw photos go to Drive; zips go to GitHub Releases.
+# Exceptions: one glob per line in .github/large-file-allow.txt, each with a dated reason in a
+# comment above it. An exception is a deviation, so it ends when its reason does.
+name: Large file gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Refuse files over 10 MB and zips
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          limit=$((10 * 1024 * 1024))
+          fail=0
+          allow=.github/large-file-allow.txt
+          while IFS= read -r -d '' f; do
+            [ -f "$f" ] || continue
+            if [ -f "$allow" ]; then
+              skip=0
+              while IFS= read -r pat; do
+                case "$pat" in ''|'#'*) continue ;; esac
+                case "$f" in $pat) skip=1 ;; esac
+              done < "$allow"
+              if [ "$skip" = 1 ]; then echo "::warning file=$f::$f is allowed by $allow"; continue; fi
+            fi
+            size=$(stat -c %s "$f")
+            if [ "$size" -gt "$limit" ]; then
+              echo "::error file=$f::$f is $(awk "BEGIN{printf \"%.1f\", $size/1048576}") MB. The limit is 10 MB (Scout Repo Standard rule 23). Optimize it, or keep the original in Drive."
+              fail=1
+            fi
+            case "$f" in
+              *.zip|*.ZIP)
+                echo "::error file=$f::$f is a zip. Zips belong in GitHub Releases, not git (Scout Repo Standard rule 24)."
+                fail=1 ;;
+            esac
+          done < <(git diff -z --name-only --diff-filter=AM "$BASE" "$HEAD")
+          exit $fail
