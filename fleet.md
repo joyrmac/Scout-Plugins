@@ -21,6 +21,7 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
 | Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `joyrmac/Andres-Borda---Golf-Carts` | The Build (favor). **In build, not deployed.** Companion plugin `scout-andysgolfcarts` 0.1.0 lives in the client repo. |
+| Chad Geoffrey | chadgeoff.com (Cloudflare, not pointed yet) | `chadgeoffrey` (Prd, empty, created 2026-11-04) | `scout-media-raleigh/chadgeoffrey` | The Build (family favor). **Kickoff, nothing installed.** |
 
 ## Versions
 
