@@ -67,7 +67,7 @@ body[class*="scout-redirects"] .sh .button:focus-visible { outline: 2px solid va
 
 .sr-pager { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 6px; }
 .sr-pager .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border-radius: 10px; text-decoration: none; color: var(--sh-accent-text); }
-.sr-pager .page-numbers.current { background: var(--sh-accent); color: #fff; }
+.sr-pager .page-numbers.current { background: var(--sh-accent-fill); color: var(--sh-on-accent, #fff); }
 
 /* Missing pages and broken links */
 .sr-list { list-style: none; margin: 8px 0 0; padding: 0; }
