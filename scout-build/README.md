@@ -9,31 +9,29 @@ Standalone: does not need Scout Core.
 
 ## Where it shows up
 
-One menu, **Scout**, on every site (the Scout Site Standard, rule 11:
+One menu, **Scout**, on every site (the Scout Site Standard §7, v1.2:
 `Scout-Internal/ops/playbook/site-standard.md`). Inside the site's existing
 Build menu when there is one (Scout Core's **Scout** menu, or a theme's own
 menu, which the hub relabels Scout until that theme's conversion), otherwise
 as its own top-level section with the cerulean bolt. **Site Build** instead
 of Scout when `SCOUT_HUB_BRAND` is false.
 
-The hub adds four screens: **Features** (the cards, the plan, the counts),
-**Updates**, **Request a change** and **Site health**. The shared admin kit
-sorts every Scout screen into seven groups in the same order everywhere:
-Home, Updates, Search, Website, Business, Reviews, Chat. A group with nothing
-on still shows, greyed, and opens Features to turn something on.
+Seven items, the same words in the sidebar and on the screen, built around
+who is looking:
 
-## Scout → Updates
+| Item | Who | What it holds |
+|---|---|---|
+| **Overview** | everyone, the first screen | Is the site all right (from Site health), Needs you (the Inbox counts), With Scout (updates, the theme, the last Site log lines), the things a client does here (change a page, write a post, update hours, ask for a review), and "Want something added? Ask Scout." |
+| **Your business** | client, editor | Business info, Call buttons, Hours, Team, Case results, Reviews and Review settings, Cards & Links, Booking, Events, Members, Partners, Newsletter, a companion plugin's own types. Each fact typed once. |
+| **Content** | editor | Site Sync, Redirects, Image optimizer, Writing. |
+| **Search and AI** | client admin | SEO, AI search, Analytics, Accessibility, Spam protection, Site checks, robots.txt. |
+| **Site health** | everyone | The whole report, Copy for Claude. |
+| **Inbox** | client, operator | Everything waiting on a person with one count: change requests, chat questions, new reviews, Ask for reviews. Other plugins add a queue with the `scout_hub_inbox` filter. |
+| **Build** | operators only | Features (turn on, off, back), Updates (theme and key, plugins, Fill from theme, Site Sync, Import posts, Site settings, Change log), Site log, Email, Chat settings, Customer list, a theme's own screen. Hidden from everyone who is not an operator; every action on it still checks for one. |
 
-Everything that brings a new version or new content onto the site, and
-nothing else does (rule 12): the **Theme** box (version, read-only key,
-Update the theme now), the **Plugins** table (each installed Scout plugin,
-its version, Up to date or Update ready, Update now) with **Check for new
-versions**, **Fill from theme**, **Site Sync** (Scout Core), **Import posts
-(XML)** (WordPress's importer), **Site settings** (export and import; a
-plugin provides the screen through the `scout_hub_site_settings_url`
-filter), the **Change log** (Scout Core 1.7.0 or newer) and the Recent
-changes log of feature actions. Check for new versions and Fill from theme
-again return to this screen.
+The shared admin kit (`tools/admin-kit/`) files every Scout screen into these
+seven by its slug, and `tools/tests/admin-kit-groups.php` fails when a screen
+drifts from the map. A screen never moves its address; only where it is filed.
 
 ## Settings in `wp-config.php`
 

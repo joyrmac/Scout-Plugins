@@ -321,9 +321,23 @@ final class Scout_Core_Admin {
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_business_group' );
 		echo '<table class="form-table" role="presentation"><tbody>';
+		$hours_plugin = class_exists( 'Scout_Hours_Admin' );
 		foreach ( Scout_Core_Business::fields() as $key => $label ) {
 			$id   = 'scout-' . $key;
 			$name = Scout_Core_Business::OPTION . '[' . $key . ']';
+			if ( 'hours' === $key && $hours_plugin ) {
+				// One fact, one place (Site Standard §7, v1.2): with Scout Hours on, hours live there.
+				// The old text stays saved untouched until the site's conversion copies it over.
+				printf( '<input type="hidden" name="%s" value="%s" />', esc_attr( $name ), esc_attr( $values[ $key ] ) );
+				echo '<tr><th scope="row">' . esc_html__( 'Hours', 'scout-core' ) . '</th><td><p class="description">'
+					. sprintf(
+						/* translators: %s: link to the Hours screen */
+						esc_html__( 'Hours live under Your business, %s, and show in the schema, the footer and the hours block from there.', 'scout-core' ),
+						'<a href="' . esc_url( admin_url( 'admin.php?page=scout-hours' ) ) . '">' . esc_html__( 'Hours', 'scout-core' ) . '</a>'
+					)
+					. '</p></td></tr>';
+				continue;
+			}
 			echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label></th><td>';
 			if ( in_array( $key, array( 'hours', 'same_as' ), true ) ) {
 				printf( '<textarea id="%s" name="%s" rows="5" class="large-text">%s</textarea>', esc_attr( $id ), esc_attr( $name ), esc_textarea( $values[ $key ] ) );

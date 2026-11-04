@@ -1,5 +1,9 @@
 # Scout Chat changelog
 
+## 0.3.1 (2026-11-04)
+
+- **Files by the new Scout menu map (Overview, Your business, Content, Search and AI, Site health, Inbox, Build).** Shared admin kit 1.7.0: the same seven items on every site, the Build group hidden from everyone who is not an operator (Site Standard §7 v1.2, Joy 2026-11-04).
+
 ## 0.3.0 (2026-11-04)
 
 - **Change requests from the chat join the site's request list.** When a visitor asks for a change in the chat and Scout Build is on the site, the ask is also saved as a change request under Scout, Request a change, with the person's name and how to reach them, so one list holds every request however it came in and the Site log records it. The chat inbox keeps its own copy as before. Sites without Scout Build change nothing.
