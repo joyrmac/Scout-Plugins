@@ -87,6 +87,8 @@ jobs:
         run: php tools/tests/law-disclaimers.php
       - name: Law firm approval rules (no WordPress needed)
         run: php tools/tests/law-approvals.php
+      - name: Today list on Home (no WordPress needed)
+        run: php tools/tests/today.php
 
   slop-check:
     name: Code slop check

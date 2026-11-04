@@ -7,6 +7,8 @@
 - **Who sees what.** Operators see everything, including Scout tools (Features, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log). Client owners see everything but Scout tools. Staff (anyone who cannot change site settings) see Home, Inbox and Your business.
 - **Greyed "Turn on" items are for operators only.** Clients only see groups that have something in them.
 - **The sidebar follows the menu order** even when the Scout menu is short enough not to be grouped.
+- **Today on Home.** "Needs you" becomes a numbered Today list: each item says about how long it takes and has one button, the first is marked Start here, and "1 of 4 done" counts what left the list earlier today. "Not today" hides an item until tomorrow. With nothing left, Home says "Nothing needs you today." Items come from the Inbox rows, failing health checks and a site hidden from Google, and any plugin can add one with the `scout_hub_today` filter. Staff only see items they can act on.
+- **The first-week setup list.** Site owners see five steps above Today until they're done: business name, address and phone, weekly hours, logo and site icon, the team, and the Google Business Profile link. Steps for features the site doesn't run are left out. Operators can hide the list on a site. Filter: `scout_hub_setup_steps`.
 - **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
 
 ## 0.11.1 (2026-11-04)

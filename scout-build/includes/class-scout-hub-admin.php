@@ -391,8 +391,6 @@ final class Scout_Hub_Admin {
 		$bad      = array_filter( $basics, static fn( $c ) => 'bad' === $c['state'] );
 		$warn     = array_filter( $basics, static fn( $c ) => 'warn' === $c['state'] );
 		$ready    = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
-		$waiting  = self::waiting_on_you();
-		$total    = (int) array_sum( array_column( $waiting, 'count' ) );
 		$updates  = self::waiting();
 		$theme    = wp_get_theme();
 		$log      = class_exists( 'Scout_Hub_Log' ) ? Scout_Hub_Log::query( array( 'per_page' => 3, 'client' => ! $operator ) ) : array( 'items' => array() );
@@ -442,21 +440,15 @@ final class Scout_Hub_Admin {
 			</p>
 		</section>
 
-		<div class="sh-grid sh-grid-2">
-			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Needs you', 'scout-build' ); ?></h2>
-				<?php if ( $total ) : ?>
-					<div class="sh-ov-rows">
-						<?php foreach ( $waiting as $row ) : ?>
-							<?php if ( ! $row['count'] ) { continue; } ?>
-							<div class="sh-ov-row"><p class="sh-num"><?php echo (int) $row['count']; ?></p><a href="<?php echo esc_url( $row['url'] ); ?>"><?php echo esc_html( $row['label'] ); ?> &rsaquo;</a></div>
-						<?php endforeach; ?>
-					</div>
-				<?php else : ?>
-					<p class="sh-note"><?php esc_html_e( 'Nothing is waiting on you.', 'scout-build' ); ?></p>
-				<?php endif; ?>
-				<p class="sh-note" style="margin-top:10px"><a href="<?php echo esc_url( self::url( 'inbox' ) ); ?>"><?php esc_html_e( 'Open the Inbox', 'scout-build' ); ?> &rsaquo;</a></p>
-			</section>
+		<?php
+		// Today and the first-week setup list (dashboard redesign, Joy 2026-11-04). The Inbox
+		// rows feed Today, so "Needs you" lives there now.
+		$setup = Scout_Hub_Today::render_setup();
+		Scout_Hub_Today::render( ! $setup );
+		?>
+		<p class="sh-note" style="margin:8px 0 0"><a href="<?php echo esc_url( self::url( 'inbox' ) ); ?>"><?php esc_html_e( 'Open the Inbox', 'scout-build' ); ?> &rsaquo;</a></p>
+
+		<div>
 			<section class="sh-box">
 				<h2 class="sh-title"><?php echo esc_html( self::branded() ? __( 'With Scout', 'scout-build' ) : __( 'Behind the scenes', 'scout-build' ) ); ?></h2>
 				<p class="sh-note">

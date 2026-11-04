@@ -177,11 +177,15 @@ Every Scout screen follows the same order, so nobody has to relearn a page.
 
 - **Needs you** reads the same rows as the Inbox (`Scout_Hub_Admin::waiting_on_you()`
   and the `scout_hub_inbox` filter).
-- **Planned:** a `scout_hub_today` filter so any plugin can add a Today item
-  with a label, a one-line reason, minutes, a link and a priority. Law-firm
-  approvals and pages due for review arrive this way.
-- **Planned:** the first-week setup list replaces Today on new sites, and the
-  "All caught up" state shows when nothing is waiting.
+- **Today** (`Scout_Hub_Today`, Scout Build 0.12.0) turns those rows, failing
+  health checks and a site hidden from Google into a numbered list. Any plugin
+  adds an item with the `scout_hub_today` filter: `id`, `label`, `why`,
+  `minutes`, `url`, `button`, `priority` (lower first) and `cap` (who sees it).
+  Law-firm approvals and pages due for review should arrive this way.
+- "Not today" hides an item until tomorrow. Progress counts what left the list
+  earlier today. An empty list shows "Nothing needs you today."
+- **The first-week setup list** shows owners five steps above Today until they
+  are done (`scout_hub_setup_steps` adjusts them). Operators can hide it.
 
 ---
 
@@ -230,7 +234,7 @@ Each works on its own branch; merge one, then rebase the other.
 **Dashboard chat**
 
 1. The new menu (Scout Build 0.12.0, admin kit 1.8.0). Built; waiting on Joy to merge.
-2. Home: the Today list (a `scout_hub_today` filter), all caught up, the first-week setup list.
+2. Home: the Today list (a `scout_hub_today` filter), all caught up, the first-week setup list. Built in Scout Build 0.12.0.
 3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting.
 4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and the More features dropdown.
 5. Plus sections: the Plus tag and each module's own overview screen.
