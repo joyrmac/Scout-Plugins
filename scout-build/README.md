@@ -23,7 +23,7 @@ screen or feature, is in `../docs/dashboard-map.md`.
 | Item | Who | What it holds |
 |---|---|---|
 | **Home** | everyone, the first screen | Is the site all right, what needs you, what Scout is doing, the things a client does here, and one line to ask for more. Clients also find **Your site** here (what Scout has done on the site, with Approve). |
-| **Inbox** | everyone | Everything waiting on a person, with one count: change requests and their status, chat questions, new reviews, Ask for reviews, site check requests. Other plugins add a queue with the `scout_hub_inbox` filter. |
+| **Inbox** | everyone | One list of everything waiting on a person, newest first, with filter chips: chat questions, new reviews, change requests and their status, site check requests, booking requests. Plugins add items with `scout_hub_inbox_items` (or a count row with `scout_hub_inbox`). Each person picks Inbox emails: never, once a day, or every new item. |
 | **Reports** | owner, operator | Recon's numbers, when Recon is on. Empty groups never show to clients. |
 | **Your business** | everyone | Facts typed once: Business info, Hours, Team, Case results, a companion plugin's own types. |
 | **Your website** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & Links, Newsletter, Redirects, Site check settings. |

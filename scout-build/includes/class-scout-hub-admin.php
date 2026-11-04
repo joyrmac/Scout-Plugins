@@ -513,39 +513,9 @@ final class Scout_Hub_Admin {
 	}
 
 	/** Inbox: every queue that waits on a person, in one place, with one count. */
+	/** The Inbox: one list of everything waiting on a person (Scout_Hub_Inbox). */
 	private static function inbox(): void {
-		$rows  = self::waiting_on_you();
-		$total = (int) array_sum( array_column( $rows, 'count' ) );
-		?>
-		<section class="sh-box">
-			<p class="sh-lede" style="margin:0">
-				<?php
-				echo esc_html(
-					$total
-						/* translators: %d: items waiting */
-						? sprintf( _n( '%d thing is waiting on a person.', '%d things are waiting on a person.', $total, 'scout-build' ), $total )
-						: __( 'Nothing is waiting. Every queue is empty.', 'scout-build' )
-				);
-				?>
-			</p>
-		</section>
-		<div class="sh-grid">
-			<?php foreach ( $rows as $row ) : ?>
-				<article class="sh-card<?php echo $row['count'] ? '' : ' is-off'; ?>">
-					<div class="sh-cardhead"><h2><?php echo esc_html( $row['label'] ); ?></h2><span class="sh-pill <?php echo $row['count'] ? 'is-on' : 'is-off'; ?>"><?php echo (int) $row['count']; ?></span></div>
-					<p class="sh-summary"><?php echo esc_html( $row['note'] ); ?></p>
-					<div class="sh-actions"><a class="button<?php echo $row['count'] ? ' button-primary' : ''; ?>" href="<?php echo esc_url( $row['url'] ); ?>"><?php esc_html_e( 'Open', 'scout-build' ); ?></a></div>
-				</article>
-			<?php endforeach; ?>
-			<?php if ( class_exists( 'Scout_Reviews_Requests' ) ) : ?>
-				<article class="sh-card">
-					<div class="sh-cardhead"><h2><?php esc_html_e( 'Ask for reviews', 'scout-build' ); ?></h2></div>
-					<p class="sh-summary"><?php esc_html_e( 'Your review link and the card to hand out. Nothing queues here; it is the way to ask.', 'scout-build' ); ?></p>
-					<div class="sh-actions"><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=scout-reviews-ask' ) ); ?>"><?php esc_html_e( 'Open', 'scout-build' ); ?></a></div>
-				</article>
-			<?php endif; ?>
-		</div>
-		<?php
+		Scout_Hub_Inbox::render();
 	}
 
 	private static function features(): void {

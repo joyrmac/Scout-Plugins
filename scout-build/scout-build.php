@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Build
  * Plugin URI:        https://scoutraleigh.com
- * Description:       The Scout menu on every site: an Overview that says whether the site is all right and what needs you, an Inbox with everything waiting on a person, Site health, and for operators the Build screens: features, every update in one place, and the Site log.
+ * Description:       The Scout menu on every site: Home with the Today list, an Inbox with everything waiting on a person, Site health, and for operators Scout tools: features, every update in one place, and the Site log.
  * Version:           0.12.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
@@ -48,6 +48,7 @@ require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-robots.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-setup.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-admin.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-today.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-inbox.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-mail.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-dashboard.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-themes.php';
@@ -60,6 +61,7 @@ Scout_Hub_Features::boot();
 Scout_Hub_Requests::boot();
 Scout_Hub_Admin::boot();
 Scout_Hub_Today::boot();
+Scout_Hub_Inbox::boot();
 Scout_Hub_Health::boot();
 Scout_Hub_Robots::boot();
 Scout_Hub_Setup::boot();
@@ -72,3 +74,4 @@ Scout_Hub_Log::boot();
 Scout_Hub_Log_API::boot();
 
 register_deactivation_hook( __FILE__, array( 'Scout_Hub_Watch', 'unschedule' ) );
+register_deactivation_hook( __FILE__, array( 'Scout_Hub_Inbox', 'unschedule' ) );

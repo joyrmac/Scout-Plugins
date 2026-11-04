@@ -197,6 +197,16 @@ Every Scout screen follows the same order, so nobody has to relearn a page.
 
 ---
 
+## The Inbox
+
+`Scout_Hub_Inbox` lists every item waiting on a person, newest first, with
+filter chips by kind (chat, reviews, requests, bookings, site checks, other).
+A plugin adds items with the `scout_hub_inbox_items` filter: `id`, `kind`,
+`label`, `from`, `preview`, `when` (timestamp), `url` and `waiting`. Count rows
+from `scout_hub_inbox` still drive Home and the sidebar bubble, and any row
+without its own items shows as one item. Each person picks Inbox emails:
+never (the default), once a day, or for every new item.
+
 ## White-label and partner sites
 
 When `SCOUT_HUB_BRAND` is false, the menu says Site Build, Scout tools says
@@ -243,7 +253,7 @@ Each works on its own branch; merge one, then rebase the other.
 
 1. The new menu (Scout Build 0.12.0, admin kit 1.8.0). Built; waiting on Joy to merge.
 2. Home: the Today list (a `scout_hub_today` filter), all caught up, the first-week setup list. Built in Scout Build 0.12.0.
-3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting.
+3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting. Built in Scout Build 0.12.0.
 4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and the More features dropdown.
 5. Plus sections: the Plus tag and each module's own overview screen.
 6. Team and My profile screens.
