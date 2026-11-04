@@ -3,6 +3,7 @@
 ## 0.1.16 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
+- **Two screens, each in its own group (Joy, 2026-11-04).** The accessibility statement and the footer link stay at `scout-accessibility`, under Policies. The weekly checks and the at-launch checklist move to their own screen, `scout-accessibility-checks`, under Site health, and carry the "to fix" count. Each screen links to the other with a "Looking for" line. A failing Statement check links to the statement screen.
 
 ## 0.1.15 (2026-11-04)
 
