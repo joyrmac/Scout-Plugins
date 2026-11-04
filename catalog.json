@@ -92,7 +92,7 @@
     {
       "slug": "scout-law",
       "name": "Law firm tools",
-      "summary": "The firm's disclaimer lines set once and shown in the footer, under forms, next to case results and under reviews, with the firm's approval of the exact wording kept as its advertising record.",
+      "summary": "The firm's disclaimer lines set once and shown where they belong, approval before publishing kept as the firm's advertising record, \"Reviewed by\" stamps on a review schedule, and form entries that delete themselves after 90 days.",
       "tier": "build",
       "law": true,
       "requires": []

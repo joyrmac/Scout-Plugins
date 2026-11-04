@@ -82,6 +82,20 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 - Filter `scout_law_review_types`; action `scout_law_page_reviewed`. Every
   review is kept in `scout_law_review_log`.
 
-## Coming next
+## Form entries that delete themselves (0.4.0)
 
-Form entries that delete themselves after 90 days on law-firm sites (Joy, 2026-11-04).
+- Each night, Gravity Forms entries older than 90 days are deleted from the
+  website with their uploaded files, in every status (active, spam and trash).
+  **Scout → Policies → Form entries** shows what happens to each form. More
+  options sets 30, 60, 90, 180 or 365 days, turns deleting off, or keeps every
+  entry from chosen forms.
+- The first delete waits 14 days after the plugin first runs on a site. Home's
+  Today list shows the start date until then.
+- Always kept: starred entries, forms that email no one (the entry is the only
+  copy), and forms with their own Gravity Forms retention setting.
+- At most 500 entries per form per night. The deletion record keeps the date
+  and the count only.
+- Only the website's copy goes. Emails already sent, and the firm's case and
+  intake records, are untouched.
+- `scout_law_entry_days()` returns the days kept (0 when off), for the privacy
+  policy page.

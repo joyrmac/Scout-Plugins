@@ -89,6 +89,8 @@ jobs:
         run: php tools/tests/law-approvals.php
       - name: Law firm "Reviewed by" due dates (no WordPress needed)
         run: php tools/tests/law-reviews.php
+      - name: Law firm form entries that delete themselves (no WordPress needed)
+        run: php tools/tests/law-entries.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)

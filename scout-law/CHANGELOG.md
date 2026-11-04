@@ -1,5 +1,14 @@
 # Scout Law Firm Tools changelog
 
+## 0.4.0 (2026-11-04)
+
+- **Form entries delete themselves (Scout → Policies → Form entries).** Each night, Gravity Forms entries older than 90 days are deleted from the website, with any files uploaded with them, in every status (active, spam and trash). The firm can pick 30, 60, 90, 180 or 365 days, turn deleting off, or keep every entry from chosen forms. On by default on law-firm sites (Joy, 2026-11-04).
+- **Nothing goes the night the update lands.** The first delete waits 14 days after the plugin first runs on a site. Until then the screen and Home's Today list say the start date, so anyone who needs an old entry can save it or star it.
+- **What is always kept:** starred entries, every entry from a form that emails no one (its entry is the only copy), and forms with their own Gravity Forms retention setting, which Gravity Forms handles.
+- A night deletes at most 500 entries per form, so a large backlog spreads over a few nights. Each night that deletes something adds a line to the deletion record: the date and the count, never names.
+- `scout_law_entry_days()` returns the days entries are kept, or 0 when deleting is off, for the privacy policy page to read.
+- Fix: uninstalling now removes the "Reviewed by" settings too. The review record stays, like the approval record.
+
 ## 0.3.0 (2026-11-04)
 
 - **"Reviewed by" stamps.** An attorney on the firm's Team (a Team profile with "Attorney" ticked) signs a page as reviewed, from the page's Reviewed by panel in the block editor, the classic editor box, or Scout → Policies → Page reviews. The page then shows "Reviewed by <attorney>, <role>. Last reviewed <date>." under its words, linked to the attorney's profile, and its schema gains `reviewedBy` (the attorney's Person node from Scout Team) and `lastReviewed`. The name and the date are always saved together. Reviewing a page does not change its words, so it needs no new approval.
