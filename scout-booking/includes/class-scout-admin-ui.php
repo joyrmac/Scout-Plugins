@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.8.1';
+		const VERSION = '1.9.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -64,61 +64,303 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		}
 
 		/**
-		 * Open a screen: eyebrow, title, Scout mark, short description.
+		 * Open a screen the way the dashboard canvas draws it (Joy, 2026-11-04):
+		 * one white bar (breadcrumb, Find anything, one button), then the
+		 * section's screens on the left when it has more than one, then the
+		 * title and one line under it. The WordPress sidebar is the only menu.
 		 *
-		 * @param string $title   Screen name, e.g. "AI search".
+		 * @param string $title   Screen name, e.g. "AI search". Ends the breadcrumb, and is the h1 unless page_head() set a headline.
 		 * @param string $lede    One or two sentences on what the screen is for.
-		 * @param string $section Eyebrow after the brand, defaults to the title.
+		 * @param string $section Kept for older callers; the breadcrumb now names the section.
 		 * @param string $nav     Sidebar slug to highlight, for a screen not in the sidebar itself.
 		 */
 		public static function open( string $title, string $lede = '', string $section = '', string $nav = '' ): void {
-			$brand = self::branded() ? 'Scout' : 'Site Build';
+			unset( $section );
+			$d = self::nav_data( $nav );
 			echo '<div class="wrap sh">';
-			echo '<header class="sh-head"><div>';
-			echo '<p class="sh-eyebrow">' . esc_html( $brand . ' · ' . ( '' !== $section ? $section : $title ) ) . '</p>';
-			echo '<h1>' . esc_html( $title ) . '</h1>';
-			echo '</div>';
-			self::lockup();
-			echo '</header>';
-			if ( ! self::$nav_printed ) {
-				self::nav( $nav );
+			self::bar( $d, $title );
+			self::$nav_printed = true;
+			$local = ! self::$no_local && ( count( $d['entries'] ) > 1 || self::looking( $d ) );
+			echo '<div class="sh-page' . ( '' !== self::$headline ? ' is-home' : '' ) . '">';
+			echo '<div class="sh-body' . ( $local ? ' has-local' : '' ) . '">';
+			if ( $local ) {
+				self::local( $d, false );
 			}
+			echo '<div class="sh-main">';
+			echo '<div class="sh-pagehead">';
+			if ( '' !== self::$eyebrow ) {
+				echo '<p class="sh-eyebrow">' . esc_html( self::$eyebrow ) . '</p>';
+			}
+			echo '<h1>' . esc_html( '' !== self::$headline ? self::$headline : $title ) . '</h1>';
 			if ( '' !== $lede ) {
 				echo '<p class="sh-lede">' . esc_html( $lede ) . '</p>';
 			}
-			// Preview on a phone (Joy, 2026-11-04): the live site in a phone-sized window, from any Scout screen.
-			$home = esc_url( home_url( '/' ) );
-			echo '<p class="sh-note sh-phone-preview" style="margin:4px 0 0"><a href="' . $home . '" target="scout-phone" rel="noopener" onclick="window.open(this.href,\'scout-phone\',\'width=390,height=844\');return false;">Preview the site on a phone</a></p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $home is escaped above.
+			echo '</div>';
 			// WordPress prints admin notices right after the first heading in .wrap.
 			echo '<hr class="wp-header-end" style="display:none">';
 		}
 
 		/**
-		 * The client's logo beside the Scout mark, top right of every screen,
-		 * so it is plain whose site this is. Logo order: the scout_admin_client_logo
-		 * filter, the theme's custom logo, the Site Icon; with none, the site name.
+		 * A sentence headline instead of the screen name, with a small line above it.
+		 * Home uses it: "Two things need you today." Call before open().
 		 */
-		private static function lockup(): void {
-			$name = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
-			$logo = (string) apply_filters( 'scout_admin_client_logo', '' );
-			if ( '' === $logo ) {
-				$id   = (int) get_theme_mod( 'custom_logo' );
-				$logo = $id ? (string) wp_get_attachment_image_url( $id, 'medium' ) : '';
+		public static function page_head( string $headline, string $eyebrow = '' ): void {
+			self::$headline = $headline;
+			self::$eyebrow  = $eyebrow;
+		}
+
+		/** The one button on the right of the bar. Call before open(). Default: View site. */
+		public static function bar_action( string $label, string $url ): void {
+			self::$action = array( $label, $url );
+		}
+
+		/** Leave out the section's screen list on this screen (Home and the Inbox). Call before open(). */
+		public static function no_local(): void {
+			self::$no_local = true;
+		}
+
+		/**
+		 * Plus sections sit right under the Scout menu, in a fixed order (Joy,
+		 * 2026-11-04), whatever position each plugin asked for.
+		 */
+		public static function plus_order(): void {
+			global $menu;
+			$plus  = (array) apply_filters( 'scout_admin_plus_menus', self::PLUS_MENUS );
+			$scout = null;
+			$found = array();
+			foreach ( (array) $menu as $pos => $m ) {
+				$slug = (string) ( $m[2] ?? '' );
+				if ( null === $scout && in_array( $slug, self::MENUS, true ) ) {
+					$scout = (string) $pos;
+				}
+				$i = array_search( $slug, $plus, true );
+				if ( false !== $i ) {
+					$found[ $i ] = $m;
+					unset( $menu[ $pos ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- moved below.
+				}
 			}
-			if ( '' === $logo && function_exists( 'get_site_icon_url' ) ) {
-				$logo = (string) get_site_icon_url( 128 );
+			if ( null === $scout || ! $found ) {
+				foreach ( $found as $m ) {
+					$menu[] = $m; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back as they were.
+				}
+				return;
 			}
-			echo '<div class="sh-lockup">';
-			echo '<a class="sh-client" href="' . esc_url( home_url( '/' ) ) . '" target="_blank" rel="noopener" title="' . esc_attr( $name ) . '">';
-			if ( '' !== $logo ) {
-				echo '<img src="' . esc_url( $logo ) . '" alt="' . esc_attr( $name ) . '">';
+			ksort( $found );
+			$n = 1;
+			foreach ( $found as $m ) {
+				do {
+					$key = $scout . ( false === strpos( $scout, '.' ) ? '.' : '' ) . str_pad( (string) $n, 2, '0', STR_PAD_LEFT );
+					++$n;
+				} while ( isset( $menu[ $key ] ) );
+				$menu[ $key ] = $m; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering only.
 			}
-			echo '<span class="sh-client-name">' . esc_html( $name ) . '</span></a>';
-			if ( self::branded() ) {
-				echo '<span class="sh-lockup-x" aria-hidden="true"></span>';
-				echo '<p class="sh-brand"><span class="sh-bolt" aria-hidden="true"></span>Scout</p>';
+		}
+
+		/** @var string A sentence headline set by page_head(). */
+		private static $headline = '';
+
+		/** @var string The small line above the headline. */
+		private static $eyebrow = '';
+
+		/** @var array{0?:string,1?:string} The bar's button: label, url. */
+		private static $action = array();
+
+		/** @var bool Leave out the section's screen list. */
+		private static $no_local = false;
+
+		/** @var bool Find anything already printed on this screen. */
+		private static $finder_printed = false;
+
+		/** The white bar: breadcrumb, Find anything, one button. */
+		private static function bar( array $d, string $title ): void {
+			$brand = self::branded() ? 'Scout' : 'Site Build';
+			$crumb = array( $brand );
+			if ( '' !== $d['section'] && strtolower( $d['section'] ) !== strtolower( $title ) ) {
+				$crumb[] = $d['section'];
 			}
-			echo '</div>';
+			echo '<header class="sh-bar">';
+			echo '<p class="sh-crumb">';
+			foreach ( $crumb as $c ) {
+				echo esc_html( $c ) . ' <span aria-hidden="true">&rsaquo;</span> ';
+			}
+			echo '<strong>' . esc_html( $title ) . '</strong></p>';
+			if ( $d['finder'] ) {
+				echo '<button type="button" class="sh-find" data-sh-find aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span>' . esc_html__( 'Find anything', 'scout-build' ) . '</span><kbd data-sh-keys>Ctrl K</kbd></button>';
+			}
+			$action = self::$action;
+			if ( ! $action ) {
+				// Request a change on every screen (Joy, 2026-11-04); its status shows in the Inbox.
+				foreach ( $d['all'] as $entries ) {
+					foreach ( $entries as $e ) {
+						if ( false !== strpos( $e['url'], 'tab=requests' ) && empty( $e['on'] ) ) {
+							$action = array( __( 'Request a change', 'scout-build' ), $e['url'] );
+						}
+					}
+				}
+			}
+			if ( $action ) {
+				echo '<a class="button" href="' . esc_url( $action[1] ) . '">' . esc_html( $action[0] ) . '</a>';
+			}
+			echo '</header>';
+			if ( $d['finder'] ) {
+				self::finder( $d );
+			}
+		}
+
+		/**
+		 * The section's screens: a list on the left of a Scout screen, or a row of
+		 * links on top of a plain WordPress screen (a post list) we cannot wrap.
+		 */
+		private static function local( array $d, bool $row ): void {
+			echo '<nav class="sh-local' . ( $row ? ' is-row' : '' ) . '" aria-label="' . esc_attr( $d['section'] ) . '">';
+			if ( ! $row ) {
+				echo '<p class="sh-eyebrow">' . esc_html( $d['section'] ) . '</p>';
+			}
+			foreach ( $d['entries'] as $e ) {
+				printf(
+					'<a href="%1$s"%2$s>%3$s%4$s</a>',
+					esc_url( $e['url'] ),
+					( $e['on'] ? ' aria-current="page"' : '' ) . ( ! empty( $e['off'] ) ? ' class="is-off"' : '' ),
+					esc_html( $e['label'] ),
+					'' !== $e['hint'] ? '<span class="sh-nav-hint">' . esc_html( $e['hint'] ) . '</span>' : ''
+				);
+			}
+			foreach ( self::looking( $d ) as $line ) {
+				echo '<p class="sh-looking">' . esc_html( $line[0] ) . ' <a href="' . esc_url( $line[2] ) . '">' . esc_html( $line[1] ) . ' &rsaquo;</a></p>';
+			}
+			echo '</nav>';
+		}
+
+		/**
+		 * "Looking for" links (Joy, 2026-11-04): a screen lives in exactly one group.
+		 * Where it also fits another, that group's list ends with one quiet line that
+		 * opens it in its home group. At most two per group. Each entry: the target's
+		 * slug (a piece of it), the line, and whether only Scout sees it. A Plus
+		 * section is named by its top-level menu slug.
+		 */
+		const LOOKING = array(
+			'build'    => array( array( 'scout-chat', "Looking for chat settings? They're in", false ), array( 'site-build-robots', "Looking for robots.txt? It's in", false ) ),
+			'policies' => array( array( 'scout-analytics', "Looking for the cookie notice? It's in", false ), array( 'scout-accessibility-checks', "Looking for the accessibility checks? They're in", false ) ),
+			'health'   => array( array( 'scout-accessibility', "Looking for the accessibility statement? It's in", false ), array( 'tab=updates', 'Scout:', true ) ),
+			'website'  => array( array( '@scout-writing', 'Looking for the Writing room? It has', false ) ),
+			'business' => array( array( '@scout-rvpark', 'Looking for the RV park? It has', false ) ),
+		);
+
+		/** The "Looking for" lines this screen's group shows: line, link text, url. */
+		private static function looking( array $d ): array {
+			global $menu;
+			$out = array();
+			foreach ( (array) apply_filters( 'scout_admin_looking_for', self::LOOKING[ $d['key'] ?? '' ] ?? array(), $d['key'] ?? '' ) as $l ) {
+				if ( count( $out ) >= 2 ) {
+					break;
+				}
+				list( $want, $line, $scout_only ) = array_pad( (array) $l, 3, false );
+				if ( $scout_only && ! self::is_operator() ) {
+					continue;
+				}
+				if ( 0 === strpos( (string) $want, '@' ) ) {
+					foreach ( (array) $menu as $m ) {
+						if ( (string) ( $m[2] ?? '' ) === substr( (string) $want, 1 ) && current_user_can( (string) ( $m[1] ?? 'manage_options' ) ) ) {
+							$out[] = array( (string) $line, __( 'its own section', 'scout-build' ), admin_url( 'admin.php?page=' . $m[2] ) );
+						}
+					}
+					continue;
+				}
+				foreach ( $d['all'] as $group => $entries ) {
+					foreach ( $entries as $e ) {
+						$slug = (string) wp_parse_url( $e['url'], PHP_URL_QUERY );
+						if ( ! empty( $e['off'] ) || false === strpos( $slug, (string) $want ) || $group === $d['section'] ) {
+							continue;
+						}
+						if ( 'tab=updates' === $want ) {
+							if ( '' !== $e['hint'] ) {
+								$out[] = array( (string) $line, __( 'Updates waiting', 'scout-build' ), $e['url'] );
+							}
+						} else {
+							$out[] = array( (string) $line, (string) $group, $e['url'] );
+						}
+						continue 3;
+					}
+				}
+			}
+			return $out;
+		}
+
+		/**
+		 * Find anything (Ctrl or Cmd + K): every Scout screen this person can open,
+		 * plus things to do now (the scout_admin_finder_items filter: label, url, note).
+		 */
+		private static function finder( array $d ): void {
+			if ( self::$finder_printed ) {
+				return;
+			}
+			self::$finder_printed = true;
+			$go = array();
+			foreach ( $d['all'] as $group => $entries ) {
+				foreach ( $entries as $e ) {
+					if ( ! empty( $e['off'] ) ) {
+						continue;
+					}
+					$go[] = array( 'label' => $e['label'], 'note' => $group, 'url' => $e['url'] );
+				}
+			}
+			$do = array();
+			foreach ( (array) apply_filters( 'scout_admin_finder_items', array() ) as $item ) {
+				if ( is_array( $item ) && ! empty( $item['label'] ) && ! empty( $item['url'] ) ) {
+					$do[] = array( 'label' => (string) $item['label'], 'note' => (string) ( $item['note'] ?? '' ), 'url' => (string) $item['url'] );
+				}
+			}
+			$data = wp_json_encode( array( 'go' => $go, 'do' => $do, 'goLabel' => __( 'Go to', 'scout-build' ), 'doLabel' => __( 'Do it now', 'scout-build' ), 'none' => __( 'Nothing matches. Try another word.', 'scout-build' ) ) );
+			?>
+			<div class="sh-finder" data-sh-finder hidden>
+				<div class="sh-finder-scrim" data-sh-close></div>
+				<div class="sh-finder-box" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Find anything', 'scout-build' ); ?>">
+					<div class="sh-finder-search">
+						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+						<label for="sh-finder-q" class="screen-reader-text"><?php esc_html_e( 'Find a setting, page or task', 'scout-build' ); ?></label>
+						<input id="sh-finder-q" type="search" autocomplete="off" placeholder="<?php esc_attr_e( 'Find a setting, page or task', 'scout-build' ); ?>">
+						<kbd>Esc</kbd>
+					</div>
+					<div class="sh-finder-list" data-sh-list role="listbox" aria-label="<?php esc_attr_e( 'Results', 'scout-build' ); ?>"></div>
+				</div>
+			</div>
+			<script>
+			(function () {
+				var D = <?php echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode. ?>;
+				var root = document.querySelector('[data-sh-finder]'); if (!root) { return; }
+				var q = root.querySelector('input'), list = root.querySelector('[data-sh-list]'), last = null, pick = 0;
+				var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+				document.querySelectorAll('[data-sh-keys]').forEach(function (k) { k.textContent = mac ? '⌘ K' : 'Ctrl K'; });
+				function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+				function draw() {
+					var w = q.value.trim().toLowerCase(), html = '', n = 0;
+					[['do', D.doLabel], ['go', D.goLabel]].forEach(function (g) {
+						var rows = D[g[0]].filter(function (r) { return !w || (r.label + ' ' + r.note).toLowerCase().indexOf(w) !== -1; }).slice(0, 8);
+						if (!rows.length) { return; }
+						html += '<p class="sh-finder-head">' + esc(g[1]) + '</p>';
+						rows.forEach(function (r) { html += '<a role="option" href="' + esc(r.url) + '" data-i="' + (n++) + '"><span>' + esc(r.label) + '</span>' + (r.note ? '<em>' + esc(r.note) + '</em>' : '') + '</a>'; });
+					});
+					list.innerHTML = html || '<p class="sh-finder-none">' + esc(D.none) + '</p>';
+					pick = 0; mark();
+				}
+				function mark() { list.querySelectorAll('a').forEach(function (a, i) { a.setAttribute('aria-selected', i === pick ? 'true' : 'false'); }); }
+				function open() { last = document.activeElement; root.hidden = false; q.value = ''; draw(); q.focus(); }
+				function close() { root.hidden = true; if (last) { last.focus(); } }
+				document.querySelectorAll('[data-sh-find]').forEach(function (b) { b.addEventListener('click', open); });
+				root.addEventListener('click', function (e) { if (e.target.hasAttribute('data-sh-close')) { close(); } });
+				q.addEventListener('input', draw);
+				document.addEventListener('keydown', function (e) {
+					if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); e.stopPropagation(); root.hidden ? open() : close(); return; }
+					if (root.hidden) { return; }
+					var a = list.querySelectorAll('a');
+					if (e.key === 'Escape') { e.preventDefault(); close(); }
+					else if (e.key === 'ArrowDown') { e.preventDefault(); pick = Math.min(pick + 1, a.length - 1); mark(); }
+					else if (e.key === 'ArrowUp') { e.preventDefault(); pick = Math.max(pick - 1, 0); mark(); }
+					else if (e.key === 'Enter' && a[pick] && document.activeElement === q) { e.preventDefault(); window.location = a[pick].href; }
+				}, true);
+			}());
+			</script>
+			<?php
 		}
 
 		/**
@@ -319,6 +561,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					$item[3] = $item[3] ?? self::$labels[ $slug ];
 					if ( $lead[ $group ] === $i ) {
 						$item[0] = esc_html( self::label( $group ) ) . ( $bubble[ $group ] ?? '' );
+						if ( 'build' === $group ) {
+							$item[4] = trim( ( $item[4] ?? '' ) . ' sh-menu-team' ); // "Scout team" label above it (operators only see it).
+						}
 						if ( self::is_off( $slug ) ) {
 							$item[4] = trim( ( $item[4] ?? '' ) . ' sh-menu-off' ); // Nothing on in this group yet: greyed, opens Turn on.
 						}
@@ -351,7 +596,13 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/** Hide the grouped screens' sidebar links. */
 		public static function menu_css(): void {
 			if ( self::$leaders ) {
-				echo '<style>#adminmenu .sh-menu-hidden{display:none}#adminmenu .sh-menu-off a{opacity:.55}</style>';
+				$team = self::branded() ? 'Scout team' : 'Web team';
+				$menus = implode( ',', array_map( static fn( $m ) => '#adminmenu #toplevel_page_' . $m, self::MENUS ) );
+				echo '<style>#adminmenu .sh-menu-hidden{display:none}#adminmenu .sh-menu-off a{opacity:.55}'
+					. '#adminmenu li.sh-menu-team{margin-top:8px;padding-top:6px;border-top:1px solid #3c434a}'
+					. '#adminmenu li.sh-menu-team::before{content:"' . esc_attr( $team ) . '";display:block;padding:4px 12px 2px;font:500 11px/1.4 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:1.2px;text-transform:uppercase;color:#a7aaad}'
+					. str_replace( ',', ' .awaiting-mod,', $menus ) . ' .awaiting-mod,' . str_replace( ',', ' .update-plugins,', $menus ) . ' .update-plugins{background:#FBB024;color:#1D1D1F;font-weight:600}'
+					. '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed CSS, $team escaped.
 			}
 			if ( self::$plus ) {
 				echo '<style>#adminmenu .sh-plus-tag{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;background:rgba(123,108,240,.28);color:#D9D4FF;font-size:10px;font-weight:600;letter-spacing:.6px;line-height:16px;vertical-align:1px;white-space:nowrap}</style>';
@@ -431,19 +682,21 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			$hub  = in_array( $page, array( 'site-build-features', 'site-build' ), true );
 			if ( $hub && ! preg_match( '/tab=/', $s ) ) {
 				$group = 'overview'; // Home, the hub's first screen.
-			} elseif ( $hub && preg_match( '/tab=(features|updates|log)\b/', $s ) ) {
+			} elseif ( $hub && preg_match( '/tab=(features|updates)\b/', $s ) ) {
 				$group = 'build';
+			} elseif ( $hub && preg_match( '/tab=log\b/', $s ) ) {
+				$group = self::is_operator() ? 'build' : 'overview'; // The client's "What's new on your site" sits under Home (Joy, 2026-11-04).
 			} elseif ( $hub && preg_match( '/tab=(inbox|requests)\b/', $s ) ) {
 				$group = 'inbox';
 			} elseif ( $hub && false !== strpos( $s, 'tab=health' ) ) {
 				$group = 'health';
 			} elseif ( 'search health' === $l ) {
 				$group = 'health';
-			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || preg_match( '/^(scout-mail|scout-chat)$/', $page ) || false !== strpos( $l, 'theme' ) ) {
+			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || 'scout-mail' === $page || false !== strpos( $l, 'theme' ) ) {
 				$group = 'build'; // Operator tools: Email, Chat settings, Site Sync, the Change log, a theme's own screen.
-			} elseif ( preg_match( '/scout-reviews-(inbox|ask)|post_type=scout_chat_q|post_type=scout_hub_request|post_type=scout_sitecheck/', $s ) || preg_match( '/^(review inbox|ask for reviews|chat questions|request a change|inbox|site checks)$/', $l ) ) {
+			} elseif ( preg_match( '/scout-reviews-inbox|post_type=scout_chat_q|post_type=scout_hub_request|post_type=scout_sitecheck/', $s ) || preg_match( '/^(review inbox|chat questions|request a change|inbox|site checks)$/', $l ) ) {
 				$group = 'inbox';
-			} elseif ( preg_match( '/tab=protect\b/', $s ) || preg_match( '/scout-optimize/', $page ) ) {
+			} elseif ( preg_match( '/tab=protect\b/', $s ) || preg_match( '/scout-optimize|scout-accessibility-checks/', $page ) ) {
 				$group = 'health'; // Spam protection and the image optimizer report on whether things are working.
 			} elseif ( preg_match( '/scout-(accessibility|policies|disclaimers|privacy)/', $page ) ) {
 				$group = 'policies';
@@ -451,8 +704,8 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'search';
 			} elseif ( preg_match( '/scout-recon/', $page ) || 'reports' === $l ) {
 				$group = 'reports';
-			} elseif ( preg_match( '/scout-(contact|redirects|cards|newsletter|sitecheck|reviews-settings)|post_type=scout_review\b/', $s ) || false !== strpos( $page, 'writing' ) ) {
-				$group = 'website'; // Call buttons, Redirects, Cards & Links, Newsletter, Site check settings, Reviews.
+			} elseif ( preg_match( '/scout-(contact|redirects|cards|newsletter|sitecheck|reviews-settings|reviews-ask|chat)\b|post_type=scout_review\b/', $s ) ) {
+				$group = 'website'; // Call buttons, Redirects, Cards & Links, Newsletter, Site check settings, Reviews, Ask for reviews, Chat.
 			} else {
 				$group = 'business'; // Business info, Hours, Team, Case results, a companion's own types, and each Plus section's own screens.
 			}
@@ -462,13 +715,17 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		}
 
 		/**
-		 * The section nav: every screen in this screen's sidebar menu, sorted into a
-		 * short row of groups (Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health, Scout tools). The open
-		 * group's screens show as tabs underneath. Empty groups never show.
+		 * Where this screen sits: its section's name and screens, every group's
+		 * screens (for Find anything), and the Scout menu it belongs to. A Scout
+		 * menu is sorted into the groups (Home, Inbox, Your business...); any other
+		 * menu, like a Plus section, is one section of its own.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
+		 * @return array{section:string,entries:array,all:array,finder:bool}
 		 */
-		public static function nav( string $current = '' ): void {
+		public static function nav_data( string $current = '' ): array {
+			global $menu;
+			$none = array( 'section' => '', 'key' => '', 'entries' => array(), 'all' => array(), 'finder' => false );
 			global $submenu;
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- reading the screen address only.
 			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
@@ -490,9 +747,16 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 					static fn( $item ) => current_user_can( (string) ( $item[1] ?? 'manage_options' ) )
 				)
 			);
-			if ( count( $items ) < 2 ) {
-				return;
+			if ( ! $items ) {
+				return $none;
 			}
+			$title = '';
+			foreach ( (array) $menu as $m ) {
+				if ( (string) ( $m[2] ?? '' ) === $parent ) {
+					$title = self::clean( preg_replace( '#<span class="sh-plus-tag">.*?</span>#', '', (string) $m[0] ) );
+				}
+			}
+			$scout = in_array( $parent, self::MENUS, true );
 			// The entry that matches the address best: same page and tab, else the page's plain entry.
 			$active = '';
 			$target = '' !== $current ? $current : $page . ( '' !== $tab ? '&tab=' . $tab : '' );
@@ -557,49 +821,64 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			if ( '' === $open ) {
 				$open = (string) array_key_first( $groups );
 			}
-			$link = static function ( array $entry, string $text, bool $on, string $hint ): void {
-				$class = trim( ( $on ? 'is-active' : '' ) . ( ! empty( $entry['off'] ) ? ' is-off' : '' ) );
-				printf(
-					'<a href="%1$s"%2$s>%3$s%4$s</a>',
-					esc_url( $entry['url'] ),
-					( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ( $on ? ' aria-current="page"' : '' ),
-					esc_html( $text ),
-					'' !== $hint ? '<span class="sh-nav-hint">' . esc_html( $hint ) . '</span>' : ''
-				);
-			};
+			$all = array();
+			foreach ( $groups as $key => $entries ) {
+				$all[ self::label( $key ) ] = $entries;
+			}
+			if ( ! $scout ) {
+				// A Plus section or another plugin's own menu: one section, every screen in sidebar order.
+				$flat = array();
+				foreach ( $groups as $entries ) {
+					$flat = array_merge( $flat, $entries );
+				}
+				return array( 'section' => '' !== $title ? $title : self::label( $open ), 'key' => '', 'entries' => $flat, 'all' => array( ( '' !== $title ? $title : self::label( $open ) ) => $flat ), 'finder' => true );
+			}
+			return array( 'section' => self::label( $open ), 'key' => $open, 'entries' => $groups[ $open ] ?? array(), 'all' => $all, 'finder' => true );
+		}
+
+		/**
+		 * The bar and the section's screens on a plain WordPress screen (a review
+		 * list, Chat questions), so no screen is a dead end. Scout's own screens get
+		 * both from open().
+		 *
+		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
+		 */
+		public static function nav( string $current = '' ): void {
+			$d = self::nav_data( $current );
+			if ( ! $d['entries'] ) {
+				return;
+			}
 			self::$nav_printed = true;
-			echo '<nav class="sh-nav" aria-label="' . esc_attr( self::branded() ? 'Scout' : 'Site Build' ) . '">';
-			if ( count( $groups ) > 1 ) {
-				echo '<div class="sh-nav-groups">';
-				foreach ( $groups as $key => $entries ) {
-					// A one-screen group links straight to it and carries its hint.
-					$solo = 1 === count( $entries );
-					$link( $entries[0], self::label( $key ), $key === $open, $solo ? $entries[0]['hint'] : '' );
-				}
-				echo '</div>';
+			$on = '';
+			foreach ( $d['entries'] as $e ) {
+				$on = $e['on'] ? $e['label'] : $on;
 			}
-			if ( count( $groups[ $open ] ?? array() ) > 1 || 1 === count( $groups ) ) {
-				echo '<div class="sh-nav-sub">';
-				foreach ( $groups[ $open ] as $entry ) {
-					$link( $entry, $entry['label'], $entry['on'], $entry['hint'] );
-				}
-				echo '</div>';
+			self::bar( $d, '' !== $on ? $on : $d['section'] );
+			if ( count( $d['entries'] ) > 1 || self::looking( $d ) ) {
+				self::local( $d, true );
 			}
-			echo '</nav>';
 		}
 
 		/** Close a screen with the Scout sign-off. */
 		public static function close(): void {
+			// Preview on a phone (Joy, 2026-11-04): the live site in a phone-sized window.
+			$home = esc_url( home_url( '/' ) );
+			echo '<p class="sh-note sh-phone-preview"><a href="' . $home . '" target="scout-phone" rel="noopener" onclick="window.open(this.href,\'scout-phone\',\'width=390,height=844\');return false;">' . esc_html__( 'Preview the site on a phone', 'scout-build' ) . '</a></p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $home is escaped above.
 			if ( self::branded() ) {
 				echo '<footer class="sh-foot"><span class="sh-bolt" aria-hidden="true"></span><p>Built and looked after by Scout Media &amp; Consulting. <a href="mailto:team@scoutraleigh.com">team@scoutraleigh.com</a> · <a href="tel:+19843259661">(984) 325-9661</a></p></footer>';
 			}
-			echo '</div>';
+			echo '</div></div></div></div>'; // .sh-main, .sh-body, .sh-page, .wrap
+			self::$headline = '';
+			self::$eyebrow  = '';
+			self::$action   = array();
+			self::$no_local = false;
 		}
 	}
 
 	// After every plugin and the hub's own ordering (999) have built the menu.
 	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'compact_menu' ), 1000 );
 	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'plus_tags' ), 1001 );
+	add_action( 'admin_menu', array( 'Scout_Admin_UI', 'plus_order' ), 1002 );
 	add_filter( 'admin_body_class', array( 'Scout_Admin_UI', 'body_class' ) );
 	add_action( 'show_user_profile', array( 'Scout_Admin_UI', 'profile_fields' ) );
 	add_action( 'personal_options_update', array( 'Scout_Admin_UI', 'save_profile' ) );

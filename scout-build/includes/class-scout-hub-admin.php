@@ -349,6 +349,19 @@ final class Scout_Hub_Admin {
 		}
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
 		$site = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
+		// The canvas layout (Joy, 2026-11-04): Home leads with a sentence, Home and the
+		// Inbox have no section list, and the Inbox bar carries Request a change.
+		if ( in_array( $tab, array( 'overview', 'inbox' ), true ) && method_exists( 'Scout_Admin_UI', 'no_local' ) ) {
+			Scout_Admin_UI::no_local();
+			if ( 'overview' === $tab ) {
+				$head = self::home_head();
+				Scout_Admin_UI::page_head( $head[0], $head[1] );
+				$lede = $head[2];
+			} else {
+				Scout_Admin_UI::bar_action( __( 'Request a change', 'scout-build' ), self::url( 'requests' ) );
+				$lede = __( 'Chat questions, reviews, bookings and your change requests all land here. Handle one, mark it done, and it moves out of the way.', 'scout-build' );
+			}
+		}
 		Scout_Admin_UI::open( $tabs[ $tab ], $lede, $site );
 		?>
 			<?php self::notice(); ?>
@@ -371,6 +384,41 @@ final class Scout_Hub_Admin {
 			?>
 		<?php
 		Scout_Admin_UI::close();
+	}
+
+	/**
+	 * Home's headline: a sentence that answers "what needs me?" (dashboard canvas,
+	 * Joy 2026-11-04), the small line above it, and the line under it.
+	 *
+	 * @return array{0:string,1:string,2:string} Headline, eyebrow, lede.
+	 */
+	public static function home_head(): array {
+		$n     = count( Scout_Hub_Today::for_user( get_current_user_id() )['items'] );
+		$words = array( '', __( 'One thing', 'scout-build' ), __( 'Two things', 'scout-build' ), __( 'Three things', 'scout-build' ), __( 'Four things', 'scout-build' ), __( 'Five things', 'scout-build' ), __( 'Six things', 'scout-build' ), __( 'Seven things', 'scout-build' ), __( 'Eight things', 'scout-build' ), __( 'Nine things', 'scout-build' ) );
+		/* translators: %d: how many things */
+		$count = $words[ $n ] ?? sprintf( __( '%d things', 'scout-build' ), $n );
+		if ( Scout_Hub_Access::is_operator() ) {
+			$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+			$site = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
+			$head = $n
+				/* translators: %s: "Three things" */
+				? sprintf( 1 === $n ? __( '%s on this site is waiting.', 'scout-build' ) : __( '%s on this site are waiting.', 'scout-build' ), $count )
+				: __( 'Nothing on this site is waiting.', 'scout-build' );
+			return array( $head, $site . ( '' !== $host ? ' · ' . $host : '' ), __( 'The client sees their own list. Scout tools stay in the sidebar for you and Sean.', 'scout-build' ) );
+		}
+		$hour  = (int) current_time( 'G' );
+		$hello = $hour < 12 ? __( 'Good morning.', 'scout-build' ) : ( $hour < 17 ? __( 'Good afternoon.', 'scout-build' ) : __( 'Good evening.', 'scout-build' ) );
+		$date  = wp_date( 'l, F j' );
+		$steps = Scout_Hub_Today::show_setup() ? array_filter( Scout_Hub_Today::setup_steps(), static fn( $s ) => empty( $s['done'] ) ) : array();
+		if ( $steps ) {
+			return array( __( "Welcome. Let's finish setting up your site.", 'scout-build' ), $date, __( 'A few short steps, in order. You can stop anytime and pick up where you left off.', 'scout-build' ) );
+		}
+		if ( ! $n ) {
+			return array( $hello . ' ' . __( "You're all caught up.", 'scout-build' ), $date, __( 'Your site is running on its own today. Enjoy the quiet.', 'scout-build' ) );
+		}
+		/* translators: 1: "Good morning.", 2: "Two things" */
+		$head = sprintf( 1 === $n ? __( '%1$s %2$s needs you today.', 'scout-build' ) : __( '%1$s %2$s need you today.', 'scout-build' ), $hello, $count );
+		return array( $head, $date, __( 'Everything else is running on its own. Each one takes a few minutes, and you can stop after any of them.', 'scout-build' ) );
 	}
 
 	/**

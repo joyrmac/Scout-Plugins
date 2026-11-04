@@ -27,17 +27,49 @@ person came to do, and the menu stays the same on every site.
 | `inbox` | Inbox | everyone | Anything a person sent, or anything waiting on a person: chat questions, new reviews, change requests and their status, site check requests, booking requests | Did someone send this, or is it waiting on someone? |
 | `reports` | Reports | owner, operator | Recon's numbers and reports (shows only when Recon is on) | Is this Recon data? |
 | `business` | Your business | everyone | Facts typed once that show up everywhere: Business info, Hours, Team, Case results, a companion plugin's own content types | Is this a fact about the business? |
-| `website` | Your website | owner, operator | What visitors see and use: Call buttons, Chat, Reviews on the site, Cards and links, Newsletter, Redirects | Is this something visitors see or use? |
+| `website` | Your website | owner, operator | What visitors see and use: Call buttons, Chat and its settings, Reviews on the site, Ask for reviews, Cards and links, Newsletter, Redirects | Is this something visitors see or use? |
 | `search` | Get found | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, site search and the sitemap | Does this help Google, AI tools or visitors find things? |
 | `policies` | Policies | owner, operator | Trust and legal pages reviewed every year: accessibility statement, law-firm disclaimers (Scout Law Firm Tools), and later the privacy policy and terms | Is this a trust or legal page? |
 | `health` | Site health | owner, operator | Reports on whether things are working: the health report, Search health, Spam protection, the image optimizer, accessibility checks | Does this tell us if something is working? |
-| `build` | Scout tools (Build tools on white-label sites) | operators only | Features and plan, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen | Is this only for Sean and Joy? |
+| `build` | Scout tools (Build tools on white-label sites) | operators only | Features and plan, Updates, Site log, Email, Site Sync, the Change log, a theme's own screen. The client's own "What's new on your site" view of the Site log sits under Home. | Is this only for Sean and Joy? |
 
 Plus modules are not in this menu. Each one is its own sidebar section (see
 "Plus sections" below).
 
 Keys stay stable even when labels change, so filters keep working. The retired
 key `content` maps to `website`.
+
+### Placements Joy decided (2026-11-04)
+
+Page: https://claude.ai/artifact/Wa5es7egHrE7fTSRvHK8DH. Every recommended option:
+
+1. Chat (settings and the assistant) lives in Your website.
+2. Ask for reviews lives in Your website, beside Reviews. It is not an Inbox tab.
+3. robots.txt lives in Get found.
+4. The cookie notice lives in Get found, with Analytics.
+5. Accessibility is split: the statement under Policies, the weekly checks under
+   Site health (`scout-accessibility-checks` files there once the plugin gives
+   the checks their own screen).
+6. Updates is in Scout tools only.
+7. People lives in Your business, for owners and Scout only.
+8. Plus sections sit right under the Scout menu, whatever position each plugin
+   asks for (the kit reorders them; `scout_admin_plus_menus` sets the order).
+9. More features stays at the bottom of Home.
+10. Empty groups are hidden for clients and greyed for Scout.
+11. The Writing room and the RV park live only in their own Plus sections.
+12. Dark mode waits.
+
+**One home, plus "Looking for" links.** A screen lives in exactly one group.
+Where it also fits another group, that group's screen list ends with one quiet
+line that opens it in its home group ("Looking for the cookie notice? It's in
+Get found ›"). At most two per group, set in `Scout_Admin_UI::LOOKING`
+(filter `scout_admin_looking_for`). The breadcrumb always shows the home path.
+Today's links: Scout tools to Chat settings and robots.txt; Policies to the
+cookie notice and the accessibility checks; Site health to the accessibility
+statement and "Updates waiting" (Scout only); Your website and Your business to
+the Writing room and RV park sections. The Inbox ends with "Ask for more
+reviews". Request a change is the header button on every screen, with its
+status in the Inbox.
 
 ---
 
@@ -168,6 +200,12 @@ How it looks (colors, type, spacing, components, contrast) is in
 Use `var(--sh-…)` tokens; never type a hex into plugin CSS.
 
 Every Scout screen follows the same order, so nobody has to relearn a page.
+The WordPress sidebar is the only menu: there are no tab rows across the top.
+`open()` draws the frame from the approved canvas (admin kit 1.9.0): one white
+bar (breadcrumb, Find anything with Ctrl or Cmd + K, one button), the section's
+screens on the left, then the title. Home leads with a sentence headline, then
+Today. The Inbox is two panes: the list, and the open message with Send reply,
+Mark done and Remind me tomorrow.
 
 1. `Scout_Admin_UI::open( $title, $lede )`: the title, then one plain sentence
    on what this screen is for. Add a link to a one-minute guide when there is one.
