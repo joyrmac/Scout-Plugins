@@ -91,6 +91,8 @@ jobs:
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)
         run: php tools/tests/inbox.php
+      - name: Plans, picks and recommendations (no WordPress needed)
+        run: php tools/tests/plans.php
 
   slop-check:
     name: Code slop check

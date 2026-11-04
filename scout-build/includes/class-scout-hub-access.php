@@ -19,14 +19,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Hub_Access {
 
-	const PLAN_OPTION = 'scout_hub_plan';
+	const PLAN_OPTION      = 'scout_hub_plan';
+	const PICKS_OPTION     = 'scout_hub_plan_picks';   // Features added to this site's plan one at a time.
+	const RECOMMEND_OPTION = 'scout_hub_recommended';  // Features Scout recommends for this site.
 
-	/** Plans in order, so a feature included in a lower plan is in every higher one. */
+	/** The plans an operator can set (Joy, 2026-11-04: Friends and family is internal, never shown in pricing). */
 	const PLANS = array(
 		'build'       => 'The Build',
 		'partnership' => 'The Partnership',
 		'whole'       => 'The Whole System',
+		'ff'          => 'Friends and family',
 	);
+
+	/** The paid plans in order, so a feature included in a lower plan is in every higher one. */
+	const ORDER = array( 'build', 'partnership', 'whole' );
 
 	/** @return string[] Lower-case operator emails. */
 	public static function operators(): array {
@@ -66,32 +72,90 @@ final class Scout_Hub_Access {
 	}
 
 	/**
-	 * Is a feature with this tier part of the site's plan?
+	 * Features added to this site's plan one at a time: Plus modules on any plan,
+	 * and everything picked for a Friends and family site. The theme's setup file
+	 * "use" list counts as picks on a Friends and family site.
 	 *
-	 * @param string $tier build | partnership | whole | addon.
+	 * @return string[]
 	 */
-	public static function included( string $tier ): bool {
+	public static function picks(): array {
+		$picks = (array) get_option( self::PICKS_OPTION, array() );
+		if ( 'ff' === self::plan() && class_exists( 'Scout_Hub_Setup' ) && method_exists( 'Scout_Hub_Setup', 'feature_plan' ) ) {
+			$picks = array_merge( $picks, (array) ( Scout_Hub_Setup::feature_plan()['use'] ?? array() ) );
+		}
+		return array_values( array_unique( array_map( 'sanitize_key', $picks ) ) );
+	}
+
+	/** Add a feature to this site's plan, or take it out. */
+	public static function pick( string $slug, bool $on ): void {
+		$picks = array_map( 'sanitize_key', (array) get_option( self::PICKS_OPTION, array() ) );
+		$picks = $on ? array_merge( $picks, array( sanitize_key( $slug ) ) ) : array_diff( $picks, array( sanitize_key( $slug ) ) );
+		update_option( self::PICKS_OPTION, array_values( array_unique( $picks ) ), false );
+	}
+
+	/** Features Scout recommends for this site: the setup file's "use" list and the ones an operator marked. */
+	public static function recommended(): array {
+		$list = (array) get_option( self::RECOMMEND_OPTION, array() );
+		if ( class_exists( 'Scout_Hub_Setup' ) && method_exists( 'Scout_Hub_Setup', 'feature_plan' ) ) {
+			$list = array_merge( (array) ( Scout_Hub_Setup::feature_plan()['use'] ?? array() ), $list );
+		}
+		return array_values( array_unique( array_map( 'sanitize_key', $list ) ) );
+	}
+
+	/** Mark a feature recommended for this site, or not. */
+	public static function recommend( string $slug, bool $on ): void {
+		$list = array_map( 'sanitize_key', (array) get_option( self::RECOMMEND_OPTION, array() ) );
+		$list = $on ? array_merge( $list, array( sanitize_key( $slug ) ) ) : array_diff( $list, array( sanitize_key( $slug ) ) );
+		update_option( self::RECOMMEND_OPTION, array_values( array_unique( $list ) ), false );
+	}
+
+	/**
+	 * Is a feature part of the site's plan?
+	 *
+	 * Core (build) comes with every plan. Plan features (partnership, whole)
+	 * come with that plan and up. Bonus features come with The Whole System and
+	 * are added on us elsewhere when they fit. Plus modules are never bundled:
+	 * they are picked one at a time (Joy, 2026-11-04). The legacy addon tier
+	 * reads as bonus.
+	 *
+	 * @param string $tier build | partnership | whole | bonus | plus | addon.
+	 * @param string $slug The feature, so a pick counts.
+	 */
+	public static function included( string $tier, string $slug = '' ): bool {
+		if ( '' !== $slug && in_array( $slug, self::picks(), true ) ) {
+			return true;
+		}
 		$plan = self::plan();
 		if ( '' === $plan ) {
 			return false;
 		}
-		// The Whole System includes every add-on (Joy, 2026-10-13).
-		if ( 'addon' === $tier ) {
+		if ( 'ff' === $plan ) {
+			return 'build' === $tier;
+		}
+		if ( in_array( $tier, array( 'bonus', 'addon' ), true ) ) {
 			return 'whole' === $plan;
 		}
-		if ( ! isset( self::PLANS[ $tier ] ) ) {
-			return false;
+		if ( ! in_array( $tier, self::ORDER, true ) ) {
+			return false; // Plus, and anything unknown.
 		}
-		$order = array_keys( self::PLANS );
-		return array_search( $tier, $order, true ) <= array_search( $plan, $order, true );
+		return array_search( $tier, self::ORDER, true ) <= array_search( $plan, self::ORDER, true );
 	}
 
 	/** The label a feature card shows for its tier. */
-	public static function tier_label( string $tier ): string {
-		if ( self::included( $tier ) ) {
+	public static function tier_label( string $tier, string $slug = '' ): string {
+		if ( '' !== $slug && in_array( $slug, self::picks(), true ) ) {
+			return __( 'Picked for this site', 'scout-build' );
+		}
+		if ( self::included( $tier, $slug ) ) {
 			return __( 'Included in your plan', 'scout-build' );
 		}
-		if ( isset( self::PLANS[ $tier ] ) ) {
+		if ( in_array( $tier, array( 'bonus', 'addon' ), true ) ) {
+			return __( 'Bonus from Scout', 'scout-build' );
+		}
+		if ( 'plus' === $tier ) {
+			return __( 'Plus: added on its own', 'scout-build' );
+		}
+		if ( in_array( $tier, self::ORDER, true ) ) {
 			/* translators: %s: plan name */
 			return sprintf( __( 'Included with %s', 'scout-build' ), self::PLANS[ $tier ] );
 		}

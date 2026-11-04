@@ -89,9 +89,14 @@ people, like a staff list and an operator setting.
 | Kind | Icon | What it means | In the dashboard | Catalog tier |
 |---|---|---|---|---|
 | **Core** | Bolt (only on the Core heading, never on each row) | On every site, every plan, including Friends and family | No label. It's simply how the site works | `build` |
-| **Bonus** | Green diamond | Free extras we love, added when they fit the client | A small "Bonus from Scout" tag on its screen | `bonus` (planned; today `addon`) |
-| **Plus** | Purple plus sign | Paid modules we build, added one at a time | Its own sidebar section with a Plus tag | `plus` (planned; today `addon`) |
+| **Bonus** | Green diamond | Free extras we love, added when they fit the client | A small "Bonus from Scout" tag on its screen | `bonus` (`addon` still reads as Bonus) |
+| **Plus** | Purple plus sign | Paid modules we build, added one at a time | Its own sidebar section with a Plus tag | `plus` |
 | **Recon** | Amber bar chart | Its own product, for reporting and proof | A Reports item, plus the monthly numbers on Home | `whole` / `recon` (planned) |
+
+In code (`Scout_Hub_Access`, Scout Build 0.12.0): `included( $tier, $slug )`
+answers whether a feature is part of the site's plan, `picks()` holds features
+added to a site one at a time (and, on Friends and family, the theme setup
+file's "use" list), and `recommended()` feeds More features on Home.
 
 Plan features (Reviews and review requests, Newsletter) come with The
 Partnership and up. Friends and family is Core plus anything picked by hand.
@@ -254,7 +259,7 @@ Each works on its own branch; merge one, then rebase the other.
 1. The new menu (Scout Build 0.12.0, admin kit 1.8.0). Built; waiting on Joy to merge.
 2. Home: the Today list (a `scout_hub_today` filter), all caught up, the first-week setup list. Built in Scout Build 0.12.0.
 3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting. Built in Scout Build 0.12.0.
-4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and the More features dropdown.
+4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and More features on Home. Built in Scout Build 0.12.0.
 5. Plus sections: the Plus tag and each module's own overview screen.
 6. Team and My profile screens.
 7. Bonus: "Not today" on Today items, comfort settings (larger text, less motion, dark mode), "Preview on a phone," and the "What's new on your site" card.
