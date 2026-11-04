@@ -265,7 +265,12 @@ bylines, business cards, chat photos, "Reviewed by" stamps, case results and
 approvals all read from the `scout_team` profile. Nothing keeps its own copy.
 
 - A login is optional. One login links to one profile. A login is needed only to
-  approve pages or to edit My profile. Scout team logins never get a profile.
+  approve pages or to edit My profile.
+- Scout team logins never get a profile on client sites (not on Team, not as a
+  blog author, not in attorney lists). On Scout's own sites, scoutraleigh.com and
+  scoutrecon.app, Sean and Joy are the team and do get profiles. The theme's
+  `scout-setup.json` marks a Scout-owned site (for example `"scout_own_site": true`);
+  never key it off the domain, because staging addresses differ.
 - Business cards are a switch on each profile, off by default. Existing card
   people come over switched on. **Card links never change** (they are printed on
   paper and QR codes). Old copies stay one release as a backup.
@@ -294,9 +299,18 @@ Customer list).
 - The Customer list becomes the People screen: one record per email, everything
   that person did, and "export or delete this person everywhere."
 - The public site never shows that someone is a member, attended or booked.
-- Open (Joy to confirm): a shared email belongs to one person, and the second
-  person is a named guest on that record; only owners and Scout see the full
-  People screen.
+- **Purchases link the same way.** Event tickets, member dues and paid bookings
+  all use the site's WooCommerce checkout. An order whose email matches a login
+  goes on that login, even at guest checkout; never make a second account. The
+  People screen lists a person's orders. "Delete this person" removes the name
+  and email from orders but keeps the amount and date for the client's taxes.
+- **Shared accounts (Joy, 2026-11-04):** one account can hold a second person,
+  only with approval. Each person keeps their own name, ticket, check-in and
+  signed agreement. The owner approves each shared account, or the client sells
+  a couples plan (couples ticket, couples membership price) that makes one. The
+  second person can split off to their own email later and keep their history.
+- **The People screen:** owners and Scout only. Staff see only the lists for
+  their own work (today's bookings, the door list).
 
 ## Build queue (Joy, 2026-11-04)
 
@@ -323,7 +337,7 @@ Each works on its own branch; merge one, then rebase the other.
 
 1. Law firm tools: check approval before publishing (0.2.0) in a live block editor, then "Reviewed by" stamps with a six-month review list, then form entries that delete themselves (90 days by default).
 2. Search and sitemap: a visitor search box on every site, and a list of searches that found nothing.
-3. One profile per person and one email per person: see "People" above for the full plan and Joy's decisions. Order: practice areas and "Handled by" on case results; Cards read profiles (card links never change); Chat picks up to two profiles; the Team screen and My profile, as designed on the canvas; Former status; the responsible attorney in the advertising line; bookings, volunteers and the newsletter save the login; the People screen in the Customer list.
+3. One profile per person and one email per person: see "People" above for the full plan and Joy's decisions. Order: practice areas and "Handled by" on case results; Cards read profiles (card links never change); Chat picks up to two profiles; the Team screen and My profile, as designed on the canvas; Former status; the responsible attorney in the advertising line; bookings, volunteers and the newsletter save the login; the People screen in the Customer list, with orders; shared accounts and couples plans (first client: Bliss Boogie, couples tickets and a couples membership price, with its move to WordPress).
 4. Nightly form test in Site health.
 5. Policies pages: privacy policy and terms templates filled from business info. The client or firm approves each one.
 6. One screen for every client site, built on the Client Hub sheet.
