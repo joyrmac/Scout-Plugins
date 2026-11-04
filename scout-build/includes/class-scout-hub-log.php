@@ -625,7 +625,7 @@ final class Scout_Hub_Log {
 			'status'      => $meta( self::META_STATUS ) ?: 'done',
 			'version'     => $meta( self::META_VERSION ),
 			'measure'     => $meta( self::META_MEASURE ),
-			'source'      => $meta( self::META_SOURCE ),
+			'source'      => 'Claude' === $meta( self::META_SOURCE ) ? 'Scout' : $meta( self::META_SOURCE ), // Older notes read Claude; Scout's writing is Scout-branded (Joy, 2026-11-04).
 			'ref'         => $meta( self::META_REF ),
 		);
 		if ( $client ) {

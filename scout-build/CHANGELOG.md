@@ -21,6 +21,7 @@
 - **What's new on your site.** For clients, the card on Home is titled "What's new on your site" with this month's count of changes from the Site log. Operators still see "With Scout."
 - **Customer list stays visible inside Events** for site owners; it no longer files as a Scout-tools screen. RV park joins the Plus sections.
 - **Shared admin kit 1.8.0** files each screen into the new groups, with the test in `tools/tests/admin-kit-groups.php` updated to match.
+- **Scout-branded wording (Joy, 2026-11-04).** Site log notes added with the write key now say Scout as their source, and older notes that said Claude show as Scout. The Site health button reads "Copy the report", and the write key is labelled for Scout's tools.
 
 ## 0.11.1 (2026-11-04)
 

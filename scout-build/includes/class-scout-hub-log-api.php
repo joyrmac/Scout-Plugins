@@ -2,7 +2,7 @@
 /**
  * The read endpoint for the Scout Client Hub: the Site log, the open change
  * requests and the site's versions and health, for the Google Sheet that
- * pulls every Scout site nightly, and for Claude to log a note as work ships.
+ * pulls every Scout site nightly, and for Scout's tools to log a note as work ships.
  *
  * Two keys. Operators make them on Scout → Site log (Hub keys), where they
  * are shown once and stored encrypted, the way the theme key is; a client
@@ -288,7 +288,7 @@ final class Scout_Hub_Log_API {
 		}
 		$fields['kind']        = 'note';
 		$fields['show_client'] = array_key_exists( 'show_client', $in ) ? (bool) $in['show_client'] : true;
-		$fields['source']      = 'Claude'; // Only the write key gets here.
+		$fields['source']      = 'Scout'; // Only the write key gets here.
 		$id                    = Scout_Hub_Log::add( $fields );
 		if ( ! $id ) {
 			return new WP_Error( 'scout_hub_line', __( 'The line needs a title.', 'scout-build' ), array( 'status' => 400 ) );

@@ -1096,7 +1096,7 @@ final class Scout_Hub_Admin {
 		</style>
 		<div class="sh-health">
 		<div class="sh-copy">
-			<button type="button" class="button button-primary" id="sh-copy-report"><?php esc_html_e( 'Copy for Claude', 'scout-build' ); ?></button>
+			<button type="button" class="button button-primary" id="sh-copy-report"><?php esc_html_e( 'Copy the report', 'scout-build' ); ?></button>
 			<p class="sh-note" id="sh-copy-note"><?php esc_html_e( 'Copies every check on this page, plus each Scout plugin and its version, as plain text to paste into a chat.', 'scout-build' ); ?></p>
 			<textarea id="sh-copy-text" hidden readonly><?php echo esc_textarea( self::health_report( $basics, $search, $ai ) ); ?></textarea>
 		</div>
@@ -1462,7 +1462,7 @@ final class Scout_Hub_Admin {
 							<p class="sh-note" style="color:var(--sh-warn)"><strong><?php esc_html_e( 'Copy both into the password manager now. They are not shown again.', 'scout-build' ); ?></strong></p>
 							<p class="sh-note"><?php esc_html_e( 'Read key (for the Sheet):', 'scout-build' ); ?></p>
 							<p><code style="user-select:all;word-break:break-all"><?php echo esc_html( $fresh['read'] ); ?></code></p>
-							<p class="sh-note"><?php esc_html_e( 'Write key (for Claude):', 'scout-build' ); ?></p>
+							<p class="sh-note"><?php esc_html_e( 'Write key (for Scout\'s tools):', 'scout-build' ); ?></p>
 							<p><code style="user-select:all;word-break:break-all"><?php echo esc_html( $fresh['write'] ); ?></code></p>
 						<?php elseif ( 'config' === $source ) : ?>
 							<p class="sh-note"><?php esc_html_e( 'Set in wp-config.php. Those win over any keys made here.', 'scout-build' ); ?></p>
