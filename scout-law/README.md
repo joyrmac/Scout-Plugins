@@ -48,8 +48,23 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 | `scout_law_disclaimer_text` | The wording a line prints (an empty return falls back to the starting wording). |
 | `scout_law_disclaimer_approved` (action) | Runs when the firm's approval is recorded. |
 
+## Approval before publishing (0.2.0)
+
+- **Scout → Policies → Approvals** picks what needs approval. Blog posts and
+  team bios start on; Pages is off until the site is built, because it also
+  holds pages Scout publishes. Case results keep their own approval.
+- Publishing without an approval saves as **Pending review** (block editor,
+  classic editor, quick edit and code all go through the same check).
+- The **Firm approval** panel (block editor sidebar and pre-publish check) or
+  box (classic editor) takes the attorney's name and a tick. The name, date and
+  exact version (a revision) are kept in `scout_law_content_log`, which stays
+  when the plugin is deleted.
+- A live item edited after approval stays live and reads **Edited since
+  approval** until the firm approves again. Both queues add Inbox rows.
+- Filter `scout_law_approval_types` adjusts the list of post types. Action
+  `scout_law_content_approved` runs on each approval.
+
 ## Coming next
 
-In priority order: approval before publishing for practice pages, results and
-bios (with the same kind of record), "Reviewed by" stamps with a six-month
-review list on Home, and form entries that delete themselves after a set time.
+In priority order: "Reviewed by" stamps with a six-month review list on Home,
+then form entries that delete themselves after a set time.

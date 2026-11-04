@@ -219,6 +219,34 @@ often it refreshes.
 
 ---
 
+## Build queue (Joy, 2026-11-04)
+
+Two chats build this at once. **The dashboard chat** owns the admin kit
+(`tools/admin-kit/`), Scout Build's Home, Inbox, Features and plan screens,
+and the menu. **The features chat** owns the feature plugins and only files
+its screens with the `scout_admin_nav_group` filter, never by editing the kit.
+Each works on its own branch; merge one, then rebase the other.
+
+**Dashboard chat**
+
+1. The new menu (Scout Build 0.12.0, admin kit 1.8.0). Built; waiting on Joy to merge.
+2. Home: the Today list (a `scout_hub_today` filter), all caught up, the first-week setup list.
+3. Inbox: one list for chat, reviews, requests and bookings, with filters and the email-me setting.
+4. Plans: Friends and family, the Bonus and Plus catalog tiers, recommended features, and the More features dropdown.
+5. Plus sections: the Plus tag and each module's own overview screen.
+6. Team and My profile screens.
+7. Bonus: "Not today" on Today items, comfort settings (larger text, less motion, dark mode), "Preview on a phone," and the "What's new on your site" card.
+
+**Features chat**
+
+1. Law firm tools: check approval before publishing (0.2.0) in a live block editor, then "Reviewed by" stamps with a six-month review list, then form entries that delete themselves (default waits on Sean).
+2. Search and sitemap: a visitor search box on every site, and a list of searches that found nothing.
+3. One profile per person: Scout Cards, chat photos and "Reviewed by" stamps read from Team.
+4. Nightly form test in Site health.
+5. Policies pages: privacy policy and terms templates filled from business info (waits on Sean).
+6. One screen for every client site, built on the Client Hub sheet.
+7. Recon as a viewer plugin (waits on Sean).
+
 ## Open items for Sean and Joy
 
 - Which plans see the monthly numbers on Home?

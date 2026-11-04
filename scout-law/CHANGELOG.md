@@ -1,5 +1,14 @@
 # Scout Law Firm Tools changelog
 
+## 0.2.0 (2026-11-04)
+
+- **Approval before publishing (Scout → Policies → Approvals).** Blog posts and team bios need the firm's approval before they go live, and the firm can add pages or other content. Publishing without an approval saves the item as Pending review, from the block editor, the classic editor, quick edit or code.
+- **Firm approval in the editor.** A Firm approval panel in the block editor's sidebar and in the pre-publish check, and a box in the classic editor: the attorney's name and "The firm approved this version." The name, the date and the exact saved version (a revision) go in the approval record.
+- **Edits after approval stay live.** A published item changed after its approval keeps showing, reads "Edited since approval" in its list column and on the Approvals screen, and adds a row to the Inbox until the firm records a new approval.
+- **Inbox rows:** Waiting for the firm's approval, and Edited since approval.
+- Not yet clicked through in a live block editor; check the publish flow on a staging site before merging.
+- Test: `php tools/tests/law-approvals.php` (10 checks, in the Lint workflow).
+
 ## 0.1.0 (2026-11-04)
 
 - **Disclaimers (Scout → Policies → Disclaimers).** The firm's required lines in one place: Not legal advice, Before someone sends a form, Attorney advertising, Prior results, and Reviews and testimonials. Starting wording for North Carolina, Virginia, Florida and Washington, DC, which the firm edits. A line always prints something: a blank box uses the starting wording.
