@@ -1,5 +1,5 @@
 <?php
-// Scout Core 1.7.0: breadcrumbs, verification codes, thank-you pages and hardening. Runs without WordPress:
+// Scout Core 1.8.0: breadcrumbs, verification codes, thank-you pages and hardening. Runs without WordPress:
 //   php tools/tests/core-seo-gaps.php
 $fail = 0;
 function ok( $cond, $msg ) { global $fail; echo ( $cond ? 'PASS ' : 'FAIL ' ) . $msg . "\n"; if ( ! $cond ) { $fail++; } }
@@ -101,5 +101,5 @@ ok( '' === $C::reason( array( 'type' => 'plugin', 'action' => 'update', 'plugins
 ok( 'plugin' === $C::reason( array( 'type' => 'plugin', 'action' => 'install' ), 'scout-law', 'x', 'x' ), 'uploading a Scout plugin zip purges' );
 ok( '' === $C::reason( array( 'type' => 'translation' ), '', 'x', 'x' ), 'a translation update does not purge' );
 
-echo $fail ? "\n$fail FAILED\n" : "\nAll Core 1.7.0 checks passed\n";
+echo $fail ? "\n$fail FAILED\n" : "\nAll Core 1.8.0 checks passed\n";
 exit( $fail ? 1 : 0 );

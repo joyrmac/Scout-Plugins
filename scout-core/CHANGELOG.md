@@ -1,6 +1,8 @@
 # Scout Core — Changelog
 
-## 1.7.0 (2026-11-04)
+## 1.8.0 (2026-11-04)
+
+Numbered 1.8.0 because the Change log branch (`claude/change-log`) already claims 1.7.0. Merge that one first, or renumber it above this.
 
 Five Site Standard gaps close in Core, so themes can drop their own copies.
 

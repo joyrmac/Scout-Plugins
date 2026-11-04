@@ -209,7 +209,7 @@ theme without DESIGN.md still gets sensible tokens.
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.
 
-## Breadcrumbs, verification, thank-you pages, hardening and cache purge (1.7.0+)
+## Breadcrumbs, verification, thank-you pages, hardening and cache purge (1.8.0+)
 
 - **Breadcrumbs:** a theme declares `add_theme_support( 'scout-breadcrumbs' )` and calls
   `scout_core_breadcrumbs()` where the links go. Core then adds the matching
