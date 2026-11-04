@@ -92,6 +92,12 @@ final class Scout_SEO_Sitemap {
 			),
 		);
 		$args['meta_query'] = $meta_query;
+		if ( 'page' === $post_type && class_exists( 'Scout_SEO_Head' ) ) {
+			$thanks = Scout_SEO_Head::thanks_pages();
+			if ( $thanks ) {
+				$args['post__not_in'] = array_merge( isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array(), $thanks );
+			}
+		}
 		return $args;
 	}
 }

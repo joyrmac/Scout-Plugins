@@ -209,6 +209,22 @@ theme without DESIGN.md still gets sensible tokens.
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.
 
+## Breadcrumbs, verification, thank-you pages and hardening (1.7.0+)
+
+- **Breadcrumbs:** a theme declares `add_theme_support( 'scout-breadcrumbs' )` and calls
+  `scout_core_breadcrumbs()` where the links go. Core then adds the matching
+  `BreadcrumbList` schema. Remove the theme's own breadcrumb schema in the same release.
+  Adjust the trail with `scout_core_breadcrumb_trail`, for example to put a page that acts
+  as an archive (Work, Services) before its items.
+- **Verification:** Get found → SEO, "Google Search Console verification code" and
+  "Bing Webmaster Tools verification code". The tags print on the front page only.
+- **Thank-you pages:** `noindex` and out of the sitemap. These are Gravity Forms
+  confirmation pages, plus the addresses thank-you and thanks. Add more with
+  `scout_core_thanks_pages`.
+- **Hardening:** switches under spam protection (`hide_users`, `xmlrpc_off`,
+  `browser_headers`). Filters: `scout_core_hide_users`, `scout_core_xmlrpc_needed`,
+  `scout_core_browser_headers`. Themes and companions stop doing this themselves.
+
 ## APIs other plugins depend on
 
 These are a contract. Renaming or removing one breaks the plugin that uses it on

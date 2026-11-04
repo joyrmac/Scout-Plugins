@@ -1,5 +1,20 @@
 # Scout Core — Changelog
 
+## 1.7.0 (2026-11-04)
+
+Four Site Standard gaps close in Core, so themes can drop their own copies.
+
+- **Breadcrumbs (gap 3).** One trail feeds both the `BreadcrumbList` schema and the visible links. The trail runs Home, then a page's parent pages, the blog page for a post, or a content type's archive. A theme turns it on with `add_theme_support( 'scout-breadcrumbs' )` and shows the links with `scout_core_breadcrumbs()`. It is off until a theme asks, because many themes still print their own and two would disagree (rule 20). It is skipped when something else already added a `BreadcrumbList`. Filter `scout_core_breadcrumb_trail`.
+- **Search engine verification (gap 1).** Scout → Get found → SEO has fields for the Google Search Console and Bing Webmaster Tools codes. Paste the code or the whole meta tag, and only the code is kept. The tags print on the front page. Google's HTML file name is refused, because it is a file check and not a code.
+- **Thank-you pages stay out of search.** Pages a visitor only reaches after sending a form get `noindex` and leave the sitemap. That covers Gravity Forms confirmations set to a page or to a redirect on this site, and pages at the address thank-you or thanks. The front page and the blog page are never hidden, even when a form sends people there. Filter `scout_core_thanks_pages`.
+- **Site hardening (gap 6), three new switches under spam protection, all on by default:**
+  - Visitors who are not signed in cannot list login names through `/wp/v2/users`.
+  - XML-RPC is off, unless Jetpack is installed.
+  - Every page sends `nosniff`, `SAMEORIGIN` framing and a referrer policy, plus HSTS on SSL, and the WordPress version is hidden. A header the host already sets is kept.
+  - This is the same code Bliss Boogie's companion and Maravela's theme run, so both can drop theirs. Until they do, the filters run twice with the same result.
+- Fix: saving the SEO screen kept only the fields it shows, which wiped `purge_on_uninstall`. Keys the screen doesn't show are now kept.
+- Tests: `tools/tests/core-seo-gaps.php` (23 checks).
+
 ## 1.6.6 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
