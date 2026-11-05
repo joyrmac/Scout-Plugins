@@ -168,8 +168,10 @@ final class Scout_Cards_Admin {
 	 * @param string $class  Extra row classes.
 	 * @param callable $fields Prints the panel's form table rows.
 	 * @param string $go     More buttons beside Edit, already escaped.
+	 * @param callable|null $more  Prints the form table rows of a closed fold under the panel's fields.
+	 * @param string        $title The fold's title.
 	 */
-	private static function person_row( $id, $photo, $name, $sub, $card, $button, $class, $fields, $go = '' ) {
+	private static function person_row( $id, $photo, $name, $sub, $card, $button, $class, $fields, $go = '', $more = null, $title = 'More' ) {
 		echo '<li class="sh-row scc-row' . ( $class ? ' ' . esc_attr( $class ) : '' ) . '">';
 		echo '<div class="scc-who">';
 		if ( $photo ) {
@@ -196,7 +198,13 @@ final class Scout_Cards_Admin {
 		echo '<div class="sh-row-go"><button type="button" class="button scc-edit" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '">' . esc_html( $button ) . '</button>' . $go . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $go is escaped by the caller.
 		echo '<div class="scc-panel" id="' . esc_attr( $id ) . '"><table class="form-table" role="presentation">';
 		call_user_func( $fields );
-		echo '</table></div></li>';
+		echo '</table>';
+		if ( $more ) {
+			echo '<details class="scc-fold"><summary>' . esc_html( $title ) . '</summary><table class="form-table" role="presentation">';
+			call_user_func( $more );
+			echo '</table></details>';
+		}
+		echo '</div></li>';
 	}
 
 	/** A QR code for a card, drawn in the browser when it opens. */
@@ -229,26 +237,117 @@ final class Scout_Cards_Admin {
 		$labels = array(
 			'phone' => 'Phone',
 			'email' => 'Email',
+			'intro' => 'Intro',
+			'tags'  => 'Tags',
 			'links' => 'Profile links',
 			'bio'   => 'Short bio',
-			'save'  => 'Save contact button',
+			'save'  => 'Save contact',
 		);
 		echo '<tr><th scope="row">Show on the card</th><td><fieldset><legend class="screen-reader-text">Show on the card</legend>';
 		foreach ( $labels as $k => $label ) {
 			echo '<label class="scc-show"><input type="hidden" name="' . esc_attr( "{$base}[show_{$k}]" ) . '" value="0"><input type="checkbox" name="' . esc_attr( "{$base}[show_{$k}]" ) . '" value="1"' . checked( ! empty( $show[ $k ] ), true, false ) . '> ' . esc_html( $label ) . '</label> ';
 		}
-		echo '<p class="description">From their People profile. A blank card phone or email uses the business one.</p></fieldset></td></tr>';
+		echo '<p class="description">Each comes from their People profile, and a blank card phone or email uses the business one.</p></fieldset></td></tr>';
+	}
+
+	/**
+	 * A main card value that comes from Business info: what it uses now, then a
+	 * closed "Use something else" fold with the override field (open when one is
+	 * saved). An empty override means "use Business info". Without Scout Core it
+	 * is a plain field, as before.
+	 *
+	 * @param string $name  Field name.
+	 * @param string $label Row label.
+	 * @param string $key   The settings key.
+	 * @param string $type  text, email or textarea.
+	 * @param array  $s     Settings (saved over the defaults).
+	 */
+	private static function from_business( $name, $label, $key, $type, array $s ) {
+		if ( ! self::has_core() ) {
+			self::field( $name, (string) $s[ $key ], $label, $type );
+			return;
+		}
+		$from = (string) Scout_Cards_Settings::defaults()[ $key ];
+		$own  = self::override( $key );
+		$id   = 'scc_' . md5( $name );
+		$src  = 'name' === $key && '' === Scout_Cards_Settings::business()['name'] ? 'From the site title: ' : 'From Business info: ';
+		echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td>';
+		echo '<p class="scc-from">' . ( '' !== $from ? esc_html( $src ) . '<strong>' . esc_html( $from ) . '</strong>' : 'Business info has none yet.' ) . '</p>';
+		echo '<details class="scc-else"' . ( '' !== $own ? ' open' : '' ) . '><summary>Use something else</summary>';
+		echo '<label class="screen-reader-text" for="' . esc_attr( $id ) . '">' . esc_html( $label ) . ' on the card</label>';
+		if ( 'textarea' === $type ) {
+			echo '<textarea class="large-text" rows="3" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '">' . esc_textarea( $own ) . '</textarea>';
+		} else {
+			echo '<input class="regular-text" type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $own ) . '">';
+		}
+		echo '<p class="description">Leave it empty to use Business info.</p></details></td></tr>';
+	}
+
+	/** Is Scout Core's Business info there to read? */
+	private static function has_core() {
+		return class_exists( 'Scout_Core_Business' ) || function_exists( 'scout_core_business' );
+	}
+
+	/**
+	 * A saved main card override, or '' when it is empty or the same as Business
+	 * info (an older save copied Business info in; it shows as "From Business info").
+	 *
+	 * @param string $key The settings key.
+	 */
+	private static function override( $key ) {
+		$raw = get_option( Scout_Cards_Settings::OPTION );
+		$own = is_array( $raw ) ? trim( (string) ( $raw[ $key ] ?? '' ) ) : '';
+		return trim( (string) Scout_Cards_Settings::defaults()[ $key ] ) === $own ? '' : $own;
+	}
+
+	/** The main card's logo or photo: what it uses now, then its pickers under "Use something else". */
+	private static function team_photo( $n, array $s ) {
+		if ( Scout_Cards_Settings::business()['logo'] ) {
+			$from = 'From Business info: the logo.';
+		} elseif ( get_site_icon_url( 256 ) ) {
+			$from = 'Uses the Site Icon.';
+		} else {
+			$from = 'Shows the first letter of the name.';
+		}
+		$own = (int) $s['photo_id'] || (int) $s['logo_id'];
+		echo '<tr><th scope="row">Logo or photo</th><td><p class="scc-from">' . esc_html( $from ) . '</p>';
+		echo '<details class="scc-else"' . ( $own ? ' open' : '' ) . '><summary>Use something else</summary><table class="form-table" role="presentation">';
+		self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'On the card', 'Empty uses the one above.' );
+		self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Links & share pages', 'Optional. A logo for the links page and share page.' );
+		echo '</table></details></td></tr>';
+	}
+
+	/**
+	 * The main card's fields when cards read from People. Name, email and logo come
+	 * from Business info, each with "Use something else". So does the intro when
+	 * Business info has a description; otherwise the intro is a card field.
+	 */
+	private static function team_fields( $n, array $s ) {
+		self::from_business( "{$n}[name]", 'Name', 'name', 'text', $s );
+		self::from_business( "{$n}[email]", 'Email', 'email', 'email', $s );
+		self::team_photo( $n, $s );
+		if ( self::has_core() && '' !== Scout_Cards_Settings::business()['description'] ) {
+			self::from_business( "{$n}[team_intro]", 'Intro', 'team_intro', 'textarea', $s );
+		} else {
+			self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
+		}
+	}
+
+	/** The main card's extras: the heading above the people and the Spotlight. */
+	private static function team_extras( $n, array $s ) {
+		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
+		self::spot_fields( $n, $s );
 	}
 
 	/**
 	 * The people box when cards read from People: the main card, then one row for
-	 * each person with Card on. Their name, title, photo and contact are edited in
-	 * People; this screen keeps each card's own settings.
+	 * each person with Card on. What a card says is edited in People (its Business
+	 * card box); here each card has its switches, link name and extras only.
 	 */
 	private static function people_box( $n, array $s, array $people ) {
 		echo '<section class="sh-box"><div class="scc-boxhead"><h2 class="sh-title">People with a card</h2>';
 		echo '<a class="button" href="' . esc_url( Scout_Cards_People::add_url() ) . '">Add a person</a></div>';
-		echo '<p>Anyone in People with Card on gets a card. Their name, title, photo, phone and email come from People.</p>';
+		echo '<p>Anyone in People with Card on gets a card, with the words and contact from their profile.</p>';
 		echo '<input type="hidden" name="' . esc_attr( $n ) . '[people_mode]" value="people">';
 		echo '<ul class="sh-rows">';
 		$team = $people['team'];
@@ -261,10 +360,13 @@ final class Scout_Cards_Admin {
 			'Edit',
 			'',
 			static function () use ( $n, $s ) {
-				self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
-				self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Logo for the links and share pages', 'Optional. When the card shows a person, the links page and share page can show the logo instead.' );
-				self::spot_fields( $n, $s );
-			}
+				self::team_fields( $n, $s );
+			},
+			'',
+			static function () use ( $n, $s ) {
+				self::team_extras( $n, $s );
+			},
+			'Extras'
 		);
 
 		// Saved card settings by link name, the same way people() reads them.
@@ -309,17 +411,16 @@ final class Scout_Cards_Admin {
 				$card,
 				'Card settings',
 				'',
-				static function () use ( $base, $s, $rec, $idx, $pid, $key, $card ) {
+				static function () use ( $base, $s, $idx, $pid, $key, $card ) {
 					echo '<tr hidden><td colspan="2"><input type="hidden" name="' . esc_attr( "{$base}[rec]" ) . '" value="' . esc_attr( $idx ) . '"><input type="hidden" name="' . esc_attr( "{$base}[profile_id]" ) . '" value="' . esc_attr( $pid ) . '"><input type="hidden" name="' . esc_attr( "{$base}[key]" ) . '" value="' . esc_attr( $key ) . '"></td></tr>';
 					self::field( "{$base}[slug]", $key, 'Link name', 'text', 'Lowercase, no spaces. "alex" makes /' . $s['card_base'] . '/alex/.' );
 					self::show_fields( $base, $card['show'] );
-					self::field( "{$base}[intro]", (string) ( $rec['intro'] ?? '' ), 'Intro (on their card, in their voice)', 'textarea' );
-					self::field( "{$base}[pick]", (string) ( $rec['pick'] ?? '' ), 'Why talk to them (on the main card)', 'textarea' );
-					self::field( "{$base}[tags]", (string) ( $rec['tags'] ?? '' ), 'Tags', 'text', 'Comma separated, two to four short topics.' );
+				},
+				self::edit_in_people( $pid ),
+				static function () use ( $base, $rec ) {
 					self::photo( "{$base}[share_id]", (int) ( $rec['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this card\'s link is texted or posted. 1200 by 630 pixels.' );
 					self::spot_fields( $base, $rec );
-				},
-				self::edit_in_people( $pid )
+				}
 			);
 			++$i;
 		}
@@ -467,7 +568,8 @@ final class Scout_Cards_Admin {
 		wp_nonce_field( 'scout_cards_save' );
 		echo '<input type="hidden" name="action" value="scout_cards_save">';
 
-		if ( Scout_Cards_People::reading() ) {
+		$reading = Scout_Cards_People::reading();
+		if ( $reading ) {
 			self::people_box( $n, $s, $people );
 		} else {
 			self::legacy_box( $n, $s, $people );
@@ -510,10 +612,12 @@ final class Scout_Cards_Admin {
 		self::photo( "{$n}[share_links_id]", (int) $s['share_links_id'], 'Share picture: links page', 'Shows when the links page is shared. Blank uses the card\'s.' );
 		echo '</table>';
 
-		echo '<h3 class="scc-sub">Main card words</h3><table class="form-table" role="presentation">';
-		self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
-		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
-		echo '</table>';
+		if ( ! $reading ) {
+			echo '<h3 class="scc-sub">Main card words</h3><table class="form-table" role="presentation">';
+			self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
+			self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
+			echo '</table>';
+		}
 
 		echo '<h3 class="scc-sub">Business details for the cards</h3>';
 		if ( class_exists( 'Scout_Core_Business' ) ) {
@@ -522,9 +626,13 @@ final class Scout_Cards_Admin {
 			echo '<p class="sh-note">Scout Core is not active, so the cards use only what you type here.</p>';
 		}
 		echo '<table class="form-table" role="presentation">';
-		self::field( "{$n}[name]", $s['name'], 'Business name' );
+		if ( ! $reading ) {
+			self::field( "{$n}[name]", $s['name'], 'Business name' );
+		}
 		self::field( "{$n}[phone]", $s['phone'], 'Phone', 'text', 'Used for Call, Text, and the saved contact.' );
-		self::field( "{$n}[email]", $s['email'], 'Main email', 'email' );
+		if ( ! $reading ) {
+			self::field( "{$n}[email]", $s['email'], 'Main email', 'email' );
+		}
 		self::field( "{$n}[city]", $s['city'], 'City' );
 		self::field( "{$n}[region]", $s['region'], 'State' );
 		self::field( "{$n}[postal]", $s['postal'], 'ZIP' );
@@ -575,7 +683,7 @@ final class Scout_Cards_Admin {
 		  }
 		  form.addEventListener('click',function(e){
 		    var edit=e.target.closest('.scc-edit');
-		    if(edit){toggle(edit,edit.getAttribute('aria-expanded')!=='true');if(edit.getAttribute('aria-expanded')==='true'){var f=document.getElementById(edit.getAttribute('aria-controls')).querySelector('input:not([type=hidden]),textarea');if(f){f.focus();}}return;}
+		    if(edit){toggle(edit,edit.getAttribute('aria-expanded')!=='true');if(edit.getAttribute('aria-expanded')==='true'){var all=document.getElementById(edit.getAttribute('aria-controls')).querySelectorAll('input:not([type=hidden]),textarea,summary,button');for(var k=0;k<all.length;k++){if(all[k].offsetParent!==null){all[k].focus();break;}}}return;}
 		    var more=e.target.closest('[data-scc-more]');
 		    if(more){
 		      var hidden=form.querySelector(more.getAttribute('data-scc-more')+'.scc-spare:not(.is-shown)');
@@ -660,15 +768,24 @@ final class Scout_Cards_Admin {
 			if ( '' === $slug ) {
 				$slug = sanitize_title( (string) ( $old['slug'] ?? ( $row['key'] ?? '' ) ) );
 			}
-			$new  = array_merge(
+			// The card's intro, why and tags live in People now. The record keeps its own
+			// copy for the fallback, changed only when a form sends them.
+			$words = array();
+			foreach ( array( 'intro', 'pick' ) as $k ) {
+				if ( isset( $row[ $k ] ) ) {
+					$words[ $k ] = sanitize_textarea_field( (string) $row[ $k ] );
+				}
+			}
+			if ( isset( $row['tags'] ) ) {
+				$words['tags'] = sanitize_text_field( (string) $row['tags'] );
+			}
+			$new = array_merge(
 				$old,
 				array(
 					'slug'     => $slug,
-					'intro'    => sanitize_textarea_field( (string) ( $row['intro'] ?? '' ) ),
-					'pick'     => sanitize_textarea_field( (string) ( $row['pick'] ?? '' ) ),
-					'tags'     => sanitize_text_field( (string) ( $row['tags'] ?? '' ) ),
 					'share_id' => absint( $row['share_id'] ?? 0 ),
 				),
+				$words,
 				self::clean_spot( $row ),
 				self::clean_show( $row )
 			);

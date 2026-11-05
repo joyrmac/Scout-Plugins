@@ -115,6 +115,8 @@ jobs:
         run: php tools/tests/security-baseline.php
       - name: Form emails sent, in Site status (no WordPress needed)
         run: php tools/tests/form-mail.php
+      - name: Update report on Scout tools, Updates (no WordPress needed)
+        run: php tools/tests/update-report.php
       - name: White-label layer for the admin, opt-in only (no WordPress needed)
         run: php tools/tests/brand.php
       - name: Monthly update to the client (no WordPress needed)
