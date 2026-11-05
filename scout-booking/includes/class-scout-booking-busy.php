@@ -71,7 +71,8 @@ final class Scout_Booking_Busy {
 
 	public static function boot(): void {
 		add_filter( 'cron_schedules', array( __CLASS__, 'schedules' ) );
-		add_action( 'init', array( __CLASS__, 'schedule' ) );
+		// Saving an address schedules the read; this only catches a plugin turned off and on again.
+		add_action( 'admin_init', array( __CLASS__, 'schedule' ) );
 		add_action( self::HOOK, array( __CLASS__, 'refresh' ) );
 		add_filter( 'site_status_tests', array( __CLASS__, 'site_tests' ) );
 	}
