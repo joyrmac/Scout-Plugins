@@ -258,6 +258,8 @@ $L::save_pending( 40, $sent, 77 );
 ok( $GLOBALS['meta'][40][ $T::META ] === $live_before, 'sending details never touches the live profile' );
 ok( 'Partner' === $T::profile( 40 )['role'] && 'Partner' === $T::public_profile( $T::profile( 40 ) )['role'], 'the profile page and the schema still read the live title' );
 ok( isset( $T::needs_look( 40 )['pending'] ) && 'Sent their details, waiting for your OK' === $T::needs_look( 40 )['pending'], 'the person needs a look: "Sent their details, waiting for your OK"' );
+$diff = $L::changes( 40 );
+ok( array( 'Partner', 'Managing Partner' ) === $diff['Title'] && array( 'Dana Lee', 'Dana Lee-Park' ) === $diff['Name'] && isset( $diff['Education'] ), 'the review table lists each field that would change, now and sent' );
 $todo = $L::inbox( array() );
 ok( 1 === count( $todo ) && 'people-details-40' === $todo[0]['id'] && 'Sent their details, waiting for your OK' === $todo[0]['label'], 'and there is one To do item for them' );
 ok( $L::approve( 40 ), 'approve runs' );

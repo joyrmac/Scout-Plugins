@@ -185,8 +185,10 @@ Photos always stay in the media library, and groups are never deleted.
 | What | Where it is kept | How long | Shared with |
 |---|---|---|---|
 | Which team member's profile a visitor views, and when they click a team member's profile, phone number or email link (the team member's name and the link clicked) (Only when the Scout Analytics plugin is installed and its tag is on the page.) | Not saved by this website. It is handed to the site's analytics tag in the visitor's browser. | Not kept by this plugin. How long Google keeps it depends on the site's Google account settings. | Google Analytics or Google Tag Manager, through the Scout Analytics plugin |
+| Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, and profile links (Only when the site owner sends someone a link and they fill it in.) | This website's database, on that person's profile, as changes waiting for the owner's OK. The photo goes in the media library. | Until the owner approves them (they become the public profile) or discards them (they and the photo are deleted). | Nobody |
+| How many times a link's form was sent, to stop abuse (Only when someone sends the link's form.) | This website's database, as a short-lived count tied to the link, not to a person | One hour | Nobody |
 
-Team profiles are written by site staff. The plugin has no form and saves nothing about visitors.
+Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

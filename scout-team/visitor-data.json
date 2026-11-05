@@ -7,8 +7,22 @@
       "kept": "Not kept by this plugin. How long Google keeps it depends on the site's Google account settings.",
       "shared": "Google Analytics or Google Tag Manager, through the Scout Analytics plugin",
       "when": "Only when the Scout Analytics plugin is installed and its tag is on the page."
+    },
+    {
+      "what": "Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, and profile links",
+      "where": "This website's database, on that person's profile, as changes waiting for the owner's OK. The photo goes in the media library.",
+      "kept": "Until the owner approves them (they become the public profile) or discards them (they and the photo are deleted).",
+      "shared": "",
+      "when": "Only when the site owner sends someone a link and they fill it in."
+    },
+    {
+      "what": "How many times a link's form was sent, to stop abuse",
+      "where": "This website's database, as a short-lived count tied to the link, not to a person",
+      "kept": "One hour",
+      "shared": "",
+      "when": "Only when someone sends the link's form."
     }
   ],
   "cookies": [],
-  "notes": "Team profiles are written by site staff. The plugin has no form and saves nothing about visitors."
+  "notes": "Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login."
 }
