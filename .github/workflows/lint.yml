@@ -121,6 +121,8 @@ jobs:
         run: php tools/tests/plans.php
       - name: People profiles (no WordPress needed)
         run: php tools/tests/people.php
+      - name: Business cards read from People (no WordPress needed)
+        run: php tools/tests/cards-people.php
       - name: Privacy export and erase tools (no WordPress needed)
         run: php tools/tests/privacy-tools.php
 

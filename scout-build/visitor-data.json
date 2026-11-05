@@ -31,5 +31,5 @@
     }
   ],
   "cookies": [],
-  "notes": "This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent. Site status counts whether form emails went out, keeping only the form, the notice's name, sent or failed, and the time, never who it went to or what it said."
+  "notes": "This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent. Site status counts whether form emails went out, keeping only which form and which email, sent or failed, and the time, never who it went to or what it said."
 }
