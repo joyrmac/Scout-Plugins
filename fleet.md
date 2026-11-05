@@ -20,7 +20,7 @@ installs; remaining TODOs need the WP Engine portal and account answers).
 | Hair by Patrick McGuire | **TODO** (live domain not launched; staging at hairbypatrick.wpenginepowered.com) | `hairbypatrick` (staging: indexing blocked in code) | **TODO** | **TODO** |
 | Maravela's Banquets & Catering | **TODO** | **TODO** | **TODO** | retained client |
 | North Crest RV Park | northcrestrvpark.com | `rlcnorthcrestr` (Prd) | **TODO** | **TODO** |
-| Avante Banquets | **TODO** (current site, built by Scout years ago; domain and host to confirm) | **TODO** | `Scout-Media-Raleigh/Avante` | **In kickoff, 2026-11-05.** New site for Andy John. Companion plugin `scout-avante` 0.1.0 drafted in the client repo. Nothing installed yet. |
+| Avanté Banquets & Conference Center | avantebanquets.com (WP Engine, WordPress + Elementor; cleanup on staging first) | **TODO** (install name) | `Scout-Media-Raleigh/Avante` | **Kickoff done 2026-11-05.** Andy-John Kalkounos; also Chicago Prime Steakhouse and Italian. Companion plugin `scout-avante` 0.1.0 drafted in the client repo. Nothing installed yet. |
 | Andy's Golf Car Garage | andysgolfcarts.com | `andysgolfcarts` (current site, per the staging domain on Yelp; account owner **TODO**) | `joyrmac/Andres-Borda---Golf-Carts` | The Build (favor). **In build, not deployed.** Companion plugin `scout-andysgolfcarts` 0.1.0 lives in the client repo. |
 
 ## Versions
