@@ -709,7 +709,7 @@ final class Scout_Sync {
 					$journal['state'] = 'failed';
 					self::save_journal( $journal );
 					self::summary( true );
-					return new WP_Error( 'write', 'Sync stopped at ' . self::label( $row ) . ', because it changed while syncing. Undo the last sync from the Site Sync screen, then review again.' );
+					return new WP_Error( 'write', 'Sync stopped at ' . self::label( $row ) . ', because it changed while syncing. Undo the last sync from the Page copy screen, then review again.' );
 				}
 				$bases[ $row['id'] ] = array( 't' => $row['t'], 'd' => $row['t'] );
 				++$written;

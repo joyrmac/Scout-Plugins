@@ -1,6 +1,6 @@
 <?php
 /**
- * The Partners hub: its own sidebar item with the Scout bolt. Overview (who is
+ * The Partners hub: its own sidebar item with the Scout bolt. Home (who is
  * running, by level, what ends soon, clicks this month and last), the partner
  * list, and settings for levels, placements and event pages. Each partner's
  * details sit in one box on its edit screen.
@@ -44,11 +44,11 @@ final class Scout_Partners_Admin {
 
 	public static function menu(): void {
 		$list = 'edit.php?post_type=' . Scout_Partners::TYPE;
-		add_menu_page( __( 'Scout Partners', 'scout-partners' ), __( 'Partners', 'scout-partners' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.3' );
-		add_submenu_page( self::SLUG, __( 'Scout Partners', 'scout-partners' ), __( 'Overview', 'scout-partners' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ) );
+		add_menu_page( __( 'Partners', 'scout-partners' ), __( 'Partners', 'scout-partners' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.3' );
+		add_submenu_page( self::SLUG, __( 'Partners', 'scout-partners' ), __( 'Home', 'scout-partners' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ) );
 		add_submenu_page( self::SLUG, __( 'All partners', 'scout-partners' ), __( 'All partners', 'scout-partners' ), self::CAP, $list );
 		add_submenu_page( self::SLUG, __( 'Add partner', 'scout-partners' ), __( 'Add partner', 'scout-partners' ), self::CAP, 'post-new.php?post_type=' . Scout_Partners::TYPE );
-		add_submenu_page( self::SLUG, __( 'Partner settings', 'scout-partners' ), __( 'Settings', 'scout-partners' ), 'manage_options', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
+		add_submenu_page( self::SLUG, __( 'Settings', 'scout-partners' ), __( 'Settings', 'scout-partners' ), 'manage_options', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
 	}
 
 	/** Partner list and edit screens light up the Partners menu. */
@@ -183,8 +183,12 @@ final class Scout_Partners_Admin {
 		if ( ! current_user_can( self::CAP ) ) {
 			return;
 		}
+		// The section's Home screen: the sidebar and the bar say Home, the heading says what it shows.
+		if ( method_exists( 'Scout_Admin_UI', 'page_head' ) ) {
+			Scout_Admin_UI::page_head( __( 'Your partners', 'scout-partners' ) );
+		}
 		Scout_Admin_UI::open(
-			__( 'Your partners', 'scout-partners' ),
+			__( 'Home', 'scout-partners' ),
 			__( 'Who is running, at what level and where, what ends soon, and how many people clicked through to each one.', 'scout-partners' ),
 			__( 'Partners', 'scout-partners' )
 		);
@@ -267,7 +271,7 @@ final class Scout_Partners_Admin {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p class="sh-note"><?php esc_html_e( 'A click is counted when someone follows a partner\'s logo or name to their website. Search engines and link checkers are left out. No visitor details are kept.', 'scout-partners' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Counts clicks on a partner\'s logo or name. Bots are left out, and no visitor details are kept.', 'scout-partners' ); ?></p>
 			</section>
 		<?php endif; ?>
 		<?php
@@ -281,7 +285,7 @@ final class Scout_Partners_Admin {
 			return;
 		}
 		$s = Scout_Partners::settings();
-		Scout_Admin_UI::open( __( 'Partner settings', 'scout-partners' ), __( 'Your levels and the places partners can appear.', 'scout-partners' ), __( 'Partners', 'scout-partners' ) );
+		Scout_Admin_UI::open( __( 'Settings', 'scout-partners' ), __( 'Your levels and the places partners can appear.', 'scout-partners' ), __( 'Partners', 'scout-partners' ) );
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'scout-partners' ) . '</p></div>';
 		}
@@ -294,7 +298,7 @@ final class Scout_Partners_Admin {
 				<textarea id="sp-levels" name="sp[levels]" rows="4" class="large-text code"><?php echo esc_textarea( $s['levels'] ); ?></textarea></p>
 				<p><label for="sp-places"><strong><?php esc_html_e( 'Places partners can appear, one per line', 'scout-partners' ); ?></strong></label><br>
 				<textarea id="sp-places" name="sp[placements]" rows="5" class="large-text code"><?php echo esc_textarea( $s['placements'] ); ?></textarea>
-				<span class="sh-note"><?php esc_html_e( 'Each one becomes a tick box on every partner. Show a place with [scout_partners placement="home-page"], using the name in lower case with dashes.', 'scout-partners' ); ?></span></p>
+				<span class="sh-note"><?php esc_html_e( 'Each becomes a tick box on every partner. Show one with [scout_partners placement="home-page"] (lower case, dashes).', 'scout-partners' ); ?></span></p>
 				<?php if ( class_exists( 'Scout_Events' ) ) : ?>
 					<p><label><input type="checkbox" name="sp[on_events]" value="1" <?php checked( $s['on_events'] ); ?>> <?php esc_html_e( 'Show partners on each event page (those placed on "Event pages", from the event\'s region and the national ones)', 'scout-partners' ); ?></label></p>
 				<?php endif; ?>

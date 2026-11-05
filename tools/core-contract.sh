@@ -25,7 +25,7 @@ done <<'CONTRACT'
 scout-core/includes/business.php | final class Scout_Core_Business | scout-cards (business identity: name, phone, email, city, region, postal, same_as)
 scout-core/includes/business.php | public static function get() | scout-cards (Scout_Core_Business::get())
 scout-core/includes/business.php | 'same_as' | scout-cards (social profile URLs)
-scout-core/includes/admin.php | 'manage_options', 'scout', | scout-cards (adds Cards & Links under the 'scout' menu slug)
+scout-core/includes/admin.php | 'manage_options', 'scout', | scout-cards (adds Cards and links under the 'scout' menu slug)
 scout-core/includes/seo/class-seo-head.php | final class Scout_SEO_Head | scout-cards (removes Scout Core head tags on card pages)
 scout-core/includes/seo/class-seo-head.php | add_action( 'wp_head', array( __CLASS__, 'output' ), 1 ) | scout-cards (remove_action must match this hook and priority)
 scout-core/includes/business.php | public static function get() | scout-contact (Scout_Core_Business::get() for the default phone number)

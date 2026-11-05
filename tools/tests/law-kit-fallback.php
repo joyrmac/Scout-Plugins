@@ -23,7 +23,7 @@ if ( isset( $argv[1] ) ) {
 $fail = 0;
 function ok( $cond, $msg ) { global $fail; echo ( $cond ? 'PASS ' : 'FAIL ' ) . $msg . "\n"; if ( ! $cond ) { $fail++; } }
 $run = function ( $v ) { return trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( __FILE__ ) . ' ' . escapeshellarg( $v ) ) ); };
-ok( 'policies,business policies,business policies,business' === $run( '1.8.0' ), 'with admin kit 1.8.0, Approvals, Page reviews and Form entries file under Policies' );
+ok( 'policies,business policies,business policies,business' === $run( '1.8.0' ), 'with admin kit 1.8.0, Firm approvals, Attorney sign-offs and Form entries file under Policies' );
 ok( 'policies,business policies,business policies,business' === $run( '1.9.2' ), 'a newer kit keeps them under Policies' );
 ok( 'search,business search,business search,business' === $run( '1.7.0' ), 'with an older kit loaded first, they file under Search, which that kit has' );
 echo $fail ? "\n$fail FAILED\n" : "\nAll kit fallback checks passed\n";

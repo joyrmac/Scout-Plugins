@@ -1,6 +1,6 @@
 <?php
 /**
- * Dashboard screen: Scout -> Cards & Links (inside Scout Core's menu), or a
+ * Dashboard screen: Scout -> Cards and links (inside Scout Core's menu), or a
  * top-level "Site Build" section on a site without Scout Core. Everything on the
  * card and links pages is edited here and saved to the `scout_cards_settings` option.
  *
@@ -50,9 +50,9 @@ final class Scout_Cards_Admin {
 		$own = 'site-build' === $parent && ! isset( $admin_page_hooks['site-build'] );
 		if ( $own ) {
 			add_menu_page( 'Site Build', 'Site Build', 'edit_pages', 'site-build', array( __CLASS__, 'render' ), 'dashicons-id-alt', 3 );
-			add_submenu_page( 'site-build', 'Cards & Links', 'Cards & Links', 'edit_pages', 'site-build', array( __CLASS__, 'render' ) );
+			add_submenu_page( 'site-build', 'Cards & links', 'Cards & links', 'edit_pages', 'site-build', array( __CLASS__, 'render' ) );
 		}
-		add_submenu_page( $parent, 'Cards & Links', 'Cards & Links', 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, 'Cards & links', 'Cards & links', 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
 		if ( $own ) {
 			remove_submenu_page( 'site-build', self::SLUG ); // the section's first item already opens this screen
 		}
@@ -204,7 +204,7 @@ final class Scout_Cards_Admin {
 		$count  = count( $people ) - 1; // 'team' is the main card, not a person.
 		$card   = Scout_Cards_Settings::card_url();
 		$links  = home_url( '/' . $s['links_base'] . '/' );
-		Scout_Admin_UI::open( 'Cards & Links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
+		Scout_Admin_UI::open( 'Cards & links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
 		}
@@ -217,7 +217,7 @@ final class Scout_Cards_Admin {
 			}
 		}
 		if ( ! class_exists( 'Scout_Core_Business' ) ) {
-			echo '<div class="notice notice-info"><p>Scout Core is not active, so fill in the business details under More options. With Scout Core, they come from its Business screen automatically.</p></div>';
+			echo '<div class="notice notice-info"><p>Scout Core is off, so fill in the business details under More options.</p></div>';
 		}
 
 		// Status line: where the cards live, how many people, and whether the links page is on.
@@ -225,19 +225,19 @@ final class Scout_Cards_Admin {
 		if ( $s['enable_cards'] ) {
 			self::status(
 				'good',
-				'Cards are live.',
+				'Live.',
 				'At /' . $s['card_base'] . '/ with ' . $who . '. The links page is ' . ( $s['enable_links'] ? 'on at /' . $s['links_base'] . '/.' : 'off.' ),
 				'<a class="button" href="' . esc_url( $card ) . '" target="_blank" rel="noopener">View card</a>'
 			);
 		} elseif ( $s['enable_links'] ) {
 			self::status(
 				'off',
-				'Business cards are off.',
+				'Cards off.',
 				'The links page is on at /' . $s['links_base'] . '/. Turn cards on under More options.',
 				'<a class="button" href="' . esc_url( $links ) . '" target="_blank" rel="noopener">View links</a>'
 			);
 		} else {
-			self::status( 'off', 'Cards and links are off.', 'Turn them on under More options.' );
+			self::status( 'off', 'Off.', 'Turn cards and links on under More options.' );
 		}
 
 		echo '<form method="post" class="scc-form" id="scc-form" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
@@ -247,7 +247,7 @@ final class Scout_Cards_Admin {
 		echo '<input type="hidden" name="action" value="scout_cards_save">';
 
 		// People: the main card, then one row per person.
-		echo '<section class="sh-box"><h2 class="sh-title">People</h2>';
+		echo '<section class="sh-box"><h2 class="sh-title">Card people</h2>';
 		echo '<p>Each person gets their own card and shows on the main card. Share mode opens a big QR code: open it on your phone and add it to your home screen (iPhone: Share, then Add to Home Screen), so it opens like an app.</p>';
 		echo '<ul class="sh-rows">';
 		$team = $people['team'];

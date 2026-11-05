@@ -13,7 +13,7 @@
  *   Scout_Admin_UI::close();
  *
  * open() also prints the section nav, read live from WordPress's own menu: a
- * short row of groups (Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health, Scout tools) with the open
+ * short row of groups (Home, To do, Reports, Business, People, Site features, Search, Legal pages, Site status, Scout tools) with the open
  * group's screens as tabs underneath. Every Scout screen shows the same nav,
  * and a new plugin lands in the right group without anyone editing a list
  * (scout_admin_nav_group moves a screen to another group).
@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.10.0';
+		const VERSION = '1.11.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -367,23 +367,40 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/**
 		 * The nav groups, in the order they show (dashboard redesign, Joy 2026-11-04).
 		 * Keys stay stable so filters keep working: overview is shown as Home, search
-		 * as Get found, build as Scout tools. Plus modules (Bookings, Events, Members,
+		 * as Search, build as Scout tools. Plus modules (Bookings, Events, Members,
 		 * Partners, Writing room) keep their own sidebar sections and are not listed here.
 		 */
 		const GROUPS = array(
 			'overview' => 'Home',
-			'inbox'    => 'Inbox',
+			'inbox'    => 'To do',
 			'reports'  => 'Reports',
-			'business' => 'Your business',
-			'website'  => 'Your website',
-			'search'   => 'Get found',
-			'policies' => 'Policies',
-			'health'   => 'Site health',
+			'business' => 'Business',
+			'people'   => 'People',
+			'website'  => 'Site features',
+			'search'   => 'Search',
+			'policies' => 'Legal pages',
+			'health'   => 'Site status',
 			'build'    => 'Scout tools',
 		);
 
 		/** Retired group keys, mapped to where their screens live now. */
 		const ALIASES = array( 'content' => 'website' );
+
+		/**
+		 * The menu a plugin screen nests under: the site's Scout menu, or Settings
+		 * when there is none. One copy for every plugin (kit 1.11.0). Plugins still
+		 * keep their own copy until every site runs kit 1.11.0 or later, because the
+		 * first kit copy loaded wins; call it through method_exists() until then.
+		 */
+		public static function parent(): string {
+			global $admin_page_hooks;
+			foreach ( array( 'scout-build', 'recon-build', 'site-build', 'scout' ) as $slug ) {
+				if ( isset( $admin_page_hooks[ $slug ] ) ) {
+					return $slug;
+				}
+			}
+			return 'options-general.php';
+		}
 
 		/** A group's label for this site: Scout tools reads Build tools on a white-label site. */
 		public static function label( string $key ): string {
@@ -401,7 +418,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/**
 		 * Groups this person does not see. Scout tools is for operators only.
 		 * Staff (anyone who cannot manage the site's settings) see Home, Inbox
-		 * and Your business, plus any Plus section they work in. The
+		 * and Business, plus any Plus section they work in. The
 		 * scout_admin_hidden_groups filter adjusts it.
 		 */
 		public static function hidden(): array {
@@ -513,7 +530,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/**
 		 * Shorten a long Scout sidebar menu to one link per group (Home, Inbox,
-		 * Reports, Your business, Your website, Get found, Policies, Site health,
+		 * Reports, Business, People, Site features, Search, Legal pages, Site status,
 		 * Scout tools). Every screen stays registered and
 		 * reachable; the others are hidden from the sidebar only, and the
 		 * section nav on each screen leads to them.
@@ -691,7 +708,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'inbox';
 			} elseif ( $hub && false !== strpos( $s, 'tab=health' ) ) {
 				$group = 'health';
-			} elseif ( 'search health' === $l ) {
+			} elseif ( in_array( $l, array( 'google checks', 'search health' ), true ) ) {
 				$group = 'health';
 			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || 'scout-mail' === $page || false !== strpos( $l, 'theme' ) ) {
 				$group = 'build'; // Operator tools: Email, Chat settings, Site Sync, the Change log, a theme's own screen.
@@ -705,10 +722,12 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'search';
 			} elseif ( preg_match( '/scout-recon/', $page ) || 'reports' === $l ) {
 				$group = 'reports';
+			} elseif ( preg_match( '/^scout-(team|people)\b|post_type=scout_team\b|taxonomy=scout_people_group\b/', $s ) ) {
+				$group = 'people'; // Everyone the public sees: team, speakers, writers, listed members (kit 1.11.0, Joy 2026-11-05).
 			} elseif ( preg_match( '/scout-(contact|redirects|cards|newsletter|sitecheck|reviews-settings|reviews-ask|chat)\b|post_type=scout_review\b/', $s ) ) {
-				$group = 'website'; // Call buttons, Redirects, Cards & Links, Newsletter, Site check settings, Reviews, Ask for reviews, Chat.
+				$group = 'website'; // Call buttons, Redirects, Cards and links, Newsletter, Site check settings, Reviews, Ask for reviews, Chat.
 			} else {
-				$group = 'business'; // Business info, Hours, Team, Case results, a companion's own types, and each Plus section's own screens.
+				$group = 'business'; // Business info, Hours, Case results, a companion's own types, and each Plus section's own screens.
 			}
 			$group = (string) apply_filters( 'scout_admin_nav_group', $group, $slug, $label );
 			$group = self::ALIASES[ $group ] ?? $group;
@@ -718,7 +737,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/**
 		 * Where this screen sits: its section's name and screens, every group's
 		 * screens (for Find anything), and the Scout menu it belongs to. A Scout
-		 * menu is sorted into the groups (Home, Inbox, Your business...); any other
+		 * menu is sorted into the groups (Home, To do, Business...); any other
 		 * menu, like a Plus section, is one section of its own.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.

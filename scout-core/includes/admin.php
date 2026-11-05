@@ -1,13 +1,17 @@
 <?php
 /**
  * The Scout admin screens. A top-level "Scout" menu with three screens
- * (with the Scout Build hub: Business info and SEO; its Site health shows the
- * search checks). The shared kit draws the section nav across all of them:
- *  - Dashboard: a plain-language health check ("is my site healthy and getting
- *    found?"), the heart of the plugin.
- *  - Business: the NAP + identity form (Scout_Core_Business).
- *  - SEO: site-wide SEO defaults (Scout_Core_SEO_Settings). Per-page SEO stays
- *    in the Scout SEO box on each page.
+ * (with the Scout Build hub: Business info and Search settings; its Site
+ * health shows the Google checks). The shared kit draws the section nav
+ * across all of them:
+ *  - Google checks (tab "dashboard"): a plain-language health check ("is my
+ *    site healthy and getting found?"), the heart of the plugin.
+ *  - Business info: the NAP + identity form (Scout_Core_Business).
+ *  - Search settings (tab "seo"): site-wide SEO defaults
+ *    (Scout_Core_SEO_Settings). Per-page SEO stays in the Scout SEO box on
+ *    each page.
+ *  - Page copy (tab "sync"): Site Sync, the theme's page copy (Scout_Sync_Admin).
+ * Labels are display text only; the page slug and tab keys never change.
  *
  * @package Scout_Core
  */
@@ -44,6 +48,22 @@ final class Scout_Core_Admin {
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 3 );
+	}
+
+	/**
+	 * The admin kit files the "scout" screen under Site health by its old label,
+	 * "Search health". It is called Google checks now, so say where it goes.
+	 *
+	 * @param string $group Group the kit chose.
+	 * @param string $slug  Sidebar slug.
+	 * @param string $label Sidebar label.
+	 */
+	public static function nav_group( $group, $slug = '', $label = '' ) {
+		if ( 'scout' === strtolower( (string) $slug ) && 'google checks' === strtolower( (string) $label ) ) {
+			return 'health';
+		}
+		return $group;
 	}
 
 	/** The menu these screens sit in: a theme's Build menu when there is one, else Scout's own. */
@@ -87,11 +107,11 @@ final class Scout_Core_Admin {
 			// The hub's Site health carries these checks, so this screen opens on Business info.
 			add_submenu_page( $parent, 'Business info', 'Business info', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
 		} else {
-			add_submenu_page( $parent, 'Search health', 'Search health', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
+			add_submenu_page( $parent, 'Google checks', 'Google checks', 'manage_options', 'scout', array( __CLASS__, 'render' ) );
 			add_submenu_page( $parent, 'Business info', 'Business info', 'manage_options', 'scout&tab=business', array( __CLASS__, 'render' ) );
 		}
-		add_submenu_page( $parent, 'SEO', 'SEO', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
-		add_submenu_page( $parent, 'Site Sync', 'Site Sync', 'manage_options', 'scout&tab=sync', array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, 'Search settings', 'Search settings', 'manage_options', 'scout&tab=seo', array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, 'Page copy', 'Page copy', 'manage_options', 'scout&tab=sync', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, 'Spam protection', 'Spam protection', 'manage_options', 'scout&tab=protect', array( __CLASS__, 'render' ) );
 		foreach ( self::groups() as $slug => $group ) {
 			add_submenu_page( $parent, $group['label'], $group['label'], 'manage_options', 'scout&tab=' . $slug, array( __CLASS__, 'render' ) );
@@ -106,9 +126,9 @@ final class Scout_Core_Admin {
 	/** @return array<string,string> tab => label */
 	private static function tabs() {
 		$tabs = self::hub()
-			? array( 'business' => 'Business info', 'seo' => 'SEO' )
-			: array( 'dashboard' => 'Search health', 'business' => 'Business info', 'seo' => 'SEO' );
-		$tabs['sync']    = 'Site Sync';
+			? array( 'business' => 'Business info', 'seo' => 'Search settings' )
+			: array( 'dashboard' => 'Google checks', 'business' => 'Business info', 'seo' => 'Search settings' );
+		$tabs['sync']    = 'Page copy';
 		$tabs['protect'] = 'Spam protection';
 		foreach ( self::groups() as $slug => $group ) {
 			$tabs[ $slug ] = $group['label'];
@@ -129,11 +149,11 @@ final class Scout_Core_Admin {
 		$tab   = self::current_tab();
 		$tabs  = self::tabs();
 		$ledes = array(
-			'dashboard' => 'A quick check that search engines and AI tools can find the business and read it correctly.',
-			'business'  => 'Your name, address, phone and profiles, entered once. They feed your search listing and every page that shows them. Keep them identical to your Google Business Profile.',
-			'sync'      => 'Keeps each page in step with the copy the theme ships. Pages nobody has edited update on their own after a theme update; anything changed in WordPress waits for you.',
-			'protect'   => 'Switches that keep spam and break-in attempts away from the site. All are on unless you turn them off.',
-			'seo'       => 'Site-wide search settings. Each page can set its own title and description in its SEO box, and your sitemap is built automatically at /wp-sitemap.xml.',
+			'dashboard' => 'Can Google and AI tools find the business and read it right? Green means yes.',
+			'business'  => 'Your name, address, phone and profiles. Keep them the same as your Google Business Profile.',
+			'sync'      => 'Pages get the theme\'s latest copy on their own. Anything edited in WordPress waits for you.',
+			'protect'   => 'Switches that keep spam and break-in attempts away. All are on unless you turn them off.',
+			'seo'       => 'Settings for the whole site. Each page sets its own title and description in its SEO box.',
 		);
 		self::styles();
 		Scout_Admin_UI::open( $tabs[ $tab ], $ledes[ $tab ] ?? '', $tabs[ $tab ] );
@@ -170,7 +190,7 @@ final class Scout_Core_Admin {
 	}
 
 	/**
-	 * The search checks. On Search health they are one list, a row each; the
+	 * The search checks. On Google checks they are one list, a row each; the
 	 * Scout Build hub prints the same checks as cards on its Site health screen.
 	 *
 	 * @param array<int,array<string,mixed>> $checks  From checks().
@@ -178,7 +198,7 @@ final class Scout_Core_Admin {
 	 */
 	public static function render_checks( array $checks, bool $as_list = false ) {
 		if ( $as_list ) {
-			echo '<section class="sh-box"><h2 class="sh-title">Search checks</h2><ul class="sh-rows">';
+			echo '<section class="sh-box"><h2 class="sh-title">Google checks</h2><ul class="sh-rows">';
 			foreach ( $checks as $c ) {
 				$state = 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' );
 				echo '<li class="sh-row sh-check is-' . esc_attr( $state ) . '"><div>';
@@ -263,9 +283,9 @@ final class Scout_Core_Admin {
 			'status'       => $type ? 'good' : 'warn',
 			'message'      => $type
 				? 'Search engines and AI get a clear description of your business.'
-				: 'Set your business type (e.g. LegalService, Restaurant) so your listing is specific.',
+				: 'Set the type of business, like LegalService or Restaurant, so your listing is specific.',
 			'action'       => $type ? '' : $base . '&tab=business',
-			'action_label' => $type ? '' : 'Set business type',
+			'action_label' => $type ? '' : 'Set type of business',
 		);
 
 		// 3. Pages missing a written description. Name them, so nobody has to hunt.
@@ -373,31 +393,38 @@ final class Scout_Core_Admin {
 
 	public static function tab_business() {
 		$values = Scout_Core_Business::get();
+		$help   = Scout_Core_Business::help();
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_business_group' );
 		echo '<table class="form-table" role="presentation"><tbody>';
-		$hours_plugin = class_exists( 'Scout_Hours_Admin' );
 		foreach ( Scout_Core_Business::fields() as $key => $label ) {
 			$id   = 'scout-' . $key;
 			$name = Scout_Core_Business::OPTION . '[' . $key . ']';
-			if ( 'hours' === $key && $hours_plugin ) {
-				// One fact, one place (Site Standard §7, v1.2): with Scout Hours on, hours live there.
-				// The old text stays saved untouched until the site's conversion copies it over.
-				printf( '<input type="hidden" name="%s" value="%s" />', esc_attr( $name ), esc_attr( $values[ $key ] ) );
-				echo '<tr><th scope="row">' . esc_html__( 'Hours', 'scout-core' ) . '</th><td><p class="description">'
-					. sprintf(
-						/* translators: %s: link to the Hours screen */
-						esc_html__( 'Hours live under Your business, %s, and show in the schema, the footer and the hours block from there.', 'scout-core' ),
-						'<a href="' . esc_url( admin_url( 'admin.php?page=scout-hours' ) ) . '">' . esc_html__( 'Hours', 'scout-core' ) . '</a>'
-					)
-					. '</p></td></tr>';
+			if ( in_array( $key, Scout_Core_Business::hidden(), true ) ) {
+				// One fact, one place (Site Standard §7, v1.2): weekly hours live in
+				// Scout Hours, so Business info no longer offers its old "Hours" box.
+				// Any text a site saved there stays saved (sanitize() keeps it).
+				if ( 'hours' === $key && class_exists( 'Scout_Hours_Admin' ) ) {
+					echo '<tr><th scope="row">' . esc_html__( 'Hours', 'scout-core' ) . '</th><td><p class="description">'
+						. sprintf(
+							/* translators: %s: link to the Hours screen */
+							esc_html__( 'Set hours on the %s screen under Business.', 'scout-core' ),
+							'<a href="' . esc_url( admin_url( 'admin.php?page=scout-hours' ) ) . '">' . esc_html__( 'Hours', 'scout-core' ) . '</a>'
+						)
+						. '</p></td></tr>';
+				}
 				continue;
 			}
 			echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label></th><td>';
-			if ( in_array( $key, array( 'hours', 'same_as' ), true ) ) {
-				printf( '<textarea id="%s" name="%s" rows="5" class="large-text">%s</textarea>', esc_attr( $id ), esc_attr( $name ), esc_textarea( $values[ $key ] ) );
+			$described = isset( $help[ $key ] ) ? ' aria-describedby="' . esc_attr( $id . '-help' ) . '"' : '';
+			if ( 'same_as' === $key ) {
+				printf( '<textarea id="%s" name="%s" rows="5" class="large-text"%s>%s</textarea>', esc_attr( $id ), esc_attr( $name ), $described, esc_textarea( $values[ $key ] ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- $described is escaped above.
 			} else {
-				printf( '<input type="text" id="%s" name="%s" value="%s" class="regular-text" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
+				$type = 'notice_email' === $key ? 'email' : 'text';
+				printf( '<input type="%s" id="%s" name="%s" value="%s" class="regular-text"%s />', esc_attr( $type ), esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ), $described ); // phpcs:ignore WordPress.Security.EscapeOutput -- $described is escaped above.
+			}
+			if ( isset( $help[ $key ] ) ) {
+				echo '<p class="description" id="' . esc_attr( $id . '-help' ) . '">' . esc_html( $help[ $key ] ) . '</p>';
 			}
 			echo '</td></tr>';
 		}
@@ -422,8 +449,8 @@ final class Scout_Core_Admin {
 			} elseif ( in_array( $key, array( 'google_verify', 'bing_verify' ), true ) ) {
 				printf( '<input type="text" id="%s" name="%s" value="%s" class="regular-text" autocomplete="off" spellcheck="false" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
 				echo '<p class="description">' . esc_html( 'google_verify' === $key
-					? __( 'In Search Console, add the site as a URL prefix and choose "HTML tag". Paste the tag or just its code. Leave it empty if the domain is verified through DNS.', 'scout-core' )
-					: __( 'In Bing Webmaster Tools, choose "HTML Meta Tag". Paste the tag or just its code. Leave it empty if you imported the site from Search Console.', 'scout-core' ) ) . '</p>';
+					? __( 'In Search Console, pick URL prefix, then HTML tag, and paste it here. Leave empty if DNS verifies the domain.', 'scout-core' )
+					: __( 'In Bing Webmaster Tools, pick HTML Meta Tag and paste it here. Leave empty if you imported from Search Console.', 'scout-core' ) ) . '</p>';
 			} else {
 				printf( '<input type="url" id="%s" name="%s" value="%s" class="regular-text" placeholder="https://" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
 			}

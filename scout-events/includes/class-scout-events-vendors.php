@@ -373,7 +373,7 @@ final class Scout_Events_Vendors {
 			}
 		}
 		/* translators: %s: business name. */
-		wp_mail( (string) get_option( 'admin_email' ), sprintf( __( 'New vendor application: %s', 'scout-events' ), $name ), __( "A new vendor applied. Review them here:\n", 'scout-events' ) . admin_url( 'post.php?post=' . (int) $id . '&action=edit' ) );
+		wp_mail( Scout_Events::notice_email(), sprintf( __( 'New vendor application: %s', 'scout-events' ), $name ), __( "A new vendor applied. Review them here:\n", 'scout-events' ) . admin_url( 'post.php?post=' . (int) $id . '&action=edit' ) );
 		$back( $photo < 0 ? 'photo' : 'applied' );
 	}
 
@@ -438,7 +438,7 @@ final class Scout_Events_Vendors {
 					<p class="se-help"><?php esc_html_e( 'No upcoming events yet.', 'scout-events' ); ?></p>
 				<?php endif; ?>
 			</fieldset>
-			<p class="se-help"><?php esc_html_e( 'The description above is what visitors read. The logo or photo is the featured image. Publish to approve them; they get an email saying they are in.', 'scout-events' ); ?></p>
+			<p class="se-help"><?php esc_html_e( 'Visitors read the description above. Publish to approve, and they get an email saying they are in.', 'scout-events' ); ?></p>
 		</div>
 		<?php
 	}

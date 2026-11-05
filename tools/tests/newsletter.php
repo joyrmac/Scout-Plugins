@@ -432,7 +432,12 @@ if ( function_exists( 'wc_create_order' ) ) {
 
 	ob_start();
 	Scout_Newsletter_Sources::checkout_box();
+	ok( '' === ob_get_clean(), 'checkout box: hidden while the setting is off and no plugin asks for it' );
+	add_filter( 'scout_newsletter_checkout_box', '__return_true' );
+	ob_start();
+	Scout_Newsletter_Sources::checkout_box();
 	$box = ob_get_clean();
+	remove_filter( 'scout_newsletter_checkout_box', '__return_true' );
 	ok( false !== strpos( $box, 'type="checkbox"' ) && false === strpos( $box, 'checked' ) && false === strpos( $box, 'required' ), 'checkout box: optional and unticked' );
 
 	$order = wc_create_order();

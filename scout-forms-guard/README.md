@@ -28,7 +28,7 @@ Visibility is Hidden**. Gravity Forms has no fix yet, so this plugin:
 - **Tells you what to fix.** Site admins see a red notice naming each form and
   field. Open the form, click the field, and in its Advanced settings set
   Visibility to Visible, or delete the field. Scout Build shows the same thing
-  as a "Hidden upload fields" row in Site health
+  as a "Hidden upload fields" row in Site status
   (`Scout_Forms_Guard::upload_check()`).
 
 The list of hidden upload fields is cached for six hours and cleared whenever a

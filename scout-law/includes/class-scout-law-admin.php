@@ -166,8 +166,8 @@ final class Scout_Law_Admin {
 		$s = Scout_Law_Disclaimers::settings();
 		Scout_Admin_UI::open(
 			__( 'Disclaimers', 'scout-law' ),
-			__( 'The firm\'s required lines, set once. Each one shows everywhere you choose, and the firm approves the exact wording. Every approval is kept as the firm\'s advertising record.', 'scout-law' ),
-			__( 'Policies', 'scout-law' )
+			__( 'The firm\'s required lines, set once and approved word for word. Every approval is kept as the advertising record.', 'scout-law' ),
+			__( 'Legal pages', 'scout-law' )
 		);
 		self::message();
 		?>
@@ -183,7 +183,7 @@ final class Scout_Law_Admin {
 						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['state'], $key ); ?>><?php echo esc_html( $label ); ?></option>
 					<?php endforeach; ?>
 				</select>
-				<p class="sh-note"><?php esc_html_e( 'This picks the starting wording shown in gray in each box. It\'s a starting point, not legal advice. Every state bar has its own rules, and the firm\'s attorneys decide the final wording.', 'scout-law' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Sets the starting wording shown in gray. It isn\'t legal advice: the firm\'s attorneys decide the final words.', 'scout-law' ); ?></p>
 			</section>
 
 			<?php foreach ( Scout_Law_Disclaimers::lines() as $key => $def ) : ?>

@@ -193,7 +193,7 @@ final class Scout_Hub_Features {
 			/* translators: %s: feature name */
 			'off'  => __( '%s is off. Its settings and content are kept.', 'scout-build' ),
 			/* translators: %s: feature name */
-			'back' => __( '%s is back on the previous version. Automatic updates for it are paused until a newer release comes out.', 'scout-build' ),
+			'back' => __( '%s is back on the previous version. Its automatic updates wait for a newer release.', 'scout-build' ),
 		);
 		self::back( sprintf( $done[ $do ], $name ) );
 	}

@@ -2,7 +2,7 @@
 
 The pieces a law firm's website needs to stay careful. Core for every law
 firm Scout builds for (catalog tier `build`, `law: true`). Screens file under
-**Scout → Policies** (see `../docs/dashboard-map.md`).
+**Scout → Legal pages** (see `../docs/dashboard-map.md`).
 
 ## Bar rules differ by state, and the firm signs off
 
@@ -25,7 +25,7 @@ the approver's name, the date and the exact words are kept as the record.
 - A line always prints something: a blank box uses the starting wording.
 - An approval belongs to one exact wording. Edited words read "Changed since
   approval" until the firm approves again. Extra spaces don't count as a change.
-- Lines that show somewhere and wait on the firm add a row to the Scout Inbox
+- Lines that show somewhere and wait on the firm add a row to Scout's To do list
   (`scout_hub_inbox`).
 - Every approval is kept in `scout_law_approval_log`, which stays when the
   plugin is deleted.
@@ -50,7 +50,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 
 ## Approval before publishing (0.2.0)
 
-- **Scout → Policies → Approvals** picks what needs approval. Blog posts and
+- **Scout → Legal pages → Firm approvals** picks what needs approval. Blog posts and
   team bios start on; Pages is off until the site is built, because it also
   holds pages Scout publishes. Case results keep their own approval.
 - Publishing without an approval saves as **Pending review** (block editor,
@@ -60,7 +60,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
   exact version (a revision) are kept in `scout_law_content_log`, which stays
   when the plugin is deleted.
 - A live item edited after approval stays live and reads **Edited since
-  approval** until the firm approves again. Both queues add Inbox rows.
+  approval** until the firm approves again. Both queues add rows to To do.
 - Filter `scout_law_approval_types` adjusts the list of post types. Action
   `scout_law_content_approved` runs on each approval.
 
@@ -68,7 +68,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 
 - An attorney on the firm's Team (Team profile with **Attorney** ticked) signs a
   page as reviewed: the **Reviewed by** panel in the block editor, the classic
-  editor box, or **Scout → Policies → Page reviews**. The name and the date are
+  editor box, or **Scout → Legal pages → Attorney sign-offs**. The name and the date are
   saved together, only when "Reviewed today" is ticked.
 - The page shows "Reviewed by *attorney*, *role*. Last reviewed *date*." under
   its words, linked to the profile, and its schema gains `reviewedBy` (the
@@ -76,7 +76,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
   options; a theme places it itself with `add_theme_support( 'scout-law-reviewed' )`
   and `scout_law_reviewed()`.
 - Pages not reviewed in the review period (6 months by default) are listed on
-  Page reviews, counted in the Inbox, and put on Home's Today list. The privacy
+  Attorney sign-offs, counted in To do, and put on Home's Today list. The privacy
   page is left out (it has its own yearly review).
 - Scout team logins never appear: only Team profiles can sign.
 - Filter `scout_law_review_types`; action `scout_law_page_reviewed`. Every
@@ -86,7 +86,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 
 - Each night, Gravity Forms entries older than 90 days are deleted from the
   website with their uploaded files, in every status (active, spam and trash).
-  **Scout → Policies → Form entries** shows what happens to each form. More
+  **Scout → Legal pages → Form entries** shows what happens to each form. More
   options sets 30, 60, 90, 180 or 365 days, turns deleting off, or keeps every
   entry from chosen forms.
 - The first delete waits 14 days after the plugin first runs on a site. Home's

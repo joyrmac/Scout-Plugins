@@ -126,7 +126,7 @@ final class Scout_Booking_Types_Admin {
 		$types = Scout_Booking::types();
 		Scout_Admin_UI::open(
 			__( 'Session types', 'scout-booking' ),
-			__( 'The sessions people can book: how long each runs, what it costs, what is paid to book it, and the few questions you ask first.', 'scout-booking' ),
+			__( 'The sessions people can book: length, price, what they pay to book, and your questions.', 'scout-booking' ),
 			__( 'Bookings', 'scout-booking' ),
 			Scout_Booking_Admin::SLUG . '-types'
 		);
@@ -178,7 +178,7 @@ final class Scout_Booking_Types_Admin {
 				<?php
 				echo esc_html(
 					Scout_Booking::payments_on()
-						? __( 'Bookings that are paid online go through the shop checkout, so discount codes are WooCommerce coupons (Marketing, Coupons). To make a code work for one session, pick that session\'s product under the coupon\'s usage restriction. The product carries the session\'s name on receipts.', 'scout-booking' )
+						? __( 'Discount codes are WooCommerce coupons (Marketing, Coupons). To limit a code to one session, pick that session\'s product on the coupon.', 'scout-booking' )
 						: __( 'Discount codes work once WooCommerce is active, through its coupons.', 'scout-booking' )
 				);
 				?>
@@ -207,13 +207,13 @@ final class Scout_Booking_Types_Admin {
 			<section class="sh-box">
 				<h2 class="sh-title"><?php echo esc_html( $new ? __( 'New session type', 'scout-booking' ) : $t['name'] ); ?></h2>
 				<p class="sbk-field"><label for="sbt-name"><?php esc_html_e( 'Name', 'scout-booking' ); ?></label><input type="text" id="sbt-name" name="<?php echo esc_attr( $f( 'name' ) ); ?>" class="regular-text" value="<?php echo esc_attr( $t['name'] ); ?>" required></p>
-				<p class="sbk-field"><label for="sbt-receipt"><?php esc_html_e( 'Name on receipts (optional)', 'scout-booking' ); ?></label><input type="text" id="sbt-receipt" name="<?php echo esc_attr( $f( 'receipt' ) ); ?>" class="regular-text" value="<?php echo esc_attr( $t['receipt'] ); ?>"><span class="description"><?php esc_html_e( 'What the checkout, the receipt and the order show. Plain, neutral wording works best with payment companies, such as "Private session, 2 hours". Empty uses the name.', 'scout-booking' ); ?></span></p>
+				<p class="sbk-field"><label for="sbt-receipt"><?php esc_html_e( 'Name on receipts (optional)', 'scout-booking' ); ?></label><input type="text" id="sbt-receipt" name="<?php echo esc_attr( $f( 'receipt' ) ); ?>" class="regular-text" value="<?php echo esc_attr( $t['receipt'] ); ?>"><span class="description"><?php esc_html_e( 'What the checkout and receipt show, such as "Private session, 2 hours". Blank uses the name.', 'scout-booking' ); ?></span></p>
 				<p class="sbk-check"><label><input type="checkbox" name="<?php echo esc_attr( $f( 'active' ) ); ?>" value="1" <?php checked( $t['active'] ); ?>> <?php esc_html_e( 'Show this session on the booking page', 'scout-booking' ); ?></label></p>
 				<p class="sbk-field"><label for="sbt-note"><?php esc_html_e( 'Note shown before booking (optional)', 'scout-booking' ); ?></label><textarea id="sbt-note" name="<?php echo esc_attr( $f( 'note' ) ); ?>" rows="3" class="large-text"><?php echo esc_textarea( $t['note'] ); ?></textarea><span class="description"><?php esc_html_e( 'A line or two the client reads before picking a time, and again in their emails.', 'scout-booking' ); ?></span></p>
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Time and price', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Time & price', 'scout-booking' ); ?></h2>
 				<div class="sbk-pair">
 					<p class="sbk-field"><label for="sbt-length"><?php esc_html_e( 'Length, in minutes', 'scout-booking' ); ?></label><input type="number" id="sbt-length" name="<?php echo esc_attr( $f( 'length' ) ); ?>" min="15" max="720" step="5" value="<?php echo (int) $t['length']; ?>" class="small-text"></p>
 					<p class="sbk-field"><label for="sbt-buffer"><?php esc_html_e( 'Buffer after, in minutes', 'scout-booking' ); ?></label><input type="number" id="sbt-buffer" name="<?php echo esc_attr( $f( 'buffer' ) ); ?>" min="0" max="240" step="5" value="<?php echo (int) $t['buffer']; ?>" class="small-text"><span class="description"><?php esc_html_e( 'Time to reset the room before the next session.', 'scout-booking' ); ?></span></p>
@@ -229,11 +229,11 @@ final class Scout_Booking_Types_Admin {
 					<label><input type="radio" name="<?php echo esc_attr( $f( 'deposit' ) ); ?>" value="none" <?php checked( 'none', $t['deposit'] ); ?>> <?php esc_html_e( 'Nothing online; everything is paid at the session', 'scout-booking' ); ?></label>
 				</fieldset>
 				<p class="sbk-check"><label><input type="checkbox" name="<?php echo esc_attr( $f( 'request' ) ); ?>" value="1" <?php checked( $t['request'] ); ?>> <?php esc_html_e( 'By request only: I approve each booking before the client pays', 'scout-booking' ); ?></label></p>
-				<p class="description"><?php esc_html_e( 'For sessions where you talk with a client first. The client sends a request, you approve or decline it on the Bookings screen, and approval emails them a link to pay and book.', 'scout-booking' ); ?></p>
+				<p class="description"><?php esc_html_e( 'The client sends a request. If you approve it, they get an email with a link to pay and book.', 'scout-booking' ); ?></p>
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Days and hours', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Days & hours', 'scout-booking' ); ?></h2>
 				<fieldset class="sbk-field">
 					<legend class="screen-reader-text"><?php esc_html_e( 'Which hours this session follows', 'scout-booking' ); ?></legend>
 					<label><input type="radio" name="<?php echo esc_attr( $f( 'schedule' ) ); ?>" value="default" <?php checked( 'default', $t['schedule'] ); ?>> <?php echo esc_html( Scout_Booking::scout_hours_on() ? __( 'Your business hours from Scout Hours', 'scout-booking' ) : __( 'The booking hours on the Settings screen', 'scout-booking' ) ); ?></label><br>
@@ -244,7 +244,7 @@ final class Scout_Booking_Types_Admin {
 
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Questions before booking', 'scout-booking' ); ?></h2>
-				<p><?php esc_html_e( 'Short, practical questions, such as how they heard about you or what they hope to work on. Keep health questions in your health intake form; this form is not built to hold health records.', 'scout-booking' ); ?></p>
+				<p><?php esc_html_e( 'Short questions, such as how they heard about you. Keep health questions in your health intake form.', 'scout-booking' ); ?></p>
 				<div class="sbk-questions">
 					<?php for ( $i = 0; $i < self::QUESTIONS; $i++ ) : ?>
 						<?php $q = $t['questions'][ $i ] ?? array( 'label' => '', 'required' => false, 'long' => false ); ?>

@@ -1,7 +1,7 @@
 <?php
 /**
  * The public review pages: /review/ (the ask) and /review/note/ (a private
- * note form whose entries land in Reviews > Inbox).
+ * note form whose entries land in Reviews > New reviews).
  *
  * Both are small standalone phone pages, so they load fast from a QR scan and
  * look the same whatever the theme does. A note becomes a draft review with
@@ -239,10 +239,10 @@ final class Scout_Reviews_Notes {
 			$v['quote'],
 			'',
 			/* translators: %s: admin link */
-			sprintf( __( 'Read it in your inbox: %s', 'scout-reviews' ), Scout_Reviews_Inbox::url() ),
+			sprintf( __( 'Read it in New reviews: %s', 'scout-reviews' ), Scout_Reviews_Inbox::url() ),
 		);
 		wp_mail(
-			(string) apply_filters( 'scout_reviews_note_recipient', '' !== Scout_Reviews_Requests::get()['note_email'] ? Scout_Reviews_Requests::get()['note_email'] : get_option( 'admin_email' ) ),
+			(string) apply_filters( 'scout_reviews_note_recipient', Scout_Reviews_Requests::note_recipient() ),
 			__( 'New note from your review page', 'scout-reviews' ),
 			implode( "\n", $lines )
 		);

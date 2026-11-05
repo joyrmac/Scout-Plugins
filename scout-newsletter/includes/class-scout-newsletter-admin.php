@@ -229,7 +229,7 @@ final class Scout_Newsletter_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Newsletter', 'scout-newsletter' ),
-			__( 'People who tick the newsletter box on this site go to your email list in Beehiiv, tagged by where they joined. Every agreement is saved here with the date, the page and the words they saw.', 'scout-newsletter' )
+			__( 'People who tick the newsletter box go to your Beehiiv list, tagged by where they joined.', 'scout-newsletter' )
 		);
 
 		if ( 'saved' === $notice ) {
@@ -344,7 +344,8 @@ final class Scout_Newsletter_Admin {
 			<input type="hidden" name="action" value="scout_newsletter_save">
 			<?php wp_nonce_field( 'scout_newsletter_save' ); ?>
 			<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Beehiiv connection', 'scout-newsletter' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Email list connection', 'scout-newsletter' ); ?></h2>
+			<p class="sh-note"><?php esc_html_e( 'Your newsletter service is Beehiiv. Paste its key here so sign-ups reach your list.', 'scout-newsletter' ); ?></p>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="nl-key"><?php esc_html_e( 'Beehiiv API key', 'scout-newsletter' ); ?></label></th>
@@ -356,7 +357,7 @@ final class Scout_Newsletter_Admin {
 							<?php if ( $have_key ) : ?>
 								<label style="margin-left:8px"><input type="checkbox" name="forget_key" value="1"> <?php esc_html_e( 'Forget the saved key', 'scout-newsletter' ); ?></label>
 							<?php endif; ?>
-							<p class="description"><?php esc_html_e( 'From Beehiiv, Settings, API. It is stored encrypted and only ever sent to Beehiiv. To keep it out of the database, put it in wp-config.php as SCOUT_BEEHIIV_KEY instead.', 'scout-newsletter' ); ?></p>
+							<p class="description"><?php esc_html_e( 'From Beehiiv, Settings, API. Stored encrypted and sent only to Beehiiv. Or put it in wp-config.php as SCOUT_BEEHIIV_KEY.', 'scout-newsletter' ); ?></p>
 						<?php endif; ?>
 					</td>
 				</tr>
@@ -371,19 +372,19 @@ final class Scout_Newsletter_Admin {
 					<th scope="row"><?php esc_html_e( 'Sending', 'scout-newsletter' ); ?></th>
 					<td>
 						<label><input type="checkbox" name="nl[enabled]" value="1" <?php checked( ! empty( $s['enabled'] ) ); ?>> <?php esc_html_e( 'Send ticked boxes to Beehiiv', 'scout-newsletter' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Leave off on staging and until launch. Sign-ups are still saved here while it is off.', 'scout-newsletter' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Leave off on staging and until launch. Sign-ups are still saved here while off.', 'scout-newsletter' ); ?></p>
 					</td>
 				</tr>
 			</table>
 			<p class="sh-actions">
 				<button type="submit" class="button" form="scout-nl-test"><?php esc_html_e( 'Test connection', 'scout-newsletter' ); ?></button>
 			</p>
-			<p class="sh-note"><?php esc_html_e( 'Test connection checks the saved key and publication, so save first.', 'scout-newsletter' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Save first. Test connection checks the saved key and publication.', 'scout-newsletter' ); ?></p>
 			</section>
 
-			<?php self::ui_fold_open( __( 'More options: tags, what Beehiiv receives and the box on this site', 'scout-newsletter' ) ); ?>
+			<?php self::ui_fold_open( __( 'More options', 'scout-newsletter' ) ); ?>
 			<h3><?php esc_html_e( 'Tags by where they joined', 'scout-newsletter' ); ?></h3>
-			<p><?php esc_html_e( 'The Beehiiv tag each sign-up gets. Separate two tags with a comma, or leave a row empty for no tag. Beehiiv allows 100 tags in all, so tag by type, never one tag per event.', 'scout-newsletter' ); ?></p>
+			<p><?php esc_html_e( 'The Beehiiv tag each sign-up gets. Use a comma between two tags. Beehiiv allows 100 tags, so tag by type, not by event.', 'scout-newsletter' ); ?></p>
 			<table class="form-table" role="presentation">
 				<?php foreach ( $labels as $key => $label ) : ?>
 					<tr>
@@ -430,14 +431,14 @@ final class Scout_Newsletter_Admin {
 						<p><label><?php esc_html_e( 'First name field', 'scout-newsletter' ); ?><br><input type="text" name="nl[field_first]" class="regular-text" value="<?php echo esc_attr( $s['field_first'] ); ?>" placeholder="First Name"></label></p>
 						<p><label><?php esc_html_e( '"Joined from" field', 'scout-newsletter' ); ?><br><input type="text" name="nl[field_joined]" class="regular-text" value="<?php echo esc_attr( $s['field_joined'] ); ?>"></label></p>
 						<p><label><?php esc_html_e( 'Member plan field', 'scout-newsletter' ); ?><br><input type="text" name="nl[field_plan]" class="regular-text" value="<?php echo esc_attr( $s['field_plan'] ); ?>"></label></p>
-						<p class="description"><?php esc_html_e( 'Each name must match a custom field already made in Beehiiv, letter for letter. Beehiiv ignores names it does not know. Leave a box empty to send nothing for it.', 'scout-newsletter' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Each name must match a Beehiiv custom field letter for letter. Leave a box empty to send nothing.', 'scout-newsletter' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Keep subscribers up to date', 'scout-newsletter' ); ?></th>
 					<td>
-						<label><input type="checkbox" name="nl[keep_current]" value="1" <?php checked( ! empty( $s['keep_current'] ) ); ?>> <?php esc_html_e( 'Tag people already on the list when they sign up for an event, buy a ticket or join, and keep their member plan field current', 'scout-newsletter' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Never subscribes anyone. The site asks Beehiiv whether the email is on the list and does nothing when it is not.', 'scout-newsletter' ); ?></p>
+						<label><input type="checkbox" name="nl[keep_current]" value="1" <?php checked( ! empty( $s['keep_current'] ) ); ?>> <?php esc_html_e( 'Tag people already on the list when they sign up, buy a ticket or join', 'scout-newsletter' ); ?></label>
+						<p class="description"><?php esc_html_e( 'Never subscribes anyone. People not already on the list are left alone.', 'scout-newsletter' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -452,21 +453,21 @@ final class Scout_Newsletter_Admin {
 					<th scope="row"><label for="nl-wording"><?php esc_html_e( 'Words next to the box', 'scout-newsletter' ); ?></label></th>
 					<td>
 						<input type="text" id="nl-wording" name="nl[wording]" class="large-text" value="<?php echo esc_attr( $s['wording'] ); ?>" placeholder="<?php echo esc_attr( Scout_Newsletter::wording() ); ?>">
-						<p class="description"><?php esc_html_e( 'Shown beside the checkout box and under the sign-up box, and saved with every agreement. Forms that show their own words save those instead.', 'scout-newsletter' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Shown beside the checkout box and the sign-up box, and saved with each yes.', 'scout-newsletter' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Checkout', 'scout-newsletter' ); ?></th>
 					<td>
-						<label><input type="checkbox" name="nl[checkout_box]" value="1" <?php checked( ! empty( $s['checkout_box'] ) ); ?>> <?php esc_html_e( 'Add the newsletter box to the WooCommerce checkout', 'scout-newsletter' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Optional and unticked. The buyer is sent once the order is paid. Leave off if another plugin already adds a newsletter box to checkout.', 'scout-newsletter' ); ?></p>
+						<label><input type="checkbox" name="nl[checkout_box]" value="1" <?php checked( ! empty( $s['checkout_box'] ) ); ?>> <?php esc_html_e( 'Add the newsletter box to every WooCommerce checkout', 'scout-newsletter' ); ?></label>
+						<p class="description"><?php esc_html_e( 'Starts unticked. Checkouts with event tickets always show it. Added to the list once the order is paid.', 'scout-newsletter' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="nl-members"><?php esc_html_e( 'Membership application', 'scout-newsletter' ); ?></label></th>
 					<td>
 						<input type="text" id="nl-members" name="nl[members_box]" class="large-text" value="<?php echo esc_attr( $s['members_box'] ); ?>">
-						<p class="description"><?php esc_html_e( 'The words of the tick-box question on the Scout Members application, exactly as written there. Left empty, any tick-box question that mentions the newsletter or its name counts.', 'scout-newsletter' ); ?></p>
+						<p class="description"><?php esc_html_e( 'The tick-box question on the membership application, word for word. Left empty, any tick-box question naming the newsletter counts.', 'scout-newsletter' ); ?></p>
 					</td>
 				</tr>
 				<tr>
@@ -478,7 +479,7 @@ final class Scout_Newsletter_Admin {
 				</tr>
 			</table>
 			<?php self::ui_fold_close(); ?>
-			<p class="sh-actions"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-newsletter' ); ?></button></p>
+			<p class="sh-actions"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save', 'scout-newsletter' ); ?></button></p>
 		</form>
 		<form id="scout-nl-test" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="scout_newsletter_test">
@@ -492,8 +493,8 @@ final class Scout_Newsletter_Admin {
 		$labels = Scout_Newsletter::sources() + array( 'membership_application' => __( 'Membership application', 'scout-newsletter' ) );
 		?>
 		<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Consent records', 'scout-newsletter' ); ?></h2>
-			<p><?php esc_html_e( 'Who agreed, when, where and the words they saw. Kept for as long as this plugin is installed, as proof that every person asked to join.', 'scout-newsletter' ); ?></p>
+			<h2 class="sh-title"><?php esc_html_e( 'Who said yes', 'scout-newsletter' ); ?></h2>
+			<p><?php esc_html_e( 'Who said yes, when, where and the words they saw. Kept as proof that each person asked to join.', 'scout-newsletter' ); ?></p>
 			<?php if ( $rows ) : ?>
 				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat striped">
 					<thead><tr><th scope="col"><?php esc_html_e( 'Agreed', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Who', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Where', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Words shown', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Status', 'scout-newsletter' ); ?></th></tr></thead>
@@ -513,7 +514,7 @@ final class Scout_Newsletter_Admin {
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 						<input type="hidden" name="action" value="scout_newsletter_export">
 						<?php wp_nonce_field( 'scout_newsletter_export' ); ?>
-						<p class="sh-actions" style="margin-top:14px"><button type="submit" class="button sh-quiet"><?php esc_html_e( 'Download every record (CSV)', 'scout-newsletter' ); ?></button></p>
+						<p class="sh-actions" style="margin-top:14px"><button type="submit" class="button sh-quiet"><?php esc_html_e( 'Download spreadsheet', 'scout-newsletter' ); ?></button></p>
 					</form>
 				<?php endif; ?>
 			<?php else : ?>
@@ -539,7 +540,7 @@ final class Scout_Newsletter_Admin {
 		$log = array_reverse( (array) get_option( Scout_Newsletter::LOG, array() ) );
 		?>
 		<?php self::ui_fold_open( __( 'Recent activity', 'scout-newsletter' ) ); ?>
-			<p><?php esc_html_e( 'What the site sent to Beehiiv and how it went. People show as a short code, never a name or email.', 'scout-newsletter' ); ?></p>
+			<p><?php esc_html_e( 'What the site sent to Beehiiv and how it went. People show as a short code.', 'scout-newsletter' ); ?></p>
 			<?php if ( $log ) : ?>
 				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat striped">
 					<thead><tr><th scope="col"><?php esc_html_e( 'When', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Person', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'What', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Result', 'scout-newsletter' ); ?></th></tr></thead>

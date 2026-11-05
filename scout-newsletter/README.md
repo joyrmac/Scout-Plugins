@@ -47,7 +47,7 @@ Scout Build, administrators. Everyone else with access sees the status only.
 | Source name | `utm_source` (the site's host by default). Where they joined goes as `utm_medium`. |
 | Custom fields | Names of Beehiiv custom fields for first name, "joined from" and member plan. Beehiiv drops names it does not know, so each must match a field already made there. Empty means not sent. |
 | Keep subscribers up to date | Off by default. When on, event sign-ups, paid tickets and membership changes add the type tag (and the member plan field) for people **already** on the list. It never subscribes anyone: a 404 from Beehiiv ends it. |
-| The box on this site | Newsletter name, the words next to the box, an optional WooCommerce checkout box, the Scout Members question to watch, and the sign-up box's thank-you line. |
+| The box on this site | Newsletter name, the words next to the box, an optional WooCommerce checkout box (always on for checkouts with event tickets), the Scout Members question to watch, and the sign-up box's thank-you line. |
 
 ## Where ticked boxes come from
 
@@ -59,6 +59,18 @@ Scout Build, administrators. Everyone else with access sees the status only.
 | Scout Members | A tick-box (`check`) question on the application: the one named in the settings, or any that mentions the newsletter or its name. Sent at application. Approval adds the membership tag only through "Keep subscribers up to date". | `membership_application` |
 | Gravity Forms | Form Settings, **Newsletter**: pick the **Newsletter consent field** (a Consent or Checkboxes field) and an optional extra tag. Spam entries are ignored. The Consent field's saved words are what gets recorded. | `form` |
 | Sign-up box | `[scout_newsletter heading="" button="" name="yes" tag=""]` or the **Newsletter sign-up** block. Nonce, honeypot, and a signature over its source and tag so a visitor cannot choose their own. | `form` |
+
+### One box at the checkout
+
+This plugin owns the one newsletter box at the WooCommerce checkout. While it
+is active, Scout Events prints no ticket box of its own: a checkout holding
+event tickets shows this box even with the checkout box setting off, so ticket
+buyers are still asked. Scout Booking asks on its booking form, so a checkout
+that only pays for bookings skips this box when the booking form already asked.
+The `scout_newsletter_checkout_box` filter (true or false) is how they steer
+it. One box, one consent record, tagged `ticket` when the order holds tickets.
+Orders placed with the older Scout Events box (it saved the time it was ticked)
+are recorded with that box's words, "Send me the newsletter".
 
 `$context` takes `wording` (the exact words next to the box), `url` (the
 page), and `campaign` (sent as `utm_campaign`, for example an event's slug).
@@ -139,7 +151,7 @@ Settings, the key and the log go. The consent records stay unless
 |---|---|---|---|
 | Newsletter sign-ups: email, first name, where they joined (event, ticket, membership, booking or form), tags, the exact words next to the box they ticked, the page address, the campaign (such as the event), the date and time, how the send went, and the Beehiiv subscriber ID (Sent to Beehiiv only when an account is connected and sending is switched on. Until then they wait on the site.) | A newsletter table in this website's database | Until someone deletes it. Deleting the plugin leaves these records in place unless the site turns on the purge setting first. | Beehiiv |
 | Email of people who sign up for an event, volunteer, apply, buy a ticket or become a member without ticking the box, with a tag for what they did and their member plan. The email is looked up in Beehiiv; if they are already subscribers their tags are updated, and if not, nothing more is sent and they are not added. (only when "Keep subscribers up to date" is on and sending is switched on) | A newsletter table in this website's database | Until someone deletes it | Beehiiv |
-| The words next to the newsletter box ticked at checkout (only when the checkout box setting is on) | The WooCommerce order in this website's database | Until someone deletes it | Nobody |
+| The words next to the newsletter box ticked at checkout (only when the checkout box setting is on, or the cart holds event tickets) | The WooCommerce order in this website's database | Until someone deletes it | Nobody |
 | A log of sends: the time, a short one-way code made from the email (not the email itself), what was done and how it went | A setting in this website's database | The newest 100 lines; older ones are dropped. Removed when the plugin is deleted. | Nobody |
 | A short one-way code made from the email of anyone Beehiiv reports as unsubscribed, with the time, so they are never sent again | A setting in this website's database | Until the plugin is deleted | Nobody |
 

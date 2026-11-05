@@ -404,7 +404,7 @@ final class Scout_Redirects {
 		$result['label']       = __( 'Some of your pages link to pages that are missing', 'scout-redirects' );
 		$result['status']      = 'recommended';
 		$result['description'] = '<p>' . esc_html__( 'Visitors followed these links and found nothing. Fix each one by adding a redirect or editing the link.', 'scout-redirects' ) . '</p><ul>' . $items . '</ul>';
-		$result['actions']     = '<p><a href="' . esc_url( $screen ) . '">' . esc_html__( 'Open Redirects', 'scout-redirects' ) . '</a></p>';
+		$result['actions']     = '<p><a href="' . esc_url( $screen ) . '">' . esc_html__( 'Open Moved pages', 'scout-redirects' ) . '</a></p>';
 		return $result;
 	}
 }

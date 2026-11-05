@@ -1,0 +1,36 @@
+/* Scout People: the People list. Kit tokens only (var(--sh-*)), scoped to
+   .st-people inside the kit's .sh wrapper. "Needs a look" uses the cerulean
+   accent, never the warn colors. */
+
+.st-people .sh-status.is-warn .sh-dot { background: var(--sh-accent); }
+
+/* Filter chips. */
+.st-people .st-chips { display: flex; flex-wrap: wrap; gap: var(--sh-space-2); margin-top: var(--sh-space-4); }
+.st-people .st-chip { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); padding: 0 var(--sh-space-4); border: 1px solid var(--sh-border-strong); border-radius: var(--sh-r-pill); background: var(--sh-surface); color: var(--sh-text); font-size: var(--sh-fs-note); font-weight: 500; text-decoration: none; }
+.st-people .st-chip:hover { border-color: var(--sh-accent-line); }
+.st-people .st-chip:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
+.st-people .st-chip-count { font-family: var(--sh-mono); font-size: var(--sh-fs-label); color: var(--sh-text-3); }
+.st-people .st-chip.is-on { background: var(--sh-accent-fill); border-color: var(--sh-accent-fill); color: var(--sh-on-accent); }
+.st-people .st-chip.is-on .st-chip-count { color: var(--sh-on-accent); }
+.st-people .st-chip.is-look { color: var(--sh-accent-text); border-color: var(--sh-accent-line); background: var(--sh-glow); }
+.st-people .st-chip.is-look.is-on { background: var(--sh-accent-fill); color: var(--sh-on-accent); }
+
+/* Sections in the Everyone view. */
+.st-people .st-hint { margin: 0 0 var(--sh-space-2); }
+.st-people .st-section { display: flex; align-items: baseline; gap: var(--sh-space-2); margin: var(--sh-space-6) 0 var(--sh-space-1); padding: 0; font-size: var(--sh-fs-label); font-family: var(--sh-mono); font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--sh-text-2); }
+.st-people .st-section:first-of-type { margin-top: var(--sh-space-3); }
+.st-people .st-section span { color: var(--sh-text-3); }
+.st-people .st-empty { color: var(--sh-text-2); }
+
+/* One row per person. */
+.st-people .st-person-main { display: flex; align-items: center; gap: var(--sh-space-3); min-width: 0; }
+.st-people .st-person-text { min-width: 0; }
+.st-people .sh-row-name { overflow-wrap: anywhere; }
+.st-people .st-avatar { flex: none; width: 48px; height: 48px; border-radius: var(--sh-r-control); overflow: hidden; background: var(--sh-surface-2); display: grid; place-items: center; }
+.st-people .st-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.st-people .st-avatar.is-initials { font-weight: 600; font-size: var(--sh-fs-note); color: var(--sh-text-2); }
+.st-people .st-person.is-look { box-shadow: inset 3px 0 0 var(--sh-accent-line); padding-left: var(--sh-space-3); }
+.st-people .st-look { margin: var(--sh-space-1) 0 0; font-size: var(--sh-fs-note); color: var(--sh-accent-text); }
+.st-people .st-look strong { color: var(--sh-accent-text); }
+.st-people .sh-tag.st-signin { background: var(--sh-glow); color: var(--sh-accent-text); }
+.st-people .st-more { margin-top: var(--sh-space-4); }

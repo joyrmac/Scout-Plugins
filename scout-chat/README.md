@@ -25,17 +25,19 @@ Nothing is rebuilt between the modes. Fill in the AI connection and it switches.
   say who answers. Blank: "our team" and "Ask us".
 - **Photos**, **greeting card** (and who it's from), **assistant name**,
   **button text**.
-- **Email new questions to**, **booking page** (blank uses the theme's booking
+- **Email new questions to** (blank uses Send notices to in Business info), **booking page** (blank uses the theme's booking
   page or Contact), **our work page** (blank hides that button).
 - **AI server address** and **connection key**. The key can instead be
   defined in `wp-config.php` as `SCOUT_CHAT_AI_KEY`, which wins.
 
-## Inbox: Scout Build → Chat questions
+## Messages: Scout Build → Chat messages
 
 Each saved conversation shows who asked, the type (Question, Change request,
 Wants a person), whether it's answered, the page it was asked on, and the
 whole transcript. "Reply by email" opens a reply; tick Answered when done. The
-sidebar shows the unanswered count.
+sidebar shows the unanswered count. A change request that also went to Scout
+Build's request list shows "In Requests" and is tracked there, so To do
+lists it once.
 
 ## For Sean: the AI server contract
 
@@ -88,9 +90,9 @@ Through Scout Analytics: `chat_open`, `chip_click`, `handoff`,
 
 | What | Where it is kept | How long | Shared with |
 |---|---|---|---|
-| Name, email, phone, the chat conversation (up to the last 30 messages), the page the chat was on, and what kind of message it is (only when the visitor leaves their name and a phone number or email in the chat) | This website's database, as private Chat question posts | Until someone deletes it. Deleting the plugin keeps these posts. | Emailed to the address set in Chat settings (the site admin email by default), plus a short text alert to the alert address if one is set |
+| Name, email, phone, the chat conversation (up to the last 30 messages), the page the chat was on, and what kind of message it is (only when the visitor leaves their name and a phone number or email in the chat) | This website's database, as private Chat message posts | Until someone deletes it. Deleting the plugin keeps these posts. | Emailed to the address set on the Chat screen, or when that is blank, to Send notices to in Business info (the site admin email by default), plus a short text alert to the alert address if one is set |
 | For a change request: the request, with the visitor's name, email and phone, and the page (only when Scout Build is on and the visitor asks for a change in the chat) | This website's database, as a change request in Scout Build's request list | Until someone deletes it | Nobody |
-| Questions typed in the chat, the earlier messages in the chat, and the page address (only when an AI server is connected) | Sent from this website to the AI server. This website does not store them unless the visitor later leaves contact details. | Not kept by this website | The AI server set in Chat settings |
+| Questions typed in the chat, the earlier messages in the chat, and the page address (only when an AI server is connected) | Sent from this website to the AI server. This website does not store them unless the visitor later leaves contact details. | Not kept by this website | The AI server set on the Chat screen |
 | A scrambled (hashed) copy of the visitor's IP address with a count, used to limit how many messages one visitor can send | A temporary record in this website's database | 10 minutes after the visitor's last chat message | Nobody |
 | Chat opens, button taps and sent messages (the button words or message type, never names or messages) (only when Scout Analytics is on) | Passed to Scout Analytics on the page | Not kept by this website | Google Analytics (Google), through Scout Analytics |
 
@@ -99,7 +101,7 @@ Through Scout Analytics: `chat_open`, `chip_click`, `handoff`,
 | `scoutChat (browser storage)` | Keeps the chat so far (up to 40 messages) so it stays in place when the visitor moves to another page | Until the browser tab is closed |
 | `scoutChatTeaser (browser storage)` | Remembers that the visitor opened the chat or closed the greeting, so the greeting does not show again | Until the browser tab is closed |
 
-Nothing is collected while the chat is switched off in Chat settings. The chat sends no cookies with its messages.
+Nothing is collected while the chat is switched off on the Chat screen. The chat sends no cookies with its messages.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

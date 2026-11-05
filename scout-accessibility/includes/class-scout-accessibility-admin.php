@@ -246,7 +246,7 @@ final class Scout_Accessibility_Admin {
 		$msg  = isset( $_GET['msg'] ) ? sanitize_key( wp_unslash( $_GET['msg'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$list = array(
 			'statement'    => array( 'success', __( 'Saved. The Accessibility page is published with the statement.', 'scout-accessibility' ) ),
-			'statement_own' => array( 'success', __( 'Saved. This site already has its own Accessibility page, so we kept its words exactly as they are and use it as the statement.', 'scout-accessibility' ) ),
+			'statement_own' => array( 'success', __( 'Saved. The site already had its own Accessibility page, so its words stay and it is used as the statement.', 'scout-accessibility' ) ),
 			'run'          => array( 'success', __( 'Checks finished. Results are below.', 'scout-accessibility' ) ),
 			'launch'       => array( 'success', __( 'At-launch checklist saved.', 'scout-accessibility' ) ),
 			'footer'       => array( 'success', __( 'Footer link setting saved.', 'scout-accessibility' ) ),
@@ -322,7 +322,7 @@ final class Scout_Accessibility_Admin {
 		Scout_Admin_UI::open(
 			__( 'Accessibility checks', 'scout-accessibility' ),
 			__( 'Weekly checks for the common issues a computer can find, and a short checklist for what needs a person at launch.', 'scout-accessibility' ),
-			__( 'Site health · Accessibility checks', 'scout-accessibility' )
+			__( 'Site status · Accessibility checks', 'scout-accessibility' )
 		);
 		self::messages();
 		?>
@@ -361,7 +361,7 @@ final class Scout_Accessibility_Admin {
 					echo esc_html( sprintf( __( '%1$d of %2$d reviewed', 'scout-accessibility' ), $launch_done, count( $items ) ) );
 					?>
 				</p>
-				<p class="sh-note"><a href="#sa-launch"><?php esc_html_e( 'Color contrast and keyboard use', 'scout-accessibility' ); ?></a></p>
+				<p class="sh-note"><a href="#sa-launch"><?php esc_html_e( 'Color contrast & keyboard use', 'scout-accessibility' ); ?></a></p>
 			</section>
 		</div>
 
@@ -468,14 +468,14 @@ final class Scout_Accessibility_Admin {
 				}
 				?>
 			</ul>
-			<p class="sh-note sa-foot"><?php esc_html_e( 'Automated checks catch the common issues. We review color contrast and keyboard use by hand at launch, since those need a real browser.', 'scout-accessibility' ); ?></p>
+			<p class="sh-note sa-foot"><?php esc_html_e( 'Automated checks catch common issues. Color contrast and keyboard use are checked by hand at launch.', 'scout-accessibility' ); ?></p>
 		</section>
 
 		<?php /* ---------------------------------------------- At launch */ ?>
 		<div class="sh-section-head" id="sa-launch">
 			<p class="sh-eyebrow"><?php esc_html_e( 'At launch', 'scout-accessibility' ); ?></p>
 			<h2><?php esc_html_e( 'Checks a person does in a real browser', 'scout-accessibility' ); ?></h2>
-			<p class="sh-note"><?php esc_html_e( 'Tick each one when it is done, with the date and who did it. Redo them after a redesign or a new page template.', 'scout-accessibility' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Tick each one when it\'s done, with the date and who did it. Redo them after a redesign.', 'scout-accessibility' ); ?></p>
 		</div>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-box">
 			<input type="hidden" name="action" value="scout_a11y_launch">
@@ -552,8 +552,8 @@ final class Scout_Accessibility_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Accessibility statement', 'scout-accessibility' ),
-			__( 'A plain statement page that tells visitors how to report a barrier, and the link to it at the bottom of every page.', 'scout-accessibility' ),
-			__( 'Policies · Accessibility statement', 'scout-accessibility' )
+			__( 'A statement page that tells visitors how to report a barrier, linked from every page.', 'scout-accessibility' ),
+			__( 'Legal pages · Accessibility statement', 'scout-accessibility' )
 		);
 		self::messages();
 		?>
@@ -579,7 +579,7 @@ final class Scout_Accessibility_Admin {
 		<div class="sh-section-head" id="sa-statement">
 			<p class="sh-eyebrow"><?php esc_html_e( 'Statement', 'scout-accessibility' ); ?></p>
 			<h2><?php esc_html_e( 'The accessibility statement', 'scout-accessibility' ); ?></h2>
-			<p class="sh-note"><?php esc_html_e( 'Saving creates the Accessibility page, or updates it if it already exists. The wording is plain and honest: it says the site aims for the standard and how to report a barrier, and never claims full compliance.', 'scout-accessibility' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Saving creates or updates the Accessibility page. It says the site aims for the standard and never claims full compliance.', 'scout-accessibility' ); ?></p>
 			<?php if ( ! empty( Scout_Accessibility::settings()['own_page'] ) ) : ?>
 				<p class="sh-note"><strong><?php esc_html_e( 'This site uses its own Accessibility page.', 'scout-accessibility' ); ?></strong> <?php esc_html_e( 'Its words stay exactly as written. Edit that page to change them; the settings below are kept for reference only.', 'scout-accessibility' ); ?></p>
 			<?php endif; ?>
@@ -594,30 +594,30 @@ final class Scout_Accessibility_Admin {
 						<p class="description">
 							<?php
 							echo Scout_Accessibility::has_core()
-								? esc_html__( 'From the business info in Scout Core. Change it there.', 'scout-accessibility' )
+								? esc_html__( 'From Business info. Change it there.', 'scout-accessibility' )
 								: esc_html__( 'The site title, from Settings, General.', 'scout-accessibility' );
 							?>
 						</p></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="sa-email"><?php esc_html_e( 'Email for barrier reports', 'scout-accessibility' ); ?></label></th>
-					<td><input id="sa-email" type="email" class="regular-text" name="sa[email]" value="<?php echo esc_attr( $s['email'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::email() ); ?>">
-						<p class="description"><?php esc_html_e( 'Leave blank to use the email in the business info. Use an inbox someone reads.', 'scout-accessibility' ); ?></p></td>
+					<td><input id="sa-email" type="email" class="regular-text" name="sa[email]" value="<?php echo esc_attr( $s['email'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::business_email() ); ?>">
+						<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-accessibility' ); ?> <?php esc_html_e( 'Use an inbox someone reads.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="sa-phone"><?php esc_html_e( 'Phone', 'scout-accessibility' ); ?></label></th>
-					<td><input id="sa-phone" type="tel" class="regular-text" name="sa[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::phone() ); ?>">
-						<p class="description"><?php esc_html_e( 'Leave blank to use the phone in the business info. A second way to reach you helps people who cannot use email.', 'scout-accessibility' ); ?></p></td>
+					<td><input id="sa-phone" type="tel" class="regular-text" name="sa[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::business_phone() ); ?>">
+						<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-accessibility' ); ?> <?php esc_html_e( 'A second way to reach you helps people who cannot use email.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="sa-days"><?php esc_html_e( 'Reply within', 'scout-accessibility' ); ?></label></th>
 					<td><input id="sa-days" type="number" min="0" max="30" step="1" class="small-text" name="sa[response_days]" value="<?php echo esc_attr( (string) (int) $s['response_days'] ); ?>"> <?php esc_html_e( 'business days', 'scout-accessibility' ); ?>
-						<p class="description"><?php esc_html_e( 'The time you can really keep to. Leave at 0 to leave the reply time out of the statement.', 'scout-accessibility' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'A reply time you can keep. Leave at 0 to leave it out.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Other formats', 'scout-accessibility' ); ?></th>
 					<td><label for="sa-formats"><input id="sa-formats" type="checkbox" name="sa[other_formats]" value="1" <?php checked( $s['other_formats'] ); ?>> <?php esc_html_e( 'Say we can send any page in another format', 'scout-accessibility' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Only turn this on if the business will really do it when asked.', 'scout-accessibility' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'Turn this on only if the business will do it when asked.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Standard', 'scout-accessibility' ); ?></th>
@@ -646,7 +646,7 @@ final class Scout_Accessibility_Admin {
 				<?php if ( ! $page ) : ?>
 					<p><?php esc_html_e( 'Create the statement page first.', 'scout-accessibility' ); ?></p>
 				<?php elseif ( ! $menus ) : ?>
-					<p><?php esc_html_e( 'This site has no classic menus. Use the shortcode instead.', 'scout-accessibility' ); ?></p>
+					<p><?php esc_html_e( 'This site has no classic menus, so add it to a page instead.', 'scout-accessibility' ); ?></p>
 				<?php else : ?>
 					<p><?php esc_html_e( 'Pick the footer menu. It counts as linked once that menu is shown in a menu location.', 'scout-accessibility' ); ?></p>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sa-inline-form">
@@ -663,16 +663,16 @@ final class Scout_Accessibility_Admin {
 				<?php endif; ?>
 			</section>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Use the shortcode', 'scout-accessibility' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Add it to a page', 'scout-accessibility' ); ?></h2>
 				<p><?php esc_html_e( 'Put this in a footer widget, a Shortcode block in the footer template, or any page.', 'scout-accessibility' ); ?></p>
 				<p><code>[<?php echo esc_html( Scout_Accessibility::LINK_CODE ); ?>]</code></p>
 			</section>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Print it automatically', 'scout-accessibility' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Add it to every page', 'scout-accessibility' ); ?></h2>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="scout_a11y_footer">
 					<?php wp_nonce_field( 'scout_a11y_footer' ); ?>
-					<p><label for="sa-footer-link"><input id="sa-footer-link" type="checkbox" name="footer_link" value="1" <?php checked( $s['footer_link'] ); ?>> <?php esc_html_e( 'Add a small link at the very bottom of every page', 'scout-accessibility' ); ?></label></p>
+					<p><label for="sa-footer-link"><input id="sa-footer-link" type="checkbox" name="footer_link" value="1" <?php checked( $s['footer_link'] ); ?>> <?php esc_html_e( 'Add a small link at the bottom of every page', 'scout-accessibility' ); ?></label></p>
 					<p class="description"><?php esc_html_e( 'For themes with no menu or widget in the footer. It sits below the theme footer.', 'scout-accessibility' ); ?></p>
 					<p><button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-accessibility' ); ?></button></p>
 				</form>

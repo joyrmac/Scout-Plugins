@@ -1,5 +1,12 @@
 # Scout Accessibility changelog
 
+## 0.1.18 (2026-11-05)
+
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
+- **Email and phone read Business info live.** The Email for barrier reports and Phone fields on the Accessibility statement screen are optional overrides. When one is blank, the statement uses Business info's email or phone at the moment the page shows. A value already saved here keeps showing exactly as before. Both hints now read "Leave blank to use Business info." and the placeholders show what Business info holds.
+- **Plainer label.** The footer box "Use the shortcode" is now "Add it to a page". The shortcode is the same.
+- **Shorter, plainer help text.** Notes on both screens are one short sentence each. "Print it automatically" is now "Add it to every page". The statement visitors read is unchanged.
+
 ## 0.1.17 (2026-11-05)
 
 - **The Accessibility statement screen opens with one status line.** Published with a View the page button, or not created yet with a link to the statement. It replaces the single status card.

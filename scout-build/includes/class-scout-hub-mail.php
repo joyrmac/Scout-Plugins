@@ -536,8 +536,8 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 		</section>
 
 		<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-build' ); ?></h2>
-			<p><?php esc_html_e( 'Every email the site sends goes out as this address. When a form asks to send as someone else, that address becomes the reply-to, so replies still reach them.', 'scout-build' ); ?></p>
+			<h2 class="sh-title"><?php esc_html_e( 'Sending address', 'scout-build' ); ?></h2>
+			<p><?php esc_html_e( 'Every email the site sends goes out as this address. Replies still reach the person who wrote.', 'scout-build' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( self::SAVE ); ?>">
 				<?php wp_nonce_field( self::SAVE ); ?>

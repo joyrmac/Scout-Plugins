@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout Build -> Chat (settings) and Chat questions (the inbox).
+ * Scout Build -> Chat (settings) and Chat messages (the inbox).
  *
  * @package Scout_Chat
  */
@@ -84,8 +84,17 @@ final class Scout_Chat_Admin {
 			array(
 				'post_type'      => Scout_Chat::CPT,
 				'post_status'    => 'private',
-				'meta_key'       => '_scout_chat_answered', // phpcs:ignore WordPress.DB.SlowDBQuery
-				'meta_value'     => '0', // phpcs:ignore WordPress.DB.SlowDBQuery
+				// Unanswered, and not already in Scout Build's request list (that list tracks those).
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery
+					array(
+						'key'   => '_scout_chat_answered',
+						'value' => '0',
+					),
+					array(
+						'key'     => '_scout_chat_request',
+						'compare' => 'NOT EXISTS',
+					),
+				),
 				'fields'         => 'ids',
 				'posts_per_page' => 99,
 				'no_found_rows'  => true,
@@ -98,8 +107,8 @@ final class Scout_Chat_Admin {
 		$parent = self::parent();
 		$n      = self::unanswered();
 		$bubble = $n ? ' <span class="awaiting-mod">' . (int) $n . '</span>' : '';
-		add_submenu_page( $parent, __( 'Chat questions', 'scout-chat' ), __( 'Chat questions', 'scout-chat' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Chat::CPT );
-		add_submenu_page( $parent, __( 'Chat settings', 'scout-chat' ), __( 'Chat settings', 'scout-chat' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Chat messages', 'scout-chat' ), __( 'Chat messages', 'scout-chat' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Chat::CPT );
+		add_submenu_page( $parent, __( 'Chat', 'scout-chat' ), __( 'Chat', 'scout-chat' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	/** Keep the Build section open while reading a question. */
@@ -156,6 +165,10 @@ final class Scout_Chat_Admin {
 			$k = (string) get_post_meta( $id, '_scout_chat_kind', true );
 			echo esc_html( array( 'question' => __( 'Question', 'scout-chat' ), 'change' => __( 'Change request', 'scout-chat' ), 'person' => __( 'Wants a person', 'scout-chat' ) )[ $k ] ?? $k );
 		} elseif ( 'scout_done' === $col ) {
+			if ( get_post_meta( $id, '_scout_chat_request', true ) ) {
+				echo '<span class="sh-pill is-good">' . esc_html__( 'In Requests', 'scout-chat' ) . '</span>';
+				return;
+			}
 			echo get_post_meta( $id, '_scout_chat_answered', true ) ? '<span class="sh-pill is-good">' . esc_html__( 'Yes', 'scout-chat' ) . '</span>' : '<span class="sh-pill is-warn">' . esc_html__( 'Not yet', 'scout-chat' ) . '</span>';
 		}
 	}
@@ -248,22 +261,22 @@ final class Scout_Chat_Admin {
 		$o  = Scout_Chat::OPTION;
 		$ai = Scout_Chat::ai_connected();
 		$n  = self::unanswered();
-		Scout_Admin_UI::open( __( 'Chat assistant', 'scout-chat' ), __( 'A chat in the corner of the site. It answers the common questions, books calls and takes change requests, and saves every visitor question to Chat questions.', 'scout-chat' ), __( 'Chat', 'scout-chat' ) );
+		Scout_Admin_UI::open( __( 'Chat', 'scout-chat' ), __( 'A chat box on the site that answers common questions and saves every message to Chat messages.', 'scout-chat' ), __( 'Chat', 'scout-chat' ) );
 		settings_errors( $o );
 		if ( $s['enabled'] ) {
 			$headline = __( 'On.', 'scout-chat' );
 			$detail   = __( 'Visitors see the chat button on every page.', 'scout-chat' );
 		} else {
 			$headline = __( 'Off.', 'scout-chat' );
-			$detail   = __( 'The chat is hidden. Fill in the details below, then tick Show the chat on the site.', 'scout-chat' );
+			$detail   = __( 'Fill in the details below, then tick Show the chat on the site.', 'scout-chat' );
 		}
-		$detail .= ' ' . ( $ai ? __( 'AI is connected and answers free-text questions.', 'scout-chat' ) : __( 'Common questions are answered right away; anything else is saved with the visitor\'s email for you to answer.', 'scout-chat' ) );
+		$detail .= ' ' . ( $ai ? __( 'AI answers free-text questions.', 'scout-chat' ) : __( 'It answers common questions and saves the rest for you.', 'scout-chat' ) );
 		if ( $n ) {
 			/* translators: %d: number of chat questions waiting for an answer. */
 			$detail .= ' ' . sprintf( _n( '%d question is waiting for an answer.', '%d questions are waiting for an answer.', $n, 'scout-chat' ), $n );
 		}
 		$state = ! $s['enabled'] ? 'off' : ( $n ? 'warn' : 'good' );
-		$go    = '<a class="button" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ) . '">' . esc_html__( 'Open Chat questions', 'scout-chat' ) . '</a>';
+		$go    = '<a class="button" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ) . '">' . esc_html__( 'Open Chat messages', 'scout-chat' ) . '</a>';
 		self::ui_status( $state, $headline, $detail, $go );
 		?>
 
@@ -274,10 +287,10 @@ final class Scout_Chat_Admin {
 				<table class="form-table" role="presentation">
 					<?php
 					self::row( __( 'Show the chat on the site', 'scout-chat' ), '<label><input type="checkbox" name="' . esc_attr( $o ) . '[enabled]" value="1" ' . checked( $s['enabled'], true, false ) . '> ' . esc_html__( 'Show the chat button on every page', 'scout-chat' ) . '</label>' );
-					self::row( __( 'Team names', 'scout-chat' ), self::text( 'team', $s['team'], 'Sean and Joy' ), __( 'Who answers. Used in the button ("Ask Sean & Joy") and the replies. Blank: "our team".', 'scout-chat' ) );
+					self::row( __( 'Team names', 'scout-chat' ), self::text( 'team', $s['team'], 'Sean and Joy' ), __( 'Who answers, shown on the button, like "Ask Sean & Joy". Blank: "our team".', 'scout-chat' ) );
 					self::row( __( 'Assistant name', 'scout-chat' ), self::text( 'name', $s['name'], __( 'Site name + assistant', 'scout-chat' ) ) );
 					self::row( __( 'Button text', 'scout-chat' ), self::text( 'launcher', $s['launcher'], __( 'Ask + team names', 'scout-chat' ) ) );
-					self::row( __( 'Photos', 'scout-chat' ), self::text( 'photo_1', $s['photo_1'], 'https://', 'url' ) . '<br>' . self::text( 'photo_2', $s['photo_2'], 'https://', 'url' ), __( 'Optional. Paste the Media links of the people who answer. They show on the button and in the chat.', 'scout-chat' ) );
+					self::row( __( 'Photos', 'scout-chat' ), self::text( 'photo_1', $s['photo_1'], 'https://', 'url' ) . '<br>' . self::text( 'photo_2', $s['photo_2'], 'https://', 'url' ), __( 'Optional. Media links to photos of the people who answer.', 'scout-chat' ) );
 					self::row( __( 'Greeting card', 'scout-chat' ), '<label><input type="checkbox" name="' . esc_attr( $o ) . '[teaser]" value="1" ' . checked( $s['teaser'], true, false ) . '> ' . esc_html__( 'Show a small greeting after a few seconds, once per visit', 'scout-chat' ) . '</label><br>' . self::text( 'teaser_by', $s['teaser_by'], 'Joy from Scout' ), __( 'Who the greeting is from.', 'scout-chat' ) );
 					?>
 				</table>
@@ -286,15 +299,15 @@ final class Scout_Chat_Admin {
 				<h2 class="sh-title"><?php esc_html_e( 'Where it sends people', 'scout-chat' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<?php
-					self::row( __( 'Email new questions to', 'scout-chat' ), self::text( 'notify', $s['notify'], get_option( 'admin_email' ), 'email' ) );
-					self::row( __( 'Text me new questions', 'scout-chat' ), self::text( 'alert', $s['alert'], '9195551234@vtext.com', 'email' ), __( 'A short text with the question and the number to text back. Use your cell number at your carrier: @vtext.com (Verizon), @tmomail.net (T-Mobile), @msg.fi.google.com (Google Fi). AT&T stopped this in 2025. Blank: no text.', 'scout-chat' ) );
-					self::row( __( 'Booking page', 'scout-chat' ), self::text( 'book_url', $s['book_url'], function_exists( 'scout_booking_url' ) ? scout_booking_url() : home_url( '/contact/' ), 'url' ), __( 'Blank uses the site\'s booking page, or Contact.', 'scout-chat' ) );
+					self::row( __( 'Email new questions to', 'scout-chat' ), self::text( 'notify', $s['notify'], Scout_Chat::notify_to(), 'email' ), __( 'Leave blank to use Send notices to in Business info.', 'scout-chat' ) );
+					self::row( __( 'Text me new questions', 'scout-chat' ), self::text( 'alert', $s['alert'], '9195551234@vtext.com', 'email' ) . '<details class="sh-more"><summary>' . esc_html__( 'More', 'scout-chat' ) . '</summary><p class="description">' . esc_html__( 'Your cell number at your carrier: @vtext.com (Verizon), @tmomail.net (T-Mobile), @msg.fi.google.com (Google Fi). AT&T stopped this in 2025.', 'scout-chat' ) . '</p></details>', __( 'Your phone\'s email-to-text address gets a short text for each new question. Blank: no text.', 'scout-chat' ) );
+					self::row( __( 'Booking page', 'scout-chat' ), self::text( 'book_url', $s['book_url'], Scout_Chat::site_booking_url(), 'url' ), __( 'Blank uses the site\'s booking page, or Contact.', 'scout-chat' ) );
 					self::row( __( 'Our work page', 'scout-chat' ), self::text( 'work_url', $s['work_url'], 'https://', 'url' ), __( 'Blank hides "Show me your work".', 'scout-chat' ) );
 					?>
 				</table>
 			</div>
 			<?php self::ui_fold_open( __( 'More options: AI connection', 'scout-chat' ) ); ?>
-				<p><?php esc_html_e( 'Sean\'s AI server answers free-text questions. The AI company\'s key stays on that server and never touches this site. Leave blank to keep collecting questions.', 'scout-chat' ); ?></p>
+				<p><?php esc_html_e( 'Connect Sean\'s AI server to answer free-text questions. Its AI key stays on that server.', 'scout-chat' ); ?></p>
 				<table class="form-table" role="presentation">
 					<?php
 					self::row( __( 'AI server address', 'scout-chat' ), self::text( 'ai_url', $s['ai_url'], 'https://', 'url' ) );
@@ -305,7 +318,7 @@ final class Scout_Chat_Admin {
 							__( 'Connection key', 'scout-chat' ),
 							self::text( 'ai_key', '', '' !== $s['ai_key'] ? __( 'Saved. Leave blank to keep it.', 'scout-chat' ) : '', 'password' )
 							. ( '' !== $s['ai_key'] ? '<br><label><input type="checkbox" name="' . esc_attr( $o ) . '[ai_key_clear]" value="1"> ' . esc_html__( 'Remove the saved key', 'scout-chat' ) . '</label>' : '' ),
-							__( 'The key Sean\'s server gives this site. Or define SCOUT_CHAT_AI_KEY in wp-config.php.', 'scout-chat' )
+							__( 'The key Sean\'s server gives this site, or SCOUT_CHAT_AI_KEY in wp-config.php.', 'scout-chat' )
 						);
 					}
 					?>

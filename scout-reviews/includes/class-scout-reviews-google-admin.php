@@ -37,10 +37,10 @@ final class Scout_Reviews_Google_Admin {
 		$settings = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
 		?>
 		<section class="sh-box srk-google">
-			<h2 class="sh-title"><?php esc_html_e( 'Google reviews sync', 'scout-reviews' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Bring in Google reviews', 'scout-reviews' ); ?></h2>
 
 			<?php if ( ! Scout_Reviews_Google::has_credentials() ) : ?>
-				<p><?php esc_html_e( 'Step 1: paste the OAuth client ID and secret from Google Cloud (APIs & Services > Credentials). Add this exact address as an "Authorized redirect URI" on that client:', 'scout-reviews' ); ?></p>
+				<p><?php esc_html_e( 'Step 1: in Google Cloud (APIs & Services > Credentials), add this address as an "Authorized redirect URI":', 'scout-reviews' ); ?></p>
 				<p><code class="srk-select"><?php echo esc_html( Scout_Reviews_Google::redirect_uri() ); ?></code></p>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="scout_reviews_google_credentials" />
@@ -76,7 +76,7 @@ final class Scout_Reviews_Google_Admin {
 				<p>
 					<?php
 					/* translators: %s: business name on Google. */
-					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones land in the Review inbox, where one click adds each to the right pages.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
+					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews come in once a day and wait in New reviews.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
 					?>
 				</p>
 				<p>
@@ -341,7 +341,7 @@ final class Scout_Reviews_Google_Admin {
 		if ( $removed ) {
 			esc_html_e( 'This review was removed from Google, so it was taken off the site. It stays here for your records.', 'scout-reviews' );
 		} else {
-			esc_html_e( 'Synced from Google. The name, text, stars, and date come from Google and update on every sync, so edits to them will not stick. You choose whether it shows (Publish or Draft), the reviewer detail, Featured, and the order.', 'scout-reviews' );
+			esc_html_e( 'From Google. The name, text, stars and date update from Google, so edits to them won\'t stick.', 'scout-reviews' );
 		}
 		echo '</p></div>';
 	}

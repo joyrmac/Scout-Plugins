@@ -12,7 +12,7 @@ and kept general, so any event or nonprofit client with sponsors can use it.
 when `SCOUT_HUB_BRAND` is false). Editors and administrators can manage
 partners; only administrators change Settings.
 
-- **Overview**: how many partners are on the site, by level, what ends in the
+- **Home**: how many partners are on the site, by level, what ends in the
   next 30 days, and clicks to each partner this month and last.
 - **All partners / Add partner**: name, logo (the featured image), and the
   **Partner details** box: level, website, one line, where they appear, and

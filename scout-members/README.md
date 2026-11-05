@@ -17,16 +17,16 @@ payment moves the renewal date forward one period through
 (a plain people icon when `SCOUT_HUB_BRAND` is false). Only people who can
 list users (administrators) see it, because member records are personal.
 
-- **Overview**: members, applications to read, renewals in the next 30 days,
+- **Home**: members, applications to read, renewals in the next 30 days,
   each application with its answers and **Approve and welcome** or **Not
   accepted**, and the memberships renewing soon.
 - **All members**: status, plan, renewal date and renewal price, each
   editable in place, and **Paid today**.
-- **Renewals**: payments to review (refunds, cancellations, a payment from
+- **Renewals due**: payments to review (refunds, cancellations, a payment from
   someone declined, a dues order no member matched), then everyone renewing
   in the next 30 days, past due or lapsed, approved but not paid yet, and who
   paid in the last 30 days, with the latest line of each member's history.
-- **Import**: bring current members in from a CSV, such as a Squarespace
+- **Add from spreadsheet**: bring current members in from a CSV, such as a Squarespace
   orders export. Preview first; running the same file twice changes nothing.
 - **Settings**: the membership page, plans, the next-step note sent after
   approval, Dues and renewals, the community agreements link, a minimum age,
@@ -50,7 +50,7 @@ ever saved: every payment, renewals included, is a fresh checkout.
   dues**, and members-only pages open the moment they pay. With the
   application, applicants go straight to the checkout after applying; the
   payment is held, their year starts the day they are approved, and anyone not
-  accepted is listed under Renewals to refund.
+  accepted is listed under Renewals due to refund.
 - **The pay link** carries the member and a signed key, so it works signed in
   or not, and ties the order to the member in the order's own meta. It stops
   working once used. Dues products cannot go in the cart any other way for
@@ -61,9 +61,9 @@ ever saved: every payment, renewals included, is a fresh checkout.
   and the member's history. Orders of dues alone complete themselves when a
   card gateway reports payment. A dues order with no pay link falls back to
   the buyer's account, then their email; one that matches nobody waits under
-  Renewals.
+  Renewals due.
 - **Refunds and cancellations** never take a membership away: the member is
-  flagged under Renewals and the owner chooses Keep the membership or End the
+  flagged under Renewals due and the owner chooses Keep the membership or End the
   membership.
 
 ## Renewals

@@ -48,10 +48,10 @@ final class Scout_Booking_Admin {
 	public static function menu(): void {
 		$waiting = count( Scout_Booking::with_status( 'requested' ) );
 		$badge   = $waiting ? ' <span class="awaiting-mod">' . (int) $waiting . '</span>' : '';
-		add_menu_page( __( 'Scout Booking', 'scout-booking' ), __( 'Bookings', 'scout-booking' ) . $badge, self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.3' );
+		add_menu_page( __( 'Bookings', 'scout-booking' ), __( 'Bookings', 'scout-booking' ) . $badge, self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.3' );
 		add_submenu_page( self::SLUG, __( 'Bookings', 'scout-booking' ), __( 'Schedule', 'scout-booking' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ) );
 		add_submenu_page( self::SLUG, __( 'Session types', 'scout-booking' ), __( 'Session types', 'scout-booking' ), self::CAP, self::SLUG . '-types', array( 'Scout_Booking_Types_Admin', 'render' ) );
-		add_submenu_page( self::SLUG, __( 'Booking settings', 'scout-booking' ), __( 'Settings', 'scout-booking' ), self::CAP, self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
+		add_submenu_page( self::SLUG, __( 'Settings', 'scout-booking' ), __( 'Settings', 'scout-booking' ), self::CAP, self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -252,7 +252,7 @@ final class Scout_Booking_Admin {
 	private static function setup_notes(): void {
 		$notes = array();
 		if ( ! Scout_Booking::payments_on() ) {
-			$notes[] = __( 'Payments are off: WooCommerce is not active, so every booking comes in as a request for you to approve, and nothing is charged on the site.', 'scout-booking' );
+			$notes[] = __( 'Payments are off because WooCommerce is not on. Every booking comes in as a request, and nothing is charged.', 'scout-booking' );
 		}
 		if ( ! Scout_Booking::types( true ) ) {
 			$notes[] = __( 'No session types are turned on yet. Add one under Session types.', 'scout-booking' );
@@ -284,8 +284,8 @@ final class Scout_Booking_Admin {
 		$await = array_merge( Scout_Booking::with_status( 'approved' ), array_filter( Scout_Booking::with_status( 'pending' ), static fn( $r ) => $r['order_id'] > 0 ) );
 
 		Scout_Admin_UI::open(
-			__( 'Bookings', 'scout-booking' ),
-			__( 'Your sessions by day or week, requests waiting for you, and who has paid. Block time you are away, and add the calendar feed to your phone.', 'scout-booking' ),
+			__( 'Schedule', 'scout-booking' ),
+			__( 'Your sessions by day or week, requests waiting for you, and who has paid.', 'scout-booking' ),
 			__( 'Bookings', 'scout-booking' )
 		);
 		self::message();
@@ -326,7 +326,7 @@ final class Scout_Booking_Admin {
 			<div class="sbk-main">
 				<section class="sh-box" id="sb-requests">
 					<h2 class="sh-title"><?php esc_html_e( 'Requests to approve', 'scout-booking' ); ?></h2>
-					<p><?php esc_html_e( 'Sessions marked "by request only" wait here. Approve to send the client a link to pay and book; decline to send a short, kind note. The time stays held until you decide.', 'scout-booking' ); ?></p>
+					<p><?php esc_html_e( '"By request only" sessions wait here. Approve sends a link to pay and book. Decline sends a short note.', 'scout-booking' ); ?></p>
 					<?php if ( $reqs ) : ?>
 						<ul class="sbk-list">
 							<?php
@@ -513,14 +513,15 @@ final class Scout_Booking_Admin {
 		$url = Scout_Booking_Front::feed_url();
 		?>
 		<section class="sh-box" id="sb-feed">
-			<h2 class="sh-title"><?php esc_html_e( 'Your calendar feed', 'scout-booking' ); ?></h2>
-			<p><?php esc_html_e( 'Subscribe to this private address in your phone calendar and every booking, request and blocked time shows up there, updated about once an hour.', 'scout-booking' ); ?></p>
-			<p><label class="screen-reader-text" for="sbk-feed"><?php esc_html_e( 'Calendar feed address', 'scout-booking' ); ?></label><input type="text" id="sbk-feed" class="large-text code" readonly value="<?php echo esc_attr( $url ); ?>" onclick="this.select()"></p>
-			<p class="sh-note"><?php esc_html_e( 'iPhone: Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar, and paste it. Google Calendar: Other calendars, From URL. Anyone with the address can see your bookings, so keep it to yourself.', 'scout-booking' ); ?></p>
+			<h2 class="sh-title"><?php esc_html_e( 'Phone calendar link', 'scout-booking' ); ?></h2>
+			<p><?php esc_html_e( 'Add this link to your phone calendar to see every booking there. It updates about once an hour.', 'scout-booking' ); ?></p>
+			<p><label class="screen-reader-text" for="sbk-feed"><?php esc_html_e( 'Phone calendar link', 'scout-booking' ); ?></label><input type="text" id="sbk-feed" class="large-text code" readonly value="<?php echo esc_attr( $url ); ?>" onclick="this.select()"></p>
+			<p class="sh-note"><?php esc_html_e( 'iPhone: Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar. Google Calendar: Other calendars, From URL.', 'scout-booking' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Anyone with this link can see your bookings, so keep it private.', 'scout-booking' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="scout_booking_feed_reset">
 				<?php wp_nonce_field( 'scout_booking_feed_reset' ); ?>
-				<button type="submit" class="button sh-quiet"><?php esc_html_e( 'Make a new address (the old one stops working)', 'scout-booking' ); ?></button>
+				<button type="submit" class="button sh-quiet"><?php esc_html_e( 'Make a new link (the old one stops working)', 'scout-booking' ); ?></button>
 			</form>
 		</section>
 		<?php
@@ -532,7 +533,7 @@ final class Scout_Booking_Admin {
 		}
 		$s = Scout_Booking::settings();
 		Scout_Admin_UI::open(
-			__( 'Booking settings', 'scout-booking' ),
+			__( 'Settings', 'scout-booking' ),
 			__( 'How far ahead people can book, the cancellation window, and where booking emails go.', 'scout-booking' ),
 			__( 'Bookings', 'scout-booking' )
 		);
@@ -546,7 +547,7 @@ final class Scout_Booking_Admin {
 			<?php wp_nonce_field( 'scout_booking_settings' ); ?>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Page and emails', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Page & emails', 'scout-booking' ); ?></h2>
 				<p class="sbk-field">
 					<label for="sbk-page"><?php esc_html_e( 'Booking page', 'scout-booking' ); ?></label>
 					<?php
@@ -562,12 +563,12 @@ final class Scout_Booking_Admin {
 					?>
 					<span class="description"><?php esc_html_e( 'Links in booking emails lead here. Set by itself the first time the form is shown.', 'scout-booking' ); ?></span>
 				</p>
-				<p class="sbk-field"><label for="sbk-notify"><?php esc_html_e( 'Send booking emails for you to', 'scout-booking' ); ?></label><input type="email" id="sbk-notify" name="sb[notify]" class="regular-text" value="<?php echo esc_attr( $s['notify'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>"><span class="description"><?php esc_html_e( 'Empty uses the site email. Clients see this address when a change is too late to make online.', 'scout-booking' ); ?></span></p>
+				<p class="sbk-field"><label for="sbk-notify"><?php esc_html_e( 'Send booking emails for you to', 'scout-booking' ); ?></label><input type="email" id="sbk-notify" name="sb[notify]" class="regular-text" value="<?php echo esc_attr( $s['notify'] ); ?>" placeholder="<?php echo esc_attr( Scout_Booking::shared_notice_email() ); ?>"><span class="description"><?php esc_html_e( 'Leave it blank to use the notice address in Business info. Clients see this address when a change is too late to make online.', 'scout-booking' ); ?></span></p>
 				<p class="sbk-check"><label><input type="checkbox" name="sb[reminders]" value="1" <?php checked( $s['reminders'] ); ?>> <?php esc_html_e( 'Email each client a reminder the day before their session.', 'scout-booking' ); ?></label></p>
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Changes and cancellations', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Changes & cancellations', 'scout-booking' ); ?></h2>
 				<?php $num( 'cancel_hours', __( 'Cancellation window, in hours', 'scout-booking' ), __( 'Clients can change or cancel online until this many hours before the session.', 'scout-booking' ), 0, 720, $s['cancel_hours'] ); ?>
 				<fieldset class="sbk-field">
 					<legend><?php esc_html_e( 'Inside the window', 'scout-booking' ); ?></legend>
@@ -602,8 +603,8 @@ final class Scout_Booking_Admin {
 					<?php
 					echo esc_html(
 						Scout_Booking::scout_hours_on()
-							? __( 'Sessions follow your business hours from Scout Hours, holiday closures included. These hours are used only if Scout Hours is switched off. A session type can also have its own hours.', 'scout-booking' )
-							: __( 'The days and hours people can book. When Scout Hours is on and its hours are confirmed, sessions follow those instead. A session type can also have its own hours.', 'scout-booking' )
+							? __( 'Sessions follow your Scout Hours, holidays included. These hours count only if Scout Hours is off.', 'scout-booking' )
+							: __( 'The days and hours people can book. A session type can also have its own hours.', 'scout-booking' )
 					);
 					?>
 				</p>

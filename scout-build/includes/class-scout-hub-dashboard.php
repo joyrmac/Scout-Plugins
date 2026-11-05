@@ -164,7 +164,7 @@ final class Scout_Hub_Dashboard {
 				/* translators: %d: updates this month */
 				echo esc_html( sprintf( _n( '%d update to your site this month.', '%d updates to your site this month.', $n, 'scout-build' ), $n ) );
 				?>
-				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'log' ) ); ?>"><?php echo esc_html( Scout_Hub_Access::is_operator() ? __( 'Site log', 'scout-build' ) : __( 'Your site', 'scout-build' ) ); ?> &rsaquo;</a>
+				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'log' ) ); ?>"><?php echo esc_html__( 'Site history', 'scout-build' ); ?> &rsaquo;</a>
 			</p>
 		<?php endif; ?>
 		<?php if ( $todo ) : ?>
@@ -186,8 +186,8 @@ final class Scout_Hub_Dashboard {
 		</form>
 		<p class="sd-links">
 			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'overview' ) ); ?>"><?php esc_html_e( 'Open Scout', 'scout-build' ); ?></a>
-			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'health' ) ); ?>"><?php esc_html_e( 'Site health', 'scout-build' ); ?></a>
-			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'requests' ) ); ?>"><?php esc_html_e( 'Your requests', 'scout-build' ); ?></a>
+			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'health' ) ); ?>"><?php esc_html_e( 'Site status', 'scout-build' ); ?></a>
+			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'requests' ) ); ?>"><?php esc_html_e( 'Request a change', 'scout-build' ); ?></a>
 		</p>
 		<?php
 	}

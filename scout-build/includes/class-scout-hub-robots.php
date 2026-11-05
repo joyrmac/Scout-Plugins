@@ -36,7 +36,7 @@ final class Scout_Hub_Robots {
 
 	/** A page with no menu item: reached from the Site health card. */
 	public static function menu(): void {
-		add_submenu_page( '', __( 'robots.txt file', 'scout-build' ), '', 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
+		add_submenu_page( '', __( 'Search engine rules', 'scout-build' ), '', 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -193,7 +193,7 @@ final class Scout_Hub_Robots {
 		if ( ! @rename( self::file(), $backup ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			self::done( __( 'The server would not rename the file. Nothing changed.', 'scout-build' ), 'error' );
 		}
-		self::done( __( 'Done. WordPress now writes robots.txt. The old file is kept as a backup. Clear the host\'s cache (WP Engine caches robots.txt) before you check it.', 'scout-build' ), 'success' );
+		self::done( __( 'Done. WordPress now writes robots.txt, and the old file is kept as a backup. Clear the host\'s cache before you check.', 'scout-build' ), 'success' );
 	}
 
 	public static function restore(): void {
@@ -219,15 +219,15 @@ final class Scout_Hub_Robots {
 		$lost = $has ? self::lost_rules( (string) file_get_contents( self::file() ), self::generated() ) : array();
 		$op   = Scout_Hub_Access::is_operator();
 
-		Scout_Admin_UI::open( __( 'robots.txt file', 'scout-build' ), __( 'robots.txt tells search engines and AI tools what they may read. WordPress writes it, and Scout features add to it, unless a file on the server takes over.', 'scout-build' ), __( 'Site health', 'scout-build' ) );
+		Scout_Admin_UI::open( __( 'Search engine rules', 'scout-build' ), __( 'What search engines and AI tools may read, set in a file called robots.txt.', 'scout-build' ), __( 'Search', 'scout-build' ) );
 		if ( $notice ) {
 			printf( '<div class="notice notice-%s inline"><p>%s</p></div>', esc_attr( $notice['type'] ), esc_html( $notice['message'] ) );
 		}
 		?>
 		<div class="sh-box">
 			<?php if ( ! $has ) : ?>
-				<h2 class="sh-title"><?php esc_html_e( 'WordPress writes robots.txt', 'scout-build' ); ?></h2>
-				<p><?php esc_html_e( 'There is no file in the way, so everything Scout adds reaches search engines.', 'scout-build' ); ?> <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View robots.txt', 'scout-build' ); ?></a></p>
+				<h2 class="sh-title"><?php esc_html_e( 'The rules are working', 'scout-build' ); ?></h2>
+				<p><?php esc_html_e( 'Nothing on the server blocks them, so everything Scout adds reaches search engines.', 'scout-build' ); ?> <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View robots.txt', 'scout-build' ); ?></a></p>
 				<?php if ( $op && self::latest_backup() ) : ?>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 						<input type="hidden" name="action" value="<?php echo esc_attr( self::RESTORE ); ?>">
@@ -237,7 +237,7 @@ final class Scout_Hub_Robots {
 				<?php endif; ?>
 			<?php else : ?>
 				<h2 class="sh-title"><?php esc_html_e( 'A file on the server is taking over', 'scout-build' ); ?></h2>
-				<p><?php esc_html_e( 'While this file is there, WordPress\'s robots.txt and everything Scout adds to it are ignored.', 'scout-build' ); ?></p>
+				<p><?php esc_html_e( 'While this file is there, search engines ignore WordPress\'s rules and everything Scout adds.', 'scout-build' ); ?></p>
 				<?php if ( '' === $why ) : ?>
 					<p><strong><?php esc_html_e( 'Safe to switch: WordPress\'s version keeps every rule in the file.', 'scout-build' ); ?></strong></p>
 					<?php if ( $op ) : ?>

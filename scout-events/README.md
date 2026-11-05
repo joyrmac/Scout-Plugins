@@ -17,8 +17,8 @@ site turns on; this plugin never sees card details.
 **Events** has its own item in the dashboard sidebar, right under Scout, with the same Scout
 bolt (a plain calendar icon on partner sites with `SCOUT_HUB_BRAND` false), so
 it reads as Scout's and sits apart from the site's Build settings. Under it:
-**Overview** (the numbers, a **Needs you** list of everything waiting on a
-person, and Coming up), **All events**, **Sessions**, **Speakers**, **Import**
+**Home** (the numbers, a **Needs you** list of everything waiting on a
+person, and Coming up), **All events**, **Sessions**, **Speakers**, **Add from spreadsheet**
 and **Settings**. Other Scout features add their screens to this menu on the
 `scout_events_menu` action and their items to Needs you with the
 `scout_events_needs_you` filter. Anyone who can edit posts can manage events;
@@ -128,7 +128,7 @@ On a phone the cards turn into a compact list.
   speaker page never shows email or phone, so use it on members-only pages.
 
 Topics are tags on speakers, sessions and vendors (the **Topics** box on each,
-or **Events, Topics**), or a `topics` column in the CSV files (`Yoga|Breath`).
+or **Events, Speaker topics**), or a `topics` column in the CSV files (`Yoga|Breath`).
 
 ## Tickets from a WooCommerce shop
 
@@ -235,6 +235,12 @@ event's slug; the first event in the cart at checkout), so the consent record
 keeps them. A listener that takes four arguments still works. Scout Events
 never calls a newsletter service itself.
 
+**With Scout Newsletter active, the checkout box is Scout Newsletter's.** The
+ticket checkout shows Scout Newsletter's one box (with its words) instead of
+this one, Scout Newsletter saves the consent record when the order is paid
+(tagged `ticket`), and this plugin only notes the time on the first ticket. The
+free sign-up form keeps its own box. Without Scout Newsletter, nothing changes.
+
 ## Regions
 
 For events that run in more than one place. Set the region once, on the
@@ -251,7 +257,7 @@ region buttons next to the topics.
 ## Topic pages
 
 A public page per topic, for search: everything on "Water" or "Solar" in one
-place. **Events, Topics**: write the topic's description, then tick **Make a
+place. **Events, Speaker topics**: write the topic's description, then tick **Make a
 draft page for this topic** (or tick several topics and use **Make topic
 pages**). Each page starts as a draft under a page with the slug `topics`
 when there is one, with the description as its introduction and search

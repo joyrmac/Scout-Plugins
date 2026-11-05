@@ -461,7 +461,7 @@ final class Scout_Events_Presenters {
 		$subject = sprintf( __( 'New presenter application: %s', 'scout-events' ), $in['name'] );
 		/* translators: %s: link to review. */
 		$body = sprintf( __( "A new presenter applied. Review them here:\n%s", 'scout-events' ), admin_url( 'post.php?post=' . (int) $speaker . '&action=edit' ) );
-		wp_mail( (string) get_option( 'admin_email' ), $subject, $body );
+		wp_mail( Scout_Events::notice_email(), $subject, $body );
 		self::back( $photo < 0 ? 'photo' : 'applied' );
 	}
 

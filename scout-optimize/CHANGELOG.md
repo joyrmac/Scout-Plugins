@@ -1,5 +1,11 @@
 # Changelog — scout-optimize
 
+## 0.9.9 (2026-11-05)
+
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
+- **Plainer label.** Optimize existing images is now Shrink older photos, on the button and on its screen. The page address is unchanged.
+- **Shorter help text.** The Image optimizer and Shrink older photos screens say each thing once, and the link back reads Image optimizer, the same as the menu.
+
 ## 0.9.8 (2026-11-05)
 
 - **The Image optimizer screen opens with one status line.** It says whether new uploads are optimized, the size limit and quality, which smaller copies are made, and whether visitors get them. Optimizing images already in the library and what the server can do now come before the settings.

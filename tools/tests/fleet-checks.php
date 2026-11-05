@@ -96,7 +96,7 @@ plugin( 'scout-forms-guard', '0.3.0' );
 plugin( 'scout-build', '0.6.7' );
 feed( array( 'scout-forms-guard-v0.2.0', 'scout-build-v0.6.6' ) );
 $r = Scout_Hub_Health::test_builds();
-ok( 'warn' === $r['state'] && '2 plugins' === $r['value'] && false !== strpos( $r['details'], 'Scout Forms Guard 0.3.0 is newer than the newest release (0.2.0)' ) && 2 === count( $r['items'] ), 'newer than any release: warn, 2 plugins' );
+ok( 'warn' === $r['state'] && '2 plugins' === $r['value'] && false !== strpos( $r['details'], 'Scout Forms Guard 0.3.0 is newer than the latest release (0.2.0)' ) && 2 === count( $r['items'] ), 'newer than any release: warn, 2 plugins' );
 
 t_reset();
 plugin( 'scout-forms-guard', '0.3.0' );
@@ -171,7 +171,7 @@ t_reset();
 ok( null === Scout_Hub_Health::review_totals(), 'no totals entered: no row' );
 Scout_Reviews_Settings::$profiles = array( 'google' => array( 'rating' => 5.0, 'count' => 17 ) );
 $r = Scout_Hub_Health::review_totals();
-ok( 'warn' === $r['state'] && false !== strpos( $r['note'], 'Update the totals once to start tracking.' ), 'no timestamp yet: warn, update once' );
+ok( 'warn' === $r['state'] && false !== strpos( $r['note'], 'Update the totals once to start.' ), 'no timestamp yet: warn, update once' );
 update_option( 'scout_reviews_totals_updated', time() - 5 * DAY_IN_SECONDS );
 $r = Scout_Hub_Health::review_totals();
 ok( 'good' === $r['state'] && '5 days ago' === $r['value'], 'updated 5 days ago: good' );

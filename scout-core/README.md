@@ -26,8 +26,9 @@ instead of a data-loss event.
 
 1. Copy `scout-core/` into `wp-content/plugins/`.
 2. Activate it. On activation it registers the types and flushes rewrite rules.
-3. Fill in the business identity from the Scout admin screen: name, address,
-   phone, email, hours, profiles.
+3. Fill in the business identity from the Scout admin screen (Business info):
+   name, address, phone, email, the address that gets notices, profiles.
+   Weekly hours live in Scout Hours.
 4. (Per client) add a companion plugin for that client's own types. See
    [`../scout-rvpark`](../scout-rvpark) for the worked example.
 
@@ -44,13 +45,25 @@ Requires WordPress 6.5+ (for Block Bindings) and PHP 8.0+.
 | `testimonial` | Author name | The quote | location, rating, source, source URL, date, plus a featured image for handwritten scans |
 | `faq` | The question | The answer | none (title + content is all FAQPage needs) |
 
-**Business identity.** Name, legal name, schema type, phone, email, full
-address, price range, geo, hours, and profile URLs. One option, read everywhere,
-typed in once.
+**Business identity.** Name, legal name, type of business (the schema type),
+phone, email, "Send notices to", full address, price range, geo, and profile
+URLs. One option, read everywhere, typed in once. The old "Hours (one line per
+day)" box is no longer shown (2026-11-05); a site's saved text under the
+`hours` key is kept and still readable through the `scout/business` binding.
+
+**One notice address.** `scout_core_notice_email(): string` returns Business
+info's "Send notices to" when set, else Business info's email, else the
+WordPress admin email. Form, booking and chat plugins call it guarded,
+`function_exists( 'scout_core_notice_email' ) ? scout_core_notice_email() : <their old default>`,
+and keep their own "send notices to" field as an optional override.
 
 **Schema.** One JSON-LD `@graph` in `wp_head`: LocalBusiness (or the configured
-subtype), WebSite, FAQPage, Review and AggregateRating from testimonials, and
-BlogPosting on posts. Stable `@id`s throughout.
+subtype), WebSite, FAQPage and BlogPosting on posts. Stable `@id`s throughout.
+No star rating or Review entries are built from testimonials (removed
+2026-11-05: hand-picked quotes are not a platform's full count). A plugin with
+real platform totals adds an AggregateRating through the
+`scout_schema_aggregate_rating` filter (default empty). Scout AI Search adds a
+page's questions and answers to this graph through `scout_schema_graph`.
 
 **SEO.** Titles, meta descriptions, canonicals, Open Graph and Twitter tags,
 robots control, an editor snippet preview with live character counts, global
@@ -120,7 +133,7 @@ A theme lists the copy it bundles in `scout-sync.json` at its root: page
 content, page fields, SEO, shared settings, site title and tagline. Scout
 compares each item with what WordPress holds and with what was there at the
 last sync. Pages nobody edited update on their own after a theme update;
-anything changed in WordPress waits on **Scout → Content → Site Sync** for
+anything changed in WordPress waits on **Scout → Scout tools → Page copy** for
 "Keep the WordPress copy" or "Use the theme copy". A page the bundle names
 and the site lacks is created when its entry says `"create": true` (pages
 publish, `posts` arrive as drafts, 1.6.5). Every sync can be undone. A
@@ -198,7 +211,7 @@ theme already says:
 $d = scout_design();                       // mode, colors, fonts, radius, logo, mark (+ logo_url, mark_url)
 $d = scout_design( 'call buttons' );       // the "## Feature: call buttons" section laid over the tokens
 echo '<style>' . scout_design_css() . '</style>';   // :root{--scout-bg:...;--scout-accent-fill:...;--scout-radius-card:...}
-scout_design_issues();                     // contrast pairs that fail 4.5:1 (Scout Build shows them in Site health)
+scout_design_issues();                     // contrast pairs that fail 4.5:1 (Scout Build shows them in Site status)
 ```
 
 Order of truth: Scout's defaults, then the active theme's `theme.json`
@@ -216,7 +229,7 @@ line runs only while `! scout_core_owns( 'hours' )`.
   `BreadcrumbList` schema. Remove the theme's own breadcrumb schema in the same release.
   Adjust the trail with `scout_core_breadcrumb_trail`, for example to put a page that acts
   as an archive (Work, Services) before its items.
-- **Verification:** Get found → SEO, "Google Search Console verification code" and
+- **Verification:** Search → Search settings, "Google Search Console verification code" and
   "Bing Webmaster Tools verification code". The tags print on the front page only.
 - **Thank-you pages:** `noindex` and out of the sitemap. These are Gravity Forms
   confirmation pages, plus the addresses thank-you and thanks. Add more with
@@ -240,7 +253,7 @@ every client site at the next automatic update. CI checks them
 | API | Used by | For |
 |---|---|---|
 | `Scout_Core_Business::get()` (keys `name`, `phone`, `email`, `city`, `region`, `postal`, `same_as`) | scout-cards | Business details on the cards and in the saved contact |
-| The `scout` admin menu slug | scout-cards | Puts Cards & Links inside the Scout menu |
+| The `scout` admin menu slug | scout-cards | Puts Cards and links inside the Scout menu |
 | `Scout_SEO_Head::output` on `wp_head` priority 1 | scout-cards | Removed on card pages, which print their own tags |
 | `scout_design()`, `scout_design_css()`, `scout_design_issues()` | scout-build and every plugin with a front-end look | The site's colors, fonts, corners, logo and mark from the theme's DESIGN.md |
 | `scout_core_owns( $job )` | every Scout theme (via the theme kit) | Whether a plugin does a job here, so a theme fallback stands down |

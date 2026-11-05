@@ -1,7 +1,7 @@
 <?php
 /**
  * Remove the settings on delete. Saved chat questions are kept: they are the
- * client's records of what visitors asked. Delete them from Chat questions
+ * client's records of what visitors asked. Delete them from Chat messages
  * first if they should go too.
  *
  * @package Scout_Chat

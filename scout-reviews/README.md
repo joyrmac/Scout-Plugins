@@ -10,7 +10,7 @@ Standalone: does not need Scout Core.
 ## Using it
 
 Where the screens are: on a site with a Build section (Scout Build, Recon Build,
-Site Build), every Reviews screen sits inside it: Reviews, Review inbox, Ask for
+Site Build), every Reviews screen sits inside it: Reviews, New reviews, Ask for
 reviews and Review settings. On any other site the plugin keeps its own Reviews
 menu, with the same screens under it.
 
@@ -35,9 +35,9 @@ menu, with the same screens under it.
 Options: `layout` (grid, row, list), `count`, `source`, `featured`,
 `min_rating`, `summary`, `topic`, `fallback`.
 
-## Inbox and topics (0.3.0)
+## New reviews and topics (0.3.0)
 
-New Google reviews land in **Review inbox**. Each card has the pages it
+New Google reviews land in **New reviews**. Each card has the pages it
 belongs on pre-checked (from each topic's keywords). Click **Add to site** and
 it shows on those pages; **Skip** keeps it as a hidden draft.
 
@@ -53,7 +53,7 @@ domain and everything needed to share it:
 |---|---|
 | `/review/` | The review page: the ask, a button to the main platform, smaller buttons for the others, and a quiet private note link |
 | `/review/?via=qr` | The same page, counted as a QR scan (also `text`, `email`, `card`) |
-| `/review/note/` | The private note form. Entries land in the Review inbox and are emailed to the site admin (filter `scout_reviews_note_recipient`) |
+| `/review/note/` | The private note form. Entries land in New reviews and are emailed to the note address set in Reviews, or to the notice address in Business info when that is blank (filter `scout_reviews_note_recipient`) |
 
 The screen also has the QR code (SVG, PNG), three printable card layouts, a
 text message and an email ready to copy, and monthly visit counts by source.
@@ -121,7 +121,7 @@ for law firms, state bar advertising rules.
 
 Once Google approves API access ([setup steps](docs/google-business-profile-api.md)):
 
-1. **Review settings > Google reviews sync.** Paste the OAuth client ID and
+1. **Review settings > Bring in Google reviews.** Paste the OAuth client ID and
    secret, or define `SCOUT_REVIEWS_GOOGLE_CLIENT_ID` and
    `SCOUT_REVIEWS_GOOGLE_CLIENT_SECRET` in `wp-config.php` (better).
 2. **Connect Google** and sign in with the account that manages the profile.
@@ -161,7 +161,7 @@ themes. To restyle:
 
 | What | Where it is kept | How long | Shared with |
 |---|---|---|---|
-| What a person sends on the private note form: their name, their note, a star rating (optional), their business name (optional), whether they said it is OK to show it on the website, and the date it was sent (When someone sends the note form at /review/note/. A note is only shown on the website if the person ticked the OK box.) | This website's database, as draft reviews in Reviews > Inbox | Until someone deletes it | Emailed to the site's own address (the note email set in Reviews, or the site admin email) |
+| What a person sends on the private note form: their name, their note, a star rating (optional), their business name (optional), whether they said it is OK to show it on the website, and the date it was sent (When someone sends the note form at /review/note/. A note is only shown on the website if the person ticked the OK box.) | This website's database, as draft reviews in Reviews > New reviews | Until someone deletes it | Emailed to the site's own address (the note email set in Reviews, or the notice address in Business info) |
 | A scrambled (hashed) form of the visitor's IP address, with a count of notes sent from it, used to limit notes to five an hour (When someone sends the private note form.) | A temporary record in this website's database | One hour | Nobody |
 | A count of visits to the review page, kept as monthly totals by how the link was shared (QR code, text, email, card or plain link). Nothing about the visitor is saved with it. (When someone opens the review page (/review/). Search engines, link previews and signed-in staff are not counted.) | This website's database, in the plugin's settings | The last 13 months of totals | Nobody |
 | Public Google reviews of the business, copied from its Google Business Profile: the reviewer's name as Google shows it (or "A Google user"), the review text, star rating, date, and the address of the reviewer's Google profile photo (Only when Google is connected in the Reviews settings. Reviews with stars but no words are not copied.) | This website's database, as reviews. New ones arrive as drafts. | Until someone deletes it. A daily sync updates each one from Google. A review removed from Google is taken off the site and kept as a draft. | Nobody |

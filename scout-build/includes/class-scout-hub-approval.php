@@ -287,11 +287,11 @@ final class Scout_Hub_Approval {
 		};
 		echo '<section class="sh-box" id="sh-approval"><h2 class="sh-title">' . esc_html__( 'Waiting for your OK', 'scout-build' ) . '</h2>';
 		if ( ! $on ) {
-			echo '<p>' . esc_html__( 'Off on this site. Scout releases install by themselves when their ring comes up.', 'scout-build' ) . '</p>';
+			echo '<p>' . esc_html__( 'Off on this site. Scout releases install by themselves when their turn in the update order comes up.', 'scout-build' ) . '</p>';
 		} elseif ( ! $waiting ) {
 			echo '<p><span class="sh-tag is-current">' . esc_html__( 'Nothing waiting', 'scout-build' ) . '</span> ' . esc_html__( 'New releases stop here until you approve them. Check each one on staging first.', 'scout-build' ) . '</p>';
 		} else {
-			echo '<p>' . esc_html__( 'These passed their staging check? Approve them and they install here. Add who said yes, like "Client OK by text, Nov 5".', 'scout-build' ) . '</p>';
+			echo '<p>' . esc_html__( 'Passed the staging check? Approve them here, and note who said yes, like "Client OK by text, Nov 5".', 'scout-build' ) . '</p>';
 			echo '<table class="sh-table sh-table-plain"><thead><tr><th scope="col">' . esc_html__( 'Update', 'scout-build' ) . '</th><th scope="col">' . esc_html__( 'Now', 'scout-build' ) . '</th><th scope="col">' . esc_html__( 'New', 'scout-build' ) . '</th><th scope="col"><span class="screen-reader-text">' . esc_html__( 'Approve', 'scout-build' ) . '</span></th></tr></thead><tbody>';
 			foreach ( $waiting as $row ) {
 				echo '<tr><td>' . esc_html( $row['name'] ) . '</td><td>' . esc_html( '' !== $row['from'] ? 'v' . $row['from'] : '' ) . '</td><td>' . esc_html( 'v' . $row['to'] ) . '</td><td>';
@@ -305,7 +305,7 @@ final class Scout_Hub_Approval {
 		if ( ! $locked ) {
 			echo $form( '<input type="hidden" name="mode" value="' . ( $on ? 'off' : 'on' ) . '"><button type="submit" name="do" value="mode" class="button sh-quiet">' . ( $on ? esc_html__( 'Install without waiting for an OK', 'scout-build' ) : esc_html__( 'Wait for my OK before installing', 'scout-build' ) ) . '</button>' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
 		}
-		echo '<p class="sh-note">' . esc_html__( 'Live sites wait for an OK; staging never does. Security fixes Scout marks in catalog.json install at once. Update now always works.', 'scout-build' ) . ( $locked ? ' ' . esc_html__( 'Set in wp-config.php (SCOUT_HUB_APPROVAL).', 'scout-build' ) : '' ) . '</p>';
+		echo '<p class="sh-note">' . esc_html__( 'Live sites wait for an OK. Staging and security fixes install at once.', 'scout-build' ) . ( $locked ? ' ' . esc_html__( 'Set in wp-config.php (SCOUT_HUB_APPROVAL).', 'scout-build' ) : '' ) . '</p>';
 		echo '</section>';
 	}
 }

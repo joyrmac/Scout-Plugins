@@ -476,11 +476,11 @@ final class Scout_Core_Protection {
 	public static function render_tab() {
 		$values = self::get();
 		$notes  = array(
-			'email_guard'     => 'Email addresses on your pages are coded so people see and click them as usual, while the bots that collect addresses for spam miss them. Search engines still read the email in your business details.',
-			'close_comments'  => 'Turns off new comments and pingbacks on every page and post, which mostly bring spam. Comments already saved stay in WordPress.',
-			'hide_users'      => 'Visitors cannot look up the login names of the people who sign in. A login name is half of a password guess. Signed-in editors are unaffected.',
-			'xmlrpc_off'      => 'XML-RPC is an old way to post from other apps, and bots use it to guess passwords. Nothing on a Scout site needs it. It stays on when Jetpack is installed.',
-			'browser_headers' => 'Every page tells the browser not to let other sites frame it or guess file types, and to use a secure connection. It also hides the WordPress version number.',
+			'email_guard'     => 'Email addresses on your pages are coded so spam bots miss them. People still see and click them.',
+			'close_comments'  => 'Turns off new comments and pingbacks, which mostly bring spam. Saved comments stay.',
+			'hide_users'      => 'Visitors cannot look up login names, which are half of a password guess.',
+			'xmlrpc_off'      => 'XML-RPC is an old way to post from other apps that bots use to guess passwords. It stays on with Jetpack.',
+			'browser_headers' => 'Tells browsers to use a secure connection and not let other sites frame your pages. Hides the WordPress version.',
 		);
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_protection_group' );

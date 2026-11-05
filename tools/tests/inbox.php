@@ -53,7 +53,7 @@ ok( 5 === $I::total( $items ), 'the total counts every waiting item, and a count
 ok( count( $w ) === 4 && in_array( 'sitecheck-9', array_column( $w, 'id' ), true ), 'a site check request is in the list and in the count' );
 $rows = $I::rows( $items );
 $byl  = array_column( $rows, 'count', 'label' );
-ok( 1 === ( $byl['Site check requests'] ?? 0 ) && 1 === ( $byl['Change requests'] ?? 0 ), 'Today gets one row per kind, with its count' );
+ok( 1 === ( $byl['Check requests'] ?? 0 ) && 1 === ( $byl['Change requests'] ?? 0 ), 'Today gets one row per kind, with its count' );
 ok( 2 === ( $byl['Disclaimers to approve'] ?? 0 ) && 1 === ( $byl['Waiting for approval'] ?? 0 ), 'Other items stay their own Today rows' );
 ok( array_sum( array_column( $rows, 'count' ) ) === $I::total( $items ), 'Today rows add up to the bubble' );
 // The open message: full text and a reply address come through; a bad address does not.

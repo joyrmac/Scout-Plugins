@@ -42,11 +42,11 @@ final class Scout_Accessibility_Checks {
 		return array(
 			'contrast' => array(
 				'title' => __( 'Color contrast', 'scout-accessibility' ),
-				'how'   => __( 'Text and buttons read clearly against their background: at least 4.5 to 1 for normal text and 3 to 1 for large text and icons. Check each page template with a contrast checker in the browser, including hover and focus colors.', 'scout-accessibility' ),
+				'how'   => __( 'Text and icons stand out from the background: 4.5 to 1 for normal text, 3 to 1 for large text, hover and focus included.', 'scout-accessibility' ),
 			),
 			'keyboard' => array(
 				'title' => __( 'Keyboard use', 'scout-accessibility' ),
-				'how'   => __( 'Tab through each page template without a mouse. Every link, button, menu and form field can be reached and used, the focus ring is easy to see, and nothing traps the keyboard.', 'scout-accessibility' ),
+				'how'   => __( 'Every link, button, menu and form field works with the Tab key alone, with a clear focus ring and no traps.', 'scout-accessibility' ),
 			),
 		);
 	}

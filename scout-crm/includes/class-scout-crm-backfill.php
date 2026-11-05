@@ -31,7 +31,7 @@ final class Scout_CRM_Backfill {
 		}
 		$ui = class_exists( 'Scout_Admin_UI' );
 		if ( $ui ) {
-			Scout_Admin_UI::open( __( 'Customer list', 'scout-crm' ), __( 'Everyone who buys, signs up, volunteers, applies or joins, in one list in FluentCRM, tagged by what they did, the event and its region.', 'scout-crm' ), __( 'Events', 'scout-crm' ) );
+			Scout_Admin_UI::open( __( 'Customer list', 'scout-crm' ), __( 'Everyone who buys, signs up, volunteers, applies or joins, in one FluentCRM list, labeled by what they did.', 'scout-crm' ), __( 'Events', 'scout-crm' ) );
 		} else {
 			echo '<div class="wrap"><h1>' . esc_html__( 'Customer list', 'scout-crm' ) . '</h1>';
 		}
@@ -49,13 +49,13 @@ final class Scout_CRM_Backfill {
 			echo '<p>' . esc_html__( 'FluentCRM is not active, so nothing is sent yet. Install and activate FluentCRM (free) and this page takes it from there.', 'scout-crm' ) . '</p></section>';
 		} else {
 			echo '<p>' . esc_html__( 'On. New tickets, sign-ups, volunteers, vendor and presenter applications and membership changes go to FluentCRM as they happen.', 'scout-crm' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=fluentcrm-admin#/subscribers' ) ) . '">' . esc_html__( 'Open the contacts', 'scout-crm' ) . '</a></p>';
-			echo '<p class="sh-note">' . esc_html__( 'New people are added as transactional: they get receipts and event notes, and join marketing emails only when they subscribe. People already in the list keep their status.', 'scout-crm' ) . '</p></section>';
+			echo '<p class="sh-note">' . esc_html__( 'New people get receipts and event notes, and marketing emails only if they subscribe. Existing people keep their status.', 'scout-crm' ) . '</p></section>';
 			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Bring in everyone so far', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Adds the people from before the sync was on, tagged the same way. Safe to run again: people are matched by email.', 'scout-crm' ) . '</p>';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="scout_crm_backfill">';
 			wp_nonce_field( 'scout_crm_backfill' );
 			echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Bring them in', 'scout-crm' ) . '</button></p></form></section>';
 		}
-		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Tags it uses', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Attendee, Waitlist, Volunteer, Vendor, Presenter, Ticket buyer, Member applicant, Member, Plan: (plan name), Event: (event name), Region: (region name), Ticket: (ticket type).', 'scout-crm' ) . '</p></section>';
+		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Labels it adds', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Attendee, Waitlist, Volunteer, Vendor, Presenter, Ticket buyer, Member applicant, Member, Plan: (plan name), Event: (event name), Region: (region name), Ticket: (ticket type).', 'scout-crm' ) . '</p></section>';
 		if ( $ui ) {
 			Scout_Admin_UI::close();
 		} else {

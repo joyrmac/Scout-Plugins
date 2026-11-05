@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout → Policies → Approvals: which kinds of content need the firm's
+ * Scout → Policies → Firm approvals: which kinds of content need the firm's
  * approval before publishing, what is waiting, what changed after approval,
  * and the approval record.
  *
@@ -23,7 +23,7 @@ final class Scout_Law_Approvals_Admin {
 		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 2 );
 	}
 
-	/** Approvals files under Policies, beside Disclaimers. */
+	/** Firm approvals files under Policies, beside Disclaimers. */
 	public static function nav_group( string $group, string $slug ): string {
 		return self::SLUG === strtok( $slug, '&' ) ? Scout_Law_Admin::policies_group() : $group;
 	}
@@ -36,7 +36,7 @@ final class Scout_Law_Approvals_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( Scout_Law_Admin::parent(), __( 'Approvals', 'scout-law' ), __( 'Approvals', 'scout-law' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( Scout_Law_Admin::parent(), __( 'Firm approvals', 'scout-law' ), __( 'Firm approvals', 'scout-law' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -83,9 +83,9 @@ final class Scout_Law_Approvals_Admin {
 		$types = Scout_Law_Approvals::types();
 		$q     = Scout_Law_Approvals::queues();
 		Scout_Admin_UI::open(
-			__( 'Approvals', 'scout-law' ),
-			__( 'Pages and posts the firm signs off on before they go live. Each approval keeps the attorney\'s name, the date and the exact version.', 'scout-law' ),
-			__( 'Policies', 'scout-law' )
+			__( 'Firm approvals', 'scout-law' ),
+			__( 'Pages and posts the firm signs off on before they go live, with the attorney, date and exact version kept.', 'scout-law' ),
+			__( 'Legal pages', 'scout-law' )
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a message flag only.
 		if ( isset( $_GET['scout-law'] ) && 'saved' === $_GET['scout-law'] ) {
@@ -99,7 +99,7 @@ final class Scout_Law_Approvals_Admin {
 
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Edited since approval', 'scout-law' ); ?></h2>
-			<p class="sh-note"><?php esc_html_e( 'These are live and stay live. Open each one, let the firm look at the change, and record a new approval in its Firm approval box.', 'scout-law' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'These stay live. Open each one, have the firm look at the change, and record a new approval.', 'scout-law' ); ?></p>
 			<?php self::items( $q['edited'], __( 'Nothing has changed since its approval.', 'scout-law' ) ); ?>
 		</section>
 
@@ -114,7 +114,7 @@ final class Scout_Law_Approvals_Admin {
 						<label style="display:block;margin:6px 0"><input type="checkbox" name="scout_law_types[]" value="<?php echo esc_attr( $type ); ?>" <?php checked( in_array( $type, $types, true ) ); ?>> <?php echo esc_html( $label ); ?></label>
 					<?php endforeach; ?>
 				</fieldset>
-				<p class="sh-note"><?php esc_html_e( 'Blog posts and team bios are on to start. Turning Pages on also holds pages Scout publishes for you, so turn it on once the site is built. Case results keep their own approval on the Case results screen.', 'scout-law' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Blog posts and team bios start on. Turn on Pages once the site is built, since it also holds pages Scout publishes.', 'scout-law' ); ?></p>
 				<?php submit_button( __( 'Save', 'scout-law' ) ); ?>
 			</section>
 		</form>

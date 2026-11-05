@@ -113,6 +113,8 @@ jobs:
         run: php tools/tests/inbox.php
       - name: Plans, picks and recommendations (no WordPress needed)
         run: php tools/tests/plans.php
+      - name: People profiles (no WordPress needed)
+        run: php tools/tests/people.php
 
   slop-check:
     name: Code slop check

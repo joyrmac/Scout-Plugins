@@ -3,9 +3,9 @@
   "items": [
     {
       "what": "Name, email, phone, the chat conversation (up to the last 30 messages), the page the chat was on, and what kind of message it is",
-      "where": "This website's database, as private Chat question posts",
+      "where": "This website's database, as private Chat message posts",
       "kept": "Until someone deletes it. Deleting the plugin keeps these posts.",
-      "shared": "Emailed to the address set in Chat settings (the site admin email by default), plus a short text alert to the alert address if one is set",
+      "shared": "Emailed to the address set on the Chat screen, or when that is blank, to Send notices to in Business info (the site admin email by default), plus a short text alert to the alert address if one is set",
       "when": "only when the visitor leaves their name and a phone number or email in the chat"
     },
     {
@@ -18,7 +18,7 @@
       "what": "Questions typed in the chat, the earlier messages in the chat, and the page address",
       "where": "Sent from this website to the AI server. This website does not store them unless the visitor later leaves contact details.",
       "kept": "Not kept by this website",
-      "shared": "The AI server set in Chat settings",
+      "shared": "The AI server set on the Chat screen",
       "when": "only when an AI server is connected"
     },
     {
@@ -46,5 +46,5 @@
       "lasts": "Until the browser tab is closed"
     }
   ],
-  "notes": "Nothing is collected while the chat is switched off in Chat settings. The chat sends no cookies with its messages."
+  "notes": "Nothing is collected while the chat is switched off on the Chat screen. The chat sends no cookies with its messages."
 }

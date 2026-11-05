@@ -40,7 +40,7 @@ final class Scout_RVPark_Admin {
 
 	public static function menu(): void {
 		add_menu_page( __( 'RV park', 'scout-rvpark' ), __( 'RV park', 'scout-rvpark' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.4' );
-		add_submenu_page( self::SLUG, __( 'RV park', 'scout-rvpark' ), __( 'Overview', 'scout-rvpark' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::SLUG, __( 'RV park', 'scout-rvpark' ), __( 'Home', 'scout-rvpark' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -60,8 +60,12 @@ final class Scout_RVPark_Admin {
 		}
 		$sites     = post_type_exists( 'site_type' ) ? get_posts( array( 'post_type' => 'site_type', 'post_status' => 'publish', 'posts_per_page' => 50, 'orderby' => 'menu_order title', 'order' => 'ASC' ) ) : array();
 		$amenities = post_type_exists( 'amenity' ) ? get_posts( array( 'post_type' => 'amenity', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC' ) ) : array();
+		// The section's Home screen: the sidebar and the bar say Home, the heading names the section.
+		if ( method_exists( 'Scout_Admin_UI', 'page_head' ) ) {
+			Scout_Admin_UI::page_head( __( 'RV park', 'scout-rvpark' ) );
+		}
 		Scout_Admin_UI::open(
-			__( 'RV park', 'scout-rvpark' ),
+			__( 'Home', 'scout-rvpark' ),
 			__( 'Your site types, rates and amenities, edited like a form. Change one here and it updates on every page that lists it.', 'scout-rvpark' ),
 			__( 'RV park', 'scout-rvpark' )
 		);

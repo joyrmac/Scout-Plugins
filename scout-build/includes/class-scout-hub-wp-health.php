@@ -149,7 +149,7 @@ final class Scout_Hub_WP_Health {
 				'label' => __( 'WordPress checks', 'scout-build' ),
 				'value' => __( 'Running now', 'scout-build' ),
 				'state' => 'good',
-				'note'  => __( 'Scout runs WordPress\'s own Site Health checks once a day. The first run is under way; reload in a minute.', 'scout-build' ),
+				'note'  => __( 'Scout runs WordPress\'s own checks once a day. The first run is going now; reload in a minute.', 'scout-build' ),
 			);
 		}
 		$act  = array_values( array_filter( $last['items'], static fn( $i ) => ! $i['host'] ) );

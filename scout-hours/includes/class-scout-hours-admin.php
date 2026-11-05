@@ -220,7 +220,7 @@ final class Scout_Hours_Admin {
 					<?php
 					printf(
 						/* translators: 1: holiday name, 2: date or dates, 3: "closed" or "open 10:00 AM to 2:00 PM". */
-						esc_html__( '%1$s is coming up on %2$s. Your site will show you as %3$s. Add the same special hours to your Google Business Profile so Google Search and Maps match.', 'scout-hours' ),
+						esc_html__( '%1$s is coming up on %2$s, and your site will show you as %3$s. Add the same hours to your Google Business Profile.', 'scout-hours' ),
 						esc_html( $name ),
 						esc_html( Scout_Hours::closure_dates_label( $c ) ),
 						esc_html( $what )
@@ -262,8 +262,8 @@ final class Scout_Hours_Admin {
 		$route     = Scout_Hours_Schema::route();
 
 		Scout_Admin_UI::open(
-			__( 'When you’re open', 'scout-hours' ),
-			__( 'Set your weekly hours and holiday closures once. The site shows them, keeps the "Open now" line current, and adds them to the schema Google reads.', 'scout-hours' ),
+			__( 'Hours', 'scout-hours' ),
+			__( 'Set weekly hours and holiday closures once. The site shows them and adds them to your Google listing.', 'scout-hours' ),
 			__( 'Hours', 'scout-hours' )
 		);
 		self::message();
@@ -281,8 +281,8 @@ final class Scout_Hours_Admin {
 						<?php
 						echo esc_html(
 							$confirmed
-								? __( 'The hours show on the site and in schema. Untick the box to take them down while you check something.', 'scout-hours' )
-								: __( 'The hours stay off the site and out of schema until the owner confirms them. People who edit the site see a short note where the hours will go.', 'scout-hours' )
+								? __( 'The hours show on the site and in your Google listing. Untick the box to take them down.', 'scout-hours' )
+								: __( 'The hours stay off the site and out of your Google listing until the owner confirms them.', 'scout-hours' )
 						);
 						?>
 					</p>
@@ -297,7 +297,7 @@ final class Scout_Hours_Admin {
 						<h2 class="sh-title"><?php esc_html_e( 'Weekly hours', 'scout-hours' ); ?></h2>
 						<button type="button" class="button sh-quiet shh-copy" hidden aria-live="polite" data-done="<?php esc_attr_e( 'Copied. Save to keep it.', 'scout-hours' ); ?>"><?php esc_html_e( 'Copy Monday to weekdays', 'scout-hours' ); ?></button>
 					</div>
-					<p class="description"><?php esc_html_e( 'Tick a day to open it. Add a second range for a day with a break, like lunch. A closing time after midnight runs into the next morning.', 'scout-hours' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Tick a day to open it, and add a second range for a break. Closing after midnight runs into the next morning.', 'scout-hours' ); ?></p>
 					<div class="shh-days">
 						<?php
 						foreach ( Scout_Hours::ordered_days() as $key ) {
@@ -324,7 +324,7 @@ final class Scout_Hours_Admin {
 			<div class="shh-side">
 				<section class="sh-box">
 					<h2 class="sh-title"><?php esc_html_e( 'Holiday closures', 'scout-hours' ); ?></h2>
-					<p><?php esc_html_e( 'Days you are closed or keep different hours. Each one is listed under the hours table for the month before, and past dates drop off by themselves.', 'scout-hours' ); ?></p>
+					<p><?php esc_html_e( 'Days you are closed or keep different hours. Past dates drop off on their own.', 'scout-hours' ); ?></p>
 					<?php if ( $closures ) : ?>
 						<ul class="shh-closures">
 							<?php foreach ( $closures as $c ) : ?>
@@ -399,16 +399,16 @@ final class Scout_Hours_Admin {
 							array(
 								true,
 								__( 'Hours table and "Open now" line', 'scout-hours' ),
-								__( 'Wherever [scout_hours] is placed, usually the footer and the contact page. The line follows the site’s timezone.', 'scout-hours' ),
+								__( 'Wherever [scout_hours] is placed, usually the footer and the contact page.', 'scout-hours' ),
 							),
 							array(
 								'none' !== $route,
-								__( 'Schema', 'scout-hours' ),
+								__( 'Google listing', 'scout-hours' ),
 								'core' === $route
-									? __( 'Opening hours and holiday hours are added to the business details from Scout Core.', 'scout-hours' )
+									? __( 'Opening and holiday hours go into the business details Google reads.', 'scout-hours' )
 									: ( 'standalone' === $route
-										? __( 'Opening hours and holiday hours go out in a small business entry of their own.', 'scout-hours' )
-										: __( 'This theme writes its own business schema, so the hours are left for the theme to add.', 'scout-hours' ) ),
+										? __( 'Opening and holiday hours go out in a small business entry of their own.', 'scout-hours' )
+										: __( 'This theme writes its own business details for Google, so the theme adds the hours.', 'scout-hours' ) ),
 							),
 							array(
 								'off' !== $s['bar'],
@@ -418,7 +418,7 @@ final class Scout_Hours_Admin {
 							array(
 								true,
 								__( 'Reminder to update Google', 'scout-hours' ),
-								__( 'A dashboard reminder a week before each closure to set the same special hours on your Google Business Profile.', 'scout-hours' ),
+								__( 'A reminder a week before each closure to set the same hours on your Google Business Profile.', 'scout-hours' ),
 							),
 						);
 						foreach ( $rows as $row ) :

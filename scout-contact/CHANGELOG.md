@@ -1,5 +1,11 @@
 # Scout Call Buttons changelog
 
+## 0.1.17 (2026-11-05)
+
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
+- **The phone number reads Business info live.** The Phone number field on Call buttons is now an optional override. Leave it blank and the call bar uses the phone in Business info at the moment the page shows, so a change there reaches the bar at once. Before, the screen copied Business info's number into its own setting the first time it was saved, and the two could drift apart. A number already saved here keeps showing exactly as before. The field's hint now reads "Leave blank to use Business info." and shows that number as its placeholder.
+- **Shorter help text.** The screen's intro and the phone hint are one short sentence each.
+
 ## 0.1.16 (2026-11-05)
 
 - **The Call buttons screen opens with one status line.** The three status cards are now one line: on or off on phones, how many options, hidden on computers, and whether taps are counted. The wording and photos move into a closed More options box. One Save changes button. Same fields and option.

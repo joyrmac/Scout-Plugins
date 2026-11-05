@@ -1,9 +1,10 @@
 <?php
 /**
- * The team member edit screen: a Profile box under the name, then the
- * optional full bio, with a live preview card and the trust checklist on the
- * side. Uses the classic screen so the layout matches the Scout design and
- * every field is a plain, labelled input.
+ * The person edit screen: a Profile box under the name, then the optional
+ * full bio. On the side: Shows on (where this person shows, plus card only
+ * contact), Groups, a live preview card and the trust checklist. Uses the
+ * classic screen so the layout matches the Scout design and every field is a
+ * plain, labelled input.
  *
  * @package Scout_Team
  */
@@ -66,6 +67,8 @@ final class Scout_Team_Editor {
 
 	public static function boxes(): void {
 		add_meta_box( 'scout-team-profile', __( 'Profile', 'scout-team' ), array( __CLASS__, 'render_profile' ), Scout_Team::POST_TYPE, 'scout_team_top', 'high' );
+		add_meta_box( 'scout-team-shows', __( 'Shows on', 'scout-team' ), array( __CLASS__, 'render_shows' ), Scout_Team::POST_TYPE, 'side', 'high' );
+		add_meta_box( 'scout-team-groups', __( 'Groups', 'scout-team' ), array( __CLASS__, 'render_groups' ), Scout_Team::POST_TYPE, 'side', 'high' );
 		add_meta_box( 'scout-team-preview', __( 'Preview', 'scout-team' ), array( __CLASS__, 'render_preview' ), Scout_Team::POST_TYPE, 'side', 'high' );
 		add_meta_box( 'scout-team-trust', __( 'Trust signals', 'scout-team' ), array( __CLASS__, 'render_trust' ), Scout_Team::POST_TYPE, 'side', 'high' );
 	}
@@ -91,7 +94,7 @@ final class Scout_Team_Editor {
 		$law = Scout_Team::is_law();
 		?>
 		<div class="sh scout-team-form">
-			<p class="sh-note"><?php esc_html_e( 'Every field also feeds the Person schema that tells search engines who this person is. Empty fields stay hidden on the site.', 'scout-team' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'These also tell search engines who this person is. Empty fields stay hidden.', 'scout-team' ); ?></p>
 
 			<div class="st-grid">
 				<p class="st-field">
@@ -107,7 +110,7 @@ final class Scout_Team_Editor {
 			<p class="st-field">
 				<label for="st-bio"><?php esc_html_e( 'Short bio', 'scout-team' ); ?></label>
 				<textarea id="st-bio" name="scout_team[bio]" rows="3"><?php echo esc_textarea( $p['bio'] ); ?></textarea>
-				<span class="description"><?php esc_html_e( 'Two or three sentences in plain language. Shows on the team grid and at the top of the profile.', 'scout-team' ); ?></span>
+				<span class="description"><?php esc_html_e( 'Two or three plain sentences. Shows on the team grid and at the top of their page.', 'scout-team' ); ?></span>
 			</p>
 
 			<fieldset class="st-group">
@@ -128,7 +131,9 @@ final class Scout_Team_Editor {
 				</div>
 			</fieldset>
 
-			<?php self::repeater( 'education', __( 'Education', 'scout-team' ), __( 'Add a school', 'scout-team' ), array( 'school' => __( 'School', 'scout-team' ), 'degree' => __( 'Degree', 'scout-team' ), 'year' => __( 'Year', 'scout-team' ) ), $p['education'] ); ?>
+			<p class="sh-note st-source-note"><?php esc_html_e( 'Add a source for each line: where someone can check it. Lines with no source stay hidden.', 'scout-team' ); ?></p>
+
+			<?php self::repeater( 'education', __( 'Education', 'scout-team' ), __( 'Add a school', 'scout-team' ), array( 'school' => __( 'School', 'scout-team' ), 'degree' => __( 'Degree', 'scout-team' ), 'year' => __( 'Year', 'scout-team' ), 'source' => __( 'Source', 'scout-team' ) ), $p['education'] ); ?>
 
 			<?php if ( $law ) : ?>
 				<div class="st-law">
@@ -136,7 +141,7 @@ final class Scout_Team_Editor {
 						<label><input type="checkbox" name="scout_team[attorney]" value="1" <?php checked( $p['attorney'] ); ?> data-st-toggle="bar"> <?php esc_html_e( 'This person is an attorney', 'scout-team' ); ?></label>
 					</p>
 					<div data-st-show="bar" <?php echo $p['attorney'] ? '' : 'hidden'; ?>>
-						<?php self::repeater( 'bar', __( 'Bar admissions', 'scout-team' ), __( 'Add a bar admission', 'scout-team' ), array( 'state' => __( 'State or court', 'scout-team' ), 'year' => __( 'Year admitted', 'scout-team' ), 'number' => __( 'Bar number (optional)', 'scout-team' ), 'url' => __( 'Bar profile link (optional)', 'scout-team' ) ), $p['bar'], __( 'Shows only when filled in. A bar profile link lets visitors confirm the license themselves.', 'scout-team' ) ); ?>
+						<?php self::repeater( 'bar', __( 'Bar admissions', 'scout-team' ), __( 'Add a bar admission', 'scout-team' ), array( 'state' => __( 'State or court', 'scout-team' ), 'year' => __( 'Year admitted', 'scout-team' ), 'number' => __( 'Bar number (optional)', 'scout-team' ), 'url' => __( 'Bar profile link (optional)', 'scout-team' ), 'source' => __( 'Source', 'scout-team' ) ), $p['bar'], __( 'Lets visitors check the license themselves.', 'scout-team' ) ); ?>
 					</div>
 				</div>
 			<?php else : ?>
@@ -151,23 +156,20 @@ final class Scout_Team_Editor {
 				<input type="hidden" name="scout_team[attorney]" value="<?php echo esc_attr( (string) $p['attorney'] ); ?>">
 			<?php endif; ?>
 
-			<?php self::repeater( 'awards', __( 'Awards and honors', 'scout-team' ), __( 'Add an award', 'scout-team' ), array( 'name' => __( 'Award', 'scout-team' ), 'year' => __( 'Year', 'scout-team' ), 'issuer' => __( 'Given by', 'scout-team' ) ), $p['awards'], __( 'List only recognitions you can document, with the group that gave each one.', 'scout-team' ) ); ?>
+			<?php self::repeater( 'awards', __( 'Awards and honors', 'scout-team' ), __( 'Add an award', 'scout-team' ), array( 'name' => __( 'Award', 'scout-team' ), 'year' => __( 'Year', 'scout-team' ), 'issuer' => __( 'Given by', 'scout-team' ), 'source' => __( 'Source', 'scout-team' ) ), $p['awards'], __( 'Only awards you can prove, with who gave each one.', 'scout-team' ) ); ?>
+
+			<?php self::repeater( 'memberships', __( 'Professional memberships', 'scout-team' ), __( 'Add a membership', 'scout-team' ), array( 'name' => __( 'Group they belong to', 'scout-team' ), 'source' => __( 'Source', 'scout-team' ) ), $p['memberships'] ); ?>
 
 			<div class="st-grid">
 				<p class="st-field">
-					<label for="st-memberships"><?php esc_html_e( 'Professional memberships', 'scout-team' ); ?></label>
-					<textarea id="st-memberships" name="scout_team[memberships]" rows="3"><?php echo esc_textarea( implode( "\n", $p['memberships'] ) ); ?></textarea>
-					<span class="description"><?php esc_html_e( 'One per line.', 'scout-team' ); ?></span>
-				</p>
-				<p class="st-field">
 					<label for="st-sameas"><?php esc_html_e( 'Profile links', 'scout-team' ); ?></label>
 					<textarea id="st-sameas" name="scout_team[same_as]" rows="3" placeholder="https://www.linkedin.com/in/..."><?php echo esc_textarea( implode( "\n", $p['same_as'] ) ); ?></textarea>
-					<span class="description"><?php esc_html_e( 'One link per line: LinkedIn, a state bar profile, Avvo, or another public profile of this person.', 'scout-team' ); ?></span>
+					<span class="description"><?php esc_html_e( 'One link per line, like LinkedIn or a bar profile.', 'scout-team' ); ?></span>
 				</p>
 			</div>
 
 			<fieldset class="st-group">
-				<legend><?php esc_html_e( 'Contact and byline', 'scout-team' ); ?></legend>
+				<legend><?php esc_html_e( 'Contact & byline', 'scout-team' ); ?></legend>
 				<div class="st-grid">
 					<p class="st-field">
 						<label for="st-email"><?php esc_html_e( 'Email (optional)', 'scout-team' ); ?></label>
@@ -192,10 +194,10 @@ final class Scout_Team_Editor {
 						)
 					);
 					?>
-					<span class="description"><?php esc_html_e( 'Pick their WordPress login and the author name on their posts links to this profile.', 'scout-team' ); ?></span>
+					<span class="description"><?php esc_html_e( 'Pick their login. Their posts then link to this profile.', 'scout-team' ); ?></span>
 				</p>
 				<?php if ( ! Scout_Team::settings()['contact'] ) : ?>
-					<p class="description"><?php esc_html_e( 'Email and phone go into the schema only. Turn on "Show email and phone" in Team settings to print them on the profile.', 'scout-team' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Hidden on their page unless "Email & phone" is on in People settings.', 'scout-team' ); ?></p>
 				<?php endif; ?>
 			</fieldset>
 		</div>
@@ -233,6 +235,8 @@ final class Scout_Team_Editor {
 	}
 
 	private static function row( string $group, string $i, array $cols, array $row ): void {
+		$source = $cols['source'] ?? '';
+		unset( $cols['source'] );
 		echo '<div class="st-row st-cols-' . count( $cols ) . '">';
 		foreach ( $cols as $col => $label ) {
 			$fid  = 'st-' . $group . '-' . $i . '-' . $col;
@@ -244,10 +248,92 @@ final class Scout_Team_Editor {
 			echo '</p>';
 		}
 		echo '<button type="button" class="button-link st-remove" data-st-remove>' . esc_html__( 'Remove', 'scout-team' ) . '</button>';
+		if ( '' !== $source ) {
+			$fid = 'st-' . $group . '-' . $i . '-source';
+			echo '<p class="st-field st-col-source">';
+			echo '<label for="' . esc_attr( $fid ) . '">' . esc_html( $source ) . '</label>';
+			echo '<input id="' . esc_attr( $fid ) . '" type="text" name="scout_team[' . esc_attr( $group ) . '][' . esc_attr( $i ) . '][source]" value="' . esc_attr( (string) ( $row['source'] ?? '' ) ) . '" placeholder="' . esc_attr__( 'Where to check it, like a website or a document', 'scout-team' ) . '">';
+			echo '</p>';
+		}
 		echo '</div>';
 	}
 
 	/* ---------- side boxes ---------- */
+
+	/** The Shows on switches: where this person shows. */
+	public static function show_labels(): array {
+		return array(
+			'bio'     => __( 'Their own profile page', 'scout-team' ),
+			'team'    => __( 'The team page', 'scout-team' ),
+			'card'    => __( 'A business card', 'scout-team' ),
+			'byline'  => __( 'Byline on their posts', 'scout-team' ),
+			'speaker' => __( 'The speakers page', 'scout-team' ),
+			'chat'    => __( 'Chat answers', 'scout-team' ),
+		);
+	}
+
+	public static function render_shows( $post ): void {
+		$p = Scout_Team::profile( (int) $post->ID );
+		?>
+		<div class="sh scout-team-form st-shows">
+			<fieldset class="st-checks">
+				<legend class="screen-reader-text"><?php esc_html_e( 'Shows on', 'scout-team' ); ?></legend>
+				<input type="hidden" name="scout_team[shows][_sent]" value="1">
+				<?php foreach ( self::show_labels() as $key => $label ) : ?>
+					<p class="st-check"><label><input type="checkbox" id="<?php echo esc_attr( 'st-show-' . $key ); ?>" name="scout_team[shows][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( Scout_Team::shows( $p, $key ) ); ?>> <?php echo esc_html( $label ); ?></label></p>
+				<?php endforeach; ?>
+			</fieldset>
+			<p class="description"><?php esc_html_e( 'Own page off: visitors get "page not found". You can still see it.', 'scout-team' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Team page needs the Team group. Byline needs "Writes posts as". Card, speakers and chat need those features on.', 'scout-team' ); ?></p>
+
+			<fieldset class="st-group st-card-only">
+				<legend><?php esc_html_e( 'Card only', 'scout-team' ); ?></legend>
+				<p class="st-field">
+					<label for="st-card-phone"><?php esc_html_e( 'Card phone', 'scout-team' ); ?></label>
+					<input id="st-card-phone" type="tel" name="scout_team[card_phone]" value="<?php echo esc_attr( $p['card_phone'] ); ?>">
+				</p>
+				<p class="st-field">
+					<label for="st-card-email"><?php esc_html_e( 'Card email', 'scout-team' ); ?></label>
+					<input id="st-card-email" type="email" name="scout_team[card_email]" value="<?php echo esc_attr( $p['card_email'] ); ?>">
+				</p>
+				<p class="description"><?php esc_html_e( 'Business card only. Never on their page, the team page or in search.', 'scout-team' ); ?></p>
+			</fieldset>
+		</div>
+		<?php
+	}
+
+	/** Groups: checkboxes for every group. A new person starts in Team. */
+	public static function render_groups( $post ): void {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => Scout_Team::TAX,
+				'hide_empty' => false,
+				'orderby'    => 'name',
+			)
+		);
+		$terms = is_wp_error( $terms ) ? array() : $terms;
+		$new   = 'auto-draft' === $post->post_status;
+		$have  = $new ? array() : wp_get_object_terms( (int) $post->ID, Scout_Team::TAX, array( 'fields' => 'ids' ) );
+		$have  = is_wp_error( $have ) ? array() : array_map( 'intval', $have );
+		$tax   = get_taxonomy( Scout_Team::TAX );
+		$can   = $tax && current_user_can( $tax->cap->assign_terms );
+		echo '<div class="sh scout-team-form st-groups">';
+		if ( ! $terms ) {
+			echo '<p class="description">' . esc_html__( 'No groups yet.', 'scout-team' ) . '</p>';
+		} else {
+			echo '<fieldset class="st-checks"' . ( $can ? '' : ' disabled' ) . '><legend class="screen-reader-text">' . esc_html__( 'Groups', 'scout-team' ) . '</legend>';
+			if ( $can ) {
+				echo '<input type="hidden" name="scout_team_groups_sent" value="1">';
+			}
+			foreach ( $terms as $term ) {
+				$on = $new ? ( Scout_Team::TEAM === $term->slug ) : in_array( (int) $term->term_id, $have, true );
+				echo '<p class="st-check"><label><input type="checkbox" name="scout_team_groups[]" value="' . esc_attr( (string) $term->term_id ) . '" ' . checked( $on, true, false ) . '> ' . esc_html( $term->name ) . '</label></p>';
+			}
+			echo '</fieldset>';
+		}
+		echo '<p class="description">' . esc_html__( 'The team page shows the Team group.', 'scout-team' ) . '</p>';
+		echo '</div>';
+	}
 
 	public static function render_preview( $post ): void {
 		$p     = Scout_Team::profile( (int) $post->ID );
@@ -261,12 +347,12 @@ final class Scout_Team_Editor {
 				<p class="st-card__meta" data-st-out="service"><?php echo esc_html( Scout_Team::military_line( $p ) ); ?></p>
 			</div>
 		</div>
-		<p class="description"><?php esc_html_e( 'How this person looks on the team grid. Colors and fonts follow the site theme.', 'scout-team' ); ?></p>
+		<p class="description"><?php esc_html_e( 'How they look on the team grid.', 'scout-team' ); ?></p>
 		<?php
 	}
 
 	public static function render_trust( $post ): void {
-		echo '<p class="description">' . esc_html__( 'What visitors and search engines look for before they trust a real person. Updates when you save.', 'scout-team' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'What visitors and search engines check before they trust a person. Updates when you save.', 'scout-team' ) . '</p>';
 		echo '<ul class="st-trust">';
 		foreach ( Scout_Team::checks( (int) $post->ID ) as $key => $check ) {
 			list( $label, $note, $done ) = $check;
@@ -299,6 +385,19 @@ final class Scout_Team_Editor {
 			$p['user'] = (int) Scout_Team::profile( (int) $post_id )['user'];
 		}
 		update_post_meta( $post_id, Scout_Team::META, $p );
+
+		// Groups, from the Groups box. Only groups that exist, and only for people allowed to set them.
+		$tax = get_taxonomy( Scout_Team::TAX );
+		if ( isset( $_POST['scout_team_groups_sent'] ) && $tax && current_user_can( $tax->cap->assign_terms ) ) {
+			$ids = array();
+			foreach ( (array) ( $_POST['scout_team_groups'] ?? array() ) as $raw_id ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast to int below.
+				$term = get_term( absint( $raw_id ), Scout_Team::TAX );
+				if ( $term && ! is_wp_error( $term ) ) {
+					$ids[] = (int) $term->term_id;
+				}
+			}
+			wp_set_object_terms( $post_id, $ids, Scout_Team::TAX, false );
+		}
 	}
 
 	/* ---------- list screen ---------- */

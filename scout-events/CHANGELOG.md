@@ -1,5 +1,12 @@
 # Scout Events changelog
 
+## 0.16.6 (2026-11-05)
+
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
+- **One newsletter box at ticket checkout.** With Scout Newsletter on, Events no longer prints its own "Send me the newsletter" box at checkout. Scout Newsletter shows its one box on any checkout with tickets and saves one consent record, tagged as a ticket. Without Scout Newsletter, nothing changes. The free sign-up form keeps its own box.
+- **Application notices go to the shared address.** New presenter and vendor applications are emailed to the notice address in Business info (the site email without Scout Core).
+- **Plainer words.** "Overview" is now "Home", "Import" is now "Add from spreadsheet", "Topics" is now "Speaker topics", and the browser tab says Events. "Add event schema for Google" is now "Show events on Google". "Shortcodes for your pages" is now "Add to a page". Long help text is cut to one short line.
+
 ## 0.16.5 (2026-11-05)
 
 - **Every Events screen has its own name.** Overview, Sign-ups, Volunteers, Import and Settings each show their own title and one sentence on what they are for, instead of "Your events" on all of them.

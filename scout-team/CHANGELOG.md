@@ -1,5 +1,19 @@
 # Scout Team changelog
 
+## 0.2.0 (2026-11-05)
+
+- **Plainer words on the People screens.** Help text cut to one short sentence each, in the dashboard word rules (admin kit DESIGN.md 2a). "Full list (bulk edit and trash)" now reads "Edit many at once". Labels only; nothing visitors see changes.
+
+- **Scout Team is now Scout People.** One profile for each person the public sees: your team, speakers, writers and members who want to be listed. It has its own People section in the Scout menu (shared admin kit 1.11.0) with three screens: People, Groups and People settings. The plugin folder and slug (`scout-team`), the `scout_team` post type, the stored profile and every `/team/` address are unchanged, so no data moves and no link breaks. People settings keeps its old address (`?page=scout-team`).
+- **Groups.** A new private `scout_people_group` taxonomy. The update makes Team, Speakers, Writers and Members, plus Attorneys when any profile is an attorney, and puts every existing person in Team (attorneys in Attorneys too). A new person starts in Team. Groups are never deleted.
+- **Shows on.** Six switches per person: their own profile page, the team page, a business card, a byline on their posts, the speakers page and chat answers. Existing profiles keep what they had: profile page and team page on, byline on when a login is linked. With the profile page off, visitors get "page not found", the page leaves the sitemap and the `/team/` archive, the grid lists the person without a link, the schema drops the address, and bylines keep WordPress's own author link. Editors can still open it, marked noindex. The team page shows live people in the Team group with the team page switch on.
+- **Card only phone and email.** For a person's business card only. They never show on the profile page or the team page and never go into the schema.
+- **Sources on credentials.** Every bar admission, school, award and membership line has a Source. The page and the schema show only lines with one. Lines saved before this release were marked "Added before sources were tracked", so live pages stay the same. A new line with no source is saved but hidden. Memberships moved from one-per-line text to lines with a source, keeping every old value.
+- **Needs a look.** A person needs a look when there is no photo, the photo has no alt text, a credential line has no source, or they are not live yet.
+- **The People screen.** One status line (people, on the team page, cards on, need a look), filter chips (Everyone, each group, Needs a look), and one row per person with photo or initials, title, groups, where they show, what needs a look and one Edit button. The Everyone view puts the people who run the site first, then Team, Speakers, Writers, Members (listed) and everyone else. The team list moved here from the settings screen, which now holds only the settings and the shortcode help.
+- **Photo alt text.** A person's photo with no alt text in the media library reads as their name wherever a theme prints it.
+- **Address changes and the Site log.** When a live person's address changes, Scout Redirects (when it is on) adds a 301 from the old `/team/` address. Going live, changes and coming off the site each add one line to the Site log when Scout Build is on.
+
 ## 0.1.14 (2026-11-05)
 
 - **The Team screen opens with one status line.** The three status cards are now one line: how many people, how many profiles are complete, and whether law firm details are on. The team list comes next. The settings (now titled Profiles, bylines and the grid) and the shortcode list move into a closed More options box. Same fields and option.

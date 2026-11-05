@@ -113,7 +113,8 @@
 .sh .sh-find:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; }
 .sh-find span { flex: 1; text-align: left; }
 .sh .sh-find kbd, .sh-finder-search kbd { font-family: var(--sh-mono); font-size: 12px; color: var(--sh-text-2); background: var(--sh-surface); border: 1px solid var(--sh-border-strong); border-radius: 6px; padding: 2px 7px; }
-.sh-page { max-width: var(--sh-max); margin: 0 auto; padding: 36px 32px 56px; }
+/* Pinned left, next to the WordPress menu, so the section list and content line up with it on wide screens (Joy, 2026-11-05). */
+.sh-page { max-width: var(--sh-max); margin: 0; padding: 36px 32px 56px; }
 .sh-page.is-home { max-width: 1040px; padding-top: 40px; }
 .sh-body { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
 .sh-main { flex: 999 1 520px; min-width: 0; }
@@ -409,3 +410,8 @@ body.sh-calm .sh *, body.sh-calm .sh *::before, body.sh-calm .sh *::after { tran
 @media (prefers-reduced-motion: reduce) {
 	.sh *, .sh *::before, .sh *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* Type details (Joy, 2026-11-05): ligatures where the font has them. Headings also allow the
+   fancier joined letters (like tt or st) when the font draws them; body text keeps the plain set. */
+.sh { font-variant-ligatures: common-ligatures contextual; text-rendering: optimizeLegibility; }
+.sh h1, .sh h2, .sh .sh-title { font-variant-ligatures: common-ligatures discretionary-ligatures contextual; }

@@ -119,7 +119,7 @@ final class Scout_AEO_Admin {
 		$pages = get_pages( array( 'sort_column' => 'menu_order,post_title' ) );
 		$custom = has_filter( 'scout_aeo_llms_txt' );
 		?>
-		<?php Scout_Admin_UI::open( __( 'AI search', 'scout-aeo' ), __( 'More people now ask ChatGPT, Google\'s AI answers, Perplexity or Claude instead of searching. These settings help those tools find this site, read it, and name it in their answers.', 'scout-aeo' ) ); ?>
+		<?php Scout_Admin_UI::open( __( 'AI search', 'scout-aeo' ), __( 'Helps AI tools like ChatGPT, Google\'s AI answers and Perplexity find this site and name it in answers.', 'scout-aeo' ) ); ?>
 			<?php
 			$with = Scout_AEO_FAQ::pages_with_answers();
 			$live = Scout_AEO::is_live();
@@ -128,17 +128,17 @@ final class Scout_AEO_Admin {
 				$detail   = __( 'AI search tools can read the site to answer people\'s questions.', 'scout-aeo' );
 			} else {
 				$headline = __( 'Off.', 'scout-aeo' );
-				$detail   = __( 'AI search tools are asked not to read the site, so it is unlikely to be quoted in AI answers.', 'scout-aeo' );
+				$detail   = __( 'AI search tools are asked not to read the site, so AI answers will rarely quote it.', 'scout-aeo' );
 			}
 			$detail .= ' ' . ( $s['training'] ? __( 'Model training is allowed.', 'scout-aeo' ) : __( 'Model training is switched off.', 'scout-aeo' ) );
-			$detail .= ' ' . ( $s['llms'] ? __( 'The guide at /llms.txt is published.', 'scout-aeo' ) : __( 'The guide at /llms.txt is off.', 'scout-aeo' ) );
+			$detail .= ' ' . ( $s['llms'] ? __( 'The AI guide page is on.', 'scout-aeo' ) : __( 'The AI guide page is off.', 'scout-aeo' ) );
 			$detail .= ' ' . ( $s['indexnow'] ? __( 'Bing hears about changes right away.', 'scout-aeo' ) : __( 'Instant updates to Bing are off.', 'scout-aeo' ) );
 			/* translators: %d: number of pages with questions and answers. */
 			$detail .= ' ' . sprintf( _n( '%d page has questions and answers.', '%d pages have questions and answers.', count( $with ), 'scout-aeo' ), count( $with ) );
 			if ( ! $live ) {
-				$detail .= ' ' . __( 'This copy of the site is not live (staging, or search engines are switched off), so robots.txt is left alone here. Everything below takes effect on the live site.', 'scout-aeo' );
+				$detail .= ' ' . __( 'This copy of the site is not live, so its search engine rules (robots.txt) stay as they are. The settings below work on the live site.', 'scout-aeo' );
 			}
-			$go = $s['llms'] ? '<a class="button" href="' . esc_url( home_url( '/llms.txt' ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'View the guide', 'scout-aeo' ) . '</a>' : '';
+			$go = $s['llms'] ? '<a class="button" href="' . esc_url( home_url( '/llms.txt' ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'View the AI guide page', 'scout-aeo' ) . '</a>' : '';
 			self::ui_status( ! $s['search'] ? 'off' : ( $live ? 'good' : 'warn' ), $headline, $detail, $go );
 			?>
 			<form method="post" action="options.php">
@@ -155,7 +155,7 @@ final class Scout_AEO_Admin {
 						<th scope="row"><?php esc_html_e( 'AI model training', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[training]" value="1" <?php checked( $s['training'] ); ?>> <?php esc_html_e( 'Let AI companies learn from the site\'s public pages', 'scout-aeo' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Helps the AI know the business by name. Switching it off does not affect AI search above.', 'scout-aeo' ); ?></p>
-							<p class="description"><?php esc_html_e( 'Both choices are also written into robots.txt as a Content-Signal line, the standard way to tell AI companies how pages may be used.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Both choices also go into the search engine rules (robots.txt), which tell AI companies how pages may be used.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Instant updates', 'scout-aeo' ); ?></th>
@@ -163,27 +163,27 @@ final class Scout_AEO_Admin {
 							<p class="description"><?php esc_html_e( 'ChatGPT search also draws on Bing, so changes reach AI answers sooner. Runs on the live site only.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Guide for AI tools', 'scout-aeo' ); ?></th>
-						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[llms]" value="1" <?php checked( $s['llms'] ); ?>> <?php esc_html_e( 'Publish a plain-text guide to the site at /llms.txt', 'scout-aeo' ); ?></label>
+						<th scope="row"><?php esc_html_e( 'AI guide page', 'scout-aeo' ); ?></th>
+						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[llms]" value="1" <?php checked( $s['llms'] ); ?>> <?php esc_html_e( 'Publish a plain-text guide to the site for AI tools, at /llms.txt', 'scout-aeo' ); ?></label>
 							<?php if ( $s['llms'] ) : ?>
-								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the guide', 'scout-aeo' ); ?></a> · <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View robots.txt', 'scout-aeo' ); ?></a></p>
+								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the AI guide page', 'scout-aeo' ); ?></a> · <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View search engine rules', 'scout-aeo' ); ?></a></p>
 							<?php endif; ?></td>
 					</tr>
 				</table>
 				</section>
 
-				<?php self::ui_fold_open( __( 'More options: what the guide says', 'scout-aeo' ) ); ?>
+				<?php self::ui_fold_open( __( 'More options', 'scout-aeo' ) ); ?>
 				<table class="form-table" role="presentation">
 					<?php if ( $custom ) : ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'What the guide says', 'scout-aeo' ); ?></th>
-						<td><p><?php esc_html_e( 'This site\'s theme writes its own guide, so its wording, pages and posts come from the theme. Open the guide above to read it.', 'scout-aeo' ); ?></p></td>
+						<td><p><?php esc_html_e( 'This theme writes its own AI guide page, so its wording comes from the theme.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<?php else : ?>
 					<tr>
 						<th scope="row"><label for="scout-aeo-intro"><?php esc_html_e( 'Short description', 'scout-aeo' ); ?></label></th>
 						<td><textarea id="scout-aeo-intro" name="<?php echo esc_attr( $o ); ?>[intro]" rows="4" class="large-text" placeholder="<?php echo esc_attr( Scout_AEO::summary() ); ?>"><?php echo esc_textarea( $s['intro'] ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'Two or three plain sentences: who the business is, what it does, where. AI tools read this first. Leave empty to use the business name, location and tagline.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Two or three plain sentences: who the business is, what it does and where. Leave empty to use the business details.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Pages to list', 'scout-aeo' ); ?></th>
@@ -192,7 +192,7 @@ final class Scout_AEO_Admin {
 								<label style="display:block;margin:4px 0;padding-left:<?php echo (int) ( count( get_post_ancestors( $p ) ) * 18 ); ?>px"><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[pages][]" value="<?php echo (int) $p->ID; ?>" <?php checked( in_array( (int) $p->ID, $s['pages'], true ) ); ?>> <?php echo esc_html( get_the_title( $p ) ); ?></label>
 							<?php endforeach; ?>
 						</fieldset>
-							<p class="description"><?php esc_html_e( 'None ticked lists the main pages automatically. Pages hidden from search are always left out.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Tick none to list the main pages. Pages hidden from search are always left out.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="scout-aeo-posts"><?php esc_html_e( 'Recent posts to list', 'scout-aeo' ); ?></label></th>
@@ -204,8 +204,8 @@ final class Scout_AEO_Admin {
 				<?php submit_button( __( 'Save changes', 'scout-aeo' ) ); ?>
 			</form>
 			<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Questions and answers', 'scout-aeo' ); ?></h2>
-			<p><?php esc_html_e( 'AI tools quote short, direct answers. Every page and post has a "Questions this page answers" box in the editor. Answers show at the end of the page (or wherever you put [scout_faq]) with the matching schema.', 'scout-aeo' ); ?></p>
+			<h2 class="sh-title"><?php esc_html_e( 'Questions & answers', 'scout-aeo' ); ?></h2>
+			<p><?php esc_html_e( 'Add them in the "Questions this page answers" box on any page or post. They show at the end of the page.', 'scout-aeo' ); ?></p>
 			<?php
 			if ( $with ) {
 				echo '<ul style="list-style:disc;padding-left:20px;margin:0">';
@@ -237,7 +237,7 @@ final class Scout_AEO_Admin {
 		$heading = (string) get_post_meta( $post->ID, Scout_AEO_FAQ::HEADING, true );
 		$show    = max( 3, min( Scout_AEO_FAQ::MAX, count( $rows ) + 1 ) );
 		?>
-		<p><?php esc_html_e( 'Write the questions people really ask, then answer each one in two or three plain sentences that make sense on their own. AI tools often quote exactly these.', 'scout-aeo' ); ?></p>
+		<p><?php esc_html_e( 'Write the questions people really ask, and answer each in two or three plain sentences.', 'scout-aeo' ); ?></p>
 		<p><label><strong><?php esc_html_e( 'Section heading', 'scout-aeo' ); ?></strong><br>
 			<input type="text" class="widefat" name="scout_aeo_heading" value="<?php echo esc_attr( $heading ); ?>" placeholder="<?php esc_attr_e( 'Common questions', 'scout-aeo' ); ?>"></label></p>
 		<?php for ( $i = 0; $i < Scout_AEO_FAQ::MAX; $i++ ) : ?>

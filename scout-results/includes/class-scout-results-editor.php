@@ -284,7 +284,7 @@ final class Scout_Results_Editor {
 			echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Saved for review. This result is not on the site yet.', 'scout-results' ) . '</strong> ' . esc_html__( 'It can go live once the firm approves it: tick "Approved by the firm", add the approver\'s name, then publish.', 'scout-results' ) . '</p></div>';
 		}
 		if ( ! empty( $_GET['scout_result_words'] ) ) {
-			echo '<div class="notice notice-info"><p>' . esc_html__( 'Some wording may read as a promise or a ranking. The suggestions under the description show a plainer way to say it, and the firm makes the final call.', 'scout-results' ) . '</p></div>';
+			echo '<div class="notice notice-info"><p>' . esc_html__( 'Some wording reads as a promise or a ranking. See the plainer wording under the description. The firm decides.', 'scout-results' ) . '</p></div>';
 		}
 		// phpcs:enable
 	}

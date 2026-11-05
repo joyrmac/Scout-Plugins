@@ -1,7 +1,7 @@
 <?php
 /**
  * The Events hub: its own sidebar item with the Scout bolt, holding the
- * Overview (numbers, Needs you, Coming up), the Events, Sessions and Speakers
+ * Home (numbers, Needs you, Coming up), the Events, Sessions and Speakers
  * lists, the spreadsheet import, and settings. Anyone who can edit posts sees
  * all of it; only administrators change the settings.
  *
@@ -76,8 +76,8 @@ final class Scout_Events_Admin {
 	}
 
 	public static function menu(): void {
-		add_menu_page( __( 'Scout Events', 'scout-events' ), __( 'Events', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.1' );
-		add_submenu_page( self::SLUG, __( 'Scout Events', 'scout-events' ), __( 'Overview', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
+		add_menu_page( __( 'Events', 'scout-events' ), __( 'Events', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.1' );
+		add_submenu_page( self::SLUG, __( 'Events', 'scout-events' ), __( 'Home', 'scout-events' ), 'edit_posts', self::SLUG, array( __CLASS__, 'render' ) );
 		global $submenu;
 		$lists = array(
 			Scout_Events::EVENT   => __( 'All events', 'scout-events' ),
@@ -93,9 +93,9 @@ final class Scout_Events_Admin {
 		}
 		add_submenu_page( self::SLUG, __( 'Sign-ups and check-in', 'scout-events' ), __( 'Sign-ups', 'scout-events' ), 'edit_posts', self::SLUG . '-signups', array( __CLASS__, 'render_signups' ) );
 		add_submenu_page( self::SLUG, __( 'Volunteer shifts', 'scout-events' ), __( 'Volunteers', 'scout-events' ), 'edit_posts', self::SLUG . '-volunteers', array( __CLASS__, 'render_volunteers' ) );
-		add_submenu_page( self::SLUG, __( 'Bring in a spreadsheet', 'scout-events' ), __( 'Import', 'scout-events' ), 'edit_posts', self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
-		add_submenu_page( self::SLUG, __( 'Showing events and settings', 'scout-events' ), __( 'Settings', 'scout-events' ), 'edit_posts', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
-		// Tickets, members and applications add their screens here, before Import.
+		add_submenu_page( self::SLUG, __( 'Add from spreadsheet', 'scout-events' ), __( 'Add from spreadsheet', 'scout-events' ), 'edit_posts', self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
+		add_submenu_page( self::SLUG, __( 'Settings', 'scout-events' ), __( 'Settings', 'scout-events' ), 'edit_posts', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
+		// Tickets, members and applications add their screens here, before Add from spreadsheet.
 		do_action( 'scout_events_menu', self::SLUG );
 	}
 
@@ -131,7 +131,7 @@ final class Scout_Events_Admin {
 			)
 		);
 		$items = array(
-			'scout-events-overview' => array( __( 'Overview', 'scout-events' ), self::url() ),
+			'scout-events-overview' => array( __( 'Home', 'scout-events' ), self::url() ),
 			'scout-events-needs'    => array(
 				$count
 					/* translators: %d: number of items. */
@@ -218,7 +218,7 @@ final class Scout_Events_Admin {
 	/** Run an import (or its preview) and come back to the screen with the report. */
 	public static function import(): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_die( esc_html__( 'You do not have permission to import events.', 'scout-events' ), 403 );
+			wp_die( esc_html__( 'You do not have permission to add events from a spreadsheet.', 'scout-events' ), 403 );
 		}
 		check_admin_referer( 'scout_events_import' );
 		$paths = array();
@@ -267,8 +267,8 @@ final class Scout_Events_Admin {
 			}
 		}
 		echo '<div class="se-report ' . ( $report['dry'] ? 'is-preview' : 'is-done' ) . '">';
-		echo '<p class="se-report-head">' . esc_html( $report['dry'] ? __( 'Preview. Nothing has changed yet.', 'scout-events' ) : __( 'Import finished.', 'scout-events' ) ) . '</p>';
-		echo '<p>' . esc_html( $lines ? implode( ', ', $lines ) . '.' : __( 'No rows to bring in.', 'scout-events' ) ) . '</p>';
+		echo '<p class="se-report-head">' . esc_html( $report['dry'] ? __( 'Preview. Nothing has changed yet.', 'scout-events' ) : __( 'Done. Your files were added.', 'scout-events' ) ) . '</p>';
+		echo '<p>' . esc_html( $lines ? implode( ', ', $lines ) . '.' : __( 'No rows to add.', 'scout-events' ) ) . '</p>';
 		if ( $report['notes'] ) {
 			echo '<details' . ( count( $report['notes'] ) < 8 ? ' open' : '' ) . '><summary>';
 			/* translators: %d: number of notes. */
@@ -280,7 +280,7 @@ final class Scout_Events_Admin {
 			echo '</ul></details>';
 		}
 		if ( $report['dry'] ) {
-			echo '<p>' . esc_html__( 'If that looks right, choose the same files again, tick "Bring them in", and import.', 'scout-events' ) . '</p>';
+			echo '<p>' . esc_html__( 'If that looks right, choose the same files again, tick "Add them now", and press Add from spreadsheet.', 'scout-events' ) . '</p>';
 		}
 		echo '</div>';
 	}
@@ -290,7 +290,7 @@ final class Scout_Events_Admin {
 		$texts = array(
 			'saved'    => array( 'success', __( 'Settings saved. Page addresses update on the next visit.', 'scout-events' ) ),
 			'sameslug' => array( 'error', __( 'Events, sessions and speakers each need their own address word. Nothing was saved.', 'scout-events' ) ),
-			'nofile'   => array( 'error', __( 'Choose at least one spreadsheet file to import.', 'scout-events' ) ),
+			'nofile'   => array( 'error', __( 'Choose at least one spreadsheet file.', 'scout-events' ) ),
 		);
 		if ( isset( $texts[ $msg ] ) ) {
 			printf( '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $texts[ $msg ][0] ), esc_html( $texts[ $msg ][1] ) );
@@ -428,11 +428,11 @@ final class Scout_Events_Admin {
 
 		// Each screen gets its own name (its menu label) and one sentence on what it is for.
 		$heads = array(
-			'overview'   => array( __( 'Overview', 'scout-events' ), __( 'What is coming up, what needs you, and every event, session and speaker. Change something here and the site follows.', 'scout-events' ) ),
-			'signups'    => array( __( 'Sign-ups', 'scout-events' ), __( 'One event\'s door list: who is going, who is checked in, and who is on the waitlist. It works on a phone at the door.', 'scout-events' ) ),
+			'overview'   => array( __( 'Home', 'scout-events' ), __( 'What is coming up, what needs you, and every event, session and speaker. Change something here and the site follows.', 'scout-events' ) ),
+			'signups'    => array( __( 'Sign-ups', 'scout-events' ), __( 'One event\'s door list: who is going, who is checked in, and the waitlist. Works on a phone.', 'scout-events' ) ),
 			'volunteers' => array( __( 'Volunteers', 'scout-events' ), __( 'The volunteer shifts for each event and who has signed up for them.', 'scout-events' ) ),
-			'import'     => array( __( 'Import', 'scout-events' ), __( 'Add many events, speakers, sessions and vendors at once from spreadsheet files.', 'scout-events' ) ),
-			'settings'   => array( __( 'Settings', 'scout-events' ), __( 'The web addresses of event pages, the currency, event schema for Google, and the link to your community agreements.', 'scout-events' ) ),
+			'import'     => array( __( 'Add from spreadsheet', 'scout-events' ), __( 'Add many events, speakers, sessions and vendors at once from spreadsheet files.', 'scout-events' ) ),
+			'settings'   => array( __( 'Settings', 'scout-events' ), __( 'Event page addresses, the currency, showing events on Google, and your community agreements link.', 'scout-events' ) ),
 		);
 		Scout_Admin_UI::open( $heads[ $view ][0], $heads[ $view ][1], __( 'Events', 'scout-events' ) );
 		self::message();
@@ -527,8 +527,8 @@ final class Scout_Events_Admin {
 	private static function view_import(): void {
 		?>
 		<section class="sh-box" id="se-import">
-			<h2 class="sh-title"><?php esc_html_e( 'Bring in a spreadsheet', 'scout-events' ); ?></h2>
-			<p><?php esc_html_e( 'Add many events, speakers and sessions at once from CSV files saved from a spreadsheet. Each run is a preview first, so nothing changes until you say so. Running the same files again updates what is there instead of adding copies.', 'scout-events' ); ?></p>
+			<h2 class="sh-title"><?php esc_html_e( 'Choose your files', 'scout-events' ); ?></h2>
+			<p><?php esc_html_e( 'Save each spreadsheet as a CSV file. You see a preview first, and running a file again updates instead of copying.', 'scout-events' ); ?></p>
 			<?php self::import_report(); ?>
 			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-import">
 				<input type="hidden" name="action" value="scout_events_import">
@@ -537,10 +537,10 @@ final class Scout_Events_Admin {
 				<p class="se-field"><label for="se-f-speakers"><?php esc_html_e( 'Speakers file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-speakers" name="se_speakers" accept=".csv,text/csv"></p>
 				<p class="se-field"><label for="se-f-sessions"><?php esc_html_e( 'Sessions file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-sessions" name="se_sessions" accept=".csv,text/csv"></p>
 				<p class="se-field"><label for="se-f-vendors"><?php esc_html_e( 'Vendors file (optional)', 'scout-events' ); ?></label><input type="file" id="se-f-vendors" name="se_vendors" accept=".csv,text/csv"></p>
-				<p class="se-field"><label for="se-apply"><input type="checkbox" id="se-apply" name="se_apply" value="1"> <?php esc_html_e( 'Bring them in (leave unticked to preview)', 'scout-events' ); ?></label></p>
-				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-events' ); ?></button></p>
+				<p class="se-field"><label for="se-apply"><input type="checkbox" id="se-apply" name="se_apply" value="1"> <?php esc_html_e( 'Add them now (leave unticked to preview)', 'scout-events' ); ?></label></p>
+				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Add from spreadsheet', 'scout-events' ); ?></button></p>
 			</form>
-			<p class="sh-note"><?php esc_html_e( 'Photos: put a file name already in the Media Library, or a web address, in the photo column. Columns are listed in the plugin README.', 'scout-events' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'For photos, put a Media Library file name or a web address in the photo column.', 'scout-events' ); ?></p>
 		</section>
 		<?php
 	}
@@ -567,7 +567,7 @@ final class Scout_Events_Admin {
 
 				<section class="sh-box" id="se-addresses">
 					<h2 class="sh-title"><?php esc_html_e( 'Page addresses', 'scout-events' ); ?></h2>
-					<p><?php esc_html_e( 'The word in the web address before each event, session or speaker name. A new word changes the address of every page of that kind, so set these before you share links.', 'scout-events' ); ?></p>
+					<p><?php esc_html_e( 'The word before each page name in its web address. Changing it changes every link, so set it before sharing.', 'scout-events' ); ?></p>
 					<?php foreach ( $slugs as $key => $f ) : ?>
 						<p class="se-field se-slug-field">
 							<label for="<?php echo esc_attr( $f[0] ); ?>"><?php echo esc_html( $f[1] ); ?></label>
@@ -585,7 +585,7 @@ final class Scout_Events_Admin {
 						<input type="text" id="se-set-currency" name="scout_events[currency]" value="<?php echo esc_attr( $s['currency'] ); ?>" maxlength="3" class="se-short-input">
 					</p>
 					<p class="se-field">
-						<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Add event schema for Google', 'scout-events' ); ?></label>
+						<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Show events on Google', 'scout-events' ); ?></label>
 						<span class="sh-note"><?php esc_html_e( 'Turn off only if the theme already prints its own event schema.', 'scout-events' ); ?></span>
 					</p>
 				</section>
@@ -607,7 +607,7 @@ final class Scout_Events_Admin {
 			</form>
 		<?php endif; ?>
 
-		<?php self::ui_fold_open( __( 'Shortcodes for your pages', 'scout-events' ), ! $can, 'se-shortcodes' ); ?>
+		<?php self::ui_fold_open( __( 'Add to a page', 'scout-events' ), ! $can, 'se-shortcodes' ); ?>
 			<p><?php esc_html_e( 'Each event already has its own page with the details, schedule and speakers. Paste these on any page to list them there.', 'scout-events' ); ?></p>
 			<table class="sh-table se-codes">
 				<tr><td>[scout_events]</td><td><?php esc_html_e( 'Upcoming events, soonest first.', 'scout-events' ); ?></td></tr>

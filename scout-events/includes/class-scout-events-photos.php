@@ -97,7 +97,7 @@ final class Scout_Events_Photos {
 		$all   = self::all( $id );
 		wp_nonce_field( 'scout_photos_save', self::NONCE );
 		?>
-		<p class="se-help"><?php esc_html_e( 'Every photo of this speaker. The main photo shows on their card and page. Swap it any time; the old one stays here as an option.', 'scout-events' ); ?></p>
+		<p class="se-help"><?php esc_html_e( 'Every photo of this speaker. The main photo shows on their card and page.', 'scout-events' ); ?></p>
 		<ul class="se-photos">
 			<?php foreach ( $all as $att ) : ?>
 				<li class="se-photo<?php echo $att === $main ? ' is-main' : ''; ?>" data-id="<?php echo (int) $att; ?>">

@@ -1,4 +1,5 @@
-/* Scout Team: add and remove repeatable rows, keep the preview card live. */
+/* Scout People: add and remove repeatable rows, keep the preview card live,
+   and tick "Byline on their posts" when a login is picked. */
 ( function () {
 	'use strict';
 
@@ -86,6 +87,13 @@
 	document.addEventListener( 'change', function ( e ) {
 		if ( e.target.matches( '#st-branch' ) ) {
 			refresh();
+		}
+		// Picking a login is how bylines worked before Shows on: keep that working.
+		if ( e.target.matches( '#st-user' ) && e.target.value && e.target.value !== '0' ) {
+			var byline = document.getElementById( 'st-show-byline' );
+			if ( byline ) {
+				byline.checked = true;
+			}
 		}
 	} );
 }() );

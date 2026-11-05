@@ -327,7 +327,7 @@ final class Scout_Reviews_Google {
 		}
 		$message = (string) ( $data['error']['message'] ?? '' );
 		if ( 429 === $code || ( 403 === $code && false !== stripos( $message, 'quota' ) ) ) {
-			$message = __( 'Google has not turned on API access for this project yet (quota is 0), or the daily limit was reached. Check the Google Cloud console.', 'scout-reviews' );
+			$message = __( 'Google API access is off for this project, or the daily limit was reached. Check the Google Cloud console.', 'scout-reviews' );
 		}
 		/* translators: 1: HTTP status code, 2: Google's error message. */
 		return new WP_Error( 'scout_reviews_google_http', sprintf( __( 'Google returned an error (%1$d): %2$s', 'scout-reviews' ), $code, $message ? $message : __( 'no details', 'scout-reviews' ) ) );

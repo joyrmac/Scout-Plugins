@@ -50,6 +50,24 @@ final class Scout_Booking_Woo {
 		add_action( 'woocommerce_store_api_checkout_order_processed', array( __CLASS__, 'placed' ) );
 		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'status' ), 10, 4 );
 		add_action( 'scout_booking_types_saved', array( __CLASS__, 'sync' ) );
+		add_filter( 'scout_newsletter_checkout_box', array( __CLASS__, 'newsletter_box' ) );
+	}
+
+	/**
+	 * Scout Newsletter's checkout box: skipped when the cart only pays for
+	 * bookings and the booking form already offered the newsletter, so the
+	 * client is asked once, on the booking form, and one consent record is saved.
+	 */
+	public static function newsletter_box( $show ): bool {
+		if ( ! $show || ! Scout_Booking::settings()['optin'] || ! WC()->cart || WC()->cart->is_empty() ) {
+			return (bool) $show;
+		}
+		foreach ( WC()->cart->get_cart() as $item ) {
+			if ( empty( $item['scout_booking'] ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/* ---------- products ---------- */
