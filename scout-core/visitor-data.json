@@ -1,0 +1,12 @@
+{
+  "plugin": "scout-core",
+  "items": [],
+  "cookies": [
+    {
+      "name": "scoutSections:<screen name> (browser storage)",
+      "why": "Remembers which sections of an edit screen a signed-in editor left open. It is used only inside the site's dashboard, never on public pages, and holds no personal information.",
+      "lasts": "Until the browser's saved site data is cleared"
+    }
+  ],
+  "notes": "Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing."
+}

@@ -60,3 +60,13 @@ the option.
 - `includes/admin.php`: the Cards & Links screen
 - `assets/cards.css`: card styles (scoped to `.scc`)
 - `assets/qrcode.min.js`: qrcode-generator 1.4.4 by Kazuhiko Arase (MIT)
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+The card, contact file and link pages only show the team's own details. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

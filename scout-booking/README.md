@@ -195,3 +195,19 @@ color come from the theme. Colors are custom properties a theme can set:
 - Staff and more than one calendar; group sessions; packages and gift cards.
 - Two-way sync with Google or Apple calendars (the feed is one way).
 - Text message reminders.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Booking details: first and last name, email, phone, the session and time picked, answers to the session's intake questions, whether the newsletter box was ticked, and the price, amount due, amount paid and order number | This website's database, in the bookings table (the Bookings screen) | Until someone deletes it. The hourly check only changes a booking's status and never deletes it. The WordPress personal data eraser removes a person's bookings by email address, and deleting the plugin removes the whole table. | Emailed to the site's own booking notice address (the site admin email unless another is set), with the intake answers |
+| Name, email and phone of each booking from the last 30 days and the next 400 days | The owner's private calendar feed, a secret address on this website | Built fresh each time the feed is read; nothing extra is stored | Whatever calendar app the owner adds the feed to |
+| What the visitor typed in the booking form, when the form has to be sent back to fix a mistake (only when the form is sent back with a problem, such as a missing field) | A temporary record in this website's database | 10 minutes | Nobody |
+| Email, first name, the page the form was on, the exact words beside the newsletter box, and the session type (only when the visitor ticks the newsletter box and Scout Newsletter is on) | Handed to the Scout Newsletter plugin. This plugin keeps no separate copy beyond the booking itself. | Not kept separately by this plugin | Scout Newsletter, which sends it to the newsletter service set there |
+| Name, email, phone, the appointment time and the booking's code (only when WooCommerce is on and the session takes a payment online) | WooCommerce's cart, checkout and order records on this website | As long as WooCommerce keeps the order. This plugin never deletes orders. | Nobody |
+
+This plugin sets no cookies itself. When a session takes payment, WooCommerce sets its own cart and session cookies and keeps the order under its own rules.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

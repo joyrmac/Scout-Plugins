@@ -252,3 +252,15 @@ Every change to this plugin:
 1. Bumps the `Version:` header in `scout-core.php`.
 2. Bumps `SCOUT_CORE_VERSION`.
 3. Adds a dated entry to `CHANGELOG.md`.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| Cookie | Why | How long |
+|---|---|---|
+| `scoutSections:<screen name> (browser storage)` | Remembers which sections of an edit screen a signed-in editor left open. It is used only inside the site's dashboard, never on public pages, and holds no personal information. | Until the browser's saved site data is cleared |
+
+Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

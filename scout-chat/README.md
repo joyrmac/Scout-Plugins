@@ -82,3 +82,24 @@ Through Scout Analytics: `chat_open`, `chip_click`, `handoff`,
   save endpoint has a honeypot field.
 - Transcripts are trimmed (30 messages, 1,500 characters each) and stored as
   private posts that only editors can see.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Name, email, phone, the chat conversation (up to the last 30 messages), the page the chat was on, and what kind of message it is (only when the visitor leaves their name and a phone number or email in the chat) | This website's database, as private Chat question posts | Until someone deletes it. Deleting the plugin keeps these posts. | Emailed to the address set in Chat settings (the site admin email by default), plus a short text alert to the alert address if one is set |
+| For a change request: the request, with the visitor's name, email and phone, and the page (only when Scout Build is on and the visitor asks for a change in the chat) | This website's database, as a change request in Scout Build's request list | Until someone deletes it | Nobody |
+| Questions typed in the chat, the earlier messages in the chat, and the page address (only when an AI server is connected) | Sent from this website to the AI server. This website does not store them unless the visitor later leaves contact details. | Not kept by this website | The AI server set in Chat settings |
+| A scrambled (hashed) copy of the visitor's IP address with a count, used to limit how many messages one visitor can send | A temporary record in this website's database | 10 minutes after the visitor's last chat message | Nobody |
+| Chat opens, button taps and sent messages (the button words or message type, never names or messages) (only when Scout Analytics is on) | Passed to Scout Analytics on the page | Not kept by this website | Google Analytics (Google), through Scout Analytics |
+
+| Cookie | Why | How long |
+|---|---|---|
+| `scoutChat (browser storage)` | Keeps the chat so far (up to 40 messages) so it stays in place when the visitor moves to another page | Until the browser tab is closed |
+| `scoutChatTeaser (browser storage)` | Remembers that the visitor opened the chat or closed the greeting, so the greeting does not show again | Until the browser tab is closed |
+
+Nothing is collected while the chat is switched off in Chat settings. The chat sends no cookies with its messages.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

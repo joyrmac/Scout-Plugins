@@ -31,3 +31,13 @@ bindings so the theme can display them.
 
 That split is what lets a small team maintain one platform across the whole
 roster instead of N bespoke codebases.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+This plugin adds the park's amenities and site types, which site staff write. It does not collect or send anything about visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

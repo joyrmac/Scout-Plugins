@@ -49,3 +49,15 @@ Class names: `.sp-partners`, `.sp-grid`, `.sp-rail`, `.sp-logos`, `.sp-title`,
 Post type `scout_partner` (not public), details in `_scout_partner`, monthly
 clicks in `_scout_partner_clicks`, settings in the `scout_partners` option.
 Deleting the plugin keeps partners.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| A count of clicks on each partner's link, kept as one total per month. No name, IP address or device details are saved with it. (When a visitor clicks a partner link. Clicks from search engines and link checkers are not counted.) | This website's database, on each partner's record | The last 24 months of totals. Older months are dropped. | Nobody |
+
+The click goes through this website and then on to the partner's own website, which sees the visit like any other. The plugin reads the browser type only to skip search engines and does not save it.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

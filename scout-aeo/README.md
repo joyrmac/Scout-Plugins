@@ -28,3 +28,13 @@ AI search** card and counts pages with answers by the `_scout_aeo_faqs` meta key
 Release it (`scout-aeo-v0.1.0`), then on each site: **Site Build → Your
 features → AI search → Turn on**. Then add answers to the pages that bring in
 business. Copy follows each client's claims rules (bar rules for law firms).
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+This plugin only changes robots.txt, serves /llms.txt and its IndexNow key file, and prints questions and answers the site's editors write. IndexNow pings send only the addresses of pages that were published or updated, never anything about visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

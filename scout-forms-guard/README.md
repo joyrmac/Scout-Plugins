@@ -54,3 +54,13 @@ this plugin does nothing.
 
 The timestamp is signed, so a cached form stays valid for up to a day. The
 honeypot and signature work regardless of caching.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+Scout Forms Guard keeps no information about visitors. It checks Gravity Forms submissions for spam and keeps only a monthly count of blocked ones. A message it marks as spam stays in that form's Spam folder as Gravity Forms' own data, and a file sent to a hidden upload field is dropped before it is saved.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

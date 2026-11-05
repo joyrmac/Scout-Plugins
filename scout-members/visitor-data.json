@@ -1,0 +1,44 @@
+{
+  "plugin": "scout-members",
+  "items": [
+    {
+      "what": "Membership applications: first and last name, email, the plan chosen, the answers to the application questions the owner writes (these can include an address, phone number or date), the age and agreement confirmations, and the date applied",
+      "where": "This website's database, on the person's account",
+      "kept": "Until someone deletes it. The site's privacy eraser tool removes the membership record by email address but leaves the account itself.",
+      "shared": "Emailed to the site's own address (the applicant's name and a link only)"
+    },
+    {
+      "what": "A member account: a login name made from the email, the email address, first and last name, and a random starting password",
+      "where": "This website's user accounts",
+      "kept": "Until someone deletes it",
+      "shared": ""
+    },
+    {
+      "what": "Membership record: status, plan, join, renewal and payment dates, dues details, staff notes, renewal reminder dates, payments flagged for review, and a history of what happened",
+      "where": "This website's database, on the member's account",
+      "kept": "Until someone deletes it. The history keeps only its newest 50 lines. The site's privacy eraser tool removes the record by email address.",
+      "shared": ""
+    },
+    {
+      "what": "Member invitations: the title, the answers to the invitation questions (often a contact line), and a show-until date",
+      "where": "This website's database, as private posts read by administrators and, once approved, by signed-in members",
+      "kept": "Until someone deletes it. A member who takes one down moves it to the WordPress trash. The site's privacy eraser tool deletes a member's invitations.",
+      "shared": "Emailed to the site's own address (the title and a link only)"
+    },
+    {
+      "what": "For dues paid through the site's checkout: which member an order pays for, and a list of dues orders no member matched",
+      "where": "The WooCommerce order and a list in this website's database",
+      "kept": "Until someone deletes it. An order leaves the unmatched list once staff match it.",
+      "shared": "",
+      "when": "only when WooCommerce is active"
+    }
+  ],
+  "cookies": [
+    {
+      "name": "wordpress_logged_in_... and wordpress_sec_... (wordpress_... on a site without https), set by WordPress",
+      "why": "Keep a member signed in after they use the member sign-in form. This plugin asks WordPress to sign them in, and WordPress sets its own sign-in cookies.",
+      "lasts": "WordPress's standard length: until the browser closes (at most 2 days), or 14 days when \"Keep me signed in on this device\" is ticked, unless the site changes it"
+    }
+  ],
+  "notes": "Staff can also add members from a spreadsheet. Membership changes are handed to Scout CRM Sync and Scout Newsletter when those plugins are on, and each of those lists what it keeps."
+}

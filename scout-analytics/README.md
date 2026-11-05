@@ -51,3 +51,23 @@ Scout Build (or Site Build) → Analytics.
 | People editing the site | Not counted |
 
 Filter `scout_analytics_is_live` overrides the live-site check.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Page views: the page address and title, the page the visitor came from, and browser and device details. Google also receives the visitor's IP address with each request. (only on the live site, and not for people logged in to edit it. The Google tag loads for every other visitor; when a visitor says No thanks, their browser sends Global Privacy Control, or (on sites set to ask first) they have not said yes, Google's consent mode tells Google not to use analytics cookies) | Google Analytics, through Google Tag Manager or the Google Analytics tag. This website does not store it. | Kept by Google under the site's own Google Analytics settings. This website keeps no copy. | Google Analytics and Google Tag Manager (Google) |
+| Taps on marked buttons and links (such as call, text, book and chat buttons): the button name, its words (up to 80 characters) and the link address (same as page views) | Google Analytics, through Google Tag Manager or the Google Analytics tag. This website does not store it. | Kept by Google under the site's own Google Analytics settings. This website keeps no copy. | Google Analytics and Google Tag Manager (Google) |
+| The visitor's answer on the cookie notice (allow or no thanks) (only after the visitor taps a button on the cookie notice) | A cookie in the visitor's own browser, and passed to the Google tag on the page | 180 days in the visitor's browser | Google (as the consent setting sent with Google's tags) |
+
+| Cookie | Why | How long |
+|---|---|---|
+| `scout_consent` | Remembers whether the visitor allowed visit counting or said no thanks, so the notice does not ask again | 180 days |
+| `Google Analytics cookies (_ga, _ga_*)` | Set by Google to count visits and tell new visitors from returning ones | Set by Google; up to 2 years by Google's default |
+| `Google ad cookies (such as _gcl_au)` | Set by Google ad tags inside the site's Tag Manager container, to measure ads | Set by Google |
+
+Google's analytics cookies are only set when counting is allowed, and ad cookies stay off unless the site turns on ad signals in Analytics settings and the visitor allows counting. Anything else the Tag Manager container sends is set inside the container by whoever manages it, so check it too.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

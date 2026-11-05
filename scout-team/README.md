@@ -101,3 +101,15 @@ Deleting the plugin removes the settings. Team profiles stay, because they
 are content someone typed in. To remove them too, define
 `SCOUT_PURGE_ON_UNINSTALL` as `true` in wp-config.php before deleting.
 Photos always stay in the media library.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Which team member's profile a visitor views, and when they click a team member's profile, phone number or email link (the team member's name and the link clicked) (Only when the Scout Analytics plugin is installed and its tag is on the page.) | Not saved by this website. It is handed to the site's analytics tag in the visitor's browser. | Not kept by this plugin. How long Google keeps it depends on the site's Google account settings. | Google Analytics or Google Tag Manager, through the Scout Analytics plugin |
+
+Team profiles are written by site staff. The plugin has no form and saves nothing about visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

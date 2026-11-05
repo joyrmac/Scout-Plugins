@@ -82,3 +82,13 @@ page template.
 Options `scout_accessibility`, `scout_accessibility_results`,
 `scout_accessibility_launch` and the weekly event. Uninstall removes them all,
 and removes the Accessibility page only if nobody has edited it.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+The statement page and footer link collect nothing and set no cookies. The email and call buttons on the statement page are marked so Scout Analytics can count taps on them when that plugin is on; Scout Analytics lists that data.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

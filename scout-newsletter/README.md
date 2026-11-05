@@ -131,3 +131,19 @@ also covers Action Scheduler, the checkout box and the application question.
 
 Settings, the key and the log go. The consent records stay unless
 `SCOUT_PURGE_ON_UNINSTALL` is true in `wp-config.php` (download them first).
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Newsletter sign-ups: email, first name, where they joined (event, ticket, membership, booking or form), tags, the exact words next to the box they ticked, the page address, the campaign (such as the event), the date and time, how the send went, and the Beehiiv subscriber ID (Sent to Beehiiv only when an account is connected and sending is switched on. Until then they wait on the site.) | A newsletter table in this website's database | Until someone deletes it. Deleting the plugin leaves these records in place unless the site turns on the purge setting first. | Beehiiv |
+| Email of people who sign up for an event, volunteer, apply, buy a ticket or become a member without ticking the box, with a tag for what they did and their member plan. The email is looked up in Beehiiv; if they are already subscribers their tags are updated, and if not, nothing more is sent and they are not added. (only when "Keep subscribers up to date" is on and sending is switched on) | A newsletter table in this website's database | Until someone deletes it | Beehiiv |
+| The words next to the newsletter box ticked at checkout (only when the checkout box setting is on) | The WooCommerce order in this website's database | Until someone deletes it | Nobody |
+| A log of sends: the time, a short one-way code made from the email (not the email itself), what was done and how it went | A setting in this website's database | The newest 100 lines; older ones are dropped. Removed when the plugin is deleted. | Nobody |
+| A short one-way code made from the email of anyone Beehiiv reports as unsubscribed, with the time, so they are never sent again | A setting in this website's database | Until the plugin is deleted | Nobody |
+
+Beehiiv receives the email, the first name (when the owner names a first-name field), how they joined, the page address, the campaign and the tags. Nobody is added without a ticked box, and staff can download the sign-up records as a spreadsheet.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

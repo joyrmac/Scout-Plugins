@@ -99,3 +99,15 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
   intake records, are untouched.
 - `scout_law_entry_days()` returns the days kept (0 when off), for the privacy
   policy page.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Form entries visitors send through the site's Gravity Forms, and the files uploaded with them (Gravity Forms stores these; this plugin deletes old ones) (only while the automatic delete setting is on (it is on unless the firm turns it off)) | This website's database and uploads folder, where Gravity Forms keeps them | Each night, entries older than the firm's limit are deleted: 90 days unless the firm picks 30, 60, 180 or 365. This includes entries in the spam and trash folders. Starred entries are kept, and so are entries from forms the firm chose to keep, forms that send no email, and forms that use Gravity Forms' own delete setting. The first delete waits 14 days after the plugin first runs, and each night deletes up to 500 entries per form. | Nobody |
+
+Scout Law collects nothing from visitors itself. Its nightly log keeps only how many entries were deleted, never names or messages.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

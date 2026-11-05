@@ -1,0 +1,28 @@
+{
+  "plugin": "scout-crm",
+  "items": [
+    {
+      "what": "Name and email of people who sign up for an event, join a waitlist, volunteer, or apply as a vendor or presenter, plus their phone number and business name when they gave one, with tags for what they did, the event and its region",
+      "where": "The FluentCRM contact list in this website's database",
+      "kept": "Until someone deletes it",
+      "shared": "",
+      "when": "only when FluentCRM is installed and active"
+    },
+    {
+      "what": "Email, first and last name, phone number, city, state, ZIP code and country from the billing details of a paid event ticket order, tagged with the event, its region and the ticket type",
+      "where": "The FluentCRM contact list in this website's database",
+      "kept": "Until someone deletes it",
+      "shared": "",
+      "when": "only when FluentCRM is installed and active and tickets are sold through the site's checkout"
+    },
+    {
+      "what": "Email, first and last name of membership applicants and members, tagged with their membership status and plan",
+      "where": "The FluentCRM contact list in this website's database",
+      "kept": "Until someone deletes it",
+      "shared": "",
+      "when": "only when FluentCRM is installed and active"
+    }
+  ],
+  "cookies": [],
+  "notes": "New people are added as transactional contacts, for receipts and event notes only; they get marketing emails only if they subscribe themselves. Staff can also bring in everyone from before the sync was switched on. Nothing here is sent outside this website."
+}

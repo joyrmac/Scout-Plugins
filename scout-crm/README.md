@@ -45,3 +45,17 @@ nothing.
   `scout_members_status_changed`.
 
 Needs FluentCRM. Without it the plugin does nothing and says so on its page.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Name and email of people who sign up for an event, join a waitlist, volunteer, or apply as a vendor or presenter, plus their phone number and business name when they gave one, with tags for what they did, the event and its region (only when FluentCRM is installed and active) | The FluentCRM contact list in this website's database | Until someone deletes it | Nobody |
+| Email, first and last name, phone number, city, state, ZIP code and country from the billing details of a paid event ticket order, tagged with the event, its region and the ticket type (only when FluentCRM is installed and active and tickets are sold through the site's checkout) | The FluentCRM contact list in this website's database | Until someone deletes it | Nobody |
+| Email, first and last name of membership applicants and members, tagged with their membership status and plan (only when FluentCRM is installed and active) | The FluentCRM contact list in this website's database | Until someone deletes it | Nobody |
+
+New people are added as transactional contacts, for receipts and event notes only; they get marketing emails only if they subscribe themselves. Staff can also bring in everyone from before the sync was switched on. Nothing here is sent outside this website.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

@@ -373,3 +373,24 @@ A real payment service (turned on in WooCommerce when the merchant account
 exists), ticket transfers between people, per-ticket fields in the block
 checkout, holding places for orders that wait for payment, and filling events
 from `scout-setup.json` (Scout Build needs an `events` section first).
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Free event sign-ups: name, email, number of guests, status (going, waitlist, cancelled), the time they signed up, their account number if they were signed in, a private ticket code, and check-in and reminder times (only when an event takes sign-ups on the site) | A table of event sign-ups in this website's database | Until someone deletes it. The site's privacy eraser tool removes a person's sign-ups by email address. | Nobody |
+| Answers to an event's agreements: the time they agreed, the full name they typed as a signature, which version of the waiver they agreed to, the age confirmation, and whether they can be in photos (only when the event asks for agreements or a photo choice) | A table of event sign-ups in this website's database | Until someone deletes it. The site's privacy eraser tool removes them with the sign-up. | Nobody |
+| The time a person ticked "Send me the newsletter" when signing up or buying a ticket (only when a newsletter plugin is on and the box is ticked) | A table of event sign-ups, and the WooCommerce order for paid tickets, in this website's database | Until someone deletes it | Nobody |
+| Paid tickets: each ticket holder's name, optional email and agreement answers, and one sign-up row per ticket with the order number (only when tickets are sold through the site's WooCommerce checkout) | The WooCommerce order and the table of event sign-ups in this website's database | Until someone deletes it. A refund marks the tickets void but does not delete them. | Nobody |
+| Volunteers: name, email, phone number, the shifts they picked, the time they signed up, reminder times, a private link code, and any shift they dropped (only when an event lists volunteer shifts) | A table of volunteers in this website's database | Until someone deletes it. The site's privacy eraser tool removes a person's volunteer rows by email address. | Nobody |
+| Vendor applications: business name, description, city, website, what they sell, a logo or photo, and the event they applied for (only when the site has a vendor application form) | This website's database, as a vendor post that waits for approval and is shown on the site once approved, and the image in the Media Library | Until someone deletes it | Emailed to the site's own address (the business name and a link only) |
+| Vendor contact details: contact name, pronouns, email, phone number, power and space needs, notes, and the time they applied (only when the site has a vendor application form) | This website's database, as private details on the vendor post. Never shown on the site. | Until someone deletes it. The site's privacy eraser tool removes these details by email address. | Nobody |
+| A presenter account: a login name made from the email, the email address and a display name (only when someone applies through the presenter form) | This website's user accounts | Until someone deletes it | Nobody |
+| Presenter applications and profile updates: name, what they do, short and full bio, website, social links, photos, and up to two class ideas with descriptions (only when someone applies through the presenter form) | This website's database, as a speaker post that waits for approval and is shown on the site once approved, draft sessions, and photos in the Media Library | Until someone deletes it | Emailed to the site's own address (the presenter's name and a link only) |
+| Presenter private details: phone number, pronouns, room needs, notes, photo release and the time they applied (only when someone applies through the presenter form) | This website's database, as private details on the speaker post. Never shown on the site. | Until someone deletes it | Nobody |
+
+Tickets, reminders and confirmations are emailed to the person, with a QR code image that is made for the email and deleted right after sending. Names and emails are also handed to Scout CRM Sync and Scout Newsletter when those plugins are on, and each of those lists what it keeps.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

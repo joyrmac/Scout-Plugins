@@ -78,3 +78,13 @@ npx @wordpress/env start  # disposable WordPress with the plugin mounted
 2. One shared versioned plugin across the roster — never forked per client.
 3. Clients never see quality controls; all admin surfaces sit behind the
    `manage_scout_optimize` capability.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+This plugin shrinks and converts images that site staff upload and changes how pages load their files. It does not collect or send anything about visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

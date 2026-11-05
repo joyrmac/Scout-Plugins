@@ -170,3 +170,13 @@ Scout — Bliss Boogie 0.3.0 stops loading its own copy of the room while this
 plugin is active. If this plugin is switched off, that copy runs again and
 moves the writing back under its names first; switching this back on moves it
 forward again.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+The writing room works only in the dashboard for signed-in site staff, and what they write is never shown on the website. It does not collect anything from visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->
