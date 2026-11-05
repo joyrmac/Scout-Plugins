@@ -527,6 +527,58 @@ final class Scout_Events_Tickets {
 		}
 	}
 
+	/* ---------- privacy ---------- */
+
+	/**
+	 * Take one person out of an order's ticket holder lists (privacy erase).
+	 * A holder is theirs when it carries their email, or carries none and its
+	 * ticket row was made with their email (the buyer's, for a ticket bought
+	 * for someone who gave no address). Other holders on the order stay.
+	 * Runs before the sign-up rows change, since it reads them.
+	 *
+	 * @return int How many holders were changed.
+	 */
+	public static function forget_holder( int $order_id, string $email ): int {
+		$email = strtolower( trim( $email ) );
+		$order = function_exists( 'wc_get_order' ) && '' !== $email ? wc_get_order( $order_id ) : null;
+		if ( ! $order ) {
+			return 0;
+		}
+		$rows = array();
+		foreach ( Scout_Events_RSVP::for_order( $order_id ) as $r ) {
+			$rows[ (int) $r['item_id'] ][] = $r; // Oldest first: row k was made from holder k.
+		}
+		$changed = 0;
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$people = $item->get_meta( self::ATTENDEES );
+			if ( ! is_array( $people ) || ! $people ) {
+				continue;
+			}
+			$people = array_values( $people );
+			$mine   = $rows[ (int) $item_id ] ?? array();
+			$edit   = false;
+			foreach ( $people as $k => $p ) {
+				$p     = is_array( $p ) ? $p : array();
+				$own   = strtolower( (string) ( $p['email'] ?? '' ) );
+				$match = '' !== $own ? $own === $email : isset( $mine[ $k ] ) && strtolower( (string) $mine[ $k ]['email'] ) === $email;
+				if ( ! $match ) {
+					continue;
+				}
+				$p['name']      = wp_privacy_anonymize_data( 'text' );
+				$p['email']     = '';
+				$p['signature'] = '';
+				$people[ $k ]   = $p;
+				$edit           = true;
+				++$changed;
+			}
+			if ( $edit ) {
+				$item->update_meta_data( self::ATTENDEES, $people );
+				$item->save();
+			}
+		}
+		return $changed;
+	}
+
 	/* ---------- refunds void tickets ---------- */
 
 	/** A refunded or cancelled order: every ticket from it is void. */
