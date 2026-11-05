@@ -38,9 +38,23 @@ final class Scout_Team_Add {
 		return ! empty( $_GET['add'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 	}
 
-	/** Where a new person shows before anyone picks: the plugin's own defaults, with no login yet. */
-	public static function form_shows(): array {
-		return Scout_Team::default_shows( 0 );
+	/**
+	 * Where a new person shows before anyone picks: the plugin's own defaults,
+	 * with no login yet. From the Cards screen (&card=1) the card starts on too.
+	 *
+	 * @param bool $card Start with Card switched on.
+	 */
+	public static function form_shows( bool $card = false ): array {
+		$shows = Scout_Team::default_shows( 0 );
+		if ( $card ) {
+			$shows['card'] = true;
+		}
+		return $shows;
+	}
+
+	/** Did the Cards screen open the walkthrough? */
+	public static function wants_card(): bool {
+		return ! empty( $_GET['card'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 	}
 
 	/**
@@ -169,7 +183,7 @@ final class Scout_Team_Add {
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Shows on', 'scout-team' ); ?></th>
-						<td class="scout-team-form st-shows"><?php Scout_Team_Editor::shows_fields( self::form_shows() ); ?></td>
+						<td class="scout-team-form st-shows"><?php Scout_Team_Editor::shows_fields( self::form_shows( self::wants_card() ) ); ?></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="st-user"><?php esc_html_e( 'Writes posts as', 'scout-team' ); ?></label></th>

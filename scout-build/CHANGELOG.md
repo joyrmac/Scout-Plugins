@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## Unreleased (2026-11-05)
+
+- **Site history reads by day.** Lines sit under a date heading, tags sit in one row under each title, and three or more lines of the same kind on one day fold into one row ("25 × Plugin release", Show all). The note for lines with no client wording is now grey: "Client reads the title as written." The Search group is named "Search & analytics" (shared admin kit).
+
 ## 0.12.4 (2026-11-05)
 
 - **Privacy tools reach chat change requests.** WordPress's Export and Erase Personal Data tools now find change requests a visitor sent through Scout Chat, by the email they gave. Erasing keeps the request as a work item and takes out their name, email and phone, and the Site log line that named them now says Scout Chat. Requests staff send from the dashboard are not touched.

@@ -40,6 +40,7 @@ These come from Joy's dashboard brief (2026-11-04) and are written for ADHD and 
 
 Straight, short and plain. Say it once. Someone who has never run a website should get it on the first read. This is the voice of the minimal Scout cards: say what it is, then stop.
 
+0. **A real word stays.** When the common word is already plain, keep it: "Redirects", "Analytics" (Joy, 2026-11-05). Rename only jargon or made-up names.
 1. **Say what it is or what to do.** "Hours", not "Manage your business hours settings".
 2. **One idea per line.** Help text is one sentence, about 20 words at most. Anything longer goes behind a "More" fold.
 3. **Common words first.** When a real term is needed (SEO, schema, robots.txt), put a few plain words beside it once: "robots.txt (tells search engines which pages to skip)".
@@ -56,7 +57,7 @@ Before and after: "Get found" became "Search". "Your website" became "Site featu
 
 ### Menu group names (kit 1.11.0)
 
-Home, To do, Reports, Business, People, Site features, Search, Legal pages, Site status, Scout tools. Labels only: the group keys (`inbox`, `business`, `website`, `search`, `policies`, `health`) never change.
+Home, To do, Reports, Business, People, Site features, Search & analytics, Legal pages, Site status, Scout tools. Labels only: the group keys (`inbox`, `business`, `website`, `search`, `policies`, `health`) never change.
 
 ## 3. Color
 
@@ -164,7 +165,7 @@ Text uses the text token, and CI checks it passes 4.5:1 on its own tint. A dot u
 | Header bar | `.sh-bar`, `.sh-crumb`, `.sh-find` | One white bar, edge to edge: breadcrumb (Scout › section › screen), Find anything (Ctrl or Cmd + K), one button. The button is Request a change unless the screen sets its own with `bar_action()`. |
 | Page column | `.sh-page` | Pinned to the left, beside the WordPress menu, never centered in the window. The section list and the content line up with the menu on every screen width (kit 1.11.0). |
 | Section list | `.sh-local` | The section's screens on the left, current one with a cerulean inset bar. Shows when the section has more than one screen or a "Looking for" link. On WordPress's own list screens it becomes a row of pills (`.is-row`). The WordPress sidebar is the only menu: no tab rows across the top. |
-| Looking for | `.sh-looking` | One quiet line at the bottom of the section list that opens a screen in its home group ("Looking for the cookie notice? It's in Search ›"). At most two per group, set in `Scout_Admin_UI::LOOKING`. |
+| Looking for | `.sh-looking` | One quiet line at the bottom of the section list that opens a screen in its home group ("Looking for the cookie notice? It's in Search & analytics ›"). At most two per group, set in `Scout_Admin_UI::LOOKING`. |
 | Page head | `.sh-pagehead`, `h1`, `.sh-lede`, `.sh-eyebrow` | The screen name as the h1, one sentence under it. Home sets a sentence headline with `page_head()` ("Good morning. Two things need you today.") in a 1040px column. |
 | Find anything | `.sh-finder` | Ctrl or Cmd + K: "Do it now" (Today's items, the `scout_admin_finder_items` filter) and "Go to" (every screen this person can open). Arrow keys, Enter, Esc. |
 | Big tabs | `.sh-tabs` | Two to four choices, each with a live hint. One column on phones. |

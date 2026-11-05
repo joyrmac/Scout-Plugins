@@ -229,7 +229,7 @@ line runs only while `! scout_core_owns( 'hours' )`.
   `BreadcrumbList` schema. Remove the theme's own breadcrumb schema in the same release.
   Adjust the trail with `scout_core_breadcrumb_trail`, for example to put a page that acts
   as an archive (Work, Services) before its items.
-- **Verification:** Search → Search settings, "Google Search Console verification code" and
+- **Verification:** Search & analytics → Search settings, "Google Search Console verification code" and
   "Bing Webmaster Tools verification code". The tags print on the front page only.
 - **Thank-you pages:** `noindex` and out of the sitemap. These are Gravity Forms
   confirmation pages, plus the addresses thank-you and thanks. Add more with

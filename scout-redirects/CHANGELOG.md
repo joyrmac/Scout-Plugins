@@ -1,5 +1,9 @@
 # Scout Redirects changelog
 
+## Unreleased (2026-11-05)
+
+- **Back to "Redirects".** The menu, screen title and Site status link say Redirects again; it is a real word people know.
+
 ## 0.1.16 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

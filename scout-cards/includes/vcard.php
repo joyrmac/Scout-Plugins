@@ -75,7 +75,7 @@ final class Scout_Cards_VCard {
 		if ( $p['email'] ) {
 			$lines[] = 'EMAIL;TYPE=WORK,INTERNET:' . $p['email'];
 		}
-		$tel = Scout_Cards_Settings::phone_e164( $s['phone'] );
+		$tel = Scout_Cards_Settings::phone_e164( $p['phone'] ?? $s['phone'] ); // the card's phone: theirs from People, else the business phone
 		if ( $tel ) {
 			$lines[] = 'TEL;TYPE=WORK,VOICE:' . $tel;
 		}

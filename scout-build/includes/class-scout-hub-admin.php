@@ -1391,6 +1391,71 @@ final class Scout_Hub_Admin {
 
 	/* ------------------------------------------------------------------ */
 
+
+	/**
+	 * One Site history line: the title, a row of tags under it, then the client
+	 * wording and detail. The Edit button sits on the title line.
+	 */
+	private static function log_row( $post, array $row ): void {
+		$id = (int) $row['id'];
+		?>
+		<li class="sh-row sh-log-row">
+			<div class="sh-log-head">
+				<p class="sh-row-name"><?php echo esc_html( $row['title'] ); ?></p>
+				<button type="button" class="button sh-quiet sh-log-editbtn" data-sh-edit="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" aria-expanded="false" aria-controls="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Edit', 'scout-build' ); ?></button>
+			</div>
+			<p class="sh-log-tags">
+				<?php
+				$kind  = (string) ( Scout_Hub_Log::KINDS[ $row['kind'] ] ?? $row['kind'] );
+				$topic = (string) ( Scout_Hub_Log::TOPICS[ $row['topic'] ] ?? $row['topic'] );
+				if ( '' !== $kind && false === stripos( $topic, $kind ) ) : // "Plugin" and "Plugin release" say the same thing once.
+					?>
+					<span class="sh-tag"><?php echo esc_html( $kind ); ?></span>
+				<?php endif; ?>
+				<span class="sh-tag"><?php echo esc_html( $topic ); ?></span>
+				<?php if ( 'done' !== $row['status'] ) : ?>
+					<span class="sh-pill <?php echo 'waiting' === $row['status'] ? 'is-received' : 'is-progress'; ?>"><?php echo esc_html( Scout_Hub_Log::STATUSES[ $row['status'] ] ?? $row['status'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( $row['show_client'] ) : ?>
+					<span class="sh-tag is-current"><?php esc_html_e( 'Client sees', 'scout-build' ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['version'] ) : ?>
+					<span class="sh-ver"><?php echo esc_html( $row['version'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['measure'] ) : ?>
+					<span><?php echo esc_html( $row['measure'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['source'] ) : ?>
+					<span class="sh-log-source"><?php echo esc_html( $row['source'] ); ?></span>
+				<?php endif; ?>
+			</p>
+			<?php if ( '' !== $row['client_text'] ) : ?>
+				<p class="sh-row-sub"><?php esc_html_e( 'Client reads:', 'scout-build' ); ?> <?php echo esc_html( $row['client_text'] ); ?></p>
+			<?php elseif ( $row['show_client'] ) : ?>
+				<p class="sh-row-sub sh-log-flag"><?php esc_html_e( 'Client reads the title as written.', 'scout-build' ); ?></p>
+			<?php endif; ?>
+			<?php if ( '' !== $row['detail'] ) : ?>
+				<p class="sh-row-sub"><?php echo esc_html( $row['detail'] ); ?></p>
+			<?php endif; ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-log-edit" id="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
+				<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+				<input type="hidden" name="do" value="edit">
+				<input type="hidden" name="line" value="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
+				<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+				<label for="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'What the client reads', 'scout-build' ); ?></label>
+				<input type="text" id="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="client_text" value="<?php echo esc_attr( $row['client_text'] ); ?>" maxlength="400" placeholder="<?php esc_attr_e( 'One plain sentence. If it claims a result, put the number in.', 'scout-build' ); ?>">
+				<label for="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Measure (before and after)', 'scout-build' ); ?></label>
+				<input type="text" id="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="measure" value="<?php echo esc_attr( $row['measure'] ); ?>" maxlength="200" placeholder="<?php esc_attr_e( 'PageSpeed phone 85 to 88', 'scout-build' ); ?>">
+				<label><input type="checkbox" name="show_client" value="1" <?php checked( $row['show_client'] ); ?>> <?php esc_html_e( 'Client sees this line', 'scout-build' ); ?></label>
+				<?php if ( 'done' !== $row['status'] ) : ?>
+					<label><input type="checkbox" name="status" value="done"> <?php esc_html_e( 'Mark as done', 'scout-build' ); ?></label>
+				<?php endif; ?>
+				<p><button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-build' ); ?></button></p>
+			</form>
+		</li>
+		<?php
+	}
+
 	/**
 	 * Site log: every change to this site, newest first. Operators add notes,
 	 * set the client wording and the measure on a line, import the history
@@ -1481,65 +1546,71 @@ final class Scout_Hub_Admin {
 			<?php if ( ! $page['items'] ) : ?>
 				<p class="sh-note"><?php esc_html_e( 'Nothing logged for this view yet.', 'scout-build' ); ?></p>
 			<?php else : ?>
-				<ul class="sh-rows sh-log-list">
-					<?php foreach ( $page['items'] as $post ) : ?>
-						<?php
-						$row = Scout_Hub_Log::to_array( $post );
-						if ( $row['show_client'] && '' === $row['client_text'] ) {
-							++$no_wording;
+				<?php
+				// Group by day, and fold three or more lines of the same kind on one day (a release day) into one row.
+				$groups = array();
+				foreach ( $page['items'] as $post ) {
+					$row = Scout_Hub_Log::to_array( $post );
+					if ( $row['show_client'] && '' === $row['client_text'] ) {
+						++$no_wording;
+					}
+					$day = get_the_date( 'Y-m-d', $post );
+					$key = $day . '|' . $row['kind'] . '|' . $row['topic'];
+					$last = count( $groups ) - 1;
+					if ( $last >= 0 && $groups[ $last ]['key'] === $key ) {
+						$groups[ $last ]['rows'][] = array( $post, $row );
+					} else {
+						$groups[] = array( 'key' => $key, 'day' => $day, 'label' => get_the_date( 'D, M j, Y', $post ), 'rows' => array( array( $post, $row ) ) );
+					}
+				}
+				$shown_day = '';
+				foreach ( $groups as $g ) :
+					if ( $g['day'] !== $shown_day ) :
+						if ( '' !== $shown_day ) {
+							echo '</ul>';
 						}
-						$id = (int) $row['id'];
+						$shown_day = $g['day'];
 						?>
-						<li class="sh-row sh-log-row">
-							<div>
-								<p class="sh-row-name"><?php echo esc_html( $row['title'] ); ?></p>
-								<p class="sh-row-sub"><span class="sh-log-date"><?php echo esc_html( get_the_date( 'M j, Y', $post ) ); ?></span><?php echo '' !== $row['source'] ? ' &middot; ' . esc_html( $row['source'] ) : ''; ?></p>
-								<?php if ( '' !== $row['client_text'] ) : ?>
-									<p class="sh-row-sub"><?php esc_html_e( 'Client wording:', 'scout-build' ); ?> <?php echo esc_html( $row['client_text'] ); ?></p>
-								<?php elseif ( $row['show_client'] ) : ?>
-									<p class="sh-row-sub sh-log-flag"><?php esc_html_e( 'No client wording yet, so the client sees the line above as written.', 'scout-build' ); ?></p>
-								<?php endif; ?>
-								<?php if ( '' !== $row['detail'] ) : ?>
-									<p class="sh-row-sub"><?php echo esc_html( $row['detail'] ); ?></p>
-								<?php endif; ?>
-							</div>
-							<div class="sh-row-facts">
-								<span class="sh-tag"><?php echo esc_html( Scout_Hub_Log::KINDS[ $row['kind'] ] ?? $row['kind'] ); ?></span>
-								<span class="sh-tag"><?php echo esc_html( Scout_Hub_Log::TOPICS[ $row['topic'] ] ?? $row['topic'] ); ?></span>
-								<?php if ( 'done' !== $row['status'] ) : ?>
-									<span class="sh-pill <?php echo 'waiting' === $row['status'] ? 'is-received' : 'is-progress'; ?>"><?php echo esc_html( Scout_Hub_Log::STATUSES[ $row['status'] ] ?? $row['status'] ); ?></span>
-								<?php endif; ?>
-								<?php if ( $row['show_client'] ) : ?>
-									<span class="sh-tag is-current"><?php esc_html_e( 'Client sees', 'scout-build' ); ?></span>
-								<?php endif; ?>
-								<?php if ( '' !== $row['version'] ) : ?>
-									<span class="sh-ver"><?php echo esc_html( $row['version'] ); ?></span>
-								<?php endif; ?>
-								<?php if ( '' !== $row['measure'] ) : ?>
-									<span><?php echo esc_html( $row['measure'] ); ?></span>
-								<?php endif; ?>
-							</div>
-							<div class="sh-row-go">
-								<button type="button" class="button" data-sh-edit="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" aria-expanded="false" aria-controls="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Edit wording', 'scout-build' ); ?></button>
-							</div>
-							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-log-edit" id="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
-								<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
-								<input type="hidden" name="do" value="edit">
-								<input type="hidden" name="line" value="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
-								<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
-								<label for="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'What the client reads', 'scout-build' ); ?></label>
-								<input type="text" id="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="client_text" value="<?php echo esc_attr( $row['client_text'] ); ?>" maxlength="400" placeholder="<?php esc_attr_e( 'One plain sentence. If it claims a result, put the number in.', 'scout-build' ); ?>">
-								<label for="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Measure (before and after)', 'scout-build' ); ?></label>
-								<input type="text" id="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="measure" value="<?php echo esc_attr( $row['measure'] ); ?>" maxlength="200" placeholder="<?php esc_attr_e( 'PageSpeed phone 85 to 88', 'scout-build' ); ?>">
-								<label><input type="checkbox" name="show_client" value="1" <?php checked( $row['show_client'] ); ?>> <?php esc_html_e( 'Client sees this line', 'scout-build' ); ?></label>
-								<?php if ( 'done' !== $row['status'] ) : ?>
-									<label><input type="checkbox" name="status" value="done"> <?php esc_html_e( 'Mark as done', 'scout-build' ); ?></label>
-								<?php endif; ?>
-								<p><button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-build' ); ?></button></p>
-							</form>
+						<h3 class="sh-log-day"><?php echo esc_html( $g['label'] ); ?></h3>
+						<ul class="sh-rows sh-log-list">
+						<?php
+					endif;
+					if ( count( $g['rows'] ) >= 3 ) :
+						$first = $g['rows'][0][1];
+						?>
+						<li class="sh-log-fold">
+							<details>
+								<summary>
+									<span class="sh-row-name">
+										<?php
+										/* translators: 1: number of lines, 2: a topic like "Plugin release" */
+										echo esc_html( sprintf( __( '%1$d × %2$s', 'scout-build' ), count( $g['rows'] ), Scout_Hub_Log::TOPICS[ $first['topic'] ] ?? $first['topic'] ) );
+										?>
+									</span>
+									<span class="sh-log-tags">
+										<span class="sh-log-more"><?php esc_html_e( 'Show all', 'scout-build' ); ?></span>
+									</span>
+								</summary>
+								<ul class="sh-rows sh-log-list">
+									<?php
+									foreach ( $g['rows'] as $pair ) {
+										self::log_row( $pair[0], $pair[1] );
+									}
+									?>
+								</ul>
+							</details>
 						</li>
-					<?php endforeach; ?>
-				</ul>
+						<?php
+					else :
+						foreach ( $g['rows'] as $pair ) {
+							self::log_row( $pair[0], $pair[1] );
+						}
+					endif;
+				endforeach;
+				if ( '' !== $shown_day ) {
+					echo '</ul>';
+				}
+				?>
 				<?php if ( $page['pages'] > 1 ) : ?>
 					<p class="sh-note sh-log-pager">
 						<?php

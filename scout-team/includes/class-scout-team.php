@@ -448,6 +448,69 @@ final class Scout_Team {
 		return $p;
 	}
 
+	/**
+	 * What a business card may show of a person, for Scout Cards. Null when the
+	 * post is not a person. The card only phone and email are here, because
+	 * they are for the card; credential lines are not. Role, bio and links come
+	 * through public_profile(), so the card shows nothing the profile page
+	 * would hide. 'on' is true when the person is live with Card switched on.
+	 *
+	 * @param int $post_id Person post ID.
+	 */
+	public static function card( int $post_id ): ?array {
+		$post = get_post( $post_id );
+		if ( ! $post || self::POST_TYPE !== $post->post_type ) {
+			return null;
+		}
+		$p     = self::profile( $post_id );
+		$pub   = self::public_profile( $p );
+		$thumb = (int) get_post_thumbnail_id( $post_id );
+		return array(
+			'id'         => (int) $post_id,
+			'status'     => (string) $post->post_status,
+			'on'         => 'publish' === $post->post_status && self::shows( $p, 'card' ),
+			'name'       => html_entity_decode( wp_strip_all_tags( (string) $post->post_title ), ENT_QUOTES, 'UTF-8' ),
+			'slug'       => (string) $post->post_name,
+			'role'       => (string) $pub['role'],
+			'bio'        => (string) $pub['bio'],
+			'email'      => (string) $p['email'],
+			'user'       => (int) $p['user'],
+			'phone'      => (string) $p['card_phone'],
+			'card_email' => (string) $p['card_email'],
+			'links'      => array_values( (array) $pub['same_as'] ),
+			'photo_id'   => $thumb,
+			'alt'        => $thumb ? trim( (string) get_post_meta( $thumb, '_wp_attachment_image_alt', true ) ) : '',
+		);
+	}
+
+	/**
+	 * People with Card switched on, in team page order (Order number, then name).
+	 *
+	 * @param bool $live_only Only people who are live. False adds drafts and pending people.
+	 */
+	public static function card_ids( bool $live_only = true ): array {
+		$ids = get_posts(
+			array(
+				'post_type'      => self::POST_TYPE,
+				'post_status'    => $live_only ? 'publish' : array( 'publish', 'draft', 'pending', 'private', 'future' ),
+				'posts_per_page' => 500,
+				'fields'         => 'ids',
+				'orderby'        => array(
+					'menu_order' => 'ASC',
+					'title'      => 'ASC',
+				),
+				'no_found_rows'  => true,
+			)
+		);
+		$out = array();
+		foreach ( $ids as $id ) {
+			if ( self::shows( self::profile( (int) $id ), 'card' ) ) {
+				$out[] = (int) $id;
+			}
+		}
+		return $out;
+	}
+
 	/** How many credential lines have no source (saved, but hidden). */
 	public static function unsourced( array $p ): int {
 		$n = 0;

@@ -13,7 +13,7 @@
  *   Scout_Admin_UI::close();
  *
  * open() also prints the section nav, read live from WordPress's own menu: a
- * short row of groups (Home, To do, Reports, Business, People, Site features, Search, Legal pages, Site status, Scout tools) with the open
+ * short row of groups (Home, To do, Reports, Business, People, Site features, Search & analytics, Legal pages, Site status, Scout tools) with the open
  * group's screens as tabs underneath. Every Scout screen shows the same nav,
  * and a new plugin lands in the right group without anyone editing a list
  * (scout_admin_nav_group moves a screen to another group).
@@ -377,7 +377,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			'business' => 'Business',
 			'people'   => 'People',
 			'website'  => 'Site features',
-			'search'   => 'Search',
+			'search'   => 'Search & analytics',
 			'policies' => 'Legal pages',
 			'health'   => 'Site status',
 			'build'    => 'Scout tools',
@@ -530,7 +530,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/**
 		 * Shorten a long Scout sidebar menu to one link per group (Home, Inbox,
-		 * Reports, Business, People, Site features, Search, Legal pages, Site status,
+		 * Reports, Business, People, Site features, Search & analytics, Legal pages, Site status,
 		 * Scout tools). Every screen stays registered and
 		 * reachable; the others are hidden from the sidebar only, and the
 		 * section nav on each screen leads to them.

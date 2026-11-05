@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Scout Cards
- * Description:       Digital business cards and a social "link in bio" page, built into the client's own site: a team card, a card per person, Save contact (vCard with photo), share mode with a big QR code, a home-screen icon, and /links/. Reads the business identity from Scout Core; edited in Scout -> Cards and links.
+ * Description:       Digital business cards and a social "link in bio" page, built into the client's own site: a team card, a card for each person in People with Card on, Save contact (vCard with photo), share mode with a big QR code, a home-screen icon, and /links/. Reads the business identity from Scout Core; edited in Scout -> Cards and links.
  * Version:           1.0.27
  * Requires at least: 6.5
  * Requires PHP:      8.0
@@ -36,6 +36,7 @@ add_action(
 
 require_once SCOUT_CARDS_DIR . 'includes/class-scout-admin-ui.php';
 require_once SCOUT_CARDS_DIR . 'includes/settings.php';
+require_once SCOUT_CARDS_DIR . 'includes/people.php';
 require_once SCOUT_CARDS_DIR . 'includes/routes.php';
 require_once SCOUT_CARDS_DIR . 'includes/vcard.php';
 require_once SCOUT_CARDS_DIR . 'includes/render.php';
@@ -60,6 +61,7 @@ add_action(
 			return;
 		}
 		Scout_Cards_Routes::init();
+		Scout_Cards_People::init();
 		Scout_Cards_Admin::init();
 	},
 	20

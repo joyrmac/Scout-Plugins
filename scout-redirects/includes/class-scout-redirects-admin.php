@@ -42,7 +42,7 @@ final class Scout_Redirects_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Moved pages', 'scout-redirects' ), __( 'Moved pages', 'scout-redirects' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Redirects', 'scout-redirects' ), __( 'Redirects', 'scout-redirects' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -381,9 +381,9 @@ final class Scout_Redirects_Admin {
 		$post_url = admin_url( 'admin-post.php' );
 
 		Scout_Admin_UI::open(
-			__( 'Moved pages', 'scout-redirects' ),
+			__( 'Redirects', 'scout-redirects' ),
 			__( 'A redirect sends visitors from an old page address to the new one. Missing pages people try show here too.', 'scout-redirects' ),
-			__( 'Moved pages', 'scout-redirects' )
+			__( 'Redirects', 'scout-redirects' )
 		);
 		self::messages();
 		?>
@@ -533,7 +533,7 @@ final class Scout_Redirects_Admin {
 		</section>
 
 		<section class="sh-box" id="scout-list">
-			<h2 class="sh-title"><?php esc_html_e( 'Your moved pages', 'scout-redirects' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Your redirects', 'scout-redirects' ); ?></h2>
 			<p><?php esc_html_e( 'Old addresses and where they go now. Use Permanent (301) for pages that moved for good.', 'scout-redirects' ); ?></p>
 			<?php if ( $total > self::PER_PAGE || '' !== $search ) : ?>
 				<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' === self::parent() ? 'options-general.php' : 'admin.php' ) ); ?>" class="sr-search" role="search">

@@ -34,6 +34,7 @@ final class Scout_Team_Front {
 	public static function boot(): void {
 		add_action( 'template_redirect', array( __CLASS__, 'guard_profile' ), 1 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'archive_query' ) );
+		add_action( 'pre_get_posts', array( __CLASS__, 'search_query' ) );
 		add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'sitemap_args' ), 10, 2 );
 		add_action( 'begin_fetch_post_thumbnail_html', array( __CLASS__, 'photo_begin' ), 10, 2 );
 		add_action( 'end_fetch_post_thumbnail_html', array( __CLASS__, 'photo_end' ) );
@@ -106,6 +107,20 @@ final class Scout_Team_Front {
 		}
 		if ( $out ) {
 			$query->set( 'post__not_in', array_merge( (array) $query->get( 'post__not_in' ), $out ) );
+		}
+	}
+
+	/**
+	 * Profile pages that are switched off stay out of the site's own search
+	 * results too, so a card only person never shows up there.
+	 */
+	public static function search_query( $query ): void {
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
+			return;
+		}
+		$hidden = Scout_Team::hidden_profiles();
+		if ( $hidden ) {
+			$query->set( 'post__not_in', array_merge( (array) $query->get( 'post__not_in' ), $hidden ) );
 		}
 	}
 

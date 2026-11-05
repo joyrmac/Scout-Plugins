@@ -128,7 +128,7 @@ final class Scout_Cards_Render {
 		?>
   <section class="scc-hero-card" aria-labelledby="scc-name">
     <div class="scc-hero">
-      <img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $p['name'] ); ?>" fetchpriority="high">
+      <img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $p['alt'] ?? $p['name'] ); ?>" fetchpriority="high">
       <a class="scc-hero-brand" href="<?php echo esc_url( Scout_Cards_Settings::card_url() ); ?>"><?php if ( $logo ) : ?><img src="<?php echo esc_url( $logo ); ?>" alt="" width="36" height="36"><?php endif; ?><span><?php echo esc_html( $s['name'] ); ?></span></a>
       <div class="scc-hero-name">
         <h1 id="scc-name"><?php echo esc_html( $p['name'] ); ?></h1>
@@ -136,7 +136,7 @@ final class Scout_Cards_Render {
       </div>
     </div>
     <div class="scc-hero-body">
-      <a class="scc-btn" href="<?php echo esc_url( $p['save'] ); ?>" download="<?php echo esc_attr( $p['file'] ); ?>.vcf"><?php echo self::icon( 'save' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span>Save my contact</span></a>
+      <?php echo self::save_button( $p, 'Save my contact' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts. ?>
       <div class="scc-actions scc-actions-3">
         <?php if ( $tel ) : ?><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo self::icon( 'call' ); // phpcs:ignore ?><span>Call</span></a>
         <a href="<?php echo esc_url( 'sms:' . $tel, array( 'sms' ) ); ?>"><?php echo self::icon( 'text' ); // phpcs:ignore ?><span>Text</span></a><?php endif; ?>
@@ -144,9 +144,9 @@ final class Scout_Cards_Render {
         <?php elseif ( $p['email'] ) : ?><a href="<?php echo esc_url( 'mailto:' . $p['email'], array( 'mailto' ) ); ?>"><?php echo self::icon( 'email' ); // phpcs:ignore ?><span>Email</span></a><?php endif; ?>
       </div>
       <?php if ( $p['intro'] ) : ?><p class="scc-intro"><?php echo esc_html( $p['intro'] ); ?></p><?php endif; ?>
-      <?php if ( $p['tags'] ) : ?><p class="scc-tags scc-hero-tags"><?php foreach ( $p['tags'] as $t ) { echo '<span>' . esc_html( $t ) . '</span>'; } ?></p><?php endif; ?>
+      <?php if ( $p['tags'] ) : ?><p class="scc-tags scc-hero-tags"><?php foreach ( $p['tags'] as $t ) { echo '<span>' . esc_html( $t ) . '</span>'; } ?></p><?php endif; ?><?php echo self::extras( $p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts. ?>
       <dl class="scc-details">
-        <?php if ( $tel ) : ?><div><dt>Phone</dt><dd><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo esc_html( $s['phone'] ); ?></a></dd></div><?php endif; ?>
+        <?php if ( $tel ) : ?><div><dt>Phone</dt><dd><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo esc_html( $p['phone'] ?? $s['phone'] ); ?></a></dd></div><?php endif; ?>
         <?php if ( $p['email'] ) : ?><div><dt>Email</dt><dd><a href="<?php echo esc_url( 'mailto:' . $p['email'], array( 'mailto' ) ); ?>"><?php echo esc_html( $p['email'] ); ?></a></dd></div><?php endif; ?>
         <div><dt>Web</dt><dd><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html( $host ); ?></a></dd></div>
       </dl>
@@ -170,8 +170,36 @@ final class Scout_Cards_Render {
 		return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $paths[ $name ] . '</svg>';
 	}
 
-	private static function social_links() {
-		$icons = array(
+	/**
+	 * Save contact, unless the card switches it off. The vCard address keeps working
+	 * either way. Ends with a line break, the way the button's own line did.
+	 */
+	private static function save_button( array $p, $words ) {
+		if ( isset( $p['show']['save'] ) && ! $p['show']['save'] ) {
+			return '';
+		}
+		return '<a class="scc-btn" href="' . esc_url( $p['save'] ) . '" download="' . esc_attr( $p['file'] ) . '.vcf">' . self::icon( 'save' ) . '<span>' . esc_html( $words ) . '</span></a>' . "\n";
+	}
+
+	/**
+	 * What a card adds from People when it is switched on there: the short bio and
+	 * the person's profile links. '' when both are off, so the card is unchanged.
+	 */
+	private static function extras( array $p ) {
+		$out = '';
+		if ( ! empty( $p['bio'] ) ) {
+			foreach ( array_values( array_filter( array_map( 'trim', preg_split( '/\n\s*\n/', (string) $p['bio'] ) ) ) ) as $para ) {
+				$out .= '<p class="scc-intro scc-bio">' . esc_html( $para ) . '</p>';
+			}
+		}
+		if ( ! empty( $p['links'] ) ) {
+			$out .= self::icon_links( Scout_Cards_Settings::label_links( (array) $p['links'] ), $p['name'] . ' online', 'scc-social scc-person-links' );
+		}
+		return $out;
+	}
+
+	private static function social_icons() {
+		return array(
 			'Facebook'  => '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
 			'Instagram' => '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>',
 			'LinkedIn'  => '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>',
@@ -181,20 +209,36 @@ final class Scout_Cards_Render {
 			'TikTok'    => '<path d="M14 3v11a4 4 0 1 1-4-4"/><path d="M14 3a5 5 0 0 0 5 5"/>',
 			'Pinterest' => '<circle cx="12" cy="12" r="9"/><path d="M11 8c3-1 6 1 5 4s-4 3-5 1M10 13l-2 8"/>',
 		);
+	}
+
+	private static function social_links() {
 		$socials = Scout_Cards_Settings::socials();
 		if ( ! $socials ) {
 			return '';
 		}
-		$out = '<nav class="scc-social" aria-label="' . esc_attr( Scout_Cards_Settings::get()['name'] ) . ' on social media">';
-		foreach ( $socials as $label => $url ) {
-			$out .= '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener" aria-label="' . esc_attr( $label ) . '"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $icons[ $label ] . '</svg></a>';
+		return self::icon_links( $socials, Scout_Cards_Settings::get()['name'] . ' on social media', 'scc-social' );
+	}
+
+	/**
+	 * A row of icon links, label => url. Known networks get their icon; any other
+	 * site gets the globe and its own name as the label.
+	 */
+	private static function icon_links( array $links, $label, $class ) {
+		if ( ! $links ) {
+			return '';
+		}
+		$icons = self::social_icons();
+		$out   = '<nav class="' . esc_attr( $class ) . '" aria-label="' . esc_attr( $label ) . '">';
+		foreach ( $links as $name => $url ) {
+			$path = $icons[ $name ] ?? '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>';
+			$out .= '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener" aria-label="' . esc_attr( $name ) . '"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $path . '</svg></a>';
 		}
 		return $out . '</nav>';
 	}
 
 	private static function avatar( array $p, $size = 112, $class = 'scc-avatar' ) {
 		if ( $p['photo'] ) {
-			return '<img class="' . esc_attr( $class ) . '" src="' . esc_url( $p['photo'] ) . '" width="' . (int) $size . '" height="' . (int) $size . '" alt="' . esc_attr( $p['name'] ) . '">';
+			return '<img class="' . esc_attr( $class ) . '" src="' . esc_url( $p['photo'] ) . '" width="' . (int) $size . '" height="' . (int) $size . '" alt="' . esc_attr( $p['alt'] ?? $p['name'] ) . '">';
 		}
 		$initial = function_exists( 'mb_substr' ) ? mb_substr( $p['name'], 0, 1 ) : substr( $p['name'], 0, 1 );
 		return '<div class="' . esc_attr( $class ) . ' scc-avatar-mark" aria-hidden="true">' . esc_html( strtoupper( $initial ) ) . '</div>';
@@ -246,7 +290,7 @@ final class Scout_Cards_Render {
 	public static function card_page( array $p, array $people ) {
 		$s       = Scout_Cards_Settings::get();
 		$is_team = 'team' === $p['key'];
-		$tel     = Scout_Cards_Settings::phone_e164( $s['phone'] );
+		$tel     = Scout_Cards_Settings::phone_e164( $p['phone'] ?? $s['phone'] );
 		$place   = trim( $s['city'] . ( $s['region'] ? ', ' . $s['region'] : '' ) );
 		self::open(
 			array(
@@ -270,8 +314,8 @@ final class Scout_Cards_Render {
     <?php if ( ! $is_team ) : ?><p class="scc-eyebrow"><?php echo esc_html( $s['name'] ); ?></p><?php endif; ?>
     <h1 id="scc-name"><?php echo esc_html( $p['name'] ); ?></h1>
     <?php if ( $p['title'] ) : ?><p class="scc-title"><?php echo esc_html( $p['title'] ); ?></p><?php endif; ?>
-    <?php if ( $p['intro'] ) : ?><p class="scc-intro"><?php echo esc_html( $p['intro'] ); ?></p><?php endif; ?>
-    <a class="scc-btn" href="<?php echo esc_url( $p['save'] ); ?>" download="<?php echo esc_attr( $p['file'] ); ?>.vcf"><?php echo self::icon( 'save' ); // phpcs:ignore ?><span>Save contact</span></a>
+    <?php if ( $p['intro'] ) : ?><p class="scc-intro"><?php echo esc_html( $p['intro'] ); ?></p><?php endif; ?><?php echo self::extras( $p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts. ?>
+    <?php echo self::save_button( $p, 'Save contact' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts. ?>
     <div class="scc-actions">
       <?php if ( $tel ) : ?>
       <a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo self::icon( 'call' ); // phpcs:ignore ?><span>Call</span></a>
@@ -281,7 +325,7 @@ final class Scout_Cards_Render {
       <a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo self::icon( 'web' ); // phpcs:ignore ?><span>Website</span></a>
     </div>
     <dl class="scc-details">
-      <?php if ( $tel ) : ?><div><dt>Phone</dt><dd><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo esc_html( $s['phone'] ); ?></a></dd></div><?php endif; ?>
+      <?php if ( $tel ) : ?><div><dt>Phone</dt><dd><a href="<?php echo esc_url( 'tel:' . $tel, array( 'tel' ) ); ?>"><?php echo esc_html( $p['phone'] ?? $s['phone'] ); ?></a></dd></div><?php endif; ?>
       <?php if ( $p['email'] ) : ?><div><dt>Email</dt><dd><a href="<?php echo esc_url( 'mailto:' . $p['email'], array( 'mailto' ) ); ?>"><?php echo esc_html( $p['email'] ); ?></a></dd></div><?php endif; ?>
       <?php if ( $place ) : ?><div><dt>Based in</dt><dd><?php echo esc_html( $place ); ?></dd></div><?php endif; ?>
     </dl>

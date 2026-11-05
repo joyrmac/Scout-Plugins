@@ -26,7 +26,7 @@ screen or feature, is in `../docs/dashboard-map.md`.
 | **To do** (key `inbox`) | everyone | One list of everything waiting on a person, newest first, with filter chips: chat questions, new reviews, change requests and their status, site check requests, booking requests. Plugins add items with `scout_hub_inbox_items` (or a count row with `scout_hub_inbox`). Each person picks Inbox emails: never, once a day, or every new item. |
 | **Reports** | owner, operator | Recon's numbers, when Recon is on. Empty groups never show to clients. |
 | **Business** | everyone | Facts typed once: Business info, Hours, Team, Case results, a companion plugin's own types. |
-| **Site features** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & Links, Newsletter, Moved pages (redirects), Free site check. |
+| **Site features** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & links, Newsletter, Redirects, Free site check. |
 | **Search** | owner, operator | SEO, AI search, Analytics and the cookie notice, Search engine rules (robots.txt), and later site search and the sitemap. |
 | **Legal pages** | owner, operator | Accessibility statement now; privacy policy, terms and law-firm disclaimers as they arrive. |
 | **Site status** | owner, operator | The whole report (the Site status screen), Search health, Spam protection, the image optimizer. |

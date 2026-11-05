@@ -45,7 +45,7 @@ $map = array(
 	'site-build-robots'                       => array( 'Search engine rules', 'search' ),
 	'scout-recon'                             => array( 'Reports', 'reports' ),
 	'scout-contact'                           => array( 'Call buttons', 'website' ),
-	'scout-redirects'                         => array( 'Moved pages', 'website' ),
+	'scout-redirects'                         => array( 'Redirects', 'website' ),
 	'scout-cards'                             => array( 'Cards & links', 'website' ),
 	'scout-newsletter'                        => array( 'Newsletter', 'website' ),
 	'scout-reviews-settings'                  => array( 'Review settings', 'website' ),
@@ -75,7 +75,7 @@ foreach ( $map as $slug => list( $label, $want ) ) {
 	ok( $got === $want, sprintf( '%-48s %-22s -> %s', $slug, $label, $got ) . ( $got === $want ? '' : " (wanted $want)" ) );
 }
 ok( array_keys( Scout_Admin_UI::GROUPS ) === array( 'overview', 'inbox', 'reports', 'business', 'people', 'website', 'search', 'policies', 'health', 'build' ), 'the groups, in menu order' );
-ok( 'Home' === Scout_Admin_UI::label( 'overview' ) && 'Search' === Scout_Admin_UI::label( 'search' ) && 'Scout tools' === Scout_Admin_UI::label( 'build' ), 'the new names' );
+ok( 'Home' === Scout_Admin_UI::label( 'overview' ) && 'Search & analytics' === Scout_Admin_UI::label( 'search' ) && 'Scout tools' === Scout_Admin_UI::label( 'build' ), 'the new names' );
 ok( array() === Scout_Admin_UI::hidden(), 'with no hub loaded and full rights, nothing is hidden' );
 eval( 'class Scout_Hub_Access { public static function is_operator() { return false; } }' );
 ok( array( 'build' ) === Scout_Admin_UI::hidden(), 'a client owner does not see Scout tools' );
