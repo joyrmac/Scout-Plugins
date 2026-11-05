@@ -4,14 +4,14 @@
     {
       "what": "Newsletter sign-ups: email, first name, where they joined (event, ticket, membership, booking or form), tags, the exact words next to the box they ticked, the page address, the campaign (such as the event), the date and time, how the send went, and the Beehiiv subscriber ID",
       "where": "A newsletter table in this website's database",
-      "kept": "Until someone deletes it. Deleting the plugin leaves these records in place unless the site turns on the purge setting first.",
+      "kept": "Until someone deletes it. The site's privacy tools export these records by email address. The eraser tool keeps each one as proof of the yes, with the email replaced by a one-way code and the first name removed, and stops any send still waiting. Deleting the plugin leaves these records in place unless the site turns on the purge setting first.",
       "shared": "Beehiiv",
       "when": "Sent to Beehiiv only when an account is connected and sending is switched on. Until then they wait on the site."
     },
     {
       "what": "Email of people who sign up for an event, volunteer, apply, buy a ticket or become a member without ticking the box, with a tag for what they did and their member plan. The email is looked up in Beehiiv; if they are already subscribers their tags are updated, and if not, nothing more is sent and they are not added.",
       "where": "A newsletter table in this website's database",
-      "kept": "Until someone deletes it",
+      "kept": "Until someone deletes it. The site's privacy tools treat it the same way as a sign-up",
       "shared": "Beehiiv",
       "when": "only when \"Keep subscribers up to date\" is on and sending is switched on"
     },
@@ -36,5 +36,5 @@
     }
   ],
   "cookies": [],
-  "notes": "Beehiiv receives the email, the first name (when the owner names a first-name field), how they joined, the page address, the campaign and the tags. Nobody is added without a ticked box, and staff can download the sign-up records as a spreadsheet."
+  "notes": "Beehiiv receives the email, the first name (when the owner names a first-name field), how they joined, the page address, the campaign and the tags. Nobody is added without a ticked box, and staff can download the sign-up records as a spreadsheet. Beehiiv keeps its own copy, so a person who asks to be erased is removed there by hand too."
 }

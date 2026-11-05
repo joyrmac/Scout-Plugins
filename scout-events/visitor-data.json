@@ -4,28 +4,28 @@
     {
       "what": "Free event sign-ups: name, email, number of guests, status (going, waitlist, cancelled), the time they signed up, their account number if they were signed in, a private ticket code, and check-in and reminder times",
       "where": "A table of event sign-ups in this website's database",
-      "kept": "Until someone deletes it. The site's privacy eraser tool removes a person's sign-ups by email address.",
+      "kept": "Until someone deletes it. The site's privacy eraser tool exports a person's sign-ups by email address, and the eraser tool deletes them.",
       "shared": "",
       "when": "only when an event takes sign-ups on the site"
     },
     {
       "what": "Answers to an event's agreements: the time they agreed, the full name they typed as a signature, which version of the waiver they agreed to, the age confirmation, and whether they can be in photos",
       "where": "A table of event sign-ups in this website's database",
-      "kept": "Until someone deletes it. The site's privacy eraser tool removes them with the sign-up.",
+      "kept": "Until someone deletes it. The site's privacy eraser tool removes them with the sign-up. On a paid ticket it removes the typed signature and keeps the time and waiver version.",
       "shared": "",
       "when": "only when the event asks for agreements or a photo choice"
     },
     {
       "what": "The time a person ticked \"Send me the newsletter\" when signing up or buying a ticket",
       "where": "A table of event sign-ups, and the WooCommerce order for paid tickets, in this website's database",
-      "kept": "Until someone deletes it",
+      "kept": "Until someone deletes it. On a paid ticket the time stays after a privacy erase, as the record of the yes",
       "shared": "",
       "when": "only when a newsletter plugin is on and the box is ticked"
     },
     {
       "what": "Paid tickets: each ticket holder's name, optional email and agreement answers, and one sign-up row per ticket with the order number",
       "where": "The WooCommerce order and the table of event sign-ups in this website's database",
-      "kept": "Until someone deletes it. A refund marks the tickets void but does not delete them.",
+      "kept": "Until someone deletes it. A refund marks the tickets void but does not delete them. The site's privacy eraser tool keeps paid tickets with their order and takes out the holder's name, email and signature, on the ticket and in the order's holder list.",
       "shared": "",
       "when": "only when tickets are sold through the site's WooCommerce checkout"
     },
@@ -39,7 +39,7 @@
     {
       "what": "Vendor applications: business name, description, city, website, what they sell, a logo or photo, and the event they applied for",
       "where": "This website's database, as a vendor post that waits for approval and is shown on the site once approved, and the image in the Media Library",
-      "kept": "Until someone deletes it",
+      "kept": "Until someone deletes it. The site's privacy tools export it by email address; the eraser tool leaves the listing for staff to edit or delete by hand",
       "shared": "Emailed to the site's own address (the business name and a link only)",
       "when": "only when the site has a vendor application form"
     },
@@ -53,21 +53,21 @@
     {
       "what": "A presenter account: a login name made from the email, the email address and a display name",
       "where": "This website's user accounts",
-      "kept": "Until someone deletes it",
+      "kept": "Until someone deletes it. WordPress's own privacy export lists the account; the eraser tool leaves the login for staff to delete under Users",
       "shared": "",
       "when": "only when someone applies through the presenter form"
     },
     {
       "what": "Presenter applications and profile updates: name, what they do, short and full bio, website, social links, photos, and up to two class ideas with descriptions",
       "where": "This website's database, as a speaker post that waits for approval and is shown on the site once approved, draft sessions, and photos in the Media Library",
-      "kept": "Until someone deletes it",
+      "kept": "Until someone deletes it. The site's privacy tools export it by email address; the eraser tool leaves the profile for staff to edit or delete by hand",
       "shared": "Emailed to the site's own address (the presenter's name and a link only)",
       "when": "only when someone applies through the presenter form"
     },
     {
       "what": "Presenter private details: phone number, pronouns, room needs, notes, photo release and the time they applied",
       "where": "This website's database, as private details on the speaker post. Never shown on the site.",
-      "kept": "Until someone deletes it",
+      "kept": "Until someone deletes it. The site's privacy eraser tool removes these details, and any profile changes waiting for approval, by email address",
       "shared": "",
       "when": "only when someone applies through the presenter form"
     }

@@ -40,6 +40,8 @@ require_once __DIR__ . '/includes/class-scout-team-front.php';
 require_once __DIR__ . '/includes/class-scout-team-schema.php';
 require_once __DIR__ . '/includes/class-scout-team-admin.php';
 require_once __DIR__ . '/includes/class-scout-team-changes.php';
+require_once __DIR__ . '/includes/class-scout-team-link.php';
+require_once __DIR__ . '/includes/class-scout-team-add.php';
 
 Scout_Team::boot();
 Scout_Team_Editor::boot();
@@ -47,6 +49,8 @@ Scout_Team_Front::boot();
 Scout_Team_Schema::boot();
 Scout_Team_Admin::boot();
 Scout_Team_Changes::boot();
+Scout_Team_Link::boot();
+Scout_Team_Add::boot();
 
 register_activation_hook(
 	__FILE__,

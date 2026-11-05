@@ -4,7 +4,7 @@
     {
       "what": "Booking details: first and last name, email, phone, the session and time picked, answers to the session's intake questions, whether the newsletter box was ticked, and the price, amount due, amount paid and order number",
       "where": "This website's database, in the bookings table (the Bookings screen)",
-      "kept": "Until someone deletes it. The hourly check only changes a booking's status and never deletes it. The WordPress personal data eraser removes a person's bookings by email address, and deleting the plugin removes the whole table.",
+      "kept": "Until someone deletes it. The hourly check only changes a booking's status and never deletes it. The WordPress personal data tools export a person's bookings by email address. The eraser deletes unpaid bookings and keeps paid ones as payment records, with the name, email, phone and answers taken out, and deleting the plugin removes the whole table.",
       "shared": "Emailed to the site's own booking notice address (the notice address in Business info unless another is set), with the intake answers"
     },
     {

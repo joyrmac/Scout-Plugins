@@ -109,3 +109,15 @@
 @media (prefers-reduced-motion: reduce) {
 	.post-type-scout_team * { transition: none !important; animation: none !important; }
 }
+
+/* Sent their details (top) and Send them a link (side). Kit tokens only. */
+.scout-team-form.st-pending { padding: 2px 0 4px; }
+.scout-team-form.st-pending .sh-status { margin: 0 0 var(--sh-space-3); }
+.scout-team-form .st-diff { margin: 0 0 var(--sh-space-3); }
+.scout-team-form .st-diff th[scope="row"] { width: 18%; font-weight: 600; }
+.scout-team-form .st-diff td { width: 41%; vertical-align: top; overflow-wrap: anywhere; }
+.scout-team-form .st-diff img { width: 72px; height: 72px; object-fit: cover; border-radius: var(--sh-r-control); }
+.scout-team-form .st-pending-go { display: flex; flex-wrap: wrap; gap: var(--sh-space-2); }
+.scout-team-form.st-link { padding: 2px 0 4px; }
+.scout-team-form.st-link .sh-actions { display: flex; flex-wrap: wrap; gap: var(--sh-space-2); }
+.scout-team-form.st-link input[readonly] { font-family: var(--sh-mono); font-size: var(--sh-fs-note); }

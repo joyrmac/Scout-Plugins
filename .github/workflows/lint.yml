@@ -117,6 +117,8 @@ jobs:
         run: php tools/tests/plans.php
       - name: People profiles (no WordPress needed)
         run: php tools/tests/people.php
+      - name: Privacy export and erase tools (no WordPress needed)
+        run: php tools/tests/privacy-tools.php
 
   slop-check:
     name: Code slop check

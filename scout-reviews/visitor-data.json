@@ -52,5 +52,5 @@
     }
   ],
   "cookies": [],
-  "notes": "Deleting the plugin keeps the reviews, notes and visit totals unless \"Remove all reviews and settings when the plugin is deleted\" is ticked."
+  "notes": "Deleting the plugin keeps the reviews, notes and visit totals unless \"Remove all reviews and settings when the plugin is deleted\" is ticked. The private note form asks for no email, so the site's privacy tools cannot find a note; staff delete one by hand in Reviews > New reviews."
 }

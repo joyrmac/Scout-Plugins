@@ -1,0 +1,61 @@
+/* Scout People: the page a person fills in from their link. It sits inside
+   the theme's own header and footer and takes its fonts and colors. The
+   button fill and corner size come from the theme's DESIGN.md through Scout
+   Core (scout_design_css()) when it is on; text colors always come from the
+   theme, so the page reads on a dark theme too. */
+
+.scout-team-details {
+	--st-d-muted: color-mix(in srgb, currentColor 72%, transparent);
+	--st-d-line: color-mix(in srgb, currentColor 22%, transparent);
+	--st-d-fill: var(--scout-accent-fill, var(--wp--preset--color--primary, #0A78C2));
+	--st-d-on-fill: var(--scout-on-accent, #FFFFFF);
+	--st-d-radius: var(--scout-radius-control, 10px);
+	box-sizing: border-box;
+	max-width: 760px;
+	margin: 0 auto;
+	padding: clamp(24px, 5vw, 56px) 16px;
+	line-height: 1.55;
+}
+.scout-team-details * { box-sizing: border-box; }
+.scout-team-details h1 { margin: 0 0 .4em; text-wrap: balance; }
+.scout-team-details p { text-wrap: pretty; }
+.scout-team-details__lede { margin: 0 0 1.5em; font-size: 1.1em; color: var(--st-d-muted); }
+.scout-team-details fieldset { margin: 0 0 1.5em; padding: 0; border: 0; min-width: 0; }
+.scout-team-details legend { margin: 0 0 .6em; padding: 0; font-size: 1.2em; font-weight: 600; }
+.scout-team-details__field { display: flex; flex-direction: column; gap: 6px; margin: 0 0 1em; min-width: 0; }
+.scout-team-details__field label { font-weight: 600; }
+.scout-team-details input[type="text"],
+.scout-team-details input[type="url"],
+.scout-team-details textarea {
+	width: 100%;
+	min-height: 44px;
+	padding: 10px 12px;
+	border: 1px solid var(--st-d-line);
+	border-radius: var(--st-d-radius);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+}
+.scout-team-details input[type="file"] { min-height: 44px; }
+.scout-team-details input:focus-visible,
+.scout-team-details textarea:focus-visible,
+.scout-team-details button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.scout-team-details__help, .scout-team-details__note { font-size: .9em; color: var(--st-d-muted); }
+.scout-team-details__note { margin: 0 0 1em; }
+.scout-team-details__row { display: grid; gap: 0 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); padding: 12px 0 0; border-top: 1px solid var(--st-d-line); }
+.scout-team-details__row .is-source { grid-column: 1 / -1; }
+.scout-team-details__errors { margin: 0 0 1.5em; padding: 12px 16px; border: 2px solid currentColor; border-radius: var(--st-d-radius); }
+.scout-team-details__errors p, .scout-team-details__errors ul { margin: 0; }
+.scout-team-details__errors ul { padding-left: 1.2em; }
+.scout-team-details__send {
+	min-height: 48px;
+	padding: 12px 28px;
+	border: 0;
+	border-radius: 980px;
+	background: var(--st-d-fill);
+	color: var(--st-d-on-fill);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+}
+.scout-team-details__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }

@@ -1,5 +1,9 @@
 # Scout CRM Sync changelog
 
+## Unreleased (2026-11-05)
+
+- **Visitor data list covers privacy requests.** The contacts live in FluentCRM, so the list now says to export or delete a person there. No code changed.
+
 ## 0.1.4 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

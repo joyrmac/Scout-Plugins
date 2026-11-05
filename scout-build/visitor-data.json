@@ -4,14 +4,14 @@
     {
       "what": "Change requests visitors send through Scout Chat: the request in their words, their name, email and phone, and the page",
       "where": "This website's database, as private change request posts (the Requests screen)",
-      "kept": "Until someone deletes it. Deleting the plugin keeps the request list.",
+      "kept": "Until someone deletes it. Deleting the plugin keeps the request list. The site's privacy tools export a request by the email the visitor gave; the eraser tool keeps the request and takes out their name, email and phone.",
       "shared": "Scout's Client Hub reads the request and the visitor's name through the site's Hub key, with email addresses and phone numbers blanked first. Only when a Hub key is set.",
       "when": "only when Scout Chat is on and a visitor asks for a change there"
     },
     {
       "what": "The visitor's name and the first words of a chat change request, as a line in the Site log",
       "where": "This website's database, as a private Site log line",
-      "kept": "Until someone deletes it. Deleting the plugin keeps the Site log.",
+      "kept": "Until someone deletes it. Deleting the plugin keeps the Site log. The site's privacy eraser tool replaces the name with Scout Chat.",
       "shared": "Scout's Client Hub, which reads the Site log through the site's Hub key, only when a Hub key is set",
       "when": "only when Scout Chat is on and a visitor asks for a change there"
     },

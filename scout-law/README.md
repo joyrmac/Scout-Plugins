@@ -107,7 +107,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 |---|---|---|---|
 | Form entries visitors send through the site's Gravity Forms, and the files uploaded with them (Gravity Forms stores these; this plugin deletes old ones) (only while the automatic delete setting is on (it is on unless the firm turns it off)) | This website's database and uploads folder, where Gravity Forms keeps them | Each night, entries older than the firm's limit are deleted: 90 days unless the firm picks 30, 60, 180 or 365. This includes entries in the spam and trash folders. Starred entries are kept, and so are entries from forms the firm chose to keep, forms that send no email, and forms that use Gravity Forms' own delete setting. The first delete waits 14 days after the plugin first runs, and each night deletes up to 500 entries per form. | Nobody |
 
-Scout Law collects nothing from visitors itself. Its nightly log keeps only how many entries were deleted, never names or messages.
+Scout Law collects nothing from visitors itself. Its nightly log keeps only how many entries were deleted, never names or messages. Gravity Forms decides whether WordPress's privacy export and erase tools reach form entries: turn on its Personal Data setting on each form and pick the email field.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

@@ -34,3 +34,25 @@
 .st-people .st-look strong { color: var(--sh-accent-text); }
 .st-people .sh-tag.st-signin { background: var(--sh-glow); color: var(--sh-accent-text); }
 .st-people .st-more { margin-top: var(--sh-space-4); }
+
+/* Add a person: three steps on one screen. Without the script every step shows. */
+.st-add [hidden] { display: none !important; }
+.st-add { display: grid; gap: var(--sh-space-4); margin-top: var(--sh-space-4); }
+.st-add .st-progress { display: flex; flex-wrap: wrap; gap: var(--sh-space-2); margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.st-add .st-progress-step { margin: 0; }
+.st-add .st-progress-step a { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); padding: 0 var(--sh-space-4) 0 var(--sh-space-2); border: 1px solid var(--sh-border-strong); border-radius: var(--sh-r-pill); background: var(--sh-surface); color: var(--sh-text-2); font-weight: 500; text-decoration: none; }
+.st-add .st-progress-step a:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
+.st-add .st-progress-num { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: var(--sh-r-pill); background: var(--sh-surface-2); color: var(--sh-text-2); font-family: var(--sh-mono); font-size: var(--sh-fs-note); font-weight: 600; }
+.st-add .st-progress-step.is-current a { border-color: var(--sh-accent-line); color: var(--sh-text); }
+.st-add .st-progress-step.is-current .st-progress-num { background: var(--sh-accent-fill); color: var(--sh-on-accent); }
+.st-add .st-progress-step.is-done .st-progress-num { background: var(--sh-good-tint); color: var(--sh-good); }
+.st-add .sh-title:focus { outline: none; }
+.st-add .sh-title:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 4px; }
+.st-add .scout-team-form .st-checks { border: 0; margin: 0; padding: 0; }
+.st-add .scout-team-form .st-check { margin: 0; }
+.st-add .scout-team-form .st-check label { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); }
+.st-add .scout-team-form > .description { margin: var(--sh-space-1) 0 0; }
+.st-add .st-add-photo img { display: block; width: 96px; height: 96px; object-fit: cover; border-radius: var(--sh-r-control); margin-bottom: var(--sh-space-2); }
+.st-add .st-add-go, .st-add .st-add-finish { display: flex; flex-wrap: wrap; gap: var(--sh-space-2); margin-top: var(--sh-space-4); }
+.st-add .st-add-link { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sh-space-2); margin: var(--sh-space-2) 0 0; }
+.st-add .st-add-full { margin: 0; }

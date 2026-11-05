@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
+- **Privacy tools reach chat change requests.** WordPress's Export and Erase Personal Data tools now find change requests a visitor sent through Scout Chat, by the email they gave. Erasing keeps the request as a work item and takes out their name, email and phone, and the Site log line that named them now says Scout Chat. Requests staff send from the dashboard are not touched.
+
 - Restore test and Uptime alert show only to Scout, since only Scout can set them. Clients see the other six security rows.
 
 - **Security in Site status (Site Standard rule 22).** Site status has a new Security section, and the copied report a SECURITY block, with eight rows that only read: XML-RPC, File editing, Admins, Two-step login, Backups, Restore test, Uptime alert and Security headers. Each is "ok" or "look", never a fix, and the look rows count on Home and in the dashboard widget like the other checks. Only people who can manage the site see the section, because it lists admins by display name (never email).
