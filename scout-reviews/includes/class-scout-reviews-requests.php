@@ -394,7 +394,7 @@ final class Scout_Reviews_Requests {
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'QR code and printed cards', 'scout-reviews' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'QR code & printed cards', 'scout-reviews' ); ?></h2>
 				<p><?php esc_html_e( 'Put the QR code where clients finish with you. Each layout prints on its own letter-size page.', 'scout-reviews' ); ?></p>
 				<ul class="sh-rows srk-print-rows">
 					<li class="sh-row">
@@ -403,9 +403,9 @@ final class Scout_Reviews_Requests {
 							<div>
 								<p class="sh-row-name"><?php esc_html_e( 'QR code', 'scout-reviews' ); ?></p>
 								<p class="sh-row-sub"><?php echo esc_html( $display ); ?></p>
+								<p class="sh-row-sub"><?php esc_html_e( 'For printers, signs and invoices', 'scout-reviews' ); ?></p>
 							</div>
 						</div>
-						<div class="sh-row-facts"><span class="sh-tag"><?php esc_html_e( 'For printers, signs and invoices', 'scout-reviews' ); ?></span></div>
 						<div class="sh-row-go">
 							<button type="button" class="button" data-qr-download="svg"><?php esc_html_e( 'Download SVG', 'scout-reviews' ); ?></button>
 							<button type="button" class="button sh-quiet" data-qr-download="png"><?php esc_html_e( 'Download PNG', 'scout-reviews' ); ?></button>
@@ -511,7 +511,7 @@ final class Scout_Reviews_Requests {
 
 		</div>
 
-		<?php Scout_Reviews_Menu::fold_open( __( 'More options: the review page and cards', 'scout-reviews' ), ! $s['enabled'], 'srk-settings' ); ?>
+		<?php Scout_Reviews_Menu::fold_open( __( 'More options: review page & cards', 'scout-reviews' ), ! $s['enabled'], 'srk-settings' ); ?>
 			<p><?php esc_html_e( 'The address, where the link goes, private notes, and the look of the review page and the printed cards.', 'scout-reviews' ); ?></p>
 			<form method="post" action="options.php">
 				<?php settings_fields( self::PAGE ); ?>

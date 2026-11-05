@@ -587,6 +587,14 @@ final class Scout_Events_Volunteers {
 			$total  += $s['spots'];
 			$filled += min( $s['spots'], count( array_filter( $roster, static fn( $r ) => $r['shift'] === $s['key'] ) ) );
 		}
+		$people_n = count( array_unique( array_column( $roster, 'email' ) ) );
+		Scout_Events_Admin::ui_status(
+			'good',
+			/* translators: 1: spots filled, 2: all spots. */
+			sprintf( __( '%1$d of %2$d spots filled.', 'scout-events' ), $filled, $total ),
+			/* translators: %d: number of volunteers. */
+			sprintf( _n( '%d volunteer signed up.', '%d volunteers signed up.', $people_n, 'scout-events' ), $people_n )
+		);
 		?>
 		<section class="sh-box se-door">
 			<form method="get" class="se-door-pick">
@@ -599,11 +607,6 @@ final class Scout_Events_Volunteers {
 				</select>
 				<noscript><button type="submit" class="button"><?php esc_html_e( 'Show', 'scout-events' ); ?></button></noscript>
 			</form>
-			<div class="sh-stats">
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) $filled; ?></p><p class="sh-note"><?php esc_html_e( 'spots filled', 'scout-events' ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) max( 0, $total - $filled ); ?></p><p class="sh-note"><?php esc_html_e( 'still open', 'scout-events' ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( array_unique( array_column( $roster, 'email' ) ) ); ?></p><p class="sh-note"><?php esc_html_e( 'volunteers', 'scout-events' ); ?></p></div>
-			</div>
 			<div class="se-door-tools">
 				<span class="se-actions">
 					<a class="button" href="<?php echo esc_url( (string) get_edit_post_link( $event ) ); ?>#scout-event-shifts"><?php esc_html_e( 'Edit shifts', 'scout-events' ); ?></a>
@@ -616,14 +619,19 @@ final class Scout_Events_Volunteers {
 			<section class="sh-box">
 				<div class="se-box-head">
 					<h2 class="sh-title"><?php echo esc_html( $s['role'] ); ?></h2>
-					<span class="se-chip<?php echo count( $people ) >= $s['spots'] ? ' is-done' : ' is-warn'; ?>"><?php echo esc_html( count( $people ) . ' / ' . $s['spots'] ); ?></span>
+					<?php $open = max( 0, $s['spots'] - count( $people ) ); ?>
+					<?php /* translators: %d: open spots on the shift. */ ?>
+					<span class="se-chip<?php echo $open ? '' : ' is-done'; ?>"><?php echo esc_html( $open ? sprintf( _n( '%d open', '%d open', $open, 'scout-events' ), $open ) : __( 'Full', 'scout-events' ) ); ?></span>
 				</div>
-				<p class="sh-note"><?php echo esc_html( self::when( $s ) . ( '' !== $s['note'] ? ' · ' . $s['note'] : '' ) ); ?></p>
+				<p class="sh-note"><?php echo esc_html( self::when( $s ) ); ?></p>
+				<?php if ( '' !== $s['note'] ) : ?>
+					<p class="sh-note"><?php echo esc_html( $s['note'] ); ?></p>
+				<?php endif; ?>
 				<?php if ( $people ) : ?>
 					<ul class="se-door-list">
 						<?php foreach ( $people as $r ) : ?>
 							<li class="se-door-row">
-								<div class="se-door-who"><strong><?php echo esc_html( $r['name'] ); ?></strong><br><span class="sh-note"><?php echo esc_html( trim( $r['email'] . ' · ' . $r['phone'], ' ·' ) ); ?></span></div>
+								<div class="se-door-who"><strong><?php echo esc_html( $r['name'] ); ?></strong><br><span class="sh-note"><?php echo esc_html( implode( ', ', array_filter( array( $r['email'], $r['phone'] ) ) ) ); ?></span></div>
 								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-door-act">
 									<input type="hidden" name="action" value="scout_volunteer_admin">
 									<input type="hidden" name="volunteer" value="<?php echo (int) $r['id']; ?>">

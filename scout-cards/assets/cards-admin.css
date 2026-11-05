@@ -36,6 +36,8 @@
 .scc-else { margin-top: var(--sh-space-1); }
 .scc-else > summary, .scc-fold > summary { display: inline-flex; align-items: center; min-height: var(--sh-tap); cursor: pointer; color: var(--sh-accent-text); font-weight: 500; }
 .scc-else[open] > summary { margin-bottom: var(--sh-space-2); }
+.scc-else > summary::after, .scc-fold > summary::after { content: "\203A"; margin-left: var(--sh-space-2); }
+.scc-else[open] > summary::after, .scc-fold[open] > summary::after { transform: rotate(90deg); }
 .scc-else .form-table { margin: 0; }
 .scc-else .form-table th { width: 160px; padding-top: var(--sh-space-3); }
 .scc-fold { margin: var(--sh-space-2) 0 var(--sh-space-3); padding-top: var(--sh-space-2); border-top: 1px solid var(--sh-border); }

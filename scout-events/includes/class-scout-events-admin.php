@@ -91,7 +91,7 @@ final class Scout_Events_Admin {
 			unset( $submenu[ $list ] ); // Its leftover sub-list would otherwise claim the screen.
 			add_submenu_page( self::SLUG, $label, $label, 'edit_posts', $list );
 		}
-		add_submenu_page( self::SLUG, __( 'Sign-ups and check-in', 'scout-events' ), __( 'Sign-ups', 'scout-events' ), 'edit_posts', self::SLUG . '-signups', array( __CLASS__, 'render_signups' ) );
+		add_submenu_page( self::SLUG, __( 'Sign-ups & check-in', 'scout-events' ), __( 'Sign-ups', 'scout-events' ), 'edit_posts', self::SLUG . '-signups', array( __CLASS__, 'render_signups' ) );
 		add_submenu_page( self::SLUG, __( 'Volunteer shifts', 'scout-events' ), __( 'Volunteers', 'scout-events' ), 'edit_posts', self::SLUG . '-volunteers', array( __CLASS__, 'render_volunteers' ) );
 		add_submenu_page( self::SLUG, __( 'Add from spreadsheet', 'scout-events' ), __( 'Add from spreadsheet', 'scout-events' ), 'edit_posts', self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
 		add_submenu_page( self::SLUG, __( 'Settings', 'scout-events' ), __( 'Settings', 'scout-events' ), 'edit_posts', self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
@@ -428,8 +428,8 @@ final class Scout_Events_Admin {
 
 		// Each screen gets its own name (its menu label) and one sentence on what it is for.
 		$heads = array(
-			'overview'   => array( __( 'Home', 'scout-events' ), __( 'What is coming up, what needs you, and every event, session and speaker. Change something here and the site follows.', 'scout-events' ) ),
-			'signups'    => array( __( 'Sign-ups', 'scout-events' ), __( 'One event\'s door list: who is going, who is checked in, and the waitlist. Works on a phone.', 'scout-events' ) ),
+			'overview'   => array( __( 'Home', 'scout-events' ), __( 'What’s coming up, what needs you, and every event, session and speaker.', 'scout-events' ) ),
+			'signups'    => array( __( 'Sign-ups', 'scout-events' ), __( 'One event’s door list: who’s going, who’s checked in, and the waitlist.', 'scout-events' ) ),
 			'volunteers' => array( __( 'Volunteers', 'scout-events' ), __( 'The volunteer shifts for each event and who has signed up for them.', 'scout-events' ) ),
 			'import'     => array( __( 'Add from spreadsheet', 'scout-events' ), __( 'Add many events, speakers, sessions and vendors at once from spreadsheet files.', 'scout-events' ) ),
 			'settings'   => array( __( 'Settings', 'scout-events' ), __( 'Event page addresses, the currency, showing events on Google, and your community agreements link.', 'scout-events' ) ),
@@ -469,32 +469,24 @@ final class Scout_Events_Admin {
 		$needs = self::needs_you();
 		$next  = $upcoming ? Scout_Events::event( $upcoming[0] ) : null;
 		?>
-		<section class="sh-box">
-			<div class="sh-stats">
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) count( $upcoming ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'upcoming events', 'scout-events' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) $sessions; ?></p>
-					<p class="sh-note"><?php esc_html_e( 'sessions in them', 'scout-events' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) count( Scout_Events::speaker_ids() ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'speakers', 'scout-events' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) count( $needs ); ?></p>
-					<p class="sh-note"><a href="#se-needs"><?php esc_html_e( 'things need you', 'scout-events' ); ?> &rsaquo;</a></p>
-				</div>
-				<?php if ( $next ) : ?>
-					<div class="sh-stat">
-						<p class="sh-num sh-num-text"><?php echo esc_html( Scout_Events::dates_label( $next ) ); ?></p>
-						<p class="sh-note"><?php echo esc_html( get_the_title( $upcoming[0] ) ); ?></p>
-					</div>
-				<?php endif; ?>
-			</div>
-		</section>
+		<?php
+		// One status line instead of a row of numbers (DESIGN 2 #5, kit 1.10.0).
+		$next_line = $next
+			/* translators: 1: event name, 2: its dates. */
+			? sprintf( __( 'Next up: %1$s, %2$s.', 'scout-events' ), get_the_title( $upcoming[0] ), Scout_Events::dates_label( $next ) )
+			: __( 'No upcoming events yet.', 'scout-events' );
+		if ( $needs ) {
+			self::ui_status(
+				'warn',
+				/* translators: %d: number of things that need the person. */
+				sprintf( _n( '%d thing needs you.', '%d things need you.', count( $needs ), 'scout-events' ), count( $needs ) ),
+				$next_line,
+				'<a class="button" href="#se-needs">' . esc_html__( 'See what', 'scout-events' ) . '</a>'
+			);
+		} else {
+			self::ui_status( 'good', __( 'Nothing needs you.', 'scout-events' ), $next_line );
+		}
+		?>
 
 		<section class="sh-box" id="se-needs">
 			<h2 class="sh-title"><?php esc_html_e( 'Needs you', 'scout-events' ); ?></h2>
@@ -518,6 +510,10 @@ final class Scout_Events_Admin {
 					<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . Scout_Events::SPEAKER ) ); ?>"><?php esc_html_e( 'Add speaker', 'scout-events' ); ?></a>
 				</span>
 			</div>
+			<?php if ( $upcoming ) : ?>
+				<?php $speakers = count( Scout_Events::speaker_ids() ); ?>
+				<p class="sh-note"><?php echo esc_html( sprintf( /* translators: 1: upcoming events, 2: sessions, 3: speakers. */ __( '%1$s, %2$s and %3$s.', 'scout-events' ), sprintf( _n( '%d upcoming event', '%d upcoming events', count( $upcoming ), 'scout-events' ), count( $upcoming ) ), sprintf( _n( '%d session', '%d sessions', $sessions, 'scout-events' ), $sessions ), sprintf( _n( '%d speaker', '%d speakers', $speakers, 'scout-events' ), $speakers ) ) ); ?></p>
+			<?php endif; ?>
 			<?php self::table( array_merge( $upcoming, array_map( 'intval', $drafts ) ) ); ?>
 		</section>
 		<?php
@@ -579,7 +575,7 @@ final class Scout_Events_Admin {
 				</section>
 
 				<section class="sh-box" id="se-details">
-					<h2 class="sh-title"><?php esc_html_e( 'Prices and Google', 'scout-events' ); ?></h2>
+					<h2 class="sh-title"><?php esc_html_e( 'Prices & Google', 'scout-events' ); ?></h2>
 					<p class="se-field">
 						<label for="se-set-currency"><?php esc_html_e( 'Currency code', 'scout-events' ); ?></label>
 						<input type="text" id="se-set-currency" name="scout_events[currency]" value="<?php echo esc_attr( $s['currency'] ); ?>" maxlength="3" class="se-short-input">
@@ -608,7 +604,7 @@ final class Scout_Events_Admin {
 		<?php endif; ?>
 
 		<?php self::ui_fold_open( __( 'Add to a page', 'scout-events' ), ! $can, 'se-shortcodes' ); ?>
-			<p><?php esc_html_e( 'Each event already has its own page with the details, schedule and speakers. Paste these on any page to list them there.', 'scout-events' ); ?></p>
+			<p><?php esc_html_e( 'Paste these on any page to list events there. Each event already has its own page.', 'scout-events' ); ?></p>
 			<table class="sh-table se-codes">
 				<tr><td>[scout_events]</td><td><?php esc_html_e( 'Upcoming events, soonest first.', 'scout-events' ); ?></td></tr>
 				<tr><td>[scout_events show="past" limit="6"]</td><td><?php esc_html_e( 'The six most recent past events.', 'scout-events' ); ?></td></tr>
@@ -628,7 +624,7 @@ final class Scout_Events_Admin {
 			return;
 		}
 		?>
-		<table class="widefat striped se-overview">
+		<table class="widefat sh-table se-overview">
 			<thead>
 				<tr>
 					<th scope="col"><?php esc_html_e( 'Event', 'scout-events' ); ?></th>
@@ -656,7 +652,7 @@ final class Scout_Events_Admin {
 								<span class="se-chip"><?php echo esc_html( 'future' === $status ? __( 'Scheduled', 'scout-events' ) : __( 'Draft', 'scout-events' ) ); ?></span>
 							<?php endif; ?>
 							<?php if ( 'scheduled' !== $e['status'] ) : ?>
-								<span class="se-chip is-warn"><?php echo esc_html( Scout_Events::statuses()[ $e['status'] ] ); ?></span>
+								<span class="se-chip<?php echo 'cancelled' === $e['status'] ? ' is-bad' : ''; ?>"><?php echo esc_html( Scout_Events::statuses()[ $e['status'] ] ); ?></span>
 							<?php endif; ?>
 						</td>
 						<td><?php echo esc_html( Scout_Events::dates_label( $e ) ); ?></td>

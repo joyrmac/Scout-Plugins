@@ -535,7 +535,7 @@ final class Scout_Cards_Admin {
 			}
 		}
 		if ( ! class_exists( 'Scout_Core_Business' ) ) {
-			echo '<div class="notice notice-info"><p>Scout Core is off, so fill in the business details under More options.</p></div>';
+			echo '<div class="notice notice-info"><p>' . esc_html( Scout_Cards_People::reading() ? 'Scout Core is off, so fill in the business details on the main card and under More options.' : 'Scout Core is off, so fill in the business details under More options.' ) . '</p></div>';
 		}
 		$moved = Scout_Cards_People::take_note();
 		if ( '' !== $moved ) {

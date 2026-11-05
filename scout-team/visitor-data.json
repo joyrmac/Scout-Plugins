@@ -9,7 +9,7 @@
       "when": "Only when the Scout Analytics plugin is installed and its tag is on the page."
     },
     {
-      "what": "Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, and profile links",
+      "what": "Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, profile links, and for people with a business card their card intro, a line on why to talk to them and tags",
       "where": "This website's database, on that person's profile, as changes waiting for the owner's OK. The photo goes in the media library.",
       "kept": "Until the owner approves them (they become the public profile) or discards them (they and the photo are deleted).",
       "shared": "",
@@ -24,5 +24,5 @@
     }
   ],
   "cookies": [],
-  "notes": "Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login. A person with Card switched on also shows on their business card (Scout Cards): name, title, photo, card phone and card email, and their profile links and short bio only when the card is set to show them. Profiles whose own page is off stay out of the site's search results."
+  "notes": "Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login. A person with Card switched on also shows on their business card (Scout Cards): name, title, photo, card phone, card email, card intro, \"why talk to them\" line and tags, and their profile links and short bio only when the card is set to show them. Profiles whose own page is off stay out of the site's search results."
 }

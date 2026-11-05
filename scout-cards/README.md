@@ -36,12 +36,14 @@ No WordPress Pages are needed; the plugin owns these addresses. The words
 2. Check **Scout -> Business** is filled in, and set a **Site Icon** (Appearance ->
    Customize, or Settings -> General) for the logo and home-screen icon.
 3. **People:** add each person (Add a person) and switch on **A business card** under
-   Shows on. Their name, title, photo, card phone and card email live there.
-4. **Scout -> Cards and links:** pick the accent color and mode, write the main intro,
-   open **Card settings** on each person to set their link name, intro, "why talk to
-   them," tags, share picture and what the card shows, and set the link rows. Each card
-   has an optional **Spotlight** (a heading, a short note, and one link row) for a
-   product, booking page, or second business.
+   Shows on. Their name, title and photo live there, and the **Business card** box
+   holds their intro, "why talk to them," tags, card phone and card email.
+4. **Scout -> Cards and links:** pick the accent color and mode, open **Edit** on the
+   main card (its name, email, logo and intro come from Business info unless you use
+   something else), open **Card settings** on each person to set their link name and
+   what the card shows, and set the link rows. Each card has an optional **Spotlight**
+   (a heading, a short note, and one link row) for a product, booking page, or second
+   business: under **Extras** on the main card and **More** on each person.
 5. Clear the host cache, then run the QA checklist in the Scout playbook
    (`ops/playbook/addon-digital-business-cards.md` in Scout-Media-Raleigh).
 
@@ -50,32 +52,49 @@ change the address in **Addresses** or rename the Page.
 
 ## Cards read from People
 
-One profile per person. **Scout People** (`scout-team`) holds who each person is:
-name, title, photo and its alt text, card phone, card email, profile links and short
-bio. This plugin keeps each card's own look and links settings.
+One profile per person. **Scout People** (`scout-team`) holds who each person is and
+what their card says: name, title, photo and its alt text, and in its **Business card**
+box the intro, "why talk to them," tags, card phone and card email, plus the profile
+links and short bio. This plugin keeps each card's own settings.
 
 | From People (`Scout_Team::card()`) | Kept in Cards, per card |
 |---|---|
 | Name, title, photo and alt text | Link name (the `/card/<link name>/` address) |
-| Card phone and card email (blank uses the business phone and email) | Intro, "why talk to them," tags |
-| Profile links and short bio (shown only when switched on) | Share picture and Spotlight |
-| | Show on the card: Phone, Email, Profile links, Short bio, Save contact button |
+| Card phone and card email (blank uses the business phone and email) | Show on the card: Phone, Email, Intro, Tags, Profile links, Short bio, Save contact |
+| Intro, "why talk to them," tags (empty uses the card's own saved words) | Share picture and Spotlight (under More) |
+| Profile links and short bio (shown only when switched on) | |
 
 - **Who gets a card:** anyone live in People with **A business card** switched on.
   Switch it off, or take them off the site, and their card address answers "not
   found", the same as a profile page that is off. The People row tag "Card" shows
   who has it on.
 - **The Cards screen** lists those people (photo, name, card address, Share mode, QR
-  code), with **Edit in People** for their details and **Card settings** for the
-  card's own settings. **Add a person** opens the People walkthrough with Card on
+  code), with **Edit in People** for what the card says and **Card settings** for
+  switches only: the link name and Show on the card, then a closed **More** with the
+  share picture and Spotlight. No words are typed on the Cards screen. **Add a person** opens the People walkthrough with Card on
   (`?page=scout-people&add=1&card=1`).
-- **The switches** start the way cards always worked: phone, email and Save contact
-  on, profile links and short bio off. With Save contact off the button goes, and the
+- **The switches** start the way cards always worked: phone, email, intro, tags and
+  Save contact on, profile links and short bio off. With Save contact off the button goes, and the
   `/save/` address still works.
-- **Fallback:** each card record keeps the name, title, email and photo it had. With
-  Scout People off, or the profile deleted, the card shows those, exactly as before.
+- **Fallback:** each card record keeps the name, title, email, photo, intro, "why talk
+  to them" and tags it had. With Scout People off, or the profile deleted, the card
+  shows those, exactly as before. An intro, why or tags that is empty in People also
+  uses the card's own.
   The screen then shows the old fields (People off) or a read-only row with "Take
   this card off" (profile deleted).
+
+### The main card and Business info
+
+With People on, the main card (`/card/`) takes its **name**, **email** and **logo or
+photo** from Business info (Scout Core), and its **intro** from Business info's
+description when Business info has one (otherwise the intro is a card field). Each has
+a closed **Use something else** with the card's own value; empty means "use Business
+info". The saved keys are the same (`name`, `email`, `photo_id`, `logo_id`,
+`team_intro`). An older save that copied Business info in shows as empty. The logo is
+read from Business info's `logo_id` or `logo` (an attachment ID) when Scout Core has
+one; until then the Site Icon shows, as before. **Heading above the people** and the
+**Spotlight** sit under **Extras**. The rest of the business details (phone, city,
+socials, footer line, contact note) stay under More options.
 
 ### The one-time move
 
@@ -100,6 +119,12 @@ recorded by the `scout_cards_people_db` option:
 5. **The note:** the Cards screen shows once what happened ("Moved 3 card people into
    People."), names any card that now shows a value People already had, and anyone
    whose Card switch was turned off. Stored in `scout_cards_people_note` until shown.
+6. **The card's words (`scout_cards_people_db` 2):** each linked card's intro, "why
+   talk to them" and tags are copied into the profile's `card_intro`, `card_why` and
+   `card_tags`, only where the profile field is empty. A People value is never
+   overwritten, and the card keeps its own copy for the fallback. It waits for a Scout
+   People that has the Business card box. Sites already past the first move run only
+   this step. The note says how many profiles got them.
 
 ## Settings
 
@@ -123,7 +148,7 @@ the option.
 
 This plugin keeps nothing about the people who visit the site and sets no cookies.
 
-The card, contact file and link pages only show the team's own details: each person's name, title, photo, card phone and card email come from their People profile, and only for people with Card switched on. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site.
+The card, contact file and link pages only show the team's own details: each person's name, title, photo, card phone, card email, intro, "why talk to them" line and tags come from their People profile, and only for people with Card switched on. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

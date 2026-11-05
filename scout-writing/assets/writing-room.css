@@ -64,7 +64,7 @@
 }
 
 .sw-flash { margin: 16px 0 0; padding: 10px 14px; background: var(--sw-blue-tint); border-left: 3px solid var(--sw-blue); border-radius: var(--sh-r-chip); }
-.sw-flash.is-err { background: var(--sh-warn-tint); border-left-color: var(--sh-warn-mark); }
+.sw-flash.is-err { background: var(--sh-bad-tint); border-left-color: var(--sh-bad-mark); }
 
 /* All prompts: a plain section heading over the step boxes. */
 .sw-all { margin-top: 28px; }
@@ -143,7 +143,7 @@
 	text-underline-offset: 3px;
 	cursor: pointer;
 }
-.sw-empty { padding: 16px var(--sh-pad); background: var(--sw-paper); border-radius: var(--sh-r-control); text-align: center; }
+.sw-empty { padding: 16px var(--sh-pad); background: var(--sw-paper); border-radius: var(--sh-r-control); }
 
 /* Steps */
 .sw-step > summary { display: flex; gap: 16px; align-items: flex-start; padding: 20px var(--sh-pad); }
@@ -238,10 +238,10 @@ details[open] > summary > .sw-chev::before { transform: rotate(225deg); top: 8px
 .sw-rule li { margin: 0 0 4px; font-size: var(--sh-fs-note); }
 .sw-guests { margin: 18px 0 6px; padding: 16px 18px; border-radius: var(--sh-r-control); background: var(--sw-wash); }
 .sw-guests .sw-gh { margin-top: 0; }
-.sw-gcats { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 18px; }
+.sw-gcats { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(220px, calc((100% - 36px) / 3)), 1fr)); gap: 12px 18px; }
 .sw-gcat ul { margin: 0; padding: 0; list-style: none; }
 .sw-gcat li { margin: 0 0 2px; font-family: var(--sw-serif); font-size: var(--sh-fs-base); }
-.sw-inv { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.sw-inv { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(260px, calc((100% - 24px) / 3)), 1fr)); gap: 12px; }
 .sw-invc { padding: 14px 16px; border: 1px solid var(--sh-border); border-radius: var(--sh-r-control); background: var(--sw-paper); }
 .sw-invc h4 { margin: 0 0 2px; font-size: var(--sh-fs-card); line-height: 1.25; }
 .sw-invsub { margin: 0 0 8px; font-size: var(--sh-fs-note); color: var(--sw-ink2); }

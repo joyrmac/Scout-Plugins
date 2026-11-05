@@ -2,6 +2,11 @@
 
 ## Unreleased (2026-11-05)
 
+- **Business card box on the People profile (Joy, 2026-11-05).** The Card only phone and email grew into a Business card box under Profile: Intro (one or two sentences in their own voice), Why talk to them (one line for the team card), Tags (comma separated), Card phone and Card email. Stored in the profile like every other field (`card_intro`, `card_why`, `card_tags`), through the same clean and store path. Scout Cards reads them through `Scout_Team::card()` (`intro`, `why`, `tags`), so they are typed once, in People.
+- **Card words stay card only.** Like the card phone and email, they never show on the profile page or the team page, never go into the schema and are never sent by the REST API. `Scout_Team::card_keys()` lists all five.
+- **Send them a link takes the card words too,** for people with A business card on: their intro, a "why talk to you" line and tags. They wait as pending changes with the rest and show in the review table. The page still never asks for email, phone, card phone or card email.
+- **Moved:** the "Card only" group (Card phone, Card email and "Business card only. Never on their page, the team page or in search.") left the Shows on box for the Business card box.
+
 - **Written by.** Posts get a Written by box (a panel in the block editor's sidebar, a box in the classic editor). Pick one or more people from People as the byline, with or without a login: guest writers, speakers with no login, and posts written by staff for someone else. Stored on the post as `_scout_people_authors`, in order. People whose byline is off can be picked, with a note that the post leaves them out until it is on. Posts only; the `scout_people_byline_post_types` filter adds other types.
 - **Bylines use it.** With people picked, the author name is theirs ("Ana Ruiz, Ben Cole & Dee Fox"), the author link goes to the first person's profile page (no address when that page is off), and `the_author_posts_link()` links each name. The article schema's author is each person's existing Person node. With nobody picked, nothing changes for any post.
 - **`Scout_Team::byline_people( $post_id )`.** Returns who a post's byline credits: the people picked, or the profile linked to its login. For Scout Build's Real authors check later. `Scout_Team_Byline::posts_for()` gives a theme the newest posts that credit a person.

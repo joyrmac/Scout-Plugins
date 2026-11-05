@@ -56,22 +56,37 @@ Each person has six switches, stored in the profile as `shows`:
 Existing profiles keep exactly what they had: profile page and team page on,
 byline on when a login is linked, the rest off.
 
-## Card only contact
+## Business card box
 
-`card_phone` and `card_email` are for a person's business card only. They
-never print on the profile page or the team page and never go into the
-schema. The editor says so under the fields.
+The **Business card** box on the edit screen (under Profile) holds what a
+person's business card says. Everything in it is for the card only: it never
+prints on the profile page or the team page, never goes into the schema and is
+never sent by the REST API. `Scout_Team::card_keys()` lists the five keys.
+
+| Field | Key | Where it shows |
+|---|---|---|
+| Intro (one or two sentences in their own voice) | `card_intro` | Their card |
+| Why talk to them (one line) | `card_why` | Under their name on the team card (`/card/`) |
+| Tags (comma separated) | `card_tags` | Their card and the team card |
+| Card phone | `card_phone` | Their card and contact file (blank uses the business phone) |
+| Card email | `card_email` | Their card and contact file (blank uses the business email) |
+
+They save through the same `sanitize_profile()` and `store()` path as every
+other field, in the same `_scout_team` value. The Cards screen keeps only the
+switches for what each card shows. Before this box, the card phone and email
+sat in a "Card only" group in the Shows on box.
 
 ## Business cards (Scout Cards)
 
 Scout Cards reads each card from the profile: name, title, photo and its alt
-text, `card_phone`, `card_email`, and the profile links and short bio when the
-card is set to show them. It calls two public functions, guarded so either
-plugin works alone:
+text, `card_phone`, `card_email`, `card_intro`, `card_why`, `card_tags`, and the
+profile links and short bio when the card is set to show them. It calls two
+public functions, guarded so either plugin works alone:
 
-- `Scout_Team::card( $post_id )`: what a card may show of one person, plus
-  `on` (live with Card switched on). Role, bio and links come through
-  `public_profile()`, so a card never shows what the profile page hides.
+- `Scout_Team::card( $post_id )`: what a card may show of one person (`intro`,
+  `why` and `tags` among it), plus `on` (live with Card switched on). Role, bio
+  and links come through `public_profile()`, so a card never shows what the
+  profile page hides.
 - `Scout_Team::card_ids()`: live people with Card on, in team page order.
 
 A profile page that is off also stays out of the site's own search results, so
@@ -116,7 +131,7 @@ plain words.
 | Military service: branch, years | Profile, grid, preview card | none (schema.org has no property for it) |
 | Languages | Profile | `knowsLanguage` |
 | Email, phone (optional) | Profile when turned on | `email`, `telephone` |
-| Card phone, card email | Business card only | never |
+| Card phone, card email, card intro, why talk to them, tags | Business card only | never |
 | Profile links (LinkedIn, state bar, Avvo...) | Profile | `sameAs` |
 | Writes posts as (a WordPress login) | Author links on posts | Post `author` |
 | Picked in "Written by" on a post | Author name and link on that post | Post `author` |
@@ -139,9 +154,9 @@ sections: Runs the site (people whose login can manage the site), Team,
 Speakers, Writers, Members (listed), then Everyone else. Rows follow the
 team page order: the Order number on each person, then name.
 
-The edit screen has the Profile fields under the name, the optional full bio
-below, and on the side: Shows on (with the card only phone and email), Groups,
-a preview card, a trust checklist and Send them a link.
+The edit screen has the Profile fields under the name, then the Business card
+box, the optional full bio below, and on the side: Shows on, Groups, a preview
+card, a trust checklist and Send them a link.
 
 ## Add a person
 
@@ -168,9 +183,10 @@ everything. "Use the full editor" opens WordPress's own Add screen.
 **Send them a link** (on each row of the People screen, on the edit screen,
 and at the end of Add a person) makes a one-time link,
 `/?scout_people=<token>`, to a page where the person fills in their own name,
-title, short bio, photo, credentials with sources, and profile links. The
-owner copies the link and sends it; the plugin sends no email. The page never
-asks for email, phone or the card only contact.
+title, short bio, photo, credentials with sources, and profile links. With A
+business card on, the page also takes their card intro, "why talk to you" line
+and tags. The owner copies the link and sends it; the plugin sends no email.
+The page never asks for email, phone, card phone or card email.
 
 - **The link:** 48 random hex characters. Only a keyed hash is stored
   (`_scout_team_link_hash`), with when it was made and when it ends
@@ -187,8 +203,8 @@ asks for email, phone or the card only contact.
   team page and the schema never read it. The person shows under **Needs a
   look** ("Sent their details, waiting for your OK") and in To do. On the
   edit screen, **Sent their details** shows each field now and as sent:
-  **Approve** copies it into the profile (an empty title or bio keeps what is
-  there; credentials and links are taken as sent, because the page starts
+  **Approve** copies it into the profile (an empty title, bio or card line
+  keeps what is there; credentials and links are taken as sent, because the page starts
   filled in with what is there), **Discard** deletes it and the photo sent
   with it.
 - WordPress's **Export** and **Erase Personal Data** tools cover waiting
@@ -312,10 +328,10 @@ Photos always stay in the media library, and groups are never deleted.
 | What | Where it is kept | How long | Shared with |
 |---|---|---|---|
 | Which team member's profile a visitor views, and when they click a team member's profile, phone number or email link (the team member's name and the link clicked) (Only when the Scout Analytics plugin is installed and its tag is on the page.) | Not saved by this website. It is handed to the site's analytics tag in the visitor's browser. | Not kept by this plugin. How long Google keeps it depends on the site's Google account settings. | Google Analytics or Google Tag Manager, through the Scout Analytics plugin |
-| Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, and profile links (Only when the site owner sends someone a link and they fill it in.) | This website's database, on that person's profile, as changes waiting for the owner's OK. The photo goes in the media library. | Until the owner approves them (they become the public profile) or discards them (they and the photo are deleted). | Nobody |
+| Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, profile links, and for people with a business card their card intro, a line on why to talk to them and tags (Only when the site owner sends someone a link and they fill it in.) | This website's database, on that person's profile, as changes waiting for the owner's OK. The photo goes in the media library. | Until the owner approves them (they become the public profile) or discards them (they and the photo are deleted). | Nobody |
 | How many times a link's form was sent, to stop abuse (Only when someone sends the link's form.) | This website's database, as a short-lived count tied to the link, not to a person | One hour | Nobody |
 
-Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login. A person with Card switched on also shows on their business card (Scout Cards): name, title, photo, card phone and card email, and their profile links and short bio only when the card is set to show them. Profiles whose own page is off stay out of the site's search results.
+Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login. A person with Card switched on also shows on their business card (Scout Cards): name, title, photo, card phone, card email, card intro, "why talk to them" line and tags, and their profile links and short bio only when the card is set to show them. Profiles whose own page is off stay out of the site's search results.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

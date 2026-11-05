@@ -978,14 +978,14 @@ function scout_writing_status_line( string $state, string $headline, string $det
 	echo '</p></section>';
 }
 
-/** One row in My writing: the prompt, its step, status, last edit and words, and Keep writing. */
+/** One row in My writing (stacked kit row): the prompt with Keep writing beside it, then status, step, group, words and last edit. */
 function scout_writing_mine_row( string $pid, array $e ): string {
 	$p   = scout_writing_data()['by_id'][ $pid ];
 	$mod = strtotime( $e['post']->post_modified_gmt . ' UTC' );
-	return '<li class="sh-row sw-mrow" data-pid="' . esc_attr( $pid ) . '"><div><p class="sh-row-name sw-mq">' . esc_html( $p['q'] ) . '</p>'
-		. '<p class="sh-row-sub">Step ' . (int) $p['step'] . ' &middot; ' . esc_html( $p['group'] ) . '</p></div>'
+	return '<li class="sh-row sw-mrow" data-pid="' . esc_attr( $pid ) . '"><div><p class="sh-row-name sw-mq">' . esc_html( $p['q'] ) . '</p></div>'
 		. '<div class="sh-row-facts"><span class="sw-status sw-s-' . esc_attr( $e['status'] ) . '">' . esc_html( scout_writing_status_label( $e['status'] ) ) . '</span>'
-		. '<span>Last edited ' . esc_html( wp_date( 'M j, g:i a', $mod ) ) . '</span><span>' . (int) scout_writing_words( scout_writing_text( $e['post'] ) ) . ' words</span></div>'
+		. '<span class="sh-tag">Step ' . (int) $p['step'] . '</span>' . ( '' !== (string) $p['group'] ? '<span class="sh-tag">' . esc_html( $p['group'] ) . '</span>' : '' )
+		. '<span class="sh-tag">' . (int) scout_writing_words( scout_writing_text( $e['post'] ) ) . ' words</span><span>Last edited ' . esc_html( wp_date( 'M j, g:i a', $mod ) ) . '</span></div>'
 		. '<div class="sh-row-go"><a class="button" data-open="' . esc_attr( $pid ) . '" href="' . esc_url( scout_writing_url( $pid ) ) . '">Keep writing</a></div></li>';
 }
 
@@ -1073,10 +1073,10 @@ function scout_writing_render() {
 		foreach ( $entries as $pid => $e ) {
 			$rows[] = scout_writing_mine_row( (string) $pid, $e );
 		}
-		echo '<ul class="sh-rows sw-mlist">' . implode( '', array_slice( $rows, 0, 5 ) ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+		echo '<ul class="sh-rows is-stacked sw-mlist">' . implode( '', array_slice( $rows, 0, 5 ) ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 		if ( count( $rows ) > 5 ) {
 			echo '<details class="sw-more"' . ( 'mine' === $view ? ' open' : '' ) . '><summary>' . esc_html( sprintf( 'Show all %d pieces', count( $rows ) ) ) . '</summary>';
-			echo '<ul class="sh-rows sw-mlist">' . implode( '', array_slice( $rows, 5 ) ) . '</ul></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+			echo '<ul class="sh-rows is-stacked sw-mlist">' . implode( '', array_slice( $rows, 5 ) ) . '</ul></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 		}
 	}
 	echo '</section>';

@@ -215,7 +215,8 @@ final class Scout_Results_Admin {
 							<textarea id="sr-disclaimer" class="large-text" rows="5" name="<?php echo esc_attr( $o ); ?>[disclaimer]" placeholder="<?php echo esc_attr( Scout_Results::default_disclaimer( $s['state'] ) ); ?>"><?php echo esc_textarea( $s['disclaimer'] ); ?></textarea>
 							<p class="description"><?php esc_html_e( 'Leave blank to use the state\'s starting wording shown in gray.', 'scout-results' ); ?></p>
 							<?php if ( class_exists( 'Scout_Law_Disclaimers' ) && in_array( 'results', Scout_Law_Disclaimers::places_for( 'results' ), true ) ) : ?>
-								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording in Scout → Legal pages → Disclaimers shows next to every result instead.', 'scout-results' ); ?></strong></p>
+								<?php $sr_legal = ( class_exists( 'Scout_Admin_UI' ) && method_exists( 'Scout_Admin_UI', 'label' ) ) ? Scout_Admin_UI::label( 'policies' ) : __( 'Legal pages', 'scout-results' ); ?>
+								<p class="description"><strong><?php echo esc_html( sprintf( /* translators: %s: the menu group that holds Disclaimers, e.g. Legal pages. */ __( 'Law firm tools is on, so the wording in %s → Disclaimers shows next to every result instead.', 'scout-results' ), $sr_legal ) ); ?></strong></p>
 							<?php endif; ?>
 						</td>
 					</tr>

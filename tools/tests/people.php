@@ -1,6 +1,7 @@
 <?php
 // Scout People (scout-team): the move to People keeps live pages the same, credential
-// lines need a source to show, card only contact never reaches the public,
+// lines need a source to show, the business card fields (card phone, card email,
+// intro, why talk to them, tags) never reach the public,
 // "needs a look" names what is missing, Add a person saves like the edit screen,
 // Send them a link is hashed, single use, expiring and never touches the
 // live profile until approved, "Written by" credits people with or without a
@@ -21,6 +22,9 @@ function add_shortcode() {}
 function apply_filters( $t, $v ) { return $v; }
 function __( $s ) { return $s; }
 function esc_html__( $s ) { return esc_html( $s ); }
+function esc_html_e( $s ) { echo esc_html( $s ); }
+function esc_attr_e( $s ) { echo esc_attr( $s ); }
+function checked( $a, $b = true, $echo = true ) { $r = (string) $a === (string) $b ? ' checked="checked"' : ''; if ( $echo ) { echo $r; } return $r; }
 function _n( $one, $many, $n ) { return 1 === (int) $n ? $one : $many; }
 function esc_html( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
 function esc_attr( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
@@ -165,6 +169,36 @@ ok( false === strpos( $person, 'Duke University' ) && false !== strpos( $person,
 ok( false === strpos( $person, 'ncbar.org/awards' ) && false === strpos( $person, $T::LEGACY_SOURCE ), 'sources themselves are never printed' );
 $html = Scout_Team_Front::profile_html( 5 );
 ok( false === strpos( $html, '555-0199' ) && false === strpos( $html, 'dana.card@' ), 'the profile page has no card only contact' );
+
+// The Business card box: intro, why talk to them and tags, stored in the profile like the rest.
+ok( array( 'card_intro', 'card_why', 'card_tags' ) === array_values( array_intersect( array_keys( $T::empty_profile() ), array( 'card_intro', 'card_why', 'card_tags' ) ) ) && '' === $T::shape( array() )['card_intro'], 'a profile has card intro, why and tags, empty to start' );
+$card_in = $in + array(
+	'card_phone' => '(919) 555-0199',
+	'card_email' => 'dana.card@firm.test',
+	'card_intro' => "I help owners <b>sell</b> their business.\nCall me first.",
+	'card_why'   => 'Selling or buying a business.',
+	'card_tags'  => 'Contracts, <i>M&A</i>, Leases',
+);
+$GLOBALS['meta'][12][ $T::META ] = Scout_Team_Editor::store( 12, $card_in, null );
+$stored = $GLOBALS['meta'][12][ $T::META ];
+ok( "I help owners sell their business.\nCall me first." === $stored['card_intro'] && 'Selling or buying a business.' === $stored['card_why'] && 'Contracts, M&A, Leases' === $stored['card_tags'], 'the edit screen saves intro, why and tags through the same clean and store path' );
+ok( '(919) 555-0199' === $stored['card_phone'] && 'dana.card@firm.test' === $stored['card_email'], 'the card phone and email save in the same box' );
+$pub = $T::public_profile( $T::shape( $stored ) );
+ok( ! array_intersect( array( 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags' ), array_keys( $pub ) ), 'public_profile() never has the card phone, email, intro, why or tags' );
+ok( array( 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags' ) === $T::card_keys() && ! array_diff( $T::card_keys(), Scout_Team_Front::rest_private_keys() ), 'the REST API keeps every card field back too' );
+$GLOBALS['meta'][12][ $T::META ]['shows']['bio'] = true;
+$html = Scout_Team_Front::profile_html( 12 );
+$person = json_encode( Scout_Team_Schema::person( 12 ) );
+ok( false === strpos( $html, 'Call me first' ) && false === strpos( $html, 'Selling or buying' ) && false === strpos( $html, 'Leases' ), 'the profile page shows none of the card words' );
+ok( false === strpos( $person, 'Call me first' ) && false === strpos( $person, 'Selling or buying' ) && false === strpos( $person, 'Leases' ) && false === strpos( $person, '555-0199' ), 'and neither does the Person schema' );
+ob_start();
+Scout_Team_Editor::render_card( new WP_Post( array( 'ID' => 12, 'post_type' => 'scout_team' ) ) );
+$box = ob_get_clean();
+ok( false !== strpos( $box, 'name="scout_team[card_intro]"' ) && false !== strpos( $box, 'name="scout_team[card_why]"' ) && false !== strpos( $box, 'name="scout_team[card_tags]"' ) && false !== strpos( $box, 'name="scout_team[card_phone]"' ) && false !== strpos( $box, 'name="scout_team[card_email]"' ), 'the Business card box has intro, why, tags, card phone and card email' );
+ok( false !== strpos( $box, 'Selling or buying a business.' ) && false !== strpos( $box, 'Contracts, M&amp;A, Leases' ), 'and is filled in with what is saved' );
+ob_start();
+Scout_Team_Editor::render_shows( new WP_Post( array( 'ID' => 12, 'post_type' => 'scout_team' ) ) );
+ok( false === strpos( ob_get_clean(), 'card_phone' ), 'the card phone and email are no longer in the Shows on box' );
 ok( false !== strpos( $html, 'dana@firm.test' ) && false !== strpos( $html, 'Wake County Bar Association' ), 'the profile page still shows the regular email and the membership' );
 ok( false === strpos( $html, 'Duke University' ) && false === strpos( $html, $T::LEGACY_SOURCE ), 'the profile page shows no unsourced line and no source text' );
 
@@ -244,6 +278,7 @@ ok( false === $L::allow_try( $tok ), 'too many sends in an hour are refused' );
 
 // The page they fill in never offers card only contact, email or phone.
 ok( ! array_intersect( array( 'card_phone', 'card_email', 'email', 'phone', 'user', 'shows' ), $L::fields() ), 'the link page takes no card only contact, email, phone, login or Shows on' );
+ok( array() === array_diff( array( 'intro', 'why', 'tags' ), $L::fields() ), 'the link page takes the card intro, why and tags' );
 $GLOBALS['meta'][40][ $T::META ] = $saved2;
 $page = $L::form_html( 40, $L::prefill( 40 ), array(), $tok, true );
 ok( false === strpos( $page, 'card_' ) && false === strpos( $page, '555-0199' ) && false === strpos( $page, 'dana.card@' ), 'the form has no card only fields and shows no card contact' );
@@ -292,6 +327,31 @@ ok( $L::discard( 41 ) && $GLOBALS['meta'][41][ $T::META ] === $saved2 && ! isset
 ok( in_array( 78, $GLOBALS['deleted'] ?? array(), true ), 'and the photo they uploaded with it' );
 $keep = $L::merge( $T::shape( $saved2 ), array( 'role' => '', 'bio' => '  ' ) );
 ok( 'Partner' === $keep['role'] && $saved2['bio'] === $keep['bio'], 'an empty title or bio keeps what is there' );
+
+// With A business card on, the link page takes their card words too, as pending changes.
+$card_on                          = $stored;
+$card_on['shows']['card']         = true;
+$GLOBALS['meta'][42][ $T::META ]  = $card_on;
+$pre  = $L::prefill( 42 );
+$page = $L::form_html( 42, $pre, array(), $tok, false );
+ok( false !== strpos( $page, 'name="st[intro]"' ) && false !== strpos( $page, 'name="st[why]"' ) && false !== strpos( $page, 'name="st[tags]"' ) && false !== strpos( $page, 'Your business card' ), 'Card on: the form has their card intro, why and tags' );
+ok( false !== strpos( $page, 'Selling or buying a business.' ) && false !== strpos( $page, 'Contracts, M&amp;A, Leases' ), 'filled in with what is there now' );
+ok( false === strpos( $page, 'card_phone' ) && false === strpos( $page, 'card_email' ) && false === strpos( $page, '555-0199' ) && false === strpos( $page, 'dana.card@' ) && false === strpos( $page, '[phone]' ) && false === strpos( $page, '[email]' ), 'and still no card phone, card email, email or phone' );
+$off_page = $L::form_html( 40, $L::prefill( 40 ), array(), $tok, false );
+ok( false === strpos( $off_page, 'name="st[intro]"' ), 'Card off: no card fields on the form' );
+$sent2 = $L::clean( array( 'name' => 'Dana Lee', 'intro' => 'New card intro <b>here</b>.', 'why' => 'Ask about leases.', 'tags' => 'Leases, Contracts', 'card_phone' => '(919) 555-0000', 'card_email' => 'x@firm.test' ) );
+ok( 'New card intro here.' === $sent2['card_intro'] && 'Ask about leases.' === $sent2['card_why'] && 'Leases, Contracts' === $sent2['card_tags'], 'the card words they send are cleaned like the edit screen' );
+ok( ! isset( $sent2['card_phone'] ) && ! isset( $sent2['card_email'] ) && ! isset( $sent2['intro'] ), 'and the card phone and email they try to send are dropped' );
+$L::save_pending( 42, $sent2, 0 );
+ok( $GLOBALS['meta'][42][ $T::META ] === $card_on && 'Selling or buying a business.' === $T::profile( 42 )['card_why'], 'sending card words never touches the live profile' );
+$diff = $L::changes( 42 );
+ok( isset( $diff['Card intro'], $diff['Why talk to them'], $diff['Card tags'] ) && array( 'Selling or buying a business.', 'Ask about leases.' ) === $diff['Why talk to them'], 'the review table lists the card words, now and sent' );
+ok( $L::approve( 42 ), 'approve runs' );
+$p42 = $T::profile( 42 );
+ok( 'New card intro here.' === $p42['card_intro'] && 'Ask about leases.' === $p42['card_why'] && 'Leases, Contracts' === $p42['card_tags'], 'approve copies the card words into the profile' );
+ok( '(919) 555-0199' === $p42['card_phone'] && 'dana.card@firm.test' === $p42['card_email'], 'and leaves the card phone and email alone' );
+$keep = $L::merge( $T::shape( $card_on ), array( 'card_intro' => '', 'card_why' => ' ' ) );
+ok( $card_on['card_intro'] === $keep['card_intro'] && $card_on['card_why'] === $keep['card_why'] && $card_on['card_tags'] === $keep['card_tags'], 'an empty card line, or one not sent, keeps what is there' );
 
 // ---------- Written by: credit people with or without a login ----------
 $F = 'Scout_Team_Front';
