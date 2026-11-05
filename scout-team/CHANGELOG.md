@@ -2,6 +2,14 @@
 
 ## Unreleased (2026-11-05)
 
+- **Written by.** Posts get a Written by box (a panel in the block editor's sidebar, a box in the classic editor). Pick one or more people from People as the byline, with or without a login: guest writers, speakers with no login, and posts written by staff for someone else. Stored on the post as `_scout_people_authors`, in order. People whose byline is off can be picked, with a note that the post leaves them out until it is on. Posts only; the `scout_people_byline_post_types` filter adds other types.
+- **Bylines use it.** With people picked, the author name is theirs ("Ana Ruiz, Ben Cole & Dee Fox"), the author link goes to the first person's profile page (no address when that page is off), and `the_author_posts_link()` links each name. The article schema's author is each person's existing Person node. With nobody picked, nothing changes for any post.
+- **`Scout_Team::byline_people( $post_id )`.** Returns who a post's byline credits: the people picked, or the profile linked to its login. For Scout Build's Real authors check later. `Scout_Team_Byline::posts_for()` gives a theme the newest posts that credit a person.
+- **The People screen shows "Byline on N posts"**: posts where the person is picked plus their login's posts, each counted once.
+- **People rows are easier to read.** The photo sits on the left and everything else in one column beside it: the name with Edit and Send them a link on the right, then title and groups, then tags, then what needs a look on one short line. Section labels like "Runs the site" are small labels again. On a narrow screen the buttons drop under the name. Same links and actions.
+- **The REST API hides what it never should have shown.** For anyone who cannot edit posts, `/wp-json/wp/v2/scout_team` and the REST search leave out people whose own page is off and drafts, and asking for one by ID answers "not found", the same as the page. Card only contact, details waiting for an OK and link data are never sent to them. Editors and the block editor see everyone, as before.
+- The Shows on help line for the byline now mentions Written by.
+
 - **A business card works.** With Scout Cards on, a person who is live with A business card switched on gets a card, which reads their name, title, photo, card phone, card email, and their profile links and short bio when the card shows them. Two new functions give Cards what it may show: `Scout_Team::card()` and `Scout_Team::card_ids()`.
 - **Profile pages that are off stay out of the site's own search results**, the same way they stay out of the sitemap. A person who shows on a card only never turns up there.
 - **Add a person from the Cards screen starts with A business card on** (`&card=1`). Opened from People, the defaults are the same as before.

@@ -31,7 +31,7 @@
 .st-people .st-person-head { display: flex; flex-wrap: nowrap; gap: var(--sh-space-1) var(--sh-space-3); align-items: center; justify-content: space-between; min-height: 32px; }
 .st-people .st-person-head .sh-row-name { min-width: 0; overflow-wrap: anywhere; }
 .st-people .st-person-go { flex: none; display: flex; align-items: center; gap: var(--sh-space-1) var(--sh-space-3); }
-.sh .st-people .button.st-edit { min-height: 32px; line-height: 30px; padding: 0 12px; }
+.sh .st-people .button.st-edit { min-height: 32px; line-height: 30px; padding: 0 12px; font-size: var(--sh-fs-note); font-weight: 500; }
 .st-people .st-send { color: var(--sh-accent-text); font-size: var(--sh-fs-note); font-weight: 500; text-decoration: none; }
 .st-people .st-send:hover { text-decoration: underline; }
 .st-people .st-send:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }

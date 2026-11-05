@@ -49,7 +49,7 @@ Each person has six switches, stored in the profile as `shows`:
 | Their own profile page | `bio` | Off: visitors who open `/team/<name>/` get "page not found", the page leaves the sitemap and the team page lists them without a link. People who can edit them still see it, marked noindex. |
 | The team page | `team` | On the grid and the `/team/` archive, when they are also in the Team group and live. |
 | A business card | `card` | A card at `/card/<link name>/` when Scout Cards is on and they are live. Off: that address answers "not found". |
-| Byline on their posts | `byline` | Author links and the article's schema author point at their profile. Needs "Writes posts as" picked. |
+| Byline on their posts | `byline` | Author names, links and the article's schema author point at their profile. Needs "Writes posts as" picked, or the person picked in a post's "Written by" box. |
 | The speakers page | `speaker` | Saved for the speakers page. |
 | Chat answers | `chat` | Saved for Scout Chat. |
 
@@ -119,6 +119,7 @@ plain words.
 | Card phone, card email | Business card only | never |
 | Profile links (LinkedIn, state bar, Avvo...) | Profile | `sameAs` |
 | Writes posts as (a WordPress login) | Author links on posts | Post `author` |
+| Picked in "Written by" on a post | Author name and link on that post | Post `author` |
 | Groups | Team page (Team group) | none |
 | Shows on | See above | `url` left out when the profile page is off |
 
@@ -131,8 +132,9 @@ person's name wherever a theme prints it.
 **People** in the Scout menu (its own People section) lists everyone: one
 status line (how many people, how many on the team page, cards on, how many
 need a look), filter chips (Everyone, each group, Needs a look), then one row
-per person with their photo or initials, title, groups, where they show,
-what needs a look, an Edit button and Send them a link. In the Everyone view the rows come in
+per person: the photo or initials on the left; then the name with Edit and
+Send them a link on the right; the title and groups; where they show as tags
+(including "Byline on N posts"); and, when needed, what needs a look. In the Everyone view the rows come in
 sections: Runs the site (people whose login can manage the site), Team,
 Speakers, Writers, Members (listed), then Everyone else. Rows follow the
 team page order: the Order number on each person, then name.
@@ -198,6 +200,60 @@ When a live person's address changes, Scout Redirects (when it is on, and its
 `/team/` address to the new one. When a person goes live, is changed, or is
 taken off the site, Scout Build's Site log (when it is on) gets one line.
 
+## Written by
+
+Posts have a **Written by** box: pick one or more people from People as the
+post's byline, with or without a WordPress login. Guest writers, speakers
+with no login, and posts staff write for someone else can all be credited.
+
+- **Where it is.** A panel in the block editor's post sidebar, and a box on
+  the classic editor (also in the block editor for a post type without custom
+  fields). It lists live people. Someone whose byline is off can be picked,
+  with a note that the post leaves them out until it is on.
+- **What it stores.** `_scout_people_authors` on the post: profile IDs, in
+  order. It is registered for the REST API so the block editor saves it; only
+  people who can edit the post can change it. Not visitor data.
+- **What visitors see.** With people picked (live, Byline on), the post's
+  author name is theirs, joined as "Ana Ruiz, Ben Cole & Dee Fox". The author
+  link goes to the first person's profile page, or has no address when that
+  page is off. `the_author_posts_link()` links each name to its own page. The
+  article schema's `author` is each person's Person node (the same `@id` the
+  profile page uses), never a second record.
+- **With nobody picked**, nothing changes: the post's author and the linked
+  login ("Writes posts as") work as before. Bylines off in People settings
+  turns this off too. Admin screens always show the WordPress author.
+- **Post types.** Posts only. Add others with the
+  `scout_people_byline_post_types` filter.
+- **The People screen** shows "Byline on N posts": posts where the person is
+  picked, plus posts by their login where nobody else is picked, each once.
+
+Public helpers for other plugins and themes:
+
+- `Scout_Team::byline_people( $post_id )`: the profile IDs a post's byline
+  credits. The people picked in Written by, or else the profile linked to the
+  post's login. Empty when neither. Scout Build's "Real authors" check can
+  read bylines from People through this.
+- `Scout_Team_Byline::posts_for( $member, $limit )`: the newest live posts
+  that credit a person, for a theme's "posts by" list.
+
+### What this feature needs from the theme
+
+Print the author with WordPress's own functions: `the_author()` (or
+`get_the_author()`) for the name and `the_author_posts_link()` (or
+`get_author_posts_url()`) for the link. The block theme's Post Author Name
+block works too. Nothing else is needed. A theme that reads the login's
+fields directly (for example `$user->display_name`) will keep showing the
+login.
+
+## The REST API
+
+`/wp-json/wp/v2/scout_team` and the REST search follow the same rule as the
+profile pages. For anyone who cannot edit posts, people whose own page is
+off and people who are not live are left out, and asking for one by ID
+answers "not found". Card only contact, details waiting for an OK and link
+data are never sent to them. Editors and the block editor get every person,
+as before.
+
 ## Settings
 
 Scout → People → **People settings** (or Settings → People settings on a site
@@ -207,7 +263,7 @@ without the Scout menu). The address stays `?page=scout-team`.
 |---|---|
 | Law firm details | Decide from the Scout Core business type |
 | Show email and phone on profiles | Off (schema only) |
-| Author names link to profile pages | On |
+| Author names link to profile pages (and Written by) | On |
 | Grid columns on wide screens | 3 |
 
 ## Shortcode
@@ -240,6 +296,7 @@ With Scout Analytics active: `team_profile_click` (grid card),
 ## Filters
 
 - `scout_team_person_schema( $node, $post_id )`: change the Person node.
+- `scout_people_byline_post_types( $types )`: post types with a Written by box. Default `array( 'post' )`.
 
 ## Uninstall
 
