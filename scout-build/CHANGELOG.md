@@ -1,6 +1,6 @@
 # Scout Build changelog
 
-## Unreleased (2026-11-05)
+## 0.12.2 (2026-11-05)
 
 - **Four screens follow the one layout.** Request a change, the Site log, Your site and Email now read top to bottom in one column: a status line first, then the thing people use most, then lists, with rare settings in a closed More options box. Each screen has at most one main (filled) button. Nothing they do has changed: the same forms, fields and buttons, in a new order.
   - **Request a change.** The status line says how many requests are open and where the newest one stands. The new-request form comes next, then the list, one row per request with its date, who sent it, the page and a status pill. Operators still change a status from the row.
@@ -8,6 +8,7 @@
   - **Your site (the client's view).** The status line says whether anything needs their OK. Then come the lines waiting for an OK (Approve is an outlined button, with "Ask for a change first" beside it), this month, their requests and what is coming up.
   - **Email.** The status line says whether email goes through Google, and as which address. Then the three setup steps as a numbered list, the settings with one Save, and Send a test as an outlined button.
 - These screens' styles moved out of the page into `assets/admin.css`, using the kit's color tokens only.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.12.1 (2026-11-05)
 

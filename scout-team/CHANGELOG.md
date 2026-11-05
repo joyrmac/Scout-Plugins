@@ -1,8 +1,9 @@
 # Scout Team changelog
 
-## Unreleased (2026-11-05)
+## 0.1.14 (2026-11-05)
 
 - **The Team screen opens with one status line.** The three status cards are now one line: how many people, how many profiles are complete, and whether law firm details are on. The team list comes next. The settings (now titled Profiles, bylines and the grid) and the shortcode list move into a closed More options box. Same fields and option.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.1.13 (2026-11-04)
 

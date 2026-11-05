@@ -1,9 +1,10 @@
 # Scout Case Results changelog
 
-## Unreleased (2026-11-05)
+## 0.1.14 (2026-11-05)
 
 - **The Case results screen opens with one status line.** The three status cards are now one line: results on the site, results waiting for the firm, the disclaimer rule, and an Add a case result button. The shortcode list moves into a closed More options box. Save disclaimer is the screen's one main button.
 - **Colors come from the admin kit tokens.** results-editor.css uses var(--sh-*) instead of its own hex colors. The result edit screen now loads the kit stylesheet so the tokens reach its boxes, and the preview there uses the same light look as the sample on the settings screen.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.1.13 (2026-11-04)
 

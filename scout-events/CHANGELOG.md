@@ -1,11 +1,12 @@
 # Scout Events changelog
 
-## Unreleased (2026-11-05)
+## 0.16.5 (2026-11-05)
 
 - **Every Events screen has its own name.** Overview, Sign-ups, Volunteers, Import and Settings each show their own title and one sentence on what they are for, instead of "Your events" on all of them.
 - **Settings is one column.** Boxes for Page addresses, Prices and Google, and Community agreements, then one Save settings button (now the screen's main button). The site address sits above each page-address field, so the field is no longer squeezed. The shortcode list moved into a closed "Shortcodes for your pages" box, open for people who cannot change settings. A status line says whether event schema is on.
 - **Sign-ups leads with one status line** for the chosen event (going, checked in, places left, waitlist) in place of four number cards, with a Move people in link when someone is waiting and a place is open.
 - **Check in and Move in and email ticket are outlined,** not blue, on every row. Cancel and Remove are quiet text buttons, and so is Event page. Nothing about check-in, the waitlist or emails changed.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.16.4 (2026-11-04)
 

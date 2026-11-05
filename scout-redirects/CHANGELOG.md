@@ -1,5 +1,9 @@
 # Scout Redirects changelog
 
+## 0.1.15 (2026-11-05)
+
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.1.14 (2026-11-05)
 
 - **A cleaner Redirects screen (Joy, 2026-11-05).** One column, top to bottom: Add a redirect, Broken links on your pages (only when there are some), Missing pages people asked for, the Redirect list, then More options (settings, import and export, closed until opened). The two side-by-side columns are gone, so addresses no longer wrap one letter per line.

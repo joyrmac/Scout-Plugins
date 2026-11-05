@@ -1,8 +1,9 @@
 # Scout Call Buttons changelog
 
-## Unreleased (2026-11-05)
+## 0.1.16 (2026-11-05)
 
 - **The Call buttons screen opens with one status line.** The three status cards are now one line: on or off on phones, how many options, hidden on computers, and whether taps are counted. The wording and photos move into a closed More options box. One Save changes button. Same fields and option.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.1.15 (2026-11-04)
 

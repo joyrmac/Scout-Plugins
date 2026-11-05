@@ -1,8 +1,9 @@
 # Scout Accessibility changelog
 
-## Unreleased (2026-11-05)
+## 0.1.17 (2026-11-05)
 
 - **The Accessibility statement screen opens with one status line.** Published with a View the page button, or not created yet with a link to the statement. It replaces the single status card.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.1.16 (2026-11-04)
 

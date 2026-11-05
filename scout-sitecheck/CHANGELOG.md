@@ -1,9 +1,10 @@
 # Scout Site Check changelog
 
 
-## Unreleased (2026-11-05)
+## 0.2.9 (2026-11-05)
 
 - **The Free site check screen opens with one status line.** The three status cards are now one line: the page (live, draft or not made), the Google speed key, checks waiting for follow-up, and the page button. The speed key and the shortcode note move into a closed More options box. One Save changes button. Same fields and option.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
 
 ## 0.2.8 (2026-11-04)
 
