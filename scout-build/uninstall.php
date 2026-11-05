@@ -21,6 +21,8 @@ foreach ( array( 'scout_hub_today_snoozed', 'scout_hub_today_seen', 'scout_hub_i
 delete_option( 'scout_hub_update_holds' );
 delete_option( 'scout_hub_approval' );
 delete_option( 'scout_hub_approved' );
+delete_option( 'scout_hub_wp_health' );
+wp_clear_scheduled_hook( 'scout_hub_wp_health_run' );
 delete_option( 'scout_hub_log' );
 delete_option( 'scout_hub_answer_seen' );
 delete_option( 'scout_hub_page' );

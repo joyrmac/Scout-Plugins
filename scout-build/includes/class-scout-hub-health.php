@@ -434,6 +434,28 @@ final class Scout_Hub_Health {
 	}
 
 	/**
+	 * True on Scout's own sites: scout-setup.json says "scout_own_site": true, the
+	 * site's address is on an agency domain, or Business info's email is.
+	 */
+	public static function own_site( array $agency ): bool {
+		if ( class_exists( 'Scout_Hub_Setup' ) && ! empty( Scout_Hub_Setup::data()['scout_own_site'] ) ) {
+			return true;
+		}
+		$host  = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$biz   = function_exists( 'scout_core_business' ) ? (array) scout_core_business() : array();
+		$email = strtolower( (string) ( $biz['email'] ?? '' ) );
+		foreach ( $agency as $domain ) {
+			if ( '' === $domain ) {
+				continue;
+			}
+			if ( $host === $domain || str_ends_with( $host, '.' . $domain ) || str_ends_with( $email, '@' . $domain ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Where each active Gravity Forms form sends its emails. Null when Gravity
 	 * Forms is not running.
 	 *
@@ -447,6 +469,8 @@ final class Scout_Hub_Health {
 		}
 		$forms   = (array) GFAPI::get_forms();
 		$agency  = array_map( 'strtolower', (array) apply_filters( 'scout_build_agency_domains', array( 'scoutraleigh.com' ) ) );
+		// On Scout's own sites Scout is the business, so Scout's addresses are the right ones.
+		$agency  = self::own_site( $agency ) ? array() : $agency;
 		$live    = self::is_live();
 		$admin   = (string) get_option( 'admin_email' );
 		$lines   = array();
@@ -657,25 +681,8 @@ final class Scout_Hub_Health {
 			$out[] = $reviews;
 		}
 
-		$health = json_decode( (string) get_transient( 'health-check-site-status-result' ), true );
-		if ( is_array( $health ) ) {
-			$critical = (int) ( $health['critical'] ?? 0 );
-			$advised  = (int) ( $health['recommended'] ?? 0 );
-			$out[]    = array(
-				'label' => __( 'Site Health', 'scout-build' ),
-				'value' => $critical ? __( 'Needs attention', 'scout-build' ) : __( 'Good', 'scout-build' ),
-				'state' => $critical ? 'bad' : ( $advised > 3 ? 'warn' : 'good' ),
-				/* translators: 1: critical count, 2: recommended count */
-				'note'  => sprintf( __( '%1$d critical, %2$d recommended (WordPress Site Health).', 'scout-build' ), $critical, $advised ),
-			);
-		} else {
-			$out[] = array(
-				'label' => __( 'Site Health', 'scout-build' ),
-				'value' => __( 'Not checked yet', 'scout-build' ),
-				'state' => 'warn',
-				'note'  => __( 'Open Tools, Site Health once to run WordPress\'s own check.', 'scout-build' ),
-			);
-		}
+		// WordPress's own Site Health, run daily by Scout and listed by name (Scout_Hub_WP_Health).
+		$out[] = Scout_Hub_WP_Health::row();
 		return $out;
 	}
 

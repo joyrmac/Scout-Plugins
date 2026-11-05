@@ -105,6 +105,8 @@ jobs:
         run: php tools/tests/approval-hold.php
       - name: Privacy policy and terms drafted from the visitor data lists (no WordPress needed)
         run: php tools/tests/core-policies.php
+      - name: WordPress's own Site Health, run by Scout (no WordPress needed)
+        run: php tools/tests/wp-health.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)
