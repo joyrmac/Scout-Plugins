@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.12.1 (2026-11-05)
+
+- **Form emails on Scout's own sites.** Site health no longer says a form "emails only Scout, not the business" on Scout's own sites, where Scout is the business. A site counts as Scout's own when scout-setup.json says `"scout_own_site": true`, its address is on scoutraleigh.com, or Business info's email is a scoutraleigh.com address. Found on scoutraleigh.com right after the 0.12.0 release.
+
 ## 0.12.0 (2026-11-04)
 
 - **Staging first, then live: the approval hold (Joy, 2026-11-04).** A live site now installs a Scout release only after Scout says OK. Staging copies install it by themselves, so it gets checked there first.

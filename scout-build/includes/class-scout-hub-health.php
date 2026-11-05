@@ -434,6 +434,28 @@ final class Scout_Hub_Health {
 	}
 
 	/**
+	 * True on Scout's own sites: scout-setup.json says "scout_own_site": true, the
+	 * site's address is on an agency domain, or Business info's email is.
+	 */
+	public static function own_site( array $agency ): bool {
+		if ( class_exists( 'Scout_Hub_Setup' ) && ! empty( Scout_Hub_Setup::data()['scout_own_site'] ) ) {
+			return true;
+		}
+		$host  = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$biz   = function_exists( 'scout_core_business' ) ? (array) scout_core_business() : array();
+		$email = strtolower( (string) ( $biz['email'] ?? '' ) );
+		foreach ( $agency as $domain ) {
+			if ( '' === $domain ) {
+				continue;
+			}
+			if ( $host === $domain || str_ends_with( $host, '.' . $domain ) || str_ends_with( $email, '@' . $domain ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Where each active Gravity Forms form sends its emails. Null when Gravity
 	 * Forms is not running.
 	 *
@@ -447,6 +469,8 @@ final class Scout_Hub_Health {
 		}
 		$forms   = (array) GFAPI::get_forms();
 		$agency  = array_map( 'strtolower', (array) apply_filters( 'scout_build_agency_domains', array( 'scoutraleigh.com' ) ) );
+		// On Scout's own sites Scout is the business, so Scout's addresses are the right ones.
+		$agency  = self::own_site( $agency ) ? array() : $agency;
 		$live    = self::is_live();
 		$admin   = (string) get_option( 'admin_email' );
 		$lines   = array();
