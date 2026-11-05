@@ -485,7 +485,8 @@ final class Scout_Hub_Admin {
 	 */
 	private static function overview(): void {
 		$operator = Scout_Hub_Access::is_operator();
-		$basics   = Scout_Hub_Health::checks();
+		// The security rows count the same way, for people who can see them.
+		$basics   = array_merge( Scout_Hub_Health::checks(), Scout_Hub_Security::visible_rows() );
 		$ai       = Scout_Hub_Health::ai_checks();
 		$bad      = array_filter( $basics, static fn( $c ) => 'bad' === $c['state'] );
 		$warn     = array_filter( $basics, static fn( $c ) => 'warn' === $c['state'] );
@@ -1219,10 +1220,11 @@ final class Scout_Hub_Admin {
 	/* ------------------------------------------------------------------ */
 
 	private static function health(): void {
-		$ai     = Scout_Hub_Health::ai_checks();
-		$score  = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
-		$basics = Scout_Hub_Health::checks();
-		$search = array();
+		$ai       = Scout_Hub_Health::ai_checks();
+		$score    = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
+		$basics   = Scout_Hub_Health::checks();
+		$security = Scout_Hub_Security::visible_rows();
+		$search   = array();
 		if ( class_exists( 'Scout_Core_Admin' ) && method_exists( 'Scout_Core_Admin', 'render_checks' ) ) {
 			// Scout Core's search checks, minus the two the AI search list below already covers.
 			$search = array_values(
@@ -1255,7 +1257,7 @@ final class Scout_Hub_Admin {
 		<div class="sh-copy">
 			<button type="button" class="button button-primary" id="sh-copy-report"><?php esc_html_e( 'Copy the report', 'scout-build' ); ?></button>
 			<p class="sh-note" id="sh-copy-note"><?php esc_html_e( 'Copies every check and each Scout plugin\'s version as plain text, ready to paste.', 'scout-build' ); ?></p>
-			<textarea id="sh-copy-text" hidden readonly><?php echo esc_textarea( self::health_report( $basics, $search, $ai ) ); ?></textarea>
+			<textarea id="sh-copy-text" hidden readonly><?php echo esc_textarea( self::health_report( $basics, $search, $ai, $security ) ); ?></textarea>
 		</div>
 		<script>
 		document.getElementById( 'sh-copy-report' ).addEventListener( 'click', function () {
@@ -1270,6 +1272,21 @@ final class Scout_Hub_Admin {
 		</script>
 		<?php self::check_grid( $basics ); ?>
 		<?php
+		if ( $security ) {
+			$safe = count( array_filter( $security, static fn( $c ) => 'good' === $c['state'] ) );
+			?>
+			<div class="sh-section-head" id="security">
+				<p class="sh-eyebrow"><?php esc_html_e( 'Security', 'scout-build' ); ?></p>
+				<h2><?php
+					/* translators: 1: checks passed, 2: total checks */
+					echo esc_html( sprintf( __( '%1$d of %2$d set', 'scout-build' ), $safe, count( $security ) ) );
+				?></h2>
+				<p class="sh-note"><?php esc_html_e( 'The safety basics every site should have.', 'scout-build' ); ?></p>
+			</div>
+			<?php
+			self::check_grid( $security );
+			Scout_Hub_Security::render_form();
+		}
 		if ( $search ) {
 			$good = count( array_filter( $search, static fn( $c ) => 'good' === $c['status'] ) );
 			?>
@@ -1303,7 +1320,7 @@ final class Scout_Hub_Admin {
 	 * The whole Site health page as plain text: one line per check, then the
 	 * active Scout plugins with versions. Built for pasting into a chat.
 	 */
-	private static function health_report( array $basics, array $search, array $ai ): string {
+	private static function health_report( array $basics, array $search, array $ai, array $security = array() ): string {
 		$mark  = static fn( string $state ): string => 'good' === $state ? '[ok]  ' : ( 'bad' === $state ? '[fix] ' : '[look]' );
 		$lines = array(
 			sprintf( 'Scout Build site health: %s (%s)', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ), home_url( '/' ) ),
@@ -1313,6 +1330,13 @@ final class Scout_Hub_Admin {
 		);
 		foreach ( $basics as $c ) {
 			$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . ( $c['details'] ?? $c['note'] );
+		}
+		if ( $security ) {
+			$lines[] = '';
+			$lines[] = 'SECURITY';
+			foreach ( $security as $c ) {
+				$lines[] = $mark( $c['state'] ) . ' ' . $c['label'] . ': ' . $c['value'] . '. ' . $c['note'];
+			}
 		}
 		if ( $search ) {
 			$lines[] = '';

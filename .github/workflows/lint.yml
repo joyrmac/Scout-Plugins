@@ -107,6 +107,8 @@ jobs:
         run: php tools/tests/core-policies.php
       - name: WordPress's own Site Health, run by Scout (no WordPress needed)
         run: php tools/tests/wp-health.php
+      - name: Security baseline in Site status (no WordPress needed)
+        run: php tools/tests/security-baseline.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)

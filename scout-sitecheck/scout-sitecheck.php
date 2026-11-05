@@ -36,6 +36,8 @@ require_once __DIR__ . '/includes/class-scout-sitecheck.php';
 require_once __DIR__ . '/includes/class-scout-sitecheck-checks.php';
 require_once __DIR__ . '/includes/class-scout-sitecheck-report.php';
 require_once __DIR__ . '/includes/class-scout-sitecheck-admin.php';
+require_once __DIR__ . '/includes/class-scout-sitecheck-privacy.php';
 
 Scout_Sitecheck::boot();
 Scout_Sitecheck_Admin::boot();
+Scout_Sitecheck_Privacy::boot();

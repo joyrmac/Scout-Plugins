@@ -182,18 +182,7 @@ final class Scout_Team_Editor {
 				</div>
 				<p class="st-field">
 					<label for="st-user"><?php esc_html_e( 'Writes posts as', 'scout-team' ); ?></label>
-					<?php
-					wp_dropdown_users(
-						array(
-							'name'              => 'scout_team[user]',
-							'id'                => 'st-user',
-							'selected'          => (int) $p['user'],
-							'show_option_none'  => __( 'Nobody (no byline)', 'scout-team' ),
-							'option_none_value' => '0',
-							'capability'        => array( 'edit_posts' ),
-						)
-					);
-					?>
+					<?php self::user_picker( (int) $p['user'] ); ?>
 					<span class="description"><?php esc_html_e( 'Pick their login. Their posts then link to this profile.', 'scout-team' ); ?></span>
 				</p>
 				<?php if ( ! Scout_Team::settings()['contact'] ) : ?>
@@ -258,6 +247,25 @@ final class Scout_Team_Editor {
 		echo '</div>';
 	}
 
+	/**
+	 * The "Writes posts as" login picker. The edit screen and the Add a person
+	 * walkthrough print the same one.
+	 *
+	 * @param int $selected Linked WordPress user ID, or 0.
+	 */
+	public static function user_picker( int $selected ): void {
+		wp_dropdown_users(
+			array(
+				'name'              => 'scout_team[user]',
+				'id'                => 'st-user',
+				'selected'          => $selected,
+				'show_option_none'  => __( 'Nobody (no byline)', 'scout-team' ),
+				'option_none_value' => '0',
+				'capability'        => array( 'edit_posts' ),
+			)
+		);
+	}
+
 	/* ---------- side boxes ---------- */
 
 	/** The Shows on switches: where this person shows. */
@@ -276,15 +284,7 @@ final class Scout_Team_Editor {
 		$p = Scout_Team::profile( (int) $post->ID );
 		?>
 		<div class="sh scout-team-form st-shows">
-			<fieldset class="st-checks">
-				<legend class="screen-reader-text"><?php esc_html_e( 'Shows on', 'scout-team' ); ?></legend>
-				<input type="hidden" name="scout_team[shows][_sent]" value="1">
-				<?php foreach ( self::show_labels() as $key => $label ) : ?>
-					<p class="st-check"><label><input type="checkbox" id="<?php echo esc_attr( 'st-show-' . $key ); ?>" name="scout_team[shows][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( Scout_Team::shows( $p, $key ) ); ?>> <?php echo esc_html( $label ); ?></label></p>
-				<?php endforeach; ?>
-			</fieldset>
-			<p class="description"><?php esc_html_e( 'Own page off: visitors get "page not found". You can still see it.', 'scout-team' ); ?></p>
-			<p class="description"><?php esc_html_e( 'Team page needs the Team group. Byline needs "Writes posts as". Card, speakers and chat need those features on.', 'scout-team' ); ?></p>
+			<?php self::shows_fields( $p['shows'] ); ?>
 
 			<fieldset class="st-group st-card-only">
 				<legend><?php esc_html_e( 'Card only', 'scout-team' ); ?></legend>
@@ -302,8 +302,50 @@ final class Scout_Team_Editor {
 		<?php
 	}
 
+	/**
+	 * The Shows on switches and their two help lines. The edit screen and the
+	 * Add a person walkthrough print the same ones. A hidden field marks the
+	 * list as sent, so an unticked box saves as off.
+	 *
+	 * @param array $shows key => on, as in a profile's 'shows'.
+	 */
+	public static function shows_fields( array $shows ): void {
+		?>
+		<fieldset class="st-checks">
+			<legend class="screen-reader-text"><?php esc_html_e( 'Shows on', 'scout-team' ); ?></legend>
+			<input type="hidden" name="scout_team[shows][_sent]" value="1">
+			<?php foreach ( self::show_labels() as $key => $label ) : ?>
+				<p class="st-check"><label><input type="checkbox" id="<?php echo esc_attr( 'st-show-' . $key ); ?>" name="scout_team[shows][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( ! empty( $shows[ $key ] ) ); ?>> <?php echo esc_html( $label ); ?></label></p>
+			<?php endforeach; ?>
+		</fieldset>
+		<p class="description"><?php esc_html_e( 'Own page off: visitors get "page not found". You can still see it.', 'scout-team' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Team page needs the Team group. Byline needs "Writes posts as". Card, speakers and chat need those features on.', 'scout-team' ); ?></p>
+		<?php
+	}
+
 	/** Groups: checkboxes for every group. A new person starts in Team. */
 	public static function render_groups( $post ): void {
+		$new  = 'auto-draft' === $post->post_status;
+		$have = $new ? array() : wp_get_object_terms( (int) $post->ID, Scout_Team::TAX, array( 'fields' => 'ids' ) );
+		echo '<div class="sh scout-team-form st-groups">';
+		self::group_fields( $new, is_wp_error( $have ) ? array() : array_map( 'intval', (array) $have ) );
+		echo '<p class="description">' . esc_html__( 'The team page shows the Team group.', 'scout-team' ) . '</p>';
+		echo '</div>';
+	}
+
+	/** The groups a new person starts in: Team. */
+	public static function starts_in( string $slug ): bool {
+		return Scout_Team::TEAM === $slug;
+	}
+
+	/**
+	 * A checkbox for every group. A new person starts in Team. The edit screen
+	 * and the Add a person walkthrough print the same ones.
+	 *
+	 * @param bool  $new  A person not saved yet: Team starts ticked.
+	 * @param int[] $have Group term IDs the person is in.
+	 */
+	public static function group_fields( bool $new, array $have ): void {
 		$terms = get_terms(
 			array(
 				'taxonomy'   => Scout_Team::TAX,
@@ -312,12 +354,8 @@ final class Scout_Team_Editor {
 			)
 		);
 		$terms = is_wp_error( $terms ) ? array() : $terms;
-		$new   = 'auto-draft' === $post->post_status;
-		$have  = $new ? array() : wp_get_object_terms( (int) $post->ID, Scout_Team::TAX, array( 'fields' => 'ids' ) );
-		$have  = is_wp_error( $have ) ? array() : array_map( 'intval', $have );
 		$tax   = get_taxonomy( Scout_Team::TAX );
 		$can   = $tax && current_user_can( $tax->cap->assign_terms );
-		echo '<div class="sh scout-team-form st-groups">';
 		if ( ! $terms ) {
 			echo '<p class="description">' . esc_html__( 'No groups yet.', 'scout-team' ) . '</p>';
 		} else {
@@ -326,13 +364,11 @@ final class Scout_Team_Editor {
 				echo '<input type="hidden" name="scout_team_groups_sent" value="1">';
 			}
 			foreach ( $terms as $term ) {
-				$on = $new ? ( Scout_Team::TEAM === $term->slug ) : in_array( (int) $term->term_id, $have, true );
+				$on = $new ? self::starts_in( (string) $term->slug ) : in_array( (int) $term->term_id, $have, true );
 				echo '<p class="st-check"><label><input type="checkbox" name="scout_team_groups[]" value="' . esc_attr( (string) $term->term_id ) . '" ' . checked( $on, true, false ) . '> ' . esc_html( $term->name ) . '</label></p>';
 			}
 			echo '</fieldset>';
 		}
-		echo '<p class="description">' . esc_html__( 'The team page shows the Team group.', 'scout-team' ) . '</p>';
-		echo '</div>';
 	}
 
 	public static function render_preview( $post ): void {
@@ -379,18 +415,34 @@ final class Scout_Team_Editor {
 		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- every key is sanitized in sanitize_profile().
 		$raw = isset( $_POST['scout_team'] ) ? (array) wp_unslash( $_POST['scout_team'] ) : array();
-		$p   = Scout_Team::sanitize_profile( $raw );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast to int in store().
+		$groups = isset( $_POST['scout_team_groups_sent'] ) ? (array) ( $_POST['scout_team_groups'] ?? array() ) : null;
+		self::store( (int) $post_id, $raw, $groups );
+	}
+
+	/**
+	 * Save a person's profile and groups from the form fields. The edit screen
+	 * and the Add a person walkthrough both save through here, so both clean
+	 * and store a profile the same way, in the same meta value.
+	 *
+	 * @param int        $post_id Person post ID.
+	 * @param array      $raw     Raw (unslashed) scout_team[] fields.
+	 * @param array|null $groups  Group term IDs from the Groups checkboxes, or null when they were not on the form.
+	 * @return array The profile as saved.
+	 */
+	public static function store( int $post_id, array $raw, ?array $groups = null ): array {
+		$p = Scout_Team::sanitize_profile( $raw );
 		// Only someone who can edit other people's posts may tie a profile to another login.
 		if ( $p['user'] && get_current_user_id() !== $p['user'] && ! current_user_can( 'edit_others_posts' ) ) {
-			$p['user'] = (int) Scout_Team::profile( (int) $post_id )['user'];
+			$p['user'] = (int) Scout_Team::profile( $post_id )['user'];
 		}
 		update_post_meta( $post_id, Scout_Team::META, $p );
 
-		// Groups, from the Groups box. Only groups that exist, and only for people allowed to set them.
+		// Groups, from the Groups checkboxes. Only groups that exist, and only for people allowed to set them.
 		$tax = get_taxonomy( Scout_Team::TAX );
-		if ( isset( $_POST['scout_team_groups_sent'] ) && $tax && current_user_can( $tax->cap->assign_terms ) ) {
+		if ( null !== $groups && $tax && current_user_can( $tax->cap->assign_terms ) ) {
 			$ids = array();
-			foreach ( (array) ( $_POST['scout_team_groups'] ?? array() ) as $raw_id ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast to int below.
+			foreach ( $groups as $raw_id ) {
 				$term = get_term( absint( $raw_id ), Scout_Team::TAX );
 				if ( $term && ! is_wp_error( $term ) ) {
 					$ids[] = (int) $term->term_id;
@@ -398,6 +450,7 @@ final class Scout_Team_Editor {
 			}
 			wp_set_object_terms( $post_id, $ids, Scout_Team::TAX, false );
 		}
+		return $p;
 	}
 
 	/* ---------- list screen ---------- */

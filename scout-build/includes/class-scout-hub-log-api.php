@@ -346,7 +346,7 @@ final class Scout_Hub_Log_API {
 		$t_update = get_site_transient( 'update_themes' );
 		$sheet    = $theme->get_stylesheet();
 		$health   = array();
-		foreach ( Scout_Hub_Health::checks() as $c ) {
+		foreach ( array_merge( Scout_Hub_Health::checks(), Scout_Hub_Security::rows() ) as $c ) {
 			$health[] = array( 'label' => (string) $c['label'], 'value' => (string) $c['value'], 'state' => (string) $c['state'] );
 		}
 		$ai   = Scout_Hub_Health::ai_checks();

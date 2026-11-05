@@ -39,11 +39,13 @@ require_once __DIR__ . '/includes/class-scout-newsletter-queue.php';
 require_once __DIR__ . '/includes/class-scout-newsletter-sources.php';
 require_once __DIR__ . '/includes/class-scout-newsletter-form.php';
 require_once __DIR__ . '/includes/class-scout-newsletter-admin.php';
+require_once __DIR__ . '/includes/class-scout-newsletter-privacy.php';
 
 Scout_Newsletter::boot();
 Scout_Newsletter_Queue::boot();
 Scout_Newsletter_Form::boot();
 Scout_Newsletter_Admin::boot();
+Scout_Newsletter_Privacy::boot();
 // Scout Events, Scout Members, Gravity Forms and WooCommerce load after this file.
 add_action( 'plugins_loaded', array( 'Scout_Newsletter_Sources', 'boot' ), 20 );
 

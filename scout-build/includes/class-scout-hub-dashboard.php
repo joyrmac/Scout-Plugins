@@ -108,7 +108,7 @@ final class Scout_Hub_Dashboard {
 			$on += 'on' === Scout_Hub_Features::status( $slug )['state'] ? 1 : 0;
 		}
 		$ai     = Scout_Hub_Health::ai_checks();
-		$basics = Scout_Hub_Health::checks();
+		$basics = array_merge( Scout_Hub_Health::checks(), Scout_Hub_Security::visible_rows() );
 		$fix    = array_values( array_filter( $basics, static fn( $c ) => 'bad' === $c['state'] ) );
 		$look   = array_values( array_filter( $basics, static fn( $c ) => 'warn' === $c['state'] ) );
 		$todo   = array_slice( array_merge( $fix, $look ), 0, 4 );

@@ -772,6 +772,9 @@ final class Scout_Events_RSVP {
 
 	/** The ticket email, the waitlist one, or (with $reminder) the day-before reminder. */
 	public static function email( array $row, bool $reminder = false ): void {
+		if ( ! is_email( (string) $row['email'] ) ) {
+			return; // A paid ticket kept after a privacy erase has no address left.
+		}
 		$id    = (int) $row['event_id'];
 		$e     = Scout_Events::event( $id );
 		$site  = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
@@ -937,6 +940,10 @@ final class Scout_Events_RSVP {
 						'name'  => __( 'Newsletter requested', 'scout-events' ),
 						'value' => (string) $r['newsletter'],
 					),
+					array(
+						'name'  => __( 'Order', 'scout-events' ),
+						'value' => (int) $r['order_id'] ? '#' . (int) $r['order_id'] : '',
+					),
 				),
 			);
 		}
@@ -954,13 +961,50 @@ final class Scout_Events_RSVP {
 		return $erasers;
 	}
 
+	/**
+	 * Free sign-ups are deleted. A paid ticket is part of a paid order, so its
+	 * row stays (it still counts against the event's places, and the order
+	 * still points at it) with the person's name, email, signature and account
+	 * taken out. The ticket holder details on the order go the same way.
+	 */
 	public static function erase_data( string $email ): array {
 		global $wpdb;
-		$n = (int) $wpdb->delete( self::table(), array( 'email' => strtolower( $email ) ), array( '%s' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$email = strtolower( $email );
+		$rows  = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, order_id FROM ' . self::table() . ' WHERE email = %s', $email ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+		$orders = array_values( array_unique( array_filter( array_map( static fn( $r ) => (int) $r['order_id'], $rows ) ) ) );
+		// Before the rows change: the order's holder list is matched to its rows.
+		if ( $orders && class_exists( 'Scout_Events_Tickets' ) ) {
+			foreach ( $orders as $order_id ) {
+				Scout_Events_Tickets::forget_holder( $order_id, $email );
+			}
+		}
+		$kept = 0;
+		foreach ( $rows as $r ) {
+			if ( (int) $r['order_id'] > 0 ) {
+				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					self::table(),
+					array(
+						'name'      => wp_privacy_anonymize_data( 'text' ),
+						'email'     => '',
+						'signature' => '',
+						'user_id'   => 0,
+					),
+					array( 'id' => (int) $r['id'] )
+				);
+				++$kept;
+			} else {
+				$wpdb->delete( self::table(), array( 'id' => (int) $r['id'] ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		}
+		$messages = array();
+		if ( $kept ) {
+			/* translators: %d: number of paid tickets. */
+			$messages[] = sprintf( _n( '%d paid ticket was kept with its order, without the person’s name, email or signature.', '%d paid tickets were kept with their orders, without the person’s name, email or signature.', $kept, 'scout-events' ), $kept );
+		}
 		return array(
-			'items_removed'  => $n > 0,
-			'items_retained' => false,
-			'messages'       => array(),
+			'items_removed'  => (bool) $rows,
+			'items_retained' => $kept > 0,
+			'messages'       => $messages,
 			'done'           => true,
 		);
 	}

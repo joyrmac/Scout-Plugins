@@ -36,6 +36,8 @@ add_action(
 require_once __DIR__ . '/includes/class-scout-admin-ui.php';
 require_once __DIR__ . '/includes/class-scout-chat.php';
 require_once __DIR__ . '/includes/class-scout-chat-admin.php';
+require_once __DIR__ . '/includes/class-scout-chat-privacy.php';
 
 Scout_Chat::boot();
 Scout_Chat_Admin::boot();
+Scout_Chat_Privacy::boot();

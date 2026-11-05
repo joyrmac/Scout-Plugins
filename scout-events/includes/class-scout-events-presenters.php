@@ -57,6 +57,8 @@ final class Scout_Events_Presenters {
 		add_filter( 'show_admin_bar', array( __CLASS__, 'admin_bar' ) );
 		add_action( 'add_meta_boxes_' . Scout_Events::SPEAKER, array( __CLASS__, 'box' ) );
 		add_filter( 'scout_events_needs_you', array( __CLASS__, 'needs_you' ) );
+		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'exporter' ) );
+		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'eraser' ) );
 	}
 
 	/** The Presenter role: signed in to manage their own profile, nothing else. */
@@ -709,5 +711,152 @@ final class Scout_Events_Presenters {
 			);
 		}
 		return $items;
+	}
+
+	/* ---------- privacy ---------- */
+
+	/**
+	 * Speakers that belong to this email: the one linked to the presenter
+	 * account with that email, and any whose public contact email it is.
+	 *
+	 * @return int[]
+	 */
+	public static function by_email( string $email ): array {
+		$email = strtolower( trim( $email ) );
+		if ( '' === $email ) {
+			return array();
+		}
+		$ids  = array();
+		$user = get_user_by( 'email', $email );
+		if ( $user ) {
+			$linked = get_posts(
+				array(
+					'post_type'      => Scout_Events::SPEAKER,
+					'post_status'    => array( 'any', 'trash' ),
+					'meta_key'       => self::USER, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one row per presenter.
+					'meta_value'     => (int) $user->ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			);
+			$ids = array_map( 'intval', (array) $linked );
+		}
+		$all = get_posts(
+			array(
+				'post_type'      => Scout_Events::SPEAKER,
+				'post_status'    => array( 'any', 'trash' ),
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+		foreach ( array_map( 'intval', (array) $all ) as $id ) {
+			if ( strtolower( Scout_Events::speaker( $id )['email'] ) === $email ) {
+				$ids[] = $id;
+			}
+		}
+		return array_values( array_unique( $ids ) );
+	}
+
+	public static function exporter( array $exporters ): array {
+		$exporters['scout-events-presenters'] = array(
+			'exporter_friendly_name' => __( 'Presenter applications', 'scout-events' ),
+			'callback'               => array( __CLASS__, 'export_data' ),
+		);
+		return $exporters;
+	}
+
+	public static function export_data( string $email, int $page = 1 ): array {
+		$data = array();
+		foreach ( self::by_email( $email ) as $id ) {
+			$post   = get_post( $id );
+			$public = Scout_Events::speaker( $id );
+			$priv   = self::private_info( $id );
+			$rows   = array(
+				__( 'Name', 'scout-events' )                 => get_the_title( $id ),
+				__( 'Status', 'scout-events' )               => $post ? ( 'publish' === $post->post_status ? __( 'On the site', 'scout-events' ) : __( 'Not on the site', 'scout-events' ) ) : '',
+				__( 'What they do', 'scout-events' )         => $public['role'],
+				__( 'Short bio', 'scout-events' )            => $public['short'],
+				__( 'Full bio', 'scout-events' )             => $post ? trim( wp_strip_all_tags( (string) $post->post_content ) ) : '',
+				__( 'Website', 'scout-events' )              => $public['website'],
+				__( 'Links', 'scout-events' )                => implode( ', ', $public['links'] ),
+				__( 'City', 'scout-events' )                 => $public['city'],
+				__( 'Booking link', 'scout-events' )         => $public['booking'],
+				__( 'Public email', 'scout-events' )         => $public['email'],
+				__( 'Public phone', 'scout-events' )         => $public['phone'],
+				__( 'Phone', 'scout-events' )                => $priv['phone'],
+				__( 'Pronouns', 'scout-events' )             => $priv['pronouns'],
+				__( 'Room needs', 'scout-events' )           => $priv['needs'],
+				__( 'Notes', 'scout-events' )                => $priv['notes'],
+				__( 'Photo release', 'scout-events' )        => $priv['photo_release'] ? __( 'Yes', 'scout-events' ) : '',
+				__( 'Applied', 'scout-events' )              => $priv['applied'],
+			);
+			$pending = get_post_meta( $id, self::PENDING, true );
+			if ( is_array( $pending ) ) {
+				$rows[ __( 'Waiting for approval: name', 'scout-events' ) ]         = (string) ( $pending['name'] ?? '' );
+				$rows[ __( 'Waiting for approval: what they do', 'scout-events' ) ] = (string) ( $pending['role'] ?? '' );
+				$rows[ __( 'Waiting for approval: short bio', 'scout-events' ) ]    = (string) ( $pending['short'] ?? '' );
+				$rows[ __( 'Waiting for approval: full bio', 'scout-events' ) ]     = trim( wp_strip_all_tags( (string) ( $pending['bio'] ?? '' ) ) );
+				$rows[ __( 'Waiting for approval: website', 'scout-events' ) ]      = (string) ( $pending['website'] ?? '' );
+				$rows[ __( 'Waiting for approval: links', 'scout-events' ) ]        = implode( ', ', array_map( 'strval', (array) ( $pending['links'] ?? array() ) ) );
+				$rows[ __( 'Waiting for approval: sent', 'scout-events' ) ]         = (string) ( $pending['sent'] ?? '' );
+			}
+			$fields = array();
+			foreach ( $rows as $name => $value ) {
+				if ( '' !== (string) $value ) {
+					$fields[] = array(
+						'name'  => $name,
+						'value' => (string) $value,
+					);
+				}
+			}
+			$data[] = array(
+				'group_id'    => 'scout-events-presenters',
+				'group_label' => __( 'Presenter applications', 'scout-events' ),
+				'item_id'     => 'presenter-' . $id,
+				'data'        => $fields,
+			);
+		}
+		return array(
+			'data' => $data,
+			'done' => true,
+		);
+	}
+
+	public static function eraser( array $erasers ): array {
+		$erasers['scout-events-presenters'] = array(
+			'eraser_friendly_name' => __( 'Presenter applications', 'scout-events' ),
+			'callback'             => array( __CLASS__, 'erase_data' ),
+		);
+		return $erasers;
+	}
+
+	/**
+	 * The private details and any changes still waiting for approval go. The
+	 * profile itself is what the presenter sent to be shown, and sessions point
+	 * at it, so it stays for staff to edit or delete by hand.
+	 */
+	public static function erase_data( string $email, int $page = 1 ): array {
+		$ids     = self::by_email( $email );
+		$removed = false;
+		foreach ( $ids as $id ) {
+			$had     = '' !== get_post_meta( $id, self::PRIVATE, true ) || '' !== get_post_meta( $id, self::PENDING, true );
+			$removed = $removed || $had;
+			delete_post_meta( $id, self::PRIVATE );
+			delete_post_meta( $id, self::PENDING );
+		}
+		$messages = array();
+		foreach ( $ids as $id ) {
+			/* translators: %s: presenter name. */
+			$messages[] = sprintf( __( 'The presenter profile for %s stays, without its private details. Edit or delete it under Speakers if they asked for that too.', 'scout-events' ), get_the_title( $id ) );
+		}
+		if ( $ids && get_user_by( 'email', $email ) ) {
+			$messages[] = __( 'Their presenter login stays. Delete it under Users if they asked for that too.', 'scout-events' );
+		}
+		return array(
+			'items_removed'  => $removed,
+			'items_retained' => (bool) $ids,
+			'messages'       => $messages,
+			'done'           => true,
+		);
 	}
 }
