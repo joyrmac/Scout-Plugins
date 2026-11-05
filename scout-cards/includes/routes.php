@@ -119,7 +119,7 @@ final class Scout_Cards_Routes {
 		if ( ! $view ) {
 			return;
 		}
-		$theme = Scout_Cards_Render_Theme::on();
+		$theme = class_exists( 'Scout_Cards_Render_Theme' ) && Scout_Cards_Render_Theme::on();
 		if ( 'links' === $view ) {
 			if ( $theme ) {
 				self::theme_template( 'links', '' );

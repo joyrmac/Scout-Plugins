@@ -529,7 +529,7 @@ final class Scout_Cards_Admin {
 		if ( isset( $_GET['reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-info is-dismissible"><p>Reset to the defaults.</p></div>';
 		}
-		$theme_pages = Scout_Cards_Theme_Import::theme_pages(); // the theme's own card Pages: kept on purpose, no warning
+		$theme_pages = class_exists( 'Scout_Cards_Theme_Import' ) ? Scout_Cards_Theme_Import::theme_pages() : array(); // the theme's own card Pages: kept on purpose, no warning
 		foreach ( array( $s['card_base'], $s['links_base'] ) as $slug ) {
 			$pg = get_page_by_path( $slug );
 			if ( $pg && ! in_array( (int) $pg->ID, $theme_pages, true ) ) {
