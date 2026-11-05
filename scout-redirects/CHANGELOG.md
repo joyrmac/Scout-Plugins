@@ -2,6 +2,10 @@
 
 ## Unreleased (2026-11-05)
 
+- **One status line instead of three stat cards (Joy, 2026-11-05).** "4 redirects live. Visitors tried 12 missing addresses in the last 7 days, and 1 link on your own pages is broken." It turns amber only when a link on the site's own pages is broken, with a quiet link down to them.
+- **One primary button.** Add redirect is the screen's main button; Save settings and Import in More options are outlined.
+- **Kit colors only.** The broken-link "!" badge uses the kit's warn tint instead of a typed-in amber, and the stat card styles are gone.
+- **Shorter help.** The opening line, the add form hint, the missing pages and broken links intros and the list intro are one sentence each. The fold reads "More options: settings, import & export".
 - **Broken links are real links now.** Scanners fake where they came from, so "/ links to /terraform.tfvars" showed as a broken link. A missing page now counts as a broken link only when that page's content, or one of the site's menus, really links to it. Links from other sites, from the missing address itself, from a sitemap file, or from a page that is missing too stay as plain missing pages. Entries an older version flagged are checked again once, and the list is checked again each time it shows.
 - **Site status uses the same checked list,** so it stops asking for a look at scanner probes.
 - **More scanner probes are left out of Missing pages:** any file other than an .html or .htm page (like /terraform.tfvars or /db.sql), index.php in a folder, and addresses under /actuator, /api, /auth, /ckfinder, /wk, /files, /vendor, /cgi-bin, /phpmyadmin, /server-status, /console, /portal, /onboarding, /register, /forgot-password, /settings, /api-docs, /swagger and /graphql, plus WordPress's demo /sample-page and /hello-world. Ones already logged are cleared the first time the screen opens. An address saved as a redirect is never left out, and a site with a real page on that list can remove that one entry with the new `scout_redirects_noise_patterns` filter.

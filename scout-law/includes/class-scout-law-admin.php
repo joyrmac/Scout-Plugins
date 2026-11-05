@@ -154,9 +154,9 @@ final class Scout_Law_Admin {
 			return '<span class="sh-pill is-on">&#10003; ' . esc_html( $label ) . '</span>';
 		}
 		if ( 'changed' === $status ) {
-			return '<span class="sh-pill is-received">&#9670; ' . esc_html__( 'Changed since approval', 'scout-law' ) . '</span>';
+			return '<span class="sh-pill is-warn">' . esc_html__( 'Changed since approval', 'scout-law' ) . '</span>';
 		}
-		return '<span class="sh-pill is-received">&#9670; ' . esc_html__( 'Needs the firm\'s approval', 'scout-law' ) . '</span>';
+		return '<span class="sh-pill is-progress">' . esc_html__( 'Needs the firm\'s approval', 'scout-law' ) . '</span>';
 	}
 
 	public static function render(): void {
@@ -166,10 +166,19 @@ final class Scout_Law_Admin {
 		$s = Scout_Law_Disclaimers::settings();
 		Scout_Admin_UI::open(
 			__( 'Disclaimers', 'scout-law' ),
-			__( 'The firm\'s required lines, set once and approved word for word. Every approval is kept as the advertising record.', 'scout-law' ),
+			__( 'The firm’s required lines, set once and approved word for word.', 'scout-law' ),
 			__( 'Legal pages', 'scout-law' )
 		);
 		self::message();
+		$waiting = Scout_Law_Disclaimers::waiting();
+		echo '<section class="sh-box"><p class="sh-status' . ( $waiting ? ' is-warn' : '' ) . '"><span class="sh-dot" aria-hidden="true"></span>';
+		if ( $waiting ) {
+			/* translators: %d: lines waiting. */
+			echo '<strong>' . esc_html( sprintf( _n( '%d line waits for the firm’s approval.', '%d lines wait for the firm’s approval.', count( $waiting ), 'scout-law' ), count( $waiting ) ) ) . '</strong> <span>' . esc_html__( 'Every approval is kept as the advertising record.', 'scout-law' ) . '</span>';
+		} else {
+			echo '<strong>' . esc_html__( 'Every line on the site is approved.', 'scout-law' ) . '</strong> <span>' . esc_html__( 'Every approval is kept as the advertising record.', 'scout-law' ) . '</span>';
+		}
+		echo '</p></section>';
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION ); ?>">

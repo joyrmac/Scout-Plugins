@@ -1,6 +1,6 @@
 <?php
 /**
- * Events, Customer list: whether the sync is on, and one button that brings
+ * Events, Contacts (called Customer list before 2026-11-05): whether the sync is on, and one button that brings
  * in everyone from before it was switched on (sign-ups, volunteers, vendors,
  * presenters, members and paid shop tickets), tagged the same way. Running it
  * twice changes nothing: each person is matched by email.
@@ -22,7 +22,7 @@ final class Scout_CRM_Backfill {
 	}
 
 	public static function menu( $parent ): void {
-		add_submenu_page( (string) $parent, __( 'Customer list', 'scout-crm' ), __( 'Customer list', 'scout-crm' ), 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
+		add_submenu_page( (string) $parent, __( 'Contacts', 'scout-crm' ), __( 'Contacts', 'scout-crm' ), 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
 	}
 
 	public static function render(): void {
@@ -31,31 +31,55 @@ final class Scout_CRM_Backfill {
 		}
 		$ui = class_exists( 'Scout_Admin_UI' );
 		if ( $ui ) {
-			Scout_Admin_UI::open( __( 'Customer list', 'scout-crm' ), __( 'Everyone who buys, signs up, volunteers, applies or joins, in one FluentCRM list, labeled by what they did.', 'scout-crm' ), __( 'Events', 'scout-crm' ) );
+			Scout_Admin_UI::open( __( 'Contacts', 'scout-crm' ), __( 'Everyone who buys, signs up, volunteers, applies or joins goes to your FluentCRM contacts.', 'scout-crm' ), __( 'Events', 'scout-crm' ) );
 		} else {
-			echo '<div class="wrap"><h1>' . esc_html__( 'Customer list', 'scout-crm' ) . '</h1>';
+			echo '<div class="wrap"><h1>' . esc_html__( 'Contacts', 'scout-crm' ) . '</h1>';
 		}
 		$done = get_transient( 'scout_crm_backfill_' . get_current_user_id() );
 		if ( is_array( $done ) ) {
 			delete_transient( 'scout_crm_backfill_' . get_current_user_id() );
 			$parts = array();
 			foreach ( $done as $what => $n ) {
-				$parts[] = $what . ': ' . number_format_i18n( (int) $n );
+				$parts[] = number_format_i18n( (int) $n ) . ' ' . $what;
 			}
-			echo '<div class="notice notice-success"><p>' . esc_html__( 'Done. Added or updated:', 'scout-crm' ) . ' ' . esc_html( implode( ' · ', $parts ) ) . '</p></div>';
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Done. Added or updated', 'scout-crm' ) . ' ' . esc_html( implode( ', ', $parts ) ) . '.</p></div>';
 		}
-		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Status', 'scout-crm' ) . '</h2>';
+		$status = static function ( string $state, string $headline, string $detail, string $go = '' ): void {
+			if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+				Scout_Admin_UI::status( $state, $headline, $detail, $go );
+				return;
+			}
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong> <span>' . esc_html( $detail ) . '</span>' . ( '' !== $go ? ' <span class="sh-status-go">' . $go . '</span>' : '' ) . '</p></section>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $go is escaped by the caller.
+		};
 		if ( ! Scout_CRM::ready() ) {
-			echo '<p>' . esc_html__( 'FluentCRM is not active, so nothing is sent yet. Install and activate FluentCRM (free) and this page takes it from there.', 'scout-crm' ) . '</p></section>';
+			$status( 'off', __( 'Off.', 'scout-crm' ), __( 'Install and activate FluentCRM (free) and this page takes it from there.', 'scout-crm' ) );
 		} else {
-			echo '<p>' . esc_html__( 'On. New tickets, sign-ups, volunteers, vendor and presenter applications and membership changes go to FluentCRM as they happen.', 'scout-crm' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=fluentcrm-admin#/subscribers' ) ) . '">' . esc_html__( 'Open the contacts', 'scout-crm' ) . '</a></p>';
-			echo '<p class="sh-note">' . esc_html__( 'New people get receipts and event notes, and marketing emails only if they subscribe. Existing people keep their status.', 'scout-crm' ) . '</p></section>';
-			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Bring in everyone so far', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Adds the people from before the sync was on, tagged the same way. Safe to run again: people are matched by email.', 'scout-crm' ) . '</p>';
+			$status( 'good', __( 'On.', 'scout-crm' ), __( 'New people go to FluentCRM as they happen.', 'scout-crm' ), '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=fluentcrm-admin#/subscribers' ) ) . '">' . esc_html__( 'Open the contacts', 'scout-crm' ) . '</a>' );
+			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Bring in everyone so far', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Adds the people from before the sync was on. Safe to run again: people are matched by email.', 'scout-crm' ) . '</p>';
+			echo '<p class="sh-note">' . esc_html__( 'They get receipts and event notes, and marketing emails only if they subscribe.', 'scout-crm' ) . '</p>';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="scout_crm_backfill">';
 			wp_nonce_field( 'scout_crm_backfill' );
 			echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Bring them in', 'scout-crm' ) . '</button></p></form></section>';
 		}
-		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Labels it adds', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Attendee, Waitlist, Volunteer, Vendor, Presenter, Ticket buyer, Member applicant, Member, Plan: (plan name), Event: (event name), Region: (region name), Ticket: (ticket type).', 'scout-crm' ) . '</p></section>';
+		$labels = array(
+			__( 'Attendee', 'scout-crm' ),
+			__( 'Waitlist', 'scout-crm' ),
+			__( 'Volunteer', 'scout-crm' ),
+			__( 'Vendor', 'scout-crm' ),
+			__( 'Presenter', 'scout-crm' ),
+			__( 'Ticket buyer', 'scout-crm' ),
+			__( 'Member applicant', 'scout-crm' ),
+			__( 'Member', 'scout-crm' ),
+			__( 'Plan: (plan name)', 'scout-crm' ),
+			__( 'Event: (event name)', 'scout-crm' ),
+			__( 'Region: (region name)', 'scout-crm' ),
+			__( 'Ticket: (ticket type)', 'scout-crm' ),
+		);
+		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Labels it adds', 'scout-crm' ) . '</h2><p class="sh-row-facts">';
+		foreach ( $labels as $label ) {
+			echo '<span class="sh-tag">' . esc_html( $label ) . '</span> ';
+		}
+		echo '</p></section>';
 		if ( $ui ) {
 			Scout_Admin_UI::close();
 		} else {

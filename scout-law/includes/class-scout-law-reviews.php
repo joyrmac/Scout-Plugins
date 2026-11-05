@@ -232,7 +232,7 @@ final class Scout_Law_Reviews {
 		echo '<p>' . esc_html( self::status_text( (int) $post->ID ) ) . '</p>';
 		$people = self::attorneys();
 		if ( ! $people ) {
-			echo '<p class="description">' . esc_html__( 'Add an attorney on the Team screen (tick "Attorney") to sign reviews.', 'scout-law' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'Add an attorney in People (tick "Attorney") to sign reviews.', 'scout-law' ) . '</p>';
 			return;
 		}
 		echo '<p><label for="scout-law-review-by">' . esc_html__( 'Attorney', 'scout-law' ) . '</label><br><select id="scout-law-review-by" name="scout_law_review_by" class="widefat"><option value="0">' . esc_html__( 'Choose an attorney', 'scout-law' ) . '</option>';

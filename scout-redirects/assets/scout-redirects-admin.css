@@ -10,15 +10,8 @@ body[class*="scout-redirects"] .sh .button { display: inline-flex; align-items: 
 body[class*="scout-redirects"] .sh a:focus-visible,
 body[class*="scout-redirects"] .sh .button:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
 
-/* Stats */
-.sh-grid.sr-stats { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.sr-stat { padding: 20px 22px; }
-.sr-stat-label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; color: var(--sh-text-2); }
-.sr-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sh-accent); flex: none; }
-.sr-stat-num { margin: 8px 0 0; font-size: 40px; line-height: 1; font-weight: 600; letter-spacing: -.03em; color: var(--sh-text); font-variant-numeric: tabular-nums; }
-
 /* One column: add, broken links, missing pages, the list, then More options */
-.sh-main > .sh-box + .sh-box, .sh-main > .sr-stats + .sh-box, .sh-main > .sh-box + .sr-more { margin-top: 16px; }
+.sh-main > .sh-box + .sh-box, .sh-main > .sh-box + .sr-more { margin-top: 16px; }
 
 .sr-path { font-family: var(--sh-mono); font-size: 13px; color: var(--sh-text); overflow-wrap: anywhere; }
 .sr-empty { margin: 4px 0 0; padding: 16px; border-radius: 12px; background: var(--sh-surface-2); color: var(--sh-text-2); }
@@ -75,7 +68,7 @@ body[class*="scout-redirects"] .sh .button:focus-visible { outline: 2px solid va
 .sr-strong { font-weight: 600; color: var(--sh-text); line-height: 1.4; }
 .sr-strong .sr-path { font-weight: 500; }
 .sr-list-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; flex: none; }
-.sr-flag { flex: none; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(251, 176, 36, .2); color: var(--sh-warn); font-weight: 700; font-size: 13px; }
+.sr-flag { flex: none; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--sh-warn-tint); color: var(--sh-warn); font-weight: 700; font-size: 13px; }
 .sr-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 14px; border-top: 1px solid var(--sh-border); }
 @media (max-width: 600px) {
 	.sr-list li { flex-wrap: wrap; }

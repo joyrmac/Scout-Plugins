@@ -228,7 +228,7 @@ final class Scout_Hours_Admin {
 					?>
 				</p>
 				<p>
-					<a class="button button-primary" href="https://business.google.com/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open Google Business Profile', 'scout-hours' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'scout-hours' ); ?></span></a>
+					<a class="button" href="https://business.google.com/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open Google Business Profile', 'scout-hours' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'scout-hours' ); ?></span></a>
 					<a class="button" href="<?php echo esc_url( $dismiss ); ?>"><?php esc_html_e( 'Done, hide this reminder', 'scout-hours' ); ?></a>
 				</p>
 			</div>
@@ -237,6 +237,15 @@ final class Scout_Hours_Admin {
 	}
 
 	/* ---- Screen ------------------------------------------------------- */
+
+	/** The kit's status line, or the same markup when an older kit without status() loaded first. */
+	private static function status( string $state, string $headline, string $detail = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail );
+			return;
+		}
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong> <span>' . esc_html( $detail ) . '</span></p></section>';
+	}
 
 	private static function message(): void {
 		$msg   = isset( $_GET['scout-hours'] ) ? sanitize_key( wp_unslash( $_GET['scout-hours'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
@@ -263,10 +272,15 @@ final class Scout_Hours_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Hours', 'scout-hours' ),
-			__( 'Set weekly hours and holiday closures once. The site shows them and adds them to your Google listing.', 'scout-hours' ),
+			__( 'Set weekly hours and holiday closures once, and the site and your Google listing follow.', 'scout-hours' ),
 			__( 'Hours', 'scout-hours' )
 		);
 		self::message();
+		if ( $confirmed ) {
+			self::status( 'good', __( 'Hours are on the site.', 'scout-hours' ), __( 'Your Google listing gets them too.', 'scout-hours' ) );
+		} else {
+			self::status( 'off', __( 'Hours aren’t on the site yet.', 'scout-hours' ), __( 'They show once the owner confirms them below.', 'scout-hours' ) );
+		}
 		?>
 		<div class="shh-layout">
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="shh-main">
@@ -274,15 +288,13 @@ final class Scout_Hours_Admin {
 				<?php wp_nonce_field( 'scout_hours_save' ); ?>
 
 				<section class="sh-box shh-confirm <?php echo $confirmed ? 'is-confirmed' : 'is-pending'; ?>">
-					<div class="shh-confirm-head">
-						<span class="sh-pill <?php echo $confirmed ? 'is-on' : 'is-received'; ?>"><?php echo esc_html( $confirmed ? __( 'Hours confirmed', 'scout-hours' ) : __( 'Hours not confirmed yet', 'scout-hours' ) ); ?></span>
-					</div>
+					<h2 class="sh-title"><?php esc_html_e( 'Owner’s OK', 'scout-hours' ); ?></h2>
 					<p class="shh-confirm-text">
 						<?php
 						echo esc_html(
 							$confirmed
-								? __( 'The hours show on the site and in your Google listing. Untick the box to take them down.', 'scout-hours' )
-								: __( 'The hours stay off the site and out of your Google listing until the owner confirms them.', 'scout-hours' )
+								? __( 'Untick the box to take the hours down.', 'scout-hours' )
+								: __( 'The hours stay off the site and Google until this is ticked.', 'scout-hours' )
 						);
 						?>
 					</p>
@@ -297,7 +309,7 @@ final class Scout_Hours_Admin {
 						<h2 class="sh-title"><?php esc_html_e( 'Weekly hours', 'scout-hours' ); ?></h2>
 						<button type="button" class="button sh-quiet shh-copy" hidden aria-live="polite" data-done="<?php esc_attr_e( 'Copied. Save to keep it.', 'scout-hours' ); ?>"><?php esc_html_e( 'Copy Monday to weekdays', 'scout-hours' ); ?></button>
 					</div>
-					<p class="description"><?php esc_html_e( 'Tick a day to open it, and add a second range for a break. Closing after midnight runs into the next morning.', 'scout-hours' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Tick a day to open it. Add a second range for a break.', 'scout-hours' ); ?></p>
 					<div class="shh-days">
 						<?php
 						foreach ( Scout_Hours::ordered_days() as $key ) {
@@ -318,7 +330,7 @@ final class Scout_Hours_Admin {
 					</fieldset>
 				</section>
 
-				<p class="shh-save"><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Save hours', 'scout-hours' ); ?></button></p>
+				<p class="shh-save"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save hours', 'scout-hours' ); ?></button></p>
 			</form>
 
 			<div class="shh-side">
@@ -331,7 +343,7 @@ final class Scout_Hours_Admin {
 								<li>
 									<div class="shh-closure-main">
 										<p class="shh-closure-name"><?php echo esc_html( '' !== $c['name'] ? $c['name'] : __( 'Closure', 'scout-hours' ) ); ?></p>
-										<p class="shh-closure-when"><?php echo esc_html( Scout_Hours::closure_dates_label( $c ) ); ?> · <?php echo esc_html( 'closed' === $c['type'] ? __( 'Closed', 'scout-hours' ) : Scout_Hours::ranges_label( $c['ranges'] ) ); ?></p>
+										<p class="shh-closure-when"><?php echo esc_html( Scout_Hours::closure_dates_label( $c ) ); ?> <span class="sh-tag"><?php echo esc_html( 'closed' === $c['type'] ? __( 'Closed', 'scout-hours' ) : Scout_Hours::ranges_label( $c['ranges'] ) ); ?></span></p>
 										<?php if ( '' !== $c['note'] ) : ?>
 											<p class="shh-closure-note"><?php echo esc_html( $c['note'] ); ?></p>
 										<?php endif; ?>
@@ -398,7 +410,7 @@ final class Scout_Hours_Admin {
 						$rows = array(
 							array(
 								true,
-								__( 'Hours table and "Open now" line', 'scout-hours' ),
+								__( 'Hours table & Open now line', 'scout-hours' ),
 								__( 'Wherever [scout_hours] is placed, usually the footer and the contact page.', 'scout-hours' ),
 							),
 							array(

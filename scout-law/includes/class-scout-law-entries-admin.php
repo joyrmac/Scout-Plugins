@@ -78,7 +78,7 @@ final class Scout_Law_Entries_Admin {
 		$date     = get_option( 'date_format' );
 		Scout_Admin_UI::open(
 			__( 'Form entries', 'scout-law' ),
-			__( 'What people send through the site\'s forms is kept for a set time, then deleted. Less kept means less to protect.', 'scout-law' ),
+			__( 'What people send through the site’s forms is kept for a set time, then deleted.', 'scout-law' ),
 			__( 'Legal pages', 'scout-law' )
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a message flag only.
@@ -87,21 +87,22 @@ final class Scout_Law_Entries_Admin {
 		}
 		?>
 		<section class="sh-box">
-			<p class="sh-status">
+			<p class="sh-status <?php echo ( ! $gravity || ! $settings['on'] || time() < $starts ) ? 'is-off' : ''; ?>">
+				<span class="sh-dot" aria-hidden="true"></span>
 				<?php if ( ! $gravity ) : ?>
-					<span aria-hidden="true">&#9675;</span> <strong><?php esc_html_e( 'Nothing to do.', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'Nothing to do.', 'scout-law' ); ?></strong>
 					<?php esc_html_e( 'Gravity Forms isn\'t active, so the website keeps no form entries.', 'scout-law' ); ?>
 				<?php elseif ( ! $settings['on'] ) : ?>
-					<span aria-hidden="true">&#9675;</span> <strong><?php esc_html_e( 'Off.', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'Off.', 'scout-law' ); ?></strong>
 					<?php esc_html_e( 'Entries stay on the website until someone deletes them.', 'scout-law' ); ?>
 				<?php elseif ( time() < $starts ) : ?>
-					<span aria-hidden="true">&#9650;</span> <strong><?php esc_html_e( 'Starts soon.', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'Starts soon.', 'scout-law' ); ?></strong>
 					<?php
 					/* translators: 1: date, 2: days */
 					echo esc_html( sprintf( __( 'From %1$s, entries older than %2$d days are deleted each night. Star an entry in Gravity Forms to keep it.', 'scout-law' ), wp_date( $date, $starts ), $settings['days'] ) );
 					?>
 				<?php else : ?>
-					<span aria-hidden="true">&#10003;</span> <strong><?php esc_html_e( 'On.', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'On.', 'scout-law' ); ?></strong>
 					<?php
 					/* translators: %d: days */
 					echo esc_html( sprintf( __( 'Entries older than %d days are deleted each night.', 'scout-law' ), $settings['days'] ) );

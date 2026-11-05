@@ -89,7 +89,7 @@ final class Scout_Law_Reviews_Admin {
 		$due      = Scout_Law_Reviews::due();
 		Scout_Admin_UI::open(
 			__( 'Attorney sign-offs', 'scout-law' ),
-			__( 'An attorney reads each page on a schedule and signs it. The page then shows who reviewed it and when.', 'scout-law' ),
+			__( 'An attorney reads each page on a schedule and signs it, and the page shows who and when.', 'scout-law' ),
 			__( 'Legal pages', 'scout-law' )
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a message flag only.
@@ -104,26 +104,27 @@ final class Scout_Law_Reviews_Admin {
 		}
 		?>
 		<section class="sh-box">
-			<p class="sh-status">
+			<p class="sh-status <?php echo ( ! $people || $due ) ? 'is-warn' : ''; ?>">
+				<span class="sh-dot" aria-hidden="true"></span>
 				<?php if ( ! $people ) : ?>
-					<span aria-hidden="true">&#9670;</span> <strong><?php esc_html_e( 'Needs you:', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'Needs you:', 'scout-law' ); ?></strong>
 					<?php
 					$waiting = Scout_Law_Reviews::waiting_attorneys();
 					echo esc_html(
 						$waiting
 							/* translators: %s: names */
-							? sprintf( __( 'No attorney can sign yet. %s can sign once their Team profile is published (it may be waiting for the firm\'s approval).', 'scout-law' ), implode( ', ', $waiting ) )
-							: __( 'No attorney can sign yet. Add one on the Team screen and tick "Attorney".', 'scout-law' )
+							? sprintf( __( 'No attorney can sign yet. %s can sign once their People profile is published.', 'scout-law' ), implode( ', ', $waiting ) )
+							: __( 'No attorney can sign yet. Add one in People and tick "Attorney".', 'scout-law' )
 					);
 					?>
 				<?php elseif ( $due ) : ?>
-					<span aria-hidden="true">&#9670;</span> <strong><?php esc_html_e( 'Needs you:', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'Needs you:', 'scout-law' ); ?></strong>
 					<?php
 					/* translators: 1: pages due, 2: months */
 					echo esc_html( sprintf( _n( '%1$d page is due. Pages are reviewed every %2$d months.', '%1$d pages are due. Pages are reviewed every %2$d months.', count( $due ), 'scout-law' ), count( $due ), $settings['months'] ) );
 					?>
 				<?php else : ?>
-					<span aria-hidden="true">&#10003;</span> <strong><?php esc_html_e( 'All caught up.', 'scout-law' ); ?></strong>
+					<strong><?php esc_html_e( 'All caught up.', 'scout-law' ); ?></strong>
 					<?php
 					/* translators: %d: months */
 					echo esc_html( sprintf( __( 'Every page has been reviewed in the last %d months.', 'scout-law' ), $settings['months'] ) );

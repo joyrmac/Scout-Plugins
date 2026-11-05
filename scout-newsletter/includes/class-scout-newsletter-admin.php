@@ -263,17 +263,16 @@ final class Scout_Newsletter_Admin {
 			$detail   = self::test_error( $test );
 		} else {
 			$state    = $conn_ok ? 'good' : 'warn';
-			$headline = $conn_ok ? __( 'Connected.', 'scout-newsletter' ) : __( 'Not tested yet.', 'scout-newsletter' );
 			if ( $conn_ok ) {
+				// Headline plus one sentence (DESIGN 2a #2). The counts show as tags in Who said yes.
 				/* translators: %s: Beehiiv publication name. */
-				$detail = sprintf( __( 'Beehiiv publication: %s.', 'scout-newsletter' ), '' !== $test['name'] ? $test['name'] : __( 'your publication', 'scout-newsletter' ) );
+				$headline = sprintf( __( 'Connected to %s.', 'scout-newsletter' ), '' !== $test['name'] ? $test['name'] : __( 'your publication', 'scout-newsletter' ) );
+				$detail   = $sending ? __( 'Sending is on, so ticked boxes go to Beehiiv within a few minutes.', 'scout-newsletter' ) : __( 'Sending is off, so ticked boxes wait here until it’s on.', 'scout-newsletter' );
 			} else {
-				$detail = __( 'Press Test connection to check the key and publication.', 'scout-newsletter' );
+				$headline = __( 'Not tested yet.', 'scout-newsletter' );
+				$detail   = __( 'Press Test connection to check the key and publication.', 'scout-newsletter' );
 			}
 		}
-		$detail .= ' ' . ( $sending ? __( 'Sending is on: ticked boxes go to Beehiiv within a few minutes.', 'scout-newsletter' ) : __( 'Sending is off: ticked boxes are saved here and wait until it is on.', 'scout-newsletter' ) );
-		/* translators: 1: total sign-ups, 2: sent, 3: waiting, 4: held, 5: skipped, 6: failed. */
-		$detail .= ' ' . sprintf( __( '%1$d sign-ups: %2$d sent, %3$d in the queue, %4$d held, %5$d skipped, %6$d failed.', 'scout-newsletter' ), array_sum( $counts ), $counts['sent'], $waiting, $counts['held'], $counts['skipped'], $counts['failed'] );
 		if ( 'good' === $state && ( ! $sending || $counts['held'] || $counts['retry'] ) ) {
 			$state = 'warn';
 		}
@@ -291,13 +290,13 @@ final class Scout_Newsletter_Admin {
 					/* translators: %d: number of sign-ups. */
 					echo esc_html( sprintf( _n( '%d person ticked the box while sending was off or the key was refused.', '%d people ticked the box while sending was off or the key was refused.', $counts['held'], 'scout-newsletter' ), $counts['held'] ) );
 					?>
-					<?php esc_html_e( 'They agreed, so they can be sent once the connection works. On a staging copy of the site these are test sign-ups: leave them.', 'scout-newsletter' ); ?>
+					<?php esc_html_e( 'They agreed, so they can be sent once the connection works.', 'scout-newsletter' ); ?>
 				</p>
 				<?php if ( Scout_Newsletter::sending() ) : ?>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 						<input type="hidden" name="action" value="scout_newsletter_release">
 						<?php wp_nonce_field( 'scout_newsletter_release' ); ?>
-						<p class="sh-actions"><button type="submit" class="button button-primary"><?php esc_html_e( 'Send them to Beehiiv', 'scout-newsletter' ); ?></button></p>
+						<p class="sh-actions"><button type="submit" class="button"><?php esc_html_e( 'Send them to Beehiiv', 'scout-newsletter' ); ?></button></p>
 					</form>
 				<?php else : ?>
 					<p class="sh-note"><?php esc_html_e( 'Connect Beehiiv and switch sending on first.', 'scout-newsletter' ); ?></p>
@@ -309,11 +308,11 @@ final class Scout_Newsletter_Admin {
 			<?php self::render_form( $s ); ?>
 		<?php else : ?>
 			<section class="sh-box">
-				<p><?php esc_html_e( 'Scout looks after these settings. To change the newsletter tags or wording, send a change request.', 'scout-newsletter' ); ?></p>
+				<p><?php echo esc_html( ( ! method_exists( 'Scout_Admin_UI', 'branded' ) || Scout_Admin_UI::branded() ) ? __( 'Scout looks after these settings. To change the tags or wording, send a change request.', 'scout-newsletter' ) : __( 'Your web team looks after these settings. To change the tags or wording, send a change request.', 'scout-newsletter' ) ); ?></p>
 			</section>
 		<?php endif; ?>
 
-		<?php self::render_records(); ?>
+		<?php self::render_records( $counts, $waiting ); ?>
 		<?php self::render_log(); ?>
 		<?php
 		Scout_Admin_UI::close();
@@ -488,15 +487,38 @@ final class Scout_Newsletter_Admin {
 		<?php
 	}
 
-	private static function render_records(): void {
+	private static function render_records( array $counts = array(), int $waiting = 0 ): void {
 		$rows   = Scout_Newsletter_Store::recent( 15 );
 		$labels = Scout_Newsletter::sources() + array( 'membership_application' => __( 'Membership application', 'scout-newsletter' ) );
 		?>
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Who said yes', 'scout-newsletter' ); ?></h2>
-			<p><?php esc_html_e( 'Who said yes, when, where and the words they saw. Kept as proof that each person asked to join.', 'scout-newsletter' ); ?></p>
+			<p><?php esc_html_e( 'When, where and the words they saw, kept as proof that each person asked to join.', 'scout-newsletter' ); ?></p>
+			<?php if ( $counts && array_sum( $counts ) ) : ?>
+				<p class="sh-row-facts">
+					<?php
+					$tags = array(
+						/* translators: %d: number of sign-ups. */
+						sprintf( _n( '%d sign-up', '%d sign-ups', array_sum( $counts ), 'scout-newsletter' ), array_sum( $counts ) ),
+						/* translators: %d: number sent. */
+						sprintf( __( '%d sent', 'scout-newsletter' ), $counts['sent'] ),
+						/* translators: %d: number in the queue. */
+						sprintf( __( '%d in the queue', 'scout-newsletter' ), $waiting ),
+						/* translators: %d: number held. */
+						sprintf( __( '%d waiting', 'scout-newsletter' ), $counts['held'] ),
+						/* translators: %d: number skipped. */
+						sprintf( __( '%d skipped', 'scout-newsletter' ), $counts['skipped'] ),
+						/* translators: %d: number failed. */
+						sprintf( __( '%d failed', 'scout-newsletter' ), $counts['failed'] ),
+					);
+					foreach ( $tags as $tag ) {
+						echo '<span class="sh-tag">' . esc_html( $tag ) . '</span> ';
+					}
+					?>
+				</p>
+			<?php endif; ?>
 			<?php if ( $rows ) : ?>
-				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat striped">
+				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat sh-table">
 					<thead><tr><th scope="col"><?php esc_html_e( 'Agreed', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Who', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Where', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Words shown', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Status', 'scout-newsletter' ); ?></th></tr></thead>
 					<tbody>
 					<?php foreach ( $rows as $r ) : ?>
@@ -505,7 +527,7 @@ final class Scout_Newsletter_Admin {
 							<td><?php echo esc_html( Scout_Newsletter::mask( $r['email'] ) ); ?></td>
 							<td><?php echo esc_html( $labels[ $r['source'] ] ?? ( '' !== $r['source'] ? $r['source'] : '-' ) ); ?></td>
 							<td><?php echo esc_html( wp_trim_words( $r['wording'], 14 ) ); ?></td>
-							<td><span class="sh-pill <?php echo esc_attr( 'sent' === $r['status'] ? 'is-done' : ( in_array( $r['status'], array( 'failed', 'skipped' ), true ) ? '' : 'is-received' ) ); ?>"><?php echo esc_html( self::status_label( $r['status'] ) ); ?></span> <span class="description"><?php echo esc_html( $r['result'] ); ?></span></td>
+							<td><span class="sh-pill <?php echo esc_attr( 'sent' === $r['status'] ? 'is-done' : ( 'failed' === $r['status'] ? 'is-bad' : ( 'skipped' === $r['status'] ? '' : 'is-progress' ) ) ); ?>"><?php echo esc_html( self::status_label( $r['status'] ) ); ?></span> <span class="description"><?php echo esc_html( $r['result'] ); ?></span></td>
 						</tr>
 					<?php endforeach; ?>
 					</tbody>
@@ -542,7 +564,7 @@ final class Scout_Newsletter_Admin {
 		<?php self::ui_fold_open( __( 'Recent activity', 'scout-newsletter' ) ); ?>
 			<p><?php esc_html_e( 'What the site sent to Beehiiv and how it went. People show as a short code.', 'scout-newsletter' ); ?></p>
 			<?php if ( $log ) : ?>
-				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat striped">
+				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat sh-table">
 					<thead><tr><th scope="col"><?php esc_html_e( 'When', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Person', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'What', 'scout-newsletter' ); ?></th><th scope="col"><?php esc_html_e( 'Result', 'scout-newsletter' ); ?></th></tr></thead>
 					<tbody>
 					<?php foreach ( array_slice( $log, 0, 20 ) as $l ) : ?>

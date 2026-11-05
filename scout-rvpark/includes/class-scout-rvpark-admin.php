@@ -66,13 +66,24 @@ final class Scout_RVPark_Admin {
 		}
 		Scout_Admin_UI::open(
 			__( 'Home', 'scout-rvpark' ),
-			__( 'Your site types, rates and amenities, edited like a form. Change one here and it updates on every page that lists it.', 'scout-rvpark' ),
+			__( 'Your site types, rates and amenities. Change one here and every page that lists it follows.', 'scout-rvpark' ),
 			__( 'RV park', 'scout-rvpark' )
 		);
+		// One status line on top (DESIGN 2 #5).
+		/* translators: %d: site types. */
+		$head   = $sites ? sprintf( _n( '%d site type on the site.', '%d site types on the site.', count( $sites ), 'scout-rvpark' ), count( $sites ) ) : __( 'No site types yet.', 'scout-rvpark' );
+		/* translators: %d: amenities. */
+		$detail = sprintf( _n( '%d amenity listed.', '%d amenities listed.', count( $amenities ), 'scout-rvpark' ), count( $amenities ) );
+		$state  = $sites ? 'good' : 'off';
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $head, $detail );
+		} else {
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $head ) . '</strong> <span>' . esc_html( $detail ) . '</span></p></section>';
+		}
 		?>
 		<section class="sh-box">
 			<div class="sh-section-head">
-				<h2 class="sh-title"><?php echo esc_html( sprintf( /* translators: %d: site types */ _n( 'Site types · %d', 'Site types · %d', count( $sites ), 'scout-rvpark' ), count( $sites ) ) ); ?></h2>
+				<h2 class="sh-title"><?php echo esc_html( sprintf( /* translators: %d: site types */ _n( 'Site types (%d)', 'Site types (%d)', count( $sites ), 'scout-rvpark' ), count( $sites ) ) ); ?></h2>
 				<a class="button button-primary" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=site_type' ) ); ?>"><?php esc_html_e( 'Add a site type', 'scout-rvpark' ); ?></a>
 			</div>
 			<?php if ( ! $sites ) : ?>
@@ -90,9 +101,9 @@ final class Scout_RVPark_Admin {
 						<tr>
 							<td><a href="<?php echo esc_url( (string) get_edit_post_link( $p->ID ) ); ?>"><?php echo esc_html( get_the_title( $p ) ); ?></a></td>
 							<td><?php echo esc_html( self::field( $p->ID, 'hookups' ) ); ?></td>
-							<td><?php echo '' !== $nightly ? esc_html( '$' . $nightly ) : '&mdash;'; ?></td>
-							<td><?php echo '' !== $monthly ? esc_html( '$' . $monthly ) : '&mdash;'; ?></td>
-							<td><?php echo '' !== $length ? esc_html( $length . ' ft' ) : '&mdash;'; ?></td>
+							<td><?php echo '' !== $nightly ? esc_html( '$' . $nightly ) : '<span class="screen-reader-text">' . esc_html__( 'None', 'scout-rvpark' ) . '</span>'; ?></td>
+							<td><?php echo '' !== $monthly ? esc_html( '$' . $monthly ) : '<span class="screen-reader-text">' . esc_html__( 'None', 'scout-rvpark' ) . '</span>'; ?></td>
+							<td><?php echo '' !== $length ? esc_html( $length . ' ft' ) : '<span class="screen-reader-text">' . esc_html__( 'None', 'scout-rvpark' ) . '</span>'; ?></td>
 						</tr>
 					<?php endforeach; ?>
 					</tbody>
@@ -102,7 +113,7 @@ final class Scout_RVPark_Admin {
 
 		<section class="sh-box">
 			<div class="sh-section-head">
-				<h2 class="sh-title"><?php echo esc_html( sprintf( /* translators: %d: amenities */ _n( 'Amenities · %d', 'Amenities · %d', count( $amenities ), 'scout-rvpark' ), count( $amenities ) ) ); ?></h2>
+				<h2 class="sh-title"><?php echo esc_html( sprintf( /* translators: %d: amenities */ _n( 'Amenities (%d)', 'Amenities (%d)', count( $amenities ), 'scout-rvpark' ), count( $amenities ) ) ); ?></h2>
 				<a class="button" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=amenity' ) ); ?>"><?php esc_html_e( 'Add an amenity', 'scout-rvpark' ); ?></a>
 			</div>
 			<?php if ( ! $amenities ) : ?>

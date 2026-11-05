@@ -45,7 +45,7 @@ ok($s['page/services#content']==='missing', 'a page the site lacks is reported, 
 ok($s['page/about#field:hero_heading']==='conflict', 'an unknown saved value is never treated as safe');
 ok($s['page/about#field:hero_image']==='update', 'an empty image field is safe to fill');
 ok(!isset($s['option#siteurl']), 'siteurl is refused');
-ok(in_array('Option "siteurl" is not one Site Sync may set.', Scout_Sync::plan()['errors'], true), 'refused option is reported');
+ok(in_array('Option "siteurl" is not one Page copy may set.', Scout_Sync::plan()['errors'], true), 'refused option is reported');
 
 // A stale review is refused.
 $r = Scout_Sync::apply('not-the-hash', 'safe');
@@ -172,8 +172,8 @@ ok($s['page/team-sean#meta:_synctest_team.bio']==='conflict', 'an unknown value 
 ok($s['user/sean-sync@example.com#description']==='update', 'an earlier author bio is safe to replace');
 ok($s['user/nobody@example.com#description']==='missing', 'an unknown author is reported missing');
 $errs = Scout_Sync::plan()['errors'];
-ok(in_array('Option "scout_business" is not one Site Sync may set.', $errs, true), 'a whole array option is refused');
-ok(in_array('Option "synctest_other.x" is not one Site Sync may set.', $errs, true), 'an option nobody allowed is refused');
+ok(in_array('Option "scout_business" is not one Page copy may set.', $errs, true), 'a whole array option is refused');
+ok(in_array('Option "synctest_other.x" is not one Page copy may set.', $errs, true), 'an option nobody allowed is refused');
 ok((bool) preg_grep('/needs an email and a field/', $errs), 'a user field outside the list is refused');
 Scout_Sync::maybe_auto_run();
 $biz = get_option('scout_business'); $cards = get_option('synctest_cards'); $tm = get_post_meta($team,'_synctest_team',true);

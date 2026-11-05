@@ -23,7 +23,7 @@ $map = array(
 	'scout&tab=changes'                       => array( 'Change log', 'build' ),
 	'scout&tab=sync'                          => array( 'Page copy', 'build' ),
 	'scout-mail'                              => array( 'Email', 'build' ),
-	'scout-events-crm'                        => array( 'Customer list', 'business' ), // Lives in the Events (Plus) section, for the owner too.
+	'scout-events-crm'                        => array( 'Contacts', 'business' ), // Lives in the Events (Plus) section, for the owner too.
 	'scout-chat'                              => array( 'Chat', 'website' ),
 	'northcrest-theme'                        => array( 'Theme', 'build' ),
 	'site-build-features&tab=inbox'           => array( 'To do', 'inbox' ),

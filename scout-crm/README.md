@@ -32,7 +32,7 @@ a ticket, sign-up or application.
 
 ## Where it lives
 
-**Events, Customer list** (administrators): whether the sync is on, and
+**Events, Contacts** (administrators): whether the sync is on, and
 **Bring them in**, which adds everyone from before it was switched on, tagged
 the same way. People are matched by email, so running it twice changes
 nothing.

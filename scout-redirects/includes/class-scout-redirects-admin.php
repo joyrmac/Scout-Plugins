@@ -385,28 +385,36 @@ final class Scout_Redirects_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Redirects', 'scout-redirects' ),
-			__( 'A redirect sends visitors from an old page address to the new one. Missing pages people try show here too.', 'scout-redirects' ),
+			__( 'A redirect sends visitors from an old page address to the new one.', 'scout-redirects' ),
 			__( 'Redirects', 'scout-redirects' )
 		);
 		self::messages();
 		?>
-		<div class="sh-grid sh-grid-3 sr-stats">
-			<section class="sh-box sr-stat">
-				<p class="sr-stat-label"><span class="sr-dot" aria-hidden="true"></span><?php esc_html_e( 'Redirects live', 'scout-redirects' ); ?></p>
-				<p class="sr-stat-num"><?php echo esc_html( number_format_i18n( $total ) ); ?></p>
-				<p class="sh-note"><?php esc_html_e( 'Old addresses that forward to a new page.', 'scout-redirects' ); ?></p>
-			</section>
-			<section class="sh-box sr-stat">
-				<p class="sr-stat-label"><?php esc_html_e( 'Missing pages hit', 'scout-redirects' ); ?></p>
-				<p class="sr-stat-num"><?php echo esc_html( number_format_i18n( $missing7 ) ); ?></p>
-				<p class="sh-note"><?php esc_html_e( 'Different missing addresses visitors tried in the last 7 days.', 'scout-redirects' ); ?></p>
-			</section>
-			<section class="sh-box sr-stat">
-				<p class="sr-stat-label"><?php esc_html_e( 'Broken links on site', 'scout-redirects' ); ?></p>
-				<p class="sr-stat-num"><?php echo esc_html( number_format_i18n( $broken ) ); ?></p>
-				<p class="sh-note"><?php esc_html_e( 'Missing pages that a link on one of your own pages leads to.', 'scout-redirects' ); ?></p>
-			</section>
-		</div>
+		<?php
+		// One status line instead of three stat cards (kit 1.10.0).
+		if ( $broken ) {
+			$state = 'warn'; // A link on the site's own pages that leads nowhere is a real problem.
+		} else {
+			$state = $total || $missing7 ? 'good' : 'off';
+		}
+		$head = $total
+			/* translators: %s: number of redirects */
+			? sprintf( _n( '%s redirect live.', '%s redirects live.', $total, 'scout-redirects' ), number_format_i18n( $total ) )
+			: __( 'No redirects yet.', 'scout-redirects' );
+		if ( $broken ) {
+			/* translators: 1: missing addresses tried this week, 2: broken links */
+			$detail = sprintf( _n( 'Visitors tried %1$s missing addresses in the last 7 days, and %2$s link on your own pages is broken.', 'Visitors tried %1$s missing addresses in the last 7 days, and %2$s links on your own pages are broken.', $broken, 'scout-redirects' ), number_format_i18n( $missing7 ), number_format_i18n( $broken ) );
+		} else {
+			/* translators: %s: missing addresses tried this week */
+			$detail = sprintf( _n( 'Visitors tried %s missing address in the last 7 days.', 'Visitors tried %s missing addresses in the last 7 days.', $missing7, 'scout-redirects' ), number_format_i18n( $missing7 ) );
+		}
+		$go = $internal ? '<a class="button sh-quiet" href="#scout-broken">' . esc_html__( 'See the broken links', 'scout-redirects' ) . ' &rsaquo;</a>' : '';
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $head, $detail, $go );
+		} else {
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $head ) . '</strong> <span>' . esc_html( $detail ) . '</span>' . ( $go ? ' <span class="sh-status-go">' . $go . '</span>' : '' ) . '</p></section>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $go is built from escaped parts.
+		}
+		?>
 
 		<section class="sh-box" id="scout-add-box">
 			<h2 class="sh-title"><?php echo $editing ? esc_html__( 'Change a redirect', 'scout-redirects' ) : esc_html__( 'Add a redirect', 'scout-redirects' ); ?></h2>
@@ -436,13 +444,13 @@ final class Scout_Redirects_Admin {
 					<?php endif; ?>
 				</div>
 			</form>
-			<p class="sh-note sr-hint"><?php esc_html_e( 'The old address is a path on this site. The new one can be a path or a full web address.', 'scout-redirects' ); ?></p>
+			<p class="sh-note sr-hint"><?php esc_html_e( 'The old address is a path on this site, and the new one can be a path or a full web address.', 'scout-redirects' ); ?></p>
 		</section>
 
 		<?php if ( $internal ) : ?>
 		<section class="sh-box" id="scout-broken">
 			<h2 class="sh-title"><?php esc_html_e( 'Broken links on your pages', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'These links are on your pages or menus and lead to a missing page. They also show in Site status.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'These links on your pages or menus lead to a missing page.', 'scout-redirects' ); ?></p>
 			<ul class="sr-list">
 				<?php
 				foreach ( $internal as $row ) :
@@ -479,7 +487,7 @@ final class Scout_Redirects_Admin {
 
 		<section class="sh-box" id="scout-missing">
 			<h2 class="sh-title"><?php esc_html_e( 'Missing pages people asked for', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'Addresses visitors tried that aren\'t on the site, with visits from search and your own pages first. Bot probes are left out.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'Addresses visitors tried that aren\'t on the site, with visits from search and your own pages first.', 'scout-redirects' ); ?></p>
 			<?php if ( ! $s['watch_404'] ) : ?>
 				<p class="sr-empty"><?php esc_html_e( 'Watching for missing pages is turned off in More options below.', 'scout-redirects' ); ?></p>
 			<?php elseif ( ! $missing ) : ?>
@@ -537,7 +545,7 @@ final class Scout_Redirects_Admin {
 
 		<section class="sh-box" id="scout-list">
 			<h2 class="sh-title"><?php esc_html_e( 'Your redirects', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'Old addresses and where they go now. Use Permanent (301) for pages that moved for good.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'Old addresses and where they go now, with Permanent (301) for pages that moved for good.', 'scout-redirects' ); ?></p>
 			<?php if ( $total > self::PER_PAGE || '' !== $search ) : ?>
 				<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' === self::parent() ? 'options-general.php' : 'admin.php' ) ); ?>" class="sr-search" role="search">
 					<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG ); ?>">
@@ -624,7 +632,7 @@ final class Scout_Redirects_Admin {
 		</section>
 
 		<details class="sh-box sr-more">
-			<summary class="sh-title"><?php esc_html_e( 'More options: settings, import and export', 'scout-redirects' ); ?></summary>
+			<summary class="sh-title"><?php esc_html_e( 'More options: settings, import & export', 'scout-redirects' ); ?></summary>
 			<div class="sh-grid sh-grid-2">
 			<form method="post" action="<?php echo esc_url( $post_url ); ?>" class="sr-pane" id="scout-settings">
 				<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-redirects' ); ?></h2>
@@ -638,7 +646,7 @@ final class Scout_Redirects_Admin {
 					<input id="sr-cap" type="number" name="log_cap" min="50" max="2000" step="50" value="<?php echo esc_attr( (string) $s['log_cap'] ); ?>">
 				</p>
 				<p class="sh-note"><?php esc_html_e( 'When the list is full, the oldest, least visited entries drop off. Between 50 and 2,000.', 'scout-redirects' ); ?></p>
-				<?php submit_button( __( 'Save settings', 'scout-redirects' ) ); ?>
+				<?php submit_button( __( 'Save settings', 'scout-redirects' ), 'secondary' ); // Outlined: Add redirect is the screen's one primary. ?>
 			</form>
 
 			<section class="sr-pane" id="scout-io">
@@ -649,7 +657,7 @@ final class Scout_Redirects_Admin {
 					<?php wp_nonce_field( 'scout_redirects_import' ); ?>
 					<label for="sr-csv"><?php esc_html_e( 'CSV file', 'scout-redirects' ); ?></label>
 					<input id="sr-csv" type="file" name="csv" accept=".csv,text/csv" required>
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-redirects' ); ?></button>
+					<button type="submit" class="button"><?php esc_html_e( 'Import', 'scout-redirects' ); ?></button>
 				</form>
 				<p class="sh-note"><?php esc_html_e( 'A row with an old address that is already here replaces that redirect.', 'scout-redirects' ); ?></p>
 				<p class="sr-export">

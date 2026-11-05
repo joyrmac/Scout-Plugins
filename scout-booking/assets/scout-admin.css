@@ -275,7 +275,7 @@
 .sh-pill.is-good { background: var(--sh-good-tint); color: var(--sh-good); }
 .sh-pill.is-warn { background: var(--sh-warn-tint); color: var(--sh-warn); }
 .sh-pill.is-bad { background: var(--sh-bad-tint); color: var(--sh-bad); }
-.sh-pill.is-off { background: var(--sh-surface-2); color: var(--sh-text-3); }
+.sh-pill.is-off { background: var(--sh-surface-2); color: var(--sh-text-2); }
 
 .sh .button { border-radius: var(--sh-r-control); min-height: var(--sh-tap); padding: 6px 14px; font-weight: 500; }
 .sh .button-primary { background: var(--sh-accent-fill); border-color: var(--sh-accent-fill); }

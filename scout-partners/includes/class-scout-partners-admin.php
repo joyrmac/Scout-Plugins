@@ -189,7 +189,7 @@ final class Scout_Partners_Admin {
 		}
 		Scout_Admin_UI::open(
 			__( 'Home', 'scout-partners' ),
-			__( 'Who is running, at what level and where, what ends soon, and how many people clicked through to each one.', 'scout-partners' ),
+			__( 'Who’s on the site, what ends soon, and the clicks each partner gets.', 'scout-partners' ),
 			__( 'Partners', 'scout-partners' )
 		);
 		$all     = array_map(
@@ -219,15 +219,22 @@ final class Scout_Partners_Admin {
 			$clicked += Scout_Partners::clicks( $id )[ $month ] ?? 0;
 		}
 		?>
-		<section class="sh-box">
-			<div class="sh-stats">
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $live ); ?></p><p class="sh-note"><?php esc_html_e( 'partners on the site', 'scout-partners' ); ?></p></div>
-				<?php foreach ( $levels as $slug => $name ) : ?>
-					<div class="sh-stat"><p class="sh-num"><?php echo (int) count( array_filter( $live, static fn( $id ) => Scout_Partners::partner( $id )['level'] === $slug ) ); ?></p><p class="sh-note"><?php echo esc_html( $name ); ?></p></div>
-				<?php endforeach; ?>
-				<div class="sh-stat"><p class="sh-num"><?php echo esc_html( number_format_i18n( $clicked ) ); ?></p><p class="sh-note"><?php esc_html_e( 'clicks this month', 'scout-partners' ); ?></p></div>
-			</div>
-		</section>
+		<?php
+		// One status line instead of a row of numbers (DESIGN 2 #5).
+		/* translators: %d: partners on the site. */
+		$headline = sprintf( _n( '%d partner on the site.', '%d partners on the site.', count( $live ), 'scout-partners' ), count( $live ) );
+		$detail   = $soon
+			/* translators: 1: partners ending soon, 2: clicks this month. */
+			? sprintf( _n( '%2$s clicks this month, and %1$d ends within 30 days.', '%2$s clicks this month, and %1$d end within 30 days.', count( $soon ), 'scout-partners' ), count( $soon ), number_format_i18n( $clicked ) )
+			/* translators: %s: clicks this month. */
+			: sprintf( __( '%s clicks this month.', 'scout-partners' ), number_format_i18n( $clicked ) );
+		$state    = $live ? 'good' : 'off';
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail );
+		} else {
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong> <span>' . esc_html( $detail ) . '</span></p></section>';
+		}
+		?>
 
 		<?php if ( ! $all ) : ?>
 			<section class="sh-box">
@@ -244,9 +251,12 @@ final class Scout_Partners_Admin {
 		<?php if ( $soon ) : ?>
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Ending within 30 days', 'scout-partners' ); ?></h2>
-				<ul>
+				<ul class="sh-rows">
 					<?php foreach ( $soon as $id ) : ?>
-						<li><a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php echo esc_html( get_the_title( $id ) ); ?></a> · <?php echo esc_html( self::runs( Scout_Partners::partner( $id ) ) ); ?></li>
+						<li class="sh-row">
+							<div><p class="sh-row-name"><a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php echo esc_html( get_the_title( $id ) ); ?></a></p></div>
+							<div class="sh-row-go"><span class="sh-tag"><?php echo esc_html( self::runs( Scout_Partners::partner( $id ) ) ); ?></span></div>
+						</li>
 					<?php endforeach; ?>
 				</ul>
 				<p class="sh-note"><?php esc_html_e( 'A good moment to ask about renewing.', 'scout-partners' ); ?></p>
