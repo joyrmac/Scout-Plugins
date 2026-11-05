@@ -686,9 +686,14 @@ function scout_writing_assets_hook() {
 
 function scout_writing_assets() {
 	$base = plugins_url( 'assets/', SCOUT_WRITING_FILE );
-	wp_enqueue_style( 'scout-writing', $base . 'writing-room.css', array(), SCOUT_WRITING_VERSION );
-	// The brand from the theme's setup file, and its own fonts; Scout's neutral look otherwise.
-	wp_add_inline_style( 'scout-writing', scout_writing_brand()['font_faces'] . scout_writing_brand_css( '.sw' ) );
+	// The room sits in the Scout admin frame: the kit first, then the room's own styles on its tokens.
+	Scout_Admin_UI::enqueue( $base . 'scout-admin.css' );
+	wp_enqueue_style( 'scout-writing', $base . 'writing-room.css', array( 'scout-admin' ), SCOUT_WRITING_VERSION );
+	// The brand from the theme's setup file, and its own fonts, when the theme sets them; Scout's look otherwise.
+	$brand = scout_writing_brand()['font_faces'] . scout_writing_brand_css( '.sw' );
+	if ( '' !== $brand ) {
+		wp_add_inline_style( 'scout-writing', $brand );
+	}
 	if ( ! scout_writing_has_prompts() ) {
 		return;
 	}
@@ -778,9 +783,9 @@ function scout_writing_howto_html( bool $open ): string {
 		array( 'We shape it', 'Scout turns your answer into a post, page or email and sends it back for your yes.' ),
 		array( 'Mark it done', 'Tap Mark done. Your marks are saved to your login, on any device.' ),
 	);
-	$h = '<details class="sw-howto"' . ( $open ? ' open' : '' ) . '><summary><span class="sw-label">Step 0</span><span class="sw-h2">How to <em>use</em> this</span><span class="sw-chev" aria-hidden="true"></span></summary><ol class="sw-flow">';
+	$h = '<details class="sw-howto"' . ( $open ? ' open' : '' ) . '><summary><span class="sw-label">Step 0</span><span class="sw-h2">How to <em>use</em> this</span><span class="sw-chev" aria-hidden="true"></span></summary><ol class="sh-steps sw-flow">';
 	foreach ( $flow as $f ) {
-		$h .= '<li><b>' . esc_html( $f[0] ) . '</b><span>' . esc_html( $f[1] ) . '</span></li>';
+		$h .= '<li class="sh-step"><b>' . esc_html( $f[0] ) . '</b><span>' . esc_html( $f[1] ) . '</span></li>';
 	}
 	$h .= '</ol><div class="sw-week"><h3>A gentle <em>week</em></h3><div class="sw-days">';
 	foreach ( scout_writing_copy( 'week' ) as $day ) {
@@ -951,6 +956,39 @@ function scout_writing_flash(): string {
 	return $msg && isset( $text[ $msg ] ) ? '<div class="sw-flash" role="status">' . esc_html( $text[ $msg ] ) . '</div>' : '';
 }
 
+/**
+ * The kit's status line and closed box. On a site mid-update an older kit (1.9.x) may be the one loaded,
+ * without status() or fold_open(), so the same markup is printed here instead.
+ *
+ * @param string $go Optional button HTML, already escaped.
+ */
+function scout_writing_status_line( string $state, string $headline, string $detail = '', string $go = '' ): void {
+	if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+		Scout_Admin_UI::status( $state, $headline, $detail, $go );
+		return;
+	}
+	$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+	echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+	if ( '' !== $detail ) {
+		echo ' <span>' . esc_html( $detail ) . '</span>';
+	}
+	if ( '' !== $go ) {
+		echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+	}
+	echo '</p></section>';
+}
+
+/** One row in My writing: the prompt, its step, status, last edit and words, and Keep writing. */
+function scout_writing_mine_row( string $pid, array $e ): string {
+	$p   = scout_writing_data()['by_id'][ $pid ];
+	$mod = strtotime( $e['post']->post_modified_gmt . ' UTC' );
+	return '<li class="sh-row sw-mrow" data-pid="' . esc_attr( $pid ) . '"><div><p class="sh-row-name sw-mq">' . esc_html( $p['q'] ) . '</p>'
+		. '<p class="sh-row-sub">Step ' . (int) $p['step'] . ' &middot; ' . esc_html( $p['group'] ) . '</p></div>'
+		. '<div class="sh-row-facts"><span class="sw-status sw-s-' . esc_attr( $e['status'] ) . '">' . esc_html( scout_writing_status_label( $e['status'] ) ) . '</span>'
+		. '<span>Last edited ' . esc_html( wp_date( 'M j, g:i a', $mod ) ) . '</span><span>' . (int) scout_writing_words( scout_writing_text( $e['post'] ) ) . ' words</span></div>'
+		. '<div class="sh-row-go"><a class="button" data-open="' . esc_attr( $pid ) . '" href="' . esc_url( scout_writing_url( $pid ) ) . '">Keep writing</a></div></li>';
+}
+
 /** The room: Your Writing. */
 function scout_writing_render() {
 	if ( ! current_user_can( 'edit_posts' ) ) {
@@ -968,15 +1006,16 @@ function scout_writing_render() {
 		}
 	}
 	$total = count( $d['prompts'] );
-	echo '<div class="wrap sw"><hr class="wp-header-end" hidden>'; // Site notices print above the room, not inside its header.
+	$label = scout_writing_menu_label();
 	if ( ! $total ) {
 		// Only administrators reach this: writers have no menu until there are prompts.
-		echo '<header class="sw-hero"><p class="sw-label">' . esc_html( scout_writing_copy( 'kicker' ) ) . '</p><h1>No prompts <em>yet</em></h1>';
-		echo '<p class="sw-lede">The writing room opens for your writers as soon as it has a prompts file. Until then, only administrators can see this screen.</p></header>';
-		echo '<section class="sw-mine"><h2 class="sw-h2">Two ways to add <em>prompts</em></h2><ol class="sw-setup">';
+		Scout_Admin_UI::open( $label, 'The writing room opens for your writers as soon as it has a prompts file. Until then, only administrators can see this screen.' );
+		scout_writing_status_line( 'off', 'No prompts yet.', 'Writers see nothing until there are prompts.' );
+		echo '<section class="sh-box sw"><h2 class="sh-title">Two ways to add prompts</h2><ol class="sw-setup">';
 		echo '<li><b>From the theme.</b> Add a <code>writing</code> section to the theme\'s <code>scout-setup.json</code> that names the prompts file, for example <code>{ "writing": { "prompts": "writing-prompts.json" } }</code>. It then updates with every theme release.</li>';
 		echo '<li><b>Upload a file.</b> <a href="' . esc_url( admin_url( 'admin.php?page=' . SCOUT_WRITING_SETTINGS_PAGE ) ) . '">Writing settings</a> takes a prompts file (.json) when the theme has none.</li>';
-		echo '</ol></section></div>';
+		echo '</ol></section>';
+		Scout_Admin_UI::close();
 		return;
 	}
 
@@ -987,10 +1026,12 @@ function scout_writing_render() {
 		$pay  = scout_writing_payload( $user_id, $write );
 		$star = $pay['star'];
 		$done = $pay['done'];
+		Scout_Admin_UI::open( $label, 'Write your answer here, in your own words. Send it to Scout when it feels ready.' );
+		echo '<div class="sw">';
 		echo '<p class="sw-back"><a href="' . esc_url( scout_writing_url() . '#sw-p-' . $write ) . '">&larr; All your prompts</a></p>';
 		echo scout_writing_flash(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
-		echo '<section class="sw-one sw-p" data-pid="' . esc_attr( $write ) . '"><p class="sw-label">Step ' . (int) $p['step'] . ' &middot; ' . esc_html( scout_writing_step_title( (int) $p['step'] ) ) . ' &middot; ' . esc_html( $p['group'] ) . '</p>';
-		echo '<h1 class="sw-q">' . esc_html( $p['q'] ) . '</h1><p class="sw-why">' . esc_html( $p['why'] ) . '</p>';
+		echo '<section class="sh-box sw-one sw-p" data-pid="' . esc_attr( $write ) . '"><p class="sw-label">Step ' . (int) $p['step'] . ' &middot; ' . esc_html( scout_writing_step_title( (int) $p['step'] ) ) . ' &middot; ' . esc_html( $p['group'] ) . '</p>';
+		echo '<h2 class="sw-q">' . esc_html( $p['q'] ) . '</h2><p class="sw-why">' . esc_html( $p['why'] ) . '</p>';
 		echo '<div class="sw-row"><div class="sw-meta">';
 		foreach ( (array) $p['dest'] as $k ) {
 			echo '<span class="sw-chip sw-d-' . esc_attr( $k ) . '">' . esc_html( $d['dest_labels'][ $k ] ?? $k ) . '</span>';
@@ -1002,44 +1043,46 @@ function scout_writing_render() {
 		echo '</div></div>';
 		echo scout_writing_panel_html( $write, $pay, true ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 		echo '</section></div>';
+		Scout_Admin_UI::close();
 		return;
 	}
 
+	// Older links open "My writing" with ?view=mine. It is now the box at the top, shown in full for that link.
 	$view    = isset( $_GET['view'] ) && 'mine' === $_GET['view'] ? 'mine' : 'all'; // phpcs:ignore WordPress.Security.NonceVerification
 	$written = count( $entries );
 	$sent    = count( array_filter( $entries, static fn( $e ) => (bool) get_post_meta( $e['post']->ID, '_sw_sent_at', true ) ) );
 
-	echo '<header class="sw-hero"><p class="sw-label">' . esc_html( scout_writing_copy( 'kicker' ) ) . '</p><h1>Your <em>writing</em> room</h1>';
-	echo '<p class="sw-lede">Every prompt from your writing plan, with a place to answer it right here. You never have to do all of it. Pick one, write it in your own words, and send it to Scout when it feels ready.</p>';
-	echo '<p class="sw-stats"><span><b>' . (int) $total . '</b> prompts</span><span><b id="sw-done-n">' . count( $marks['done'] ) . '</b> done</span><span><b id="sw-written-n">' . (int) $written . '</b> written</span><span><b>' . (int) $sent . '</b> sent to Scout</span></p></header>';
+	// The title and its small label above (text.kicker in the theme's setup file).
+	if ( method_exists( 'Scout_Admin_UI', 'page_head' ) ) {
+		Scout_Admin_UI::page_head( 'Your writing room', (string) scout_writing_copy( 'kicker' ) );
+	}
+	Scout_Admin_UI::open( $label, 'Every prompt from your writing plan, with a place to answer it right here. You never have to do all of it. Pick one, write it in your own words, and send it to Scout when it feels ready.' );
+	echo '<div class="sw">';
+	// Status line, the kit's markup with live numbers the script keeps up to date.
+	echo '<section class="sh-box"><p class="sh-status is-' . ( $written ? 'good' : 'off' ) . '"><span class="sh-dot" aria-hidden="true"></span>';
+	echo '<strong><span id="sw-done-n">' . count( $marks['done'] ) . '</span> of ' . (int) $total . ' prompts done.</strong> ';
+	echo '<span><span id="sw-written-n">' . (int) $written . '</span> written, ' . (int) $sent . ' sent to Scout.</span></p></section>';
 	echo scout_writing_flash(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 
-	$base = scout_writing_url();
-	echo '<nav class="sw-tabs" aria-label="Writing room views">';
-	echo '<a href="' . esc_url( $base ) . '" class="sw-tab' . ( 'all' === $view ? ' is-on' : '' ) . '" data-view="all"' . ( 'all' === $view ? ' aria-current="page"' : '' ) . '>All prompts</a>';
-	echo '<a href="' . esc_url( add_query_arg( 'view', 'mine', $base ) ) . '" class="sw-tab' . ( 'mine' === $view ? ' is-on' : '' ) . '" data-view="mine"' . ( 'mine' === $view ? ' aria-current="page"' : '' ) . '>My writing <span class="sw-tabn">' . (int) $written . '</span></a></nav>';
-
-	// My writing.
-	echo '<section class="sw-view sw-mine" data-view="mine"' . ( 'mine' === $view ? '' : ' hidden' ) . '><h2 class="sw-h2">My <em>writing</em></h2>';
+	// My writing: the newest five, the rest one tap away (open for ?view=mine).
+	echo '<section class="sh-box sw-mine" id="sw-mine" aria-labelledby="sw-mine-h"><h2 class="sh-title" id="sw-mine-h">My writing</h2>';
 	if ( ! $entries ) {
-		echo '<p class="sw-empty-mine">Nothing written yet. Open any prompt and tap Write. Everything you write shows up here.</p>';
+		echo '<p class="sw-empty-mine">Nothing written yet. Open any prompt below and tap Write. Everything you write shows up here.</p>';
 	} else {
-		echo '<ol class="sw-mlist">';
+		$rows = array();
 		foreach ( $entries as $pid => $e ) {
-			$p   = $d['by_id'][ $pid ];
-			$mod = strtotime( $e['post']->post_modified_gmt . ' UTC' );
-			echo '<li class="sw-mrow" data-pid="' . esc_attr( $pid ) . '"><div class="sw-mtext"><p class="sw-label">Step ' . (int) $p['step'] . ' &middot; ' . esc_html( $p['group'] ) . '</p>';
-			echo '<p class="sw-mq">' . esc_html( $p['q'] ) . '</p>';
-			echo '<p class="sw-mmeta"><span class="sw-status sw-s-' . esc_attr( $e['status'] ) . '">' . esc_html( scout_writing_status_label( $e['status'] ) ) . '</span>';
-			echo '<span>Last edited ' . esc_html( wp_date( 'M j, g:i a', $mod ) ) . '</span><span>' . (int) scout_writing_words( scout_writing_text( $e['post'] ) ) . ' words</span></p></div>';
-			echo '<a class="sw-btn" data-open="' . esc_attr( $pid ) . '" href="' . esc_url( scout_writing_url( $pid ) ) . '">Keep writing</a></li>';
+			$rows[] = scout_writing_mine_row( (string) $pid, $e );
 		}
-		echo '</ol>';
+		echo '<ul class="sh-rows sw-mlist">' . implode( '', array_slice( $rows, 0, 5 ) ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+		if ( count( $rows ) > 5 ) {
+			echo '<details class="sw-more"' . ( 'mine' === $view ? ' open' : '' ) . '><summary>' . esc_html( sprintf( 'Show all %d pieces', count( $rows ) ) ) . '</summary>';
+			echo '<ul class="sh-rows sw-mlist">' . implode( '', array_slice( $rows, 5 ) ) . '</ul></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+		}
 	}
 	echo '</section>';
 
 	// All prompts.
-	echo '<div class="sw-view sw-all" data-view="all"' . ( 'all' === $view ? '' : ' hidden' ) . '>';
+	echo '<section class="sw-all" aria-labelledby="sw-all-h"><h2 class="sw-all-h" id="sw-all-h">All prompts</h2>';
 	echo scout_writing_howto_html( ! $entries ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 
 	$dest_counts = array();
@@ -1052,7 +1095,7 @@ function scout_writing_render() {
 		$time_counts[ $p['t'] ] = ( $time_counts[ $p['t'] ] ?? 0 ) + 1;
 		$step_has[ (int) $p['step'] ] = true;
 	}
-	echo '<section class="sw-tools" data-js-only hidden aria-labelledby="sw-tools-h"><h2 class="sw-h2" id="sw-tools-h">Find a <em>prompt</em></h2><div class="sw-trow">';
+	echo '<section class="sw-tools" data-js-only hidden aria-labelledby="sw-tools-h"><h3 class="sw-h2" id="sw-tools-h">Find a prompt</h3><div class="sw-trow">';
 	echo '<label class="sw-search"><span class="sw-sr">Search prompts</span><input type="search" id="sw-q" placeholder="' . esc_attr( scout_writing_copy( 'search_hint' ) ) . '" autocomplete="off"></label>';
 	echo '<label class="sw-sr" for="sw-stepsel">Show one step</label><select id="sw-stepsel"><option value="">All steps</option>';
 	foreach ( $d['steps'] as $st ) {
@@ -1081,13 +1124,14 @@ function scout_writing_render() {
 	echo '<p class="sw-empty" id="sw-empty" hidden>No prompts match. Try fewer filters, or <button type="button" class="sw-link" id="sw-clear2">clear them all</button>.</p>';
 
 	echo '<div class="sw-steps" id="sw-steps">' . scout_writing_steps_html( $marks, $entries ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
-	echo '</div>';
+	echo '</section>';
 
 	// The inline panel, cloned by the script under any prompt.
 	$blank = array( 'text' => '', 'saved' => '', 'memos' => array(), 'draft' => null, 'sent' => '', 'note' => '' );
 	echo '<template id="sw-panel-tpl">' . scout_writing_panel_html( '__PID__', $blank, false ) . '</template>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 	echo '<p class="sw-foot">Your stars, done marks and writing are saved to your login, so they follow you to any device. Only you and Scout can see what you write.</p>';
 	echo '</div>';
+	Scout_Admin_UI::close();
 }
 
 /* ------------------------------------------------------------------ dashboard welcome */
@@ -1112,6 +1156,20 @@ function scout_writing_next( int $user_id ): ?array {
 	return null;
 }
 
+/** The welcome's styles on the dashboard: the Scout admin kit for its tokens, then writing-room.css. */
+add_action( 'admin_enqueue_scripts', function ( $hook ) {
+	if ( 'index.php' !== $hook || ! current_user_can( 'edit_posts' ) || ! scout_writing_has_prompts() ) {
+		return;
+	}
+	$base = plugins_url( 'assets/', SCOUT_WRITING_FILE );
+	Scout_Admin_UI::enqueue( $base . 'scout-admin.css' );
+	wp_enqueue_style( 'scout-writing', $base . 'writing-room.css', array( 'scout-admin' ), SCOUT_WRITING_VERSION );
+	$brand = scout_writing_brand()['font_faces'] . scout_writing_brand_css( '.sw-welcome' );
+	if ( '' !== $brand ) {
+		wp_add_inline_style( 'scout-writing', $brand );
+	}
+} );
+
 /**
  * The writing welcome on the dashboard: a full-width panel at the very top, above every box
  * (Joy, 2026-11-03: "this should be better and bigger... she can't use or won't if it's too small").
@@ -1135,32 +1193,8 @@ add_action( 'admin_notices', function () {
 	}
 	$next = scout_writing_next( $user_id );
 	$pct  = $total ? max( 2, round( 100 * $done / $total ) ) : 0;
-	$sys  = '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
 	?>
-	<style><?php echo scout_writing_brand()['font_faces'] . scout_writing_brand_css( '.sw-welcome' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped URLs, sanitized colors and font names. ?>
-	.sw-welcome{clear:both;box-sizing:border-box;max-width:100%;margin:18px 0 22px;background:var(--sw-paper);border:1px solid var(--sw-frame);border-left:8px solid var(--sw-accent);border-radius:16px;padding:34px 40px;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:36px;color:var(--sw-ink);box-shadow:0 18px 40px -30px color-mix(in srgb,var(--sw-ink) 45%,transparent)}
-	.sw-welcome .k{margin:0 0 10px;font:600 12px/1.4 <?php echo $sys; // phpcs:ignore WordPress.Security.EscapeOutput ?>;letter-spacing:.16em;text-transform:uppercase;color:var(--sw-goldtext)}
-	.sw-welcome h2{margin:0 0 6px;font-weight:500;font-size:34px;line-height:1.15;font-family:var(--sw-serif);color:var(--sw-ink);padding:0}
-	.sw-welcome h2 em{color:var(--sw-blue)}
-	.sw-welcome .lead{margin:0 0 18px;font-size:15px;color:var(--sw-ink2)}
-	.sw-welcome .prompt{margin:0 0 8px;font-weight:400;font-size:27px;line-height:1.35;font-family:var(--sw-serif);color:var(--sw-ink);max-width:46ch}
-	.sw-welcome .why{margin:0 0 22px;font-size:15px;line-height:1.6;color:var(--sw-ink2);max-width:62ch}
-	.sw-welcome .acts{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-	.sw-welcome .go{display:inline-block;background:var(--sw-accent);color:var(--sw-on-accent);text-decoration:none;font-size:17px;font-weight:600;padding:15px 30px;border-radius:999px}
-	.sw-welcome .go:hover,.sw-welcome .go:focus{background:var(--sw-accent-dark);color:var(--sw-on-accent)}
-	.sw-welcome .alt{display:inline-block;color:var(--sw-blue);text-decoration:none;font-size:15px;font-weight:600;padding:13px 22px;border:1.5px solid var(--sw-blue);border-radius:999px}
-	.sw-welcome .alt:hover,.sw-welcome .alt:focus{background:var(--sw-blue);color:var(--sw-paper)}
-	.sw-welcome .go:focus-visible,.sw-welcome .alt:focus-visible{outline:3px solid var(--sw-goldtext);outline-offset:3px}
-	.sw-welcome aside{border-left:1px solid var(--sw-rule-soft);padding-left:30px;display:flex;flex-direction:column;gap:14px}
-	.sw-welcome .num{font-weight:500;font-size:46px;line-height:1;font-family:var(--sw-serif);color:var(--sw-ink)}
-	.sw-welcome .num small{font:400 15px/1.3 <?php echo $sys; // phpcs:ignore WordPress.Security.EscapeOutput ?>;color:var(--sw-ink2);display:block;margin-top:4px}
-	.sw-welcome .bar{height:8px;background:var(--sw-bar);border-radius:4px;overflow:hidden}
-	.sw-welcome .bar i{display:block;height:8px;background:var(--sw-accent);border-radius:4px}
-	.sw-welcome .facts{margin:0;padding:0;list-style:none;font-size:14px;color:var(--sw-ink2);display:flex;flex-direction:column;gap:6px}
-	.sw-welcome .tip{margin:0;font-size:13.5px;line-height:1.55;color:var(--sw-ink2);background:var(--sw-tip);border-radius:10px;padding:12px 14px}
-	@media (max-width:960px){.sw-welcome{grid-template-columns:1fr;padding:24px 20px;gap:22px;margin-right:10px}.sw-welcome aside{border-left:0;padding-left:0;border-top:1px solid var(--sw-rule-soft);padding-top:18px}.sw-welcome h2{font-size:28px}.sw-welcome .prompt{font-size:23px}}
-	</style>
-	<section class="sw-welcome" aria-labelledby="sw-welcome-h">
+	<section class="sh sw-welcome" aria-labelledby="sw-welcome-h"><div class="sw-wgrid">
 		<div>
 			<p class="k">✦ <?php echo esc_html( scout_writing_copy( 'dashboard_kicker' ) ); ?></p>
 			<h2 id="sw-welcome-h"><?php echo esc_html( $first ? 'Welcome back, ' . $first . '.' : 'Welcome back.' ); ?> Here's your <em>next</em> prompt.</h2>
@@ -1191,7 +1225,7 @@ add_action( 'admin_notices', function () {
 			</ul>
 			<p class="tip">Prefer talking? Open any prompt and tap <b>Add a voice memo</b>. When a piece feels ready, tap <b>Send to Scout</b>.</p>
 		</aside>
-	</section>
+	</div></section>
 	<?php
 } );
 
@@ -1278,6 +1312,6 @@ add_action( 'add_meta_boxes_' . SCOUT_WRITING_CPT, function ( $post ) {
 		if ( $draft && get_post( $draft ) ) {
 			echo '<p><a href="' . esc_url( (string) get_edit_post_link( $draft ) ) . '">Open the draft post</a> (' . esc_html( get_post_status( $draft ) ) . ')</p>';
 		}
-		echo '<p style="color:#646970">Private. Never shown on the site.</p>';
+		echo '<p class="description">Private. Never shown on the site.</p>';
 	}, null, 'side', 'high' );
 } );

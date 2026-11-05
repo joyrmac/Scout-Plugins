@@ -1,5 +1,14 @@
 # Scout Writing changelog
 
+## Unreleased (2026-11-05)
+
+- **The writing room sits inside the Scout admin frame**, with the same top bar, section list and footer as every Scout screen. A status line comes first: how many prompts are done, how many are written and how many are sent to Scout. The numbers still update as you mark prompts done.
+- **No more tab row.** My writing is now its own box above All prompts, showing the five newest pieces with the rest one tap away. Old links that open My writing (`?view=mine`) still land on it, with every piece shown.
+- **The five-step "How to use this" strip is a numbered list, one step under the other**, so it reads well at any width. Anything side by side in the room now stacks by the width of the main column, not the window.
+- **Prompt rows have outlined buttons.** Send to Scout in the open Write panel is the one filled button.
+- **The dashboard welcome's styles moved out of the page into `writing-room.css`**, on the admin kit's color tokens. The room and the welcome use Scout's colors by default. A theme brand in `scout-setup.json` still recolors them, and now only the colors and fonts the theme actually sets are printed.
+- Every link, form, saved mark and entry works as before.
+
 ## 0.1.4 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
