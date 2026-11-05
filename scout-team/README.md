@@ -1,16 +1,22 @@
-# Scout Team
+# Scout People
 
-Team profiles with real credentials. Each person gets a profile page at
-`/team/<name>/` and Person schema, and `[scout_team]` shows the whole team as
-a grid on any page.
+One profile for each person the public sees: your team, speakers, writers,
+and members who want to be listed. Each person can have a profile page at
+`/team/<name>/`, a spot on the team page, a byline on their posts and Person
+schema. `[scout_team]` shows the team page as a grid on any page.
+
+On screen it is called People. Under the hood nothing moved: the plugin
+folder and slug stay `scout-team`, the post type stays `scout_team`, the
+profile stays in the `_scout_team` meta value, and every `/team/` address
+keeps working, so no data moves and no link breaks.
 
 ## Why it is its own post type
 
-Scout Core (1.1.x) has no person or team type, and its field registry stores
-one flat value per field. Credentials are lists (several bar admissions,
-several schools, several awards), so Scout Team registers `scout_team` itself
-and keeps each person's details in one protected meta value, `_scout_team`.
-It still plugs into Scout Core wherever Scout Core offers a hook:
+Scout Core (1.1.x) has no person type, and its field registry stores one flat
+value per field. Credentials are lists (several bar admissions, several
+schools, several awards), so this plugin registers `scout_team` itself and
+keeps each person's details in one protected meta value, `_scout_team`. It
+still plugs into Scout Core wherever Scout Core offers a hook:
 
 - the Person joins Scout Core's single JSON-LD graph through the public
   `scout_schema_graph` filter, with `worksFor` pointing at
@@ -23,6 +29,60 @@ It still plugs into Scout Core wherever Scout Core offers a hook:
 Without Scout Core it works on its own and prints its own small graph on
 profile pages.
 
+## Groups
+
+Groups say who a person is to the site. They are a private taxonomy,
+`scout_people_group` (no pages of their own), managed under **Groups** in the
+People section. Every site starts with **Team**, **Speakers**, **Writers** and
+**Members** (members who asked to be listed), plus **Attorneys** when any
+profile is marked as an attorney. A person can be in more than one group.
+
+The team page (the grid and the `/team/` archive) shows the **Team** group.
+A new person starts in Team. Groups are never deleted by the plugin.
+
+## Shows on
+
+Each person has six switches, stored in the profile as `shows`:
+
+| Switch | Key | What it does |
+|---|---|---|
+| Their own profile page | `bio` | Off: visitors who open `/team/<name>/` get "page not found", the page leaves the sitemap and the team page lists them without a link. People who can edit them still see it, marked noindex. |
+| The team page | `team` | On the grid and the `/team/` archive, when they are also in the Team group and live. |
+| A business card | `card` | Saved for Scout Cards. |
+| Byline on their posts | `byline` | Author links and the article's schema author point at their profile. Needs "Writes posts as" picked. |
+| The speakers page | `speaker` | Saved for the speakers page. |
+| Chat answers | `chat` | Saved for Scout Chat. |
+
+Existing profiles keep exactly what they had: profile page and team page on,
+byline on when a login is linked, the rest off.
+
+## Card only contact
+
+`card_phone` and `card_email` are for a person's business card only. They
+never print on the profile page or the team page and never go into the
+schema. The editor says so under the fields.
+
+## Sources on credentials
+
+Every line of bar admissions, education, awards and professional memberships
+has a **Source**: where someone could check it, like a website or a
+document. The profile page and the Person schema show only lines with a
+source. The source itself is never printed.
+
+Lines saved before this existed were marked "Added before sources were
+tracked" when the site updated, so live pages did not change. A line saved
+or imported with no source field at all is treated the same way. A new line
+with an empty source is saved but stays hidden, and the person shows under
+**Needs a look**. Memberships used to be one per line of text; each line
+became a membership with that same source.
+
+## Needs a look
+
+A person needs a look when they have no photo, their photo has no alt text in
+the media library, a credential line has no source, or they are not live yet
+(draft or pending). `Scout_Team::needs_look( $post_id )` returns the reasons in
+plain words.
+
 ## What each person has
 
 | Field | Where it shows | Schema |
@@ -32,44 +92,61 @@ profile pages.
 | Role or title | Profile, grid | `jobTitle` |
 | Short bio | Profile, grid, archive excerpt | `description` |
 | Full bio (editor, optional) | Profile | none |
-| Education: school, degree, year | Profile | `alumniOf`, `hasCredential` (degree) |
-| Bar admissions: state or court, year, number, profile link | Profile, law sites and attorneys only | `hasCredential` (license, `validIn`), link added to `sameAs` |
-| Awards: name, year, given by | Profile | `award` |
-| Professional memberships | Profile | `memberOf` |
+| Education: school, degree, year, source | Profile | `alumniOf`, `hasCredential` (degree) |
+| Bar admissions: state or court, year, number, profile link, source | Profile, law sites and attorneys only | `hasCredential` (license, `validIn`), link added to `sameAs` |
+| Awards: name, year, given by, source | Profile | `award` |
+| Professional memberships: name, source | Profile | `memberOf` |
 | Military service: branch, years | Profile, grid, preview card | none (schema.org has no property for it) |
 | Languages | Profile | `knowsLanguage` |
 | Email, phone (optional) | Profile when turned on | `email`, `telephone` |
+| Card phone, card email | Business card only | never |
 | Profile links (LinkedIn, state bar, Avvo...) | Profile | `sameAs` |
 | Writes posts as (a WordPress login) | Author links on posts | Post `author` |
+| Groups | Team page (Team group) | none |
+| Shows on | See above | `url` left out when the profile page is off |
 
 The profile page also gets a `ProfilePage` node with the Person as its
-`mainEntity`.
+`mainEntity`. A photo with no alt text in the media library reads as the
+person's name wherever a theme prints it.
 
 ## Editing
 
-**Team** in the dashboard menu lists everyone with a photo, role and trust
-count. The edit screen has the Profile fields under the name, the optional
-full bio below, and on the side a preview card and a trust checklist (real
-photo, bio and role, byline, education, bar admissions for attorneys, profile
-links).
+**People** in the Scout menu (its own People section) lists everyone: one
+status line (how many people, how many on the team page, cards on, how many
+need a look), filter chips (Everyone, each group, Needs a look), then one row
+per person with their photo or initials, title, groups, where they show,
+what needs a look, and an Edit button. In the Everyone view the rows come in
+sections: Runs the site (people whose login can manage the site), Team,
+Speakers, Writers, Members (listed), then Everyone else. Rows follow the
+team page order: the Order number on each person, then name.
+
+The edit screen has the Profile fields under the name, the optional full bio
+below, and on the side: Shows on (with the card only phone and email), Groups,
+a preview card and a trust checklist.
+
+When a live person's address changes, Scout Redirects (when it is on, and its
+"forward a page automatically" setting is on) gets a 301 from the old
+`/team/` address to the new one. When a person goes live, is changed, or is
+taken off the site, Scout Build's Site log (when it is on) gets one line.
 
 ## Settings
 
-Scout Build (or Site Build) → Team.
+Scout → People → **People settings** (or Settings → People settings on a site
+without the Scout menu). The address stays `?page=scout-team`.
 
 | Setting | Default |
 |---|---|
 | Law firm details | Decide from the Scout Core business type |
 | Show email and phone on profiles | Off (schema only) |
-| Author names link to team profiles | On |
+| Author names link to profile pages | On |
 | Grid columns on wide screens | 3 |
 
 ## Shortcode
 
 ```
-[scout_team]                  everyone who is live, in order
+[scout_team]                  the team page: live, in the Team group, team page on, in order
 [scout_team columns="2"]      2 columns on wide screens
-[scout_team ids="12,15"]      only these people, in this order
+[scout_team ids="12,15"]      only these people, in this order, whatever their group
 [scout_team bio="no"]         photo, name and role only
 [scout_team heading="h2"]     heading level for names (h2, h3, h4)
 ```
@@ -97,10 +174,10 @@ With Scout Analytics active: `team_profile_click` (grid card),
 
 ## Uninstall
 
-Deleting the plugin removes the settings. Team profiles stay, because they
-are content someone typed in. To remove them too, define
+Deleting the plugin removes the settings. Profiles and groups stay, because
+they are content someone typed in. To remove profiles too, define
 `SCOUT_PURGE_ON_UNINSTALL` as `true` in wp-config.php before deleting.
-Photos always stay in the media library.
+Photos always stay in the media library, and groups are never deleted.
 
 <!-- visitor-data:start -->
 ## Visitor data
