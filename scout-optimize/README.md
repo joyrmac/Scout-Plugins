@@ -79,6 +79,17 @@ npx @wordpress/env start  # disposable WordPress with the plugin mounted
 3. Clients never see quality controls; all admin surfaces sit behind the
    `manage_scout_optimize` capability.
 
+## What this feature needs from the theme
+
+No visitor-facing output: it changes how images and form files load, never
+how anything looks. What it assumes of the theme:
+
+- Theme images ship already optimized (Site Standard §2). Images in the page
+  stay plain `<img>` tags; with delivery on, the plugin wraps them in
+  `<picture>` and skips anything already inside one.
+- Theme scripts that need jQuery can run from the footer, where the speed
+  module moves jQuery and everything that depends on it.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

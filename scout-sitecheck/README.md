@@ -62,6 +62,22 @@ the sample out.
 
 3 checks per visitor per hour, 3 per email per day, 40 per site per day.
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** none yet. The form, the live run and the report rows read the
+  theme's own CSS custom properties when they exist and fall back to Scout's
+  dark palette: `--bg`, `--surface`, `--surface-2`, `--text`, `--text-2`,
+  `--text-3`, `--line`, `--accent-fill`, `--accent-fill-hover`, `--accent`,
+  `--accent-text`, `--positive`, `--caution`, `--negative`, `--font-mono`.
+  Button text is always white.
+- **Where it lands:** where `[scout_site_check]` sits, with an H2 heading;
+  `layout="hero"` sets the form and the sample side by side. Its CSS and
+  script load only on that page.
+- **Booking link:** the setting, else `scout_booking_url()`, else `/contact/`.
+- **The emailed report** uses Scout's own fonts and colors, the site icon as
+  its logo, and the photo from Settings. It reads nothing from the theme.
+- **scout-setup.json:** nothing.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

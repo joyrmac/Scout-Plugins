@@ -144,6 +144,18 @@ also covers Action Scheduler, the checkout box and the application question.
 Settings, the key and the log go. The consent records stay unless
 `SCOUT_PURGE_ON_UNINSTALL` is true in `wp-config.php` (download them first).
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** none. The box takes the theme's fonts and colors, and every
+  rule sits inside `:where()`, so the theme's own `input` and `button` styles
+  win. Field borders are `currentColor`.
+- **Where it lands:** where `[scout_newsletter]` or the **Newsletter
+  sign-up** block (`scout/newsletter`) sits, at most 30rem wide, with an
+  optional H2. The boxes at the checkout, on bookings, on the membership
+  application and in Gravity Forms print inside those features.
+- **scout-setup.json:** nothing. The words beside the box come from this
+  plugin's settings and are kept with every sign-up.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

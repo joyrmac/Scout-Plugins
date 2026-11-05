@@ -66,6 +66,8 @@ final class Scout_Cards_Settings {
 			'accent'       => '#0E8FE6',
 			'font'         => '',
 			'name'         => $id['name'] ? $id['name'] : get_bloginfo( 'name' ),
+			'org'          => '', // the company name saved to phones; empty uses the name
+			'look'         => '', // '' the plugin's own look; 'theme' the theme's own card look (render-theme.php)
 			'phone'        => $id['phone'],
 			'email'        => $id['email'], // never the WordPress admin email: on client sites that is often not the business
 			'city'         => $id['city'],
@@ -118,6 +120,11 @@ final class Scout_Cards_Settings {
 			}
 		}
 		return $d;
+	}
+
+	/** The company name saved to phones (vCard): its own setting, else the card name. */
+	public static function org( array $s ) {
+		return '' !== trim( (string) ( $s['org'] ?? '' ) ) ? (string) $s['org'] : (string) $s['name'];
 	}
 
 	public static function phone_e164( $phone ) {
@@ -197,7 +204,7 @@ final class Scout_Cards_Settings {
 				'url'      => self::card_url( 'team' ),
 				'save'     => self::card_url( 'team', 'save' ),
 				'share'    => self::card_url( 'team', 'share' ),
-				'file'     => sanitize_title( $s['name'] ),
+				'file'     => sanitize_title( self::org( $s ) ),
 				'spot'     => self::spot( $s ),
 			),
 		);

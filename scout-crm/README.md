@@ -46,6 +46,10 @@ nothing.
 
 Needs FluentCRM. Without it the plugin does nothing and says so on its page.
 
+## What this feature needs from the theme
+
+No visitor-facing output, and it reads nothing from the theme.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

@@ -175,6 +175,11 @@ final class Scout_Cards_Theme_Import {
 				$filled[]     = 'links';
 			}
 		}
+		// Keep the theme's own card look, so visitors see the same pages (render-theme.php).
+		if ( ! array_key_exists( 'look', $saved ) || '' === (string) $saved['look'] ) {
+			$out['look'] = 'theme';
+			$filled[]    = 'look';
+		}
 		$have = array();
 		foreach ( (array) ( $saved['people'] ?? array() ) as $r ) {
 			$have[] = self::slug( (string) ( $r['slug'] ?? '' ) );

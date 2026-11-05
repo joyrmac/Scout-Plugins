@@ -105,6 +105,8 @@ jobs:
         run: php tools/tests/core-hreflang.php
       - name: Every plugin lists the visitor data it keeps (Site Standard rule 24)
         run: php tools/visitor-data.php --check
+      - name: Every plugin README says what it needs from the theme (Site Standard rule 4)
+        run: php tools/tests/readme-theme-needs.php
       - name: Approval hold, live sites wait for Scout's OK (no WordPress needed)
         run: php tools/tests/approval-hold.php
       - name: Privacy policy and terms drafted from the visitor data lists (no WordPress needed)

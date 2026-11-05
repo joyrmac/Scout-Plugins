@@ -152,7 +152,20 @@ person's membership record. Deleting the plugin keeps member accounts.
   `scout_events_ticket_html`, `scout_events_card_tags` and
   `scout_events_imported_event` when Scout Events 0.6.0 or later is active.
 
-## Styling
+## What this feature needs from the theme
+
+- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
+  are custom properties with neutral defaults: `--scout-members-accent`
+  (`#1D1D1F`), `--scout-members-on-accent` (`#fff`), `--scout-members-line`,
+  `--scout-members-inset`, `--scout-members-radius` (`14px`).
+- **Where it lands:** where its shortcodes sit, and on the members home
+  through `the_content`. Headings start at H2 under the theme's H1
+  (`scout_members_heading_level`, or `level=""` on a shortcode).
+- **Menu link:** a menu custom link to `#scout-member-link` becomes "Member
+  sign in" or "Members home", in classic menus and the Navigation block.
+- **Sign-in screen logo:** the theme's Custom Logo (`custom_logo`), else the
+  site icon. DESIGN.md's `logo` is not read yet.
+- **scout-setup.json:** nothing.
 
 Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-field`, `.sm-statement`, `.sm-check`, `.sm-button`, `.sm-account`,
@@ -161,9 +174,7 @@ Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-perk-text`, `.sm-member-link`, `.sm-invitations`, `.sm-invite`,
 `.sm-invite-title`, `.sm-invite-meta`, `.sm-invite-answers`, `.sm-mine`,
 `.sm-invite-new`, `.sm-invite-form`, `.sm-pay`, `.sm-pay-note`,
-`.sm-thanks` (the order received note). Colors are custom properties:
-`--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
-`--scout-members-inset`, `--scout-members-radius`.
+`.sm-thanks` (the order received note).
 
 ## What themes rely on (keep stable)
 

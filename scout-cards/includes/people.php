@@ -260,6 +260,9 @@ final class Scout_Cards_People {
 	public static function note_text( array $n ) {
 		$moved = (int) ( $n['moved'] ?? 0 );
 		$lines = array();
+		if ( '' !== (string) ( $n['theme'] ?? '' ) ) {
+			$lines[] = (string) $n['theme']; // the one-time copy from the theme (theme-import.php)
+		}
 		if ( $moved ) {
 			$lines[] = sprintf( 1 === $moved ? 'Moved %d card person into People.' : 'Moved %d card people into People.', $moved );
 		}

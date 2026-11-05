@@ -29,6 +29,19 @@ Release it (`scout-aeo-v0.1.0`), then on each site: **Site Build → Your
 features → AI search → Turn on**. Then add answers to the pages that bring in
 business. Copy follows each client's claims rules (bar rules for law firms).
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** none. The answers box takes the theme's fonts and colors. A
+  few neutral rules (hairlines in `currentColor`, a plus sign that turns to a
+  minus when open) print in `<head>` only on a page that has answers.
+- **Where it lands:** at the end of the content through `the_content`, or
+  wherever `[scout_faq]` sits: `<section class="scout-faq" id="answers">` with
+  an H2 ("Common questions" unless the page names its own) and one
+  `<details>` per question, the question as an H3. The theme prints the title
+  as the H1 and calls `the_content()`, `wp_head()` and `wp_footer()`.
+- `/llms.txt`, `robots.txt` and IndexNow need nothing from the theme.
+- **scout-setup.json:** nothing.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

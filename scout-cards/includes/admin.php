@@ -529,8 +529,10 @@ final class Scout_Cards_Admin {
 		if ( isset( $_GET['reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-info is-dismissible"><p>Reset to the defaults.</p></div>';
 		}
+		$theme_pages = Scout_Cards_Theme_Import::theme_pages(); // the theme's own card Pages: kept on purpose, no warning
 		foreach ( array( $s['card_base'], $s['links_base'] ) as $slug ) {
-			if ( get_page_by_path( $slug ) ) {
+			$pg = get_page_by_path( $slug );
+			if ( $pg && ! in_array( (int) $pg->ID, $theme_pages, true ) ) {
 				echo '<div class="notice notice-warning"><p>A WordPress Page already uses <code>/' . esc_html( $slug ) . '/</code>. Scout Cards will show at that address instead of the Page. Change the address under More options, or rename that Page.</p></div>';
 			}
 		}
@@ -608,6 +610,13 @@ final class Scout_Cards_Admin {
 		echo '<tr><th scope="row">Mode</th><td><label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="dark"' . checked( $s['mode'], 'dark', false ) . '> Dark</label> &nbsp; <label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="light"' . checked( $s['mode'], 'light', false ) . '> Light</label></td></tr>';
 		echo '<tr><th scope="row"><label for="scc-accent">Accent color</label></th><td><input type="color" id="scc-accent" name="' . esc_attr( $n ) . '[accent]" value="' . esc_attr( $s['accent'] ) . '"><p class="description">The brand color for buttons, links, and tags on the card.</p></td></tr>';
 		self::field( "{$n}[font]", $s['font'], 'Font (optional)', 'text', 'Leave blank to use the site\'s own font. Or a CSS font list, e.g. "Hanken Grotesk", sans-serif.' );
+		if ( function_exists( 'scout_card_settings' ) || 'theme' === $s['look'] ) {
+			// The theme drew these cards before the plugin did; its look keeps them the same for visitors.
+			echo '<tr><th scope="row">Card look</th><td><label><input type="radio" name="' . esc_attr( $n ) . '[look]" value="theme"' . checked( $s['look'], 'theme', false ) . '> The theme\'s own card look</label> &nbsp; <label><input type="radio" name="' . esc_attr( $n ) . '[look]" value=""' . checked( $s['look'], '', false ) . '> The Scout Cards look</label>'
+				. '<p class="description">The theme\'s own look keeps the cards exactly as your theme drew them. Mode, accent color and font apply to the Scout Cards look.</p></td></tr>';
+		} else {
+			echo '<input type="hidden" name="' . esc_attr( $n ) . '[look]" value="' . esc_attr( $s['look'] ) . '">';
+		}
 		self::photo( "{$n}[share_card_id]", (int) $s['share_card_id'], 'Share picture: card', 'Shows when someone texts or posts the card link. 1200 by 630 pixels.' );
 		self::photo( "{$n}[share_links_id]", (int) $s['share_links_id'], 'Share picture: links page', 'Shows when the links page is shared. Blank uses the card\'s.' );
 		echo '</table>';
@@ -630,6 +639,7 @@ final class Scout_Cards_Admin {
 			self::field( "{$n}[name]", $s['name'], 'Business name' );
 		}
 		self::field( "{$n}[phone]", $s['phone'], 'Phone', 'text', 'Used for Call, Text, and the saved contact.' );
+		self::field( "{$n}[org]", $s['org'], 'Company name saved to phones', 'text', 'Blank uses the name on the main card.' );
 		if ( ! $reading ) {
 			self::field( "{$n}[email]", $s['email'], 'Main email', 'email' );
 		}
@@ -813,7 +823,7 @@ final class Scout_Cards_Admin {
 			return sanitize_textarea_field( (string) $v );
 		};
 		$out  = array();
-		foreach ( array( 'name', 'phone', 'city', 'region', 'postal', 'footer', 'font', 'pick_heading' ) as $k ) {
+		foreach ( array( 'name', 'org', 'phone', 'city', 'region', 'postal', 'footer', 'font', 'pick_heading' ) as $k ) {
 			$out[ $k ] = $txt( $in[ $k ] ?? '' );
 		}
 		foreach ( array( 'note', 'team_intro', 'links_intro', 'socials' ) as $k ) {
@@ -821,6 +831,7 @@ final class Scout_Cards_Admin {
 		}
 		$out['email']        = sanitize_email( $in['email'] ?? '' );
 		$out['mode']         = 'light' === ( $in['mode'] ?? '' ) ? 'light' : 'dark';
+		$out['look']         = 'theme' === ( $in['look'] ?? '' ) ? 'theme' : '';
 		$out['accent']       = sanitize_hex_color( $in['accent'] ?? '' ) ? sanitize_hex_color( $in['accent'] ) : '#0E8FE6';
 		$out['photo_id']     = absint( $in['photo_id'] ?? 0 );
 		$out['logo_id']        = absint( $in['logo_id'] ?? 0 );

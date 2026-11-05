@@ -56,9 +56,8 @@ overview lists what each upcoming and draft event still needs.
   `scout_events_schedule_html( $id )` for themes and other Scout features.
 
 Session descriptions open in place with `<details>`, so no script loads. The
-stylesheet loads only on pages that show events. Colors are custom
-properties: `--scout-events-accent`, `--scout-events-on-accent`,
-`--scout-events-line`, `--scout-events-inset`, `--scout-events-radius`.
+stylesheet loads only on pages that show events. Its colors are listed under
+"What this feature needs from the theme", below.
 
 Other Scout features add to the event pages with filters:
 `scout_events_detail_rows` (rows of the details panel), `scout_events_ticket_html`
@@ -381,6 +380,24 @@ A real payment service (turned on in WooCommerce when the merchant account
 exists), ticket transfers between people, per-ticket fields in the block
 checkout, holding places for orders that wait for payment, and filling events
 from `scout-setup.json` (Scout Build needs an `events` section first).
+
+## What this feature needs from the theme
+
+- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
+  are custom properties with neutral defaults: `--scout-events-accent`
+  (`#1D1D1F`), `--scout-events-on-accent` (`#fff`), `--scout-events-line`,
+  `--scout-events-muted`, `--scout-events-inset`, `--scout-events-radius`
+  (`14px`).
+- **Where it lands:** event, session and speaker pages (`scout_event`,
+  `scout_session`, `scout_speaker`) fill themselves in through `the_content`.
+  The theme's single templates print the title as the H1 and call
+  `the_content()`. A theme that places the pieces itself turns that off with
+  `scout_events_auto_content`. Lists, schedules, speakers and directories
+  print where their shortcodes sit, with H2 and H3 headings. The stylesheet
+  loads only on pages that show events.
+- **Images:** each event's and speaker's featured image. A speaker with no
+  photo shows their initials.
+- **scout-setup.json:** nothing.
 
 <!-- visitor-data:start -->
 ## Visitor data

@@ -100,6 +100,25 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 - `scout_law_entry_days()` returns the days kept (0 when off), for the privacy
   policy page.
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** none. Every line takes the theme's font and color. The first
+  line on a page brings a few lines of inline style: 13px, slightly faded, and
+  the footer block centered at up to 72ch.
+- **Footer lines:** printed through `wp_footer()` after the theme's footer,
+  unless the theme declares `add_theme_support( 'scout-law-footer' )` and calls
+  `scout_law_disclaimers( 'footer' )` inside its own footer (For themes, above).
+- **Under forms:** added after each Gravity Form. Next to case results and
+  under reviews: through Scout Case Results and Scout Reviews.
+- **"Reviewed by" line:** added after the page content through
+  `the_content`, or placed by a theme that declares
+  `add_theme_support( 'scout-law-reviewed' )` and calls
+  `scout_law_reviewed()`.
+- **Class names:** `.scout-law-disclaimers`, `.scout-law-disclaimer`,
+  `.scout-law-reviewed`.
+- **scout-setup.json:** nothing. The wording lives in the plugin and the firm
+  approves it.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

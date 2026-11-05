@@ -31,10 +31,9 @@ carries a two-week plan with every moment already worked out on the server,
 and a small script picks the right line every minute, so a cached page still
 says "Open now" at the right time. Without scripts the server's line shows.
 
-Front-end CSS and JS load only on pages that show the hours or the bar. Every
-color is a custom property (`--scout-hours-open`, `--scout-hours-closed`,
-`--scout-hours-line`, `--scout-hours-today`, `--scout-hours-bar-bg`,
-`--scout-hours-bar-text`); fonts and text color come from the theme.
+Front-end CSS and JS load only on pages that show the hours or the bar. The
+colors it takes from the theme are listed under "What this feature needs from
+the theme", below.
 
 ## Schema
 
@@ -66,6 +65,25 @@ The notice bar's close button sends `hours_notice_hide` through
 
 Options `scout_hours`, `scout_hours_closures`, `scout_hours_dismissed`.
 All three are removed when the plugin is deleted.
+
+## What this feature needs from the theme
+
+- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
+  are custom properties: `--scout-hours-open`, `--scout-hours-closed`,
+  `--scout-hours-line`, `--scout-hours-today`, `--scout-hours-bar-bg`,
+  `--scout-hours-bar-text`.
+- **Hours and the status line:** print where `[scout_hours]` sits or where the
+  theme calls `scout_hours_html()`, at most 32rem wide. A theme's own hours
+  line runs only while `! scout_core_owns( 'hours' )` (rule 6).
+- **Holiday notice bar:** printed at the top of the page through
+  `wp_body_open()`, in the page flow above the header, so a theme with a fixed
+  header leaves room for it. A theme without `wp_body_open()` gets the bar
+  pinned to the bottom of the screen from `wp_footer()` instead.
+- **scout-setup.json:** `hours.confirmed` and `hours.days`, filled in by Scout
+  Build only on a site with no hours saved.
+- **Schema:** goes into Scout Core's business node. A theme that still prints
+  its own business schema merges `Scout_Hours_Schema::properties()` into it
+  (see Schema). The theme never types the hours.
 
 <!-- visitor-data:start -->
 ## Visitor data

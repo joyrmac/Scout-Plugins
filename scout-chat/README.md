@@ -85,6 +85,25 @@ Through Scout Analytics: `chat_open`, `chip_click`, `handoff`,
 - Transcripts are trimmed (30 messages, 1,500 characters each) and stored as
   private posts that only editors can see.
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** none yet. The panel reads the theme's own CSS custom
+  properties when they exist and falls back to Scout's dark palette: `--bg`,
+  `--surface`, `--surface-2`, `--text`, `--text-2`, `--text-3`, `--line`,
+  `--accent`, `--accent-text`, `--font-mono`, `--font-sans`. These are the
+  Scout themes' names; tokens built from DESIGN.md are named `--scout-*`, so a
+  theme with only those gets the dark fallback.
+- **Where it lands:** a launcher fixed to the bottom right of every public
+  page (20px from the edges, `z-index: 9998`), added at the end of `<body>` by
+  its script, with the panel opening above it. On phones it moves up to clear
+  Scout Call Buttons' bar. The theme calls `wp_footer()` and keeps the
+  bottom-right corner clear.
+- **scout-setup.json:** the `chat` section, filled in by Scout Build where the
+  setting is blank: `name`, `team`, `notify`, `book_url`, `work_url`,
+  `photo_1`, `photo_2` (photos as a theme path or an https address).
+- **Booking link:** `book_url`, else `scout_booking_url()`, else `/contact/`.
+- The `scout_chat_show` filter turns it off for a page.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

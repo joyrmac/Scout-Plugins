@@ -252,14 +252,36 @@ Public helpers for other plugins and themes:
 - `Scout_Team_Byline::posts_for( $member, $limit )`: the newest live posts
   that credit a person, for a theme's "posts by" list.
 
-### What this feature needs from the theme
+## What this feature needs from the theme
 
-Print the author with WordPress's own functions: `the_author()` (or
-`get_the_author()`) for the name and `the_author_posts_link()` (or
-`get_author_posts_url()`) for the link. The block theme's Post Author Name
-block works too. Nothing else is needed. A theme that reads the login's
-fields directly (for example `$user->display_name`) will keep showing the
-login.
+- **DESIGN.md:** the page a person fills in from their link reads
+  `colors.accent_fill`, `colors.on_accent` and `radius.control` through
+  `scout_design_css()` (as `--scout-accent-fill`, `--scout-on-accent` and
+  `--scout-radius-control`) when Scout Core is on. Its text colors come from
+  the theme. The profile and the grid read no DESIGN.md keys yet.
+- **Profile and grid:** they inherit the theme's fonts and colors. The accent
+  defaults to the theme.json `primary` color (`--wp--preset--color--primary`).
+  Custom properties on `.scout-team-profile` and `.scout-team-grid`:
+  `--scout-team-accent`, `--scout-team-muted`, `--scout-team-line`,
+  `--scout-team-surface`, `--scout-team-radius`, `--scout-team-gap`. The
+  stylesheet loads only on team pages and pages that use the shortcode.
+- **Where it lands:** a profile prints inside the theme's own template through
+  `the_content`, so the theme prints the title and calls `the_content()`. The
+  plugin prints the photo itself and hides the theme's featured image on a
+  profile page, so it never shows twice. The team page prints where
+  `[scout_team]` sits and on the `/team/` archive.
+- **The link page** sits inside the theme's header and footer: the `header`
+  and `footer` template parts on a block theme, `get_header()` and
+  `get_footer()` on a classic theme.
+- **Bylines:** print the author with WordPress's own functions:
+  `the_author()` (or `get_the_author()`) for the name and
+  `the_author_posts_link()` (or `get_author_posts_url()`) for the link. The
+  block theme's Post Author Name block works too. A theme that reads the
+  login's fields directly (for example `$user->display_name`) keeps showing
+  the login.
+- **scout-setup.json:** the `team` section, filled in by Scout Build: `name`,
+  `role`, `bio`, `email`, `military_branch`, `photo` (a theme path or an https
+  address) and `order`.
 
 ## The REST API
 
@@ -291,17 +313,6 @@ without the Scout menu). The address stays `?page=scout-team`.
 [scout_team bio="no"]         photo, name and role only
 [scout_team heading="h2"]     heading level for names (h2, h3, h4)
 ```
-
-## Theming
-
-The profile and grid inherit the theme's fonts and colors. A theme can
-restyle them with `--scout-team-accent`, `--scout-team-muted`,
-`--scout-team-line`, `--scout-team-surface`, `--scout-team-radius` and
-`--scout-team-gap` on `.scout-team-profile` and `.scout-team-grid`.
-The stylesheet loads only on team pages and pages that use the shortcode.
-
-On a profile page the plugin prints the photo itself, so the theme's own
-featured image for that person is hidden to avoid showing it twice.
 
 ## Analytics
 

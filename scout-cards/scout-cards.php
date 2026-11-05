@@ -40,6 +40,7 @@ require_once SCOUT_CARDS_DIR . 'includes/people.php';
 require_once SCOUT_CARDS_DIR . 'includes/routes.php';
 require_once SCOUT_CARDS_DIR . 'includes/vcard.php';
 require_once SCOUT_CARDS_DIR . 'includes/render.php';
+require_once SCOUT_CARDS_DIR . 'includes/render-theme.php';
 require_once SCOUT_CARDS_DIR . 'includes/admin.php';
 require_once SCOUT_CARDS_DIR . 'includes/theme-import.php';
 

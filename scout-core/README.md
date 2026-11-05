@@ -222,6 +222,35 @@ theme without DESIGN.md still gets sensible tokens.
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** Scout Core is the reader for every plugin. From the front
+  matter it takes `design`, `name`, `mode`, `colors` (`bg`, `surface`,
+  `surface_2`, `text`, `text_2`, `line`, `accent`, `accent_fill`,
+  `on_accent`), `fonts` (`heading`, `body`, `label`, each with `family`,
+  `weight` and `file`, and `case` and `tracking` on `label`), `radius`
+  (`pill`, `card`, `control`, `chip`), `logo` and `mark`, plus every
+  `## Feature: <name>` section. Core's own output on the site uses none of it.
+- **Head and schema:** printed through `wp_head()`. The theme prints no title,
+  description, canonical, Open Graph or JSON-LD of its own, breadcrumbs
+  excepted (rule 7).
+- **Business facts:** the theme shows them through `scout_core_business()` or
+  the `scout/business` binding, never typed.
+- **Page fields:** the theme's templates place them with `scout_core_field()`,
+  `scout_core_image()`, `scout_core_setting()` or the `scout/field` binding.
+- **Breadcrumbs:** a theme with `add_theme_support( 'scout-breadcrumbs' )`
+  calls `scout_core_breadcrumbs()` where the links go. It prints
+  `<nav class="scout-breadcrumbs" aria-label="Breadcrumb"><ol>` with no styles
+  of its own; the trail's look is the theme's.
+- **Site Sync:** `scout-sync.json` and the `sync/` folder at the root of the
+  active theme (the child theme on a child theme).
+- **Images:** the share image is the page's featured image, else the Default
+  share image URL in Search settings, else the site icon. The schema logo is
+  the site icon. Neither reads DESIGN.md's `logo` or `mark`, or
+  `scout-setup.json`, yet.
+- **The email guard** rewrites addresses on the finished page. The theme does
+  nothing for it.
+
 ## Breadcrumbs, verification, thank-you pages, hardening and cache purge (1.8.0+)
 
 - **Breadcrumbs:** a theme declares `add_theme_support( 'scout-breadcrumbs' )` and calls

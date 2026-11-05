@@ -177,6 +177,25 @@ Turn on and Go back download the `<slug>.zip` asset from this repo's GitHub
 releases (`<slug>-v<version>` tags), the same releases the updater uses. The
 repo's releases must stay public for this to work without a login.
 
+## What this feature needs from the theme
+
+Scout Build has no visitor-facing output. It reads these from the theme:
+
+- **`scout-setup.json`** (child theme first): `features.use` and
+  `features.skip`, `scout_own_site`, and the sections it fills into other
+  plugins (`team`, `reviews`, `chat`, `hours`, `analytics`, `cards`). The
+  `brand` section dresses the login screen and the admin: `logo`,
+  `logo_width`, `color`, `background`, `text`, `message`, `hide_menus`, `off`.
+  Format: `includes/class-scout-hub-setup.php`.
+- **DESIGN.md** through `scout_design()`: `colors.accent_fill` as the
+  detected color on the Email screen, and the pairs `scout_design_issues()`
+  checks (`on_accent` on `accent_fill`, `text` on `bg` and `surface`, `text_2`
+  on `bg`), shown as Design contrast in Site status.
+- **`style.css`:** `Update URI` and `Scout Release` for theme updates (Theme
+  updates, above), and the theme's `CHANGELOG.md` line for the Site log.
+- **`add_theme_support( '<feature slug>' )`** lets a theme named in a
+  feature's `not_with_themes` offer that feature anyway.
+
 <!-- visitor-data:start -->
 ## Visitor data
 
