@@ -81,12 +81,15 @@ register_activation_hook(
 	}
 );
 
-// The Scout admin look on the Review settings screen.
+// The Scout admin look on the Review settings, Ask for reviews and Review inbox screens.
 add_action(
 	'admin_enqueue_scripts',
 	static function ( $hook ) {
-		if ( false !== strpos( (string) $hook, Scout_Reviews_Settings::PAGE ) ) {
-			Scout_Admin_UI::enqueue( SCOUT_REVIEWS_URL . 'assets/scout-admin.css' );
+		foreach ( array( Scout_Reviews_Settings::PAGE, Scout_Reviews_Requests::PAGE, Scout_Reviews_Inbox::PAGE ) as $page ) {
+			if ( false !== strpos( (string) $hook, $page ) ) {
+				Scout_Admin_UI::enqueue( SCOUT_REVIEWS_URL . 'assets/scout-admin.css' );
+				return;
+			}
 		}
 	}
 );

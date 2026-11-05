@@ -36,12 +36,12 @@ final class Scout_Reviews_Google_Admin {
 		$g        = Scout_Reviews_Google::get();
 		$settings = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
 		?>
-		<div class="card" style="max-width:1100px;padding:16px 20px;margin:16px 0 24px;">
-			<h2 style="margin-top:0;"><?php esc_html_e( 'Google reviews sync', 'scout-reviews' ); ?></h2>
+		<section class="sh-box srk-google">
+			<h2 class="sh-title"><?php esc_html_e( 'Google reviews sync', 'scout-reviews' ); ?></h2>
 
 			<?php if ( ! Scout_Reviews_Google::has_credentials() ) : ?>
 				<p><?php esc_html_e( 'Step 1: paste the OAuth client ID and secret from Google Cloud (APIs & Services > Credentials). Add this exact address as an "Authorized redirect URI" on that client:', 'scout-reviews' ); ?></p>
-				<p><code style="user-select:all;"><?php echo esc_html( Scout_Reviews_Google::redirect_uri() ); ?></code></p>
+				<p><code class="srk-select"><?php echo esc_html( Scout_Reviews_Google::redirect_uri() ); ?></code></p>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="scout_reviews_google_credentials" />
 					<?php wp_nonce_field( 'scout_reviews_google_credentials' ); ?>
@@ -61,11 +61,13 @@ final class Scout_Reviews_Google_Admin {
 
 			<?php elseif ( ! Scout_Reviews_Google::is_connected() ) : ?>
 				<p><?php esc_html_e( 'Step 2: sign in with the Google account that owns or manages your Business Profile.', 'scout-reviews' ); ?></p>
-				<?php self::button( 'connect', __( 'Connect Google', 'scout-reviews' ), 'primary' ); ?>
-				<?php if ( ! Scout_Reviews_Google::credentials_in_config() ) : ?>
-					<?php self::button( 'disconnect', __( 'Clear credentials', 'scout-reviews' ), 'link', array( 'forget' => '1' ) ); ?>
-				<?php endif; ?>
-				<p class="description"><?php esc_html_e( 'Redirect URI on the Google client:', 'scout-reviews' ); ?> <code style="user-select:all;"><?php echo esc_html( Scout_Reviews_Google::redirect_uri() ); ?></code></p>
+				<div class="sh-links">
+					<?php self::button( 'connect', __( 'Connect Google', 'scout-reviews' ), 'main' ); ?>
+					<?php if ( ! Scout_Reviews_Google::credentials_in_config() ) : ?>
+						<?php self::button( 'disconnect', __( 'Clear credentials', 'scout-reviews' ), 'quiet', array( 'forget' => '1' ) ); ?>
+					<?php endif; ?>
+				</div>
+				<p class="description"><?php esc_html_e( 'Redirect URI on the Google client:', 'scout-reviews' ); ?> <code class="srk-select"><?php echo esc_html( Scout_Reviews_Google::redirect_uri() ); ?></code></p>
 
 			<?php elseif ( ! Scout_Reviews_Google::is_ready() ) : ?>
 				<?php self::location_picker(); ?>
@@ -95,17 +97,17 @@ final class Scout_Reviews_Google_Admin {
 				<?php if ( $g['last_error'] ) : ?>
 					<div class="notice notice-error inline"><p><?php echo esc_html( $g['last_error'] ); ?></p></div>
 				<?php endif; ?>
-				<p>
-					<?php self::button( 'sync', __( 'Sync now', 'scout-reviews' ), 'primary' ); ?>
-					<?php self::button( 'location', __( 'Change location', 'scout-reviews' ), 'secondary', array( 'reset' => '1' ) ); ?>
-					<?php self::button( 'disconnect', __( 'Disconnect', 'scout-reviews' ), 'link' ); ?>
-				</p>
+				<div class="sh-links">
+					<?php self::button( 'sync', __( 'Sync now', 'scout-reviews' ), 'main' ); ?>
+					<?php self::button( 'location', __( 'Change location', 'scout-reviews' ), 'quiet', array( 'reset' => '1' ) ); ?>
+					<?php self::button( 'disconnect', __( 'Disconnect', 'scout-reviews' ), 'quiet' ); ?>
+				</div>
 			<?php endif; ?>
 
 			<?php if ( $g['last_error'] && ! Scout_Reviews_Google::is_ready() ) : ?>
 				<div class="notice notice-error inline"><p><?php echo esc_html( $g['last_error'] ); ?></p></div>
 			<?php endif; ?>
-		</div>
+		</section>
 		<?php
 	}
 
@@ -113,12 +115,12 @@ final class Scout_Reviews_Google_Admin {
 		$locations = Scout_Reviews_Google::locations();
 		if ( is_wp_error( $locations ) ) {
 			echo '<div class="notice notice-error inline"><p>' . esc_html( $locations->get_error_message() ) . '</p></div>';
-			self::button( 'disconnect', __( 'Disconnect and start over', 'scout-reviews' ), 'secondary' );
+			self::button( 'disconnect', __( 'Disconnect and start over', 'scout-reviews' ), 'main' );
 			return;
 		}
 		if ( ! $locations ) {
 			echo '<p>' . esc_html__( 'This Google account does not manage any Business Profiles. Disconnect and sign in with the account that does.', 'scout-reviews' ) . '</p>';
-			self::button( 'disconnect', __( 'Disconnect', 'scout-reviews' ), 'secondary' );
+			self::button( 'disconnect', __( 'Disconnect', 'scout-reviews' ), 'main' );
 			return;
 		}
 		?>
@@ -126,9 +128,10 @@ final class Scout_Reviews_Google_Admin {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="scout_reviews_google_location" />
 			<?php wp_nonce_field( 'scout_reviews_google_location' ); ?>
-			<fieldset>
+			<fieldset class="srk-locations">
+				<legend class="screen-reader-text"><?php esc_html_e( 'Business to pull reviews from', 'scout-reviews' ); ?></legend>
 				<?php foreach ( $locations as $i => $loc ) : ?>
-					<label style="display:block;margin:6px 0;">
+					<label>
 						<input type="radio" name="pick" value="<?php echo esc_attr( $loc['account'] . '|' . $loc['location'] . '|' . $loc['title'] ); ?>" <?php checked( 0, $i ); ?> />
 						<strong><?php echo esc_html( $loc['title'] ); ?></strong>
 						<?php if ( $loc['address'] ) : ?>
@@ -137,15 +140,20 @@ final class Scout_Reviews_Google_Admin {
 					</label>
 				<?php endforeach; ?>
 			</fieldset>
-			<?php submit_button( __( 'Use this business and sync', 'scout-reviews' ) ); ?>
+			<?php submit_button( __( 'Use this business and sync', 'scout-reviews' ), 'secondary' ); ?>
 		</form>
 		<?php
 	}
 
+	/**
+	 * One action button in its own small form.
+	 *
+	 * @param string $style main (outlined, the box's main action) or quiet (text only).
+	 */
 	private static function button( string $action, string $label, string $style, array $extra = array() ): void {
-		$class = 'link' === $style ? 'button-link' : 'button button-' . $style;
+		$class = 'quiet' === $style ? 'button sh-quiet' : 'button';
 		?>
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline-block;margin-right:8px;">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
 			<input type="hidden" name="action" value="<?php echo esc_attr( 'scout_reviews_google_' . $action ); ?>" />
 			<?php foreach ( $extra as $k => $v ) : ?>
 				<input type="hidden" name="<?php echo esc_attr( $k ); ?>" value="<?php echo esc_attr( $v ); ?>" />

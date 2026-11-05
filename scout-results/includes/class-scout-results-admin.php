@@ -12,6 +12,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Results_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** A closed "More options" box (admin kit 1.10.0), with the same fallback. */
+	private static function ui_fold_open( string $title ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 	const SLUG = 'scout-results';
 
 	public static function boot(): void {
@@ -64,7 +103,7 @@ final class Scout_Results_Admin {
 		if ( false !== strpos( $hook, self::SLUG ) ) {
 			Scout_Admin_UI::enqueue( SCOUT_RESULTS_URL . 'assets/scout-admin.css' );
 			wp_enqueue_style( 'scout-results', SCOUT_RESULTS_URL . 'assets/scout-results.css', array(), SCOUT_RESULTS_VERSION );
-			wp_enqueue_style( 'scout-results-editor', SCOUT_RESULTS_URL . 'assets/results-editor.css', array( 'scout-results' ), SCOUT_RESULTS_VERSION );
+			wp_enqueue_style( 'scout-results-editor', SCOUT_RESULTS_URL . 'assets/results-editor.css', array( 'scout-results', 'scout-admin' ), SCOUT_RESULTS_VERSION );
 			wp_enqueue_script( 'scout-results-settings', SCOUT_RESULTS_URL . 'assets/results-settings.js', array(), SCOUT_RESULTS_VERSION, true );
 			$defaults = array();
 			foreach ( array_keys( Scout_Results::states() ) as $state ) {
@@ -143,23 +182,15 @@ final class Scout_Results_Admin {
 		);
 		settings_errors( $o );
 		?>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box sh-check is-<?php echo $counts['live'] ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'On the site', 'scout-results' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( sprintf( /* translators: %d: number */ _n( '%d result', '%d results', $counts['live'], 'scout-results' ), $counts['live'] ) ); ?></p>
-				<p class="sh-note"><a href="<?php echo esc_url( $list ); ?>"><?php esc_html_e( 'See all case results', 'scout-results' ); ?></a></p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo $counts['waiting'] ? 'warn' : 'good'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Waiting for the firm', 'scout-results' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( sprintf( /* translators: %d: number */ _n( '%d result', '%d results', $counts['waiting'], 'scout-results' ), $counts['waiting'] ) ); ?></p>
-				<p class="sh-note"><?php esc_html_e( 'A result goes live once the firm ticks "Approved by the firm" and adds the approver\'s name.', 'scout-results' ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-good">
-				<p class="sh-label"><?php esc_html_e( 'Disclaimer', 'scout-results' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php esc_html_e( 'On every result', 'scout-results' ); ?></p>
-				<p class="sh-note"><?php esc_html_e( 'Printed beside each result in the grid. It cannot be switched off for a single result.', 'scout-results' ); ?></p>
-			</section>
-		</div>
+		<?php
+		/* translators: %d: number of case results on the site. */
+		$headline = sprintf( _n( '%d result on the site.', '%d results on the site.', $counts['live'], 'scout-results' ), $counts['live'] );
+		/* translators: %d: number of case results waiting for the firm's approval. */
+		$detail  = sprintf( _n( '%d is waiting for the firm.', '%d are waiting for the firm.', $counts['waiting'], 'scout-results' ), $counts['waiting'] );
+		$detail .= ' ' . __( 'A result goes live once the firm ticks "Approved by the firm" and adds the approver\'s name. The disclaimer prints beside every result and cannot be switched off for one.', 'scout-results' );
+		$go      = '<a class="button" href="' . esc_url( $new ) . '">' . esc_html__( 'Add a case result', 'scout-results' ) . '</a>';
+		self::ui_status( $counts['waiting'] ? 'warn' : ( $counts['live'] ? 'good' : 'off' ), $headline, $detail, $go );
+		?>
 
 		<div class="sr-settings">
 			<form method="post" action="options.php" class="sh-box">
@@ -214,8 +245,7 @@ final class Scout_Results_Admin {
 			</section>
 		</div>
 
-		<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Put the results on a page', 'scout-results' ); ?></h2>
+		<?php self::ui_fold_open( __( 'More options: put the results on a page', 'scout-results' ) ); ?>
 			<p><?php esc_html_e( 'Add a shortcode block to any page. Visitors can filter the grid by practice area.', 'scout-results' ); ?></p>
 			<table class="sh-table sr-shortcodes">
 				<tr><td>[scout_results]</td><td><?php esc_html_e( 'Every approved result, with practice-area filters.', 'scout-results' ); ?></td></tr>
@@ -224,11 +254,11 @@ final class Scout_Results_Admin {
 				<tr><td>[scout_results filters="no"]</td><td><?php esc_html_e( 'The grid without the filter buttons.', 'scout-results' ); ?></td></tr>
 				<tr><td>[scout_result id="12"]</td><td><?php esc_html_e( 'One result by its ID, with the disclaimer.', 'scout-results' ); ?></td></tr>
 			</table>
-			<div class="sh-links">
-				<a class="button button-primary" href="<?php echo esc_url( $new ); ?>"><?php esc_html_e( 'Add a case result', 'scout-results' ); ?></a>
-				<a class="button" href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=' . Scout_Results::TAXONOMY . '&post_type=' . Scout_Results::POST_TYPE ) ); ?>"><?php esc_html_e( 'Practice areas', 'scout-results' ); ?></a>
-			</div>
-		</section>
+			<p class="sh-actions">
+				<a class="button" href="<?php echo esc_url( $list ); ?>"><?php esc_html_e( 'See all case results', 'scout-results' ); ?></a>
+				<a class="button sh-quiet" href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=' . Scout_Results::TAXONOMY . '&post_type=' . Scout_Results::POST_TYPE ) ); ?>"><?php esc_html_e( 'Practice areas', 'scout-results' ); ?></a>
+			</p>
+		<?php self::ui_fold_close(); ?>
 		<?php
 		Scout_Admin_UI::close();
 	}

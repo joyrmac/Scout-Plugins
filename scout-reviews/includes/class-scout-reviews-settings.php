@@ -142,66 +142,129 @@ final class Scout_Reviews_Settings {
 		}
 		$settings = self::get();
 		$name     = self::OPTION;
+		$sources  = Scout_Reviews_Sources::all();
+		unset( $sources['direct'] ); // Direct testimonials have no platform profile.
+		$with_link = array();
+		foreach ( $sources as $slug => $info ) {
+			if ( '' !== self::profile( $slug )['write_url'] ) {
+				$with_link[] = $info['label'];
+			}
+		}
+		$stamp = (int) get_option( self::STAMP, 0 );
+
+		Scout_Admin_UI::open( __( 'Review settings', 'scout-reviews' ), __( 'Your profile on each review platform, how reviews look on the site, and where to put them.', 'scout-reviews' ) );
+
+		if ( ! $with_link ) {
+			Scout_Reviews_Menu::status( 'warn', __( 'No "leave a review" link yet.', 'scout-reviews' ), __( 'Add one below so the review page and the printed cards have somewhere to send people.', 'scout-reviews' ) );
+		} else {
+			$detail = Scout_Reviews_Google::is_ready()
+				? __( 'Google syncs once a day.', 'scout-reviews' )
+				: ( $stamp
+					/* translators: %s: time since the totals were saved, e.g. "3 days". */
+					? sprintf( __( 'Totals last updated %s ago.', 'scout-reviews' ), human_time_diff( $stamp ) )
+					: __( 'Check the totals below match each platform.', 'scout-reviews' ) );
+			Scout_Reviews_Menu::status(
+				'good',
+				/* translators: %s: list of platforms, e.g. "Google, Yelp". */
+				sprintf( __( 'Review links are set for %s.', 'scout-reviews' ), implode( ', ', $with_link ) ),
+				$detail
+			);
+		}
+
+		do_action( 'scout_reviews_settings_top' );
 		?>
-		<?php Scout_Admin_UI::open( __( 'Review settings', 'scout-reviews' ), __( 'Your profile on each review platform, how reviews look on the site, and where to put them.', 'scout-reviews' ) ); ?>
 
-			<?php do_action( 'scout_reviews_settings_top' ); ?>
+		<form method="post" action="options.php">
+			<?php settings_fields( self::PAGE ); ?>
 
-			<form method="post" action="options.php">
-				<?php settings_fields( self::PAGE ); ?>
-
-				<h2><?php esc_html_e( 'Your profile on each platform', 'scout-reviews' ); ?></h2>
-				<p class="description" style="max-width:720px;">
-					<?php esc_html_e( 'Copy the overall rating and total review count exactly as each platform shows them. The rating summary on the site uses these numbers, so visitors see your real totals, not just the reviews you picked. Leave a row empty to skip that platform.', 'scout-reviews' ); ?>
-				</p>
-
-				<table class="widefat striped" style="max-width:1100px;margin-top:12px;">
-					<thead>
-						<tr>
-							<th><?php esc_html_e( 'Platform', 'scout-reviews' ); ?></th>
-							<th><?php esc_html_e( 'Overall rating', 'scout-reviews' ); ?></th>
-							<th><?php esc_html_e( 'Total reviews', 'scout-reviews' ); ?></th>
-							<th><?php esc_html_e( 'Profile link (read all reviews)', 'scout-reviews' ); ?></th>
-							<th><?php esc_html_e( 'Leave a review link', 'scout-reviews' ); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php
-						foreach ( Scout_Reviews_Sources::all() as $slug => $info ) :
-							if ( 'direct' === $slug ) {
-								continue; // Direct testimonials have no platform profile.
-							}
-							$p      = self::profile( $slug );
-							$base   = $name . '[profiles][' . $slug . ']';
-							$synced = 'google' === $slug && Scout_Reviews_Google::is_ready();
-							$lock   = $synced ? ' readonly' : '';
-							?>
-							<tr>
-								<td>
-									<strong><?php echo esc_html( $info['label'] ); ?></strong>
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Your profile on each platform', 'scout-reviews' ); ?></h2>
+				<p><?php esc_html_e( 'Copy the overall rating and total review count exactly as each platform shows them. The rating summary on the site uses these numbers, so visitors see your real totals, not just the reviews you picked. Leave a platform empty to skip it.', 'scout-reviews' ); ?></p>
+				<ul class="sh-rows srk-platforms">
+					<?php
+					foreach ( $sources as $slug => $info ) :
+						$p      = self::profile( $slug );
+						$base   = $name . '[profiles][' . $slug . ']';
+						$synced = 'google' === $slug && Scout_Reviews_Google::is_ready();
+						$lock   = $synced ? ' readonly' : '';
+						$id     = 'srk-p-' . sanitize_html_class( $slug );
+						$empty  = ! $p['rating'] && ! $p['count'] && '' === $p['url'] && '' === $p['write_url'];
+						?>
+						<li class="sh-row srk-platform">
+							<details>
+								<summary>
+									<span class="srk-platform-name">
+										<span class="sh-row-name"><?php echo esc_html( $info['label'] ); ?></span>
+										<span class="sh-row-sub">
+											<?php
+											if ( $empty ) {
+												esc_html_e( 'Not set up', 'scout-reviews' );
+											} else {
+												$facts = array();
+												if ( $info['stars'] && $p['rating'] ) {
+													/* translators: %s: rating, e.g. 4.8 */
+													$facts[] = sprintf( __( '%s stars', 'scout-reviews' ), number_format_i18n( $p['rating'], 1 ) );
+												}
+												if ( $p['count'] ) {
+													/* translators: %s: number of reviews */
+													$facts[] = sprintf( _n( '%s review', '%s reviews', $p['count'], 'scout-reviews' ), number_format_i18n( $p['count'] ) );
+												}
+												echo esc_html( $facts ? implode( ', ', $facts ) : __( 'No totals yet', 'scout-reviews' ) );
+											}
+											?>
+										</span>
+									</span>
+									<span class="sh-row-facts">
+										<?php if ( $synced ) : ?>
+											<span class="sh-tag is-update"><?php esc_html_e( 'Synced', 'scout-reviews' ); ?></span>
+										<?php endif; ?>
+										<?php if ( '' !== $p['write_url'] ) : ?>
+											<span class="sh-tag is-current"><?php esc_html_e( 'Review link', 'scout-reviews' ); ?></span>
+										<?php elseif ( ! $empty ) : ?>
+											<span class="sh-tag is-held"><?php esc_html_e( 'No review link', 'scout-reviews' ); ?></span>
+										<?php endif; ?>
+									</span>
+									<span class="sh-row-go"><span class="button"><?php echo $synced ? esc_html__( 'See details', 'scout-reviews' ) : ( $empty ? esc_html__( 'Add', 'scout-reviews' ) : esc_html__( 'Change', 'scout-reviews' ) ); ?></span></span>
+								</summary>
+								<div class="srk-fields">
 									<?php if ( $synced ) : ?>
-										<br /><span class="description"><?php esc_html_e( 'Synced', 'scout-reviews' ); ?></span>
+										<p class="sh-note"><?php esc_html_e( 'Google fills these in on every sync, so they cannot be changed here.', 'scout-reviews' ); ?></p>
 									<?php endif; ?>
-								</td>
-								<td>
-									<?php if ( $info['stars'] ) : ?>
-										<input type="number" step="0.1" min="1" max="5" style="width:80px;"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[rating]' ); ?>" value="<?php echo $p['rating'] ? esc_attr( (string) $p['rating'] ) : ''; ?>" />
-									<?php else : ?>
-										<span class="description"><?php esc_html_e( 'No stars', 'scout-reviews' ); ?></span>
-									<?php endif; ?>
-								</td>
-								<td><input type="number" min="0" step="1" style="width:90px;"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[count]' ); ?>" value="<?php echo $p['count'] ? esc_attr( (string) $p['count'] ) : ''; ?>" /></td>
-								<td><input type="url" class="regular-text" placeholder="https://"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[url]' ); ?>" value="<?php echo esc_attr( $p['url'] ); ?>" /></td>
-								<td><input type="url" class="regular-text" placeholder="https://"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[write_url]' ); ?>" value="<?php echo esc_attr( $p['write_url'] ); ?>" /></td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-				<p class="description">
-					<?php esc_html_e( 'Google\'s "leave a review" link is in your Business Profile under "Ask for reviews." It takes clients straight to the review box.', 'scout-reviews' ); ?>
-				</p>
+									<div class="srk-fields-row">
+										<?php if ( $info['stars'] ) : ?>
+											<span class="srk-field">
+												<label for="<?php echo esc_attr( $id . '-rating' ); ?>"><?php esc_html_e( 'Overall rating', 'scout-reviews' ); ?></label>
+												<input id="<?php echo esc_attr( $id . '-rating' ); ?>" type="number" step="0.1" min="1" max="5" class="srk-num"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[rating]' ); ?>" value="<?php echo $p['rating'] ? esc_attr( (string) $p['rating'] ) : ''; ?>" />
+											</span>
+										<?php else : ?>
+											<span class="srk-field">
+												<span class="srk-field-label"><?php esc_html_e( 'Overall rating', 'scout-reviews' ); ?></span>
+												<span class="description"><?php esc_html_e( 'No stars', 'scout-reviews' ); ?></span>
+											</span>
+										<?php endif; ?>
+										<span class="srk-field">
+											<label for="<?php echo esc_attr( $id . '-count' ); ?>"><?php esc_html_e( 'Total reviews', 'scout-reviews' ); ?></label>
+											<input id="<?php echo esc_attr( $id . '-count' ); ?>" type="number" min="0" step="1" class="srk-num"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[count]' ); ?>" value="<?php echo $p['count'] ? esc_attr( (string) $p['count'] ) : ''; ?>" />
+										</span>
+									</div>
+									<span class="srk-field">
+										<label for="<?php echo esc_attr( $id . '-url' ); ?>"><?php esc_html_e( 'Profile link (read all reviews)', 'scout-reviews' ); ?></label>
+										<input id="<?php echo esc_attr( $id . '-url' ); ?>" type="url" placeholder="https://"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[url]' ); ?>" value="<?php echo esc_attr( $p['url'] ); ?>" />
+									</span>
+									<span class="srk-field">
+										<label for="<?php echo esc_attr( $id . '-write' ); ?>"><?php esc_html_e( 'Leave a review link', 'scout-reviews' ); ?></label>
+										<input id="<?php echo esc_attr( $id . '-write' ); ?>" type="url" placeholder="https://"<?php echo $lock; // phpcs:ignore WordPress.Security.EscapeOutput ?> name="<?php echo esc_attr( $base . '[write_url]' ); ?>" value="<?php echo esc_attr( $p['write_url'] ); ?>" />
+									</span>
+								</div>
+							</details>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<p class="sh-note"><?php esc_html_e( 'Google\'s "leave a review" link is in your Business Profile under "Ask for reviews." It takes clients straight to the review box.', 'scout-reviews' ); ?></p>
+			</section>
 
-				<h2 style="margin-top:32px;"><?php esc_html_e( 'Display', 'scout-reviews' ); ?></h2>
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Display', 'scout-reviews' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><label for="scout-reviews-disclaimer"><?php esc_html_e( 'Disclaimer (optional)', 'scout-reviews' ); ?></label></th>
@@ -220,6 +283,11 @@ final class Scout_Reviews_Settings {
 							<p class="description"><?php esc_html_e( 'Leave off for law firms: bar rules expect a person to approve each testimonial.', 'scout-reviews' ); ?></p>
 						</td>
 					</tr>
+				</table>
+			</section>
+
+			<?php Scout_Reviews_Menu::fold_open( __( 'More options', 'scout-reviews' ) ); ?>
+				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Built-in design', 'scout-reviews' ); ?></th>
 						<td>
@@ -233,13 +301,14 @@ final class Scout_Reviews_Settings {
 						</td>
 					</tr>
 				</table>
+			<?php Scout_Reviews_Menu::fold_close(); ?>
 
-				<?php submit_button(); ?>
-			</form>
+			<?php submit_button(); ?>
+		</form>
 
-			<h2><?php esc_html_e( 'Putting reviews on a page', 'scout-reviews' ); ?></h2>
+		<?php Scout_Reviews_Menu::fold_open( __( 'Putting reviews on a page', 'scout-reviews' ) ); ?>
 			<p><?php esc_html_e( 'In the block editor, add the "Scout Reviews" block. Anywhere else, use a shortcode:', 'scout-reviews' ); ?></p>
-			<ul style="list-style:disc;padding-left:20px;">
+			<ul class="srk-codes">
 				<li><code>[scout_reviews]</code> <?php esc_html_e( 'shows the rating summary and every published review.', 'scout-reviews' ); ?></li>
 				<li><code>[scout_reviews featured="1" count="3"]</code> <?php esc_html_e( 'shows three featured reviews, good for the home page.', 'scout-reviews' ); ?></li>
 				<li><code>[scout_reviews source="google" layout="row"]</code> <?php esc_html_e( 'shows only Google reviews in a sideways-scrolling row.', 'scout-reviews' ); ?></li>
@@ -248,7 +317,8 @@ final class Scout_Reviews_Settings {
 				<li><code>[scout_review_summary]</code> <?php esc_html_e( 'shows only the rating summary.', 'scout-reviews' ); ?></li>
 			</ul>
 			<p><?php esc_html_e( 'Theme developers: call scout_reviews_slot() in a template to show the reviews for that page automatically. See the plugin README.', 'scout-reviews' ); ?></p>
-		<?php Scout_Admin_UI::close(); ?>
+		<?php Scout_Reviews_Menu::fold_close(); ?>
 		<?php
+		Scout_Admin_UI::close();
 	}
 }

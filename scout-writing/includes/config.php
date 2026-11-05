@@ -223,14 +223,21 @@ function scout_writing_brand(): array {
 		'tip'         => '#F5F5F7',
 	);
 	$set   = (array) ( scout_writing_setup()['brand'] ?? array() );
-	$brand = array();
+	$brand = array( 'set' => array() );
 	foreach ( $defaults as $k => $v ) {
 		$c           = isset( $set[ $k ] ) && is_string( $set[ $k ] ) ? sanitize_hex_color( $set[ $k ] ) : null;
 		$brand[ $k ] = $c ? $c : $v;
+		if ( $c ) {
+			$brand['set'][] = $k; // Only these are printed over the room's Scout look (scout_writing_brand_css).
+		}
 	}
 	$sans                = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 	$brand['heading']    = scout_writing_font_stack( $set['heading_font'] ?? '', "Georgia, 'Times New Roman', serif", $sans );
 	$brand['body']       = scout_writing_font_stack( $set['body_font'] ?? '', $sans, $sans );
+	$brand['fonts_set']  = array(
+		'serif' => is_string( $set['heading_font'] ?? null ) && '' !== trim( $set['heading_font'] ),
+		'sans'  => is_string( $set['body_font'] ?? null ) && '' !== trim( $set['body_font'] ),
+	);
 	$brand['font_faces'] = scout_writing_font_faces( (array) ( $set['font_files'] ?? array() ) );
 	return $brand;
 }
@@ -293,11 +300,20 @@ function scout_writing_brand_css( string $selector ): string {
 		'bar'         => 'bar',
 		'tip'         => 'tip',
 	);
-	$css = $selector . '{';
+	// Only what the theme sets. Everything else comes from the Scout admin kit's tokens in writing-room.css.
+	$css = '';
 	foreach ( $vars as $var => $key ) {
-		$css .= '--sw-' . $var . ':' . $b[ $key ] . ';';
+		if ( in_array( $key, $b['set'], true ) ) {
+			$css .= '--sw-' . $var . ':' . $b[ $key ] . ';';
+		}
 	}
-	return $css . '--sw-serif:' . $b['heading'] . ';--sw-sans:' . $b['body'] . '}';
+	if ( $b['fonts_set']['serif'] ) {
+		$css .= '--sw-serif:' . $b['heading'] . ';';
+	}
+	if ( $b['fonts_set']['sans'] ) {
+		$css .= '--sw-sans:' . $b['body'] . ';';
+	}
+	return '' === $css ? '' : $selector . '{' . $css . '}';
 }
 
 /** One of the room's words, from the theme's "text" section or the default. */

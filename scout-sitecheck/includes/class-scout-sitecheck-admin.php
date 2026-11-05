@@ -11,6 +11,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Sitecheck_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** A closed "More options" box (admin kit 1.10.0), with the same fallback. */
+	private static function ui_fold_open( string $title ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 	const SLUG = 'scout-sitecheck';
 
 	public static function boot(): void {
@@ -297,30 +336,33 @@ final class Scout_Sitecheck_Admin {
 		Scout_Admin_UI::open( __( 'Free site check', 'scout-sitecheck' ), __( 'Visitors enter their web address and get a free check of eight things: speed, security, page titles, business info for Google, phone layout, AI crawlers, the sitemap and photo sizes. They see the result on the page and get the full report by email. Every request lands in Site checks.', 'scout-sitecheck' ), __( 'Site check', 'scout-sitecheck' ) );
 		settings_errors( $o );
 		?>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box sh-check is-<?php echo $live ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'The page', 'scout-sitecheck' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $live ? esc_html__( 'Live', 'scout-sitecheck' ) : ( $page ? esc_html__( 'Draft', 'scout-sitecheck' ) : esc_html__( 'Not made yet', 'scout-sitecheck' ) ); ?></p>
-				<p class="sh-note">
-					<?php if ( $page ) : ?>
-						<a href="<?php echo esc_url( (string) get_edit_post_link( $page->ID ) ); ?>"><?php esc_html_e( 'Edit the page', 'scout-sitecheck' ); ?> &rsaquo;</a>
-						<?php if ( $live ) : ?> &middot; <a href="<?php echo esc_url( (string) get_permalink( $page ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View', 'scout-sitecheck' ); ?></a><?php endif; ?>
-					<?php else : ?>
-						<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_ssc_page' ), 'scout_ssc_page' ) ); ?>"><?php esc_html_e( 'Make the page (as a draft)', 'scout-sitecheck' ); ?></a>
-					<?php endif; ?>
-				</p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo $key ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Google\'s speed tool', 'scout-sitecheck' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $key ? esc_html__( 'Key saved', 'scout-sitecheck' ) : esc_html__( 'No key yet', 'scout-sitecheck' ); ?></p>
-				<p class="sh-note"><?php echo $key ? esc_html__( 'Speed checks run on your own Google allowance.', 'scout-sitecheck' ) : esc_html__( 'Without a key, Google often turns speed checks away and speed is left out of the score. Add a free key before the page goes live.', 'scout-sitecheck' ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo $n ? 'warn' : 'good'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Waiting for follow-up', 'scout-sitecheck' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( (string) $n ); ?></p>
-				<p class="sh-note"><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . Scout_Sitecheck::CPT ) ); ?>"><?php esc_html_e( 'Open Site checks', 'scout-sitecheck' ); ?> &rsaquo;</a></p>
-			</section>
-		</div>
+		<?php
+		if ( $live ) {
+			$headline = __( 'Live.', 'scout-sitecheck' );
+			$detail   = __( 'The free site check page is on the site.', 'scout-sitecheck' );
+		} elseif ( $page ) {
+			$headline = __( 'Draft.', 'scout-sitecheck' );
+			$detail   = __( 'The page is made but not published yet.', 'scout-sitecheck' );
+		} else {
+			$headline = __( 'Not made yet.', 'scout-sitecheck' );
+			$detail   = __( 'Make the page as a draft, check it, then publish it.', 'scout-sitecheck' );
+		}
+		$detail .= ' ' . ( $key ? __( 'Google speed key saved, so speed checks run on your own Google allowance.', 'scout-sitecheck' ) : __( 'No Google speed key yet: Google often turns speed checks away and speed is left out of the score. Add a free key under More options before the page goes live.', 'scout-sitecheck' ) );
+		if ( $n ) {
+			/* translators: %d: number of site checks waiting for follow-up. */
+			$detail .= ' ' . sprintf( _n( '%d check is waiting for follow-up.', '%d checks are waiting for follow-up.', $n, 'scout-sitecheck' ), $n );
+		}
+		if ( $page ) {
+			$go = '<a class="button" href="' . esc_url( (string) get_edit_post_link( $page->ID ) ) . '">' . esc_html__( 'Edit the page', 'scout-sitecheck' ) . '</a>';
+			if ( $live ) {
+				$go .= ' <a class="button sh-quiet" href="' . esc_url( (string) get_permalink( $page ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'View', 'scout-sitecheck' ) . '</a>';
+			}
+		} else {
+			$go = '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_ssc_page' ), 'scout_ssc_page' ) ) . '">' . esc_html__( 'Make the page (as a draft)', 'scout-sitecheck' ) . '</a>';
+		}
+		$go .= ' <a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Sitecheck::CPT ) ) . '">' . esc_html__( 'Open Site checks', 'scout-sitecheck' ) . '</a>';
+		self::ui_status( ( $live && $key && ! $n ) ? 'good' : 'warn', $headline, $detail, $go );
+		?>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'scout_sitecheck_group' ); ?>
@@ -336,8 +378,8 @@ final class Scout_Sitecheck_Admin {
 					?>
 				</table>
 			</div>
-			<div class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Google\'s speed tool', 'scout-sitecheck' ); ?></h2>
+			<?php self::ui_fold_open( __( 'More options', 'scout-sitecheck' ) ); ?>
+				<h3><?php esc_html_e( 'Google\'s speed tool', 'scout-sitecheck' ); ?></h3>
 				<p><?php esc_html_e( 'A free PageSpeed Insights key from Google Cloud (APIs & Services → Credentials → Create API key, then enable the PageSpeed Insights API). Without one, Google shares a small allowance across everyone and often turns the check away.', 'scout-sitecheck' ); ?></p>
 				<table class="form-table" role="presentation">
 					<?php
@@ -352,13 +394,11 @@ final class Scout_Sitecheck_Admin {
 					}
 					?>
 				</table>
-			</div>
-			<?php submit_button(); ?>
+				<h3><?php esc_html_e( 'Putting it on another page', 'scout-sitecheck' ); ?></h3>
+				<p><?php esc_html_e( 'Add a Shortcode block with [scout_site_check]. Use [scout_site_check sample="no"] to leave out the sample report.', 'scout-sitecheck' ); ?></p>
+			<?php self::ui_fold_close(); ?>
+			<?php submit_button( __( 'Save changes', 'scout-sitecheck' ) ); ?>
 		</form>
-		<div class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Putting it on another page', 'scout-sitecheck' ); ?></h2>
-			<p><?php esc_html_e( 'Add a Shortcode block with [scout_site_check]. Use [scout_site_check sample="no"] to leave out the sample report.', 'scout-sitecheck' ); ?></p>
-		</div>
 		<?php
 		Scout_Admin_UI::close();
 	}

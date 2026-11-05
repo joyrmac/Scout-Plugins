@@ -280,16 +280,19 @@ final class Scout_Reviews_Requests {
 	}
 
 	public static function assets( string $hook ): void {
-		if ( false === strpos( $hook, self::PAGE ) && false === strpos( $hook, Scout_Reviews_Inbox::PAGE ) ) {
+		if ( false === strpos( $hook, self::PAGE ) && false === strpos( $hook, Scout_Reviews_Inbox::PAGE ) && false === strpos( $hook, Scout_Reviews_Settings::PAGE ) ) {
 			return;
 		}
-		wp_enqueue_style( 'scout-reviews-fonts', 'https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap', array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		wp_enqueue_style( 'scout-reviews-ask', SCOUT_REVIEWS_URL . 'assets/ask.css', array(), SCOUT_REVIEWS_VERSION );
-		$brand = Scout_Reviews_Brand::fonts_url( self::get() );
-		if ( '' !== $brand ) {
-			wp_enqueue_style( 'scout-reviews-brand-fonts', $brand, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		}
+		// The screens use the shared Scout admin kit (no web fonts in the dashboard);
+		// ask.css only adds the review link, the card previews, the inbox rows and
+		// the platform rows on Review settings.
+		wp_enqueue_style( 'scout-reviews-ask', SCOUT_REVIEWS_URL . 'assets/ask.css', array( 'scout-admin' ), SCOUT_REVIEWS_VERSION );
 		if ( false !== strpos( $hook, self::PAGE ) ) {
+			// The client's own fonts, for the printed card previews only.
+			$brand = Scout_Reviews_Brand::fonts_url( self::get() );
+			if ( '' !== $brand ) {
+				wp_enqueue_style( 'scout-reviews-brand-fonts', $brand, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			}
 			wp_enqueue_script( 'scout-reviews-qr', SCOUT_REVIEWS_URL . 'assets/qrcode.min.js', array(), SCOUT_REVIEWS_VERSION, true );
 			wp_enqueue_script( 'scout-reviews-ask', SCOUT_REVIEWS_URL . 'assets/ask.js', array( 'scout-reviews-qr' ), SCOUT_REVIEWS_VERSION, true );
 		}
@@ -318,156 +321,160 @@ final class Scout_Reviews_Requests {
 		);
 	}
 
-	/** The shared admin header: mono eyebrow, title, optional actions. */
-	public static function header( string $section, string $title, string $actions = '' ): void {
-		?>
-		<header class="srk-head">
-			<div>
-				<p class="srk-eyebrow"><?php echo esc_html( __( 'Reviews', 'scout-reviews' ) . ' · ' . $section ); ?></p>
-				<h1><?php echo esc_html( $title ); ?></h1>
-			</div>
-			<?php if ( $actions ) : ?>
-				<div class="srk-actions"><?php echo $actions; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts by the caller. ?></div>
-			<?php endif; ?>
-		</header>
-		<?php
-	}
-
 	public static function page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$s       = self::get();
-		$links   = self::write_links();
-		$target  = self::target();
-		$msg     = self::messages( $s, $target );
-		$name    = self::OPTION;
-		$card_h  = self::card_headline( $s );
-		$display = preg_replace( '#^https?://#', '', untrailingslashit( self::link() ) );
-		$stats   = get_option( self::STATS, array() );
-		$stats   = is_array( $stats ) ? array_slice( $stats, 0, 6, true ) : array();
+		$s            = self::get();
+		$links        = self::write_links();
+		$target       = self::target();
+		$msg          = self::messages( $s, $target );
+		$name         = self::OPTION;
+		$card_h       = self::card_headline( $s );
+		$display      = preg_replace( '#^https?://#', '', untrailingslashit( self::link() ) );
+		$stats        = get_option( self::STATS, array() );
+		$stats        = is_array( $stats ) ? array_slice( $stats, 0, 6, true ) : array();
 		$settings_url = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
-		$test    = '<a class="button" href="' . esc_url( self::link() ) . '" target="_blank" rel="noopener">' . esc_html__( 'Open the review page', 'scout-reviews' ) . '</a>';
+		$test         = '<a class="button" href="' . esc_url( self::link() ) . '" target="_blank" rel="noopener">' . esc_html__( 'Open the review page', 'scout-reviews' ) . '</a>';
+
+		Scout_Admin_UI::open(
+			__( 'Ask for reviews', 'scout-reviews' ),
+			__( 'One link for every review request. Share it by text, by email, or on a printed card with a QR code. If your review link ever changes, update it in Review settings and every card and message keeps working.', 'scout-reviews' )
+		);
+
+		if ( ! $s['enabled'] ) {
+			Scout_Reviews_Menu::status( 'off', __( 'The review page is off.', 'scout-reviews' ), __( 'Turn it on in More options at the bottom of this screen.', 'scout-reviews' ) );
+		} elseif ( ! $links ) {
+			Scout_Reviews_Menu::status(
+				'bad',
+				__( 'No review link yet.', 'scout-reviews' ),
+				__( 'Add your "leave a review" link first. Until then the review page has no review button.', 'scout-reviews' ),
+				'<a class="button" href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Open Review settings', 'scout-reviews' ) . '</a>'
+			);
+		} else {
+			$where = 'direct' === $s['mode'] && $target
+				/* translators: %s: platform */
+				? sprintf( __( 'It goes straight to your %s review box.', 'scout-reviews' ), $target['label'] )
+				/* translators: %s: platform */
+				: sprintf( __( 'It opens your review page, with a button to your %s review box.', 'scout-reviews' ), $target['label'] );
+			Scout_Reviews_Menu::status( 'good', __( 'Your review link is ready.', 'scout-reviews' ), $where, $test );
+		}
 		?>
-		<div class="wrap srk recon-theme" data-theme="light" style="<?php echo esc_attr( Scout_Reviews_Brand::card_vars( $s ) ); ?>">
-			<?php self::header( __( 'Ask for reviews', 'scout-reviews' ), __( 'Ask every client the same way', 'scout-reviews' ), $test ); ?>
-			<p class="srk-lede"><?php esc_html_e( 'One link for every review request. Share it by text, by email, or on a printed card with a QR code. If your review link ever changes, update it in Settings and every card and message keeps working.', 'scout-reviews' ); ?></p>
+		<div class="srk" style="<?php echo esc_attr( Scout_Reviews_Brand::card_vars( $s ) ); ?>">
 
-			<?php if ( ! $s['enabled'] ) : ?>
-				<div class="notice notice-warning inline"><p><?php esc_html_e( 'The review page is turned off. Turn it on under Page settings below.', 'scout-reviews' ); ?></p></div>
-			<?php elseif ( ! $links ) : ?>
-				<div class="notice notice-error inline"><p>
-					<?php esc_html_e( 'Add your "leave a review" link first. Until then the review page has no review button.', 'scout-reviews' ); ?>
-					<a href="<?php echo esc_url( $settings_url ); ?>"><?php esc_html_e( 'Open Settings', 'scout-reviews' ); ?></a>
-				</p></div>
-			<?php endif; ?>
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Your review link', 'scout-reviews' ); ?></h2>
+				<p><?php esc_html_e( 'Use this one link everywhere you ask. Your own visits are not counted while you are signed in.', 'scout-reviews' ); ?></p>
+				<div class="srk-link">
+					<code id="srk-main"><?php echo esc_html( self::link() ); ?></code>
+					<button type="button" class="button button-primary" data-copy="#srk-main"><?php esc_html_e( 'Copy link', 'scout-reviews' ); ?></button>
+				</div>
+				<?php if ( $s['notes'] ) : ?>
+					<p class="srk-sublabel"><?php esc_html_e( 'Private note form', 'scout-reviews' ); ?></p>
+					<div class="srk-link"><code><?php echo esc_html( self::note_link() ); ?></code></div>
+					<p class="sh-note"><?php esc_html_e( 'Linked quietly at the bottom of the review page. Notes land in your Review inbox and only go on the site when the client said yes.', 'scout-reviews' ); ?></p>
+				<?php endif; ?>
+			</section>
 
-			<div class="srk-grid">
-				<section class="srk-box">
-					<p class="srk-label"><?php esc_html_e( 'Your review link', 'scout-reviews' ); ?></p>
-					<p class="srk-link"><code id="srk-main"><?php echo esc_html( self::link() ); ?></code>
-						<button type="button" class="button" data-copy="#srk-main"><?php esc_html_e( 'Copy', 'scout-reviews' ); ?></button></p>
-					<p class="srk-note">
-						<?php
-						if ( 'direct' === $s['mode'] && $target ) {
-							/* translators: %s: platform */
-							echo esc_html( sprintf( __( 'Goes straight to your %s review box.', 'scout-reviews' ), $target['label'] ) );
-						} elseif ( $target ) {
-							/* translators: %s: platform */
-							echo esc_html( sprintf( __( 'Opens your review page, with a button to your %s review box.', 'scout-reviews' ), $target['label'] ) );
-						}
-						?>
-						<?php esc_html_e( 'Your own visits are not counted while you are signed in.', 'scout-reviews' ); ?>
-					</p>
-					<?php if ( $s['notes'] ) : ?>
-						<p class="srk-label" style="margin-top:20px"><?php esc_html_e( 'Private note form', 'scout-reviews' ); ?></p>
-						<p class="srk-link"><code><?php echo esc_html( self::note_link() ); ?></code></p>
-						<p class="srk-note"><?php esc_html_e( 'Linked quietly at the bottom of the review page. Notes land in your Inbox and only go on the site when the client said yes.', 'scout-reviews' ); ?></p>
-					<?php endif; ?>
-				</section>
-
-				<section class="srk-box srk-qrbox">
-					<div class="srk-qrcard">
-						<p class="srk-qrname"><?php echo esc_html( $s['business'] ); ?></p>
-						<div class="srk-qr srk-qr-lg" data-qr-url="<?php echo esc_attr( self::link( 'qr' ) ); ?>" role="img" aria-label="<?php esc_attr_e( 'QR code for your review link', 'scout-reviews' ); ?>"></div>
-						<p class="srk-qrurl"><?php echo esc_html( $display ); ?></p>
-					</div>
-					<p class="srk-btnrow">
-						<button type="button" class="button" data-qr-download="svg"><?php esc_html_e( 'Download SVG (for printers)', 'scout-reviews' ); ?></button>
-						<button type="button" class="button" data-qr-download="png"><?php esc_html_e( 'Download PNG', 'scout-reviews' ); ?></button>
-					</p>
-				</section>
-			</div>
-
-			<section class="srk-box">
-				<p class="srk-label"><?php esc_html_e( 'Printable cards', 'scout-reviews' ); ?></p>
-				<h2><?php esc_html_e( 'Put the QR code where clients finish with you', 'scout-reviews' ); ?></h2>
-				<p class="srk-note"><?php esc_html_e( 'Print on card stock. Each layout prints on its own letter-size page with light cut lines. The same QR code works on invoices.', 'scout-reviews' ); ?></p>
-				<div class="srk-print-grid">
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'QR code and printed cards', 'scout-reviews' ); ?></h2>
+				<p><?php esc_html_e( 'Put the QR code where clients finish with you. Print on card stock: each layout prints on its own letter-size page with light cut lines. The same QR code works on invoices.', 'scout-reviews' ); ?></p>
+				<ul class="sh-rows srk-print-rows">
+					<li class="sh-row">
+						<div class="srk-rowmain">
+							<div class="srk-qr srk-qr-lg" data-qr-url="<?php echo esc_attr( self::link( 'qr' ) ); ?>" role="img" aria-label="<?php esc_attr_e( 'QR code for your review link', 'scout-reviews' ); ?>"></div>
+							<div>
+								<p class="sh-row-name"><?php esc_html_e( 'QR code', 'scout-reviews' ); ?></p>
+								<p class="sh-row-sub"><?php echo esc_html( $display ); ?></p>
+							</div>
+						</div>
+						<div class="sh-row-facts"><span class="sh-tag"><?php esc_html_e( 'For printers, signs and invoices', 'scout-reviews' ); ?></span></div>
+						<div class="sh-row-go">
+							<button type="button" class="button" data-qr-download="svg"><?php esc_html_e( 'Download SVG', 'scout-reviews' ); ?></button>
+							<button type="button" class="button sh-quiet" data-qr-download="png"><?php esc_html_e( 'Download PNG', 'scout-reviews' ); ?></button>
+						</div>
+					</li>
 					<?php
 					$layouts = array(
-						'counter' => __( 'Counter card, 4 by 6 inches', 'scout-reviews' ),
-						'cards'   => __( 'Business cards, 10 per page', 'scout-reviews' ),
-						'tent'    => __( 'Table tent, fold in half', 'scout-reviews' ),
+						'counter' => array( __( 'Counter card', 'scout-reviews' ), __( '4 by 6 inches, one per page', 'scout-reviews' ) ),
+						'cards'   => array( __( 'Business cards', 'scout-reviews' ), __( '3.5 by 2 inches, 10 per page', 'scout-reviews' ) ),
+						'tent'    => array( __( 'Table tent', 'scout-reviews' ), __( 'Fold in half along the middle line', 'scout-reviews' ) ),
 					);
-					foreach ( $layouts as $key => $label ) :
+					foreach ( $layouts as $key => $layout ) :
 						$copies = 'cards' === $key ? 10 : ( 'tent' === $key ? 2 : 1 );
 						?>
-						<figure class="srk-layout">
-							<div class="srk-sheet-wrap srk-wrap-<?php echo esc_attr( $key ); ?>">
-							<div class="srk-sheet srk-sheet-<?php echo esc_attr( $key ); ?>" data-layout="<?php echo esc_attr( $key ); ?>">
-								<?php for ( $i = 0; $i < $copies; $i++ ) : ?>
-									<div class="srk-card">
-										<p class="srk-biz"><?php echo esc_html( $s['business'] ); ?></p>
-										<p class="srk-chead"><?php echo esc_html( $card_h ); ?></p>
-										<div class="srk-qr" data-qr-url="<?php echo esc_attr( self::link( 'qr' ) ); ?>"></div>
-										<p class="srk-scan"><?php echo esc_html( $display ); ?></p>
+						<li class="sh-row">
+							<div class="srk-rowmain">
+								<div class="srk-sheet-wrap srk-wrap-<?php echo esc_attr( $key ); ?>" aria-hidden="true">
+									<div class="srk-sheet srk-sheet-<?php echo esc_attr( $key ); ?>" data-layout="<?php echo esc_attr( $key ); ?>">
+										<?php for ( $i = 0; $i < $copies; $i++ ) : ?>
+											<div class="srk-card">
+												<p class="srk-biz"><?php echo esc_html( $s['business'] ); ?></p>
+												<p class="srk-chead"><?php echo esc_html( $card_h ); ?></p>
+												<div class="srk-qr" data-qr-url="<?php echo esc_attr( self::link( 'qr' ) ); ?>"></div>
+												<p class="srk-scan"><?php echo esc_html( $display ); ?></p>
+											</div>
+										<?php endfor; ?>
 									</div>
-								<?php endfor; ?>
+								</div>
+								<div>
+									<p class="sh-row-name"><?php echo esc_html( $layout[0] ); ?></p>
+									<p class="sh-row-sub"><?php echo esc_html( $layout[1] ); ?></p>
+								</div>
 							</div>
+							<div class="sh-row-facts"></div>
+							<div class="sh-row-go">
+								<button type="button" class="button" data-print="<?php echo esc_attr( $key ); ?>"><?php esc_html_e( 'Print', 'scout-reviews' ); ?><span class="screen-reader-text"> <?php echo esc_html( $layout[0] ); ?></span></button>
 							</div>
-							<figcaption>
-								<span><?php echo esc_html( $label ); ?></span>
-								<button type="button" class="button button-primary" data-print="<?php echo esc_attr( $key ); ?>"><?php esc_html_e( 'Print', 'scout-reviews' ); ?></button>
-							</figcaption>
-						</figure>
+						</li>
 					<?php endforeach; ?>
+				</ul>
+			</section>
+
+			<section class="sh-box" id="srk-messages">
+				<h2 class="sh-title"><?php esc_html_e( 'Ready-to-send messages', 'scout-reviews' ); ?></h2>
+				<p><?php esc_html_e( 'Send the same message to every client, right after you finish the work. Replace [first name] before sending.', 'scout-reviews' ); ?></p>
+				<div class="srk-field">
+					<label for="srk-text"><?php esc_html_e( 'Text message', 'scout-reviews' ); ?></label>
+					<textarea id="srk-text" rows="4" readonly><?php echo esc_textarea( $msg['text'] ); ?></textarea>
+					<div class="srk-btnrow"><button type="button" class="button" data-copy="#srk-text"><?php esc_html_e( 'Copy text', 'scout-reviews' ); ?></button></div>
+				</div>
+				<div class="srk-field">
+					<label for="srk-subject"><?php esc_html_e( 'Email subject', 'scout-reviews' ); ?></label>
+					<input id="srk-subject" type="text" readonly value="<?php echo esc_attr( $msg['subject'] ); ?>" />
+					<label for="srk-email"><?php esc_html_e( 'Email', 'scout-reviews' ); ?></label>
+					<textarea id="srk-email" rows="9" readonly><?php echo esc_textarea( $msg['email'] ); ?></textarea>
+					<div class="srk-btnrow">
+						<button type="button" class="button" data-copy="#srk-email"><?php esc_html_e( 'Copy email', 'scout-reviews' ); ?></button>
+						<button type="button" class="button sh-quiet" data-copy="#srk-subject"><?php esc_html_e( 'Copy subject', 'scout-reviews' ); ?></button>
+					</div>
 				</div>
 			</section>
 
-			<section class="srk-box" id="srk-messages">
-				<p class="srk-label"><?php esc_html_e( 'Ready-to-send messages', 'scout-reviews' ); ?></p>
-				<h2><?php esc_html_e( 'Send the same message to every client', 'scout-reviews' ); ?></h2>
-				<p class="srk-note"><?php esc_html_e( 'Send it right after you finish the work. Replace [first name] before sending.', 'scout-reviews' ); ?></p>
-				<div class="srk-grid">
-					<div>
-						<label class="srk-label" for="srk-text"><?php esc_html_e( 'Text message', 'scout-reviews' ); ?></label>
-						<textarea id="srk-text" rows="5" readonly><?php echo esc_textarea( $msg['text'] ); ?></textarea>
-						<p class="srk-btnrow"><button type="button" class="button" data-copy="#srk-text"><?php esc_html_e( 'Copy text', 'scout-reviews' ); ?></button></p>
-					</div>
-					<div>
-						<label class="srk-label" for="srk-subject"><?php esc_html_e( 'Email', 'scout-reviews' ); ?></label>
-						<input id="srk-subject" type="text" readonly value="<?php echo esc_attr( $msg['subject'] ); ?>" />
-						<textarea id="srk-email" rows="9" readonly aria-label="<?php esc_attr_e( 'Email body', 'scout-reviews' ); ?>"><?php echo esc_textarea( $msg['email'] ); ?></textarea>
-						<p class="srk-btnrow"><button type="button" class="button" data-copy="#srk-subject"><?php esc_html_e( 'Copy subject', 'scout-reviews' ); ?></button>
-							<button type="button" class="button" data-copy="#srk-email"><?php esc_html_e( 'Copy email', 'scout-reviews' ); ?></button></p>
-					</div>
-				</div>
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Asking the right way', 'scout-reviews' ); ?></h2>
+				<ul class="srk-rules">
+					<li><?php esc_html_e( 'Ask every client the same way. Asking only the happy ones breaks Google\'s rules and FTC guidance.', 'scout-reviews' ); ?></li>
+					<li><?php esc_html_e( 'Offer nothing in return: no discounts, gifts, or entries.', 'scout-reviews' ); ?></li>
+					<li><?php esc_html_e( 'Ask soon after the work is done, while it is fresh.', 'scout-reviews' ); ?></li>
+					<li><?php esc_html_e( 'Law firms: check your state bar\'s rules on asking clients for reviews before you send anything.', 'scout-reviews' ); ?></li>
+				</ul>
 			</section>
 
-			<div class="srk-grid">
-				<section class="srk-box">
-					<p class="srk-label"><?php esc_html_e( 'Visits to your review link', 'scout-reviews' ); ?></p>
-					<?php if ( ! $stats ) : ?>
-						<p class="srk-note"><?php esc_html_e( 'No visits yet. Counts appear here as people use the link.', 'scout-reviews' ); ?></p>
-					<?php else : ?>
+			<section class="sh-box">
+				<h2 class="sh-title"><?php esc_html_e( 'Visits to your review link', 'scout-reviews' ); ?></h2>
+				<?php if ( ! $stats ) : ?>
+					<p><?php esc_html_e( 'No visits yet. Counts appear here as people use the link.', 'scout-reviews' ); ?></p>
+				<?php else : ?>
+					<p><?php esc_html_e( 'These are visits, not reviews. Your platform shows how many reviews came in.', 'scout-reviews' ); ?></p>
+					<div class="srk-scroll">
 						<table class="srk-stats">
 							<thead><tr>
-								<th><?php esc_html_e( 'Month', 'scout-reviews' ); ?></th>
-								<th><?php esc_html_e( 'QR scans', 'scout-reviews' ); ?></th>
-								<th><?php esc_html_e( 'Texts', 'scout-reviews' ); ?></th>
-								<th><?php esc_html_e( 'Emails', 'scout-reviews' ); ?></th>
-								<th><?php esc_html_e( 'Other', 'scout-reviews' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Month', 'scout-reviews' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'QR scans', 'scout-reviews' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Texts', 'scout-reviews' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Emails', 'scout-reviews' ); ?></th>
+								<th scope="col"><?php esc_html_e( 'Other', 'scout-reviews' ); ?></th>
 							</tr></thead>
 							<tbody>
 							<?php foreach ( $stats as $month => $row ) : ?>
@@ -481,130 +488,124 @@ final class Scout_Reviews_Requests {
 							<?php endforeach; ?>
 							</tbody>
 						</table>
-						<p class="srk-note"><?php esc_html_e( 'These are visits, not reviews. Your platform shows how many reviews came in.', 'scout-reviews' ); ?></p>
-					<?php endif; ?>
-				</section>
+					</div>
+				<?php endif; ?>
+			</section>
 
-				<section class="srk-box srk-rules">
-					<p class="srk-label"><?php esc_html_e( 'Asking the right way', 'scout-reviews' ); ?></p>
-					<ul>
-						<li><?php esc_html_e( 'Ask every client the same way. Asking only the happy ones breaks Google\'s rules and FTC guidance.', 'scout-reviews' ); ?></li>
-						<li><?php esc_html_e( 'Offer nothing in return: no discounts, gifts, or entries.', 'scout-reviews' ); ?></li>
-						<li><?php esc_html_e( 'Ask soon after the work is done, while it is fresh.', 'scout-reviews' ); ?></li>
-						<li><?php esc_html_e( 'Law firms: check your state bar\'s rules on asking clients for reviews before you send anything.', 'scout-reviews' ); ?></li>
-					</ul>
-				</section>
-			</div>
+		</div>
 
-			<section class="srk-box">
-				<p class="srk-label"><?php esc_html_e( 'Page settings', 'scout-reviews' ); ?></p>
-				<form method="post" action="options.php">
-					<?php settings_fields( self::PAGE ); ?>
-					<table class="form-table" role="presentation">
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Review page', 'scout-reviews' ); ?></th>
-							<td><label><input type="checkbox" name="<?php echo esc_attr( $name . '[enabled]' ); ?>" value="1" <?php checked( $s['enabled'] ); ?> /> <?php esc_html_e( 'Turn on the review page', 'scout-reviews' ); ?></label></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-slug"><?php esc_html_e( 'Address', 'scout-reviews' ); ?></label></th>
-							<td><code><?php echo esc_html( home_url( '/' ) ); ?></code><input id="srk-slug" type="text" style="width:160px" name="<?php echo esc_attr( $name . '[slug]' ); ?>" value="<?php echo esc_attr( $s['slug'] ); ?>" /><code>/</code>
-								<p class="description"><?php esc_html_e( 'Change this before you print cards. Printed cards keep the address they were printed with.', 'scout-reviews' ); ?></p></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-primary"><?php esc_html_e( 'Main platform', 'scout-reviews' ); ?></label></th>
-							<td>
-								<select id="srk-primary" name="<?php echo esc_attr( $name . '[primary]' ); ?>">
-									<?php foreach ( Scout_Reviews_Sources::all() as $slug => $info ) : ?>
-										<?php if ( 'direct' === $slug ) { continue; } ?>
-										<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $s['primary'], $slug ); ?>><?php echo esc_html( $info['label'] . ( isset( $links[ $slug ] ) ? '' : ' ' . __( '(no link yet)', 'scout-reviews' ) ) ); ?></option>
-									<?php endforeach; ?>
-								</select>
-								<p class="description"><?php esc_html_e( 'The big button on the review page. Other platforms with a link show as smaller buttons under it.', 'scout-reviews' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Where the link goes', 'scout-reviews' ); ?></th>
-							<td>
-								<label><input type="radio" name="<?php echo esc_attr( $name . '[mode]' ); ?>" value="page" <?php checked( $s['mode'], 'page' ); ?> /> <?php esc_html_e( 'Your review page (recommended)', 'scout-reviews' ); ?></label><br />
-								<label><input type="radio" name="<?php echo esc_attr( $name . '[mode]' ); ?>" value="direct" <?php checked( $s['mode'], 'direct' ); ?> /> <?php esc_html_e( 'Straight to the main platform, skipping the page', 'scout-reviews' ); ?></label>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Private notes', 'scout-reviews' ); ?></th>
-							<td><label><input type="checkbox" name="<?php echo esc_attr( $name . '[notes]' ); ?>" value="1" <?php checked( $s['notes'] ); ?> /> <?php esc_html_e( 'Show the "send us a note privately" link and form', 'scout-reviews' ); ?></label></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-note-email"><?php esc_html_e( 'Send private notes to', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-note-email" type="email" class="regular-text" name="<?php echo esc_attr( $name . '[note_email]' ); ?>" value="<?php echo esc_attr( $s['note_email'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" />
-							<p class="description"><?php esc_html_e( 'Leave empty to use the site\'s admin email.', 'scout-reviews' ); ?></p></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-business"><?php esc_html_e( 'Business name', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-business" type="text" class="regular-text" name="<?php echo esc_attr( $name . '[business]' ); ?>" value="<?php echo esc_attr( $s['business'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-headline"><?php esc_html_e( 'Page headline', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-headline" type="text" class="regular-text" name="<?php echo esc_attr( $name . '[headline]' ); ?>" value="<?php echo esc_attr( $s['headline'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-ask"><?php esc_html_e( 'Page ask line', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-ask" type="text" class="large-text" name="<?php echo esc_attr( $name . '[ask]' ); ?>" value="<?php echo esc_attr( $s['ask'] ); ?>" />
-								<p class="description"><?php esc_html_e( 'Keep it the same for everyone. Never ask whether they were happy first.', 'scout-reviews' ); ?></p></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-photo"><?php esc_html_e( 'Team photo', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-photo" type="url" class="large-text" placeholder="https://" name="<?php echo esc_attr( $name . '[photo]' ); ?>" value="<?php echo esc_attr( $s['photo'] ); ?>" />
-								<p class="description"><?php esc_html_e( 'Optional. Paste the link of a photo from Media. A real photo of the team makes the ask feel personal.', 'scout-reviews' ); ?></p></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-card-headline"><?php esc_html_e( 'Card headline', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-card-headline" type="text" class="regular-text" placeholder="<?php echo esc_attr( self::card_headline( array( 'card_headline' => '' ) ) ); ?>" name="<?php echo esc_attr( $name . '[card_headline]' ); ?>" value="<?php echo esc_attr( $s['card_headline'] ); ?>" /></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-accent"><?php esc_html_e( 'Brand color', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-accent" type="color" name="<?php echo esc_attr( $name . '[accent]' ); ?>" value="<?php echo esc_attr( $s['accent'] ); ?>" />
-								<p class="description"><?php esc_html_e( 'Used for the review button and the card headline.', 'scout-reviews' ); ?></p></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-background"><?php esc_html_e( 'Page background', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-background" type="color" name="<?php echo esc_attr( $name . '[background]' ); ?>" value="<?php echo esc_attr( $s['background'] ); ?>" />
-								<p class="description"><?php esc_html_e( 'The review page background. Use the site\'s own background color so the page feels like part of the site.', 'scout-reviews' ); ?></p></td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="srk-text-color"><?php esc_html_e( 'Text color', 'scout-reviews' ); ?></label></th>
-							<td><input id="srk-text-color" type="color" name="<?php echo esc_attr( $name . '[text_color]' ); ?>" value="<?php echo esc_attr( '' !== $s['text_color'] ? $s['text_color'] : '#1D1D1F' ); ?>" />
-								<label style="margin-left:12px"><input type="checkbox" name="<?php echo esc_attr( $name . '[text_auto]' ); ?>" value="1" <?php checked( '' === $s['text_color'] ); ?> /> <?php esc_html_e( 'Pick it for me from the background', 'scout-reviews' ); ?></label></td>
-						</tr>
-						<?php
-						$fonts = array_keys( Scout_Reviews_Brand::FONTS );
-						$rows  = array(
-							'heading_font' => array( __( 'Heading font', 'scout-reviews' ), false ),
-							'body_font'    => array( __( 'Body font', 'scout-reviews' ), false ),
-							'label_font'   => array( __( 'Small label font', 'scout-reviews' ), true ),
-						);
-						foreach ( $rows as $key => $row ) :
-							?>
-						<tr>
-							<th scope="row"><label for="srk-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $row[0] ); ?></label></th>
-							<td><select id="srk-<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>">
-								<?php if ( $row[1] ) : ?>
-									<option value="same" <?php selected( $s[ $key ], 'same' ); ?>><?php esc_html_e( 'Same as body', 'scout-reviews' ); ?></option>
-								<?php endif; ?>
-								<option value="system" <?php selected( $s[ $key ], 'system' ); ?>><?php esc_html_e( 'Device default', 'scout-reviews' ); ?></option>
-								<?php foreach ( $fonts as $font ) : ?>
-									<option value="<?php echo esc_attr( $font ); ?>" <?php selected( $s[ $key ], $font ); ?>><?php echo esc_html( $font ); ?></option>
+		<?php Scout_Reviews_Menu::fold_open( __( 'More options: the review page and cards', 'scout-reviews' ), ! $s['enabled'], 'srk-settings' ); ?>
+			<p><?php esc_html_e( 'The address, where the link goes, private notes, and the look of the review page and the printed cards.', 'scout-reviews' ); ?></p>
+			<form method="post" action="options.php">
+				<?php settings_fields( self::PAGE ); ?>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Review page', 'scout-reviews' ); ?></th>
+						<td><label><input type="checkbox" name="<?php echo esc_attr( $name . '[enabled]' ); ?>" value="1" <?php checked( $s['enabled'] ); ?> /> <?php esc_html_e( 'Turn on the review page', 'scout-reviews' ); ?></label></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-slug"><?php esc_html_e( 'Address', 'scout-reviews' ); ?></label></th>
+						<td><span class="srk-address"><code><?php echo esc_html( home_url( '/' ) ); ?></code><input id="srk-slug" type="text" class="srk-slug" name="<?php echo esc_attr( $name . '[slug]' ); ?>" value="<?php echo esc_attr( $s['slug'] ); ?>" /><code>/</code></span>
+							<p class="description"><?php esc_html_e( 'Change this before you print cards. Printed cards keep the address they were printed with.', 'scout-reviews' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-primary"><?php esc_html_e( 'Main platform', 'scout-reviews' ); ?></label></th>
+						<td>
+							<select id="srk-primary" name="<?php echo esc_attr( $name . '[primary]' ); ?>">
+								<?php foreach ( Scout_Reviews_Sources::all() as $slug => $info ) : ?>
+									<?php if ( 'direct' === $slug ) { continue; } ?>
+									<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $s['primary'], $slug ); ?>><?php echo esc_html( $info['label'] . ( isset( $links[ $slug ] ) ? '' : ' ' . __( '(no link yet)', 'scout-reviews' ) ) ); ?></option>
 								<?php endforeach; ?>
 							</select>
-							<?php if ( 'heading_font' === $key ) : ?>
-								<p class="description"><?php esc_html_e( 'Match the fonts the website uses. They show on the review page and the printed cards.', 'scout-reviews' ); ?></p>
-							<?php endif; ?></td>
-						</tr>
-						<?php endforeach; ?>
-					</table>
-					<?php submit_button(); ?>
-				</form>
-			</section>
-		</div>
+							<p class="description"><?php esc_html_e( 'The big button on the review page. Other platforms with a link show as smaller buttons under it.', 'scout-reviews' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Where the link goes', 'scout-reviews' ); ?></th>
+						<td>
+							<fieldset>
+								<legend class="screen-reader-text"><?php esc_html_e( 'Where the link goes', 'scout-reviews' ); ?></legend>
+								<label><input type="radio" name="<?php echo esc_attr( $name . '[mode]' ); ?>" value="page" <?php checked( $s['mode'], 'page' ); ?> /> <?php esc_html_e( 'Your review page (recommended)', 'scout-reviews' ); ?></label><br />
+								<label><input type="radio" name="<?php echo esc_attr( $name . '[mode]' ); ?>" value="direct" <?php checked( $s['mode'], 'direct' ); ?> /> <?php esc_html_e( 'Straight to the main platform, skipping the page', 'scout-reviews' ); ?></label>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Private notes', 'scout-reviews' ); ?></th>
+						<td><label><input type="checkbox" name="<?php echo esc_attr( $name . '[notes]' ); ?>" value="1" <?php checked( $s['notes'] ); ?> /> <?php esc_html_e( 'Show the "send us a note privately" link and form', 'scout-reviews' ); ?></label></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-note-email"><?php esc_html_e( 'Send private notes to', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-note-email" type="email" class="regular-text" name="<?php echo esc_attr( $name . '[note_email]' ); ?>" value="<?php echo esc_attr( $s['note_email'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" />
+						<p class="description"><?php esc_html_e( 'Leave empty to use the site\'s admin email.', 'scout-reviews' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-business"><?php esc_html_e( 'Business name', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-business" type="text" class="regular-text" name="<?php echo esc_attr( $name . '[business]' ); ?>" value="<?php echo esc_attr( $s['business'] ); ?>" /></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-headline"><?php esc_html_e( 'Page headline', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-headline" type="text" class="regular-text" name="<?php echo esc_attr( $name . '[headline]' ); ?>" value="<?php echo esc_attr( $s['headline'] ); ?>" /></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-ask"><?php esc_html_e( 'Page ask line', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-ask" type="text" class="large-text" name="<?php echo esc_attr( $name . '[ask]' ); ?>" value="<?php echo esc_attr( $s['ask'] ); ?>" />
+							<p class="description"><?php esc_html_e( 'Keep it the same for everyone. Never ask whether they were happy first.', 'scout-reviews' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-photo"><?php esc_html_e( 'Team photo', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-photo" type="url" class="large-text" placeholder="https://" name="<?php echo esc_attr( $name . '[photo]' ); ?>" value="<?php echo esc_attr( $s['photo'] ); ?>" />
+							<p class="description"><?php esc_html_e( 'Optional. Paste the link of a photo from Media. A real photo of the team makes the ask feel personal.', 'scout-reviews' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-card-headline"><?php esc_html_e( 'Card headline', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-card-headline" type="text" class="regular-text" placeholder="<?php echo esc_attr( self::card_headline( array( 'card_headline' => '' ) ) ); ?>" name="<?php echo esc_attr( $name . '[card_headline]' ); ?>" value="<?php echo esc_attr( $s['card_headline'] ); ?>" /></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-accent"><?php esc_html_e( 'Brand color', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-accent" type="color" name="<?php echo esc_attr( $name . '[accent]' ); ?>" value="<?php echo esc_attr( $s['accent'] ); ?>" />
+							<p class="description"><?php esc_html_e( 'Used for the review button and the card headline.', 'scout-reviews' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-background"><?php esc_html_e( 'Page background', 'scout-reviews' ); ?></label></th>
+						<td><input id="srk-background" type="color" name="<?php echo esc_attr( $name . '[background]' ); ?>" value="<?php echo esc_attr( $s['background'] ); ?>" />
+							<p class="description"><?php esc_html_e( 'The review page background. Use the site\'s own background color so the page feels like part of the site.', 'scout-reviews' ); ?></p></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="srk-text-color"><?php esc_html_e( 'Text color', 'scout-reviews' ); ?></label></th>
+						<td><span class="srk-inline-fields"><input id="srk-text-color" type="color" name="<?php echo esc_attr( $name . '[text_color]' ); ?>" value="<?php echo esc_attr( '' !== $s['text_color'] ? $s['text_color'] : '#1D1D1F' ); ?>" />
+							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[text_auto]' ); ?>" value="1" <?php checked( '' === $s['text_color'] ); ?> /> <?php esc_html_e( 'Pick it for me from the background', 'scout-reviews' ); ?></label></span></td>
+					</tr>
+					<?php
+					$fonts = array_keys( Scout_Reviews_Brand::FONTS );
+					$rows  = array(
+						'heading_font' => array( __( 'Heading font', 'scout-reviews' ), false ),
+						'body_font'    => array( __( 'Body font', 'scout-reviews' ), false ),
+						'label_font'   => array( __( 'Small label font', 'scout-reviews' ), true ),
+					);
+					foreach ( $rows as $key => $row ) :
+						?>
+					<tr>
+						<th scope="row"><label for="srk-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $row[0] ); ?></label></th>
+						<td><select id="srk-<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>">
+							<?php if ( $row[1] ) : ?>
+								<option value="same" <?php selected( $s[ $key ], 'same' ); ?>><?php esc_html_e( 'Same as body', 'scout-reviews' ); ?></option>
+							<?php endif; ?>
+							<option value="system" <?php selected( $s[ $key ], 'system' ); ?>><?php esc_html_e( 'Device default', 'scout-reviews' ); ?></option>
+							<?php foreach ( $fonts as $font ) : ?>
+								<option value="<?php echo esc_attr( $font ); ?>" <?php selected( $s[ $key ], $font ); ?>><?php echo esc_html( $font ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<?php if ( 'heading_font' === $key ) : ?>
+							<p class="description"><?php esc_html_e( 'Match the fonts the website uses. They show on the review page and the printed cards.', 'scout-reviews' ); ?></p>
+						<?php endif; ?></td>
+					</tr>
+					<?php endforeach; ?>
+				</table>
+				<?php submit_button( __( 'Save settings', 'scout-reviews' ), 'secondary' ); ?>
+			</form>
+		<?php Scout_Reviews_Menu::fold_close(); ?>
 		<?php
+		Scout_Admin_UI::close();
 	}
 }

@@ -41,7 +41,7 @@ final class Scout_Results_Editor {
 		if ( Scout_Results::POST_TYPE !== $post->post_type ) {
 			return;
 		}
-		echo '<p class="sr-title-help">' . esc_html__( 'The headline above is what visitors see on the site and in the preview. Keep it plain and factual.', 'scout-results' ) . '</p>';
+		echo '<p class="sh sr-kit sr-title-help">' . esc_html__( 'The headline above is what visitors see on the site and in the preview. Keep it plain and factual.', 'scout-results' ) . '</p>';
 	}
 
 	public static function boxes(): void {
@@ -61,7 +61,7 @@ final class Scout_Results_Editor {
 		);
 		$areas = is_wp_error( $areas ) ? array() : $areas;
 		?>
-		<div class="sr-fields">
+		<div class="sh sr-kit sr-fields">
 			<div class="sr-row">
 				<p class="sr-field">
 					<label for="sr-area"><?php esc_html_e( 'Practice area', 'scout-results' ); ?></label>
@@ -113,7 +113,7 @@ final class Scout_Results_Editor {
 	public static function box_approval( WP_Post $post ): void {
 		$r = Scout_Results::get( $post->ID );
 		?>
-		<div class="sr-approval">
+		<div class="sh sr-kit sr-approval">
 			<p class="sr-check">
 				<input id="sr-approved" type="checkbox" name="scout_result[approved]" value="1" <?php checked( $r['approved'] ); ?>>
 				<label for="sr-approved"><?php esc_html_e( 'Approved by the firm', 'scout-results' ); ?></label>
@@ -134,7 +134,7 @@ final class Scout_Results_Editor {
 	public static function box_preview( WP_Post $post ): void {
 		$r = Scout_Results::get( $post->ID );
 		?>
-		<div class="sr-preview" id="sr-preview">
+		<div class="sh sr-kit sr-preview" id="sr-preview">
 			<p class="sr-preview-note"><?php esc_html_e( 'This is how the result reads in the grid. The disclaimer is added to every result on its own.', 'scout-results' ); ?></p>
 			<?php
 			// The same card the site prints, filled from the saved values; the
@@ -348,8 +348,10 @@ final class Scout_Results_Editor {
 		if ( ! $screen || Scout_Results::POST_TYPE !== $screen->post_type ) {
 			return;
 		}
+		// The kit stylesheet carries the color tokens the edit screen's boxes use.
+		Scout_Admin_UI::enqueue( SCOUT_RESULTS_URL . 'assets/scout-admin.css' );
 		wp_enqueue_style( 'scout-results', SCOUT_RESULTS_URL . 'assets/scout-results.css', array(), SCOUT_RESULTS_VERSION );
-		wp_enqueue_style( 'scout-results-editor', SCOUT_RESULTS_URL . 'assets/results-editor.css', array( 'scout-results' ), SCOUT_RESULTS_VERSION );
+		wp_enqueue_style( 'scout-results-editor', SCOUT_RESULTS_URL . 'assets/results-editor.css', array( 'scout-results', 'scout-admin' ), SCOUT_RESULTS_VERSION );
 		wp_enqueue_script( 'scout-results-editor', SCOUT_RESULTS_URL . 'assets/results-editor.js', array(), SCOUT_RESULTS_VERSION, true );
 		wp_localize_script(
 			'scout-results-editor',

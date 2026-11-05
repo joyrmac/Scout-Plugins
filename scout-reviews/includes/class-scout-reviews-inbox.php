@@ -1,7 +1,8 @@
 <?php
 /**
  * Reviews > Inbox: new reviews pulled from Google and notes sent from the
- * review page (/review/note/), one card each, with "Add to site" and "Skip".
+ * review page (/review/note/), one row each, with "Approve and add to site"
+ * and "Skip".
  * A note the client did not OK for the site can only be marked as read.
  *
  * "Add to site" publishes the review with the checked topics (suggested ones
@@ -70,54 +71,69 @@ final class Scout_Reviews_Inbox {
 		}
 		$items  = self::items();
 		$topics = Scout_Reviews_Topics::all();
+		$count  = count( $items );
+
+		Scout_Admin_UI::open(
+			__( 'Review inbox', 'scout-reviews' ),
+			__( 'New Google reviews and notes from your review page wait here. Check the pages each one belongs on (we pre-check the ones that match), then add it to the site. Skipped items stay saved as hidden drafts under All reviews.', 'scout-reviews' )
+		);
+
+		if ( ! $items ) {
+			Scout_Reviews_Menu::status(
+				'good',
+				__( 'All caught up.', 'scout-reviews' ),
+				Scout_Reviews_Google::is_ready()
+					? __( 'New Google reviews show up here after the next daily sync. Notes from your review page arrive the moment someone sends one.', 'scout-reviews' )
+					: __( 'Notes from your review page arrive here the moment someone sends one. Google reviews join them once you connect Google in Review settings. Yelp and Facebook reviews can be added by hand under Add review.', 'scout-reviews' )
+			);
+			Scout_Admin_UI::close();
+			return;
+		}
+
+		// The status line is a paragraph, so its button points at a form printed after it.
+		$all = $count > 1
+			? '<button type="submit" form="srk-add-all" class="button">' . esc_html__( 'Add all with suggested pages', 'scout-reviews' ) . '</button>'
+			: '';
+		Scout_Reviews_Menu::status(
+			'warn',
+			/* translators: %d: number of new reviews and notes. */
+			sprintf( _n( '%d new review waiting.', '%d new reviews waiting.', $count, 'scout-reviews' ), $count ),
+			$count > 1
+				? __( 'Look over each one below, or add every one that may be shown, each on its suggested pages.', 'scout-reviews' )
+				: __( 'Look it over below, then add it to the site or skip it.', 'scout-reviews' ),
+			$all
+		);
+		if ( $count > 1 ) :
+			?>
+			<form id="srk-add-all" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" hidden>
+				<input type="hidden" name="action" value="scout_reviews_inbox" />
+				<input type="hidden" name="do" value="add_all" />
+				<?php wp_nonce_field( 'scout_reviews_inbox' ); ?>
+			</form>
+			<?php
+		endif;
 		?>
-		<div class="wrap srk recon-theme" data-theme="light">
-			<?php Scout_Reviews_Requests::header( __( 'Inbox', 'scout-reviews' ), __( 'New reviews and notes', 'scout-reviews' ) ); ?>
-			<p class="srk-lede">
-				<?php esc_html_e( 'New Google reviews and notes from your review page wait here. Check the pages each one belongs on (we pre-check the ones that match), then click Add to site. Skipped items stay saved as hidden drafts under All reviews.', 'scout-reviews' ); ?>
-			</p>
+		<?php if ( ! $topics ) : ?>
+			<div class="notice notice-warning inline"><p><?php esc_html_e( 'No topics exist yet, so reviews will be added without one. They still show anywhere that displays all reviews.', 'scout-reviews' ); ?></p></div>
+		<?php endif; ?>
 
-			<?php if ( ! $items ) : ?>
-				<section class="srk-box" style="max-width:720px;">
-					<p class="srk-label"><?php esc_html_e( 'All caught up', 'scout-reviews' ); ?></p>
-					<p class="srk-note" style="font-size:14px;">
-						<?php
-						if ( Scout_Reviews_Google::is_ready() ) {
-							esc_html_e( 'New Google reviews show up here after the next daily sync. Notes from your review page arrive the moment someone sends one.', 'scout-reviews' );
-						} else {
-							esc_html_e( 'Notes from your review page arrive here the moment someone sends one. Google reviews join them once you connect Google in Settings. Yelp and Facebook reviews can be added by hand under Add review.', 'scout-reviews' );
-						}
-						?>
-					</p>
-				</section>
-			<?php else : ?>
-
-				<?php if ( count( $items ) > 1 ) : ?>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:16px 0 0;">
-						<input type="hidden" name="action" value="scout_reviews_inbox" />
-						<input type="hidden" name="do" value="add_all" />
-						<?php wp_nonce_field( 'scout_reviews_inbox' ); ?>
-						<button type="submit" class="button"><?php
-							esc_html_e( 'Add every item that may be shown, with its suggested topics', 'scout-reviews' );
-						?></button>
-					</form>
-				<?php endif; ?>
-
-				<?php if ( ! $topics ) : ?>
-					<div class="notice notice-warning inline"><p><?php esc_html_e( 'No topics exist yet, so reviews will be added without one. They still show anywhere that displays all reviews.', 'scout-reviews' ); ?></p></div>
-				<?php endif; ?>
-
-				<div class="srk-inbox">
-					<?php foreach ( $items as $post ) : ?>
-						<?php self::card( $post, $topics ); ?>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
-		</div>
+		<section class="sh-box">
+			<h2 class="sh-title"><?php esc_html_e( 'Waiting for a look', 'scout-reviews' ); ?></h2>
+			<ul class="sh-rows srk-inbox">
+				<?php foreach ( $items as $post ) : ?>
+					<?php self::card( $post, $topics ); ?>
+				<?php endforeach; ?>
+			</ul>
+		</section>
 		<?php
+		Scout_Admin_UI::close();
 	}
 
 	/**
+	 * One row per review: who, stars, platform, a short line of the text and
+	 * the date, then one main button. The full text and the pages it shows on
+	 * sit in a closed box under the row; those fields belong to the row's form.
+	 *
 	 * @param WP_Term[] $topics
 	 */
 	private static function card( WP_Post $post, array $topics ): void {
@@ -128,61 +144,87 @@ final class Scout_Reviews_Inbox {
 		$website   = Scout_Reviews_Notes::from_website( $post->ID );
 		$allowed   = Scout_Reviews_Notes::can_publish( $post->ID );
 		$source    = Scout_Reviews_Sources::label( (string) get_post_meta( $post->ID, Scout_Reviews_Post_Type::META_SOURCE, true ) );
+		$form      = 'srk-review-' . (int) $post->ID;
+		$who       = get_the_title( $post ) . ( '' !== $detail ? ', ' . $detail : '' );
+		$picked    = array();
+		foreach ( $topics as $term ) {
+			if ( in_array( $term->term_id, $suggested, true ) ) {
+				$picked[] = $term->name;
+			}
+		}
 		?>
-		<form class="srk-box srk-item is-new" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="scout_reviews_inbox" />
-			<input type="hidden" name="review" value="<?php echo (int) $post->ID; ?>" />
-			<input type="hidden" name="topics_sent" value="1" />
-			<?php wp_nonce_field( 'scout_reviews_inbox' ); ?>
-
-			<p class="srk-itemhead">
-				<span class="srk-pill"><?php echo esc_html( $website ? __( 'New · from the website', 'scout-reviews' ) : sprintf( /* translators: %s: platform */ __( 'New · from %s', 'scout-reviews' ), $source ? $source : 'Google' ) ); ?></span>
-				<?php if ( $rating ) : ?>
-					<span class="srk-stars" aria-label="<?php echo esc_attr( sprintf( /* translators: %d: stars */ __( '%d out of 5 stars', 'scout-reviews' ), $rating ) ); ?>"><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></span>
-				<?php endif; ?>
+		<li class="sh-row srk-review">
+			<div>
+				<p class="sh-row-name"><?php echo esc_html( $who ); ?>
+					<?php if ( $rating ) : ?>
+						<span class="srk-stars" role="img" aria-label="<?php echo esc_attr( sprintf( /* translators: %d: stars */ __( '%d out of 5 stars', 'scout-reviews' ), $rating ) ); ?>"><?php echo esc_html( str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) ); ?></span>
+					<?php endif; ?>
+				</p>
+				<p class="sh-row-sub"><?php echo esc_html( wp_trim_words( wp_strip_all_tags( $post->post_content ), 20 ) ); ?></p>
+			</div>
+			<div class="sh-row-facts">
+				<span class="sh-tag"><?php echo esc_html( $website ? __( 'From the website', 'scout-reviews' ) : ( $source ? $source : 'Google' ) ); ?></span>
 				<?php if ( $date ) : ?>
-					<span class="srk-note" style="margin:0;"><?php echo esc_html( $date ); ?></span>
+					<span><?php echo esc_html( $date ); ?></span>
 				<?php endif; ?>
-			</p>
-			<blockquote class="srk-quote"><?php echo wpautop( esc_html( $post->post_content ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped before wpautop. ?></blockquote>
-			<p class="srk-itemhead">
-				<strong><?php echo esc_html( get_the_title( $post ) . ( '' !== $detail ? ', ' . $detail : '' ) ); ?></strong>
 				<?php if ( $website ) : ?>
 					<?php if ( $allowed ) : ?>
-						<span class="srk-pill is-ok"><?php esc_html_e( 'OK to show on the site', 'scout-reviews' ); ?></span>
+						<span class="sh-pill is-on"><?php esc_html_e( 'OK to show on the site', 'scout-reviews' ); ?></span>
 					<?php else : ?>
-						<span class="srk-pill is-private"><?php esc_html_e( 'Private: not OK to show', 'scout-reviews' ); ?></span>
+						<span class="sh-pill is-received"><?php esc_html_e( 'Private: not OK to show', 'scout-reviews' ); ?></span>
 					<?php endif; ?>
 				<?php endif; ?>
-			</p>
-
-			<?php if ( $allowed && $topics ) : ?>
-				<fieldset class="srk-topics">
-					<legend class="screen-reader-text"><?php esc_html_e( 'Show on', 'scout-reviews' ); ?></legend>
-					<span class="srk-label" style="display:inline;margin-right:8px;"><?php esc_html_e( 'Show on', 'scout-reviews' ); ?></span>
-					<?php foreach ( $topics as $term ) : ?>
-						<?php $is = in_array( $term->term_id, $suggested, true ); ?>
-						<label>
-							<input type="checkbox" name="topics[]" value="<?php echo (int) $term->term_id; ?>" <?php checked( $is ); ?> />
-							<?php echo esc_html( $term->name ); ?><?php echo $is ? ' <span class="srk-note">' . esc_html__( '(suggested)', 'scout-reviews' ) . '</span>' : ''; ?>
-						</label>
-					<?php endforeach; ?>
-				</fieldset>
-			<?php endif; ?>
-
-			<p class="srk-btnrow">
-				<?php if ( $allowed ) : ?>
-					<label style="margin-right:8px;"><input type="checkbox" name="featured" value="1" /> <?php esc_html_e( 'Featured', 'scout-reviews' ); ?></label>
-					<button type="submit" name="do" value="add" class="button button-primary"><?php esc_html_e( 'Approve and add to site', 'scout-reviews' ); ?></button>
-					<button type="submit" name="do" value="skip" class="button"><?php esc_html_e( 'Skip', 'scout-reviews' ); ?></button>
-				<?php else : ?>
-					<button type="submit" name="do" value="skip" class="button button-primary"><?php esc_html_e( 'Mark as read', 'scout-reviews' ); ?></button>
-				<?php endif; ?>
+			</div>
+			<div class="sh-row-go">
+				<form id="<?php echo esc_attr( $form ); ?>" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="scout_reviews_inbox" />
+					<input type="hidden" name="review" value="<?php echo (int) $post->ID; ?>" />
+					<input type="hidden" name="topics_sent" value="1" />
+					<?php wp_nonce_field( 'scout_reviews_inbox', '_wpnonce', true, true ); ?>
+					<?php if ( $allowed ) : ?>
+						<button type="submit" name="do" value="add" class="button"><?php esc_html_e( 'Approve and add to site', 'scout-reviews' ); ?><span class="screen-reader-text"> <?php echo esc_html( get_the_title( $post ) ); ?></span></button>
+						<button type="submit" name="do" value="skip" class="button sh-quiet"><?php esc_html_e( 'Skip', 'scout-reviews' ); ?><span class="screen-reader-text"> <?php echo esc_html( get_the_title( $post ) ); ?></span></button>
+					<?php else : ?>
+						<button type="submit" name="do" value="skip" class="button"><?php esc_html_e( 'Mark as read', 'scout-reviews' ); ?><span class="screen-reader-text"> <?php echo esc_html( get_the_title( $post ) ); ?></span></button>
+					<?php endif; ?>
+				</form>
 				<?php if ( $website ) : ?>
-					<a class="button" href="<?php echo esc_url( Scout_Reviews_Menu::url( Scout_Reviews_Requests::PAGE, 'srk-messages' ) ); ?>"><?php esc_html_e( 'Ask for a Google review too', 'scout-reviews' ); ?></a>
+					<a class="button sh-quiet" href="<?php echo esc_url( Scout_Reviews_Menu::url( Scout_Reviews_Requests::PAGE, 'srk-messages' ) ); ?>"><?php esc_html_e( 'Ask for a Google review too', 'scout-reviews' ); ?></a>
 				<?php endif; ?>
-			</p>
-		</form>
+			</div>
+			<details class="srk-review-more">
+				<summary>
+					<?php
+					if ( $allowed && $topics ) {
+						echo esc_html(
+							$picked
+								/* translators: %s: list of suggested pages. */
+								? sprintf( __( 'Read it all and pick pages. Suggested: %s', 'scout-reviews' ), implode( ', ', $picked ) )
+								: __( 'Read it all and pick pages', 'scout-reviews' )
+						);
+					} else {
+						esc_html_e( 'Read it all', 'scout-reviews' );
+					}
+					?>
+				</summary>
+				<blockquote class="srk-quote"><?php echo wpautop( esc_html( $post->post_content ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped before wpautop. ?></blockquote>
+				<?php if ( $allowed && $topics ) : ?>
+					<fieldset class="srk-topics">
+						<legend><?php esc_html_e( 'Show on', 'scout-reviews' ); ?></legend>
+						<?php foreach ( $topics as $term ) : ?>
+							<?php $is = in_array( $term->term_id, $suggested, true ); ?>
+							<label>
+								<input type="checkbox" form="<?php echo esc_attr( $form ); ?>" name="topics[]" value="<?php echo (int) $term->term_id; ?>" <?php checked( $is ); ?> />
+								<?php echo esc_html( $term->name ); ?><?php echo $is ? ' <span class="sh-note">' . esc_html__( '(suggested)', 'scout-reviews' ) . '</span>' : ''; ?>
+							</label>
+						<?php endforeach; ?>
+					</fieldset>
+				<?php endif; ?>
+				<?php if ( $allowed ) : ?>
+					<label class="srk-featured"><input type="checkbox" form="<?php echo esc_attr( $form ); ?>" name="featured" value="1" /> <?php esc_html_e( 'Featured', 'scout-reviews' ); ?></label>
+				<?php endif; ?>
+			</details>
+		</li>
 		<?php
 	}
 
