@@ -86,7 +86,7 @@ ok( false === strpos( $R::text( array( 'plugins' => $no_core ) + $data ), 'Updat
 // Nothing private leaves the site: no email address, no key, anywhere in the report.
 ok( ! preg_match( '/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i', $text ), 'no email addresses in the report' );
 ok( false === strpos( $text, 'github_pat_' ), 'the theme key never appears' );
-$keyed = $R::text( array( 'health' => $health . "\nNote: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" ) + $data );
+$keyed = $R::text( array( 'health' => $health . "\nNote: " . 'ghp' . '_' . str_repeat( 'A', 36 ) ) + $data );
 ok( false === strpos( $keyed, 'ghp_' ) && false !== strpos( $keyed, '[key hidden]' ), 'a key shaped string is hidden even inside the Site status part' );
 ok( false !== strpos( $text, 'Fix coming, ask [email hidden]' ), 'an address in a note is replaced, the rest of the note stays' );
 
