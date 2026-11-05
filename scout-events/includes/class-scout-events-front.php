@@ -424,11 +424,11 @@ final class Scout_Events_Front {
 		if ( ! $ids ) {
 			return '<p class="se-empty">' . esc_html__( 'New events are on the way. Check back soon.', 'scout-events' ) . '</p>';
 		}
-		if ( 'month' === $group || ( 'auto' === $group && count( $ids ) > self::GROUP_AFTER ) ) {
+		if ( 'year' === $group || 'month' === $group || ( 'auto' === $group && count( $ids ) > self::GROUP_AFTER ) ) {
 			$months = array();
 			foreach ( $ids as $id ) {
 				$start = Scout_Events::start( Scout_Events::event( $id ) );
-				$key   = $start ? wp_date( 'F Y', $start->getTimestamp() ) : __( 'Date to be announced', 'scout-events' );
+				$key   = $start ? wp_date( 'year' === $group ? 'Y' : 'F Y', $start->getTimestamp() ) : __( 'Date to be announced', 'scout-events' );
 				$months[ $key ][] = $id;
 			}
 			$out = '<div class="se-events-by-month">';
@@ -441,11 +441,13 @@ final class Scout_Events_Front {
 	}
 
 	private static function cards( array $ids ): string {
-		$out = '<ul class="se-events">';
+		$gallery = 'gallery' === self::$layout;
+		$out     = '<ul class="se-events' . ( $gallery ? ' is-gallery' : '' ) . '">';
 		foreach ( $ids as $id ) {
 			$e     = Scout_Events::event( $id );
 			$start = Scout_Events::start( $e );
-			$out  .= '<li class="se-event-card">';
+			$photo = $gallery ? get_the_post_thumbnail( $id, 'medium_large', array( 'class' => 'se-card-photo', 'loading' => 'lazy' ) ) : '';
+			$out  .= '<li class="se-event-card' . ( '' !== $photo ? ' has-photo' : '' ) . '" data-series="' . esc_attr( sanitize_title( self::series( $id ) ) ) . '">' . $photo;
 			if ( $start ) {
 				$out .= '<p class="se-date" aria-hidden="true"><span class="se-date-m">' . esc_html( wp_date( 'M', $start->getTimestamp() ) ) . '</span><span class="se-date-d">' . esc_html( wp_date( 'j', $start->getTimestamp() ) ) . '</span></p>';
 			}
@@ -491,18 +493,127 @@ final class Scout_Events_Front {
 				'limit'  => 0,
 				'group'  => 'auto',
 				'region' => '',
+				'views'  => '',
+				'filter' => '',
+				'layout' => 'list',
 			),
 			(array) $atts,
 			'scout_events'
 		);
+		self::$layout = 'gallery' === $a['layout'] ? 'gallery' : 'list';
 		$show  = in_array( $a['show'], array( 'upcoming', 'past', 'all' ), true ) ? $a['show'] : 'upcoming';
-		$group = in_array( $a['group'], array( 'auto', 'month', 'none' ), true ) ? $a['group'] : 'auto';
+		$group = in_array( $a['group'], array( 'auto', 'month', 'year', 'none' ), true ) ? $a['group'] : 'auto';
 		if ( '' === $a['region'] ) {
-			return self::events( Scout_Events::event_ids( $show, absint( $a['limit'] ) ), $group );
+			$ids = Scout_Events::event_ids( $show, absint( $a['limit'] ) );
+		} else {
+			// One region's events: filter the whole list first, then apply the limit.
+			$ids = Scout_Events_Regions::filter( Scout_Events::event_ids( $show ), (string) $a['region'] );
+			$ids = absint( $a['limit'] ) ? array_slice( $ids, 0, absint( $a['limit'] ) ) : $ids;
 		}
-		// One region's events: filter the whole list first, then apply the limit.
-		$ids = Scout_Events_Regions::filter( Scout_Events::event_ids( $show ), (string) $a['region'] );
-		return self::events( absint( $a['limit'] ) ? array_slice( $ids, 0, absint( $a['limit'] ) ) : $ids, $group );
+		if ( 'gallery' === self::$layout && 'auto' === $group ) {
+			$group = 'year';
+		}
+		$views = array_values( array_intersect( array_map( 'trim', explode( ',', (string) $a['views'] ) ), array( 'list', 'month' ) ) );
+		$out   = self::explore( $ids, $group, $views, 'series' === $a['filter'] );
+		self::$layout = 'list';
+		return $out;
+	}
+
+	/** Card layout for the list being drawn: 'list' (date tile) or 'gallery' (the event's photo). */
+	private static string $layout = 'list';
+
+	/**
+	 * The event's series: events that repeat share a title ("Pause & Play"), so the title is the series unless
+	 * a feature names one with the `scout_events_series` filter.
+	 */
+	public static function series( int $id ): string {
+		return (string) apply_filters( 'scout_events_series', wp_strip_all_tags( get_the_title( $id ) ), $id );
+	}
+
+	/**
+	 * The list with its options: series chips that show one kind of event, and a List / Month switch. Without
+	 * either it is the plain list. Every event stays in the page, so it works with no script; the small script
+	 * only shows and hides.
+	 *
+	 * @param int[]    $ids    Event IDs in order.
+	 * @param string[] $views  Views offered, first is the default.
+	 */
+	private static function explore( array $ids, string $group, array $views, bool $filter ): string {
+		$list = self::events( $ids, $group );
+		if ( ! $ids || ( count( $views ) < 2 && ! $filter ) ) {
+			return $list;
+		}
+		wp_enqueue_script( 'scout-events-explore', SCOUT_EVENTS_URL . 'assets/scout-events-explore.js', array(), SCOUT_EVENTS_VERSION, array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		$uid  = 'se-x' . wp_rand( 1000, 9999 );
+		$bar  = '';
+		if ( $filter ) {
+			$names = array();
+			foreach ( $ids as $id ) {
+				$names[ sanitize_title( self::series( $id ) ) ] = self::series( $id );
+			}
+			if ( count( $names ) > 1 ) {
+				$bar .= '<div class="se-chips" role="group" aria-label="' . esc_attr__( 'Show', 'scout-events' ) . '"><button type="button" class="se-chip" aria-pressed="true" data-se-series="">' . esc_html__( 'Everything', 'scout-events' ) . '</button>';
+				foreach ( $names as $key => $name ) {
+					$bar .= '<button type="button" class="se-chip" aria-pressed="false" data-se-series="' . esc_attr( $key ) . '">' . esc_html( $name ) . '</button>';
+				}
+				$bar .= '</div>';
+			}
+		}
+		$panels = '<div class="se-view is-list" data-se-view="list">' . $list . '</div>';
+		if ( in_array( 'month', $views, true ) ) {
+			$labels = array(
+				'list'  => __( 'List', 'scout-events' ),
+				'month' => __( 'Month', 'scout-events' ),
+			);
+			$bar .= '<div class="se-views" role="group" aria-label="' . esc_attr__( 'View', 'scout-events' ) . '">';
+			foreach ( $views as $i => $v ) {
+				$bar .= '<button type="button" class="se-viewbtn is-' . esc_attr( $v ) . '" aria-pressed="' . ( 0 === $i ? 'true' : 'false' ) . '" aria-controls="' . esc_attr( $uid . '-' . $v ) . '" data-se-show="' . esc_attr( $v ) . '">' . esc_html( $labels[ $v ] ) . '</button>';
+			}
+			$bar   .= '</div>';
+			$panels = '<div class="se-view is-list" id="' . esc_attr( $uid . '-list' ) . '" data-se-view="list"' . ( 'list' === $views[0] ? '' : ' hidden' ) . '>' . $list . '</div>'
+				. '<div class="se-view is-month" id="' . esc_attr( $uid . '-month' ) . '" data-se-view="month"' . ( 'month' === $views[0] ? '' : ' hidden' ) . '>' . self::months( $ids ) . '</div>';
+		}
+		$empty = '<p class="se-empty se-filter-empty" hidden>' . esc_html__( 'Nothing of that kind on the calendar yet.', 'scout-events' ) . '</p>';
+		return '<div class="se-explore" data-se-explore>' . ( '' !== $bar ? '<div class="se-bar">' . $bar . '</div>' : '' ) . $panels . $empty . '</div>';
+	}
+
+	/** A month grid for every month that has an event, Monday first, each event a dot and a link on its day. */
+	private static function months( array $ids ): string {
+		$by = array();
+		foreach ( $ids as $id ) {
+			$start = Scout_Events::start( Scout_Events::event( $id ) );
+			if ( $start ) {
+				$by[ wp_date( 'Y-m', $start->getTimestamp() ) ][ (int) wp_date( 'j', $start->getTimestamp() ) ][] = $id;
+			}
+		}
+		if ( ! $by ) {
+			return '<p class="se-empty">' . esc_html__( 'Dates to be announced.', 'scout-events' ) . '</p>';
+		}
+		$tz   = wp_timezone();
+		$week = (int) get_option( 'start_of_week', 1 );
+		$out  = '<div class="se-months">';
+		foreach ( $by as $ym => $days ) {
+			$first = new DateTimeImmutable( $ym . '-01', $tz );
+			$count = (int) $first->format( 't' );
+			$lead  = ( (int) $first->format( 'w' ) - $week + 7 ) % 7;
+			$out  .= '<section class="se-cal"><h3 class="se-cal-title">' . esc_html( wp_date( 'F Y', $first->getTimestamp() ) ) . '</h3><ol class="se-cal-grid">';
+			for ( $d = 0; $d < 7; $d++ ) {
+				$out .= '<li class="se-cal-dow" aria-hidden="true">' . esc_html( mb_substr( wp_date( 'D', strtotime( 'Sunday +' . ( ( $week + $d ) % 7 ) . ' days' ) ), 0, 2 ) ) . '</li>';
+			}
+			for ( $i = 0; $i < $lead; $i++ ) {
+				$out .= '<li class="se-cal-day is-blank" aria-hidden="true"></li>';
+			}
+			for ( $d = 1; $d <= $count; $d++ ) {
+				$has  = $days[ $d ] ?? array();
+				$out .= '<li class="se-cal-day' . ( $has ? ' has-events' : '' ) . '"><span class="se-cal-n">' . $d . '</span>';
+				foreach ( $has as $id ) {
+					$out .= '<a class="se-cal-event" data-series="' . esc_attr( sanitize_title( self::series( $id ) ) ) . '" href="' . esc_url( get_permalink( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>';
+				}
+				$out .= '</li>';
+			}
+			$out .= '</ol></section>';
+		}
+		return $out . '</div>';
 	}
 
 	public static function event_shortcode( $atts ): string {

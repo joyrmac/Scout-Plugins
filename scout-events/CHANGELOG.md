@@ -1,5 +1,10 @@
 # Scout Events changelog
 
+## Unreleased (2026-11-05)
+
+- **The calendar gets options** (from the Oct 27 work, never released until now). `[scout_events views="list,month"]` adds a List & Month switch; Month draws a calendar for every month with an event. `filter="series"` adds chips to show one kind of event at a time. Events that repeat share a title, so the title is the series; the `scout_events_series` filter names one otherwise. Every event stays in the page, so it all works without the script, which only shows and hides.
+- **Past events as a photo gallery.** `layout="gallery"` shows each event's photo on its card and groups by year (`group="year"` works on any list). Built for Bliss Boogie's "Where we have gathered" (Joy, 2026-10-26). A plain `[scout_events]` is unchanged; Bliss Boogie's theme already asks for these options, so its Events page picks them up with this release.
+
 ## 0.16.7 (2026-11-05)
 
 - **Privacy tools reach presenters.** Export Personal Data now lists a presenter's application, profile, private details and changes waiting for approval, found by their login email or the profile's contact email. Erasing removes the private details and waiting changes. The public profile and the login stay for staff to remove by hand, and the tool says so.
