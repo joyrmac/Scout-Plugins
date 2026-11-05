@@ -183,6 +183,9 @@ final class Scout_Results_Admin {
 						<td>
 							<textarea id="sr-disclaimer" class="large-text" rows="5" name="<?php echo esc_attr( $o ); ?>[disclaimer]" placeholder="<?php echo esc_attr( Scout_Results::default_disclaimer( $s['state'] ) ); ?>"><?php echo esc_textarea( $s['disclaimer'] ); ?></textarea>
 							<p class="description"><?php esc_html_e( 'Leave blank to use the state\'s starting wording shown in gray. A blank disclaimer is never printed; the starting wording is used instead.', 'scout-results' ); ?></p>
+							<?php if ( class_exists( 'Scout_Law_Disclaimers' ) && in_array( 'results', Scout_Law_Disclaimers::places_for( 'results' ), true ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording set on Scout → Policies → Disclaimers prints next to every result instead of this box.', 'scout-results' ); ?></strong></p>
+							<?php endif; ?>
 						</td>
 					</tr>
 				</table>

@@ -107,6 +107,14 @@ final class Scout_Hub_Rings {
 			/* translators: %s: date */
 			return sprintf( __( 'Automatic updates are paused on this site until %s.', 'scout-build' ), wp_date( 'M j', $until ) );
 		}
+		// A live site waits for Scout's OK; an approved version or a security fix skips its ring.
+		$ok = class_exists( 'Scout_Hub_Approval' ) ? Scout_Hub_Approval::reason( $slug, $version ) : '';
+		if ( '' !== $ok ) {
+			return $ok;
+		}
+		if ( class_exists( 'Scout_Hub_Approval' ) && Scout_Hub_Approval::skips_ring( $slug, $version ) ) {
+			return '';
+		}
 		$lands = self::lands_at( $slug, $version );
 		if ( $lands > time() ) {
 			/* translators: 1: date, 2: ring label */
@@ -174,7 +182,7 @@ final class Scout_Hub_Rings {
 		$until  = self::paused_until();
 		$holds  = Scout_Hub_Catalog::holds();
 		$locked = defined( 'SCOUT_HUB_RING' );
-		echo '<section class="sh-box" id="sh-rings"><h2 class="sh-title">' . esc_html__( 'When releases install here', 'scout-build' ) . '</h2>';
+		echo '<section class="sh-box" id="sh-rings"><h2 class="sh-title">' . esc_html__( 'When updates install', 'scout-build' ) . '</h2>';
 		$days = self::delay_days();
 		echo '<p>' . esc_html(
 			sprintf(
@@ -200,9 +208,11 @@ final class Scout_Hub_Rings {
 			echo '<input type="hidden" name="action" value="' . esc_attr( self::ACTION ) . '">';
 			wp_nonce_field( self::ACTION );
 			if ( ! $locked ) {
+				// Short options: the sentence above already says what a ring means (Joy, 2026-11-04).
+				$short = array( 1 => __( 'Ring 1: first', 'scout-build' ), 2 => __( 'Ring 2: a day later', 'scout-build' ), 3 => __( 'Ring 3: two days later', 'scout-build' ) );
 				echo '<label for="sh-ring" class="screen-reader-text">' . esc_html__( 'Ring', 'scout-build' ) . '</label><select id="sh-ring" name="ring">';
 				foreach ( self::RINGS as $n => $meta ) {
-					echo '<option value="' . (int) $n . '"' . selected( $ring, $n, false ) . '>' . esc_html( $meta[0] . ( self::guess() === $n ? ' ' . __( '(from the address)', 'scout-build' ) : '' ) ) . '</option>';
+					echo '<option value="' . (int) $n . '"' . selected( $ring, $n, false ) . '>' . esc_html( $short[ $n ] ?? $meta[0] ) . '</option>';
 				}
 				echo '</select> <button type="submit" name="do" value="ring" class="button">' . esc_html__( 'Save ring', 'scout-build' ) . '</button>';
 			}
@@ -212,6 +222,8 @@ final class Scout_Hub_Rings {
 				echo ' <button type="submit" name="do" value="pause" class="button sh-quiet">' . esc_html__( 'Pause automatic updates for 7 days', 'scout-build' ) . '</button>';
 			}
 			echo '</form>';
+			/* translators: %s: ring name, like "Ring 3: client sites" */
+			echo '<p class="sh-note">' . esc_html( sprintf( __( 'Suggested for this address: %s.', 'scout-build' ), self::RINGS[ self::guess() ][0] ?? '' ) ) . '</p>';
 			echo '<p class="sh-note">' . esc_html__( 'A pause stops automatic updates on this site only. To hold a release on every site, add it to "hold" in catalog.json. Update now always works.', 'scout-build' ) . ( $locked ? ' ' . esc_html__( 'The ring is set in wp-config.php (SCOUT_HUB_RING).', 'scout-build' ) : '' ) . '</p>';
 		}
 		echo '</section>';

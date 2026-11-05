@@ -1,0 +1,6 @@
+{
+  "plugin": "scout-cards",
+  "items": [],
+  "cookies": [],
+  "notes": "The card, contact file and link pages only show the team's own details. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site."
+}

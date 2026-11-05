@@ -69,3 +69,17 @@ Build section.
 
 Deleting the plugin removes the missing-page log, its options and notices. The redirects stay, so reinstalling brings them straight back. To remove them too, define `SCOUT_PURGE_ON_UNINSTALL` as `true` in wp-config.php before deleting.
 Export the redirects first if they may be needed again.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Addresses on this website that visitors asked for but that do not exist (missing pages), without any query string, with how many times each was asked for and the first and last time (Only while "Keep a list of missing pages people ask for" is on (it is on by default). Search engines, scripts and file requests are skipped.) | A table in this website's database (the missing-page list) | Until someone deletes it. The list holds 500 addresses by default (the setting allows 50 to 2,000). When it is full, the oldest, least visited addresses are removed. Deleting the plugin removes the list. | Nobody |
+| The web page a visitor came from when they reached a missing page (the referrer), without its query string and cut to 255 characters (Only when the visitor's browser sends it, under the same rules as the missing-page list.) | A table in this website's database (the missing-page list) | Until someone deletes it, or until its missing page drops off the full list. Deleting the plugin removes the list. | Nobody |
+| A count of how many times each redirect was used and when it was last used. Nothing about the visitor is saved with it. (When a visitor opens an old address that is forwarded.) | This website's database, on each redirect | Until someone deletes the redirect | Nobody |
+
+The plugin reads the browser type only to skip search engines and scripts and does not save it.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

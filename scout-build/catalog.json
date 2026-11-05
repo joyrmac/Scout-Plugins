@@ -1,8 +1,9 @@
 {
   "version": 1,
-  "updated": "2026-11-03",
-  "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers: build, partnership, whole, addon. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there. \"hold\" lists releases Scout holds back on every site (Site Standard rule 19): {\"slug\", \"version\" (or \"*\"), \"note\"}; sites read it within 12 hours.",
+  "updated": "2026-11-04",
+  "about": "The feature list the Site Build hub (scout-build) shows on every site. Fetched from this repo's main branch; scout-build/catalog.json is the offline copy. Keep the two identical. Tiers (docs/dashboard-map.md): build is Core, on every plan; partnership and whole come with that plan and up; bonus is a free extra added when it fits and included with The Whole System; plus is a paid module added to a site one at a time and never bundled; addon is the old name for bonus. client_specific features only appear on sites that already have them installed. not_with_themes lists theme folders that already do the job; the hub will not turn the feature on there.",
   "hold": [],
+  "security": [],
   "features": [
     {
       "slug": "scout-core",
@@ -90,10 +91,18 @@
       "requires": []
     },
     {
+      "slug": "scout-law",
+      "name": "Law firm tools",
+      "summary": "The firm's disclaimer lines set once and shown where they belong, approval before publishing kept as the firm's advertising record, \"Reviewed by\" stamps on a review schedule, and form entries that delete themselves after 90 days.",
+      "tier": "build",
+      "law": true,
+      "requires": []
+    },
+    {
       "slug": "scout-results",
       "name": "Case results",
       "summary": "Show the firm's case results with the firm's approval on each one and the disclaimer next to every result. Visitors can filter by practice area.",
-      "tier": "addon",
+      "tier": "bonus",
       "law": true,
       "requires": []
     },
@@ -101,7 +110,7 @@
       "slug": "scout-chat",
       "name": "Chat assistant",
       "summary": "A chat in the corner of your site that answers common questions, books calls and takes change requests. Every other question lands in your inbox with the visitor's email, and AI answers start once it's connected.",
-      "tier": "addon",
+      "tier": "bonus",
       "law": false,
       "requires": []
     },
@@ -109,7 +118,7 @@
       "slug": "scout-cards",
       "name": "Digital business cards and link page",
       "summary": "A card for each person that saves to a phone in one tap, a QR code to share it, and a link page for your social bios.",
-      "tier": "addon",
+      "tier": "bonus",
       "law": false,
       "requires": [],
       "not_with_themes": [
@@ -129,7 +138,7 @@
       "slug": "scout-rvpark",
       "name": "RV park content",
       "summary": "Sites, amenities and rates for an RV park, edited like a form.",
-      "tier": "build",
+      "tier": "plus",
       "law": false,
       "requires": [
         "scout-core"
@@ -149,7 +158,7 @@
       "slug": "scout-events",
       "name": "Events and schedule",
       "summary": "Event pages with dates, venue, tickets and what to know, a day-by-day schedule, speaker pages, and event listings Google can show. Sell tickets or take free sign-ups, with a QR ticket and signed agreements for each person and check-in at the door.",
-      "tier": "addon",
+      "tier": "plus",
       "law": false,
       "requires": []
     },
@@ -157,7 +166,7 @@
       "slug": "scout-members",
       "name": "Membership",
       "summary": "People apply on the site, you approve each one, and members sign in to see members-only pages and events. Plans, renewal dates and a members list you run from the dashboard. With a shop, members pay dues and renew through your site's own checkout, with renewal reminders.",
-      "tier": "addon",
+      "tier": "plus",
       "law": false,
       "requires": []
     },
@@ -165,7 +174,7 @@
       "slug": "scout-partners",
       "name": "Partners and sponsors",
       "summary": "Partners by level, such as Founding, National and Regional, each with a logo, link and the places they appear. Change a partner once and every placement follows, with monthly click counts to show them.",
-      "tier": "addon",
+      "tier": "plus",
       "law": false,
       "requires": []
     },
@@ -173,7 +182,7 @@
       "slug": "scout-crm",
       "name": "Customer list sync",
       "summary": "Everyone who buys a ticket, signs up, volunteers, applies or joins goes into one customer list in FluentCRM on your own site, tagged by what they did, the event and its region.",
-      "tier": "addon",
+      "tier": "plus",
       "law": false,
       "requires": []
     },
@@ -189,7 +198,7 @@
       "slug": "scout-booking",
       "name": "Booking with deposits",
       "summary": "Clients pick a session and a time on your site, answer a few short questions, and pay a deposit or the full price at checkout. Sessions you screen first come in as requests you approve, and every booking gets change and cancel links, a reminder, and a spot in your phone calendar.",
-      "tier": "addon",
+      "tier": "plus",
       "law": false,
       "requires": []
     },
@@ -197,7 +206,7 @@
       "slug": "scout-writing",
       "name": "Writing room",
       "summary": "A private place in your dashboard to answer your writing prompts, in your own words or a voice memo, and send each piece to Scout when it's ready.",
-      "tier": "addon",
+      "tier": "plus",
       "law": false,
       "requires": []
     }

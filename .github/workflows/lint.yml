@@ -81,8 +81,36 @@ jobs:
           coverage: none
       - name: DESIGN.md parser, token merge, contrast and scout_core_owns (no WordPress needed)
         run: php tools/tests/design.php
-      - name: Admin kit files every Scout screen by the Site Standard §7 map
+      - name: Admin kit files every Scout screen by the dashboard map (docs/dashboard-map.md)
         run: php tools/tests/admin-kit-groups.php
+      - name: Dashboard tokens match tools/admin-kit/tokens.json, kit copies are current, contrast passes
+        run: |
+          php tools/admin-kit/build-tokens.php --check
+          php tools/tests/admin-tokens.php
+      - name: Law firm disclaimer rules (no WordPress needed)
+        run: php tools/tests/law-disclaimers.php
+      - name: Law firm approval rules (no WordPress needed)
+        run: php tools/tests/law-approvals.php
+      - name: Law firm "Reviewed by" due dates (no WordPress needed)
+        run: php tools/tests/law-reviews.php
+      - name: Law firm form entries that delete themselves (no WordPress needed)
+        run: php tools/tests/law-entries.php
+      - name: Law firm screens fall back when an older admin kit loads first (no WordPress needed)
+        run: php tools/tests/law-kit-fallback.php
+      - name: Scout Core breadcrumbs, verification, thank-you pages and hardening (no WordPress needed)
+        run: php tools/tests/core-seo-gaps.php
+      - name: Every plugin lists the visitor data it keeps (Site Standard rule 24)
+        run: php tools/visitor-data.php --check
+      - name: Approval hold, live sites wait for Scout's OK (no WordPress needed)
+        run: php tools/tests/approval-hold.php
+      - name: Privacy policy and terms drafted from the visitor data lists (no WordPress needed)
+        run: php tools/tests/core-policies.php
+      - name: Today list on Home (no WordPress needed)
+        run: php tools/tests/today.php
+      - name: Inbox list (no WordPress needed)
+        run: php tools/tests/inbox.php
+      - name: Plans, picks and recommendations (no WordPress needed)
+        run: php tools/tests/plans.php
 
   slop-check:
     name: Code slop check

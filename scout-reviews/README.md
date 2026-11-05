@@ -155,3 +155,21 @@ themes. To restyle:
 ## Roadmap
 
 - **0.3.0:** Facebook Page recommendations sync.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| What a person sends on the private note form: their name, their note, a star rating (optional), their business name (optional), whether they said it is OK to show it on the website, and the date it was sent (When someone sends the note form at /review/note/. A note is only shown on the website if the person ticked the OK box.) | This website's database, as draft reviews in Reviews > Inbox | Until someone deletes it | Emailed to the site's own address (the note email set in Reviews, or the site admin email) |
+| A scrambled (hashed) form of the visitor's IP address, with a count of notes sent from it, used to limit notes to five an hour (When someone sends the private note form.) | A temporary record in this website's database | One hour | Nobody |
+| A count of visits to the review page, kept as monthly totals by how the link was shared (QR code, text, email, card or plain link). Nothing about the visitor is saved with it. (When someone opens the review page (/review/). Search engines, link previews and signed-in staff are not counted.) | This website's database, in the plugin's settings | The last 13 months of totals | Nobody |
+| Public Google reviews of the business, copied from its Google Business Profile: the reviewer's name as Google shows it (or "A Google user"), the review text, star rating, date, and the address of the reviewer's Google profile photo (Only when Google is connected in the Reviews settings. Reviews with stars but no words are not copied.) | This website's database, as reviews. New ones arrive as drafts. | Until someone deletes it. A daily sync updates each one from Google. A review removed from Google is taken off the site and kept as a draft. | Nobody |
+| Reviews that site staff copy in by hand from other review sites (such as Yelp, Facebook or BBB): the reviewer's name, the review text, stars, date, a link to the review and an optional reviewer detail (When site staff add them.) | This website's database, as reviews | Until someone deletes it | Nobody |
+| The visitor's IP address and browser details, seen by Google when a review card shows a Google reviewer's photo (When a page shows a Google review that has a profile photo.) | Not kept by this website. The photo loads straight from Google's servers, without telling Google which page it is on. | Not kept by this website | Google |
+| The visitor's IP address and browser details, seen by Google Fonts when the review pages load their fonts (On the /review/ and /review/note/ pages, when a font from the list is chosen in the Reviews settings (Hanken Grotesk and Geist Mono are the defaults).) | Not kept by this website | Not kept by this website | Google Fonts |
+
+Deleting the plugin keeps the reviews, notes and visit totals unless "Remove all reviews and settings when the plugin is deleted" is ticked.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

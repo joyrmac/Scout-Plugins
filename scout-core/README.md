@@ -209,6 +209,28 @@ theme without DESIGN.md still gets sensible tokens.
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.
 
+## Breadcrumbs, verification, thank-you pages, hardening and cache purge (1.8.0+)
+
+- **Breadcrumbs:** a theme declares `add_theme_support( 'scout-breadcrumbs' )` and calls
+  `scout_core_breadcrumbs()` where the links go. Core then adds the matching
+  `BreadcrumbList` schema. Remove the theme's own breadcrumb schema in the same release.
+  Adjust the trail with `scout_core_breadcrumb_trail`, for example to put a page that acts
+  as an archive (Work, Services) before its items.
+- **Verification:** Get found → SEO, "Google Search Console verification code" and
+  "Bing Webmaster Tools verification code". The tags print on the front page only.
+- **Thank-you pages:** `noindex` and out of the sitemap. These are Gravity Forms
+  confirmation pages, plus the addresses thank-you and thanks. Add more with
+  `scout_core_thanks_pages`.
+- **Hardening:** switches under spam protection (`hide_users`, `xmlrpc_off`,
+  `browser_headers`). Filters: `scout_core_hide_users`, `scout_core_xmlrpc_needed`,
+  `scout_core_browser_headers`. Themes and companions stop doing this themselves.
+- **Staging guard:** on a staging copy, email goes only to Scout and calls to newsletter,
+  texting and payment services are refused (`scout_core_staging_mail_to`,
+  `scout_core_staging_blocked_hosts`, `SCOUT_STAGING`).
+- **Cache purge:** after the active theme or a Scout plugin updates, WP Engine and WP
+  Rocket caches purge by themselves (`scout_core_purge_after_update`). Cloudflare is
+  still purged by hand.
+
 ## APIs other plugins depend on
 
 These are a contract. Renaming or removing one breaks the plugin that uses it on
@@ -230,3 +252,13 @@ Every change to this plugin:
 1. Bumps the `Version:` header in `scout-core.php`.
 2. Bumps `SCOUT_CORE_VERSION`.
 3. Adds a dated entry to `CHANGELOG.md`.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+This plugin keeps nothing about the people who visit the site and sets no cookies.
+
+Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing. The dashboard remembers which sections a staff member opened, in their own browser (scoutSections), which never touches visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

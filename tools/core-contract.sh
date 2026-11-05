@@ -44,6 +44,7 @@ scout-core/includes/schema/class-scout-schema.php | home_url( '/#business' ) | s
 scout-core/includes/design.php | function scout_design( string $feature = '' ): array | scout-build and every plugin with a front-end look (DESIGN.md tokens from the theme)
 scout-core/includes/design.php | function scout_design_issues(): array | scout-build (Site health: design contrast)
 scout-core/includes/design.php | function scout_core_owns( string $job ): bool | every Scout theme through the theme kit (fallbacks stand down when a plugin owns the job)
+scout-core/includes/schema/class-scout-schema.php | public static function add_webpage( array $graph ) | scout-law (Reviewed by: builds the WebPage node before adding reviewedBy)
 CONTRACT
 
 exit "$fail"

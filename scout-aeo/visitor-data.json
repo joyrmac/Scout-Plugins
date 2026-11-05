@@ -1,0 +1,6 @@
+{
+  "plugin": "scout-aeo",
+  "items": [],
+  "cookies": [],
+  "notes": "This plugin only changes robots.txt, serves /llms.txt and its IndexNow key file, and prints questions and answers the site's editors write. IndexNow pings send only the addresses of pages that were published or updated, never anything about visitors."
+}

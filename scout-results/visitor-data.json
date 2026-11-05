@@ -1,0 +1,14 @@
+{
+  "plugin": "scout-results",
+  "items": [
+    {
+      "what": "The label of the practice-area filter button a visitor clicks on the case results list",
+      "where": "Not saved by this website. It is handed to the site's analytics tag in the visitor's browser.",
+      "kept": "Not kept by this plugin. How long Google keeps it depends on the site's Google account settings.",
+      "shared": "Google Analytics or Google Tag Manager, through the Scout Analytics plugin",
+      "when": "Only when the Scout Analytics plugin is installed and its tag is on the page."
+    }
+  ],
+  "cookies": [],
+  "notes": "Case results are written by site staff. The plugin has no form and saves nothing about visitors."
+}

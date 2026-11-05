@@ -59,3 +59,17 @@ the sample out.
 ## Limits
 
 3 checks per visitor per hour, 3 per email per day, 40 per site per day.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| What a person types into the site check form: their name, their email address and the website address they want checked, plus the check results for that website, the address of the page the form was on, and when the report was sent (When someone runs a check with the [scout_site_check] form.) | This website's database, as private site check records | Until someone deletes it. Deleting the plugin keeps these records. | Emailed to the visitor (their report) and emailed to the site's own address (the notify address in Site Check settings, or the site admin email) |
+| The website address the person asked to check (During every site check.) | Sent to Google's speed tool to measure the site's speed on phones | Not kept there by this website | Google PageSpeed Insights |
+| A scrambled (hashed) form of the visitor's IP address and a scrambled form of their email address, each with a count of checks, used to limit checks to three an hour per connection and three a day per email (When someone submits the site check form with a valid name, email and web address.) | A temporary record in this website's database | One hour for the IP address record and one day for the email record | Nobody |
+
+To run the check, this website also visits the address the person entered, the same way a browser would. Only the website address goes to Google, never the person's name or email.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

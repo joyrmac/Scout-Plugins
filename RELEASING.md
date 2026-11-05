@@ -112,6 +112,36 @@ Install test zips on staging only.
 
 ---
 
+## Staging first, then live (the approval hold)
+
+A release installs by itself on every staging copy. A live site waits for
+Scout's OK (Scout Build 0.12.0, Joy 2026-11-04):
+
+1. The release lands on staging. Scout, and the client where it changes what
+   they see, check it there.
+2. On the live site: **Scout tools → Updates → Waiting for your OK**. Type who
+   said yes ("Client OK by text, Nov 5"), then **Approve** or **Approve all**.
+   The Site log records it, and the client sees it under Your site.
+3. The live site installs it on its next update run, or at once with Update now.
+
+This covers Scout plugins and any theme that updates from GitHub. Update now
+always works. A site can switch the hold off on the same screen;
+`define( 'SCOUT_HUB_APPROVAL', false )` in wp-config.php does the same.
+
+**Security fixes skip the wait.** Add the release to `"security"` in
+`catalog.json` (and its copy in `scout-build/catalog.json`):
+
+```json
+"security": [ { "slug": "scout-forms-guard", "version": "0.3.5", "note": "Upload fix" } ]
+```
+
+Any site still below that version installs it (or anything newer) as soon as
+it is out, with no OK and no ring wait. Once a site has the fix, later releases
+wait for an OK as usual. A theme is listed by its folder name. A `"hold"`
+entry still stops it, and so does a pause on one site.
+
+---
+
 ## Checking it worked
 
 The release shows up at

@@ -1,0 +1,14 @@
+{
+  "plugin": "scout-partners",
+  "items": [
+    {
+      "what": "A count of clicks on each partner's link, kept as one total per month. No name, IP address or device details are saved with it.",
+      "where": "This website's database, on each partner's record",
+      "kept": "The last 24 months of totals. Older months are dropped.",
+      "shared": "",
+      "when": "When a visitor clicks a partner link. Clicks from search engines and link checkers are not counted."
+    }
+  ],
+  "cookies": [],
+  "notes": "The click goes through this website and then on to the partner's own website, which sees the visit like any other. The plugin reads the browser type only to skip search engines and does not save it."
+}

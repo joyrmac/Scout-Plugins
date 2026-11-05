@@ -53,12 +53,15 @@ final class Scout_Core_Protection {
 	/** @return array<string,string> setting key => label */
 	public static function fields() {
 		return array(
-			'email_guard'    => 'Hide email addresses from spam bots',
-			'close_comments' => 'Close comments and pingbacks',
+			'email_guard'     => 'Hide email addresses from spam bots',
+			'close_comments'  => 'Close comments and pingbacks',
+			'hide_users'      => 'Hide login names from visitors',
+			'xmlrpc_off'      => 'Turn off XML-RPC',
+			'browser_headers' => 'Send basic browser protections',
 		);
 	}
 
-	/** @return array<string,string> Each switch is "1" (on) or "0" (off). Both default on. */
+	/** @return array<string,string> Each switch is "1" (on) or "0" (off). All default on. */
 	public static function get() {
 		$defaults = array_fill_keys( array_keys( self::fields() ), '1' );
 		$saved    = get_option( self::OPTION, array() );
@@ -74,6 +77,7 @@ final class Scout_Core_Protection {
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_guard' ), 9999 );
 		add_action( 'init', array( __CLASS__, 'maybe_close_comments' ), 20 );
+		add_action( 'init', array( __CLASS__, 'maybe_harden' ), 20 );
 	}
 
 	public static function register_settings() {
@@ -405,13 +409,78 @@ final class Scout_Core_Protection {
 		return $methods;
 	}
 
+	/* ---------- Hardening ---------- */
+
+	/**
+	 * Site hardening moved from themes (Site Standard gap 6; Bliss Boogie's companion and Maravela's
+	 * theme did it in their own code). Visitors who are not signed in cannot list login names, XML-RPC
+	 * is off unless Jetpack needs it, and every page sends the basic browser protections. Signed-in
+	 * editors and the block editor are unaffected. Themes that still do this themselves are harmless:
+	 * the same filters run twice with the same result.
+	 */
+	public static function maybe_harden() {
+		if ( self::on( 'hide_users' ) && (bool) apply_filters( 'scout_core_hide_users', true ) ) {
+			add_filter( 'rest_endpoints', array( __CLASS__, 'hide_user_routes' ) );
+		}
+		if ( self::on( 'xmlrpc_off' ) && ! self::xmlrpc_needed() ) {
+			add_filter( 'xmlrpc_enabled', '__return_false' );
+			add_filter( 'xmlrpc_methods', '__return_empty_array' );
+			add_filter( 'wp_headers', array( __CLASS__, 'drop_pingback_header' ), 20 );
+		}
+		if ( self::on( 'browser_headers' ) ) {
+			add_filter( 'wp_headers', array( __CLASS__, 'browser_headers' ) );
+			remove_action( 'wp_head', 'wp_generator' );
+			add_filter( 'the_generator', '__return_empty_string' );
+		}
+	}
+
+	/** Jetpack and the WordPress mobile apps talk to the site over XML-RPC. */
+	public static function xmlrpc_needed() {
+		return (bool) apply_filters( 'scout_core_xmlrpc_needed', class_exists( 'Jetpack' ) || defined( 'JETPACK__VERSION' ) );
+	}
+
+	/** The /wp/v2/users routes list every author's login name. Hidden from visitors only. */
+	public static function hide_user_routes( $endpoints ) {
+		if ( ! is_array( $endpoints ) || ( function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) ) {
+			return $endpoints;
+		}
+		foreach ( array_keys( $endpoints ) as $route ) {
+			if ( 0 === strpos( (string) $route, '/wp/v2/users' ) ) {
+				unset( $endpoints[ $route ] );
+			}
+		}
+		return $endpoints;
+	}
+
+	/** Headers already set by the host (WP Engine, Cloudflare) are left as they are. */
+	public static function browser_headers( $headers ) {
+		$headers = is_array( $headers ) ? $headers : array();
+		$add     = array(
+			'X-Content-Type-Options' => 'nosniff',
+			'X-Frame-Options'        => 'SAMEORIGIN',
+			'Referrer-Policy'        => 'strict-origin-when-cross-origin',
+		);
+		if ( function_exists( 'is_ssl' ) && is_ssl() ) {
+			$add['Strict-Transport-Security'] = 'max-age=31536000';
+		}
+		foreach ( (array) apply_filters( 'scout_core_browser_headers', $add ) as $name => $value ) {
+			if ( ! isset( $headers[ $name ] ) ) {
+				$headers[ $name ] = $value;
+			}
+		}
+		return $headers;
+	}
+
 	/* ---------- Settings tab ---------- */
 
 	public static function render_tab() {
 		$values = self::get();
 		$notes  = array(
-			'email_guard'    => 'Email addresses on your pages are coded so people see and click them as usual, while the bots that collect addresses for spam miss them. Search engines still read the email in your business details.',
-			'close_comments' => 'Turns off new comments and pingbacks on every page and post, which mostly bring spam. Comments already saved stay in WordPress.',
+			'email_guard'     => 'Email addresses on your pages are coded so people see and click them as usual, while the bots that collect addresses for spam miss them. Search engines still read the email in your business details.',
+			'close_comments'  => 'Turns off new comments and pingbacks on every page and post, which mostly bring spam. Comments already saved stay in WordPress.',
+			'hide_users'      => 'Visitors cannot look up the login names of the people who sign in. A login name is half of a password guess. Signed-in editors are unaffected.',
+			'xmlrpc_off'      => 'XML-RPC is an old way to post from other apps, and bots use it to guess passwords. Nothing on a Scout site needs it. It stays on when Jetpack is installed.',
+			'browser_headers' => 'Every page tells the browser not to let other sites frame it or guess file types, and to use a secure connection. It also hides the WordPress version number.',
 		);
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_protection_group' );

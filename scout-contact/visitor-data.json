@@ -1,0 +1,14 @@
+{
+  "plugin": "scout-contact",
+  "items": [
+    {
+      "what": "Taps on the Call, Text, Book a time and Let's talk buttons (which button was tapped, never who tapped it)",
+      "where": "Passed to Scout Analytics on the page",
+      "kept": "Not kept by this website",
+      "shared": "Google Analytics (Google), through Scout Analytics",
+      "when": "only when Scout Analytics is on"
+    }
+  ],
+  "cookies": [],
+  "notes": "The call bar stores nothing and sets no cookies. Call and Text open the visitor's own phone app."
+}

@@ -66,3 +66,15 @@ The notice bar's close button sends `hours_notice_hide` through
 
 Options `scout_hours`, `scout_hours_closures`, `scout_hours_dismissed`.
 All three are removed when the plugin is deleted.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| Cookie | Why | How long |
+|---|---|---|
+| `scoutHoursBar (browser storage)` | Remembers that the visitor closed the hours or closure notice bar, so it stays closed on other pages. It holds only the notice's ID. | Until the browser tab is closed |
+
+When Scout Analytics is on, closing the notice is also passed to it as a click, with the notice's wording. Scout Analytics lists what it does with that.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

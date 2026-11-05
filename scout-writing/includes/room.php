@@ -607,15 +607,15 @@ add_action( 'admin_menu', function () {
 	}
 	$list   = 'edit.php?post_type=' . SCOUT_WRITING_CPT;
 	$label  = scout_writing_menu_label();
-	$parent = scout_writing_build_parent();
 	// Its own top-level section, right under Dashboard, so the writer sees it first (Joy, 2026-11-03: "writing should be
 	// an ENTIRELY NEW section... make it stand out... VERY CLEAR for her"). A named exception to Scout's "client tools
-	// live under the Scout menu" rule; the administrators' screens below do live there.
+	// live under the Scout menu" rule. Writing room is a Plus module, so its administrators' screens live in this
+	// section too (dashboard redesign, Joy 2026-11-04: Plus modules get their own sections completely).
 	$icon = 'data:image/svg+xml;base64,' . base64_encode( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="black" d="M15.6 2.2a1.6 1.6 0 0 1 2.2 2.2l-9.6 9.6-3.1.9.9-3.1zM3 16.5h14v1.5H3z"/></svg>' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	$hook = add_menu_page( $label, $label, 'edit_posts', SCOUT_WRITING_PAGE, 'scout_writing_render', $icon, 2.5 );
 	add_submenu_page( SCOUT_WRITING_PAGE, $label, 'Write', 'edit_posts', SCOUT_WRITING_PAGE );
-	add_submenu_page( '' !== $parent ? $parent : SCOUT_WRITING_PAGE, 'Writing (all)', 'Writing (all)', 'manage_options', $list );
-	$settings = add_submenu_page( '' !== $parent ? $parent : SCOUT_WRITING_PAGE, 'Writing settings', 'Writing settings', 'manage_options', SCOUT_WRITING_SETTINGS_PAGE, 'scout_writing_settings_render' );
+	add_submenu_page( SCOUT_WRITING_PAGE, 'Writing (all)', 'Writing (all)', 'manage_options', $list );
+	$settings = add_submenu_page( SCOUT_WRITING_PAGE, 'Writing settings', 'Writing settings', 'manage_options', SCOUT_WRITING_SETTINGS_PAGE, 'scout_writing_settings_render' );
 	add_action( 'load-' . $hook, 'scout_writing_assets_hook' );
 	if ( $settings ) {
 		add_action( 'load-' . $settings, 'scout_writing_settings_assets_hook' );
@@ -673,8 +673,7 @@ add_filter( 'parent_file', function ( $parent ) {
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 	if ( $screen && SCOUT_WRITING_CPT === $screen->post_type ) {
 		$submenu_file = 'edit.php?post_type=' . SCOUT_WRITING_CPT; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-		$build        = scout_writing_build_parent();
-		return '' !== $build ? $build : SCOUT_WRITING_PAGE;
+		return SCOUT_WRITING_PAGE;
 	}
 	return $parent;
 } );

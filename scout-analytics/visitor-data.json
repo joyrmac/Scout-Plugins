@@ -1,0 +1,44 @@
+{
+  "plugin": "scout-analytics",
+  "items": [
+    {
+      "what": "Page views: the page address and title, the page the visitor came from, and browser and device details. Google also receives the visitor's IP address with each request.",
+      "where": "Google Analytics, through Google Tag Manager or the Google Analytics tag. This website does not store it.",
+      "kept": "Kept by Google under the site's own Google Analytics settings. This website keeps no copy.",
+      "shared": "Google Analytics and Google Tag Manager (Google)",
+      "when": "only on the live site, and not for people logged in to edit it. The Google tag loads for every other visitor; when a visitor says No thanks, their browser sends Global Privacy Control, or (on sites set to ask first) they have not said yes, Google's consent mode tells Google not to use analytics cookies"
+    },
+    {
+      "what": "Taps on marked buttons and links (such as call, text, book and chat buttons): the button name, its words (up to 80 characters) and the link address",
+      "where": "Google Analytics, through Google Tag Manager or the Google Analytics tag. This website does not store it.",
+      "kept": "Kept by Google under the site's own Google Analytics settings. This website keeps no copy.",
+      "shared": "Google Analytics and Google Tag Manager (Google)",
+      "when": "same as page views"
+    },
+    {
+      "what": "The visitor's answer on the cookie notice (allow or no thanks)",
+      "where": "A cookie in the visitor's own browser, and passed to the Google tag on the page",
+      "kept": "180 days in the visitor's browser",
+      "shared": "Google (as the consent setting sent with Google's tags)",
+      "when": "only after the visitor taps a button on the cookie notice"
+    }
+  ],
+  "cookies": [
+    {
+      "name": "scout_consent",
+      "why": "Remembers whether the visitor allowed visit counting or said no thanks, so the notice does not ask again",
+      "lasts": "180 days"
+    },
+    {
+      "name": "Google Analytics cookies (_ga, _ga_*)",
+      "why": "Set by Google to count visits and tell new visitors from returning ones",
+      "lasts": "Set by Google; up to 2 years by Google's default"
+    },
+    {
+      "name": "Google ad cookies (such as _gcl_au)",
+      "why": "Set by Google ad tags inside the site's Tag Manager container, to measure ads",
+      "lasts": "Set by Google"
+    }
+  ],
+  "notes": "Google's analytics cookies are only set when counting is allowed, and ad cookies stay off unless the site turns on ad signals in Analytics settings and the visitor allows counting. Anything else the Tag Manager container sends is set inside the container by whoever manages it, so check it too."
+}

@@ -1,0 +1,6 @@
+{
+  "plugin": "scout-core",
+  "items": [],
+  "cookies": [],
+  "notes": "Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing. The dashboard remembers which sections a staff member opened, in their own browser (scoutSections), which never touches visitors."
+}

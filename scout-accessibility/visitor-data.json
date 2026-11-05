@@ -1,0 +1,6 @@
+{
+  "plugin": "scout-accessibility",
+  "items": [],
+  "cookies": [],
+  "notes": "The statement page and footer link collect nothing and set no cookies. The email and call buttons on the statement page are marked so Scout Analytics can count taps on them when that plugin is on; Scout Analytics lists that data."
+}

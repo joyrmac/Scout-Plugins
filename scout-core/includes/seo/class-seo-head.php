@@ -19,6 +19,86 @@ final class Scout_SEO_Head {
 		add_action( 'wp', array( __CLASS__, 'replace_core_canonical' ) );
 		add_action( 'wp_head', array( __CLASS__, 'output' ), 1 );
 		add_filter( 'wp_robots', array( __CLASS__, 'robots' ) );
+		add_action( 'wp_head', array( __CLASS__, 'verification' ), 2 );
+		foreach ( array( 'gform_after_save_form', 'gform_post_form_trashed', 'gform_post_form_restored', 'gform_after_delete_form', 'gform_pre_confirmation_save', 'save_post_page' ) as $hook ) {
+			add_action( $hook, array( __CLASS__, 'forget_thanks' ) );
+		}
+	}
+
+	/** Google and Bing verification tags, on the front page only (that is the page both check). */
+	public static function verification() {
+		if ( ! is_front_page() || ! class_exists( 'Scout_Core_SEO_Settings' ) ) {
+			return;
+		}
+		$tags = array(
+			'google-site-verification' => Scout_Core_SEO_Settings::value( 'google_verify' ),
+			'msvalidate.01'            => Scout_Core_SEO_Settings::value( 'bing_verify' ),
+		);
+		foreach ( $tags as $name => $code ) {
+			if ( '' !== (string) $code ) {
+				printf( '<meta name="%s" content="%s" />' . "\n", esc_attr( $name ), esc_attr( $code ) );
+			}
+		}
+	}
+
+	/**
+	 * Pages a visitor only reaches after sending a form: Gravity Forms confirmation pages (a
+	 * confirmation set to "Page", or to a redirect on this site), plus pages whose address is
+	 * thank-you or thanks. They are kept out of search results and the sitemap.
+	 *
+	 * @return int[]
+	 */
+	public static function thanks_pages() {
+		$ids = get_transient( 'scout_core_thanks_pages' );
+		if ( ! is_array( $ids ) ) {
+			$ids = array();
+			if ( class_exists( 'GFAPI' ) && method_exists( 'GFAPI', 'get_forms' ) ) {
+				foreach ( (array) GFAPI::get_forms() as $form ) {
+					foreach ( (array) ( $form['confirmations'] ?? array() ) as $c ) {
+						$ids[] = self::confirmation_page( (array) $c );
+					}
+				}
+			}
+			$slugs = get_posts(
+				array(
+					'post_type'        => 'page',
+					'post_status'      => 'publish',
+					'fields'           => 'ids',
+					'numberposts'      => 50,
+					'suppress_filters' => true,
+					'post_name__in'    => array( 'thank-you', 'thankyou', 'thanks', 'thank-you-for-contacting-us', 'contact-thank-you', 'form-thank-you' ),
+				)
+			);
+			$ids = array_merge( $ids, array_map( 'intval', (array) $slugs ) );
+			$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+			set_transient( 'scout_core_thanks_pages', $ids, 12 * HOUR_IN_SECONDS );
+		}
+		$ids = array_map( 'intval', (array) apply_filters( 'scout_core_thanks_pages', $ids ) );
+		// A form that sends people back to the home page or the blog must never hide those pages.
+		$keep = array( (int) get_option( 'page_on_front' ), (int) get_option( 'page_for_posts' ) );
+		return array_values( array_diff( array_unique( $ids ), $keep, array( 0 ) ) );
+	}
+
+	/** The page a Gravity Forms confirmation sends people to, or 0. */
+	public static function confirmation_page( array $c ) {
+		if ( ! empty( $c['isActive'] ) || ! array_key_exists( 'isActive', $c ) ) {
+			$type = (string) ( $c['type'] ?? '' );
+			if ( 'page' === $type ) {
+				return (int) ( $c['pageId'] ?? 0 );
+			}
+			if ( 'redirect' === $type && ! empty( $c['url'] ) && function_exists( 'url_to_postid' ) ) {
+				$url  = (string) $c['url'];
+				$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+				if ( '' === $host || (string) wp_parse_url( home_url(), PHP_URL_HOST ) === $host ) {
+					return (int) url_to_postid( $url );
+				}
+			}
+		}
+		return 0;
+	}
+
+	public static function forget_thanks() {
+		delete_transient( 'scout_core_thanks_pages' );
 	}
 
 	/**
@@ -118,6 +198,10 @@ final class Scout_SEO_Head {
 			unset( $robots['index'] );
 		}
 		if ( is_singular() && get_post_meta( get_queried_object_id(), SCOUT_SEO_META_NOINDEX, true ) ) {
+			$robots['noindex'] = true;
+			unset( $robots['index'] );
+		}
+		if ( is_page() && in_array( (int) get_queried_object_id(), self::thanks_pages(), true ) ) {
 			$robots['noindex'] = true;
 			unset( $robots['index'] );
 		}

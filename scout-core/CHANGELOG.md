@@ -1,5 +1,32 @@
 # Scout Core — Changelog
 
+## 1.8.0 (2026-11-04)
+
+Numbered 1.8.0 because the Change log branch (`claude/change-log`) already claims 1.7.0. Merge that one first, or renumber it above this.
+
+Five Site Standard gaps close in Core, so themes can drop their own copies.
+
+- **Policies → Privacy and terms (Joy, 2026-11-05).** A privacy policy and terms of service drafted from what the site actually runs: Business info, plus the visitor data list (`visitor-data.json`) of every Scout plugin that is on, plus Gravity Forms. Scout drafts; the business's own lawyer reviews; the business approves.
+  - **Copy the email** gives a ready-to-send email with both drafts as plain text, for the business to forward to its lawyer. Lines in [square brackets] are for the lawyer or the business to confirm.
+  - **Mark approved** records who approved it and when. Then **Make the page** creates a draft page with the approved text and the date, where the lawyer's changes go in before a person publishes it. Nothing publishes on its own, and an existing page is never overwritten.
+  - **Changed since it was approved:** when a feature that collects something is turned on or off, or business details change, the screen says so and lists what is new or no longer collected.
+- **Breadcrumbs (gap 3).** One trail feeds both the `BreadcrumbList` schema and the visible links. The trail runs Home, then a page's parent pages, the blog page for a post, or a content type's archive. A theme turns it on with `add_theme_support( 'scout-breadcrumbs' )` and shows the links with `scout_core_breadcrumbs()`. It is off until a theme asks, because many themes still print their own and two would disagree (rule 20). It is skipped when something else already added a `BreadcrumbList`. Filter `scout_core_breadcrumb_trail`.
+- **Search engine verification (gap 1).** Scout → Get found → SEO has fields for the Google Search Console and Bing Webmaster Tools codes. Paste the code or the whole meta tag, and only the code is kept. The tags print on the front page. Google's HTML file name is refused, because it is a file check and not a code.
+- **Thank-you pages stay out of search.** Pages a visitor only reaches after sending a form get `noindex` and leave the sitemap. That covers Gravity Forms confirmations set to a page or to a redirect on this site, and pages at the address thank-you or thanks. The front page and the blog page are never hidden, even when a form sends people there. Filter `scout_core_thanks_pages`.
+- **Site hardening (gap 6), three new switches under spam protection, all on by default:**
+  - Visitors who are not signed in cannot list login names through `/wp/v2/users`.
+  - XML-RPC is off, unless Jetpack is installed.
+  - Every page sends `nosniff`, `SAMEORIGIN` framing and a referrer policy, plus HSTS on SSL, and the WordPress version is hidden. A header the host already sets is kept.
+  - This is the same code Bliss Boogie's companion and Maravela's theme run, so both can drop theirs. Until they do, the filters run twice with the same result.
+- **Caches purge themselves after an update (gap 5).** When the active theme or any Scout plugin is updated or replaced, Core purges WP Engine's caches (and WP Rocket's, where a site runs it), so pages stop pointing at old styles. Cloudflare still needs a hand purge, because that takes the site's Cloudflare key. Filter `scout_core_purge_after_update`; action `scout_core_caches_purged`. Bliss Boogie's theme can drop its own purge.
+- **Staging copies never reach real people.** A staging copy carries the live site's customers and keys, and its scheduled jobs keep running. On a staging copy, email now goes only to scoutraleigh.com addresses, and customers are dropped from To, Cc and Bcc. That covers booking reminders, member renewals and form notifications. Calls to newsletter, email-marketing, texting, payment and Zapier services are refused, so a test sign-up never joins the real list and a test checkout never charges a card. A notice on every dashboard screen says so. A copy is staging when WordPress is set to staging or its address is a host's staging address. `SCOUT_STAGING` in wp-config.php overrides that either way. Filters: `scout_core_staging_mail_to` and `scout_core_staging_blocked_hosts`.
+- Fix: saving the SEO screen kept only the fields it shows, which wiped `purge_on_uninstall`. Keys the screen doesn't show are now kept.
+- Tests: `tools/tests/core-seo-gaps.php` (23 checks).
+
+## 1.6.6 (2026-11-04)
+
+- **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
+
 ## 1.6.5 (2026-11-04)
 
 - **Site Sync creates the pages the bundle names and brings posts in as drafts** (Site Standard §6 and §12). A page entry with `"create": true` (or `"create_missing": true` at the top of the manifest) that the site lacks is created on the next run: pages publish, with their title, content, template, parent, menu order and front-page or posts-page setting; a new `posts` list works like `pages` with post_type `post` and arrives as drafts. The state reads "Will be created" and counts as a safe update, never as something to review. Undo trashes what the run created and puts the front-page settings back. A page without `create` is still reported as "Page not found", as before.

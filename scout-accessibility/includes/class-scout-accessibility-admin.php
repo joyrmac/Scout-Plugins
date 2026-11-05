@@ -12,7 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Accessibility_Admin {
 
-	const SLUG = 'scout-accessibility';
+	const SLUG   = 'scout-accessibility';
+	const CHECKS = 'scout-accessibility-checks';
 
 	public static function boot(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 30 );
@@ -35,13 +36,20 @@ final class Scout_Accessibility_Admin {
 		return 'options-general.php';
 	}
 
-	public static function url( array $args = array() ): string {
-		$base = 'options-general.php' === self::parent() ? admin_url( 'options-general.php?page=' . self::SLUG ) : admin_url( 'admin.php?page=' . self::SLUG );
+	public static function url( array $args = array(), string $slug = '' ): string {
+		// admin.php?page= opens the screen wherever its menu is, also while a form saves (admin-post.php builds no menu).
+		$base = admin_url( 'admin.php?page=' . ( '' !== $slug ? $slug : self::SLUG ) );
 		return $args ? add_query_arg( $args, $base ) : $base;
 	}
 
+	public static function checks_url( array $args = array() ): string {
+		return self::url( $args, self::CHECKS );
+	}
+
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Accessibility', 'scout-accessibility' ), __( 'Accessibility', 'scout-accessibility' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		// The statement files under Policies and the checks under Site health; each screen links to the other (Joy, 2026-11-04).
+		add_submenu_page( self::parent(), __( 'Accessibility statement', 'scout-accessibility' ), __( 'Accessibility statement', 'scout-accessibility' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Accessibility checks', 'scout-accessibility' ), __( 'Accessibility checks', 'scout-accessibility' ), 'manage_options', self::CHECKS, array( __CLASS__, 'render_checks' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -63,7 +71,7 @@ final class Scout_Accessibility_Admin {
 	}
 
 	public static function nav_hint( $hint, $slug ) {
-		if ( self::SLUG !== $slug ) {
+		if ( self::CHECKS !== strtok( (string) $slug, '&' ) ) {
 			return $hint;
 		}
 		$n = self::to_fix();
@@ -91,7 +99,7 @@ final class Scout_Accessibility_Admin {
 	private static function back( string $msg, string $anchor = '' ): void {
 		// admin-post.php builds no menu, so go back to the screen the form came from.
 		$ref  = wp_get_referer();
-		$base = $ref ? strtok( remove_query_arg( 'msg', $ref ), '#' ) : self::url();
+		$base = $ref ? strtok( remove_query_arg( 'msg', $ref ), '#' ) : ( in_array( $anchor, array( 'sa-weekly', 'sa-launch' ), true ) ? self::checks_url() : self::url() );
 		wp_safe_redirect( add_query_arg( 'msg', $msg, $base ) . ( '' !== $anchor ? '#' . $anchor : '' ) );
 		exit;
 	}
@@ -271,7 +279,8 @@ final class Scout_Accessibility_Admin {
 		<?php
 	}
 
-	public static function render(): void {
+	/** Site health → Accessibility checks: the weekly results and the at-launch checklist. */
+	public static function render_checks(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
@@ -288,24 +297,13 @@ final class Scout_Accessibility_Admin {
 		$launch_done = count( array_filter( wp_list_pluck( $launch, 'done' ) ) );
 
 		Scout_Admin_UI::open(
-			__( 'Accessibility', 'scout-accessibility' ),
-			__( 'A plain statement page that tells visitors how to report a barrier, weekly checks for the common issues a computer can find, and a short checklist for what needs a person at launch.', 'scout-accessibility' ),
-			__( 'Site health · Accessibility', 'scout-accessibility' )
+			__( 'Accessibility checks', 'scout-accessibility' ),
+			__( 'Weekly checks for the common issues a computer can find, and a short checklist for what needs a person at launch.', 'scout-accessibility' ),
+			__( 'Site health · Accessibility checks', 'scout-accessibility' )
 		);
 		self::messages();
 		?>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box sh-check is-<?php echo $url ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Statement page', 'scout-accessibility' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $url ? esc_html__( 'Published', 'scout-accessibility' ) : esc_html__( 'Not created yet', 'scout-accessibility' ); ?></p>
-				<p class="sh-note">
-					<?php if ( $url ) : ?>
-						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'View the page', 'scout-accessibility' ); ?></a>
-					<?php else : ?>
-						<a href="#sa-statement"><?php esc_html_e( 'Fill in the statement below to create it', 'scout-accessibility' ); ?></a>
-					<?php endif; ?>
-				</p>
-			</section>
+		<div class="sh-grid sh-grid-2">
 			<section class="sh-box sh-check is-<?php echo ! $ran ? 'warn' : ( $to_fix ? 'warn' : 'good' ); ?>">
 				<p class="sh-label"><?php esc_html_e( 'Weekly checks', 'scout-accessibility' ); ?></p>
 				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>
@@ -435,12 +433,13 @@ final class Scout_Accessibility_Admin {
 				}
 
 				// Statement page.
+				$fix_statement = array( '<a href="' . esc_url( self::url() ) . '">' . esc_html__( 'Open the accessibility statement', 'scout-accessibility' ) . '</a>' );
 				if ( ! $st['exists'] ) {
-					self::row( __( 'Statement page', 'scout-accessibility' ), 'fix', __( 'No published Accessibility page yet', 'scout-accessibility' ) );
+					self::row( __( 'Statement page', 'scout-accessibility' ), 'fix', __( 'No published Accessibility page yet', 'scout-accessibility' ), $fix_statement );
 				} elseif ( ! $st['linked'] ) {
-					self::row( __( 'Statement page', 'scout-accessibility' ), 'fix', __( 'Published, but no link to it was found on the site', 'scout-accessibility' ) );
+					self::row( __( 'Statement page', 'scout-accessibility' ), 'fix', __( 'Published, but no link to it was found on the site', 'scout-accessibility' ), $fix_statement );
 				} elseif ( ! $st['reviewed'] ) {
-					self::row( __( 'Statement page', 'scout-accessibility' ), 'fix', __( 'Linked, but not reviewed in the last year', 'scout-accessibility' ) );
+					self::row( __( 'Statement page', 'scout-accessibility' ), 'fix', __( 'Linked, but not reviewed in the last year', 'scout-accessibility' ), $fix_statement );
 				} else {
 					self::row( __( 'Statement page', 'scout-accessibility' ), 'pass', __( 'Published, linked and reviewed this year', 'scout-accessibility' ) );
 				}
@@ -508,6 +507,44 @@ final class Scout_Accessibility_Admin {
 			} );
 		} );
 		</script>
+		<?php
+		Scout_Admin_UI::close();
+	}
+
+	public static function render(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$s       = Scout_Accessibility::settings();
+		$page    = Scout_Accessibility::page();
+		$url     = Scout_Accessibility::page_url();
+		$results = Scout_Accessibility_Checks::results();
+		$ran     = ! empty( $results['time'] );
+		$launch  = Scout_Accessibility_Checks::launch();
+		$items   = Scout_Accessibility_Checks::launch_items();
+		$st      = $results['statement'] ?? Scout_Accessibility_Checks::statement_check();
+
+		$to_fix = max( 0, self::to_fix() );
+		$launch_done = count( array_filter( wp_list_pluck( $launch, 'done' ) ) );
+
+		Scout_Admin_UI::open(
+			__( 'Accessibility statement', 'scout-accessibility' ),
+			__( 'A plain statement page that tells visitors how to report a barrier, and the link to it at the bottom of every page.', 'scout-accessibility' ),
+			__( 'Policies · Accessibility statement', 'scout-accessibility' )
+		);
+		self::messages();
+		?>
+		<section class="sh-box sh-check is-<?php echo $url ? 'good' : 'warn'; ?>">
+				<p class="sh-label"><?php esc_html_e( 'Statement page', 'scout-accessibility' ); ?></p>
+				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $url ? esc_html__( 'Published', 'scout-accessibility' ) : esc_html__( 'Not created yet', 'scout-accessibility' ); ?></p>
+				<p class="sh-note">
+					<?php if ( $url ) : ?>
+						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'View the page', 'scout-accessibility' ); ?></a>
+					<?php else : ?>
+						<a href="#sa-statement"><?php esc_html_e( 'Fill in the statement below to create it', 'scout-accessibility' ); ?></a>
+					<?php endif; ?>
+				</p>
+			</section>
 
 		<?php /* ---------------------------------------------- Statement */ ?>
 		<div class="sh-section-head" id="sa-statement">

@@ -89,20 +89,20 @@ t_reset();
 plugin( 'scout-build', '0.6.7-test.1' );
 feed( array( 'scout-build-v0.7.8' ) );
 $r = Scout_Hub_Health::test_builds();
-ok( 'warn' === $r['state'] && false !== strpos( $r['note'], 'Scout Build 0.6.7-test.1 is a test build' ) && false !== strpos( $r['note'], 'once 0.6.7 is released' ), 'a -test version: warn, names it and the release it waits for' );
+ok( 'warn' === $r['state'] && false !== strpos( $r['details'], 'Scout Build 0.6.7-test.1 is a test build' ) && false !== strpos( $r['details'], 'once 0.6.7 is released' ) && in_array( 'Scout Build 0.6.7-test.1', $r['items'], true ) && false === strpos( $r['note'], 'Scout Build' ), 'a -test version: warn, the tile keeps one line, the name sits behind Show which, the report names the release it waits for' );
 
 t_reset();
 plugin( 'scout-forms-guard', '0.3.0' );
 plugin( 'scout-build', '0.6.7' );
 feed( array( 'scout-forms-guard-v0.2.0', 'scout-build-v0.6.6' ) );
 $r = Scout_Hub_Health::test_builds();
-ok( 'warn' === $r['state'] && '2 plugins' === $r['value'] && false !== strpos( $r['note'], 'Scout Forms Guard 0.3.0 is newer than the newest release (0.2.0)' ), 'newer than any release: warn, 2 plugins' );
+ok( 'warn' === $r['state'] && '2 plugins' === $r['value'] && false !== strpos( $r['details'], 'Scout Forms Guard 0.3.0 is newer than the newest release (0.2.0)' ) && 2 === count( $r['items'] ), 'newer than any release: warn, 2 plugins' );
 
 t_reset();
 plugin( 'scout-forms-guard', '0.3.0' );
 feed( array( 'scout-build-v0.7.8' ) );
 $r = Scout_Hub_Health::test_builds();
-ok( 'warn' === $r['state'] && false !== strpos( $r['note'], 'has no release yet' ), 'no release at all: warn, has no release yet' );
+ok( 'warn' === $r['state'] && false !== strpos( $r['details'], 'has no release yet' ), 'no release at all: warn, has no release yet' );
 
 t_reset();
 plugin( 'scout-forms-guard', '0.3.0' );

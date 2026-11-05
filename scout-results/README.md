@@ -78,3 +78,15 @@ state wording).
 Deleting the plugin removes the setting. Case results and practice areas
 stay, because the firm approved them. To remove them too, define
 `SCOUT_PURGE_ON_UNINSTALL` as `true` in wp-config.php before deleting.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| The label of the practice-area filter button a visitor clicks on the case results list (Only when the Scout Analytics plugin is installed and its tag is on the page.) | Not saved by this website. It is handed to the site's analytics tag in the visitor's browser. | Not kept by this plugin. How long Google keeps it depends on the site's Google account settings. | Google Analytics or Google Tag Manager, through the Scout Analytics plugin |
+
+Case results are written by site staff. The plugin has no form and saves nothing about visitors.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

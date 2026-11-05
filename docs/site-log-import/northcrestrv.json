@@ -42,7 +42,7 @@
       "topic": "plugin",
       "status": "done",
       "version": "Admin kit 1.5.0, all 15 Scout plugins patched",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": true,
       "measure": "",
       "ref": ""
@@ -57,7 +57,7 @@
       "topic": "plugin",
       "status": "done",
       "version": "Scout Build 0.6.3",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": true,
       "measure": "",
       "ref": ""
@@ -72,7 +72,7 @@
       "topic": "plugin",
       "status": "done",
       "version": "Forms Guard 0.2.0, Scout Build 0.6.2",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": true,
       "measure": "",
       "ref": ""
@@ -102,7 +102,7 @@
       "topic": "plugin",
       "status": "done",
       "version": "0.6.1",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": true,
       "measure": "",
       "ref": ""
@@ -117,7 +117,7 @@
       "topic": "plugin",
       "status": "done",
       "version": "0.9.0",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": true,
       "measure": "",
       "ref": ""
@@ -132,7 +132,7 @@
       "topic": "plugin",
       "status": "done",
       "version": "0.6.0",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": true,
       "measure": "",
       "ref": ""
@@ -177,7 +177,7 @@
       "topic": "speed",
       "status": "planned",
       "version": "",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": false,
       "measure": "",
       "ref": ""
@@ -192,7 +192,7 @@
       "topic": "brand",
       "status": "planned",
       "version": "",
-      "source": "Claude",
+      "source": "Scout",
       "show_client": false,
       "measure": "",
       "ref": ""

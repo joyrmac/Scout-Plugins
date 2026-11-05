@@ -14,3 +14,15 @@ Design: Scout features DESIGN.md 5.9 (screen 4b).
   In Tag Manager, widen the click trigger regex to `^(card|links|contact)_`.
 - **Filter:** `scout_contact_active` (bool) turns the bar on or off for the current page.
 - **Restyle:** the sheet reads the theme's `--surface`, `--text`, `--accent` and `--accent-fill` tokens when they exist.
+
+<!-- visitor-data:start -->
+## Visitor data
+
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Taps on the Call, Text, Book a time and Let's talk buttons (which button was tapped, never who tapped it) (only when Scout Analytics is on) | Passed to Scout Analytics on the page | Not kept by this website | Google Analytics (Google), through Scout Analytics |
+
+The call bar stores nothing and sets no cookies. Call and Text open the visitor's own phone app.
+
+Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
+<!-- visitor-data:end -->

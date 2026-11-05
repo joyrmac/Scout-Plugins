@@ -109,7 +109,7 @@ final class Scout_Core_Admin {
 			'dashboard' => 'A quick check that search engines and AI tools can find the business and read it correctly.',
 			'business'  => 'Your name, address, phone and profiles, entered once. They feed your search listing and every page that shows them. Keep them identical to your Google Business Profile.',
 			'sync'      => 'Keeps each page in step with the copy the theme ships. Pages nobody has edited update on their own after a theme update; anything changed in WordPress waits for you.',
-			'protect'   => 'Two switches that keep spam away from the business. Both are on unless you turn them off.',
+			'protect'   => 'Switches that keep spam and break-in attempts away from the site. All are on unless you turn them off.',
 			'seo'       => 'Site-wide search settings. Each page can set its own title and description in its SEO box, and your sitemap is built automatically at /wp-sitemap.xml.',
 		);
 		self::styles();
@@ -364,6 +364,11 @@ final class Scout_Core_Admin {
 			echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label></th><td>';
 			if ( 'home_description' === $key ) {
 				printf( '<textarea id="%s" name="%s" rows="3" class="large-text">%s</textarea>', esc_attr( $id ), esc_attr( $name ), esc_textarea( $values[ $key ] ) );
+			} elseif ( in_array( $key, array( 'google_verify', 'bing_verify' ), true ) ) {
+				printf( '<input type="text" id="%s" name="%s" value="%s" class="regular-text" autocomplete="off" spellcheck="false" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
+				echo '<p class="description">' . esc_html( 'google_verify' === $key
+					? __( 'In Search Console, add the site as a URL prefix and choose "HTML tag". Paste the tag or just its code. Leave it empty if the domain is verified through DNS.', 'scout-core' )
+					: __( 'In Bing Webmaster Tools, choose "HTML Meta Tag". Paste the tag or just its code. Leave it empty if you imported the site from Search Console.', 'scout-core' ) ) . '</p>';
 			} else {
 				printf( '<input type="url" id="%s" name="%s" value="%s" class="regular-text" placeholder="https://" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
 			}
