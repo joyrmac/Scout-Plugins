@@ -59,6 +59,16 @@
 .sm-chip.is-good { background: var(--sh-good-tint); color: var(--sm-good); }
 .sm-comp { display: block; margin-top: 8px; font-size: 12px; color: var(--sm-text-2); }
 .sm-comp-input { width: 7em; }
+/* Members: the kit's stacked rows, with each member's fields opening under the row. */
+.sm-members .sm-edit { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 18px; padding: 12px 0 2px; }
+.sm-members .sm-edit[hidden] { display: none; }
+.sm-members .sm-edit form { display: contents; }
+.sm-edit-field { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+.sm-edit-field label { font-size: var(--sh-fs-note); color: var(--sh-text-2); }
+.sm-edit-field select, .sm-edit-field input[type="date"] { max-width: 100%; }
+.sm-edit-go { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.sm-members a.sh-pill { text-decoration: none; }
+.sm-warn-line { margin-top: 6px; font-size: var(--sh-fs-note); }
 /* Settings: one column of boxes, one Save at the bottom. */
 .sm-save { margin: 20px 0 0; }
 .sm-codes td:first-child { font-family: var(--sm-mono); font-size: 12px; overflow-wrap: anywhere; }

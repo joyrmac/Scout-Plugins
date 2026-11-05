@@ -23,7 +23,7 @@ $map = array(
 	'scout&tab=changes'                       => array( 'Change log', 'build' ),
 	'scout&tab=sync'                          => array( 'Page copy', 'build' ),
 	'scout-mail'                              => array( 'Email', 'build' ),
-	'scout-events-crm'                        => array( 'Customer list', 'business' ), // Lives in the Events (Plus) section, for the owner too.
+	'scout-events-crm'                        => array( 'Contacts', 'business' ), // Lives in the Events (Plus) section, for the owner too.
 	'scout-chat'                              => array( 'Chat', 'website' ),
 	'northcrest-theme'                        => array( 'Theme', 'build' ),
 	'site-build-features&tab=inbox'           => array( 'To do', 'inbox' ),
@@ -45,7 +45,7 @@ $map = array(
 	'site-build-robots'                       => array( 'Search engine rules', 'search' ),
 	'scout-recon'                             => array( 'Reports', 'reports' ),
 	'scout-contact'                           => array( 'Call buttons', 'website' ),
-	'scout-redirects'                         => array( 'Moved pages', 'website' ),
+	'scout-redirects'                         => array( 'Redirects', 'website' ),
 	'scout-cards'                             => array( 'Cards & links', 'website' ),
 	'scout-newsletter'                        => array( 'Newsletter', 'website' ),
 	'scout-reviews-settings'                  => array( 'Review settings', 'website' ),
@@ -75,11 +75,12 @@ foreach ( $map as $slug => list( $label, $want ) ) {
 	ok( $got === $want, sprintf( '%-48s %-22s -> %s', $slug, $label, $got ) . ( $got === $want ? '' : " (wanted $want)" ) );
 }
 ok( array_keys( Scout_Admin_UI::GROUPS ) === array( 'overview', 'inbox', 'reports', 'business', 'people', 'website', 'search', 'policies', 'health', 'build' ), 'the groups, in menu order' );
-ok( 'Home' === Scout_Admin_UI::label( 'overview' ) && 'Search' === Scout_Admin_UI::label( 'search' ) && 'Scout tools' === Scout_Admin_UI::label( 'build' ), 'the new names' );
+ok( 'Home' === Scout_Admin_UI::label( 'overview' ) && 'Search & analytics' === Scout_Admin_UI::label( 'search' ) && 'Scout tools' === Scout_Admin_UI::label( 'build' ), 'the new names' );
 ok( array() === Scout_Admin_UI::hidden(), 'with no hub loaded and full rights, nothing is hidden' );
 eval( 'class Scout_Hub_Access { public static function is_operator() { return false; } }' );
 ok( array( 'build' ) === Scout_Admin_UI::hidden(), 'a client owner does not see Scout tools' );
 ok( 'overview' === Scout_Admin_UI::group( 'site-build-features&tab=log', 'Site history' ), "a client's Site history sits under Home, where they can reach it" );
+ok( 'overview' === Scout_Admin_UI::group( 'site-build-features&tab=log', "What's new on your site" ), "the client's name for it sits under Home too" );
 ok( ! array_filter( Scout_Admin_UI::LOOKING, static fn( $l ) => count( $l ) > 2 ), 'no group carries more than two Looking for links' );
 ok( ! array_diff( array_keys( Scout_Admin_UI::LOOKING ), array_keys( Scout_Admin_UI::GROUPS ) ), 'Looking for links belong to real groups' );
 ok( in_array( 'scout-writing', Scout_Admin_UI::PLUS_MENUS, true ) && in_array( 'scout-events', Scout_Admin_UI::PLUS_MENUS, true ), 'Plus modules get the Plus tag in the sidebar' );

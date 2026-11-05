@@ -2,5 +2,5 @@
   "plugin": "scout-cards",
   "items": [],
   "cookies": [],
-  "notes": "The card, contact file and link pages only show the team's own details. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site."
+  "notes": "The card, contact file and link pages only show the team's own details: each person's name, title, photo, card phone, card email, intro, \"why talk to them\" line and tags come from their People profile, and only for people with Card switched on. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site."
 }

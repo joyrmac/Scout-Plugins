@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Scout Cards
- * Description:       Digital business cards and a social "link in bio" page, built into the client's own site: a team card, a card per person, Save contact (vCard with photo), share mode with a big QR code, a home-screen icon, and /links/. Reads the business identity from Scout Core; edited in Scout -> Cards and links.
- * Version:           1.0.27
+ * Description:       Digital business cards and a social "link in bio" page, built into the client's own site: a team card, a card for each person in People with Card on, Save contact (vCard with photo), share mode with a big QR code, a home-screen icon, and /links/. Reads the business identity from Scout Core; edited in Scout -> Cards and links.
+ * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CARDS_VERSION', '1.0.27' );
+define( 'SCOUT_CARDS_VERSION', '1.1.0' );
 define( 'SCOUT_CARDS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_CARDS_URL', plugin_dir_url( __FILE__ ) );
 define( 'SCOUT_CARDS_FILE', __FILE__ );
@@ -36,19 +36,26 @@ add_action(
 
 require_once SCOUT_CARDS_DIR . 'includes/class-scout-admin-ui.php';
 require_once SCOUT_CARDS_DIR . 'includes/settings.php';
+require_once SCOUT_CARDS_DIR . 'includes/people.php';
 require_once SCOUT_CARDS_DIR . 'includes/routes.php';
 require_once SCOUT_CARDS_DIR . 'includes/vcard.php';
 require_once SCOUT_CARDS_DIR . 'includes/render.php';
+require_once SCOUT_CARDS_DIR . 'includes/render-theme.php';
 require_once SCOUT_CARDS_DIR . 'includes/admin.php';
+require_once SCOUT_CARDS_DIR . 'includes/theme-import.php';
 
 /**
- * True when the active theme already makes the cards and links pages itself
- * (the Scout Media theme does). Then this plugin stays out of the way: no
- * routes, no menu, nothing that could take over the theme's /card/ and
- * /links/ addresses. Filter `scout_cards_theme_has_cards` to decide.
+ * True when the active theme still makes the cards and links pages itself: its
+ * Cards screen and its card builder are both loaded (the Scout Media theme before
+ * 1.54.0). Then this plugin stays out of the way: no routes, no menu, nothing that
+ * could take over the theme's /card/ and /links/ addresses. Scout Media 1.54.0 and
+ * later load neither while this plugin is active, so the plugin takes over and
+ * copies the theme's card settings once (includes/theme-import.php). Filter
+ * `scout_cards_theme_has_cards` to decide.
  */
 function scout_cards_theme_has_cards() {
-	return (bool) apply_filters( 'scout_cards_theme_has_cards', function_exists( 'scout_cards_admin_page' ) );
+	$theme = function_exists( 'scout_cards_admin_page' ) && function_exists( 'scout_card_people' );
+	return (bool) apply_filters( 'scout_cards_theme_has_cards', $theme );
 }
 
 // After the theme has loaded, so the check above can see it.
@@ -59,7 +66,9 @@ add_action(
 			add_action( 'admin_notices', 'scout_cards_resting_notice' );
 			return;
 		}
+		Scout_Cards_Theme_Import::init(); // before the People move, so it links the copied people too
 		Scout_Cards_Routes::init();
+		Scout_Cards_People::init();
 		Scout_Cards_Admin::init();
 	},
 	20

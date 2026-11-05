@@ -2,15 +2,17 @@
    and speaker cards. Fonts and text color come from the theme. Every color
    that matters is a custom property, so a theme can retune it:
    --scout-events-accent, --scout-events-on-accent, --scout-events-line,
-   --scout-events-muted, --scout-events-inset, --scout-events-radius. */
+   --scout-events-muted, --scout-events-inset, --scout-events-radius.
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default. */
 
 .se-details, .se-schedule, .se-speakers, .se-directory, .se-regions, .se-topic, .se-events, .se-know, .se-block, .se-speaker-head, .se-facts, .se-attendees {
-	--se-accent: var(--scout-events-accent, #1D1D1F);
-	--se-on-accent: var(--scout-events-on-accent, #fff);
-	--se-line: var(--scout-events-line, rgba(127, 127, 127, .28));
-	--se-muted: var(--scout-events-muted, inherit);
-	--se-inset: var(--scout-events-inset, rgba(127, 127, 127, .08));
-	--se-radius: var(--scout-events-radius, 14px);
+	--se-accent: var(--scout-events-accent, var(--scout-accent-fill, #1D1D1F));
+	--se-on-accent: var(--scout-events-on-accent, var(--scout-on-accent, #fff));
+	--se-line: var(--scout-events-line, var(--scout-line, rgba(127, 127, 127, .28)));
+	--se-muted: var(--scout-events-muted, var(--scout-text-2, inherit));
+	--se-inset: var(--scout-events-inset, var(--scout-surface-2, rgba(127, 127, 127, .08)));
+	--se-radius: var(--scout-events-radius, var(--scout-radius-card, 14px));
 }
 
 /* Details panel. */
@@ -95,7 +97,7 @@
 .se-empty { opacity: .8; }
 
 /* Presenter portal. */
-.se-portal { --se-accent: var(--scout-events-accent, #1D1D1F); --se-on-accent: var(--scout-events-on-accent, #fff); --se-line: var(--scout-events-line, rgba(127, 127, 127, .28)); --se-inset: var(--scout-events-inset, rgba(127, 127, 127, .08)); --se-radius: var(--scout-events-radius, 14px); scroll-margin-top: 2em; }
+.se-portal { --se-accent: var(--scout-events-accent, var(--scout-accent-fill, #1D1D1F)); --se-on-accent: var(--scout-events-on-accent, var(--scout-on-accent, #fff)); --se-line: var(--scout-events-line, var(--scout-line, rgba(127, 127, 127, .28))); --se-inset: var(--scout-events-inset, var(--scout-surface-2, rgba(127, 127, 127, .08))); --se-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); scroll-margin-top: 2em; }
 .se-p-form { display: grid; gap: 1.25em; }
 .se-p-group { border: 1px solid var(--se-line); border-radius: var(--se-radius); padding: 1.1em 1.25em .4em; margin: 0; min-width: 0; }
 .se-p-group :where(legend) { font-weight: 600; padding: 0 .4em; }
@@ -129,7 +131,7 @@
 
 /* Agreements: the waiver box, tick boxes, photo choice and signature (sign-up form, checkout, ticket page). */
 .se-s-agree, .se-signup-form :where(.se-newsletter) { grid-column: 1 / -1; }
-.se-waiver { max-height: 14em; overflow: auto; margin: 0 0 1em; padding: .9em 1.1em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 10px; background: var(--se-inset, rgba(127, 127, 127, .08)); font-size: .92em; text-align: start; }
+.se-waiver { max-height: 14em; overflow: auto; margin: 0 0 1em; padding: .9em 1.1em; border: 1px solid var(--se-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: 10px; background: var(--se-inset, var(--scout-surface-2, rgba(127, 127, 127, .08))); font-size: .92em; text-align: start; }
 .se-waiver:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .se-waiver :where(p) { margin: 0 0 .7em; text-wrap: pretty; }
 .se-waiver :where(.se-waiver-title) { font-weight: 600; margin-bottom: .4em; }
@@ -147,7 +149,7 @@
 .se-attendees { clear: both; margin: 1.5em 0; }
 .se-attendees-help, .se-attendees-event { margin: 0 0 1em; }
 .se-attendees-event { font-weight: 600; }
-.se-attendee { margin: 0 0 1em; padding: 1em 1.1em .4em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, 14px); }
+.se-attendee { margin: 0 0 1em; padding: 1em 1.1em .4em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); }
 .se-attendee :where(legend) { padding: 0 .4em; font-weight: 600; }
 .se-attendee::after { content: ""; display: table; clear: both; }
 .se-attendee :where(.se-agree) { clear: both; }
@@ -158,7 +160,7 @@
 }
 
 /* The ticket, at the top of the event page. */
-.se-ticket { --se-line: var(--scout-events-line, rgba(127, 127, 127, .28)); --se-inset: var(--scout-events-inset, rgba(127, 127, 127, .08)); --se-accent: var(--scout-events-accent, #1D1D1F); --se-on-accent: var(--scout-events-on-accent, #fff); max-width: 30rem; margin: 0 auto 2em; padding: 1.5em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, 14px); text-align: center; scroll-margin-top: 2em; }
+.se-ticket { --se-line: var(--scout-events-line, var(--scout-line, rgba(127, 127, 127, .28))); --se-inset: var(--scout-events-inset, var(--scout-surface-2, rgba(127, 127, 127, .08))); --se-accent: var(--scout-events-accent, var(--scout-accent-fill, #1D1D1F)); --se-on-accent: var(--scout-events-on-accent, var(--scout-on-accent, #fff)); max-width: 30rem; margin: 0 auto 2em; padding: 1.5em; border: 1px solid var(--se-line); border-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); text-align: center; scroll-margin-top: 2em; }
 .se-ticket-kicker { margin: 0; font-size: .75em; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
 .se-ticket-title { margin: .2em 0 .3em; text-wrap: balance; }
 .se-ticket-who { margin: 0; font-size: 1.15em; font-weight: 600; }
@@ -185,8 +187,8 @@
 
 /* Vendors: the list on event pages and the application's choices. */
 .se-vendors { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1rem; }
-.se-vendor { display: flex; gap: .9rem; align-items: flex-start; padding: 1rem 1.1rem; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-events-radius, 14px); margin: 0; }
-.se-vendor-logo { flex: none; width: 3.5rem; height: 3.5rem; border-radius: 10px; overflow: hidden; background: var(--se-inset, rgba(127, 127, 127, .08)); }
+.se-vendor { display: flex; gap: .9rem; align-items: flex-start; padding: 1rem 1.1rem; border: 1px solid var(--se-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); margin: 0; }
+.se-vendor-logo { flex: none; width: 3.5rem; height: 3.5rem; border-radius: 10px; overflow: hidden; background: var(--se-inset, var(--scout-surface-2, rgba(127, 127, 127, .08))); }
 .se-vendor-logo :where(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
 .se-vendor-body { min-width: 0; }
 .se-vendor-name { margin: 0; font-size: 1.1em; }
@@ -217,7 +219,7 @@
 .se-shift-day { margin: .75em 0 .1em; font-weight: 600; font-size: .9em; letter-spacing: .04em; }
 .se-shift-day:first-child { margin-top: 0; }
 .se-shift { margin: 0; }
-.se-shift :where(label), .se-shift-list.is-mine :where(.se-shift) { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .4em .8em; padding: .75em .9em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 10px; cursor: pointer; }
+.se-shift :where(label), .se-shift-list.is-mine :where(.se-shift) { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .4em .8em; padding: .75em .9em; border: 1px solid var(--se-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: 10px; cursor: pointer; }
 .se-shift :where(label) :where(input) { margin-top: .3em; flex: none; }
 .se-shift-what { flex: 1 1 12em; min-width: 0; display: flex; flex-direction: column; gap: .15em; }
 .se-shift-time, .se-shift-note { font-size: .9em; opacity: .8; }
@@ -229,7 +231,7 @@
 /* More photos on a speaker's page. */
 .se-speaker-photos { list-style: none; margin: 1.5em 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: .6em; }
 .se-speaker-photos :where(li) { margin: 0; }
-.se-speaker-photos :where(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--scout-events-radius, 14px); }
+.se-speaker-photos :where(img) { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); }
 
 /* The speaker directory: search, topic buttons, cards. */
 .se-directory { display: grid; gap: 1em; }
@@ -321,7 +323,7 @@
 
 /* Region cards: [scout_regions]. */
 .se-regions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 1em; }
-.se-region-link { display: flex; flex-direction: column; gap: .35em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-events-radius, 14px); color: inherit; text-decoration: none; }
+.se-region-link { display: flex; flex-direction: column; gap: .35em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--se-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); color: inherit; text-decoration: none; }
 .se-region-link:hover:where(a), .se-region-link:focus-visible:where(a) { border-color: currentColor; }
 .se-region-name { font-weight: 600; font-size: 1.1em; text-wrap: balance; }
 .se-region-about { font-size: .92em; text-wrap: pretty; }
@@ -341,14 +343,14 @@
 .se-tickets { margin: 1.25em 0 0; text-align: start; }
 .se-tickets-title { margin: 0 0 .6em; font-size: 1.1em; }
 .se-ticket-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .6em; }
-.se-ticket-list > :where(.se-ticket) { display: flex; flex-wrap: wrap; align-items: center; text-align: start; gap: .5em 1em; width: 100%; max-width: none; box-sizing: border-box; margin: 0; padding: .9em 1em; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-events-radius, 14px); }
+.se-ticket-list > :where(.se-ticket) { display: flex; flex-wrap: wrap; align-items: center; text-align: start; gap: .5em 1em; width: 100%; max-width: none; box-sizing: border-box; margin: 0; padding: .9em 1em; border: 1px solid var(--se-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: var(--scout-events-radius, var(--scout-radius-card, 14px)); }
 .se-ticket-what { display: flex; flex-direction: column; gap: .2em; flex: 1 1 11em; min-width: 0; }
 .se-ticket-name { font-weight: 600; text-wrap: balance; }
 .se-ticket-about { font-size: .9em; opacity: .8; text-wrap: pretty; }
 .se-ticket-price { font-weight: 600; white-space: nowrap; }
 .se-ticket-left { flex-basis: 100%; order: 3; font-size: .85em; opacity: .8; }
 .se-ticket-buy { display: flex; align-items: center; gap: .5em; margin: 0 0 0 auto; order: 4; }
-.se-ticket-buy :where(input) { width: 4.2em; padding: .55em .5em; font: inherit; color: inherit; background: transparent; border: 1px solid var(--se-line, rgba(127, 127, 127, .28)); border-radius: 8px; }
+.se-ticket-buy :where(input) { width: 4.2em; padding: .55em .5em; font: inherit; color: inherit; background: transparent; border: 1px solid var(--se-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: 8px; }
 .se-ticket > :where(.se-soldout) { margin-left: auto; order: 4; }
 .se-tickets-cart { margin: .75em 0 0; font-size: .92em; }
 
@@ -358,3 +360,30 @@
 .se-topic-part > :where(h2) { margin: 0 0 .75em; text-wrap: balance; }
 .se-topic-links { margin-top: 1.5em; font-size: .92em; }
 .se-topic-links :where(span) { font-weight: 600; }
+
+/* 0.15.0 the list with options: series chips, List / Month switch, month grids, and the photo gallery for past events */
+.se-explore { display: grid; gap: 1.4em; }
+.se-explore [hidden] { display: none !important; }
+.se-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8em 1.5em; }
+.se-chips, .se-views { display: flex; flex-wrap: wrap; gap: .5em; }
+.se-chip, .se-viewbtn { font: inherit; font-size: .88em; line-height: 1.2; padding: .55em 1.05em; border-radius: 999px; border: 1px solid var(--se-line); background: transparent; color: inherit; cursor: pointer; min-height: 40px; }
+.se-chip[aria-pressed="true"], .se-viewbtn[aria-pressed="true"] { background: var(--scout-events-accent, var(--scout-accent-fill, currentColor)); border-color: var(--scout-events-accent, var(--scout-accent-fill, currentColor)); color: var(--scout-events-on-accent, var(--scout-on-accent, #fff)); }
+.se-views { padding: .25em; border: 1px solid var(--se-line); border-radius: 999px; gap: .2em; }
+.se-views .se-viewbtn { border: 0; }
+.se-months { display: grid; gap: 2em; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.se-cal-title { margin: 0 0 .6em; }
+.se-cal-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.se-cal-dow { font-size: .72em; text-transform: uppercase; letter-spacing: .12em; text-align: center; opacity: .7; padding-bottom: .3em; }
+.se-cal-day { min-height: 3.2em; padding: .3em; border-radius: 8px; border: 1px solid transparent; font-size: .85em; display: grid; align-content: start; gap: .2em; }
+.se-cal-day.is-blank { visibility: hidden; }
+.se-cal-day.has-events { border-color: var(--se-line); background: var(--se-inset); }
+.se-cal-day.is-quiet { background: transparent; }
+.se-cal-n { opacity: .75; }
+.se-cal-event { display: block; font-size: .82em; line-height: 1.25; text-decoration: none; padding-left: .7em; position: relative; }
+.se-cal-event::before { content: ""; position: absolute; left: 0; top: .45em; width: .4em; height: .4em; border-radius: 50%; background: var(--scout-events-accent, var(--scout-accent-fill, currentColor)); }
+.se-events.is-gallery { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 1.4em; }
+.se-events.is-gallery .se-event-card { grid-template-columns: 1fr; padding: 0; overflow: hidden; align-content: start; }
+.se-events.is-gallery .se-card-photo { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.se-events.is-gallery .se-date { display: none; }
+.se-events.is-gallery .se-event-body { padding: 1em 1.1em 1.2em; }
+@media (max-width: 600px) { .se-cal-event { font-size: 0; width: .6em; height: .6em; padding: 0; } .se-cal-event::before { top: 0; width: .6em; height: .6em; } }

@@ -9,7 +9,7 @@
 .sh-log-links { margin: 0 0 6px; }
 .sh-log-list { margin-top: 6px; }
 .sh-log-list .sh-row-sub + .sh-row-sub { margin-top: 4px; }
-.sh-log-flag { color: var(--sh-warn); }
+.sh-log-flag { color: var(--sh-text-3); }
 .sh-log-date { font-family: var(--sh-mono); }
 .sh-log-edit { display: none; grid-column: 1 / -1; gap: 6px; max-width: 640px; padding: 12px 0 4px; }
 .sh-log-edit.is-open { display: grid; }
@@ -49,3 +49,34 @@
 .sm-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 14px; }
 .sm-actions label { display: grid; gap: 6px; font-weight: 600; flex: 1 1 240px; max-width: 420px; }
 .sm-note { margin-top: 10px; }
+
+/* Site history: one column per line, grouped by day (Joy, 2026-11-05). */
+.sh .sh-box > h3.sh-log-day, .sh .sh-log-day { margin: 22px 0 2px; font-family: var(--sh-mono); font-size: 12px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--sh-text-2); }
+.sh .sh-box > h3.sh-log-day:first-of-type { margin-top: 10px; }
+.sh .sh-log-row { display: block; }
+.sh-log-head { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; }
+.sh-log-head .sh-row-name { min-width: 0; }
+.sh .sh-log-editbtn { flex: none; min-height: 32px; padding: 0 12px; }
+.sh-log-tags { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 6px 0 0; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
+.sh-log-source::before { content: "· "; }
+.sh-log-fold { padding: 14px 0; border-top: 1px solid var(--sh-border); list-style: none; }
+.sh-log-list > .sh-log-fold:first-child { border-top: 0; }
+.sh-log-fold summary { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; }
+.sh-log-fold summary::-webkit-details-marker { display: none; }
+.sh-log-fold summary .sh-log-tags { margin: 0; }
+.sh-log-more { color: var(--sh-accent-text); }
+.sh-log-fold[open] .sh-log-more, .sh-log-fold details[open] .sh-log-more { visibility: hidden; }
+.sh-log-fold .sh-log-list { margin: 8px 0 0 14px; padding-left: 14px; border-left: 2px solid var(--sh-border); }
+
+/* Monthly update to the client (Site history, operators only). */
+.sh-report .sh-status { margin: 4px 0 6px; }
+.sh-report-draft { border-top: 1px solid var(--sh-border); margin-top: 16px; padding-top: 16px; }
+.sh-report-draft h3 { font-size: var(--sh-fs-base); font-weight: 600; margin: 0 0 6px; color: var(--sh-text); }
+.sh-report-preview { max-width: 640px; margin: 10px 0; padding: 16px 18px; border: 1px solid var(--sh-border); border-radius: var(--sh-r-control); background: var(--sh-surface-2); color: var(--sh-text); }
+.sh-report-preview ul { list-style: disc; }
+.sh-report-draft .sh-form, .sh-report-more .sh-form { max-width: 640px; }
+.sh-report-text { width: 100%; max-width: 640px; }
+.sh-report-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+.sh-report-more { margin-top: 16px; }
+.sh-report-more summary { cursor: pointer; color: var(--sh-accent-text); }
+.sh-report-more input[type="email"], .sh-report-more input[type="text"] { width: 100%; }

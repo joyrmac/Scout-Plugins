@@ -81,7 +81,9 @@ final class Scout_Hub_Admin {
 		add_submenu_page( $parent, __( 'Updates', 'scout-build' ), __( 'Updates', 'scout-build' ), 'edit_posts', $base . '&tab=updates', array( __CLASS__, 'render' ) );
 		// One plain name for everyone: operators find the full Site history under Build, everyone
 		// else finds their own view of it under Home (the admin kit and Scout_Hub_Log::nav_group sort it).
-		add_submenu_page( $parent, __( 'Site history', 'scout-build' ), __( 'Site history', 'scout-build' ), 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
+		// Clients read it as "What's new on your site" (Joy, 2026-11-05); Scout keeps "Site history".
+		$log_name = Scout_Hub_Access::is_operator() ? __( 'Site history', 'scout-build' ) : __( 'What\'s new on your site', 'scout-build' );
+		add_submenu_page( $parent, $log_name, $log_name, 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
 			update_option( 'scout_hub_page', $slug, false );
@@ -379,7 +381,8 @@ final class Scout_Hub_Admin {
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'overview';
 		$lede = 'updates' === $tab ? __( 'Every update to this site in one place: theme, plugins, setup file, page copy and imports.', 'scout-build' ) : '';
 		if ( 'log' === $tab && $client_view ) {
-			$lede = __( 'What Scout has done on your website, and anything you have asked for.', 'scout-build' );
+			$tabs['log'] = __( 'What\'s new on your site', 'scout-build' );
+			$lede = self::branded() ? __( 'What Scout has done on your website, and anything you have asked for.', 'scout-build' ) : __( 'What your web team has done on your website, and anything you have asked for.', 'scout-build' );
 		}
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
 		$site = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
@@ -393,7 +396,7 @@ final class Scout_Hub_Admin {
 				$lede = $head[2];
 			} else {
 				Scout_Admin_UI::bar_action( __( 'Request a change', 'scout-build' ), self::url( 'requests' ) );
-				$lede = __( 'Everything waiting on a person lands here. Mark one done and it leaves the list.', 'scout-build' );
+				$lede = __( 'Everything waiting on a person, until you mark it done.', 'scout-build' );
 			}
 		}
 		Scout_Admin_UI::open( $tabs[ $tab ], $lede, $site );
@@ -440,7 +443,7 @@ final class Scout_Hub_Admin {
 				: __( 'Nothing on this site is waiting.', 'scout-build' );
 			// Scout's own sites (scout-setup.json "scout_own_site": true) have no separate client.
 			$own  = ! empty( Scout_Hub_Setup::data()['scout_own_site'] );
-			$lede = $own ? __( "Everything waiting on Scout's own site. Each one says about how long it takes.", 'scout-build' ) : __( 'The client sees their own list. Scout tools stay in the sidebar for you and Sean.', 'scout-build' );
+			$lede = $own ? __( "Everything waiting on Scout's own site, each with about how long it takes.", 'scout-build' ) : __( 'The client sees their own list, and Scout tools stay in the sidebar for you and Sean.', 'scout-build' );
 			return array( $head, $site . ( '' !== $host ? ' · ' . $host : '' ), $lede );
 		}
 		$hour  = (int) current_time( 'G' );
@@ -448,14 +451,14 @@ final class Scout_Hub_Admin {
 		$date  = wp_date( 'l, F j' );
 		$steps = Scout_Hub_Today::show_setup() ? array_filter( Scout_Hub_Today::setup_steps(), static fn( $s ) => empty( $s['done'] ) ) : array();
 		if ( $steps ) {
-			return array( __( 'Welcome. Finish setting up your site here.', 'scout-build' ), $date, __( 'A few short steps. Stop anytime and pick up where you left off.', 'scout-build' ) );
+			return array( __( 'Welcome. Finish setting up your site here.', 'scout-build' ), $date, __( 'A few short steps you can stop and pick up anytime.', 'scout-build' ) );
 		}
 		if ( ! $n ) {
 			return array( $hello . ' ' . __( "You're all caught up.", 'scout-build' ), $date, __( 'Your site is running on its own today.', 'scout-build' ) );
 		}
 		/* translators: 1: "Good morning.", 2: "Two things" */
 		$head = sprintf( 1 === $n ? __( '%1$s %2$s needs you today.', 'scout-build' ) : __( '%1$s %2$s need you today.', 'scout-build' ), $hello, $count );
-		return array( $head, $date, __( 'Everything else runs on its own. Each one takes a few minutes.', 'scout-build' ) );
+		return array( $head, $date, __( 'Each one takes a few minutes, and everything else runs on its own.', 'scout-build' ) );
 	}
 
 	/**
@@ -509,19 +512,11 @@ final class Scout_Hub_Admin {
 		}
 		?>
 		<style>
-			.sh-ov-status{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
-			.sh-ov-status .sh-dot{width:10px;height:10px;border-radius:50%;flex:none}
-			.sh-ov-status .is-good{background:var(--sh-good)}.sh-ov-status .is-warn{background:var(--sh-warn)}.sh-ov-status .is-bad{background:var(--sh-bad,#F2553D)}
-			.sh-ov-status p{margin:0;font-size:17px;font-weight:600}
-			.sh-ov-rows{display:grid;gap:6px;margin-top:10px}
-			.sh-ov-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding:10px 12px;border-radius:10px;background:var(--sh-surface-2)}
-			.sh-ov-row .sh-num{font:600 20px/1 var(--sh-mono);margin:0;min-width:28px}
-			.sh-ov-row .sh-note{margin:0}
-			.sh-ov-do{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
-			.sh-ov-do a{display:grid;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid var(--sh-border);text-decoration:none;color:inherit}
-			.sh-ov-do a:hover{border-color:var(--sh-accent)}
-			.sh-ov-do b{color:var(--sh-text)}
-			.sh-ov-do span{font-size:13px;color:var(--sh-text-2)}
+			.sh-ov-do .sh-row{padding:12px 0}
+			.sh-ov-do .sh-row-name a{color:var(--sh-accent-text);text-decoration:none}
+			.sh-ov-do .sh-row-name a:hover{text-decoration:underline}
+			.sh-ov-ops{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:14px}
+			.sh-ov-ops .sh-label{margin:0 4px 0 0}
 			.sh-ov-log{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:6px}
 			.sh-ov-log li{display:grid;grid-template-columns:auto 1fr;gap:10px;color:var(--sh-text-2)}
 			.sh-ov-log .sh-when{font-family:var(--sh-mono);font-size:12px;color:var(--sh-text-3);padding-top:2px;white-space:nowrap}
@@ -534,19 +529,16 @@ final class Scout_Hub_Admin {
 		?>
 		<p class="sh-note" style="margin:8px 0 0"><a href="<?php echo esc_url( self::url( 'inbox' ) ); ?>"><?php esc_html_e( 'Open To do', 'scout-build' ); ?> &rsaquo;</a></p>
 
-		<section class="sh-box">
-			<div class="sh-ov-status">
-				<span class="sh-dot is-<?php echo esc_attr( $state ); ?>" aria-hidden="true"></span>
-				<p><?php echo esc_html( $line ); ?></p>
-				<a href="<?php echo esc_url( self::url( 'health' ) ); ?>"><?php esc_html_e( 'See the full report', 'scout-build' ); ?> &rsaquo;</a>
-			</div>
-			<p class="sh-note" style="margin-top:8px">
-				<?php
-				/* translators: 1: site name, 2: checks ready for AI search, 3: total AI checks */
-				echo esc_html( sprintf( __( '%1$s is ready for AI search on %2$d of %3$d checks.', 'scout-build' ), $site, $ready, count( $ai ) ) );
-				?>
-			</p>
-		</section>
+		<?php
+		// The kit status line (dot, a few bold words, one sentence, one quiet link).
+		self::status_line(
+			$state,
+			$line,
+			/* translators: 1: site name, 2: checks ready for AI search, 3: total AI checks */
+			sprintf( __( '%1$s is ready for AI search on %2$d of %3$d checks.', 'scout-build' ), $site, $ready, count( $ai ) ),
+			'<a class="button sh-quiet" href="' . esc_url( self::url( 'health' ) ) . '">' . esc_html__( 'See the full report', 'scout-build' ) . ' &rsaquo;</a>'
+		);
+		?>
 
 
 		<div>
@@ -582,7 +574,7 @@ final class Scout_Hub_Admin {
 							<li><span class="sh-when"><?php echo esc_html( wp_date( 'M j', strtotime( $row['date'] ) ) ); ?></span><span><?php echo esc_html( ( ! $operator && '' !== $row['client_text'] ) ? $row['client_text'] : $row['title'] ); ?></span></li>
 						<?php endforeach; ?>
 					</ul>
-					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : __( 'Everything Scout has done on your site', 'scout-build' ) ); ?> &rsaquo;</a></p>
+					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : __( 'See everything that\'s new', 'scout-build' ) ); ?> &rsaquo;</a></p>
 				<?php endif; ?>
 			</section>
 		</div>
@@ -602,28 +594,29 @@ final class Scout_Hub_Admin {
 			$do[] = array( admin_url( 'admin.php?page=scout&tab=business' ), __( 'Business info', 'scout-build' ), __( 'Name, phone, address and profiles, typed once.', 'scout-build' ) );
 		}
 		?>
-		<div class="sh-section-head"><p class="sh-eyebrow"><?php esc_html_e( 'Things you can do here', 'scout-build' ); ?></p></div>
-		<div class="sh-ov-do">
-			<?php foreach ( $do as list( $url, $title, $text ) ) : ?>
-				<a href="<?php echo esc_url( $url ); ?>"><b><?php echo esc_html( $title ); ?></b><span><?php echo esc_html( $text ); ?></span></a>
-			<?php endforeach; ?>
-		</div>
-		<section class="sh-box" style="margin-top:16px">
-			<p>
-				<?php echo esc_html( self::branded() ? __( 'Want something added or changed? Ask Scout.', 'scout-build' ) : __( 'Want something added or changed? Ask us.', 'scout-build' ) ); ?>
-				<a class="button" style="margin-left:8px" href="<?php echo esc_url( self::url( 'requests' ) ); ?>"><?php esc_html_e( 'Request a change', 'scout-build' ); ?></a>
-			</p>
-			<p class="sh-note" style="margin:10px 0 0"><a href="<?php echo esc_url( admin_url( 'profile.php#scout-comfort' ) ); ?>"><?php esc_html_e( 'Make these screens easier to read: larger text, less motion', 'scout-build' ); ?> &rsaquo;</a></p>
+		<section class="sh-box sh-ov-do">
+			<h2 class="sh-title"><?php esc_html_e( 'Things you can do here', 'scout-build' ); ?></h2>
+			<ul class="sh-rows">
+				<?php foreach ( $do as list( $url, $title, $text ) ) : ?>
+					<li class="sh-row">
+						<div>
+							<p class="sh-row-name"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?> &rsaquo;</a></p>
+							<p class="sh-row-sub"><?php echo esc_html( $text ); ?></p>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 		</section>
 		<?php if ( $operator ) : ?>
-			<p class="sh-note" style="margin-top:14px">
-				<?php esc_html_e( 'Operators:', 'scout-build' ); ?>
-				<a href="<?php echo esc_url( self::url( 'features' ) ); ?>"><?php esc_html_e( 'Features', 'scout-build' ); ?></a> ·
-				<a href="<?php echo esc_url( self::url( 'updates' ) ); ?>"><?php esc_html_e( 'Updates', 'scout-build' ); ?></a> ·
-				<a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Site history', 'scout-build' ); ?></a>
+			<p class="sh-ov-ops">
+				<span class="sh-label"><?php echo esc_html( method_exists( 'Scout_Admin_UI', 'label' ) ? Scout_Admin_UI::label( 'build' ) : __( 'Scout tools', 'scout-build' ) ); ?></span>
+				<a class="button sh-quiet" href="<?php echo esc_url( self::url( 'features' ) ); ?>"><?php esc_html_e( 'Features', 'scout-build' ); ?></a>
+				<a class="button sh-quiet" href="<?php echo esc_url( self::url( 'updates' ) ); ?>"><?php esc_html_e( 'Updates', 'scout-build' ); ?></a>
+				<a class="button sh-quiet" href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Site history', 'scout-build' ); ?></a>
 			</p>
 		<?php endif; ?>
 		<?php self::more_features(); ?>
+		<p class="sh-note" style="margin-top:16px"><a href="<?php echo esc_url( admin_url( 'profile.php#scout-comfort' ) ); ?>"><?php esc_html_e( 'Make these screens easier to read: larger text, less motion', 'scout-build' ); ?> &rsaquo;</a></p>
 		<?php
 	}
 
@@ -649,23 +642,24 @@ final class Scout_Hub_Admin {
 			return;
 		}
 		?>
-		<details class="sh-box" style="margin-top:16px">
-			<summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center">
-				<?php
-				/* translators: %d: recommended features */
-				echo esc_html( sprintf( _n( 'More features: %d recommended for you', 'More features: %d recommended for you', count( $list ), 'scout-build' ), count( $list ) ) );
-				?>
-			</summary>
-			<ul class="sh-list" style="margin-top:8px">
+		<?php
+		/* translators: %d: recommended features */
+		self::fold_open( sprintf( _n( 'More features: %d recommended for you', 'More features: %d recommended for you', count( $list ), 'scout-build' ), count( $list ) ) );
+		?>
+			<ul class="sh-rows">
 				<?php foreach ( $list as $slug => $f ) : ?>
 					<?php $ask = sprintf( /* translators: %s: feature */ __( 'Please add %s to our site.', 'scout-build' ), $f['name'] ); ?>
-					<li style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 0">
-						<span style="flex:1 1 280px"><strong><?php echo esc_html( $f['name'] ); ?></strong> <span class="sh-note"><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'], $slug ) ); ?></span><br><span class="sh-note"><?php echo esc_html( $f['summary'] ); ?></span></span>
-						<a class="button" href="<?php echo esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ); ?>"><?php esc_html_e( 'Ask us to add this', 'scout-build' ); ?></a>
+					<li class="sh-row">
+						<div>
+							<p class="sh-row-name"><?php echo esc_html( $f['name'] ); ?></p>
+							<p class="sh-row-sub"><?php echo esc_html( $f['summary'] ); ?></p>
+						</div>
+						<p class="sh-row-facts"><span class="sh-tag"><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'], $slug ) ); ?></span></p>
+						<div class="sh-row-go"><a class="button" href="<?php echo esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ); ?>"><?php esc_html_e( 'Ask us to add this', 'scout-build' ); ?></a></div>
 					</li>
 				<?php endforeach; ?>
 			</ul>
-		</details>
+		<?php self::fold_close(); ?>
 		<?php
 	}
 
@@ -682,7 +676,9 @@ final class Scout_Hub_Admin {
 		$group = sanitize_key( (string) ( $_GET['group'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( '' !== $group && class_exists( 'Scout_Admin_UI' ) && isset( Scout_Admin_UI::GROUPS[ $group ] ) ) {
 			/* translators: %s: nav group name, e.g. Reviews */
-			printf( '<div class="notice notice-info"><p>%s</p></div>', esc_html( sprintf( __( 'Nothing in %s is on yet. Turn on a feature below and the group fills in.', 'scout-build' ), Scout_Admin_UI::GROUPS[ $group ] ) ) );
+			// The group's name for this site: Scout tools reads Build tools on a white-label site.
+			$group_name = method_exists( 'Scout_Admin_UI', 'label' ) ? Scout_Admin_UI::label( $group ) : Scout_Admin_UI::GROUPS[ $group ];
+			printf( '<div class="notice notice-info"><p>%s</p></div>', esc_html( sprintf( __( 'Nothing in %s is on yet. Turn on a feature below and the group fills in.', 'scout-build' ), $group_name ) ) );
 		}
 		$states   = array(
 			'missing' => __( 'Not installed', 'scout-build' ),
@@ -730,53 +726,25 @@ final class Scout_Hub_Admin {
 		$ai    = Scout_Hub_Health::ai_checks();
 		$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
 		?>
-		<section class="sh-box sh-overview">
-			<div class="sh-stats">
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) count( $groups['on'] ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'features on', 'scout-build' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) ( count( $groups['picked'] ) + count( $groups['ready'] ) ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'ready to add', 'scout-build' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo esc_html( $ready . '/' . count( $ai ) ); ?></p>
-					<p class="sh-note"><a href="<?php echo esc_url( self::url( 'health' ) . '#ai-search' ); ?>"><?php esc_html_e( 'ready for AI search', 'scout-build' ); ?> &rsaquo;</a></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num sh-num-text"><?php echo esc_html( $plan ? Scout_Hub_Access::PLANS[ $plan ] ?? __( 'Not set', 'scout-build' ) : __( 'Not set', 'scout-build' ) ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'this site\'s plan', 'scout-build' ); ?></p>
-				</div>
-			</div>
-			<?php if ( $operator ) : ?>
-				<div class="sh-ops">
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
-						<input type="hidden" name="action" value="<?php echo esc_attr( self::PLAN_ACTION ); ?>">
-						<input type="hidden" name="do" value="plan">
-						<?php wp_nonce_field( self::PLAN_ACTION ); ?>
-						<label for="sh-plan" class="screen-reader-text"><?php esc_html_e( 'This site\'s plan', 'scout-build' ); ?></label>
-						<select id="sh-plan" name="plan">
-							<option value=""><?php esc_html_e( 'Plan not set', 'scout-build' ); ?></option>
-							<?php foreach ( Scout_Hub_Access::PLANS as $key => $label ) : ?>
-								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $plan, $key ); ?>><?php echo esc_html( $label ); ?></option>
-							<?php endforeach; ?>
-						</select>
-						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
-					</form>
-				</div>
-				<p class="sh-note"><?php
-					echo esc_html(
-						'ff' === $plan
-							? __( 'Core features plus anything you add below. Plus modules can go on any plan.', 'scout-build' )
-							: __( 'Everything without a label is in this plan. Add Plus modules from each feature\'s More menu.', 'scout-build' )
-					);
-				?></p>
-				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
-					<p class="sh-note"><?php esc_html_e( 'This site blocks installs from the dashboard, so upload new features by hand.', 'scout-build' ); ?></p>
-				<?php endif; ?>
-			<?php endif; ?>
-		</section>
+		<?php
+		// One status line instead of four stat cards (kit 1.10.0).
+		$to_add = count( $groups['picked'] ) + count( $groups['ready'] );
+		$detail = $to_add
+			/* translators: 1: features ready to add, 2: AI checks passed, 3: total AI checks */
+			? sprintf( _n( '%1$d more is ready to add, and the site is ready for AI search on %2$d of %3$d checks.', '%1$d more are ready to add, and the site is ready for AI search on %2$d of %3$d checks.', $to_add, 'scout-build' ), $to_add, $ready, count( $ai ) )
+			/* translators: 1: AI checks passed, 2: total AI checks */
+			: sprintf( __( 'The site is ready for AI search on %1$d of %2$d checks.', 'scout-build' ), $ready, count( $ai ) );
+		self::status_line(
+			$groups['on'] ? 'good' : 'off',
+			/* translators: %d: features on */
+			sprintf( _n( '%d feature on.', '%d features on.', count( $groups['on'] ), 'scout-build' ), count( $groups['on'] ) ),
+			$detail,
+			'<a class="button sh-quiet" href="' . esc_url( self::url( 'health' ) . '#ai-search' ) . '">' . esc_html__( 'AI search checks', 'scout-build' ) . ' &rsaquo;</a>'
+		);
+		if ( $operator && ! Scout_Hub_Access::can_install() ) {
+			echo '<p class="sh-note">' . esc_html__( 'This site blocks installs from the dashboard, so upload new features by hand.', 'scout-build' ) . '</p>';
+		}
+		?>
 
 		<?php
 		$titles = array(
@@ -792,7 +760,7 @@ final class Scout_Hub_Admin {
 			$step = 0;
 			?>
 			<div class="sh-section-head">
-				<p class="sh-eyebrow"><?php echo esc_html( $title . ' · ' . count( $groups[ $key ] ) ); ?></p>
+				<p class="sh-eyebrow"><?php echo esc_html( $title . ' (' . count( $groups[ $key ] ) . ')' ); ?></p>
 			</div>
 			<section class="sh-box sh-flist-box<?php echo 'skip' === $key ? ' sh-skip' : ''; ?>">
 				<ul class="sh-flist">
@@ -814,8 +782,8 @@ final class Scout_Hub_Admin {
 		.sh-fmeta .sh-ver{font-family:var(--sh-mono)}
 		.sh-fact{display:flex;gap:8px;align-items:center;justify-content:flex-end}
 		.sh-fact .button{min-height:36px;line-height:34px;padding:0 14px}
-		.sh-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sh-border-strong);margin-right:10px;vertical-align:2px}
-		.sh-frow.is-on .sh-dot{background:var(--sh-good)}
+		.sh-frow .sh-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sh-border-strong);margin-right:10px;vertical-align:2px}
+		.sh-frow.is-on .sh-dot{background:var(--sh-good-mark)}
 		.sh-more{position:relative}
 		.sh-more>summary{list-style:none;cursor:pointer;color:var(--sh-accent-text);padding:6px 10px;border-radius:var(--sh-r-control)}
 		.sh-more>summary::-webkit-details-marker{display:none}
@@ -839,133 +807,633 @@ final class Scout_Hub_Admin {
 				</ul>
 			</section>
 		<?php endif; ?>
+		<?php if ( $operator ) : ?>
+			<?php
+			$plan_name = $plan ? ( Scout_Hub_Access::PLANS[ $plan ] ?? __( 'Not set', 'scout-build' ) ) : __( 'Not set', 'scout-build' );
+			/* translators: %s: plan name, e.g. The Build */
+			self::fold_open( sprintf( __( 'More options: plan (%s)', 'scout-build' ), $plan_name ), false, 'sh-plan-fold' );
+			?>
+				<div class="sh-ops">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
+						<input type="hidden" name="action" value="<?php echo esc_attr( self::PLAN_ACTION ); ?>">
+						<input type="hidden" name="do" value="plan">
+						<?php wp_nonce_field( self::PLAN_ACTION ); ?>
+						<label for="sh-plan" class="screen-reader-text"><?php esc_html_e( 'This site\'s plan', 'scout-build' ); ?></label>
+						<select id="sh-plan" name="plan">
+							<option value=""><?php esc_html_e( 'Plan not set', 'scout-build' ); ?></option>
+							<?php foreach ( Scout_Hub_Access::PLANS as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $plan, $key ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
+					</form>
+				</div>
+				<p class="sh-note"><?php
+					echo esc_html(
+						'ff' === $plan
+							? __( 'Core features plus anything you add below. Plus modules can go on any plan.', 'scout-build' )
+							: __( 'Everything without a label is in this plan. Add Plus modules from each feature\'s More menu.', 'scout-build' )
+					);
+				?></p>
+				<?php if ( class_exists( 'Scout_Hub_Brand' ) ) : // Operators only: is the white-label layer on, and from where. ?>
+					<p class="sh-note sh-brand-status"><?php echo esc_html( Scout_Hub_Brand::status_text() ); ?></p>
+				<?php endif; ?>
+			<?php self::fold_close(); ?>
+		<?php endif; ?>
 		<?php
 	}
 
 	/* ------------------------------------------------------------------ */
 
 	/**
-	 * Scout → Updates (Site Standard rule 12): the theme, the plugins, the
-	 * setup file, Site Sync, the post importer, site settings and the change
-	 * log. Nothing elsewhere brings a new version or new content onto the site.
+	 * Scout → Updates (Site Standard rule 12): everything it takes to update a site,
+	 * on one screen and in order (Joy, 2026-11-05). A status line with the next step,
+	 * then six steps: check for new versions, plugins, theme, page copy, bring changes
+	 * back, check the site. One report copies all of it for the chat. The rarer tools
+	 * (Fill from theme, Import posts, Site settings, the update order) sit under Other
+	 * tools. Nothing elsewhere brings a new version or new content onto the site.
 	 */
 	private static function updates(): void {
+		require_once __DIR__ . '/class-scout-hub-update-report.php';
 		$operator  = Scout_Hub_Access::is_operator();
 		$features  = Scout_Hub_Catalog::features();
 		$installed = self::installed();
-		uksort( $installed, static fn( $a, $b ) => strcasecmp( $features[ $a ]['name'] ?? $a, $features[ $b ]['name'] ?? $b ) );
-		$waiting = count( array_filter( $installed, static fn( $st ) => '' !== $st['update'] ) );
-		$checked = $installed ? max( array_column( $installed, 'checked' ) ) : 0;
+		$waiting   = count( array_filter( $installed, static fn( $st ) => '' !== $st['update'] ) );
+		$checked   = $installed ? max( array_column( $installed, 'checked' ) ) : 0;
 		Scout_Hub_Features::refresh_if_stale( $checked );
 		$offline = ! $waiting && Scout_Hub_Catalog::unreachable();
-		// Scout Build updates itself from the Plugins screen, so its own version sits first.
+		// Scout Build updates itself from the Plugins screen, so its own new version comes from WordPress's list.
 		$updates   = get_site_transient( 'update_plugins' );
 		$build_new = $updates->response[ plugin_basename( SCOUT_HUB_FILE ) ]->new_version ?? '';
 		$build_new = $build_new && version_compare( $build_new, SCOUT_HUB_VERSION, '>' ) ? $build_new : '';
 
-		// Most used first (Joy, 2026-11-04): the plugin list, then when updates install, then the theme.
+		$rows      = self::update_rows( $features, $installed, $build_new );
+		$ready     = array_values( array_filter( $rows, static fn( $r ) => '' !== $r['available'] ) );
+		$all       = self::update_all( $rows );
+		$approvals = Scout_Hub_Approval::waiting();
+		$theme     = self::update_theme();
+		$copy      = self::update_copy();
+		$changes   = self::update_changes();
+		$parts     = self::health_parts();
+		$counts    = Scout_Hub_Update_Report::counts( self::health_rows( $parts ) );
+		/* translators: %s: time since, e.g. "5 minutes" */
+		$when = $checked ? sprintf( __( '%s ago', 'scout-build' ), human_time_diff( $checked ) ) : '';
+		$next = self::update_next( $ready, $all, $approvals, $theme, $copy, $changes, $counts, $checked, $offline, $operator );
+
+		self::update_styles();
+		echo '<div class="sh-upd">';
+		if ( $operator ) {
+			$report = Scout_Hub_Update_Report::text(
+				array(
+					'site'    => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+					'url'     => home_url( '/' ),
+					'time'    => wp_date( 'Y-m-d H:i' ),
+					'wp'      => get_bloginfo( 'version' ),
+					'php'     => PHP_VERSION,
+					'theme'   => $theme,
+					'checked' => $when,
+					'offline' => $offline,
+					'plugins' => $rows,
+					'copy'    => $copy['line'],
+					'changes' => $changes['line'],
+					'checks'  => $counts,
+					// The same builder as Site status, so this part matches its Copy the report text.
+					'health'  => self::health_report( $parts['basics'], $parts['search'], $parts['ai'], $parts['security'] ),
+				)
+			);
+			echo '<textarea id="sh-upd-report" hidden readonly>' . esc_textarea( $report ) . '</textarea>';
+			// The same Check for new versions action as step 1, for the status line's button.
+			echo '<form id="sh-upd-refresh" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" hidden>'
+				. '<input type="hidden" name="action" value="' . esc_attr( Scout_Hub_Features::ACTION ) . '">'
+				. '<input type="hidden" name="slug" value=""><input type="hidden" name="do" value="refresh">'
+				. wp_nonce_field( Scout_Hub_Features::ACTION . 'refresh', '_wpnonce', true, false ) . '</form>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
+			self::update_copy_button();
+		}
+		self::status_line( $next[0], $next[1], $next[2], $next[3] );
+
+		// Step 1: ask GitHub for new versions.
+		self::step_head( 1, __( 'Check for new versions', 'scout-build' ), 'sh-step-1' );
 		?>
-		<section class="sh-box" id="sh-plugins">
-			<h2 class="sh-title"><?php esc_html_e( 'Plugins', 'scout-build' ); ?></h2>
-			<p class="sh-inline sh-note">
-				<span class="sh-tag <?php echo ( $waiting || $build_new || $offline ) ? 'is-update' : 'is-current'; ?>"><?php
-					$ready = $waiting + ( $build_new ? 1 : 0 );
+		<section class="sh-box">
+			<div class="sh-upd-line">
+				<span class="sh-tag <?php echo ( $ready || $offline ) ? 'is-update' : 'is-current'; ?>"><?php
 					echo esc_html(
 						$ready
 							/* translators: %d: plugins with an update */
-							? sprintf( _n( '%d update ready', '%d updates ready', $ready, 'scout-build' ), $ready )
+							? sprintf( _n( '%d update ready', '%d updates ready', count( $ready ), 'scout-build' ), count( $ready ) )
 							: ( $offline
 								// The check failed, so "up to date" would be a guess.
 								? __( 'Could not reach GitHub. Try again in 15 minutes.', 'scout-build' )
 								: __( 'Everything is up to date', 'scout-build' ) )
 					);
 				?></span>
-				<?php if ( $checked ) : ?>
-					<?php
-					/* translators: %s: time since, e.g. "5 minutes" */
-					echo esc_html( sprintf( __( 'Checked %s ago', 'scout-build' ), human_time_diff( $checked ) ) );
-					?>
-				<?php endif; ?>
+				<span><?php
+					/* translators: %s: time since, e.g. "5 minutes ago" */
+					echo esc_html( '' !== $when ? sprintf( __( 'Last checked %s.', 'scout-build' ), $when ) : __( 'Not checked yet.', 'scout-build' ) );
+				?></span>
 				<?php if ( $operator ) : ?>
-					<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check for new versions', 'scout-build' ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+					<?php echo Scout_Hub_Features::button( '', 'refresh', __( 'Check again', 'scout-build' ), 'button' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
 				<?php endif; ?>
-			</p>
-			<table class="sh-table sh-table-plain">
-				<thead>
-					<tr>
-						<th scope="col"><?php esc_html_e( 'Plugin', 'scout-build' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Version', 'scout-build' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Status', 'scout-build' ); ?></th>
-						<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Action', 'scout-build' ); ?></span></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><?php esc_html_e( 'Scout Build', 'scout-build' ); ?></td>
-						<td><?php echo esc_html( 'v' . SCOUT_HUB_VERSION ); ?></td>
-						<td>
-							<?php if ( $build_new ) : ?>
-								<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $build_new ) ); ?></span>
-							<?php else : ?>
-								<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
-							<?php endif; ?>
-						</td>
-						<td>
-							<?php if ( $build_new && current_user_can( 'update_plugins' ) ) : ?>
-								<a class="button button-primary" href="<?php echo esc_url( admin_url( 'plugins.php?plugin_status=upgrade' ) ); ?>"><?php esc_html_e( 'Update now', 'scout-build' ); ?></a>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<?php foreach ( $installed as $slug => $st ) : ?>
-						<tr>
-							<td><?php echo esc_html( $features[ $slug ]['name'] ?? $slug ); ?><?php if ( 'on' !== $st['state'] ) : ?> <span class="sh-pill is-off"><?php esc_html_e( 'Off', 'scout-build' ); ?></span><?php endif; ?></td>
-							<td><?php echo esc_html( 'v' . $st['version'] ); ?></td>
-							<td>
-								<?php if ( $st['update'] ) : ?>
-									<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $st['update'] ) ); ?></span>
-									<?php $wait = Scout_Hub_Rings::wait_reason( $slug, (string) $st['update'] ); ?>
-									<?php if ( '' !== $wait ) : ?><span class="sh-note" style="display:block;margin-top:4px"><?php echo esc_html( $wait ); ?></span><?php endif; ?>
-								<?php elseif ( $st['checked'] ) : ?>
-									<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
-								<?php endif; ?>
-								<?php if ( Scout_Hub_Features::held( $slug ) ) : ?><span class="sh-tag is-held"><?php esc_html_e( 'Updates paused', 'scout-build' ); ?></span><?php endif; ?>
-							</td>
-							<td>
-								<?php
-								$update = $operator && $st['update'] ? Scout_Hub_Features::update_url( $slug ) : '';
-								if ( '' !== $update ) {
-									echo '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
-								}
-								?>
-							</td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
+			</div>
+			<p class="sh-note"><?php esc_html_e( 'If it says up to date right after a release, check again in 2 minutes.', 'scout-build' ); ?></p>
+		</section>
+		<?php
+
+		// Step 2: the plugins, waiting ones on top with Scout Core first, then the OK list.
+		self::step_head( 2, __( 'Plugins', 'scout-build' ), 'sh-step-2' );
+		?>
+		<section class="sh-box" id="sh-plugins">
+			<ul class="sh-rows">
+				<?php foreach ( $rows as $row ) : ?>
+					<?php self::update_row( $row ); ?>
+				<?php endforeach; ?>
+			</ul>
+			<?php if ( '' !== $all['url'] ) : ?>
+				<p class="sh-actions sh-upd-all"><a class="button" href="<?php echo esc_url( $all['url'] ); ?>"><?php echo esc_html( $all['label'] ); ?></a> <span class="sh-note"><?php esc_html_e( 'WordPress installs them one after another, in this order.', 'scout-build' ); ?></span></p>
+			<?php endif; ?>
 			<p class="sh-note"><?php esc_html_e( 'Scout plugins update themselves within hours of each release. Turn features on or off on Features.', 'scout-build' ); ?></p>
 		</section>
 		<?php
 		Scout_Hub_Approval::panel( $operator );
-		Scout_Hub_Rings::panel( $operator );
-		Scout_Hub_Themes::panel( $operator );
-		?>
 
+		// Step 3: the theme, its version and its read-only key.
+		self::step_head( 3, __( 'Theme', 'scout-build' ), 'sh-step-3' );
+		Scout_Hub_Themes::panel( $operator );
+		if ( $theme['approval'] ) {
+			echo '<p class="sh-note">' . esc_html__( 'The new theme version waits for your OK. Approve it in step 2.', 'scout-build' ) . '</p>';
+		}
+
+		// Step 4: page copy from the theme (Scout Core's Site Sync).
+		self::step_head( 4, __( 'Page copy', 'scout-build' ), 'sh-step-4' );
+		$go = '' !== $copy['url'] ? '<a class="button" href="' . esc_url( $copy['url'] ) . '">' . esc_html( $copy['label'] ) . '</a>' : '';
+		self::status_line( $copy['state'], $copy['head'], $copy['detail'], $go );
+
+		// Step 5: client edits that go back to the repo (Scout Core's Change log).
+		self::step_head( 5, __( 'Bring changes back', 'scout-build' ), 'sh-step-5' );
+		$go = '';
+		if ( '' !== $changes['export'] ) {
+			echo '<textarea id="sh-upd-changes" hidden readonly>' . esc_textarea( $changes['export'] ) . '</textarea>';
+			$go .= '<button type="button" class="button" data-sh-copy="sh-upd-changes" data-sh-note="sh-upd-changes-note" data-sh-done="' . esc_attr__( 'Copied. Paste it into the chat, then mark them on the Change log.', 'scout-build' ) . '">' . esc_html__( 'Copy the changes', 'scout-build' ) . '</button> ';
+		}
+		if ( '' !== $changes['url'] ) {
+			$go .= '<a class="button sh-quiet" href="' . esc_url( $changes['url'] ) . '">' . esc_html__( 'Open Change log', 'scout-build' ) . '</a>';
+		}
+		self::status_line( $changes['state'], $changes['head'], $changes['detail'], $go );
+		if ( '' !== $changes['export'] ) {
+			echo '<p class="sh-note" id="sh-upd-changes-note" aria-live="polite"></p>';
+		}
+
+		// Step 6: a short Site status summary, with the fixes named.
+		self::step_head( 6, __( 'Check the site', 'scout-build' ), 'sh-step-6' );
+		self::status_line(
+			$counts['fix'] ? 'bad' : ( $counts['look'] ? 'warn' : 'good' ),
+			/* translators: 1: checks to fix, 2: checks to look at, 3: checks that are fine */
+			sprintf( __( '%1$d to fix, %2$d to look at, %3$d ok.', 'scout-build' ), $counts['fix'], $counts['look'], $counts['ok'] ),
+			/* translators: %s: names of the checks to fix */
+			$counts['fix_names'] ? sprintf( __( 'Fix: %s.', 'scout-build' ), implode( ', ', $counts['fix_names'] ) ) : '',
+			'<a class="button" href="' . esc_url( self::url( 'health' ) ) . '">' . esc_html__( 'Open Site status', 'scout-build' ) . '</a>'
+		);
+
+		if ( $operator ) {
+			self::update_copy_button();
+		}
+
+		self::update_other_tools( $operator, $features );
+		echo '</div>';
+		self::update_script();
+	}
+
+	/**
+	 * Every Scout plugin on the site as one row each, Scout Build included, sorted
+	 * with waiting updates on top and Scout Core first among them.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	private static function update_rows( array $features, array $installed, string $build_new ): array {
+		$operator = Scout_Hub_Access::is_operator();
+		$rows     = array(
+			array(
+				'slug'      => 'scout-build',
+				'name'      => __( 'Scout Build', 'scout-build' ),
+				'file'      => plugin_basename( SCOUT_HUB_FILE ),
+				'installed' => SCOUT_HUB_VERSION,
+				'available' => $build_new,
+				'on'        => true,
+				'checked'   => true,
+				'url'       => $build_new && current_user_can( 'update_plugins' ) ? admin_url( 'plugins.php?plugin_status=upgrade' ) : '',
+			),
+		);
+		foreach ( $installed as $slug => $st ) {
+			$rows[] = array(
+				'slug'      => (string) $slug,
+				'name'      => (string) ( $features[ $slug ]['name'] ?? $slug ),
+				'file'      => Scout_Hub_Features::file( (string) $slug ),
+				'installed' => (string) $st['version'],
+				'available' => (string) $st['update'],
+				'on'        => 'on' === $st['state'],
+				'checked'   => ! empty( $st['checked'] ),
+				'url'       => $operator && $st['update'] ? Scout_Hub_Features::update_url( (string) $slug ) : '',
+			);
+		}
+		foreach ( $rows as $i => $row ) {
+			$rows[ $i ] = array_merge( $row, self::update_state( $row ) );
+		}
+		return Scout_Hub_Update_Report::sort( $rows );
+	}
+
+	/**
+	 * Where one plugin's update stands, from the same checks the automatic updates use
+	 * (Scout_Hub_Rings, Scout_Hub_Approval, Scout_Hub_Features). The OK comes before a
+	 * pause here, because approving is the step a person takes.
+	 *
+	 * @return array{state:string,tag:string,sub:string,status:string}
+	 */
+	private static function update_state( array $row ): array {
+		$slug = (string) $row['slug'];
+		$new  = (string) $row['available'];
+		if ( '' === $new ) {
+			return $row['checked']
+				? array( 'state' => 'current', 'tag' => '', 'sub' => '', 'status' => 'up to date' )
+				: array( 'state' => 'unchecked', 'tag' => '', 'sub' => '', 'status' => 'not checked yet' );
+		}
+		foreach ( Scout_Hub_Catalog::holds() as $hold ) {
+			if ( $hold['slug'] === $slug && ( '*' === $hold['version'] || $hold['version'] === $new ) ) {
+				return array( 'state' => 'held', 'tag' => __( 'Held by Scout', 'scout-build' ), 'sub' => Scout_Hub_Rings::wait_reason( $slug, $new ), 'status' => trim( 'held by Scout. ' . $hold['note'] ) );
+			}
+		}
+		$rolled = Scout_Hub_Features::held( $slug );
+		if ( '' !== $rolled && version_compare( $new, $rolled, '<=' ) ) {
+			return array( 'state' => 'rolled', 'tag' => '', 'sub' => __( 'Went back a version. Its automatic updates wait for a newer release.', 'scout-build' ), 'status' => 'went back a version, waits for a newer release' );
+		}
+		$ok = Scout_Hub_Approval::reason( $slug, $new );
+		if ( '' !== $ok ) {
+			return array( 'state' => 'approval', 'tag' => __( 'Waiting for your OK', 'scout-build' ), 'sub' => $ok, 'status' => 'waiting for your OK' );
+		}
+		$until = Scout_Hub_Rings::paused_until();
+		if ( $until ) {
+			return array( 'state' => 'paused', 'tag' => __( 'Paused', 'scout-build' ), 'sub' => Scout_Hub_Rings::wait_reason( $slug, $new ), 'status' => 'automatic updates paused here until ' . wp_date( 'M j', $until ) );
+		}
+		$lands = Scout_Hub_Approval::skips_ring( $slug, $new ) ? 0 : Scout_Hub_Rings::lands_at( $slug, $new );
+		if ( $lands > time() ) {
+			return array( 'state' => 'later', 'tag' => '', 'sub' => Scout_Hub_Rings::wait_reason( $slug, $new ), 'status' => 'installs by itself ' . wp_date( 'M j', $lands ) );
+		}
+		return array( 'state' => 'ready', 'tag' => '', 'sub' => '', 'status' => 'ready to install' );
+	}
+
+	/** One plugin row: name and where its update stands, the versions, then Update now (or More). */
+	private static function update_row( array $row ): void {
+		$waits = in_array( $row['state'], array( 'held', 'rolled', 'approval' ), true );
+		$main  = '';
+		$more  = '';
+		if ( '' !== $row['url'] ) {
+			$link = '<a class="button" href="' . esc_url( $row['url'] ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
+			// Update now always works, as before; while a release waits for an OK or a hold it moves into More.
+			if ( $waits ) {
+				$more = $link;
+			} else {
+				$main = $link;
+			}
+		}
+		?>
+		<li class="sh-row" id="sh-plugin-<?php echo esc_attr( $row['slug'] ); ?>">
+			<div>
+				<p class="sh-row-name"><?php echo esc_html( $row['name'] ); ?><?php if ( Scout_Hub_Update_Report::CORE === $row['slug'] && false === stripos( $row['name'], 'Scout Core' ) ) : ?> <span class="sh-row-sub">(<?php esc_html_e( 'Scout Core', 'scout-build' ); ?>)</span><?php endif; ?><?php if ( ! $row['on'] ) : ?> <span class="sh-pill is-off"><?php esc_html_e( 'Off', 'scout-build' ); ?></span><?php endif; ?></p>
+				<?php if ( '' !== $row['sub'] ) : ?><p class="sh-row-sub"><?php echo esc_html( $row['sub'] ); ?></p><?php endif; ?>
+			</div>
+			<div class="sh-row-facts">
+				<span class="sh-ver"><?php echo esc_html( 'v' . $row['installed'] ); ?></span>
+				<?php if ( '' !== $row['available'] ) : ?>
+					<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $row['available'] ) ); ?></span>
+				<?php elseif ( 'current' === $row['state'] ) : ?>
+					<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['tag'] ) : ?><span class="sh-tag is-held"><?php echo esc_html( $row['tag'] ); ?></span><?php endif; ?>
+				<?php if ( 'scout-build' !== $row['slug'] && Scout_Hub_Features::held( $row['slug'] ) ) : ?><span class="sh-tag is-held"><?php esc_html_e( 'Updates paused', 'scout-build' ); ?></span><?php endif; ?>
+			</div>
+			<div class="sh-row-go">
+				<?php echo $main; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+				<?php if ( '' !== $more ) : ?>
+					<details class="sh-more">
+						<summary><?php esc_html_e( 'More', 'scout-build' ); ?><span class="screen-reader-text"><?php echo esc_html( ': ' . $row['name'] ); ?></span></summary>
+						<div><?php echo $more; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?></div>
+					</details>
+				<?php endif; ?>
+			</div>
+		</li>
 		<?php
-		// The other ways content and settings reach the site. Each lands here and nowhere
-		// else; a card says plainly when its tool is not on this site yet.
-		$sync    = class_exists( 'Scout_Sync_Admin' ) ? admin_url( 'admin.php?page=scout&tab=sync' ) : '';
-		$changes = class_exists( 'Scout_Changelog_Admin' ) ? admin_url( 'admin.php?page=scout&tab=changes' ) : '';
+	}
+
+	/**
+	 * WordPress's own bulk updater, pointed at the plugins that may install now, in
+	 * screen order so Scout Core goes first. Releases waiting for an OK, held by Scout
+	 * or sent back a version stay out. A link only: nothing runs until someone presses it.
+	 *
+	 * @return array{url:string,label:string,count:int}
+	 */
+	private static function update_all( array $rows ): array {
+		$out = array( 'url' => '', 'label' => '', 'count' => 0 );
+		if ( ! Scout_Hub_Access::is_operator() || ! current_user_can( 'update_plugins' ) || ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) ) {
+			return $out;
+		}
+		$files   = array();
+		$core    = false;
+		$waiting = 0;
+		foreach ( $rows as $row ) {
+			if ( '' === $row['available'] ) {
+				continue;
+			}
+			++$waiting;
+			if ( in_array( $row['state'], array( 'ready', 'later', 'paused' ), true ) ) {
+				$files[] = $row['file'];
+				$core    = $core || Scout_Hub_Update_Report::CORE === $row['slug'];
+			}
+		}
+		$out['count'] = count( $files );
+		if ( count( $files ) < 2 ) {
+			return $out; // One plugin has its own Update now.
+		}
+		$out['url'] = wp_nonce_url( self_admin_url( 'update-core.php?action=do-plugin-upgrade&plugins=' . rawurlencode( implode( ',', $files ) ) ), 'upgrade-core' );
+		if ( count( $files ) === $waiting ) {
+			$out['label'] = $core ? __( 'Update all, Scout Core first', 'scout-build' ) : __( 'Update all', 'scout-build' );
+		} else {
+			$out['label'] = $core
+				/* translators: %d: plugins that may install now */
+				? sprintf( __( 'Update the %d ready, Scout Core first', 'scout-build' ), count( $files ) )
+				/* translators: %d: plugins that may install now */
+				: sprintf( __( 'Update the %d ready', 'scout-build' ), count( $files ) );
+		}
+		return $out;
+	}
+
+	/**
+	 * The theme in a few words, for the status line and the report. Reads the same
+	 * facts as the Theme box (Scout_Hub_Themes::panel). Never the key itself.
+	 *
+	 * @return array{name:string,version:string,state:string,key:string,ready:bool,approval:bool}
+	 */
+	private static function update_theme(): array {
+		$theme = wp_get_theme();
+		$src   = Scout_Hub_Themes::source( $theme );
+		$out   = array(
+			'name'     => (string) $theme->get( 'Name' ),
+			'version'  => (string) $theme->get( 'Version' ),
+			'state'    => 'updated by uploading it',
+			'key'      => '',
+			'ready'    => false,
+			'approval' => false,
+		);
+		if ( ! $src ) {
+			return $out;
+		}
+		$has_key    = '' !== Scout_Hub_Themes::token();
+		$out['key'] = defined( 'SCOUT_THEME_TOKEN' ) && '' !== (string) SCOUT_THEME_TOKEN ? 'set in wp-config.php' : ( $has_key ? 'saved' : 'not set' );
+		$rel        = $has_key ? Scout_Hub_Themes::latest( $src ) : null;
+		$updates    = get_site_transient( 'update_themes' );
+		$new        = is_object( $updates ) && isset( $updates->response[ $src['stylesheet'] ]['new_version'] ) ? (string) $updates->response[ $src['stylesheet'] ]['new_version'] : '';
+		if ( '' === $new && $rel && '' === $rel['error'] && version_compare( $rel['version'], $src['version'], '>' ) ) {
+			$new = $rel['version'];
+		}
+		if ( ! $has_key ) {
+			$out['state'] = 'needs its key to update itself';
+		} elseif ( $rel && 'key' === $rel['error'] ) {
+			$out['state'] = 'GitHub turned the key down';
+		} elseif ( $rel && 'offline' === $rel['error'] ) {
+			$out['state'] = 'could not reach GitHub';
+		} elseif ( '' !== $new ) {
+			$out['ready']    = true;
+			$out['approval'] = '' !== Scout_Hub_Approval::reason( Scout_Hub_Approval::THEME . $src['stylesheet'], $new );
+			$out['state']    = $new . ' ready' . ( $out['approval'] ? ', waiting for your OK' : '' );
+		} else {
+			$out['state'] = 'up to date';
+		}
+		return $out;
+	}
+
+	/**
+	 * Page copy (Scout Core's Site Sync) in one line, read through its public summary.
+	 *
+	 * @return array{state:string,head:string,detail:string,label:string,url:string,line:string}
+	 */
+	private static function update_copy(): array {
+		if ( ! class_exists( 'Scout_Sync' ) || ! method_exists( 'Scout_Sync', 'summary' ) ) {
+			return array( 'state' => 'off', 'head' => __( 'Page copy needs Scout Core.', 'scout-build' ), 'detail' => '', 'label' => '', 'url' => '', 'line' => 'Needs Scout Core.' );
+		}
+		$url = class_exists( 'Scout_Sync_Admin' ) && method_exists( 'Scout_Sync_Admin', 'url' ) ? (string) Scout_Sync_Admin::url() : admin_url( 'admin.php?page=scout&tab=sync' );
+		$sum = (array) Scout_Sync::summary();
+		if ( empty( $sum['manifest'] ) ) {
+			return array( 'state' => 'off', 'head' => __( 'This theme has no page copy file.', 'scout-build' ), 'detail' => __( 'Nothing to bring in.', 'scout-build' ), 'label' => '', 'url' => '', 'line' => 'This theme has no page copy file.' );
+		}
+		$review = (int) ( $sum['review'] ?? 0 );
+		$counts = (array) ( $sum['counts'] ?? array() );
+		$ready  = (int) ( $counts['update'] ?? 0 ) + (int) ( $counts['create'] ?? 0 );
+		if ( $review ) {
+			return array(
+				'state'  => 'warn',
+				/* translators: %d: page copy items */
+				'head'   => sprintf( _n( '%d item to review.', '%d items to review.', $review, 'scout-build' ), $review ),
+				'detail' => __( 'Edited here, or changed in both places. Pick which copy stays.', 'scout-build' ),
+				'label'  => __( 'Review page copy', 'scout-build' ),
+				'url'    => $url,
+				'line'   => sprintf( '%d %s to review.', $review, 1 === $review ? 'item' : 'items' ),
+			);
+		}
+		if ( $ready ) {
+			return array(
+				'state'  => 'warn',
+				/* translators: %d: page copy changes */
+				'head'   => sprintf( _n( '%d change ready from the theme.', '%d changes ready from the theme.', $ready, 'scout-build' ), $ready ),
+				'detail' => __( 'Nothing here was edited, so they are safe to bring in.', 'scout-build' ),
+				'label'  => __( 'Open Page copy', 'scout-build' ),
+				'url'    => $url,
+				'line'   => sprintf( '%d %s ready from the theme.', $ready, 1 === $ready ? 'change' : 'changes' ),
+			);
+		}
+		return array( 'state' => 'good', 'head' => __( 'In sync with the theme.', 'scout-build' ), 'detail' => '', 'label' => __( 'Open Page copy', 'scout-build' ), 'url' => $url, 'line' => 'In sync.' );
+	}
+
+	/**
+	 * Client edits waiting to go back to the repo (Scout Core's Change log), through its
+	 * public count and export. Says so plainly when this Scout Core has no Change log yet.
+	 *
+	 * @return array{state:string,head:string,detail:string,count:int,url:string,export:string,line:string}
+	 */
+	private static function update_changes(): array {
+		$out = array( 'state' => 'off', 'head' => '', 'detail' => '', 'count' => 0, 'url' => '', 'export' => '', 'line' => '' );
+		if ( ! class_exists( 'Scout_Changelog' ) || ! method_exists( 'Scout_Changelog', 'count_new' ) ) {
+			$out['head'] = __( 'The Change log comes with a later Scout Core release.', 'scout-build' );
+			$out['line'] = 'The Change log is not on this site yet.';
+			return $out;
+		}
+		$out['url'] = class_exists( 'Scout_Changelog_Admin' ) && method_exists( 'Scout_Changelog_Admin', 'url' ) ? (string) Scout_Changelog_Admin::url() : admin_url( 'admin.php?page=scout&tab=changes' );
+		if ( class_exists( 'Scout_Changelog_Admin' ) && method_exists( 'Scout_Changelog_Admin', 'allowed' ) && ! Scout_Changelog_Admin::allowed() ) {
+			$out['head'] = __( 'Only Scout sees the Change log.', 'scout-build' );
+			$out['url']  = '';
+			$out['line'] = 'Only Scout sees the Change log.';
+			return $out;
+		}
+		if ( method_exists( 'Scout_Changelog', 'enabled' ) && ! Scout_Changelog::enabled() ) {
+			$out['head'] = __( 'The Change log is off on this site.', 'scout-build' );
+			$out['line'] = 'The Change log is off on this site.';
+			return $out;
+		}
+		$n = (int) Scout_Changelog::count_new();
+		$out['count'] = $n;
+		if ( ! $n ) {
+			$out['state']  = 'good';
+			$out['head']   = __( 'Nothing to bring back.', 'scout-build' );
+			$out['detail'] = __( 'Every edit made on the site is in the repo.', 'scout-build' );
+			$out['line']   = 'Nothing waiting. Every edit made on the site is in the repo.';
+			return $out;
+		}
+		$out['state'] = 'warn';
+		/* translators: %d: client edits */
+		$out['head']   = sprintf( _n( '%d client edit to bring back.', '%d client edits to bring back.', $n, 'scout-build' ), $n );
+		$out['detail'] = __( 'Copy them, fold them into the repo, then mark them on the Change log.', 'scout-build' );
+		$out['line']   = sprintf( '%d client %s waiting to go back to the repo.', $n, 1 === $n ? 'edit' : 'edits' );
+		if ( method_exists( 'Scout_Changelog', 'entries' ) && method_exists( 'Scout_Changelog', 'export' ) ) {
+			$out['export'] = (string) Scout_Changelog::export( (array) Scout_Changelog::entries( 'new' ) );
+		}
+		return $out;
+	}
+
+	/**
+	 * The four lists Site status shows, gathered the same way health() does: basics,
+	 * security, Scout Core's search checks (minus the two AI search covers) and AI search.
+	 *
+	 * @return array{basics:array,security:array,search:array,ai:array}
+	 */
+	private static function health_parts(): array {
+		$search = array();
+		if ( class_exists( 'Scout_Core_Admin' ) && method_exists( 'Scout_Core_Admin', 'render_checks' ) ) {
+			$search = array_values(
+				array_filter(
+					Scout_Core_Admin::checks(),
+					static fn( $c ) => ! in_array( $c['label'], array( 'Business details', 'Search listing (schema)' ), true )
+				)
+			);
+		}
+		return array(
+			'basics'   => Scout_Hub_Health::checks(),
+			'security' => Scout_Hub_Security::visible_rows(),
+			'search'   => $search,
+			'ai'       => Scout_Hub_Health::ai_checks(),
+		);
+	}
+
+	/** Every Site status row as label and state (good, warn, bad), in report order. */
+	private static function health_rows( array $parts ): array {
+		$rows = array_merge( $parts['basics'], $parts['security'] );
+		foreach ( $parts['search'] as $c ) {
+			$rows[] = array(
+				'label' => (string) $c['label'],
+				'state' => 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' ),
+			);
+		}
+		return array_merge( $rows, $parts['ai'] );
+	}
+
+	/**
+	 * The status line: what needs doing now, in order of the steps, with one button.
+	 *
+	 * @return array{0:string,1:string,2:string,3:string} State, headline, detail, button HTML.
+	 */
+	private static function update_next( array $ready, array $all, array $approvals, array $theme, array $copy, array $changes, array $counts, int $checked, bool $offline, bool $operator ): array {
+		$go = static function ( string $label, string $url ) use ( $operator ): string {
+			return $operator && '' !== $url ? '<a class="button button-primary" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>' : '';
+		};
+		// Submits the hidden Check for new versions form, since a form cannot sit inside the status line.
+		$check = static function ( string $label ) use ( $operator ): string {
+			return $operator ? '<button type="submit" form="sh-upd-refresh" class="button button-primary">' . esc_html( $label ) . '</button>' : '';
+		};
+		if ( $offline ) {
+			return array( 'warn', __( 'Could not reach GitHub.', 'scout-build' ), __( 'Try again in 15 minutes.', 'scout-build' ), $check( __( 'Check again', 'scout-build' ) ) );
+		}
+		if ( ! $checked ) {
+			return array( 'off', __( 'Not checked yet.', 'scout-build' ), __( 'Check for new versions to see what is waiting.', 'scout-build' ), $check( __( 'Check for new versions', 'scout-build' ) ) );
+		}
+		$oks = count( $approvals );
+		if ( $ready ) {
+			$n      = count( $ready );
+			$detail = array();
+			if ( Scout_Hub_Update_Report::CORE === $ready[0]['slug'] ) {
+				$detail[] = __( 'Update Scout Core first.', 'scout-build' );
+			}
+			if ( $oks ) {
+				/* translators: %d: updates waiting for an OK */
+				$detail[] = sprintf( _n( '%d waits for your OK.', '%d wait for your OK.', $oks, 'scout-build' ), $oks );
+				$button   = $go( __( 'Approve updates', 'scout-build' ), '#sh-approval' );
+			} elseif ( '' !== $all['url'] ) {
+				$button = $go( $all['label'], $all['url'] );
+			} else {
+				$button = '';
+				foreach ( $ready as $row ) {
+					if ( '' !== $row['url'] && in_array( $row['state'], array( 'ready', 'later', 'paused' ), true ) ) {
+						/* translators: %s: plugin name */
+						$button = $go( sprintf( __( 'Update %s', 'scout-build' ), $row['name'] ), $row['url'] );
+						break;
+					}
+				}
+				if ( '' === $button ) {
+					$detail[] = __( 'Each one says below when it installs.', 'scout-build' );
+				}
+			}
+			/* translators: %d: plugins with an update */
+			return array( 'warn', sprintf( _n( '%d plugin waiting.', '%d plugins waiting.', $n, 'scout-build' ), $n ), implode( ' ', $detail ), $button );
+		}
+		if ( $oks ) {
+			/* translators: %d: updates waiting for an OK */
+			return array( 'warn', sprintf( _n( '%d update waits for your OK.', '%d updates wait for your OK.', $oks, 'scout-build' ), $oks ), __( 'Check it on staging first, then approve it.', 'scout-build' ), $go( __( 'Approve updates', 'scout-build' ), '#sh-approval' ) );
+		}
+		if ( $theme['ready'] ) {
+			return array( 'warn', __( 'The theme has an update.', 'scout-build' ), __( 'It updates by itself within a few hours.', 'scout-build' ), $go( __( 'Go to the theme', 'scout-build' ), '#sh-theme' ) );
+		}
+		if ( 'warn' === $copy['state'] ) {
+			return array( 'warn', __( 'Page copy:', 'scout-build' ) . ' ' . $copy['head'], '', $go( $copy['label'], $copy['url'] ) );
+		}
+		if ( $changes['count'] ) {
+			return array( 'warn', $changes['head'], __( 'Copy them in step 5.', 'scout-build' ), $go( __( 'Go to step 5', 'scout-build' ), '#sh-step-5' ) );
+		}
+		if ( $counts['fix'] ) {
+			return array(
+				'bad',
+				/* translators: %d: site checks to fix */
+				sprintf( _n( '%d site check needs a fix.', '%d site checks need a fix.', $counts['fix'], 'scout-build' ), $counts['fix'] ),
+				/* translators: %s: names of the checks */
+				sprintf( __( 'Fix: %s.', 'scout-build' ), implode( ', ', $counts['fix_names'] ) ),
+				$go( __( 'Open Site status', 'scout-build' ), self::url( 'health' ) )
+			);
+		}
+		/* translators: %s: time since, e.g. "5 minutes" */
+		return array( 'good', __( 'Everything is up to date.', 'scout-build' ), sprintf( __( 'Checked %s ago.', 'scout-build' ), human_time_diff( $checked ) ), '' );
+	}
+
+	/** A step's heading: "Step 1" above the short title. */
+	private static function step_head( int $n, string $title, string $id ): void {
+		/* translators: %d: step number */
+		echo '<div class="sh-section-head" id="' . esc_attr( $id ) . '"><p class="sh-eyebrow">' . esc_html( sprintf( __( 'Step %d', 'scout-build' ), $n ) ) . '</p><h2>' . esc_html( $title ) . '</h2></div>';
+	}
+
+	/** The Copy the update report button, at the top of the screen and again at the bottom. */
+	private static function update_copy_button(): void {
+		?>
+		<div class="sh-upd-copy">
+			<button type="button" class="button" data-sh-copy="sh-upd-report" data-sh-done="<?php echo esc_attr__( 'Copied. Paste it into the chat to get the next steps.', 'scout-build' ); ?>"><?php esc_html_e( 'Copy the update report', 'scout-build' ); ?></button>
+			<p class="sh-note" aria-live="polite"><?php esc_html_e( 'Paste it into the chat to get the next steps.', 'scout-build' ); ?></p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Other tools, in one closed fold: Fill from theme, Import posts, Site settings,
+	 * when updates install, and the recent feature changes. Same buttons as before.
+	 */
+	private static function update_other_tools( bool $operator, array $features ): void {
 		$settings = (string) apply_filters( 'scout_hub_site_settings_url', '' );
-		$cards   = array(
+		$tools    = array(
 			array(
 				'title' => __( 'Fill from theme', 'scout-build' ),
 				'text'  => __( 'Copies facts from the theme\'s setup file into blank fields. Anything already set stays.', 'scout-build' ),
 				'go'    => Scout_Hub_Setup::data() ? ( $operator ? Scout_Hub_Features::button( '', 'refill', __( 'Fill from theme', 'scout-build' ), 'button' ) : '' ) : '<span class="sh-note">' . esc_html__( 'This theme has no setup file.', 'scout-build' ) . '</span>',
-			),
-			array(
-				'title' => __( 'Page copy', 'scout-build' ),
-				'text'  => __( 'Pulls page copy from the theme. Pages edited here wait for your review.', 'scout-build' ),
-				'go'    => '' !== $sync ? '<a class="button" href="' . esc_url( $sync ) . '">' . esc_html__( 'Open Page copy', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Needs Scout Core.', 'scout-build' ) . '</span>',
 			),
 			array(
 				'title' => __( 'Import posts (XML)', 'scout-build' ),
@@ -977,27 +1445,16 @@ final class Scout_Hub_Admin {
 				'text'  => __( 'Save this site\'s Scout settings to a file, or load one from another site.', 'scout-build' ),
 				'go'    => '' !== $settings ? '<a class="button" href="' . esc_url( $settings ) . '">' . esc_html__( 'Export or import', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Not available on this site yet.', 'scout-build' ) . '</span>',
 			),
-			array(
-				'title' => __( 'Change log', 'scout-build' ),
-				'text'  => __( 'What changed on this site, by whom and when, with a copy to send to Scout.', 'scout-build' ),
-				'go'    => '' !== $changes ? '<a class="button" href="' . esc_url( $changes ) . '">' . esc_html__( 'Open Change log', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Coming in a later Scout Core release.', 'scout-build' ) . '</span>',
-			),
 		);
-		?>
-		<div class="sh-section-head"><p class="sh-eyebrow"><?php esc_html_e( 'Content & settings', 'scout-build' ); ?></p></div>
-		<div class="sh-grid">
-			<?php foreach ( $cards as $card ) : ?>
-				<article class="sh-card">
-					<div class="sh-cardhead"><h2><?php echo esc_html( $card['title'] ); ?></h2></div>
-					<p class="sh-summary"><?php echo esc_html( $card['text'] ); ?></p>
-					<div class="sh-actions"><?php echo $card['go']; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?></div>
-				</article>
-			<?php endforeach; ?>
-		</div>
-
-		<?php
+		self::fold_open( __( 'Other tools', 'scout-build' ), false, 'sh-other-tools' );
+		echo '<div class="sh-upd-other"><ul class="sh-rows">';
+		foreach ( $tools as $tool ) {
+			echo '<li class="sh-row"><div><p class="sh-row-name">' . esc_html( $tool['title'] ) . '</p><p class="sh-row-sub">' . esc_html( $tool['text'] ) . '</p></div><div class="sh-row-facts"></div><div class="sh-row-go">' . $tool['go'] . '</div></li>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
+		}
+		echo '</ul>';
+		Scout_Hub_Rings::panel( $operator );
 		$log = Scout_Hub_Features::recent_log();
-		if ( $operator && $log ) :
+		if ( $operator && $log ) {
 			$verbs = array( 'on' => __( 'Turned on', 'scout-build' ), 'off' => __( 'Turned off', 'scout-build' ), 'back' => __( 'Went back a version', 'scout-build' ) );
 			?>
 			<section class="sh-box">
@@ -1015,10 +1472,73 @@ final class Scout_Hub_Admin {
 					</tbody>
 				</table>
 			</section>
-		<?php endif; ?>
+			<?php
+		}
+		echo '</div>';
+		self::fold_close();
+	}
+
+	/** Styles for the Updates screen only. Tokens only. */
+	private static function update_styles(): void {
+		?>
+		<style>
+		.sh-upd .sh-section-head{margin-top:28px}
+		.sh-upd-copy{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px 14px;margin:12px 0 0}
+		.sh-upd-copy .sh-note{margin:0}
+		.sh-upd-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0}
+		.sh-upd-line form{margin:0}
+		.sh-upd .sh-ver{font-family:var(--sh-mono)}
+		.sh-upd-all{align-items:center;margin-top:12px}
+		.sh-upd-all .sh-note{margin:0}
+		.sh-upd .sh-status-go{display:inline-flex;flex-wrap:wrap;gap:8px}
+		.sh-upd .sh-status-go form{margin:0}
+		.sh-upd-other > .sh-box{border:0;border-top:1px solid var(--sh-border);border-radius:0;padding:18px 0 0;margin-top:18px}
+		.sh-upd .sh-more{position:relative}
+		.sh-upd .sh-more>summary{list-style:none;cursor:pointer;color:var(--sh-accent-text);padding:6px 10px;border-radius:var(--sh-r-control)}
+		.sh-upd .sh-more>summary::-webkit-details-marker{display:none}
+		.sh-upd .sh-more>summary:hover,.sh-upd .sh-more[open]>summary{background:var(--sh-surface-2)}
+		.sh-upd .sh-more>div{position:absolute;right:0;top:calc(100% + 4px);z-index:20;display:flex;flex-direction:column;gap:2px;min-width:200px;padding:6px;background:var(--sh-surface);border:1px solid var(--sh-border);border-radius:var(--sh-r-control);box-shadow:var(--sh-shadow-hover)}
+		.sh-upd .sh-more .button{display:block;width:100%;text-align:left;border:0;background:none;box-shadow:none;min-height:36px;line-height:36px;padding:0 10px;color:var(--sh-text);font-size:var(--sh-fs-note);border-radius:var(--sh-r-chip)}
+		.sh-upd .sh-more .button:hover{background:var(--sh-surface-2)}
+		@container shmain (max-width: 640px){.sh-upd .sh-more>div{position:static;margin-top:6px;box-shadow:none}.sh-upd-copy{justify-content:flex-start}}
+		</style>
 		<?php
 	}
 
+	/**
+	 * The copy buttons (same mechanics as Copy the report on Site status: the clipboard
+	 * on a secure page, the hidden text box otherwise), and opening the Other tools
+	 * fold when a saved form sends you back to something inside it.
+	 */
+	private static function update_script(): void {
+		?>
+		<script>
+		( function () {
+			document.querySelectorAll( '.sh-upd [data-sh-copy]' ).forEach( function ( button ) {
+				button.addEventListener( 'click', function () {
+					var box  = document.getElementById( button.getAttribute( 'data-sh-copy' ) );
+					var note = button.getAttribute( 'data-sh-note' ) ? document.getElementById( button.getAttribute( 'data-sh-note' ) ) : button.nextElementSibling;
+					if ( ! box ) {
+						return;
+					}
+					var done = function () { if ( note ) { note.textContent = button.getAttribute( 'data-sh-done' ); } };
+					if ( navigator.clipboard && window.isSecureContext ) {
+						navigator.clipboard.writeText( box.value ).then( done );
+					} else {
+						box.hidden = false; box.select(); document.execCommand( 'copy' ); box.hidden = true; done();
+					}
+				} );
+			} );
+			var target = location.hash ? document.getElementById( location.hash.slice( 1 ) ) : null;
+			var fold   = target ? target.closest( 'details' ) : null;
+			if ( fold ) {
+				fold.open = true;
+				target.scrollIntoView();
+			}
+		}() );
+		</script>
+		<?php
+	}
 
 	/** One feature, as a row: the name and what it does, its plan and version, then one main action and a More menu. */
 	private static function card( string $slug, array $f, array $s, bool $operator, int $step = 0 ): void {
@@ -1039,7 +1559,7 @@ final class Scout_Hub_Admin {
 			$update   = $s['update'] ? Scout_Hub_Features::update_url( $slug ) : '';
 			$settings = 'on' === $s['state'] ? self::settings_url( $slug ) : '';
 			if ( '' !== $update ) {
-				$main = '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
+				$main = '<a class="button" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
 			}
 			if ( 'on' === $s['state'] ) {
 				if ( '' !== $settings ) {
@@ -1056,7 +1576,7 @@ final class Scout_Hub_Admin {
 					$more[] = Scout_Hub_Features::button( $slug, 'back', sprintf( __( 'Go back to v%s', 'scout-build' ), $s['previous'] ) );
 				}
 			} else {
-				$main .= Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ), 'button button-primary' );
+				$main .= Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ) ); // Outlined: one main button a row, never a row of primaries (DESIGN 8).
 			}
 			$picked_now = in_array( $slug, Scout_Hub_Access::picks(), true );
 			// Only offer "add to the plan" when the plan does not already include it.
@@ -1148,12 +1668,12 @@ final class Scout_Hub_Admin {
 				/* translators: %d: number of open requests */
 				? sprintf( _n( '%d open request.', '%d open requests.', $open, 'scout-build' ), $open )
 				: __( 'All requests are done.', 'scout-build' );
-			self::status_line( $open ? 'warn' : 'good', $head, $detail );
+			self::status_line( 'good', $head, $detail ); // Open requests are normal work, not a warning.
 		}
 		?>
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'New request', 'scout-build' ); ?></h2>
-			<p><?php esc_html_e( 'Tell us what to change. It shows in the list below with its status.', 'scout-build' ); ?></p>
+			<p><?php esc_html_e( 'Tell us what to change, and it shows in the list below with its status.', 'scout-build' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data" class="sh-form">
 				<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Requests::ACTION ); ?>">
 				<input type="hidden" name="do" value="new">
@@ -1234,31 +1754,87 @@ final class Scout_Hub_Admin {
 				)
 			);
 		}
+		// Scout Core's checks in the same shape as the hub's rows: state, value, note, links.
+		$search_rows = array();
+		foreach ( $search as $c ) {
+			$state = 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' );
+			$links = array();
+			foreach ( (array) ( $c['items'] ?? array() ) as $item_id ) {
+				$title   = get_the_title( $item_id );
+				$links[] = array( '' !== $title ? $title : sprintf( '#%d', $item_id ), (string) get_edit_post_link( $item_id ) );
+			}
+			$search_rows[] = array(
+				'label'     => $c['label'],
+				'value'     => 'good' === $state ? __( 'All set', 'scout-build' ) : __( 'Needs a look', 'scout-build' ),
+				'state'     => $state,
+				'note'      => (string) $c['message'],
+				'item_links' => $links,
+				'link'      => (string) ( $c['action'] ?? '' ),
+				'link_text' => (string) ( $c['action_label'] ?? '' ),
+				'link_all'  => true, // Core's links are for everyone who can open Site status.
+			);
+		}
+		// The plugin rows get their own list; the copied report keeps its old order.
+		$plugin_labels = array( __( 'Updates waiting', 'scout-build' ), __( 'Test builds', 'scout-build' ) );
+		$plugins       = array_values( array_filter( $basics, static fn( $c ) => in_array( $c['label'], $plugin_labels, true ) ) );
+		$basic_rows    = array_values( array_filter( $basics, static fn( $c ) => ! in_array( $c['label'], $plugin_labels, true ) ) );
+
+		$every = array_merge( $basics, $security, $search_rows, $ai );
+		$fix   = count( array_filter( $every, static fn( $c ) => 'bad' === $c['state'] ) );
+		$look  = count( array_filter( $every, static fn( $c ) => 'warn' === $c['state'] ) );
+		if ( $fix && $look ) {
+			/* translators: 1: checks to fix, 2: checks to look at */
+			$head = sprintf( __( '%1$d to fix, %2$d to look at.', 'scout-build' ), $fix, $look );
+		} elseif ( $fix ) {
+			/* translators: %d: checks to fix */
+			$head = sprintf( __( '%d to fix.', 'scout-build' ), $fix );
+		} elseif ( $look ) {
+			/* translators: %d: checks to look at */
+			$head = sprintf( __( '%d to look at.', 'scout-build' ), $look );
+		} else {
+			$head = __( 'Everything checks out.', 'scout-build' );
+		}
 		?>
 		<style>
-			/* Compact, so the whole report fits on one screen (and one screenshot). */
-			/* At most three across (the map's rule), and never smaller than the dashboard's type floor. */
-			.sh-health .sh-grid-3{grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px}
-			.sh-health .sh-box{padding:16px 18px; border-radius:var(--sh-r-control)}
-			.sh-health .sh-label{font-size:var(--sh-fs-label); margin-bottom:6px}
-			.sh-health .sh-check .sh-value{font-size:var(--sh-fs-card); margin-top:2px}
-			.sh-health .sh-note{font-size:var(--sh-fs-note); line-height:1.45; margin-top:4px}
-			.sh-which{margin-top:8px; font-size:var(--sh-fs-note)}
+			.sh-health .sh-row{padding:12px 0}
+			.sh-health .sh-row-name{display:flex;align-items:center;gap:10px}
+			.sh-health .sh-row-sub{margin-left:20px}
+			.sh-health .sh-row-facts{font-weight:600;color:var(--sh-text)}
+			.sh-health .sh-which{margin:6px 0 0 20px}
+			.sh-which{font-size:var(--sh-fs-note)}
 			.sh-which summary{cursor:pointer; color:var(--sh-accent-text); font-weight:500; min-height:32px; display:flex; align-items:center}
 			.sh-which ul{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:6px}
 			.sh-which li{margin:0; padding:3px 10px; border-radius:var(--sh-r-pill); background:var(--sh-surface-2); color:var(--sh-text-2); font-size:13px}
-			.sh-health .sh-section-head{margin:18px 0 8px}
-			.sh-health .sh-section-head h2{font-size:17px}
-			.sh-health .sh-section-head .sh-note,.sh-health .sh-meter{display:none}
-			.sh-copy{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin:12px 0 14px}
+			.sh-which li a{color:var(--sh-accent-text); text-decoration:none}
+			.sh-which p{margin:6px 0 0; color:var(--sh-text-2); max-width:720px}
+			.sh-health .sh-fold > .sh-box{border:0; border-radius:0; padding:0; margin:20px 0 0 !important}
+			.sh-copy{display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:10px 14px; margin:0 0 12px}
 			.sh-copy .sh-note{margin:0}
 		</style>
 		<div class="sh-health">
+		<?php // Copy the report sits on top: it is how a site's state reaches Scout (Joy, 2026-11-05). ?>
 		<div class="sh-copy">
-			<button type="button" class="button button-primary" id="sh-copy-report"><?php esc_html_e( 'Copy the report', 'scout-build' ); ?></button>
+			<button type="button" class="button" id="sh-copy-report"><?php esc_html_e( 'Copy the report', 'scout-build' ); ?></button>
 			<p class="sh-note" id="sh-copy-note"><?php esc_html_e( 'Copies every check and each Scout plugin\'s version as plain text, ready to paste.', 'scout-build' ); ?></p>
 			<textarea id="sh-copy-text" hidden readonly><?php echo esc_textarea( self::health_report( $basics, $search, $ai, $security ) ); ?></textarea>
 		</div>
+		<?php
+		/* translators: 1: AI checks passed, 2: total AI checks */
+		self::status_line( $fix ? 'bad' : ( $look ? 'warn' : 'good' ), $head, sprintf( __( 'The site is ready for AI search on %1$d of %2$d checks.', 'scout-build' ), $score, count( $ai ) ) );
+		self::check_list( 'basics', __( 'Basics', 'scout-build' ), $basic_rows );
+		self::check_list( 'search', __( 'Search listing', 'scout-build' ), $search_rows );
+		self::check_list( 'ai-search', __( 'Ready for AI search', 'scout-build' ), $ai );
+		self::check_list( 'security', __( 'Security', 'scout-build' ), $security );
+		self::check_list( 'plugins', __( 'Plugins', 'scout-build' ), $plugins );
+
+		// What people rarely use: the test email and the restore test.
+		self::fold_open( __( 'More options', 'scout-build' ), false, 'sh-health-more' );
+		Scout_Hub_Form_Mail::render_test();
+		if ( $security ) {
+			Scout_Hub_Security::render_form();
+		}
+		?>
+		<?php self::fold_close(); ?>
 		<script>
 		document.getElementById( 'sh-copy-report' ).addEventListener( 'click', function () {
 			var text = document.getElementById( 'sh-copy-text' ).value, note = document.getElementById( 'sh-copy-note' );
@@ -1269,51 +1845,14 @@ final class Scout_Hub_Admin {
 				var t = document.getElementById( 'sh-copy-text' ); t.hidden = false; t.select(); document.execCommand( 'copy' ); t.hidden = true; done();
 			}
 		} );
+		// Coming back from "Send a test" (#form-mail-test): open the fold it sits in.
+		( function () {
+			var el = location.hash ? document.getElementById( location.hash.slice( 1 ) ) : null, d = el ? el.closest( 'details' ) : null;
+			if ( d ) { d.open = true; el.scrollIntoView(); }
+		} )();
 		</script>
-		<?php self::check_grid( $basics ); ?>
-		<?php
-		if ( $security ) {
-			$safe = count( array_filter( $security, static fn( $c ) => 'good' === $c['state'] ) );
-			?>
-			<div class="sh-section-head" id="security">
-				<p class="sh-eyebrow"><?php esc_html_e( 'Security', 'scout-build' ); ?></p>
-				<h2><?php
-					/* translators: 1: checks passed, 2: total checks */
-					echo esc_html( sprintf( __( '%1$d of %2$d set', 'scout-build' ), $safe, count( $security ) ) );
-				?></h2>
-				<p class="sh-note"><?php esc_html_e( 'The safety basics every site should have.', 'scout-build' ); ?></p>
-			</div>
-			<?php
-			self::check_grid( $security );
-			Scout_Hub_Security::render_form();
-		}
-		if ( $search ) {
-			$good = count( array_filter( $search, static fn( $c ) => 'good' === $c['status'] ) );
-			?>
-			<div class="sh-section-head" id="search">
-				<p class="sh-eyebrow"><?php esc_html_e( 'Search listing', 'scout-build' ); ?></p>
-				<h2><?php
-					/* translators: 1: checks passed, 2: total checks */
-					echo esc_html( sprintf( __( '%1$d of %2$d set', 'scout-build' ), $good, count( $search ) ) );
-				?></h2>
-				<p class="sh-note"><?php esc_html_e( 'How the site shows up in Google results and when someone shares a page.', 'scout-build' ); ?></p>
-			</div>
-			<?php
-			Scout_Core_Admin::render_checks( $search );
-		}
-		?>
-		<div class="sh-section-head" id="ai-search">
-			<p class="sh-eyebrow"><?php esc_html_e( 'Ready for AI search', 'scout-build' ); ?></p>
-			<h2><?php
-				/* translators: 1: checks passed, 2: total checks */
-				echo esc_html( sprintf( __( '%1$d of %2$d ready', 'scout-build' ), $score, count( $ai ) ) );
-			?></h2>
-			<p class="sh-note"><?php esc_html_e( 'People ask ChatGPT, Google\'s AI answers and Perplexity instead of searching. This is what those tools need.', 'scout-build' ); ?></p>
-			<div class="sh-meter" role="img" aria-label="<?php echo esc_attr( sprintf( '%d / %d', $score, count( $ai ) ) ); ?>"><span style="width:<?php echo esc_attr( (string) round( 100 * $score / max( 1, count( $ai ) ) ) ); ?>%"></span></div>
 		</div>
 		<?php
-		self::check_grid( $ai );
-		echo '</div>';
 	}
 
 	/**
@@ -1366,30 +1905,137 @@ final class Scout_Hub_Admin {
 		return implode( "\n", $lines );
 	}
 
-	/** @param array<int, array{label:string, value:string, state:string, note:string, link?:string, link_text?:string}> $checks */
-	private static function check_grid( array $checks ): void {
+	/**
+	 * One Site status section as a kit list (Joy, 2026-11-05): a row per check with
+	 * its dot and name, the value, one short line, and a link on the right.
+	 *
+	 * @param array<int, array{label:string, value:string, state:string, note:string, items?:array, item_links?:array, details?:string, link?:string, link_text?:string, link_all?:bool}> $checks
+	 */
+	private static function check_list( string $id, string $title, array $checks ): void {
+		if ( ! $checks ) {
+			return;
+		}
+		$good     = count( array_filter( $checks, static fn( $c ) => 'good' === $c['state'] ) );
+		$operator = Scout_Hub_Access::is_operator();
 		?>
-		<div class="sh-grid sh-grid-3">
-			<?php foreach ( $checks as $c ) : ?>
-				<section class="sh-box sh-check is-<?php echo esc_attr( $c['state'] ); ?>">
-					<p class="sh-label"><?php echo esc_html( $c['label'] ); ?></p>
-					<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $c['value'] ); ?></p>
-					<p class="sh-note"><?php echo esc_html( $c['note'] ); ?></p>
-					<?php if ( ! empty( $c['items'] ) ) : ?>
-						<details class="sh-which"><summary><?php esc_html_e( 'Show which', 'scout-build' ); ?></summary>
-							<ul><?php foreach ( (array) $c['items'] as $item ) : ?><li><?php echo esc_html( (string) $item ); ?></li><?php endforeach; ?></ul>
-						</details>
-					<?php endif; ?>
-					<?php if ( ! empty( $c['link'] ) && Scout_Hub_Access::is_operator() ) : ?>
-						<p class="sh-note"><a href="<?php echo esc_url( $c['link'] ); ?>"><?php echo esc_html( $c['link_text'] ?? __( 'Fix this', 'scout-build' ) ); ?> &rsaquo;</a></p>
-					<?php endif; ?>
-				</section>
-			<?php endforeach; ?>
-		</div>
+		<section class="sh-box" id="<?php echo esc_attr( $id ); ?>">
+			<h2 class="sh-title"><?php echo esc_html( $title ); ?></h2>
+			<p><?php
+				/* translators: 1: checks that pass, 2: total checks */
+				echo esc_html( sprintf( __( '%1$d of %2$d all set.', 'scout-build' ), $good, count( $checks ) ) );
+			?></p>
+			<ul class="sh-rows">
+				<?php foreach ( $checks as $c ) : ?>
+					<?php
+					$state = in_array( $c['state'], array( 'good', 'warn', 'bad' ), true ) ? $c['state'] : 'warn';
+					$note  = trim( (string) $c['note'] );
+					$more  = '';
+					// A long note shows its first sentence; the rest opens under "More".
+					if ( function_exists( 'mb_strlen' ) ? mb_strlen( $note ) > 160 : strlen( $note ) > 160 ) {
+						$parts = preg_split( '/(?<=[.;])\s+/u', $note, 2 );
+						if ( 2 === count( $parts ) ) {
+							$note = rtrim( $parts[0], ';' ) . ( ';' === substr( $parts[0], -1 ) ? '.' : '' );
+							$more = $parts[1];
+						}
+					}
+					$show = ! empty( $c['link'] ) && ( ! empty( $c['link_all'] ) || $operator );
+					?>
+					<li class="sh-row sh-check is-<?php echo esc_attr( $state ); ?>">
+						<div>
+							<p class="sh-row-name"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $c['label'] ); ?></p>
+							<?php if ( '' !== $note ) : ?><p class="sh-row-sub"><?php echo esc_html( $note ); ?></p><?php endif; ?>
+							<?php if ( '' !== $more ) : ?>
+								<details class="sh-which"><summary><?php esc_html_e( 'More', 'scout-build' ); ?></summary><p><?php echo esc_html( $more ); ?></p></details>
+							<?php endif; ?>
+							<?php if ( ! empty( $c['items'] ) ) : ?>
+								<details class="sh-which"><summary><?php esc_html_e( 'Show which', 'scout-build' ); ?></summary>
+									<ul><?php foreach ( (array) $c['items'] as $item ) : ?><li><?php echo esc_html( (string) $item ); ?></li><?php endforeach; ?></ul>
+								</details>
+							<?php elseif ( ! empty( $c['item_links'] ) ) : ?>
+								<details class="sh-which"><summary><?php esc_html_e( 'Show which', 'scout-build' ); ?></summary>
+									<ul><?php foreach ( (array) $c['item_links'] as $l ) : ?><li><a href="<?php echo esc_url( $l[1] ); ?>"><?php echo esc_html( $l[0] ); ?></a></li><?php endforeach; ?></ul>
+								</details>
+							<?php endif; ?>
+						</div>
+						<p class="sh-row-facts"><?php echo esc_html( $c['value'] ); ?><span class="screen-reader-text"><?php echo esc_html( ', ' . ( 'good' === $state ? __( 'all set', 'scout-build' ) : ( 'bad' === $state ? __( 'needs fixing', 'scout-build' ) : __( 'needs a look', 'scout-build' ) ) ) ); ?></span></p>
+						<div class="sh-row-go">
+							<?php if ( $show ) : ?>
+								<a class="button sh-quiet" href="<?php echo esc_url( $c['link'] ); ?>"><?php echo esc_html( '' !== (string) ( $c['link_text'] ?? '' ) ? $c['link_text'] : __( 'Fix this', 'scout-build' ) ); ?> &rsaquo;</a>
+							<?php endif; ?>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
 		<?php
 	}
 
 	/* ------------------------------------------------------------------ */
+
+
+	/**
+	 * One Site history line: the title, a row of tags under it, then the client
+	 * wording and detail. The Edit button sits on the title line.
+	 */
+	private static function log_row( $post, array $row ): void {
+		$id = (int) $row['id'];
+		?>
+		<li class="sh-row sh-log-row">
+			<div class="sh-log-head">
+				<p class="sh-row-name"><?php echo esc_html( $row['title'] ); ?></p>
+				<button type="button" class="button sh-quiet sh-log-editbtn" data-sh-edit="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" aria-expanded="false" aria-controls="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Edit', 'scout-build' ); ?></button>
+			</div>
+			<p class="sh-log-tags">
+				<?php
+				$kind  = (string) ( Scout_Hub_Log::KINDS[ $row['kind'] ] ?? $row['kind'] );
+				$topic = (string) ( Scout_Hub_Log::TOPICS[ $row['topic'] ] ?? $row['topic'] );
+				if ( '' !== $kind && false === stripos( $topic, $kind ) ) : // "Plugin" and "Plugin release" say the same thing once.
+					?>
+					<span class="sh-tag"><?php echo esc_html( $kind ); ?></span>
+				<?php endif; ?>
+				<span class="sh-tag"><?php echo esc_html( $topic ); ?></span>
+				<?php if ( 'done' !== $row['status'] ) : ?>
+					<span class="sh-pill <?php echo 'waiting' === $row['status'] ? 'is-received' : 'is-progress'; ?>"><?php echo esc_html( Scout_Hub_Log::STATUSES[ $row['status'] ] ?? $row['status'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( $row['show_client'] ) : ?>
+					<span class="sh-tag is-current"><?php esc_html_e( 'Client sees', 'scout-build' ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['version'] ) : ?>
+					<span class="sh-ver"><?php echo esc_html( $row['version'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['measure'] ) : ?>
+					<span><?php echo esc_html( $row['measure'] ); ?></span>
+				<?php endif; ?>
+				<?php if ( '' !== $row['source'] ) : ?>
+					<span class="sh-log-source"><?php echo esc_html( $row['source'] ); ?></span>
+				<?php endif; ?>
+			</p>
+			<?php if ( '' !== $row['client_text'] ) : ?>
+				<p class="sh-row-sub"><?php esc_html_e( 'Client reads:', 'scout-build' ); ?> <?php echo esc_html( $row['client_text'] ); ?></p>
+			<?php elseif ( $row['show_client'] ) : ?>
+				<p class="sh-row-sub sh-log-flag"><?php esc_html_e( 'Client reads the title as written.', 'scout-build' ); ?></p>
+			<?php endif; ?>
+			<?php if ( '' !== $row['detail'] ) : ?>
+				<p class="sh-row-sub"><?php echo esc_html( $row['detail'] ); ?></p>
+			<?php endif; ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-log-edit" id="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
+				<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
+				<input type="hidden" name="do" value="edit">
+				<input type="hidden" name="line" value="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
+				<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
+				<label for="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'What the client reads', 'scout-build' ); ?></label>
+				<input type="text" id="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="client_text" value="<?php echo esc_attr( $row['client_text'] ); ?>" maxlength="400" placeholder="<?php esc_attr_e( 'One plain sentence. If it claims a result, put the number in.', 'scout-build' ); ?>">
+				<label for="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Measure (before and after)', 'scout-build' ); ?></label>
+				<input type="text" id="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="measure" value="<?php echo esc_attr( $row['measure'] ); ?>" maxlength="200" placeholder="<?php esc_attr_e( 'PageSpeed phone 85 to 88', 'scout-build' ); ?>">
+				<label><input type="checkbox" name="show_client" value="1" <?php checked( $row['show_client'] ); ?>> <?php esc_html_e( 'Client sees this line', 'scout-build' ); ?></label>
+				<?php if ( 'done' !== $row['status'] ) : ?>
+					<label><input type="checkbox" name="status" value="done"> <?php esc_html_e( 'Mark as done', 'scout-build' ); ?></label>
+				<?php endif; ?>
+				<p><button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-build' ); ?></button></p>
+			</form>
+		</li>
+		<?php
+	}
 
 	/**
 	 * Site log: every change to this site, newest first. Operators add notes,
@@ -1442,6 +2088,11 @@ final class Scout_Hub_Admin {
 				: __( 'Nothing is waiting on the client.', 'scout-build' ),
 			'<a class="button sh-quiet" href="' . esc_url( self::url( 'log', array( 'view' => 'client' ) ) ) . '">' . esc_html__( 'See it as the client', 'scout-build' ) . ' &rsaquo;</a>'
 		);
+		// The monthly update to the client: first when a draft waits on someone, else after Add a note.
+		$report_first = class_exists( 'Scout_Hub_Report' ) && (bool) Scout_Hub_Report::drafts();
+		if ( $report_first ) {
+			Scout_Hub_Report::panel();
+		}
 		?>
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Every change to this site', 'scout-build' ); ?></h2>
@@ -1481,65 +2132,71 @@ final class Scout_Hub_Admin {
 			<?php if ( ! $page['items'] ) : ?>
 				<p class="sh-note"><?php esc_html_e( 'Nothing logged for this view yet.', 'scout-build' ); ?></p>
 			<?php else : ?>
-				<ul class="sh-rows sh-log-list">
-					<?php foreach ( $page['items'] as $post ) : ?>
-						<?php
-						$row = Scout_Hub_Log::to_array( $post );
-						if ( $row['show_client'] && '' === $row['client_text'] ) {
-							++$no_wording;
+				<?php
+				// Group by day, and fold three or more lines of the same kind on one day (a release day) into one row.
+				$groups = array();
+				foreach ( $page['items'] as $post ) {
+					$row = Scout_Hub_Log::to_array( $post );
+					if ( $row['show_client'] && '' === $row['client_text'] ) {
+						++$no_wording;
+					}
+					$day = get_the_date( 'Y-m-d', $post );
+					$key = $day . '|' . $row['kind'] . '|' . $row['topic'];
+					$last = count( $groups ) - 1;
+					if ( $last >= 0 && $groups[ $last ]['key'] === $key ) {
+						$groups[ $last ]['rows'][] = array( $post, $row );
+					} else {
+						$groups[] = array( 'key' => $key, 'day' => $day, 'label' => get_the_date( 'D, M j, Y', $post ), 'rows' => array( array( $post, $row ) ) );
+					}
+				}
+				$shown_day = '';
+				foreach ( $groups as $g ) :
+					if ( $g['day'] !== $shown_day ) :
+						if ( '' !== $shown_day ) {
+							echo '</ul>';
 						}
-						$id = (int) $row['id'];
+						$shown_day = $g['day'];
 						?>
-						<li class="sh-row sh-log-row">
-							<div>
-								<p class="sh-row-name"><?php echo esc_html( $row['title'] ); ?></p>
-								<p class="sh-row-sub"><span class="sh-log-date"><?php echo esc_html( get_the_date( 'M j, Y', $post ) ); ?></span><?php echo '' !== $row['source'] ? ' &middot; ' . esc_html( $row['source'] ) : ''; ?></p>
-								<?php if ( '' !== $row['client_text'] ) : ?>
-									<p class="sh-row-sub"><?php esc_html_e( 'Client wording:', 'scout-build' ); ?> <?php echo esc_html( $row['client_text'] ); ?></p>
-								<?php elseif ( $row['show_client'] ) : ?>
-									<p class="sh-row-sub sh-log-flag"><?php esc_html_e( 'No client wording yet, so the client sees the line above as written.', 'scout-build' ); ?></p>
-								<?php endif; ?>
-								<?php if ( '' !== $row['detail'] ) : ?>
-									<p class="sh-row-sub"><?php echo esc_html( $row['detail'] ); ?></p>
-								<?php endif; ?>
-							</div>
-							<div class="sh-row-facts">
-								<span class="sh-tag"><?php echo esc_html( Scout_Hub_Log::KINDS[ $row['kind'] ] ?? $row['kind'] ); ?></span>
-								<span class="sh-tag"><?php echo esc_html( Scout_Hub_Log::TOPICS[ $row['topic'] ] ?? $row['topic'] ); ?></span>
-								<?php if ( 'done' !== $row['status'] ) : ?>
-									<span class="sh-pill <?php echo 'waiting' === $row['status'] ? 'is-received' : 'is-progress'; ?>"><?php echo esc_html( Scout_Hub_Log::STATUSES[ $row['status'] ] ?? $row['status'] ); ?></span>
-								<?php endif; ?>
-								<?php if ( $row['show_client'] ) : ?>
-									<span class="sh-tag is-current"><?php esc_html_e( 'Client sees', 'scout-build' ); ?></span>
-								<?php endif; ?>
-								<?php if ( '' !== $row['version'] ) : ?>
-									<span class="sh-ver"><?php echo esc_html( $row['version'] ); ?></span>
-								<?php endif; ?>
-								<?php if ( '' !== $row['measure'] ) : ?>
-									<span><?php echo esc_html( $row['measure'] ); ?></span>
-								<?php endif; ?>
-							</div>
-							<div class="sh-row-go">
-								<button type="button" class="button" data-sh-edit="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" aria-expanded="false" aria-controls="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Edit wording', 'scout-build' ); ?></button>
-							</div>
-							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-log-edit" id="sh-log-edit-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
-								<input type="hidden" name="action" value="<?php echo esc_attr( Scout_Hub_Log::ACTION ); ?>">
-								<input type="hidden" name="do" value="edit">
-								<input type="hidden" name="line" value="<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>">
-								<?php wp_nonce_field( Scout_Hub_Log::ACTION ); ?>
-								<label for="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'What the client reads', 'scout-build' ); ?></label>
-								<input type="text" id="sh-ct-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="client_text" value="<?php echo esc_attr( $row['client_text'] ); ?>" maxlength="400" placeholder="<?php esc_attr_e( 'One plain sentence. If it claims a result, put the number in.', 'scout-build' ); ?>">
-								<label for="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>"><?php esc_html_e( 'Measure (before and after)', 'scout-build' ); ?></label>
-								<input type="text" id="sh-ms-<?php echo $id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- an integer. ?>" name="measure" value="<?php echo esc_attr( $row['measure'] ); ?>" maxlength="200" placeholder="<?php esc_attr_e( 'PageSpeed phone 85 to 88', 'scout-build' ); ?>">
-								<label><input type="checkbox" name="show_client" value="1" <?php checked( $row['show_client'] ); ?>> <?php esc_html_e( 'Client sees this line', 'scout-build' ); ?></label>
-								<?php if ( 'done' !== $row['status'] ) : ?>
-									<label><input type="checkbox" name="status" value="done"> <?php esc_html_e( 'Mark as done', 'scout-build' ); ?></label>
-								<?php endif; ?>
-								<p><button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-build' ); ?></button></p>
-							</form>
+						<h3 class="sh-log-day"><?php echo esc_html( $g['label'] ); ?></h3>
+						<ul class="sh-rows sh-log-list">
+						<?php
+					endif;
+					if ( count( $g['rows'] ) >= 3 ) :
+						$first = $g['rows'][0][1];
+						?>
+						<li class="sh-log-fold">
+							<details>
+								<summary>
+									<span class="sh-row-name">
+										<?php
+										/* translators: 1: number of lines, 2: a topic like "Plugin release" */
+										echo esc_html( sprintf( __( '%1$d × %2$s', 'scout-build' ), count( $g['rows'] ), Scout_Hub_Log::TOPICS[ $first['topic'] ] ?? $first['topic'] ) );
+										?>
+									</span>
+									<span class="sh-log-tags">
+										<span class="sh-log-more"><?php esc_html_e( 'Show all', 'scout-build' ); ?></span>
+									</span>
+								</summary>
+								<ul class="sh-rows sh-log-list">
+									<?php
+									foreach ( $g['rows'] as $pair ) {
+										self::log_row( $pair[0], $pair[1] );
+									}
+									?>
+								</ul>
+							</details>
 						</li>
-					<?php endforeach; ?>
-				</ul>
+						<?php
+					else :
+						foreach ( $g['rows'] as $pair ) {
+							self::log_row( $pair[0], $pair[1] );
+						}
+					endif;
+				endforeach;
+				if ( '' !== $shown_day ) {
+					echo '</ul>';
+				}
+				?>
 				<?php if ( $page['pages'] > 1 ) : ?>
 					<p class="sh-note sh-log-pager">
 						<?php
@@ -1615,6 +2272,12 @@ final class Scout_Hub_Admin {
 				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Add to the log', 'scout-build' ); ?></button></p>
 			</form>
 		</section>
+
+		<?php
+		if ( ! $report_first && class_exists( 'Scout_Hub_Report' ) ) {
+			Scout_Hub_Report::panel();
+		}
+		?>
 
 		<?php self::fold_open( __( 'More options', 'scout-build' ), $open_more, 'sh-log-more' ); ?>
 			<div class="sh-log-part" id="sh-log-export">
@@ -1794,13 +2457,17 @@ final class Scout_Hub_Admin {
 			<?php if ( $open ) : ?>
 				<ul class="sh-rows">
 					<?php foreach ( $open as $post ) : ?>
-						<?php $status = (string) get_post_meta( $post->ID, Scout_Hub_Requests::META_STATUS, true ); ?>
+						<?php
+						// No saved status yet means it just came in, as on Request a change.
+						$status = (string) get_post_meta( $post->ID, Scout_Hub_Requests::META_STATUS, true );
+						$status = isset( Scout_Hub_Requests::STATUSES[ $status ] ) ? $status : 'received';
+						?>
 						<li class="sh-row">
 							<div>
 								<p class="sh-row-name"><?php echo esc_html( get_the_title( $post ) ); ?></p>
 								<p class="sh-row-sub"><?php echo esc_html( get_the_date( 'M j, Y', $post ) ); ?></p>
 							</div>
-							<div class="sh-row-facts"><span class="sh-pill is-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( Scout_Hub_Requests::STATUSES[ $status ] ?? $status ); ?></span></div>
+							<div class="sh-row-facts"><span class="sh-pill is-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( Scout_Hub_Requests::STATUSES[ $status ] ); ?></span></div>
 						</li>
 					<?php endforeach; ?>
 				</ul>

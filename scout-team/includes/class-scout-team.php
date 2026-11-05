@@ -25,6 +25,9 @@ final class Scout_Team {
 	/** Details a person sent through their link, waiting for the owner's OK. Never read by the public side. */
 	const PENDING = '_scout_team_pending';
 
+	/** On a post: the people picked in its "Written by" box, as profile IDs in order. */
+	const AUTHORS = '_scout_people_authors';
+
 	/** Groups: Team, Speakers, Writers, Members, Attorneys. */
 	const TAX = 'scout_people_group';
 
@@ -321,6 +324,9 @@ final class Scout_Team {
 			'phone'           => '',
 			'card_phone'      => '',
 			'card_email'      => '',
+			'card_intro'      => '',
+			'card_why'        => '',
+			'card_tags'       => '',
 			'user'            => 0,
 			'attorney'        => 0,
 			'military_branch' => '',
@@ -435,17 +441,92 @@ final class Scout_Team {
 
 	/**
 	 * What the public may see of a profile: the profile page, the team page and
-	 * the Person schema all read this, never the stored profile. Card only
-	 * contact is taken out, and credential lines without a source are left out.
+	 * the Person schema all read this, never the stored profile. The business
+	 * card fields (card phone, card email, intro, why talk to them, tags) are
+	 * taken out, and credential lines without a source are left out.
 	 *
 	 * @param array $p Profile in the full shape.
 	 */
 	public static function public_profile( array $p ): array {
-		unset( $p['card_phone'], $p['card_email'] );
+		foreach ( self::card_keys() as $key ) {
+			unset( $p[ $key ] );
+		}
 		foreach ( array_keys( self::groups() ) as $group ) {
 			$p[ $group ] = array_values( array_filter( (array) $p[ $group ], array( __CLASS__, 'sourced' ) ) );
 		}
 		return $p;
+	}
+
+	/** The profile fields that belong to the business card only. Never on the profile page, the team page, the schema or the REST API. */
+	public static function card_keys(): array {
+		return array( 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags' );
+	}
+
+	/**
+	 * What a business card may show of a person, for Scout Cards. Null when the
+	 * post is not a person. The card only phone, email, intro, "why talk to
+	 * them" and tags are here, because they are for the card; credential lines
+	 * are not. Role, bio and links come
+	 * through public_profile(), so the card shows nothing the profile page
+	 * would hide. 'on' is true when the person is live with Card switched on.
+	 *
+	 * @param int $post_id Person post ID.
+	 */
+	public static function card( int $post_id ): ?array {
+		$post = get_post( $post_id );
+		if ( ! $post || self::POST_TYPE !== $post->post_type ) {
+			return null;
+		}
+		$p     = self::profile( $post_id );
+		$pub   = self::public_profile( $p );
+		$thumb = (int) get_post_thumbnail_id( $post_id );
+		return array(
+			'id'         => (int) $post_id,
+			'status'     => (string) $post->post_status,
+			'on'         => 'publish' === $post->post_status && self::shows( $p, 'card' ),
+			'name'       => html_entity_decode( wp_strip_all_tags( (string) $post->post_title ), ENT_QUOTES, 'UTF-8' ),
+			'slug'       => (string) $post->post_name,
+			'role'       => (string) $pub['role'],
+			'bio'        => (string) $pub['bio'],
+			'email'      => (string) $p['email'],
+			'user'       => (int) $p['user'],
+			'phone'      => (string) $p['card_phone'],
+			'card_email' => (string) $p['card_email'],
+			'intro'      => (string) $p['card_intro'],
+			'why'        => (string) $p['card_why'],
+			'tags'       => (string) $p['card_tags'],
+			'links'      => array_values( (array) $pub['same_as'] ),
+			'photo_id'   => $thumb,
+			'alt'        => $thumb ? trim( (string) get_post_meta( $thumb, '_wp_attachment_image_alt', true ) ) : '',
+		);
+	}
+
+	/**
+	 * People with Card switched on, in team page order (Order number, then name).
+	 *
+	 * @param bool $live_only Only people who are live. False adds drafts and pending people.
+	 */
+	public static function card_ids( bool $live_only = true ): array {
+		$ids = get_posts(
+			array(
+				'post_type'      => self::POST_TYPE,
+				'post_status'    => $live_only ? 'publish' : array( 'publish', 'draft', 'pending', 'private', 'future' ),
+				'posts_per_page' => 500,
+				'fields'         => 'ids',
+				'orderby'        => array(
+					'menu_order' => 'ASC',
+					'title'      => 'ASC',
+				),
+				'no_found_rows'  => true,
+			)
+		);
+		$out = array();
+		foreach ( $ids as $id ) {
+			if ( self::shows( self::profile( (int) $id ), 'card' ) ) {
+				$out[] = (int) $id;
+			}
+		}
+		return $out;
 	}
 
 	/** How many credential lines have no source (saved, but hidden). */
@@ -562,6 +643,9 @@ final class Scout_Team {
 		$out['phone']           = self::clean_phone( (string) ( $in['phone'] ?? '' ) );
 		$out['card_email']      = sanitize_email( (string) ( $in['card_email'] ?? '' ) );
 		$out['card_phone']      = self::clean_phone( (string) ( $in['card_phone'] ?? '' ) );
+		$out['card_intro']      = sanitize_textarea_field( (string) ( $in['card_intro'] ?? '' ) );
+		$out['card_why']        = sanitize_textarea_field( (string) ( $in['card_why'] ?? '' ) );
+		$out['card_tags']       = sanitize_text_field( (string) ( $in['card_tags'] ?? '' ) );
 		$out['user']            = absint( $in['user'] ?? 0 );
 		$out['attorney']        = ! empty( $in['attorney'] ) ? 1 : 0;
 		$branch                 = sanitize_key( (string) ( $in['military_branch'] ?? '' ) );
@@ -682,6 +766,119 @@ final class Scout_Team {
 			}
 		}
 		return $map[ $user_id ] ?? 0;
+	}
+
+	/* ---------- Written by ---------- */
+
+	/**
+	 * Post types with a "Written by" box. Posts only, unless a site adds more
+	 * with the scout_people_byline_post_types filter.
+	 */
+	public static function byline_post_types(): array {
+		$types = (array) apply_filters( 'scout_people_byline_post_types', array( 'post' ) );
+		return array_values( array_unique( array_filter( array_map( 'sanitize_key', $types ) ) ) );
+	}
+
+	/**
+	 * A clean list of profile IDs: whole numbers above zero, each once, in the
+	 * order given, ten at most.
+	 *
+	 * @param mixed $raw Stored or sent value.
+	 */
+	public static function clean_ids( $raw ): array {
+		$out = array();
+		foreach ( is_array( $raw ) ? $raw : array() as $id ) {
+			$id = is_scalar( $id ) && is_numeric( $id ) ? (int) $id : 0;
+			if ( $id > 0 && ! in_array( $id, $out, true ) ) {
+				$out[] = $id;
+			}
+		}
+		return array_slice( $out, 0, 10 );
+	}
+
+	/**
+	 * The people picked in a post's "Written by" box, as saved, in order.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function chosen_authors( int $post_id ): array {
+		return self::clean_ids( get_post_meta( $post_id, self::AUTHORS, true ) );
+	}
+
+	/**
+	 * Can this person be credited on a byline right now? Live, with Byline on.
+	 *
+	 * @param int $member Person post ID.
+	 */
+	public static function byline_ready( int $member ): bool {
+		return $member > 0
+			&& self::POST_TYPE === get_post_type( $member )
+			&& 'publish' === get_post_status( $member )
+			&& self::shows( self::profile( $member ), 'byline' );
+	}
+
+	/**
+	 * The people picked in "Written by" who can be credited now. Empty means
+	 * the post's byline works as it always did.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function written_by( int $post_id ): array {
+		return array_values( array_filter( self::chosen_authors( $post_id ), array( __CLASS__, 'byline_ready' ) ) );
+	}
+
+	/**
+	 * Who a post's byline credits, as People profile IDs: the people picked in
+	 * "Written by" (live, with Byline on), or else the profile linked to the
+	 * post's WordPress author. Empty when neither. Other plugins can read
+	 * bylines from People through this.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return int[]
+	 */
+	public static function byline_people( $post_id ): array {
+		$post_id = (int) $post_id;
+		if ( $post_id <= 0 ) {
+			return array();
+		}
+		$chosen = self::written_by( $post_id );
+		if ( $chosen ) {
+			return $chosen;
+		}
+		$member = self::member_for_user( (int) get_post_field( 'post_author', $post_id ) );
+		return $member ? array( $member ) : array();
+	}
+
+	/**
+	 * A person's name as plain text.
+	 *
+	 * @param int $member Person post ID.
+	 */
+	public static function name( int $member ): string {
+		return html_entity_decode( wp_strip_all_tags( (string) get_the_title( $member ) ), ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
+	 * Names joined for a byline: "Dana", "Dana & Sam", "Dana, Sam & Lee".
+	 *
+	 * @param string[] $names Names, in order.
+	 */
+	public static function join_names( array $names ): string {
+		$names = array_values( array_filter( array_map( 'strval', $names ), 'strlen' ) );
+		if ( count( $names ) < 2 ) {
+			return (string) ( $names[0] ?? '' );
+		}
+		$last = array_pop( $names );
+		return implode( ', ', $names ) . ' & ' . $last;
+	}
+
+	/**
+	 * A person's profile page address, or '' when their page is off.
+	 *
+	 * @param int $member Person post ID.
+	 */
+	public static function profile_url( int $member ): string {
+		return self::shows( self::profile( $member ), 'bio' ) ? (string) get_permalink( $member ) : '';
 	}
 
 	/**

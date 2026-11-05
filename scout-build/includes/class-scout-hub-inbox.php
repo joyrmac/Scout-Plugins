@@ -44,7 +44,7 @@ final class Scout_Hub_Inbox {
 		return array(
 			'chat'      => __( 'Chat', 'scout-build' ),
 			'reviews'   => __( 'Reviews', 'scout-build' ),
-			'requests'  => __( 'Requests', 'scout-build' ),
+			'requests'  => __( 'Change requests', 'scout-build' ),
 			'bookings'  => __( 'Bookings', 'scout-build' ),
 			'sitecheck' => __( 'Check requests', 'scout-build' ),
 			'other'     => __( 'Other', 'scout-build' ),
@@ -481,7 +481,7 @@ final class Scout_Hub_Inbox {
 		$pref  = self::pref( get_current_user_id() );
 		$dots  = array(
 			'chat'      => 'border-radius:50%;background:var(--sh-data-1)',
-			'reviews'   => 'border-radius:2px;background:var(--sh-data-4);transform:rotate(45deg)',
+			'reviews'   => 'border-radius:2px;background:var(--sh-data-3);transform:rotate(45deg)',
 			'requests'  => 'border-radius:50%;background:var(--sh-data-2)',
 			'bookings'  => 'border-radius:2px;background:var(--sh-data-5)',
 			'sitecheck' => 'border-radius:50%;border:2px solid var(--sh-data-1);box-sizing:border-box',
@@ -529,7 +529,7 @@ final class Scout_Hub_Inbox {
 			.sh .sh-open textarea{width:100%;font-size:16px}
 			.sh-open-acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 			.sh-open-acts form{margin:0}
-			.sh-calm{padding:40px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+			.sh-calm{padding:40px 32px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
 		</style>
 		<?php if ( isset( $_GET['saved'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a message flag only. ?>
 			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Saved. Your email setting is updated.', 'scout-build' ); ?></p></div>

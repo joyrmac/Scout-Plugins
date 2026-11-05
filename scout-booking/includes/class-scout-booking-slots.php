@@ -10,6 +10,8 @@
  *   3. the booking hours on the Booking settings screen.
  *
  * One person runs the practice, so any booking blocks every session type.
+ * Busy times from the owner's own calendar (Scout_Booking_Busy) block every
+ * type too, with the type's buffer kept clear on both sides.
  *
  * @package Scout_Booking
  */
@@ -82,6 +84,11 @@ final class Scout_Booking_Slots {
 			if ( (int) $r['id'] !== $skip && Scout_Booking::holds( $r, $now ) ) {
 				$busy[] = array( Scout_Booking::at( $r['start_at'] ), Scout_Booking::at( $r['block_end'] ) );
 			}
+		}
+		// The owner's own calendar. The slot's end already carries the buffer
+		// before the busy time; adding it to the busy end keeps it after too.
+		foreach ( Scout_Booking_Busy::between( $day->modify( '-1 day' ), $day->modify( '+2 days' ) ) as $b ) {
+			$busy[] = array( $b[0], $b[1]->modify( '+' . $buffer . ' minutes' ) );
 		}
 		$out = array();
 		foreach ( self::working( $type, $day ) as $range ) {

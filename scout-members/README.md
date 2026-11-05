@@ -152,7 +152,25 @@ person's membership record. Deleting the plugin keeps member accounts.
   `scout_events_ticket_html`, `scout_events_card_tags` and
   `scout_events_imported_event` when Scout Events 0.6.0 or later is active.
 
-## Styling
+## What this feature needs from the theme
+
+- **DESIGN.md:** fonts and text color come from the theme. Colors read
+  the DESIGN.md roles accent fill (buttons), on accent, line, surface 2
+  (insets) and the card corner, as `--scout-accent-fill`, `--scout-on-accent`,
+  `--scout-line`, `--scout-surface-2` and `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The
+  plugin's own variables still win when the theme sets them:
+  `--scout-members-accent`, `--scout-members-on-accent`,
+  `--scout-members-line`, `--scout-members-inset`, `--scout-members-radius`.
+  With neither, neutral defaults (`#1D1D1F`, `#fff`, a soft gray, `14px`). The
+  red and green note lines stay fixed.
+- **Where it lands:** where its shortcodes sit, and on the members home
+  through `the_content`. Headings start at H2 under the theme's H1
+  (`scout_members_heading_level`, or `level=""` on a shortcode).
+- **Menu link:** a menu custom link to `#scout-member-link` becomes "Member
+  sign in" or "Members home", in classic menus and the Navigation block.
+- **Sign-in screen logo:** the theme's Custom Logo (`custom_logo`), else the
+  site icon. DESIGN.md's `logo` is not read yet.
+- **scout-setup.json:** nothing.
 
 Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-field`, `.sm-statement`, `.sm-check`, `.sm-button`, `.sm-account`,
@@ -161,9 +179,7 @@ Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
 `.sm-perk-text`, `.sm-member-link`, `.sm-invitations`, `.sm-invite`,
 `.sm-invite-title`, `.sm-invite-meta`, `.sm-invite-answers`, `.sm-mine`,
 `.sm-invite-new`, `.sm-invite-form`, `.sm-pay`, `.sm-pay-note`,
-`.sm-thanks` (the order received note). Colors are custom properties:
-`--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
-`--scout-members-inset`, `--scout-members-radius`.
+`.sm-thanks` (the order received note).
 
 ## What themes rely on (keep stable)
 

@@ -239,13 +239,15 @@
 
 /* A list of things, one row each: name and one line, then facts, then one main button and More. */
 .sh-rows { list-style: none; margin: 0; padding: 0; }
-.sh-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--sh-border); margin: 0; }
+.sh-row { display: grid; grid-template-columns: minmax(240px, 1.3fr) minmax(0, 1fr) auto; gap: 6px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--sh-border); margin: 0; }
 .sh-row:first-child { border-top: 0; }
 .sh-row-name { margin: 0; font-weight: 600; color: var(--sh-text); }
 .sh-row-sub { margin: 2px 0 0; font-size: var(--sh-fs-note); color: var(--sh-text-2); }
-.sh-row-facts { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
-.sh-row-go { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.sh-row-facts { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; min-width: 0; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
+.sh-row-go { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; white-space: nowrap; }
 .sh-row-go form { margin: 0; }
+.sh-row:not(:has(> .sh-row-facts)) { grid-template-columns: minmax(0, 1fr) auto; }
+@container shmain (max-width: 820px) { .sh-row { grid-template-columns: minmax(0, 1fr) auto; } .sh-row > .sh-row-facts { grid-column: 1 / -1; grid-row: 2; } }
 @container shmain (max-width: 640px) { .sh-row { grid-template-columns: minmax(0, 1fr); } .sh-row-go { justify-content: flex-start; } }
 
 .sh-card { background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: var(--sh-r-card); padding: var(--sh-pad); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -261,14 +263,19 @@
 .sh-tag.is-update { background: var(--sh-glow); color: var(--sh-accent-text); }
 .sh-tag.is-current { background: var(--sh-good-tint); color: var(--sh-good); }
 .sh-tag.is-current::before { content: "\2713\00a0"; }
-.sh-tag.is-held { background: var(--sh-warn-tint); color: var(--sh-warn); }
+.sh-tag.is-held { background: var(--sh-surface-2); color: var(--sh-text-2); }
 .sh-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
 
 .sh-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: var(--sh-r-pill); white-space: nowrap; background: var(--sh-surface-2); color: var(--sh-text-2); }
 .sh-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .sh-pill.is-on, .sh-pill.is-done { background: var(--sh-good-tint); color: var(--sh-good); }
 .sh-pill.is-progress { background: var(--sh-glow); color: var(--sh-accent-text); }
-.sh-pill.is-received { background: var(--sh-warn-tint); color: var(--sh-warn); }
+.sh-pill.is-received { background: var(--sh-glow); color: var(--sh-accent-text); }
+/* Status pills by meaning (kit 1.11.0). Amber only for a real warning; waiting and paused states stay calm. */
+.sh-pill.is-good { background: var(--sh-good-tint); color: var(--sh-good); }
+.sh-pill.is-warn { background: var(--sh-warn-tint); color: var(--sh-warn); }
+.sh-pill.is-bad { background: var(--sh-bad-tint); color: var(--sh-bad); }
+.sh-pill.is-off { background: var(--sh-surface-2); color: var(--sh-text-2); }
 
 .sh .button { border-radius: var(--sh-r-control); min-height: var(--sh-tap); padding: 6px 14px; font-weight: 500; }
 .sh .button-primary { background: var(--sh-accent-fill); border-color: var(--sh-accent-fill); }
@@ -307,7 +314,7 @@
 .sh-ai-chip { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
 .sh-ai-chip a { color: var(--sh-accent-text); font-weight: 500; text-decoration: none; }
 .sh-overview { display: grid; gap: 16px; }
-.sh-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 24px; }
+.sh-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(max(160px, calc((100% - 48px) / 3)), 1fr)); gap: 12px 24px; }
 .sh-stat .sh-num { margin: 0; font-family: var(--sh-mono); font-size: var(--sh-fs-number); font-weight: 600; line-height: 1.1; letter-spacing: -.02em; color: var(--sh-text); font-variant-numeric: tabular-nums; }
 .sh-stat .sh-num-text { font-family: inherit; font-size: 20px; padding: 5px 0 4px; }
 .sh-stat .sh-note { margin-top: 2px; }
@@ -415,3 +422,11 @@ body.sh-calm .sh *, body.sh-calm .sh *::before, body.sh-calm .sh *::after { tran
    fancier joined letters (like tt or st) when the font draws them; body text keeps the plain set. */
 .sh { font-variant-ligatures: common-ligatures contextual; text-rendering: optimizeLegibility; }
 .sh h1, .sh h2, .sh .sh-title { font-variant-ligatures: common-ligatures discretionary-ligatures contextual; }
+
+/* Stacked rows (kit 1.11.0): the name line with small buttons on the right, then a full-width
+   facts line and any notes. Use for lists whose rows carry several lines or many tags. */
+.sh .sh-rows.is-stacked > .sh-row { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+.sh .sh-rows.is-stacked > .sh-row > .sh-row-facts { grid-column: 1 / -1; grid-row: 2; }
+.sh .sh-rows.is-stacked > .sh-row > .sh-row-go { grid-column: 2; grid-row: 1; }
+.sh .sh-rows.is-stacked .sh-row-go .button { min-height: 32px; padding: 0 12px; }
+@container shmain (max-width: 640px) { .sh .sh-rows.is-stacked > .sh-row > .sh-row-go { grid-column: 1; grid-row: 3; justify-content: flex-start; } }

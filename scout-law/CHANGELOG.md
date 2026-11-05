@@ -1,5 +1,11 @@
 # Scout Law Firm Tools changelog
 
+## 0.4.4 (2026-11-05)
+
+- **Old names.** Attorney sign-offs says People instead of the Team screen and Team profile.
+- **Status lines.** Disclaimers and Firm approvals open with a status line, and Attorney sign-offs and Form entries use the kit's dot instead of hand-made symbols. "Needs the firm’s approval" is a calm pill; "Changed since approval" keeps amber. No ◆ marks on statuses.
+- **Firm approvals.** What needs approval moved into a More options fold below the record, with an outlined Save. On white-label sites its note says "pages your web team publishes". An approval with no saved version leaves the cell empty (screen readers hear "None") instead of a dash. "Reviews & testimonials". Shorter ledes.
+
 ## 0.4.3 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** Gravity Forms decides whether WordPress's privacy tools reach form entries, so the list now says to turn on its Personal Data setting on each form. No code changed.

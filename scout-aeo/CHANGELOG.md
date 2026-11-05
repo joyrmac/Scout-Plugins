@@ -1,5 +1,9 @@
 # Scout AI Search changelog
 
+## 0.2.11 (2026-11-05)
+
+- **Status line is a headline and one sentence.** Each switch already shows its own state, so the training, guide page, Bing and Q&A sentences came off the status line. The robots.txt note sits behind More. View the AI guide page and View search engine rules are two links, not a dot list. Shorter help.
+
 ## 0.2.10 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

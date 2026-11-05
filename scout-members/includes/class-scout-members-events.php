@@ -35,7 +35,7 @@ final class Scout_Members_Events {
 	public static function render_box( $post ): void {
 		wp_nonce_field( 'scout_members_event_' . $post->ID, '_sm_event' );
 		echo '<p><label><input type="checkbox" name="sm_members_only" value="1" ' . checked( Scout_Members::is_members_only( (int) $post->ID ), true, false ) . '> ' . esc_html__( 'Only members can come', 'scout-members' ) . '</label></p>';
-		echo '<p class="description">' . esc_html__( 'The event stays on the calendar with a Members only tag. Members see the ticket button; everyone else sees how to join.', 'scout-members' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'It stays on the calendar with a Members only tag, and everyone else sees how to join.', 'scout-members' ) . '</p>';
 	}
 
 	public static function save( $post_id ): void {

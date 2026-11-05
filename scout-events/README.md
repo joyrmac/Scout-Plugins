@@ -45,7 +45,9 @@ overview lists what each upcoming and draft event still needs.
   `scout_events_auto_content` filter when a theme template places the pieces.
 - `[scout_events]` upcoming events; `show="past"` or `show="all"`, `limit="6"`.
   Lists longer than eight fall under month headings; `group="month"` or
-  `group="none"` chooses. Speaker cards carry `id="their-slug"` for links.
+  `group="none"` chooses (`group="year"` too). Speaker cards carry `id="their-slug"` for links.
+  `views="list,month"` adds a List / Month switch, `filter="series"` adds chips for each kind of
+  event, and `layout="gallery"` shows each event's photo (grouped by year), made for past events.
 - `[scout_event id="12"]` one event's details panel and ticket button.
 - `[scout_schedule event="12"]` the schedule by day and time;
   `layout="grid"` puts rooms side by side and scrolls sideways on phones.
@@ -54,9 +56,8 @@ overview lists what each upcoming and draft event still needs.
   `scout_events_schedule_html( $id )` for themes and other Scout features.
 
 Session descriptions open in place with `<details>`, so no script loads. The
-stylesheet loads only on pages that show events. Colors are custom
-properties: `--scout-events-accent`, `--scout-events-on-accent`,
-`--scout-events-line`, `--scout-events-inset`, `--scout-events-radius`.
+stylesheet loads only on pages that show events. Its colors are listed under
+"What this feature needs from the theme", below.
 
 Other Scout features add to the event pages with filters:
 `scout_events_detail_rows` (rows of the details panel), `scout_events_ticket_html`
@@ -379,6 +380,29 @@ A real payment service (turned on in WooCommerce when the merchant account
 exists), ticket transfers between people, per-ticket fields in the block
 checkout, holding places for orders that wait for payment, and filling events
 from `scout-setup.json` (Scout Build needs an `events` section first).
+
+## What this feature needs from the theme
+
+- **DESIGN.md:** fonts and text color come from the theme. Colors read
+  the DESIGN.md roles accent fill (buttons and chosen chips), on accent, line,
+  muted text, surface 2 (insets) and the card corner, as `--scout-accent-fill`,
+  `--scout-on-accent`, `--scout-line`, `--scout-text-2`, `--scout-surface-2`
+  and `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables still win when
+  the theme sets them: `--scout-events-accent`, `--scout-events-on-accent`,
+  `--scout-events-line`, `--scout-events-muted`, `--scout-events-inset`,
+  `--scout-events-radius`. With neither, neutral defaults (`#1D1D1F`, `#fff`,
+  a soft gray, `14px`). The red and green status lines and the white plate
+  behind logos stay fixed.
+- **Where it lands:** event, session and speaker pages (`scout_event`,
+  `scout_session`, `scout_speaker`) fill themselves in through `the_content`.
+  The theme's single templates print the title as the H1 and call
+  `the_content()`. A theme that places the pieces itself turns that off with
+  `scout_events_auto_content`. Lists, schedules, speakers and directories
+  print where their shortcodes sit, with H2 and H3 headings. The stylesheet
+  loads only on pages that show events.
+- **Images:** each event's and speaker's featured image. A speaker with no
+  photo shows their initials.
+- **scout-setup.json:** nothing.
 
 <!-- visitor-data:start -->
 ## Visitor data

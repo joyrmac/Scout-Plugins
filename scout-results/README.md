@@ -49,11 +49,23 @@ date are kept on each result as the record.
 | `[scout_results filters="no"]` | The grid without filters |
 | `[scout_result id="12"]` | One result |
 
-## Styling
+## What this feature needs from the theme
 
-The grid inherits the theme's fonts and colors. A theme can set these on
-`.scout-results`: `--scout-results-surface`, `--scout-results-border`,
-`--scout-results-accent`, `--scout-results-radius`, `--scout-results-gap`.
+- **DESIGN.md:** the grid inherits the theme's fonts and text color.
+  Cards read the DESIGN.md roles surface, line, accent and the card corner, as
+  `--scout-surface`, `--scout-line`, `--scout-accent` and
+  `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables on `.scout-results`
+  still win when the theme sets them: `--scout-results-surface`
+  (transparent), `--scout-results-border`, `--scout-results-accent`
+  (`currentColor`), `--scout-results-radius` (`12px`), `--scout-results-gap`
+  (`1.25rem`).
+- **Where it lands:** where `[scout_results]` or `[scout_result]` sits.
+  `heading=""` adds an H2 above the grid, and each headline is an H3. The
+  stylesheet and the filter script load only there.
+- **Disclaimer:** printed on every card from this plugin's setting, or Scout
+  Law Firm Tools' approved wording when it is on. The theme adds none of its
+  own.
+- **scout-setup.json:** nothing.
 
 ## Analytics
 

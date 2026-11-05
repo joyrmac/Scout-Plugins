@@ -9,15 +9,15 @@
 
 .scout-reviews,
 .scout-reviews-summary {
-	--sr-surface: var(--surface, color-mix(in srgb, currentColor 4%, transparent));
-	--sr-line: var(--line, color-mix(in srgb, currentColor 12%, transparent));
-	--sr-muted: var(--text-2, color-mix(in srgb, currentColor 68%, transparent));
-	--sr-faint: var(--text-3, color-mix(in srgb, currentColor 50%, transparent));
-	--sr-link: var(--accent-text, #0a6fb4);
+	--sr-surface: var(--surface, var(--scout-surface, color-mix(in srgb, currentColor 4%, transparent)));
+	--sr-line: var(--line, var(--scout-line, color-mix(in srgb, currentColor 12%, transparent)));
+	--sr-muted: var(--text-2, var(--scout-text-2, color-mix(in srgb, currentColor 68%, transparent)));
+	--sr-faint: var(--text-3, var(--scout-text-2, color-mix(in srgb, currentColor 50%, transparent)));
+	--sr-link: var(--accent-text, var(--scout-accent-text, var(--scout-accent, #0a6fb4)));
 	--sr-star: #fbb024;
 	--sr-star-empty: color-mix(in srgb, currentColor 18%, transparent);
-	--sr-mono: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace);
-	--sr-radius: var(--r-card, 18px);
+	--sr-mono: var(--font-mono, var(--scout-font-label, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace));
+	--sr-radius: var(--r-card, var(--scout-radius-card, 18px));
 	--sr-gap: 20px;
 }
 

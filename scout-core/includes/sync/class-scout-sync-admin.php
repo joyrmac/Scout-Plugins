@@ -3,7 +3,7 @@
  * Site Sync screen, notices and health check.
  *
  * The screen is the Scout menu's "Page copy" tab (tab key "sync"; the screen
- * was called Site Sync before 2026-11-05): counts at the top, then every
+ * was called Site Sync before 2026-11-05): the status line at the top, then every
  * row that is not already current, with what WordPress holds next to what the
  * theme ships. Looking never changes anything; every change is a button.
  *
@@ -111,14 +111,6 @@ final class Scout_Sync_Admin {
 			return;
 		}
 
-		$counts = array(
-			Scout_Sync::CURRENT  => array( 'Up to date', 'good' ),
-			Scout_Sync::UPDATE   => array( 'Ready to update', 'good' ),
-			Scout_Sync::EDITED   => array( 'Edited in WordPress', 'warn' ),
-			Scout_Sync::CONFLICT => array( 'Needs a decision', 'warn' ),
-			Scout_Sync::MISSING  => array( 'Page not found', 'bad' ),
-			Scout_Sync::CREATE   => array( 'Will be created', 'good' ),
-		);
 		$num     = static function ( $key ) use ( $state ) {
 			return count( $state[ $key ] ?? array() );
 		};
@@ -140,20 +132,6 @@ final class Scout_Sync_Admin {
 		}
 		self::ui_status( $plan['errors'] ? 'bad' : $level, $headline, 'Edits made in WordPress are never overwritten on their own.' );
 
-		echo '<section class="sh-box"><div class="sh-stats">';
-		foreach ( $counts as $key => $meta ) {
-			$n = $num( $key );
-			if ( ! $n && in_array( $key, array( Scout_Sync::MISSING, Scout_Sync::CONFLICT, Scout_Sync::CREATE ), true ) ) {
-				continue;
-			}
-			printf(
-				'<div class="sh-stat"><p class="sh-num">%d</p><p class="sh-note">%s</p></div>',
-				(int) $n,
-				esc_html( $meta[0] )
-			);
-		}
-		echo '</div></section>';
-
 		foreach ( $plan['errors'] as $error ) {
 			echo '<div class="notice notice-error inline"><p>' . esc_html( $error ) . '</p></div>';
 		}
@@ -161,7 +139,7 @@ final class Scout_Sync_Admin {
 		$updates = array_merge( $state[ Scout_Sync::UPDATE ] ?? array(), $state[ Scout_Sync::CREATE ] ?? array() );
 		if ( $updates ) {
 			echo '<section class="sh-box"><h2>' . esc_html( sprintf( _n( '%d update from the theme', '%d updates from the theme', count( $updates ), 'scout-core' ), count( $updates ) ) ) . '</h2>';
-			echo '<p>Nobody edited these in WordPress, so the theme copy can go straight in.</p><p>New pages publish and new posts arrive as drafts. You can undo it below.</p>';
+			echo '<p>Nobody edited these in WordPress, so the theme copy can go straight in. You can undo it.</p>';
 			self::rows( $updates, false );
 			self::form( 'safe', $plan['hash'], 'Sync these now' );
 			echo '</section>';
@@ -170,17 +148,18 @@ final class Scout_Sync_Admin {
 		$review = array_merge( $state[ Scout_Sync::EDITED ] ?? array(), $state[ Scout_Sync::CONFLICT ] ?? array() );
 		if ( $review ) {
 			echo '<section class="sh-box"><h2>Changes made in WordPress</h2>';
-			echo '<p>These were edited in WordPress, so they wait for you. Tick the ones to decide on, then choose.</p><p>If you keep the WordPress copy, add the edit to the theme too so the next update carries it.</p>';
+			echo '<p>These were edited in WordPress, so they wait for you. Tick the ones to decide on, then choose.</p>';
+			echo '<details class="sh-fold"><summary>More</summary><p class="sh-note">If you keep the WordPress copy, add the edit to the theme too so the next update carries it.</p></details>';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 			self::rows( $review, true );
 			self::hidden( 'pick', $plan['hash'] );
-			echo '<p class="sh-actions"><button class="button button-primary" name="choice" value="keep">Keep the WordPress copy</button> <button class="button" name="choice" value="take">Use the theme copy</button></p>';
+			echo '<p class="sh-actions"><button class="button" name="choice" value="keep">Keep the WordPress copy</button> <button class="button" name="choice" value="take">Use the theme copy</button></p>';
 			echo '</form></section>';
 		}
 
 		$missing = $state[ Scout_Sync::MISSING ] ?? array();
 		if ( $missing ) {
-			echo '<section class="sh-box"><h2>Pages the theme names but the site does not have</h2><p>Create them by hand, or add <code>"create": true</code> to the page in scout-sync.json and they are made on the next update from the theme.</p><ul class="sh-list">';
+			echo '<section class="sh-box"><h2>Pages the theme names but the site doesn’t have</h2><p>Create them by hand, or add <code>"create": true</code> to the page in scout-sync.json.</p><ul class="sh-list">';
 			foreach ( $missing as $row ) {
 				echo '<li>' . esc_html( Scout_Sync::label( $row ) ) . '</li>';
 			}
@@ -204,7 +183,7 @@ final class Scout_Sync_Admin {
 	}
 
 	private static function rows( array $rows, $pick ) {
-		echo '<table class="widefat striped"><thead><tr>';
+		echo '<table class="widefat"><thead><tr>';
 		if ( $pick ) {
 			echo '<td class="check-column"></td>';
 		}

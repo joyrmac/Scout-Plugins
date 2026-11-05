@@ -222,6 +222,35 @@ theme without DESIGN.md still gets sensible tokens.
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** Scout Core is the reader for every plugin. From the front
+  matter it takes `design`, `name`, `mode`, `colors` (`bg`, `surface`,
+  `surface_2`, `text`, `text_2`, `line`, `accent`, `accent_fill`,
+  `on_accent`), `fonts` (`heading`, `body`, `label`, each with `family`,
+  `weight` and `file`, and `case` and `tracking` on `label`), `radius`
+  (`pill`, `card`, `control`, `chip`), `logo` and `mark`, plus every
+  `## Feature: <name>` section. Core's own output on the site uses none of it.
+- **Head and schema:** printed through `wp_head()`. The theme prints no title,
+  description, canonical, Open Graph or JSON-LD of its own, breadcrumbs
+  excepted (rule 7).
+- **Business facts:** the theme shows them through `scout_core_business()` or
+  the `scout/business` binding, never typed.
+- **Page fields:** the theme's templates place them with `scout_core_field()`,
+  `scout_core_image()`, `scout_core_setting()` or the `scout/field` binding.
+- **Breadcrumbs:** a theme with `add_theme_support( 'scout-breadcrumbs' )`
+  calls `scout_core_breadcrumbs()` where the links go. It prints
+  `<nav class="scout-breadcrumbs" aria-label="Breadcrumb"><ol>` with no styles
+  of its own; the trail's look is the theme's.
+- **Site Sync:** `scout-sync.json` and the `sync/` folder at the root of the
+  active theme (the child theme on a child theme).
+- **Images:** the share image is the page's featured image, else the Default
+  share image URL in Search settings, else the site icon. The schema logo is
+  the site icon. Neither reads DESIGN.md's `logo` or `mark`, or
+  `scout-setup.json`, yet.
+- **The email guard** rewrites addresses on the finished page. The theme does
+  nothing for it.
+
 ## Breadcrumbs, verification, thank-you pages, hardening and cache purge (1.8.0+)
 
 - **Breadcrumbs:** a theme declares `add_theme_support( 'scout-breadcrumbs' )` and calls
@@ -229,7 +258,7 @@ line runs only while `! scout_core_owns( 'hours' )`.
   `BreadcrumbList` schema. Remove the theme's own breadcrumb schema in the same release.
   Adjust the trail with `scout_core_breadcrumb_trail`, for example to put a page that acts
   as an archive (Work, Services) before its items.
-- **Verification:** Search → Search settings, "Google Search Console verification code" and
+- **Verification:** Search & analytics → Search settings, "Google Search Console verification code" and
   "Bing Webmaster Tools verification code". The tags print on the front page only.
 - **Thank-you pages:** `noindex` and out of the sitemap. These are Gravity Forms
   confirmation pages, plus the addresses thank-you and thanks. Add more with
@@ -243,6 +272,37 @@ line runs only while `! scout_core_owns( 'hours' )`.
 - **Cache purge:** after the active theme or a Scout plugin updates, WP Engine and WP
   Rocket caches purge by themselves (`scout_core_purge_after_update`). Cloudflare is
   still purged by hand.
+
+## Language versions (hreflang, unreleased)
+
+For a site with the same page in two languages, such as a Spanish copy of a
+service page. Without links between them, Google treats the two as duplicates
+or shows the wrong one.
+
+- **Where:** the Scout SEO box on a page or post, under "Other language
+  versions". Set the page's own language (blank means the site language), then
+  pick each other version with its language code: es, en, fr, pt, zh, vi, ko,
+  or any simple BCP 47 code such as pt-BR or zh-Hant.
+- **Both ways:** saving on one page writes the same group onto every linked
+  page. Taking a page out of the group, on any page, takes it out everywhere.
+  Deleting a page takes it out too.
+- **Stored:** `_scout_hreflang` (language => post ID, the other pages in the
+  group) and `_scout_lang` (the page's own language) on each post.
+- **Head:** on a linked page, one `<link rel="alternate" hreflang>` for the
+  page and each version that is published and not hidden from search, plus
+  `x-default` for the version in the site language. Pages nobody has linked
+  print nothing new. The tags print even when the theme writes its own head.
+- **`<html lang>`:** a page whose own language is not the site's gets that
+  language in the attribute. Pages in the site language keep WordPress's.
+- **Google checks:** a "Language versions" row shows once any page is linked.
+  It asks for a look and names the pages when a version is not live, is hidden
+  from search, or does not link back.
+- **Translation plugins:** with WPML, Polylang, TranslatePress or Weglot active,
+  Core prints nothing, shows no check and the box only says the plugin handles
+  it. A site can also stand down with `scout_core_hreflang_stand_down`.
+- **Sitemap:** not changed. WordPress's own sitemap has no place for
+  alternates, and the head tags are what Google needs.
+- Test: `php tools/tests/core-hreflang.php`.
 
 ## APIs other plugins depend on
 
@@ -269,9 +329,12 @@ Every change to this plugin:
 <!-- visitor-data:start -->
 ## Visitor data
 
-This plugin keeps nothing about the people who visit the site and sets no cookies.
+| What | Where it is kept | How long | Shared with |
+|---|---|---|---|
+| Words typed into the site's own search box when the search finds nothing, with how many times each was searched and the first and last day it was seen. Nothing that points to a person is kept: no IP address, browser or time of the search. Words that look like an email address, a phone number or a web address are not kept. (only while the list of searches that found nothing is on in Search settings, which it is by default, and not for people logged in to edit the site) | This website's database, as one list | 90 days after the words were last searched, or until someone clears the list. At most 200 searches are kept. | Nobody |
+| A scrambled (hashed) copy of the search words and the visitor's IP address, so one visitor's repeat searches count once (only while the search words are kept) | A temporary record in this website's database | 30 minutes | Nobody |
 
-Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing. The dashboard remembers which sections a staff member opened, in their own browser (scoutSections), which never touches visitors.
+Scout Core sets no cookies. Its email guard only changes how email addresses are written into the page, and it stores nothing. The dashboard remembers which sections a staff member opened, in their own browser (scoutSections), which never touches visitors.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

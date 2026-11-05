@@ -1,5 +1,10 @@
 # Scout Case Results changelog
 
+## 0.1.16 (2026-11-05)
+
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** result cards now read the theme's DESIGN.md surface, line, accent and card corner (from `design-tokens.css`) when the theme does not set `--scout-results-*`. Sites that set them, or set neither, look exactly the same.
+- **Status line is a headline and one sentence.** The Law note names the menu group from the kit (Legal pages → Disclaimers) instead of "Scout → Legal pages → Disclaimers". Shorter lede and help. The editor's field grid stops at three across.
+
 ## 0.1.15 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

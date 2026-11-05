@@ -114,6 +114,9 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-social { display: flex; justify-content: center; gap: 14px; margin-top: 6px; }
 .scc-social a { color: var(--scc-text-3); display: inline-flex; transition: color .15s ease; }
 .scc-social a:hover { color: var(--scc-accent); }
+/* A person's own profile links and short bio, from People, when the card shows them. */
+.scc-person-links { margin: 0 0 18px; }
+.scc-bio + .scc-bio { margin-top: 0 !important; }
 .scc-foot { text-align: center; color: var(--scc-text-3); font-size: 13px; }
 .scc-foot a { color: var(--scc-text-3) !important; }
 

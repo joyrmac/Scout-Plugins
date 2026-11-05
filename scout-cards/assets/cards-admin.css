@@ -21,6 +21,29 @@
 .sh .scc-form .scc-js-only { display: none; }
 .sh .scc-form.scc-js .scc-js-only:not([hidden]) { display: inline-flex; }
 
+/* People with a card: a QR code under the card links, the card's switches, and rows with nothing to edit here. */
+.scc-qr summary { cursor: pointer; color: var(--sh-accent-text); font-weight: 500; }
+.scc-qr-box { width: 160px; margin-top: var(--sh-space-2); padding: var(--sh-space-1); background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: var(--sh-r-control); }
+.scc-qr-box svg { display: block; width: 100%; height: auto; }
+.scc-show { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); margin-right: var(--sh-space-4); }
+.scc-remove { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); }
+.scc-boxhead + p { margin-top: var(--sh-space-2); }
+
+/* People mode: what the main card takes from Business info, its "Use something else"
+   folds, and the closed More / Extras fold under a card's switches. */
+.scc-from { margin: 0; min-height: var(--sh-tap); display: flex; align-items: center; color: var(--sh-text-2); }
+.scc-from strong { margin-left: var(--sh-space-1); color: var(--sh-text); font-weight: 600; }
+.scc-else { margin-top: var(--sh-space-1); }
+.scc-else > summary, .scc-fold > summary { display: inline-flex; align-items: center; min-height: var(--sh-tap); cursor: pointer; color: var(--sh-accent-text); font-weight: 500; }
+.scc-else[open] > summary { margin-bottom: var(--sh-space-2); }
+.scc-else > summary::after, .scc-fold > summary::after { content: "\203A"; margin-left: var(--sh-space-2); }
+.scc-else[open] > summary::after, .scc-fold[open] > summary::after { transform: rotate(90deg); }
+.scc-else .form-table { margin: 0; }
+.scc-else .form-table th { width: 160px; padding-top: var(--sh-space-3); }
+.scc-fold { margin: var(--sh-space-2) 0 var(--sh-space-3); padding-top: var(--sh-space-2); border-top: 1px solid var(--sh-border); }
+.scc-fold > summary { font-weight: 600; }
+.scc-fold > .form-table { margin-top: 0; }
+
 /* Photo pickers. */
 .scc-thumb { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: var(--sh-space-2); }
 .scc-spot-head th { padding-bottom: 0; }

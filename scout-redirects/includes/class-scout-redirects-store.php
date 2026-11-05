@@ -323,7 +323,7 @@ final class Scout_Redirects_Store {
 	/**
 	 * Missing pages, most visited first.
 	 *
-	 * @param bool $internal_only Only the ones linked from the site's own pages.
+	 * @param bool $internal_only Only the ones a link on the site's own pages leads to.
 	 */
 	public static function log_list( int $limit, bool $internal_only = false ): array {
 		global $wpdb;
@@ -354,6 +354,21 @@ final class Scout_Redirects_Store {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->delete( self::log_table(), array( 'id' => $id ) );
+	}
+
+	/** True when a path is on the missing-page list. */
+	public static function log_has( string $path ): bool {
+		global $wpdb;
+		$log = self::log_table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$log} WHERE path_hash = %s", self::hash( $path ) ) );
+	}
+
+	/** Keep a missing page on the list but stop calling it a broken link on the site. */
+	public static function log_unflag( int $id ): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update( self::log_table(), array( 'internal' => 0 ), array( 'id' => $id ) );
 	}
 
 	public static function log_delete_path( string $path ): void {

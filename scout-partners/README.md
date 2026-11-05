@@ -37,12 +37,23 @@ never anywhere else. Links are marked `rel="sponsored"`. Search engines and
 link checkers are not counted, and no visitor details are kept: only a number
 per month, for two years.
 
-## Styling
+## What this feature needs from the theme
 
-Class names: `.sp-partners`, `.sp-grid`, `.sp-rail`, `.sp-logos`, `.sp-title`,
-`.sp-level`, `.sp-level-name`, `.sp-list`, `.sp-partner`, `.sp-link`,
-`.sp-logo`, `.sp-name`, `.sp-line`. Custom properties:
-`--scout-partners-line`, `--scout-partners-logo-bg`, `--scout-partners-radius`.
+- **DESIGN.md:** fonts and text color come from the theme. The card
+  border and corner read the DESIGN.md roles line and card corner, as
+  `--scout-line` and `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables
+  still win when the theme sets them: `--scout-partners-line`,
+  `--scout-partners-radius` (`14px`). The plate behind each logo stays white
+  (`--scout-partners-logo-bg`, `#fff`) so every logo reads.
+- **Where it lands:** where `[scout_partners]` sits, and on event pages
+  through `the_content` when Settings or a region puts partners there.
+  `title=""` adds an H2; level names are H3.
+- **Images:** each partner's logo is its featured image. A partner with no
+  logo shows its name.
+- **Class names:** `.sp-partners`, `.sp-grid`, `.sp-rail`, `.sp-logos`,
+  `.sp-title`, `.sp-level`, `.sp-level-name`, `.sp-list`, `.sp-partner`,
+  `.sp-link`, `.sp-logo`, `.sp-name`, `.sp-line`.
+- **scout-setup.json:** nothing.
 
 ## Data
 

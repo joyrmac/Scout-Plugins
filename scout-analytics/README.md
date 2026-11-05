@@ -52,6 +52,29 @@ Scout Build (or Site Build) → Visits and cookies.
 
 Filter `scout_analytics_is_live` overrides the live-site check.
 
+## What this feature needs from the theme
+
+- **Tag Manager container:** nothing visible. Consent defaults and the
+  container print in `<head>` through `wp_head()`, and Tag Manager's
+  `<noscript>` frame through `wp_body_open()`. The theme calls both and
+  carries no tag or consent code of its own (rule 7).
+- **Cookie notice, the one visible part:** printed through `wp_footer()` and
+  fixed to the bottom left of the screen (16px from the edges on phones, 24px
+  from 600px up, at most 420px wide, `z-index: 9999`). On phones it moves up
+  to clear Scout Call Buttons' bar. The theme keeps that corner clear.
+- **DESIGN.md:** read through Scout Build only. The OK button takes Scout
+  Build's brand color: the color picked on its Email screen, else the
+  `scout_brand_accent` filter, else `colors.accent_fill`. Without Scout Build:
+  the filter, then `#0A78C2`. The button text is white or near-black,
+  whichever reads at 4.5:1.
+- **Light or dark:** the panel is white with dark text, and turns dark when
+  the page's root element carries `data-theme="dark"`. It does not read the
+  theme's `bg`, `surface` or `text`. Fonts are inherited.
+- **Privacy choices:** `[scout_privacy_choices]`, or any link to
+  `#privacy-choices`, reopens the notice, so the theme's footer can carry it.
+- **scout-setup.json:** `analytics.gtm`, the container ID, filled in by Scout
+  Build.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

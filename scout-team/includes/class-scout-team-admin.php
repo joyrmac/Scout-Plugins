@@ -428,39 +428,48 @@ final class Scout_Team_Admin {
 		if ( Scout_Team::shows( $p, 'card' ) ) {
 			$tags[] = __( 'Card', 'scout-team' );
 		}
-		if ( Scout_Team::shows( $p, 'byline' ) && $r['login'] ) {
-			$n = (int) count_user_posts( (int) $p['user'], 'post', true );
-			/* translators: %d: number of published posts. */
-			$tags[] = sprintf( _n( 'Byline, %d post', 'Byline, %d posts', $n, 'scout-team' ), $n );
+		// Posts that credit them: picked in "Written by", or by their login. Each post once.
+		$n = Scout_Team_Byline::count_for( $id );
+		if ( $n > 0 ) {
+			/* translators: %d: number of live posts. */
+			$tags[] = sprintf( _n( 'Byline on %d post', 'Byline on %d posts', $n, 'scout-team' ), $n );
+		} elseif ( Scout_Team::shows( $p, 'byline' ) && $r['login'] ) {
+			$tags[] = __( 'Byline', 'scout-team' );
 		}
 		if ( Scout_Team::shows( $p, 'speaker' ) ) {
 			$tags[] = __( 'Speaker page', 'scout-team' );
 		}
 
 		$edit = get_edit_post_link( $id );
+
+		// Photo on the left; name and buttons, then title and groups, then tags, then what needs a look.
 		echo '<li class="sh-row st-person' . ( $r['look'] ? ' is-look' : '' ) . '">';
-		echo '<div class="st-person-main">';
 		if ( has_post_thumbnail( $id ) ) {
 			echo '<span class="st-avatar">' . get_the_post_thumbnail( $id, array( 96, 96 ), array( 'alt' => '' ) ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core image markup.
 		} else {
 			echo '<span class="st-avatar is-initials" aria-hidden="true">' . esc_html( self::initials( $name ) ) . '</span>';
 		}
-		echo '<div class="st-person-text">';
+		echo '<div class="st-person-body">';
+
+		echo '<div class="st-person-head">';
 		echo '<p class="sh-row-name">' . esc_html( $name ) . '</p>';
+		if ( $edit ) {
+			echo '<div class="st-person-go">';
+			echo '<a class="button sh-quiet st-edit" href="' . esc_url( $edit ) . '">' . esc_html__( 'Edit', 'scout-team' ) . '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span></a>';
+			if ( current_user_can( 'edit_post', $id ) ) {
+				echo '<a class="st-send" href="' . esc_url( Scout_Team_Link::action_url( $id, 'new' ) ) . '">' . esc_html__( 'Send them a link', 'scout-team' ) . '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span></a>';
+			}
+			echo '</div>';
+		}
+		echo '</div>';
+
 		if ( $sub ) {
 			echo '<p class="sh-row-sub">' . esc_html( implode( ' · ', $sub ) ) . '</p>';
 		}
-		if ( $r['look'] ) {
-			echo '<p class="st-look"><strong>' . esc_html__( 'Needs a look:', 'scout-team' ) . '</strong> ' . esc_html( implode( ', ', $r['look'] ) ) . '</p>';
-		}
-		echo '</div></div>';
 
-		echo '<div class="sh-row-facts">';
+		echo '<p class="st-tags">';
 		if ( $r['login'] ) {
 			echo '<span class="sh-tag st-signin">' . esc_html__( 'Can sign in', 'scout-team' ) . '</span>';
-		}
-		if ( Scout_Team_Link::active( $id ) ) {
-			echo '<span class="sh-tag st-signin">' . esc_html__( 'Link sent', 'scout-team' ) . '</span>';
 		}
 		if ( $tags ) {
 			echo '<span class="screen-reader-text">' . esc_html__( 'Shows on:', 'scout-team' ) . '</span>';
@@ -470,15 +479,15 @@ final class Scout_Team_Admin {
 		} else {
 			echo '<span class="sh-tag">' . esc_html__( 'Not shown anywhere', 'scout-team' ) . '</span>';
 		}
-		echo '</div>';
-
-		echo '<div class="sh-row-go">';
-		if ( $edit ) {
-			echo '<a class="button" href="' . esc_url( $edit ) . '">' . esc_html__( 'Edit', 'scout-team' ) . '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span></a>';
-			if ( current_user_can( 'edit_post', $id ) ) {
-				echo '<a class="button sh-quiet" href="' . esc_url( Scout_Team_Link::action_url( $id, 'new' ) ) . '">' . esc_html__( 'Send them a link', 'scout-team' ) . '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span></a>';
-			}
+		if ( Scout_Team_Link::active( $id ) ) {
+			echo '<span class="sh-tag st-signin">' . esc_html__( 'Link sent', 'scout-team' ) . '</span>';
 		}
+		echo '</p>';
+
+		if ( $r['look'] ) {
+			echo '<p class="st-look"><span class="st-look-dot" aria-hidden="true"></span>' . esc_html__( 'Needs a look:', 'scout-team' ) . ' ' . esc_html( implode( ', ', $r['look'] ) ) . '</p>';
+		}
+
 		echo '</div>';
 		echo '</li>';
 	}

@@ -50,6 +50,11 @@ final class Scout_Chat_Admin {
 		echo '</details>';
 	}
 
+	/** Scout-branded site? White-label sites say "your web team" instead of Scout (kit DESIGN 2a #9). */
+	private static function branded(): bool {
+		return method_exists( 'Scout_Admin_UI', 'branded' ) ? Scout_Admin_UI::branded() : ( ! defined( 'SCOUT_HUB_BRAND' ) || SCOUT_HUB_BRAND );
+	}
+
 	const SLUG = 'scout-chat';
 
 	public static function boot(): void {
@@ -166,10 +171,11 @@ final class Scout_Chat_Admin {
 			echo esc_html( array( 'question' => __( 'Question', 'scout-chat' ), 'change' => __( 'Change request', 'scout-chat' ), 'person' => __( 'Wants a person', 'scout-chat' ) )[ $k ] ?? $k );
 		} elseif ( 'scout_done' === $col ) {
 			if ( get_post_meta( $id, '_scout_chat_request', true ) ) {
-				echo '<span class="sh-pill is-good">' . esc_html__( 'In Requests', 'scout-chat' ) . '</span>';
+				echo '<span class="sh-pill is-good">' . esc_html__( 'Sent as a change request', 'scout-chat' ) . '</span>';
 				return;
 			}
-			echo get_post_meta( $id, '_scout_chat_answered', true ) ? '<span class="sh-pill is-good">' . esc_html__( 'Yes', 'scout-chat' ) . '</span>' : '<span class="sh-pill is-warn">' . esc_html__( 'Not yet', 'scout-chat' ) . '</span>';
+			// Not yet is an ordinary state, so a calm pill; amber is for real warnings.
+			echo get_post_meta( $id, '_scout_chat_answered', true ) ? '<span class="sh-pill is-good">' . esc_html__( 'Yes', 'scout-chat' ) . '</span>' : '<span class="sh-pill">' . esc_html__( 'Not yet', 'scout-chat' ) . '</span>';
 		}
 	}
 
@@ -263,17 +269,19 @@ final class Scout_Chat_Admin {
 		$n  = self::unanswered();
 		Scout_Admin_UI::open( __( 'Chat', 'scout-chat' ), __( 'A chat box on the site that answers common questions and saves every message to Chat messages.', 'scout-chat' ), __( 'Chat', 'scout-chat' ) );
 		settings_errors( $o );
+		// The status line: a few words and one sentence. Whether AI is connected sits in its fold below.
 		if ( $s['enabled'] ) {
-			$headline = __( 'On.', 'scout-chat' );
-			$detail   = __( 'Visitors see the chat button on every page.', 'scout-chat' );
+			$headline = $n
+				/* translators: %d: number of chat questions waiting for an answer. */
+				? sprintf( _n( 'On. %d question is waiting.', 'On. %d questions are waiting.', $n, 'scout-chat' ), $n )
+				: __( 'On.', 'scout-chat' );
+			$detail = __( 'Visitors see the chat button on every page.', 'scout-chat' );
 		} else {
-			$headline = __( 'Off.', 'scout-chat' );
-			$detail   = __( 'Fill in the details below, then tick Show the chat on the site.', 'scout-chat' );
-		}
-		$detail .= ' ' . ( $ai ? __( 'AI answers free-text questions.', 'scout-chat' ) : __( 'It answers common questions and saves the rest for you.', 'scout-chat' ) );
-		if ( $n ) {
-			/* translators: %d: number of chat questions waiting for an answer. */
-			$detail .= ' ' . sprintf( _n( '%d question is waiting for an answer.', '%d questions are waiting for an answer.', $n, 'scout-chat' ), $n );
+			$headline = $n
+				/* translators: %d: number of chat questions waiting for an answer. */
+				? sprintf( _n( 'Off. %d question is waiting.', 'Off. %d questions are waiting.', $n, 'scout-chat' ), $n )
+				: __( 'Off.', 'scout-chat' );
+			$detail = __( 'Fill in the details below, then tick Show the chat on the site.', 'scout-chat' );
 		}
 		$state = ! $s['enabled'] ? 'off' : ( $n ? 'warn' : 'good' );
 		$go    = '<a class="button" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ) . '">' . esc_html__( 'Open Chat messages', 'scout-chat' ) . '</a>';
@@ -287,11 +295,11 @@ final class Scout_Chat_Admin {
 				<table class="form-table" role="presentation">
 					<?php
 					self::row( __( 'Show the chat on the site', 'scout-chat' ), '<label><input type="checkbox" name="' . esc_attr( $o ) . '[enabled]" value="1" ' . checked( $s['enabled'], true, false ) . '> ' . esc_html__( 'Show the chat button on every page', 'scout-chat' ) . '</label>' );
-					self::row( __( 'Team names', 'scout-chat' ), self::text( 'team', $s['team'], 'Sean and Joy' ), __( 'Who answers, shown on the button, like "Ask Sean & Joy". Blank: "our team".', 'scout-chat' ) );
+					self::row( __( 'Team names', 'scout-chat' ), self::text( 'team', $s['team'], __( 'First names', 'scout-chat' ) ), __( 'Who answers, shown on the button, like "Ask Maria & Tom". Blank: "our team".', 'scout-chat' ) );
 					self::row( __( 'Assistant name', 'scout-chat' ), self::text( 'name', $s['name'], __( 'Site name + assistant', 'scout-chat' ) ) );
 					self::row( __( 'Button text', 'scout-chat' ), self::text( 'launcher', $s['launcher'], __( 'Ask + team names', 'scout-chat' ) ) );
 					self::row( __( 'Photos', 'scout-chat' ), self::text( 'photo_1', $s['photo_1'], 'https://', 'url' ) . '<br>' . self::text( 'photo_2', $s['photo_2'], 'https://', 'url' ), __( 'Optional. Media links to photos of the people who answer.', 'scout-chat' ) );
-					self::row( __( 'Greeting card', 'scout-chat' ), '<label><input type="checkbox" name="' . esc_attr( $o ) . '[teaser]" value="1" ' . checked( $s['teaser'], true, false ) . '> ' . esc_html__( 'Show a small greeting after a few seconds, once per visit', 'scout-chat' ) . '</label><br>' . self::text( 'teaser_by', $s['teaser_by'], 'Joy from Scout' ), __( 'Who the greeting is from.', 'scout-chat' ) );
+					self::row( __( 'Greeting card', 'scout-chat' ), '<label><input type="checkbox" name="' . esc_attr( $o ) . '[teaser]" value="1" ' . checked( $s['teaser'], true, false ) . '> ' . esc_html__( 'Show a small greeting after a few seconds, once per visit', 'scout-chat' ) . '</label><br>' . self::text( 'teaser_by', $s['teaser_by'], __( 'Maria from the office', 'scout-chat' ) ), __( 'Who the greeting is from.', 'scout-chat' ) );
 					?>
 				</table>
 			</div>
@@ -307,7 +315,8 @@ final class Scout_Chat_Admin {
 				</table>
 			</div>
 			<?php self::ui_fold_open( __( 'More options: AI connection', 'scout-chat' ) ); ?>
-				<p><?php esc_html_e( 'Connect Sean\'s AI server to answer free-text questions. Its AI key stays on that server.', 'scout-chat' ); ?></p>
+				<p class="sh-status<?php echo $ai ? '' : ' is-off'; ?>"><span class="sh-dot" aria-hidden="true"></span><strong><?php echo esc_html( $ai ? __( 'Connected.', 'scout-chat' ) : __( 'Not connected.', 'scout-chat' ) ); ?></strong> <span><?php echo esc_html( $ai ? __( 'AI answers free-text questions.', 'scout-chat' ) : __( 'The chat answers common questions and saves the rest for you.', 'scout-chat' ) ); ?></span></p>
+				<p><?php echo esc_html( self::branded() ? __( 'Connect Scout\'s AI server to answer free-text questions. Its AI key stays on that server.', 'scout-chat' ) : __( 'Connect your web team\'s AI server to answer free-text questions. Its AI key stays on that server.', 'scout-chat' ) ); ?></p>
 				<table class="form-table" role="presentation">
 					<?php
 					self::row( __( 'AI server address', 'scout-chat' ), self::text( 'ai_url', $s['ai_url'], 'https://', 'url' ) );
@@ -318,7 +327,7 @@ final class Scout_Chat_Admin {
 							__( 'Connection key', 'scout-chat' ),
 							self::text( 'ai_key', '', '' !== $s['ai_key'] ? __( 'Saved. Leave blank to keep it.', 'scout-chat' ) : '', 'password' )
 							. ( '' !== $s['ai_key'] ? '<br><label><input type="checkbox" name="' . esc_attr( $o ) . '[ai_key_clear]" value="1"> ' . esc_html__( 'Remove the saved key', 'scout-chat' ) . '</label>' : '' ),
-							__( 'The key Sean\'s server gives this site, or SCOUT_CHAT_AI_KEY in wp-config.php.', 'scout-chat' )
+							self::branded() ? __( 'The key Scout\'s server gives this site, or SCOUT_CHAT_AI_KEY in wp-config.php.', 'scout-chat' ) : __( 'The key your web team\'s server gives this site, or SCOUT_CHAT_AI_KEY in wp-config.php.', 'scout-chat' )
 						);
 					}
 					?>

@@ -62,6 +62,28 @@ the sample out.
 
 3 checks per visitor per hour, 3 per email per day, 40 per site per day.
 
+## What this feature needs from the theme
+
+- **DESIGN.md:** the form, the live run and the report rows read the
+  DESIGN.md roles page, surface, surface 2, text, muted text, line, accent,
+  accent fill, on accent (button text) and the label font, as `--scout-bg`,
+  `--scout-surface`, `--scout-surface-2`, `--scout-text`, `--scout-text-2`,
+  `--scout-line`, `--scout-accent`, `--scout-accent-fill`, `--scout-on-accent`
+  and `--scout-font-label` (links use `--scout-accent-text` when a DESIGN.md
+  adds `accent_text`, else `--scout-accent`). These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The names it read before
+  still win when the theme sets them: `--bg`, `--surface`, `--surface-2`,
+  `--text`, `--text-2`, `--text-3`, `--line`, `--accent-fill`,
+  `--accent-fill-hover`, `--accent`, `--accent-text`, `--font-mono`. With
+  neither, Scout's dark palette. Pass, warning and fail colors come from
+  `--positive`, `--caution` and `--negative` (DESIGN.md has no status colors).
+- **Where it lands:** where `[scout_site_check]` sits, with an H2 heading;
+  `layout="hero"` sets the form and the sample side by side. Its CSS and
+  script load only on that page.
+- **Booking link:** the setting, else `scout_booking_url()`, else `/contact/`.
+- **The emailed report** uses Scout's own fonts and colors, the site icon as
+  its logo, and the photo from Settings. It reads nothing from the theme.
+- **scout-setup.json:** nothing.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

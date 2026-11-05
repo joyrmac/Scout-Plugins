@@ -282,9 +282,25 @@ final class Scout_Booking {
 			'request'        => ! empty( $t['request'] ),
 			'questions'      => $questions,
 			'note'           => sanitize_textarea_field( (string) ( $t['note'] ?? '' ) ),
+			'video'          => self::clean_video( (string) ( $t['video'] ?? '' ) ),
 			'active'         => ! empty( $t['active'] ),
 			'product_id'     => absint( $t['product_id'] ?? 0 ),
 		);
+	}
+
+	/** A fixed video room address (Google Meet, Zoom...), https only, or ''. */
+	public static function clean_video( string $url ): string {
+		$url = trim( $url );
+		if ( '' === $url || 0 !== stripos( $url, 'https://' ) ) {
+			return '';
+		}
+		return (string) esc_url_raw( $url, array( 'https' ) );
+	}
+
+	/** The video call link for a booking's session type, or ''. */
+	public static function video( array $row ): string {
+		$type = self::type( (string) ( $row['type_id'] ?? '' ) );
+		return $type ? $type['video'] : '';
 	}
 
 	/** @return array<string,array> id => type, in the owner's order */
@@ -561,6 +577,9 @@ final class Scout_Booking {
 
 	public static function unschedule(): void {
 		wp_clear_scheduled_hook( self::CRON );
+		if ( class_exists( 'Scout_Booking_Busy' ) ) {
+			Scout_Booking_Busy::unschedule();
+		}
 	}
 
 	/**

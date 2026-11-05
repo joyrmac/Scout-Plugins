@@ -75,7 +75,7 @@ final class Scout_Reviews_Inbox {
 
 		Scout_Admin_UI::open(
 			__( 'New reviews', 'scout-reviews' ),
-			__( 'New Google reviews and notes from your review page wait here. Pick the pages for each one, then add it.', 'scout-reviews' )
+			__( 'New Google reviews and notes from your review page wait here for your OK.', 'scout-reviews' )
 		);
 
 		if ( ! $items ) {
@@ -83,8 +83,8 @@ final class Scout_Reviews_Inbox {
 				'good',
 				__( 'All caught up.', 'scout-reviews' ),
 				Scout_Reviews_Google::is_ready()
-					? __( 'New Google reviews show up here after the next daily sync. Notes from your review page arrive the moment someone sends one.', 'scout-reviews' )
-					: __( 'Notes from your review page show up here. Google reviews join them once Google is connected in Review settings.', 'scout-reviews' )
+					? __( 'New Google reviews show up after the daily sync, and review page notes arrive right away.', 'scout-reviews' )
+					: __( 'Review page notes show up here, and Google reviews join them once Google is connected.', 'scout-reviews' )
 			);
 			Scout_Admin_UI::close();
 			return;
@@ -119,7 +119,7 @@ final class Scout_Reviews_Inbox {
 
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Waiting for a look', 'scout-reviews' ); ?></h2>
-			<ul class="sh-rows srk-inbox">
+			<ul class="sh-rows is-stacked srk-inbox">
 				<?php foreach ( $items as $post ) : ?>
 					<?php self::card( $post, $topics ); ?>
 				<?php endforeach; ?>
@@ -171,7 +171,7 @@ final class Scout_Reviews_Inbox {
 					<?php if ( $allowed ) : ?>
 						<span class="sh-pill is-on"><?php esc_html_e( 'OK to show on the site', 'scout-reviews' ); ?></span>
 					<?php else : ?>
-						<span class="sh-pill is-received"><?php esc_html_e( 'Private: not OK to show', 'scout-reviews' ); ?></span>
+						<span class="sh-pill"><?php esc_html_e( 'Private: not OK to show', 'scout-reviews' ); ?></span>
 					<?php endif; ?>
 				<?php endif; ?>
 			</div>
@@ -188,9 +188,6 @@ final class Scout_Reviews_Inbox {
 						<button type="submit" name="do" value="skip" class="button"><?php esc_html_e( 'Mark as read', 'scout-reviews' ); ?><span class="screen-reader-text"> <?php echo esc_html( get_the_title( $post ) ); ?></span></button>
 					<?php endif; ?>
 				</form>
-				<?php if ( $website ) : ?>
-					<a class="button sh-quiet" href="<?php echo esc_url( Scout_Reviews_Menu::url( Scout_Reviews_Requests::PAGE, 'srk-messages' ) ); ?>"><?php esc_html_e( 'Ask for a Google review too', 'scout-reviews' ); ?></a>
-				<?php endif; ?>
 			</div>
 			<details class="srk-review-more">
 				<summary>
@@ -222,6 +219,9 @@ final class Scout_Reviews_Inbox {
 				<?php endif; ?>
 				<?php if ( $allowed ) : ?>
 					<label class="srk-featured"><input type="checkbox" form="<?php echo esc_attr( $form ); ?>" name="featured" value="1" /> <?php esc_html_e( 'Featured', 'scout-reviews' ); ?></label>
+				<?php endif; ?>
+				<?php if ( $website ) : ?>
+					<p class="sh-note"><a href="<?php echo esc_url( Scout_Reviews_Menu::url( Scout_Reviews_Requests::PAGE, 'srk-messages' ) ); ?>"><?php esc_html_e( 'Ask for a Google review too ›', 'scout-reviews' ); ?></a></p>
 				<?php endif; ?>
 			</details>
 		</li>

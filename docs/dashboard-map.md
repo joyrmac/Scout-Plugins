@@ -29,7 +29,7 @@ person came to do, and the menu stays the same on every site.
 | `business` | Business | everyone | Facts typed once that show up everywhere: Business info, Hours, Case results, a companion plugin's own content types | Is this a fact about the business? |
 | `people` | People | everyone | One profile per person the public sees: the team, speakers, writers and members who chose to be listed. Bio pages, the team page, bylines, speaker pages and business cards read from it (kit 1.11.0, Joy 2026-11-05) | Is this about a person? |
 | `website` | Site features | owner, operator | What visitors see and use: Call buttons, Chat and its settings, Reviews on the site, Ask for reviews, Cards and links, Newsletter, Redirects | Is this something visitors see or use? |
-| `search` | Search | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, site search and the sitemap | Does this help Google, AI tools or visitors find things? |
+| `search` | Search & analytics | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, site search and the sitemap | Does this help Google, AI tools or visitors find things? |
 | `policies` | Legal pages | owner, operator | Trust and legal pages reviewed every year: accessibility statement, law-firm disclaimers (Scout Law Firm Tools), and later the privacy policy and terms | Is this a trust or legal page? |
 | `health` | Site status | owner, operator | Reports on whether things are working: the health report, Search health, Spam protection, the image optimizer, accessibility checks | Does this tell us if something is working? |
 | `build` | Scout tools (Build tools on white-label sites) | operators only | Features and plan, Updates, Site log, Email, Site Sync, the Change log, a theme's own screen. The client's own "What's new on your site" view of the Site log sits under Home. | Is this only for Sean and Joy? |
@@ -331,7 +331,7 @@ approvals all read from the `scout_team` profile. Nothing keeps its own copy.
 
 **Everyone else is linked by email: one email is one person across the whole
 site** (members, speakers, event sign-ups, volunteers, bookings, newsletter,
-Customer list).
+Contacts).
 
 - Match emails ignoring case and spaces. Once someone has a login, the login is
   the anchor; every record also saves the login when there is one.
@@ -339,7 +339,7 @@ Customer list).
   with the same email.
 - A speaker whose email matches a Team profile uses the Team photo and bio.
   Guest speakers keep their own speaker page and never appear on Team.
-- The Customer list becomes the People screen: one record per email, everything
+- The Contacts becomes the People screen: one record per email, everything
   that person did, and "export or delete this person everywhere."
 - The public site never shows that someone is a member, attended or booked.
 - **Purchases link the same way.** Event tickets, member dues and paid bookings
@@ -373,14 +373,14 @@ Each works on its own branch; merge one, then rebase the other.
 6. Team and My profile screens moved to the features chat (they live in Scout Team, which it is rewiring).
 7. Bonus: "Not today" on Today items, comfort settings (larger text and less motion; dark mode left out because WordPress's own screen parts don't support it), "Preview on a phone," and the "What's new on your site" card. Built in Scout Build 0.12.0 and admin kit 1.8.0.
 
-8. RV park as one Plus section with an overview (Scout RV Park 0.2.0), and the Customer list visible to owners inside Events. Built.
+8. RV park as one Plus section with an overview (Scout RV Park 0.2.0), and the Contacts visible to owners inside Events. Built.
 9. Cleanup pass: bring older screens onto the one layout, most-used first (Hours, Call buttons, Review settings, then the rest). Skip Scout Core, Team, Cards, Chat and Law screens while the features chat is in them.
 
 **Features chat**
 
 1. Law firm tools: check approval before publishing (0.2.0) in a live block editor, then "Reviewed by" stamps with a six-month review list, then form entries that delete themselves (90 days by default).
 2. Search and sitemap: a visitor search box on every site, and a list of searches that found nothing.
-3. One profile per person and one email per person: see "People" above for the full plan and Joy's decisions. Order: practice areas and "Handled by" on case results; Cards read profiles (card links never change); Chat picks up to two profiles; the Team screen and My profile, as designed on the canvas; Former status; the responsible attorney in the advertising line; bookings, volunteers and the newsletter save the login; the People screen in the Customer list, with orders; shared accounts and couples plans (first client: Bliss Boogie, couples tickets and a couples membership price, with its move to WordPress).
+3. One profile per person and one email per person: see "People" above for the full plan and Joy's decisions. Order: practice areas and "Handled by" on case results; Cards read profiles (card links never change); Chat picks up to two profiles; the Team screen and My profile, as designed on the canvas; Former status; the responsible attorney in the advertising line; bookings, volunteers and the newsletter save the login; the People screen in the Contacts, with orders; shared accounts and couples plans (first client: Bliss Boogie, couples tickets and a couples membership price, with its move to WordPress).
 4. Nightly form test in Site health.
 5. Policies pages: privacy policy and terms templates filled from business info. The client or firm approves each one.
 6. One screen for every client site, built on the Client Hub sheet.

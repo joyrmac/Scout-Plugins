@@ -7,6 +7,8 @@
  *  - google_verify, bing_verify: the Search Console and Bing Webmaster Tools
  *    verification codes, printed as meta tags on the front page (Site
  *    Standard gap 1). Paste the code or the whole tag; only the code is kept.
+ *  - empty_searches: keep a list of searches that found nothing ('1', the
+ *    default when unset) or not ('0'). See class-seo-empty-searches.php.
  *
  * @package Scout_Core
  */
@@ -57,6 +59,11 @@ final class Scout_Core_SEO_Settings {
 		$out['home_description'] = isset( $input['home_description'] ) ? sanitize_textarea_field( $input['home_description'] ) : '';
 		$out['google_verify']    = self::code( $input['google_verify'] ?? '' );
 		$out['bing_verify']      = self::code( $input['bing_verify'] ?? '' );
+		// The form sends 0 before the checkbox, so a missing key means another
+		// caller: keep what was saved, on by default.
+		$out['empty_searches'] = isset( $input['empty_searches'] )
+			? ( '1' === (string) $input['empty_searches'] ? '1' : '0' )
+			: ( '0' === (string) ( $out['empty_searches'] ?? '1' ) ? '0' : '1' );
 		return $out;
 	}
 

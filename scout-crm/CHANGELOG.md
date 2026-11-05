@@ -1,5 +1,9 @@
 # Scout CRM Sync changelog
 
+## 0.1.6 (2026-11-05)
+
+- **Customer list is now Contacts**, in the Events menu and on the screen, to match where people go (your FluentCRM contacts). The page address is unchanged. It opens with a status line and an Open the contacts button instead of a Status box, the labels it adds are tags, and the done message is a sentence.
+
 ## 0.1.5 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** The contacts live in FluentCRM, so the list now says to export or delete a person there. No code changed.

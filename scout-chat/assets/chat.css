@@ -1,12 +1,13 @@
 /* Scout Chat. Design: Scout features DESIGN.md 5.1. Reads the site's tokens
-   when they exist (Scout themes) and falls back to the Scout dark palette. */
+   when they exist (Scout themes), then DESIGN.md's --scout-* names, then the
+   Scout dark palette. */
 .sc-root {
-  --sc-bg: var(--bg, #0B0B0B); --sc-surface: var(--surface, #161616); --sc-surface-2: var(--surface-2, #1E1E1E);
-  --sc-text: var(--text, #F5F5F7); --sc-text-2: var(--text-2, #B5B5B8); --sc-text-3: var(--text-3, #86868B);
-  --sc-line: var(--line, rgba(255,255,255,.10)); --sc-accent: var(--accent, #0E8FE6); --sc-accent-text: var(--accent-text, #5FB8F2);
-  --sc-mono: var(--font-mono, 'Geist Mono', ui-monospace, Menlo, monospace);
+  --sc-bg: var(--bg, var(--scout-bg, #0B0B0B)); --sc-surface: var(--surface, var(--scout-surface, #161616)); --sc-surface-2: var(--surface-2, var(--scout-surface-2, #1E1E1E));
+  --sc-text: var(--text, var(--scout-text, #F5F5F7)); --sc-text-2: var(--text-2, var(--scout-text-2, #B5B5B8)); --sc-text-3: var(--text-3, var(--scout-text-2, #86868B));
+  --sc-line: var(--line, var(--scout-line, rgba(255,255,255,.10))); --sc-accent: var(--accent, var(--scout-accent, #0E8FE6)); --sc-accent-text: var(--accent-text, var(--scout-accent-text, var(--scout-accent, #5FB8F2)));
+  --sc-mono: var(--font-mono, var(--scout-font-label, 'Geist Mono', ui-monospace, Menlo, monospace));
   position: fixed; right: 20px; bottom: 20px; z-index: 9998; display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
-  font: 15px/1.5 var(--font-sans, 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif); color: var(--sc-text);
+  font: 15px/1.5 var(--font-sans, var(--scout-font-body, 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif)); color: var(--sc-text);
 }
 .sc-root *, .sc-root *::before, .sc-root *::after { box-sizing: border-box; }
 .sc-root button, .sc-root input { font: inherit; }
@@ -14,7 +15,7 @@
 .sc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Bolt mark and avatar stack */
-.sc-bolt { display: block; width: 45%; height: 45%; background: #fff; clip-path: polygon(58% 0, 0 58%, 42% 58%, 30% 100%, 100% 40%, 54% 40%); }
+.sc-bolt { display: block; width: 45%; height: 45%; background: var(--scout-on-accent, #fff); clip-path: polygon(58% 0, 0 58%, 42% 58%, 30% 100%, 100% 40%, 54% 40%); }
 .sc-stack { display: inline-flex; align-items: center; }
 .sc-stack > * { border-radius: 50%; border: 2px solid var(--sc-surface); flex: none; object-fit: cover; }
 .sc-stack > * + * { margin-left: -8px; }
@@ -56,7 +57,7 @@
 .sc-status .sc-dot { flex: none; }
 .sc-dot { width: 6px; height: 6px; border-radius: 50%; background: #0E9E73; flex: none; }
 .sc-person { flex: none; min-height: 34px; padding: 0 12px; border-radius: 980px; border: 1px solid rgba(14,143,230,.55); background: none; color: var(--sc-accent-text); font-size: 13px; font-weight: 500; cursor: pointer; }
-.sc-person:hover { background: var(--sc-accent); border-color: var(--sc-accent); color: #fff; }
+.sc-person:hover { background: var(--sc-accent); border-color: var(--sc-accent); color: var(--scout-on-accent, #fff); }
 .sc-min { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 0; background: none; color: var(--sc-text-2); cursor: pointer; display: grid; place-items: center; }
 .sc-min:hover { background: var(--sc-surface-2); }
 
@@ -66,7 +67,7 @@
 .sc-user { justify-content: flex-end; }
 .sc-bubble { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.5; text-wrap: pretty; white-space: pre-wrap; }
 .sc-bot .sc-bubble { background: var(--sc-surface-2); border-bottom-left-radius: 6px; }
-.sc-user .sc-bubble { background: var(--sc-accent); color: #fff; border-bottom-right-radius: 6px; }
+.sc-user .sc-bubble { background: var(--sc-accent); color: var(--scout-on-accent, #fff); border-bottom-right-radius: 6px; }
 .sc-caret { display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -2px; background: var(--sc-accent); }
 .sc-typing { gap: 4px; padding: 12px 14px; background: var(--sc-surface-2); border-radius: 18px; border-bottom-left-radius: 6px; align-self: flex-start; }
 .sc-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--sc-text-3); animation: sc-blink 1s infinite; }
@@ -75,7 +76,7 @@
 
 .sc-chips { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 2px; }
 .sc-chip { min-height: 38px; padding: 8px 14px; border-radius: 980px; border: 1px solid rgba(14,143,230,.55); background: none; color: var(--sc-accent-text); font-size: 14px; font-weight: 500; cursor: pointer; transition: background .15s ease, color .15s ease, transform .15s ease; }
-.sc-chip:hover { background: var(--sc-accent); color: #fff; transform: translateY(-1px); }
+.sc-chip:hover { background: var(--sc-accent); color: var(--scout-on-accent, #fff); transform: translateY(-1px); }
 
 .sc-card { width: 100%; padding: 14px; background: var(--sc-surface); border: 1px solid var(--sc-line); border-radius: 16px; }
 .sc-eyebrow { margin: 0 0 8px; font-family: var(--sc-mono); font-size: 11px; font-weight: 500; letter-spacing: 1.4px; text-transform: uppercase; color: var(--sc-accent-text); }
@@ -85,8 +86,8 @@
 .sc-tier div { display: flex; flex-direction: column; gap: 2px; }
 .sc-tier strong { font-weight: 600; }
 .sc-tier span:not(.sc-num) { color: var(--sc-text-2); font-size: 14px; }
-.sc-linkbtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 980px; background: var(--sc-accent); color: #fff; text-decoration: none; font-weight: 500; }
-.sc-linkbtn:hover { background: #0B7CC9; color: #fff; }
+.sc-linkbtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 980px; background: var(--sc-accent); color: var(--scout-on-accent, #fff); text-decoration: none; font-weight: 500; }
+.sc-linkbtn:hover { background: var(--scout-accent-fill, #0B7CC9); color: var(--scout-on-accent, #fff); }
 
 .sc-form { width: 100%; display: flex; flex-direction: column; gap: 6px; padding: 14px; background: var(--sc-surface); border: 1px solid var(--sc-line); border-radius: 16px; }
 .sc-form label { font-family: var(--sc-mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--sc-text-3); margin-top: 4px; }
@@ -95,11 +96,11 @@
 .sc-hp { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; }
 .sc-err { margin: 2px 0 0; min-height: 0; color: #F2553D; font-size: 13.5px; }
 .sc-err:empty { display: none; }
-.sc-submit { margin-top: 8px; min-height: 44px; border-radius: 980px; border: 0; background: var(--sc-accent); color: #fff; font-weight: 500; cursor: pointer; }
+.sc-submit { margin-top: 8px; min-height: 44px; border-radius: 980px; border: 0; background: var(--sc-accent); color: var(--scout-on-accent, #fff); font-weight: 500; cursor: pointer; }
 .sc-submit:disabled { opacity: .6; cursor: default; }
 
 .sc-done { width: 100%; display: flex; gap: 12px; padding: 14px; border-radius: 16px; background: var(--sc-surface); border: 1px solid var(--sc-accent); box-shadow: 0 12px 32px -14px rgba(14,143,230,.55); }
-.sc-check { width: 28px; height: 28px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--sc-accent); color: #fff; }
+.sc-check { width: 28px; height: 28px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--sc-accent); color: var(--scout-on-accent, #fff); }
 .sc-done div { display: flex; flex-direction: column; gap: 2px; }
 .sc-done span:not(.sc-check) { color: var(--sc-text-2); font-size: 14px; text-wrap: pretty; }
 
@@ -107,7 +108,7 @@
 .sc-composer { display: flex; align-items: center; gap: 6px; margin: 0 12px; padding: 4px 4px 4px 16px; border-radius: 980px; background: var(--sc-surface-2); border: 1px solid var(--sc-line); }
 .sc-composer:focus-within { border-color: var(--sc-accent); }
 .sc-composer input { flex: 1; min-width: 0; height: 40px; border: 0; background: none; color: var(--sc-text); outline: none; font-size: 16px; }
-.sc-send { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 0; background: var(--sc-accent); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.sc-send { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 0; background: var(--sc-accent); color: var(--scout-on-accent, #fff); display: grid; place-items: center; cursor: pointer; }
 .sc-foot { margin: 8px 16px 12px; text-align: center; font-size: 12px; color: var(--sc-text-3); text-wrap: balance; }
 
 @media (max-width: 480px) {

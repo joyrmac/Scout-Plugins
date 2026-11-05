@@ -171,6 +171,19 @@ plugin is active. If this plugin is switched off, that copy runs again and
 moves the writing back under its names first; switching this back on moves it
 forward again.
 
+## What this feature needs from the theme
+
+No visitor-facing output: the writing room lives in the dashboard. From the
+theme it reads:
+
+- **`scout-setup.json`:** the `writing` section (child theme first):
+  `prompts`, `menu_label`, `menu_tag`, `send_to`, `text`, and `brand` with its
+  colors, `heading_font`, `body_font` and `font_files`. Full list in Setting
+  it up for a client, above.
+- **Files:** the prompts file and the font files named there, as paths inside
+  the theme.
+- **DESIGN.md:** none. The room's look comes from `writing.brand`.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

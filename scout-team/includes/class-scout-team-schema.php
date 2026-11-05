@@ -4,8 +4,9 @@
  *
  * With Scout Core active, the Person (and a ProfilePage wrapping it) joins
  * Scout Core's single @graph through its public `scout_schema_graph` filter,
- * and worksFor points at the business entity, home_url( '/#business' ). Blog
- * posts by a linked author get that Person as their author. Without Scout Core,
+ * and worksFor points at the business entity, home_url( '/#business' ). A
+ * post's author is the Person of each person picked in its "Written by" box,
+ * or else of the profile linked to its login. Without Scout Core,
  * the plugin prints its own small graph on profile pages.
  *
  * Military service has no schema.org property, so it shows on the page only.
@@ -195,14 +196,35 @@ final class Scout_Team_Schema {
 			$graph['scout_team_page'] = self::profile_page( $id );
 			return $graph;
 		}
-		// A blog post by a linked author: the author is the full Person.
-		if ( is_singular( 'post' ) && isset( $graph['article'] ) && Scout_Team::settings()['bylines'] ) {
-			$member = Scout_Team::member_for_user( (int) get_post_field( 'post_author', get_queried_object_id() ) );
-			if ( $member ) {
-				$graph['article']['author']    = array( '@id' => self::person_id( $member ) );
+		// A post's byline: the people picked in "Written by", or else the
+		// profile linked to its author. The author is the full Person, once.
+		if ( isset( $graph['article'] ) && is_singular( Scout_Team::byline_post_types() ) && Scout_Team::settings()['bylines'] ) {
+			$graph = self::with_authors( $graph, Scout_Team::byline_people( (int) get_queried_object_id() ) );
+		}
+		return $graph;
+	}
+
+	/**
+	 * Point the article's author at the Person node of each person, and add
+	 * each Person to the graph under the same key the profile page uses, so a
+	 * person is one record however many times they are named.
+	 *
+	 * @param array $graph   Scout Core graph, keyed, with an 'article' node.
+	 * @param int[] $members Person post IDs, in byline order.
+	 */
+	public static function with_authors( array $graph, array $members ): array {
+		if ( ! $members || ! isset( $graph['article'] ) ) {
+			return $graph;
+		}
+		$refs = array();
+		foreach ( $members as $member ) {
+			$member = (int) $member;
+			$refs[] = array( '@id' => self::person_id( $member ) );
+			if ( ! isset( $graph[ 'person_' . $member ] ) ) {
 				$graph[ 'person_' . $member ] = self::person( $member );
 			}
 		}
+		$graph['article']['author'] = 1 === count( $refs ) ? $refs[0] : $refs;
 		return $graph;
 	}
 

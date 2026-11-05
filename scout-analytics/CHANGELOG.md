@@ -1,5 +1,10 @@
 # Scout Analytics changelog
 
+## 0.1.22 (2026-11-05)
+
+- **Two fields had the same label.** The Tag Manager field is now "Tag Manager code" and the one in More options "GA4 code (no Tag Manager)". The setting keys are unchanged.
+- **Status line is a headline and one sentence.** The box intro is one sentence; the Global Privacy Control note moved under the consent choice. Shorter help.
+
 ## 0.1.21 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

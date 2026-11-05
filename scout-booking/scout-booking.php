@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Booking
  * Description:       Private sessions booked on the site: session types the owner edits, open times from the working hours, a booking form with short intake questions, requests the owner approves, deposits through the WooCommerce checkout, reschedule and cancel links, and a private calendar feed for the owner's phone. Without WooCommerce every booking is a request.
- * Version:           0.2.1
+ * Version:           0.3.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_BOOKING_VERSION', '0.2.1' );
+define( 'SCOUT_BOOKING_VERSION', '0.3.0' );
 define( 'SCOUT_BOOKING_FILE', __FILE__ );
 define( 'SCOUT_BOOKING_URL', plugin_dir_url( __FILE__ ) );
 
@@ -34,6 +34,7 @@ add_action(
 require_once __DIR__ . '/includes/class-scout-admin-ui.php';
 require_once __DIR__ . '/includes/class-scout-booking.php';
 require_once __DIR__ . '/includes/class-scout-booking-slots.php';
+require_once __DIR__ . '/includes/class-scout-booking-busy.php';
 require_once __DIR__ . '/includes/class-scout-booking-emails.php';
 require_once __DIR__ . '/includes/class-scout-booking-front.php';
 require_once __DIR__ . '/includes/class-scout-booking-woo.php';
@@ -41,6 +42,7 @@ require_once __DIR__ . '/includes/class-scout-booking-admin.php';
 require_once __DIR__ . '/includes/class-scout-booking-types-admin.php';
 
 Scout_Booking::boot();
+Scout_Booking_Busy::boot();
 Scout_Booking_Front::boot();
 Scout_Booking_Admin::boot();
 Scout_Booking_Types_Admin::boot();

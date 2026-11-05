@@ -1,5 +1,24 @@
 # Scout Core — Changelog
 
+## 1.10.0 (2026-11-05)
+
+- **Screen cleanup (Joy's dashboard review).** Page copy opens with its status line only: the row of up to six numbers is gone, since the status line already counts. Its two boxes each open with one sentence, the extra note sits behind More, and only Sync these now is a filled button (Keep the WordPress copy is outlined). Page copy errors say "Page copy" instead of the old name Site Sync. The comparison table has no zebra stripes.
+- **Privacy & terms.** Each document's state uses the kit's dot and word (an amber dot only when it changed after approval) instead of hand-made symbols, and only the first Make the page button is filled. The lede is one sentence. The settings-group screens use the kit's colors, corners and text size, and fill the kit's column instead of a narrower 900px box. The select placeholder reads "Select one" (no dashes). The staging notice says "your web team" on white-label sites.
+- **Language versions (hreflang).** The Scout SEO box on pages and posts has a new "Other language versions" part: set the page's language and pick the same page in another language (es, en, fr, pt, zh, vi, ko, or any simple code like pt-BR). Google then shows each visitor the right one instead of treating the two as duplicates. Nothing changes for visitors until someone links a page.
+  - Links are saved on every page in the group (`_scout_hreflang`), so they always run both ways, and removing a version on one page removes it on all of them. Each page also keeps its own language (`_scout_lang`), the site language by default.
+  - On a linked page the head gets one `<link rel="alternate" hreflang>` per live version and `x-default` for the site language version. Drafts, pages hidden from search, thank-you pages and pages whose canonical points elsewhere are left out.
+  - A page in another language gets that language in `<html lang>`.
+  - Google checks has a "Language versions" row once any page is linked. It names pages whose versions are not live or do not link back.
+  - With WPML, Polylang, TranslatePress or Weglot active, Core stands down (or through `scout_core_hreflang_stand_down`). The sitemap is not changed.
+  - Deleting the plugin with "remove all Scout data" on also removes the two new keys. No visitor data.
+
+- **Searches that found nothing.** When a visitor uses the site's own search box and gets no results, Scout Core counts the search words, so you can see what people look for and can't find. Search settings shows the top 20 with how many times and the last day each was searched, a "Clear the list" button, and the hint "Add a page or an FAQ answer for the top ones." Nothing changes for visitors, and no search box is added to any page.
+  - Only the words are kept, lowercased and cut to 80 characters, with a count and the first and last day seen. No IP address, browser or time of the search. Words with an @, seven or more digits in a row (phone numbers however they are written), a web address, or more than 8 words are never kept.
+  - Not counted for people logged in to edit the site, for bots, inside the dashboard, on page two of results, or when the search found something. One visitor's repeat search within 30 minutes counts once, through a short-lived record named by a scrambled copy of the words and IP address.
+  - At most 200 phrases. Phrases not searched for 90 days are removed by Core's existing daily check. The list is one setting that is not loaded on every page (`scout_core_empty_searches`), and deleting the plugin removes it.
+  - A new switch in Search settings, "Keep a list of searches that found nothing", is on by default and saved with the other Search settings (`scout_seo_defaults[empty_searches]`). Turning it off stops the count and clears the list.
+  - Scout Core's visitor data list now names the search words and the 30-minute record, so the privacy policy draft includes them.
+
 ## 1.9.0 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

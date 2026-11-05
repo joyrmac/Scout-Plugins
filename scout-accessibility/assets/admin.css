@@ -8,8 +8,8 @@
 .sh .sa-row:first-child { padding-top: 4px; }
 .sh .sa-row:last-child { border-bottom: 0; }
 .sh .sa-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; background: var(--sh-surface-2); color: var(--sh-text-2); margin-top: 1px; }
-.sh .sa-row.is-pass .sa-icon { background: rgba(14, 158, 115, .14); color: var(--sh-good); }
-.sh .sa-row.is-fix .sa-icon { background: rgba(251, 176, 36, .2); color: var(--sh-warn); }
+.sh .sa-row.is-pass .sa-icon { background: var(--sh-good-tint); color: var(--sh-good); }
+.sh .sa-row.is-fix .sa-icon { background: var(--sh-warn-tint); color: var(--sh-warn); }
 .sh .sa-body { min-width: 0; }
 .sh .sa-name { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: var(--sh-text); }
 .sh .sa-detail { margin: 2px 0 0; color: var(--sh-text-2); max-width: 680px; text-wrap: pretty; }

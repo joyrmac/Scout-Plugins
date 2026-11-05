@@ -40,6 +40,12 @@ const SCOUT_WRITING_MAX = 200000;
  *
  * @return array{steps:array,prompts:array,by_id:array,dest:array,time:array,groups:array,blocks:array,social_rules:array,guests:array,inventory:array}
  */
+/** Who writing goes to: Scout on Scout-branded sites, "your web team" on white-label sites. */
+function scout_writing_team(): string {
+	$branded = class_exists( 'Scout_Admin_UI' ) && method_exists( 'Scout_Admin_UI', 'branded' ) ? Scout_Admin_UI::branded() : true;
+	return $branded ? 'Scout' : 'your web team';
+}
+
 function scout_writing_data(): array {
 	static $data = null;
 	if ( null !== $data ) {
@@ -297,7 +303,7 @@ function scout_writing_status( WP_Post $entry ): string {
 function scout_writing_status_label( string $status ): string {
 	return array(
 		'draft' => 'Draft',
-		'ready' => 'Sent to Scout',
+		'ready' => 'Sent to ' . scout_writing_team(),
 		'done'  => 'Done',
 	)[ $status ] ?? 'Draft';
 }
@@ -355,7 +361,7 @@ function scout_writing_send( int $user_id, WP_Post $entry ): bool {
 	if ( $user && is_email( $user->user_email ) ) {
 		$headers[] = 'Reply-To: ' . str_replace( array( "\r", "\n", '"', '<', '>' ), '', $name ) . ' <' . $user->user_email . '>';
 	}
-	$subject = $name . ' sent writing to Scout: ' . wp_trim_words( $prompt['q'], 9, '...' );
+	$subject = $name . ' sent writing to ' . scout_writing_team() . ': ' . wp_trim_words( $prompt['q'], 9, '...' );
 	$sent    = wp_mail( $to, $subject, implode( "\n", $lines ), $headers );
 	update_post_meta( $entry->ID, '_sw_sent_mail', $sent ? '1' : '0' );
 	return (bool) $sent;
@@ -430,7 +436,7 @@ function scout_writing_payload( int $user_id, string $pid, string $note = '' ): 
 	$out['label']  = scout_writing_status_label( $status );
 	$out['saved']  = 'Saved ' . wp_date( 'M j, g:i a', strtotime( $entry->post_modified_gmt . ' UTC' ) );
 	$sent_at       = (int) get_post_meta( $entry->ID, '_sw_sent_at', true );
-	$out['sent']   = $sent_at ? 'Sent to Scout on ' . wp_date( 'F j', $sent_at ) . '.' : '';
+	$out['sent']   = $sent_at ? 'Sent to ' . scout_writing_team() . ' on ' . wp_date( 'F j', $sent_at ) . '.' : '';
 	foreach ( scout_writing_memos( $entry ) as $att ) {
 		$mime           = (string) get_post_mime_type( $att );
 		$out['memos'][] = array(
@@ -498,8 +504,8 @@ function scout_writing_do( string $do, array $req ) {
 				return new WP_Error( 'sw_empty', 'Write a little or add a voice memo first, then send it.' );
 			}
 			$note = scout_writing_send( $user_id, $entry )
-				? 'Sent. Scout has it now. You can keep adding to it, and send again any time.'
-				: 'Marked Sent to Scout, but the email did not go out from this site. Let Joy or Sean know.';
+				? 'Sent. ' . ucfirst( scout_writing_team() ) . ' has it now. You can keep adding to it, and send again any time.'
+				: 'Marked sent, but the email did not go out from this site. Let ' . scout_writing_team() . ' know.';
 			break;
 		case 'draft':
 			if ( ! scout_writing_can_draft( $prompt ) ) {
@@ -516,7 +522,7 @@ function scout_writing_do( string $do, array $req ) {
 			if ( is_wp_error( $res ) ) {
 				return $res;
 			}
-			$note = 'A draft post is waiting in Posts for Scout to shape. It stays a draft, so nothing goes live.';
+			$note = 'A draft post is waiting in Posts for ' . scout_writing_team() . ' to shape. It stays a draft, so nothing goes live.';
 			break;
 		case 'memo':
 		case 'unmemo':
@@ -779,8 +785,8 @@ function scout_writing_howto_html( bool $open ): string {
 	$flow = array(
 		array( 'Pick one prompt', 'Start with Step 1, or anything that sparks you today.' ),
 		array( 'Write it here', 'Tap Write. It saves as you type. Voice memos count too.' ),
-		array( 'Send it to Scout', 'Tap Send to Scout when it feels ready. Rough is perfect.' ),
-		array( 'We shape it', 'Scout turns your answer into a post, page or email and sends it back for your yes.' ),
+		array( 'Send it to ' . scout_writing_team(), 'Tap Send when it feels ready. Rough is perfect.' ),
+		array( 'We shape it', ucfirst( scout_writing_team() ) . ' turns your answer into a post, page or email and sends it back for your yes.' ),
 		array( 'Mark it done', 'Tap Mark done. Your marks are saved to your login, on any device.' ),
 	);
 	$h = '<details class="sw-howto"' . ( $open ? ' open' : '' ) . '><summary><span class="sw-label">Step 0</span><span class="sw-h2">How to <em>use</em> this</span><span class="sw-chev" aria-hidden="true"></span></summary><ol class="sh-steps sw-flow">';
@@ -792,7 +798,7 @@ function scout_writing_howto_html( bool $open ): string {
 		$h .= '<div class="sw-day"><span class="sw-label">' . esc_html( $day['label'] ) . '</span><p><strong>' . esc_html( $day['title'] ) . '</strong>' . esc_html( $day['text'] ) . '</p></div>';
 	}
 	$h .= '</div><p class="sw-note">Skip a week and nothing breaks. You can stop any time and pick up right where you left off.</p></div>'
-		. '<p class="sw-private">Everything you write here is private. Only you and Scout can see it, and nothing goes on the site until you say yes.</p></details>';
+		. '<p class="sw-private">Everything you write here is private. Only you and ' . scout_writing_team() . ' can see it, and nothing goes on the site until you say yes.</p></details>';
 	return $h;
 }
 
@@ -923,7 +929,7 @@ function scout_writing_panel_html( string $pid, array $payload, bool $form ): st
 	$h .= '<div class="sw-pacts">';
 	$h .= $form ? '<button type="submit" name="do" value="save" class="sw-btn sw-save">Save</button>' : '';
 	$h .= $can_memo ? '<button type="button" class="sw-btn sw-memo" data-js-only hidden>Add a voice memo</button>' : '';
-	$h .= '<button type="submit" name="do" value="send" class="sw-btn sw-primary sw-send">Send to Scout</button>';
+	$h .= '<button type="submit" name="do" value="send" class="sw-btn sw-primary sw-send">Send to ' . esc_html( scout_writing_team() ) . '</button>';
 	// Website and newsletter prompts only. The inline template (no prompt yet) carries it hidden; the script shows it.
 	if ( ! $prompt || scout_writing_can_draft( $prompt ) ) {
 		$h .= '<button type="submit" name="do" value="draft" class="sw-link sw-draft"' . ( $payload['draft'] || ! $prompt ? ' hidden' : '' ) . '>Start a draft from this</button>';
@@ -945,8 +951,8 @@ function scout_writing_flash(): string {
 	// phpcs:enable
 	$text = array(
 		'save'      => 'Saved.',
-		'send'      => 'Sent. Scout has it now.',
-		'draft'     => 'A draft post is waiting in Posts for Scout to shape.',
+		'send'      => 'Sent. ' . ucfirst( scout_writing_team() ) . ' has it now.',
+		'draft'     => 'A draft post is waiting in Posts for ' . scout_writing_team() . ' to shape.',
 		'sw_empty' => 'Write a little (or add a voice memo) first.',
 		'sw_cap'   => 'Sign in again.',
 	);
@@ -978,14 +984,14 @@ function scout_writing_status_line( string $state, string $headline, string $det
 	echo '</p></section>';
 }
 
-/** One row in My writing: the prompt, its step, status, last edit and words, and Keep writing. */
+/** One row in My writing (stacked kit row): the prompt with Keep writing beside it, then status, step, group, words and last edit. */
 function scout_writing_mine_row( string $pid, array $e ): string {
 	$p   = scout_writing_data()['by_id'][ $pid ];
 	$mod = strtotime( $e['post']->post_modified_gmt . ' UTC' );
-	return '<li class="sh-row sw-mrow" data-pid="' . esc_attr( $pid ) . '"><div><p class="sh-row-name sw-mq">' . esc_html( $p['q'] ) . '</p>'
-		. '<p class="sh-row-sub">Step ' . (int) $p['step'] . ' &middot; ' . esc_html( $p['group'] ) . '</p></div>'
+	return '<li class="sh-row sw-mrow" data-pid="' . esc_attr( $pid ) . '"><div><p class="sh-row-name sw-mq">' . esc_html( $p['q'] ) . '</p></div>'
 		. '<div class="sh-row-facts"><span class="sw-status sw-s-' . esc_attr( $e['status'] ) . '">' . esc_html( scout_writing_status_label( $e['status'] ) ) . '</span>'
-		. '<span>Last edited ' . esc_html( wp_date( 'M j, g:i a', $mod ) ) . '</span><span>' . (int) scout_writing_words( scout_writing_text( $e['post'] ) ) . ' words</span></div>'
+		. '<span class="sh-tag">Step ' . (int) $p['step'] . '</span>' . ( '' !== (string) $p['group'] ? '<span class="sh-tag">' . esc_html( $p['group'] ) . '</span>' : '' )
+		. '<span class="sh-tag">' . (int) scout_writing_words( scout_writing_text( $e['post'] ) ) . ' words</span><span>Last edited ' . esc_html( wp_date( 'M j, g:i a', $mod ) ) . '</span></div>'
 		. '<div class="sh-row-go"><a class="button" data-open="' . esc_attr( $pid ) . '" href="' . esc_url( scout_writing_url( $pid ) ) . '">Keep writing</a></div></li>';
 }
 
@@ -1026,7 +1032,7 @@ function scout_writing_render() {
 		$pay  = scout_writing_payload( $user_id, $write );
 		$star = $pay['star'];
 		$done = $pay['done'];
-		Scout_Admin_UI::open( $label, 'Write your answer here, in your own words. Send it to Scout when it feels ready.' );
+		Scout_Admin_UI::open( $label, 'Write your answer here, in your own words. Send it to ' . scout_writing_team() . ' when it feels ready.' );
 		echo '<div class="sw">';
 		echo '<p class="sw-back"><a href="' . esc_url( scout_writing_url() . '#sw-p-' . $write ) . '">&larr; All your prompts</a></p>';
 		echo scout_writing_flash(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
@@ -1056,12 +1062,12 @@ function scout_writing_render() {
 	if ( method_exists( 'Scout_Admin_UI', 'page_head' ) ) {
 		Scout_Admin_UI::page_head( 'Your writing room', (string) scout_writing_copy( 'kicker' ) );
 	}
-	Scout_Admin_UI::open( $label, 'Every prompt from your writing plan. Pick one, write it in your own words, and send it to Scout when it\'s ready.' );
+	Scout_Admin_UI::open( $label, 'Every prompt from your writing plan. Pick one, write it in your own words, and send it to ' . scout_writing_team() . ' when it\'s ready.' );
 	echo '<div class="sw">';
 	// Status line, the kit's markup with live numbers the script keeps up to date.
 	echo '<section class="sh-box"><p class="sh-status is-' . ( $written ? 'good' : 'off' ) . '"><span class="sh-dot" aria-hidden="true"></span>';
 	echo '<strong><span id="sw-done-n">' . count( $marks['done'] ) . '</span> of ' . (int) $total . ' prompts done.</strong> ';
-	echo '<span><span id="sw-written-n">' . (int) $written . '</span> written, ' . (int) $sent . ' sent to Scout.</span></p></section>';
+	echo '<span><span id="sw-written-n">' . (int) $written . '</span> written, ' . (int) $sent . ' sent to ' . esc_html( scout_writing_team() ) . '.</span></p></section>';
 	echo scout_writing_flash(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 
 	// My writing: the newest five, the rest one tap away (open for ?view=mine).
@@ -1073,10 +1079,10 @@ function scout_writing_render() {
 		foreach ( $entries as $pid => $e ) {
 			$rows[] = scout_writing_mine_row( (string) $pid, $e );
 		}
-		echo '<ul class="sh-rows sw-mlist">' . implode( '', array_slice( $rows, 0, 5 ) ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+		echo '<ul class="sh-rows is-stacked sw-mlist">' . implode( '', array_slice( $rows, 0, 5 ) ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 		if ( count( $rows ) > 5 ) {
 			echo '<details class="sw-more"' . ( 'mine' === $view ? ' open' : '' ) . '><summary>' . esc_html( sprintf( 'Show all %d pieces', count( $rows ) ) ) . '</summary>';
-			echo '<ul class="sh-rows sw-mlist">' . implode( '', array_slice( $rows, 5 ) ) . '</ul></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
+			echo '<ul class="sh-rows is-stacked sw-mlist">' . implode( '', array_slice( $rows, 5 ) ) . '</ul></details>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 		}
 	}
 	echo '</section>';
@@ -1129,7 +1135,7 @@ function scout_writing_render() {
 	// The inline panel, cloned by the script under any prompt.
 	$blank = array( 'text' => '', 'saved' => '', 'memos' => array(), 'draft' => null, 'sent' => '', 'note' => '' );
 	echo '<template id="sw-panel-tpl">' . scout_writing_panel_html( '__PID__', $blank, false ) . '</template>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
-	echo '<p class="sw-foot">Your stars, done marks and writing are saved to your login, so they follow you to any device. Only you and Scout can see what you write.</p>';
+	echo '<p class="sw-foot">Your stars, done marks and writing are saved to your login, so they follow you to any device. Only you and ' . esc_html( scout_writing_team() ) . ' can see what you write.</p>';
 	echo '</div>';
 	Scout_Admin_UI::close();
 }

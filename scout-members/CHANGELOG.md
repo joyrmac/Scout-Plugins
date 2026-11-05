@@ -1,5 +1,12 @@
 # Scout Members changelog
 
+## 0.4.8 (2026-11-05)
+
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the membership pages now read the theme's DESIGN.md (accent fill, on accent, line, surface 2 and card corner, from `design-tokens.css`) when the theme does not set `--scout-members-*`. Sites that set them, or set neither, look exactly the same.
+- **All members rows stack**: name and email with one Edit button, then status, plan, renewal and payment tags. Edit opens the status, plan, renewal price and date fields under the row, with Save and a quiet Paid today. Without scripts the fields stay open. Real warnings (past due, lapsed, payment to review) keep amber; "Approved, dues not paid yet" is calm.
+- **Home opens with the status line only.** The four number cards are gone; when nothing waits, the status line says how many members and plans there are.
+- **Settings.** The application questions format is one line plus a More fold. Plan warnings (not for sale yet, checkout price differs) show as a line with an amber dot instead of a full-sentence chip. "Status, plan & renewal" and "Plans & approval". Shorter help.
+
 ## 0.4.7 (2026-11-05)
 
 - **Fuller privacy export.** Export Personal Data now includes staff notes and any payment flagged for review. Erasing now says the login stays.

@@ -277,7 +277,7 @@ final class Scout_Accessibility_Admin {
 	private static function row( string $title, string $state, string $detail, array $items = array() ): void {
 		$pill = array(
 			'pass' => array( 'is-done', __( 'Pass', 'scout-accessibility' ) ),
-			'fix'  => array( 'is-received', __( 'Fix', 'scout-accessibility' ) ),
+			'fix'  => array( 'is-warn', __( 'Fix', 'scout-accessibility' ) ),
 			'none' => array( '', __( 'Not checked', 'scout-accessibility' ) ),
 		)[ $state ];
 		?>
@@ -321,49 +321,34 @@ final class Scout_Accessibility_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Accessibility checks', 'scout-accessibility' ),
-			__( 'Weekly checks for the common issues a computer can find, and a short checklist for what needs a person at launch.', 'scout-accessibility' ),
+			__( 'Weekly checks a computer can run, and a short launch checklist for a person.', 'scout-accessibility' ),
 			__( 'Site status · Accessibility checks', 'scout-accessibility' )
 		);
 		self::messages();
 		?>
-		<div class="sh-grid sh-grid-2">
-			<section class="sh-box sh-check is-<?php echo ! $ran ? 'warn' : ( $to_fix ? 'warn' : 'good' ); ?>">
-				<p class="sh-label"><?php esc_html_e( 'Weekly checks', 'scout-accessibility' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>
-					<?php
-					if ( ! $ran ) {
-						esc_html_e( 'Not run yet', 'scout-accessibility' );
-					} elseif ( $to_fix ) {
-						/* translators: %d: number of checks */
-						echo esc_html( sprintf( _n( '%d check to fix', '%d checks to fix', $to_fix, 'scout-accessibility' ), $to_fix ) );
-					} else {
-						esc_html_e( 'All four pass', 'scout-accessibility' );
-					}
-					?>
-				</p>
-				<p class="sh-note">
-					<?php
-					$next = wp_next_scheduled( Scout_Accessibility_Checks::CRON );
-					if ( $next ) {
-						/* translators: %s: date */
-						echo esc_html( sprintf( __( 'Next run %s', 'scout-accessibility' ), wp_date( get_option( 'date_format' ), $next ) ) );
-					} else {
-						esc_html_e( 'Runs once a week.', 'scout-accessibility' );
-					}
-					?>
-				</p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo count( $items ) === $launch_done ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'At launch', 'scout-accessibility' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>
-					<?php
-					/* translators: 1: done, 2: total */
-					echo esc_html( sprintf( __( '%1$d of %2$d reviewed', 'scout-accessibility' ), $launch_done, count( $items ) ) );
-					?>
-				</p>
-				<p class="sh-note"><a href="#sa-launch"><?php esc_html_e( 'Color contrast & keyboard use', 'scout-accessibility' ); ?></a></p>
-			</section>
-		</div>
+		<?php
+		// One status line instead of two status cards (DESIGN 8).
+		$all_launch = count( $items ) === $launch_done;
+		if ( ! $ran ) {
+			$state    = 'off';
+			$headline = __( 'Weekly checks haven’t run yet.', 'scout-accessibility' );
+		} elseif ( $to_fix ) {
+			$state = 'warn';
+			/* translators: %d: number of checks */
+			$headline = sprintf( _n( '%d check to fix.', '%d checks to fix.', $to_fix, 'scout-accessibility' ), $to_fix );
+		} else {
+			$state    = $all_launch ? 'good' : 'warn';
+			$headline = __( 'All four weekly checks pass.', 'scout-accessibility' );
+		}
+		/* translators: 1: done, 2: total */
+		$detail = sprintf( __( '%1$d of %2$d launch checks reviewed.', 'scout-accessibility' ), $launch_done, count( $items ) );
+		$go     = $all_launch ? '' : '<a class="button" href="#sa-launch">' . esc_html__( 'Review launch checks', 'scout-accessibility' ) . '</a>';
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+		} else {
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong> <span>' . esc_html( $detail ) . '</span>' . ( '' !== $go ? ' <span class="sh-status-go">' . $go . '</span>' : '' ) . '</p></section>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $go is built from escaped parts.
+		}
+		?>
 
 		<?php /* ------------------------------------------------ Weekly */ ?>
 		<div class="sh-section-head sa-head" id="sa-weekly">
@@ -579,7 +564,7 @@ final class Scout_Accessibility_Admin {
 		<div class="sh-section-head" id="sa-statement">
 			<p class="sh-eyebrow"><?php esc_html_e( 'Statement', 'scout-accessibility' ); ?></p>
 			<h2><?php esc_html_e( 'The accessibility statement', 'scout-accessibility' ); ?></h2>
-			<p class="sh-note"><?php esc_html_e( 'Saving creates or updates the Accessibility page. It says the site aims for the standard and never claims full compliance.', 'scout-accessibility' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Saving creates or updates the Accessibility page, which never claims full compliance.', 'scout-accessibility' ); ?></p>
 			<?php if ( ! empty( Scout_Accessibility::settings()['own_page'] ) ) : ?>
 				<p class="sh-note"><strong><?php esc_html_e( 'This site uses its own Accessibility page.', 'scout-accessibility' ); ?></strong> <?php esc_html_e( 'Its words stay exactly as written. Edit that page to change them; the settings below are kept for reference only.', 'scout-accessibility' ); ?></p>
 			<?php endif; ?>
@@ -627,7 +612,7 @@ final class Scout_Accessibility_Admin {
 				<tr>
 					<th scope="row"><label for="sa-reviewed"><?php esc_html_e( 'Last reviewed', 'scout-accessibility' ); ?></label></th>
 					<td><input id="sa-reviewed" type="date" name="sa[last_reviewed]" value="<?php echo esc_attr( '' !== $s['last_reviewed'] ? $s['last_reviewed'] : current_time( 'Y-m-d' ) ); ?>">
-						<p class="description"><?php esc_html_e( 'Shown at the bottom of the statement as the month and year. Review it at least once a year.', 'scout-accessibility' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'Shown at the bottom of the statement. Review it at least once a year.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 			</table>
 			<?php submit_button( $page ? __( 'Save and update the page', 'scout-accessibility' ) : __( 'Save and create the page', 'scout-accessibility' ) ); ?>
@@ -637,47 +622,65 @@ final class Scout_Accessibility_Admin {
 		<div class="sh-section-head" id="sa-footer">
 			<p class="sh-eyebrow"><?php esc_html_e( 'Footer link', 'scout-accessibility' ); ?></p>
 			<h2><?php esc_html_e( 'Link to the statement from every page', 'scout-accessibility' ); ?></h2>
-			<p class="sh-note"><?php esc_html_e( 'Visitors expect it in the footer, next to the privacy policy. Use whichever way fits the theme.', 'scout-accessibility' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Visitors look for it in the footer. Use whichever way fits the theme.', 'scout-accessibility' ); ?></p>
 		</div>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Add it to a menu', 'scout-accessibility' ); ?></h2>
+		<section class="sh-box">
+			<ul class="sh-rows">
 				<?php $menus = wp_get_nav_menus(); ?>
-				<?php if ( ! $page ) : ?>
-					<p><?php esc_html_e( 'Create the statement page first.', 'scout-accessibility' ); ?></p>
-				<?php elseif ( ! $menus ) : ?>
-					<p><?php esc_html_e( 'This site has no classic menus, so add it to a page instead.', 'scout-accessibility' ); ?></p>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Pick the footer menu. It counts as linked once that menu is shown in a menu location.', 'scout-accessibility' ); ?></p>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sa-inline-form">
-						<input type="hidden" name="action" value="scout_a11y_menu_add">
-						<?php wp_nonce_field( 'scout_a11y_menu_add' ); ?>
-						<label for="sa-menu" class="screen-reader-text"><?php esc_html_e( 'Menu', 'scout-accessibility' ); ?></label>
-						<select id="sa-menu" name="menu">
-							<?php foreach ( $menus as $menu ) : ?>
-								<option value="<?php echo esc_attr( (string) $menu->term_id ); ?>" <?php selected( false !== stripos( $menu->name, 'footer' ) ); ?>><?php echo esc_html( $menu->name ); ?></option>
-							<?php endforeach; ?>
-						</select>
-						<button type="submit" class="button"><?php esc_html_e( 'Add the link', 'scout-accessibility' ); ?></button>
-					</form>
-				<?php endif; ?>
-			</section>
-			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Add it to a page', 'scout-accessibility' ); ?></h2>
-				<p><?php esc_html_e( 'Put this in a footer widget, a Shortcode block in the footer template, or any page.', 'scout-accessibility' ); ?></p>
-				<p><code>[<?php echo esc_html( Scout_Accessibility::LINK_CODE ); ?>]</code></p>
-			</section>
-			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Add it to every page', 'scout-accessibility' ); ?></h2>
-				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-					<input type="hidden" name="action" value="scout_a11y_footer">
-					<?php wp_nonce_field( 'scout_a11y_footer' ); ?>
-					<p><label for="sa-footer-link"><input id="sa-footer-link" type="checkbox" name="footer_link" value="1" <?php checked( $s['footer_link'] ); ?>> <?php esc_html_e( 'Add a small link at the bottom of every page', 'scout-accessibility' ); ?></label></p>
-					<p class="description"><?php esc_html_e( 'For themes with no menu or widget in the footer. It sits below the theme footer.', 'scout-accessibility' ); ?></p>
-					<p><button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-accessibility' ); ?></button></p>
-				</form>
-			</section>
-		</div>
+				<li class="sh-row">
+					<div>
+						<p class="sh-row-name"><?php esc_html_e( 'Add it to a menu', 'scout-accessibility' ); ?></p>
+						<p class="sh-row-sub">
+							<?php
+							if ( ! $page ) {
+								esc_html_e( 'Create the statement page first.', 'scout-accessibility' );
+							} elseif ( ! $menus ) {
+								esc_html_e( 'This site has no classic menus, so add it to a page instead.', 'scout-accessibility' );
+							} else {
+								esc_html_e( 'Pick the footer menu. It counts once that menu is shown on the site.', 'scout-accessibility' );
+							}
+							?>
+						</p>
+					</div>
+					<?php if ( $page && $menus ) : ?>
+						<div class="sh-row-go">
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sa-inline-form">
+								<input type="hidden" name="action" value="scout_a11y_menu_add">
+								<?php wp_nonce_field( 'scout_a11y_menu_add' ); ?>
+								<label for="sa-menu" class="screen-reader-text"><?php esc_html_e( 'Menu', 'scout-accessibility' ); ?></label>
+								<select id="sa-menu" name="menu">
+									<?php foreach ( $menus as $menu ) : ?>
+										<option value="<?php echo esc_attr( (string) $menu->term_id ); ?>" <?php selected( false !== stripos( $menu->name, 'footer' ) ); ?>><?php echo esc_html( $menu->name ); ?></option>
+									<?php endforeach; ?>
+								</select>
+								<button type="submit" class="button"><?php esc_html_e( 'Add the link', 'scout-accessibility' ); ?></button>
+							</form>
+						</div>
+					<?php endif; ?>
+				</li>
+				<li class="sh-row">
+					<div>
+						<p class="sh-row-name"><?php esc_html_e( 'Add it to a page', 'scout-accessibility' ); ?></p>
+						<p class="sh-row-sub"><?php esc_html_e( 'Put this in a footer widget, a Shortcode block or any page.', 'scout-accessibility' ); ?></p>
+					</div>
+					<div class="sh-row-go"><code>[<?php echo esc_html( Scout_Accessibility::LINK_CODE ); ?>]</code></div>
+				</li>
+				<li class="sh-row">
+					<div>
+						<p class="sh-row-name"><?php esc_html_e( 'Add it to every page', 'scout-accessibility' ); ?></p>
+						<p class="sh-row-sub"><?php esc_html_e( 'A small link below the theme footer, for themes with no footer menu.', 'scout-accessibility' ); ?></p>
+					</div>
+					<div class="sh-row-go">
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sa-inline-form">
+							<input type="hidden" name="action" value="scout_a11y_footer">
+							<?php wp_nonce_field( 'scout_a11y_footer' ); ?>
+							<label for="sa-footer-link"><input id="sa-footer-link" type="checkbox" name="footer_link" value="1" <?php checked( $s['footer_link'] ); ?>> <?php esc_html_e( 'On', 'scout-accessibility' ); ?></label>
+							<button type="submit" class="button"><?php esc_html_e( 'Save', 'scout-accessibility' ); ?></button>
+						</form>
+					</div>
+				</li>
+			</ul>
+		</section>
 		<?php
 		Scout_Admin_UI::close();
 	}

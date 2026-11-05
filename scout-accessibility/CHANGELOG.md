@@ -1,5 +1,11 @@
 # Scout Accessibility changelog
 
+## 0.1.19 (2026-11-05)
+
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the statement's contact buttons and "last reviewed" line now read the theme's DESIGN.md accent, pill corner and muted text (from `design-tokens.css`) when the theme does not set `--scout-a11y-*`. Sites that set them, or set neither, look exactly the same.
+- **Accessibility checks open with one status line** ("1 check to fix. 2 of 4 launch checks reviewed.") instead of two status cards. The Fix pill and icon use the kit's warning tokens.
+- **Footer link.** The three cards (menu, page, every page) are three rows in one box. Shorter lede and help.
+
 ## 0.1.18 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

@@ -131,17 +131,33 @@ New reviews arrive as drafts with a count on the Reviews menu. Publish the
 ones you want. Google keeps control of the name, text, stars, and date; a
 review deleted on Google comes off the site on the next sync.
 
-## Design
+## What this feature needs from the theme
 
-The stylesheet reads Scout design tokens when the theme has them (`--surface`,
-`--line`, `--text-2`, `--accent-text`, `--font-mono`, `--r-card`) and
-otherwise mixes colors from the page's text color, so it fits light and dark
-themes. To restyle:
-
-- Override the `--sr-*` variables on `.scout-reviews`.
-- Replace markup by copying `templates/section.php`, `summary.php`, or
-  `card.php` to `{theme}/scout-reviews/`.
-- Turn the stylesheet off in Settings or with
+- **DESIGN.md:** on the site, the stylesheet reads the DESIGN.md roles
+  surface, line, muted text, accent (links, or `accent_text` when a DESIGN.md
+  adds it), the card corner and the label font, as `--scout-surface`,
+  `--scout-line`, `--scout-text-2`, `--scout-accent-text`, `--scout-accent`,
+  `--scout-radius-card` and `--scout-font-label`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The names it read
+  before still win when the theme sets them: `--surface`, `--line`,
+  `--text-2`, `--text-3`, `--accent-text`, `--font-mono`, `--r-card`. With
+  neither, it mixes shades from the page's text color, so it fits light and
+  dark themes. The stars are a fixed amber, `#fbb024`.
+- **Where it lands:** where the **Scout Reviews** block, `[scout_reviews]`,
+  `[scout_review_summary]` or `scout_reviews_slot()` sits (Theme
+  integration, above). A slot prints nothing when there is nothing to show,
+  so the theme passes its section wrapper as `before` and `after`.
+- **The review page** (`/review/` and `/review/note/`) is its own page,
+  outside the theme's templates. Its look comes from Review settings
+  (`background`, `text_color`, `accent`, `heading_font`, `body_font`,
+  `label_font`), whose defaults a theme can set with the `scout_reviews_brand`
+  filter. The logo at the top is the site icon.
+- **scout-setup.json:** the `reviews` section, filled in by Scout Build where
+  the setting is blank: `business`, `headline`, `ask`, `photo`,
+  `card_headline`, `google_review_url`, and the look keys `background`,
+  `text_color`, `accent`, `heading_font`, `body_font`, `label_font`.
+- **Restyling today:** override the `--sr-*` variables on `.scout-reviews`,
+  copy `templates/section.php`, `summary.php` or `card.php` to
+  `{theme}/scout-reviews/`, or turn the stylesheet off in Settings or with
   `add_filter( 'scout_reviews_load_styles', '__return_false' );`.
 
 ## Filters

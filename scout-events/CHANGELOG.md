@@ -1,5 +1,15 @@
 # Scout Events changelog
 
+## 0.16.8 (2026-11-05)
+
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** event cards, the ticket and the portals now read the theme's DESIGN.md (accent fill, on accent, line, muted text, surface 2 and card corner, from `design-tokens.css`) when the theme does not set `--scout-events-*`. Sites that set them, or set neither, look exactly the same.
+- **Events home opens with the status line** ("4 things need you. Next up: Spring Summit, …" with a See what button) instead of five number cards. The counts of events, sessions and speakers are one line in Coming up. The overview table has no zebra stripes. A Postponed or Moved event shows a plain tag, and Cancelled a red one, instead of amber.
+- **Sign-ups rows stack** (the kit's stacked rows): name and email with Check in and a quiet Cancel on the right, then guests, check-in time, ticket, agreement and photo tags, the order link and the signature under it. No more " · " lists.
+- **Volunteers.** A status line ("3 of 5 spots filled. 2 volunteers signed up.") replaces the three numbers, and each shift shows "2 open" in grey or "Full" in green instead of an amber "3 / 5". Email and phone are separated by a comma, and a shift's note sits on its own line.
+- **Calmer colors and words.** The admin stylesheet uses the kit's tokens instead of typed hex colors, and the edit-screen grids stop at three across. "Sign-ups & check-in" and "Prices & Google". Shorter ledes and help.
+- **The calendar gets options** (from the Oct 27 work, never released until now). `[scout_events views="list,month"]` adds a List & Month switch; Month draws a calendar for every month with an event. `filter="series"` adds chips to show one kind of event at a time. Events that repeat share a title, so the title is the series; the `scout_events_series` filter names one otherwise. Every event stays in the page, so it all works without the script, which only shows and hides.
+- **Past events as a photo gallery.** `layout="gallery"` shows each event's photo on its card and groups by year (`group="year"` works on any list). Built for Bliss Boogie's "Where we have gathered" (Joy, 2026-10-26). A plain `[scout_events]` is unchanged; Bliss Boogie's theme already asks for these options, so its Events page picks them up with this release.
+
 ## 0.16.7 (2026-11-05)
 
 - **Privacy tools reach presenters.** Export Personal Data now lists a presenter's application, profile, private details and changes waiting for approval, found by their login email or the profile's contact email. Erasing removes the private details and waiting changes. The public profile and the login stay for staff to remove by hand, and the tool says so.

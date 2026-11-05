@@ -62,7 +62,7 @@ final class Scout_Cards_VCard {
 		$lines = array( 'BEGIN:VCARD', 'VERSION:3.0' );
 		if ( 'team' === $p['key'] ) {
 			$lines[] = 'N:;;;;';
-			$lines[] = 'FN:' . self::escape( $s['name'] );
+			$lines[] = 'FN:' . self::escape( Scout_Cards_Settings::org( $s ) );
 			$lines[] = 'X-ABShowAs:COMPANY';
 		} else {
 			$lines[] = 'N:' . self::escape( $p['last'] ) . ';' . self::escape( $p['first'] ) . ';;;';
@@ -71,11 +71,11 @@ final class Scout_Cards_VCard {
 				$lines[] = 'TITLE:' . self::escape( $p['title'] );
 			}
 		}
-		$lines[] = 'ORG:' . self::escape( $s['name'] );
+		$lines[] = 'ORG:' . self::escape( Scout_Cards_Settings::org( $s ) );
 		if ( $p['email'] ) {
 			$lines[] = 'EMAIL;TYPE=WORK,INTERNET:' . $p['email'];
 		}
-		$tel = Scout_Cards_Settings::phone_e164( $s['phone'] );
+		$tel = Scout_Cards_Settings::phone_e164( $p['phone'] ?? $s['phone'] ); // the card's phone: theirs from People, else the business phone
 		if ( $tel ) {
 			$lines[] = 'TEL;TYPE=WORK,VOICE:' . $tel;
 		}
@@ -86,8 +86,11 @@ final class Scout_Cards_VCard {
 		if ( $s['note'] ) {
 			$lines[] = 'NOTE:' . self::escape( $s['note'] );
 		}
+		// In the theme's own card look, a card with no photo of its own uses the theme's
+		// contact photo, as the theme's cards did (render-theme.php).
+		$theme    = ! $p['photo_id'] && class_exists( 'Scout_Cards_Render_Theme' ) && Scout_Cards_Render_Theme::on() ? Scout_Cards_Render_Theme::contact_photo( (string) $p['key'] ) : '';
 		$photo_id = $p['photo_id'] ? $p['photo_id'] : ( 'team' === $p['key'] ? (int) get_option( 'site_icon' ) : 0 );
-		$photo    = self::photo( $photo_id );
+		$photo    = '' !== $theme ? $theme : self::photo( $photo_id );
 		if ( '' !== $photo ) {
 			$lines[] = 'PHOTO;ENCODING=b;TYPE=JPEG:' . base64_encode( $photo ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		}

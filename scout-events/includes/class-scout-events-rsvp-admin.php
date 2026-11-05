@@ -231,7 +231,7 @@ final class Scout_Events_RSVP_Admin {
 			<?php if ( ! $rows ) : ?>
 				<p class="se-empty-admin"><?php echo esc_html( $empty ); ?></p>
 			<?php else : ?>
-				<ul class="se-door-list">
+				<ul class="sh-rows is-stacked se-signups">
 					<?php foreach ( $rows as $r ) : ?>
 						<?php self::row( $r ); ?>
 					<?php endforeach; ?>
@@ -249,9 +249,12 @@ final class Scout_Events_RSVP_Admin {
 		$paid  = 'shop' === $r['source'];
 		$order = $paid && (int) $r['order_id'] && function_exists( 'wc_get_order' ) ? wc_get_order( (int) $r['order_id'] ) : null;
 		?>
-		<li class="se-door-row<?php echo $in ? ' is-in' : ''; ?>" id="se-s-<?php echo (int) $r['id']; ?>">
-			<div class="se-door-who">
-				<strong><?php echo esc_html( $r['name'] ); ?></strong>
+		<li class="sh-row se-signup<?php echo $in ? ' is-in' : ''; ?>" id="se-s-<?php echo (int) $r['id']; ?>">
+			<div>
+				<p class="sh-row-name"><?php echo esc_html( $r['name'] ); ?></p>
+				<p class="sh-row-sub"><?php echo esc_html( $r['email'] ); ?></p>
+			</div>
+			<div class="sh-row-facts">
 				<?php if ( (int) $r['guests'] > 0 ) : ?>
 					<?php /* translators: %d: number of guests. */ ?>
 					<span class="se-chip"><?php echo esc_html( sprintf( _n( '+%d guest', '+%d guests', (int) $r['guests'], 'scout-events' ), (int) $r['guests'] ) ); ?></span>
@@ -264,18 +267,16 @@ final class Scout_Events_RSVP_Admin {
 					<span class="se-chip"><?php echo esc_html( (int) $r['product_id'] ? get_the_title( (int) $r['product_id'] ) : __( 'Paid', 'scout-events' ) ); ?></span>
 				<?php endif; ?>
 				<?php echo wp_kses_post( Scout_Events_RSVP::answers( $r, Scout_Events::event( (int) $r['event_id'] ) ) ); ?>
-				<br><span class="sh-note"><?php echo esc_html( $r['email'] ); ?>
 				<?php if ( $order ) : ?>
 					<?php /* translators: %s: order number. */ ?>
-					· <a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>"><?php echo esc_html( sprintf( __( 'Order %s', 'scout-events' ), $order->get_order_number() ) ); ?></a>
+					<a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>"><?php echo esc_html( sprintf( __( 'Order %s', 'scout-events' ), $order->get_order_number() ) ); ?></a>
 				<?php endif; ?>
 				<?php if ( ! empty( $r['signature'] ) ) : ?>
 					<?php /* translators: %s: the typed signature. */ ?>
-					· <?php echo esc_html( sprintf( __( 'Signed "%s"', 'scout-events' ), $r['signature'] ) ); ?>
+					<span><?php echo esc_html( sprintf( __( 'Signed "%s"', 'scout-events' ), $r['signature'] ) ); ?></span>
 				<?php endif; ?>
-				</span>
 			</div>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-door-act">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-row-go">
 				<input type="hidden" name="action" value="scout_events_signup_admin">
 				<input type="hidden" name="signup" value="<?php echo (int) $r['id']; ?>">
 				<?php wp_nonce_field( 'scout_events_signup_admin_' . $r['id'] ); ?>

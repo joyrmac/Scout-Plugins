@@ -15,25 +15,40 @@
 .st-people .st-chip.is-look { color: var(--sh-accent-text); border-color: var(--sh-accent-line); background: var(--sh-glow); }
 .st-people .st-chip.is-look.is-on { background: var(--sh-accent-fill); color: var(--sh-on-accent); }
 
-/* Sections in the Everyone view. */
+/* Sections in the Everyone view: small mono labels. The kit's
+   ".sh .sh-box > h2" makes box headings large, so match its weight. */
 .st-people .st-hint { margin: 0 0 var(--sh-space-2); }
-.st-people .st-section { display: flex; align-items: baseline; gap: var(--sh-space-2); margin: var(--sh-space-6) 0 var(--sh-space-1); padding: 0; font-size: var(--sh-fs-label); font-family: var(--sh-mono); font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--sh-text-2); }
-.st-people .st-section:first-of-type { margin-top: var(--sh-space-3); }
+.sh .st-people .sh-box > h2.st-section, .st-people .st-section { display: flex; align-items: baseline; gap: var(--sh-space-2); margin: 22px 0 2px; padding: 0; font-family: var(--sh-mono); font-size: var(--sh-fs-label); font-weight: 500; line-height: 1.4; letter-spacing: 1.2px; text-transform: uppercase; color: var(--sh-text-2); }
+.sh .st-people .sh-box > h2.st-section:first-of-type { margin-top: var(--sh-space-3); }
 .st-people .st-section span { color: var(--sh-text-3); }
 .st-people .st-empty { color: var(--sh-text-2); }
 
-/* One row per person. */
-.st-people .st-person-main { display: flex; align-items: center; gap: var(--sh-space-3); min-width: 0; }
-.st-people .st-person-text { min-width: 0; }
-.st-people .sh-row-name { overflow-wrap: anywhere; }
+/* One row per person (Joy, 2026-11-05): the photo on the left, everything
+   else in one column beside it. Line 1 is the name with Edit and Send them a
+   link on the right; then title and groups; then tags; then what needs a look. */
+.sh .st-people .sh-row.st-person { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 0 var(--sh-space-3); align-items: start; }
+.st-people .st-person-body { min-width: 0; }
+.st-people .st-person-head { display: flex; flex-wrap: nowrap; gap: var(--sh-space-1) var(--sh-space-3); align-items: center; justify-content: space-between; min-height: 32px; }
+.st-people .st-person-head .sh-row-name { min-width: 0; overflow-wrap: anywhere; }
+.st-people .st-person-go { flex: none; display: flex; align-items: center; gap: var(--sh-space-1) var(--sh-space-3); }
+.sh .st-people .button.st-edit { min-height: 32px; line-height: 30px; padding: 0 12px; font-size: var(--sh-fs-note); font-weight: 500; }
+.st-people .st-send { color: var(--sh-accent-text); font-size: var(--sh-fs-note); font-weight: 500; text-decoration: none; }
+.st-people .st-send:hover { text-decoration: underline; }
+.st-people .st-send:focus-visible { outline: 2px solid var(--sh-accent-text); outline-offset: 2px; box-shadow: none; }
+.st-people .st-person-body > .sh-row-sub { margin: 2px 0 0; }
+.st-people .st-tags { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 8px 0 0; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
 .st-people .st-avatar { flex: none; width: 48px; height: 48px; border-radius: var(--sh-r-control); overflow: hidden; background: var(--sh-surface-2); display: grid; place-items: center; }
 .st-people .st-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .st-people .st-avatar.is-initials { font-weight: 600; font-size: var(--sh-fs-note); color: var(--sh-text-2); }
 .st-people .st-person.is-look { box-shadow: inset 3px 0 0 var(--sh-accent-line); padding-left: var(--sh-space-3); }
-.st-people .st-look { margin: var(--sh-space-1) 0 0; font-size: var(--sh-fs-note); color: var(--sh-accent-text); }
-.st-people .st-look strong { color: var(--sh-accent-text); }
+.st-people .st-look { display: flex; align-items: baseline; gap: 6px; margin: 8px 0 0; font-size: var(--sh-fs-label); line-height: 1.4; color: var(--sh-accent-text); }
+.st-people .st-look-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--sh-accent); transform: translateY(-1px); }
 .st-people .sh-tag.st-signin { background: var(--sh-glow); color: var(--sh-accent-text); }
 .st-people .st-more { margin-top: var(--sh-space-4); }
+@container shmain (max-width: 640px) {
+	.st-people .st-person-head { flex-direction: column; align-items: flex-start; }
+	.st-people .st-person-go { margin-left: -12px; }
+}
 
 /* Add a person: three steps on one screen. Without the script every step shows. */
 .st-add [hidden] { display: none !important; }

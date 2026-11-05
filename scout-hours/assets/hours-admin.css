@@ -9,10 +9,7 @@
 .shh-box-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 
 /* Confirmation */
-.shh-confirm.is-pending { border-color: rgba(251, 176, 36, .55); background: var(--sh-warn-tint); }
-.shh-confirm-head { display: flex; align-items: center; gap: 10px; }
-.shh-confirm .sh-pill { font-size: 13px; padding: 5px 12px; }
-.shh-confirm-text { color: var(--sh-text-2); margin: 10px 0 6px; max-width: 640px; }
+.shh-confirm-text { color: var(--sh-text-2); margin: 6px 0; max-width: 640px; }
 .shh-check-row { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; }
 .sh .shh-check-row input[type="checkbox"] { margin: 0; }
 
@@ -48,7 +45,8 @@
 .shh-closures li:last-child { border-bottom: 1px solid var(--sh-border); }
 .shh-closure-main { min-width: 0; }
 .shh-closure-name { margin: 0; font-weight: 600; font-size: 15px; }
-.shh-closure-when { margin: 2px 0 0; font-family: var(--sh-mono); font-size: 12px; color: var(--sh-text-2); }
+.shh-closure-when { margin: 2px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-family: var(--sh-mono); font-size: 12px; color: var(--sh-text-2); }
+.shh-closure-when .sh-tag { font-family: var(--sh-font); }
 .shh-closure-note { margin: 4px 0 0; color: var(--sh-text-3); font-size: 13px; }
 .sh .shh-remove { min-height: 44px; color: var(--sh-bad); }
 .sh .shh-remove:hover { background: rgba(194, 58, 38, .08); color: var(--sh-bad); }
@@ -75,7 +73,7 @@
 .shh-tick { flex: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(14, 158, 115, .14); position: relative; }
 .shh-tick::after { content: ""; position: absolute; left: 10px; top: 7px; width: 6px; height: 11px; border: solid var(--sh-good); border-width: 0 2px 2px 0; transform: rotate(45deg); }
 .shh-where-list li.is-off .shh-tick, .shh-where-list li.is-pending .shh-tick { background: var(--sh-surface-2); }
-.shh-where-list li.is-off .shh-tick::after, .shh-where-list li.is-pending .shh-tick::after { border-color: #8E8E93; }
+.shh-where-list li.is-off .shh-tick::after, .shh-where-list li.is-pending .shh-tick::after { border-color: var(--sh-text-3); }
 .shh-where.is-pending .shh-where-name { color: var(--sh-text-2); }
 
 @media (max-width: 782px) {

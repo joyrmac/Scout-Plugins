@@ -134,35 +134,35 @@ final class Scout_Analytics_Admin {
 		if ( 'gtm' === $tag ) {
 			$headline = __( 'On.', 'scout-analytics' );
 			/* translators: %s: the Tag Manager container ID. */
-			$detail = sprintf( __( 'Google Tag Manager %s loads on the live site. Tags and GA4 are set in the container.', 'scout-analytics' ), $s['gtm'] );
+			$detail = sprintf( __( 'Google Tag Manager %s loads on the live site.', 'scout-analytics' ), $s['gtm'] );
 		} elseif ( 'ga4' === $tag ) {
 			$headline = __( 'On.', 'scout-analytics' );
 			/* translators: %s: the GA4 measurement ID. */
-			$detail = sprintf( __( 'GA4 %s loads directly on the live site. Add a Tag Manager container to manage tags in one place.', 'scout-analytics' ), $s['ga4'] );
+			$detail = sprintf( __( 'GA4 %s loads on the live site, without Tag Manager.', 'scout-analytics' ), $s['ga4'] );
 		} else {
 			$headline = __( 'Not set up.', 'scout-analytics' );
-			$detail   = __( 'Nothing is counted yet. Add the Google tracking code below.', 'scout-analytics' );
+			$detail   = __( 'Add the Tag Manager code below to start counting.', 'scout-analytics' );
 		}
-		$detail .= ' ' . ( 'optin' === $s['mode'] ? __( 'Consent: count nothing until a visitor says yes.', 'scout-analytics' ) : __( 'Consent: count the visit, with a "No thanks" button.', 'scout-analytics' ) );
-		$detail .= ' ' . __( 'Never on staging or local copies.', 'scout-analytics' );
+		// Headline plus one sentence (DESIGN 2a #2). The consent choice shows below.
 		self::ui_status( $tag ? 'good' : 'warn', $headline, $detail );
 		?>
 		<form method="post" action="options.php">
 			<?php settings_fields( 'scout_analytics_group' ); ?>
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Tracking & privacy', 'scout-analytics' ); ?></h2>
-				<p class="sh-note"><?php esc_html_e( 'Google consent mode is set before any tag runs. Browsers that send Global Privacy Control count as a no.', 'scout-analytics' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Google consent mode is set before any tag runs, and nothing loads on staging or local copies.', 'scout-analytics' ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="sa-gtm"><?php esc_html_e( 'Google tracking code', 'scout-analytics' ); ?></label></th>
+						<th scope="row"><label for="sa-gtm"><?php esc_html_e( 'Tag Manager code', 'scout-analytics' ); ?></label></th>
 						<td><input id="sa-gtm" type="text" class="regular-text code" placeholder="GTM-XXXXXXX" name="<?php echo esc_attr( $o ); ?>[gtm]" value="<?php echo esc_attr( $s['gtm'] ); ?>">
-							<p class="description"><?php esc_html_e( 'Your Tag Manager container ID, starting with GTM-. Put the GA4 tag and other tags inside the container.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Starts with GTM-. Put GA4 and any other tags inside the container.', 'scout-analytics' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Before a visitor chooses', 'scout-analytics' ); ?></th>
 						<td>
 							<label><input type="radio" name="<?php echo esc_attr( $o ); ?>[mode]" value="optout" <?php checked( 'optout', $s['mode'] ); ?>> <?php esc_html_e( 'Count the visit, with a "No thanks" button (our US standard)', 'scout-analytics' ); ?></label><br>
 							<label><input type="radio" name="<?php echo esc_attr( $o ); ?>[mode]" value="optin" <?php checked( 'optin', $s['mode'] ); ?>> <?php esc_html_e( 'Count nothing until they say yes', 'scout-analytics' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Browsers that send Global Privacy Control count as a no.', 'scout-analytics' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -173,7 +173,7 @@ final class Scout_Analytics_Admin {
 					<tr>
 						<th scope="row"><label for="sa-privacy"><?php esc_html_e( 'Privacy policy page', 'scout-analytics' ); ?></label></th>
 						<td><?php wp_dropdown_pages( array( 'name' => esc_attr( $o ) . '[privacy_page]', 'id' => 'sa-privacy', 'selected' => (int) $s['privacy_page'], 'show_option_none' => esc_html__( 'None', 'scout-analytics' ), 'option_none_value' => '0' ) ); ?>
-							<p class="description"><?php esc_html_e( 'Linked from the notice. Put [scout_privacy_choices] on that page so visitors can change their answer.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Linked from the notice. Add [scout_privacy_choices] to it so visitors can change their answer.', 'scout-analytics' ); ?></p></td>
 					</tr>
 				</table>
 			</section>
@@ -181,9 +181,9 @@ final class Scout_Analytics_Admin {
 			<?php self::ui_fold_open( __( 'More options', 'scout-analytics' ) ); ?>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="sa-ga4"><?php esc_html_e( 'Google tracking code', 'scout-analytics' ); ?></label></th>
+						<th scope="row"><label for="sa-ga4"><?php esc_html_e( 'GA4 code (no Tag Manager)', 'scout-analytics' ); ?></label></th>
 						<td><input id="sa-ga4" type="text" class="regular-text code" placeholder="G-XXXXXXXXXX" name="<?php echo esc_attr( $o ); ?>[ga4]" value="<?php echo esc_attr( $s['ga4'] ); ?>">
-							<p class="description"><?php esc_html_e( 'A GA4 measurement ID, starting with G-, for a site with no Tag Manager. Ignored while a Tag Manager ID is set.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Starts with G-. Ignored while a Tag Manager code is set.', 'scout-analytics' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Ad signals', 'scout-analytics' ); ?></th>
@@ -197,7 +197,7 @@ final class Scout_Analytics_Admin {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Page speed', 'scout-analytics' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[late]" value="1" <?php checked( $s['late'] ); ?>> <?php esc_html_e( 'Load Tag Manager after the page shows (recommended)', 'scout-analytics' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Pages show faster on phones. A visitor who leaves in the first second or two is not counted.', 'scout-analytics' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'Pages show faster on phones, but a visitor who leaves in the first second or two isn’t counted.', 'scout-analytics' ); ?></p></td>
 					</tr>
 				</table>
 

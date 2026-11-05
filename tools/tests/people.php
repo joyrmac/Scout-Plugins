@@ -1,9 +1,12 @@
 <?php
 // Scout People (scout-team): the move to People keeps live pages the same, credential
-// lines need a source to show, card only contact never reaches the public,
+// lines need a source to show, the business card fields (card phone, card email,
+// intro, why talk to them, tags) never reach the public,
 // "needs a look" names what is missing, Add a person saves like the edit screen,
-// and Send them a link is hashed, single use, expiring and never touches the
-// live profile until approved. Runs without WordPress:
+// Send them a link is hashed, single use, expiring and never touches the
+// live profile until approved, "Written by" credits people with or without a
+// login and changes nothing when empty, and the REST API hides what visitors
+// may not see. Runs without WordPress:
 //   php tools/tests/people.php
 $fail = 0;
 function ok( $cond, $msg ) { global $fail; echo ( $cond ? 'PASS ' : 'FAIL ' ) . $msg . "\n"; if ( ! $cond ) { $fail++; } }
@@ -19,6 +22,9 @@ function add_shortcode() {}
 function apply_filters( $t, $v ) { return $v; }
 function __( $s ) { return $s; }
 function esc_html__( $s ) { return esc_html( $s ); }
+function esc_html_e( $s ) { echo esc_html( $s ); }
+function esc_attr_e( $s ) { echo esc_attr( $s ); }
+function checked( $a, $b = true, $echo = true ) { $r = (string) $a === (string) $b ? ' checked="checked"' : ''; if ( $echo ) { echo $r; } return $r; }
 function _n( $one, $many, $n ) { return 1 === (int) $n ? $one : $many; }
 function esc_html( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
 function esc_attr( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
@@ -38,8 +44,8 @@ function get_post_meta( $id, $k, $single = false ) { return $GLOBALS['meta'][ $i
 function get_post_status( $id ) { return $GLOBALS['status'][ $id ] ?? 'publish'; }
 function get_post_thumbnail_id( $id ) { return $GLOBALS['thumb'][ $id ] ?? 0; }
 function has_post_thumbnail( $id ) { return ! empty( $GLOBALS['thumb'][ $id ] ); }
-function get_the_title( $id ) { return 'Dana Lee'; }
-function get_permalink( $id ) { return 'https://firm.test/team/dana-lee/'; }
+function get_the_title( $id ) { return $GLOBALS['titles'][ $id ] ?? 'Dana Lee'; }
+function get_permalink( $id ) { return 'https://firm.test/team/' . ( isset( $GLOBALS['titles'][ $id ] ) ? strtolower( str_replace( ' ', '-', $GLOBALS['titles'][ $id ] ) ) : 'dana-lee' ) . '/'; }
 function get_bloginfo( $k ) { return 'Firm Site'; }
 function home_url( $p = '' ) { return 'https://firm.test' . $p; }
 function get_the_modified_date( $f, $id ) { return '2026-11-05T00:00:00+00:00'; }
@@ -55,7 +61,7 @@ function set_transient( $k, $v, $t = 0 ) { $GLOBALS['transients'][ $k ] = $v; re
 function get_transient( $k ) { return $GLOBALS['transients'][ $k ] ?? false; }
 function delete_transient( $k ) { unset( $GLOBALS['transients'][ $k ] ); return true; }
 function get_current_user_id() { return 1; }
-function current_user_can( $cap ) { return true; }
+function current_user_can( $cap ) { return $GLOBALS['caps'][ $cap ] ?? true; }
 function get_taxonomy( $t ) { return null; }
 function esc_attr__( $s ) { return esc_attr( $s ); }
 function esc_textarea( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
@@ -67,6 +73,20 @@ function set_post_thumbnail( $id, $att ) { $GLOBALS['thumb'][ $id ] = $att; retu
 function wp_get_post_parent_id( $id ) { return $GLOBALS['parent'][ $id ] ?? 0; }
 function wp_delete_attachment( $id, $force = false ) { $GLOBALS['deleted'][] = $id; return true; }
 function get_edit_post_link( $id, $c = 'display' ) { return 'https://firm.test/wp-admin/post.php?post=' . $id . '&action=edit'; }
+// For Written by and the REST API.
+class WP_Post { public $ID = 0; public $post_type = 'post'; public $post_status = 'publish'; public $post_author = 0; public function __construct( array $f = array() ) { foreach ( $f as $k => $v ) { $this->$k = $v; } } }
+class WP_Error { public $code; public $data; public function __construct( $code = '', $msg = '', $data = array() ) { $this->code = $code; $this->data = $data; } }
+class Fake_Response { private $d; public function __construct( array $d ) { $this->d = $d; } public function get_data() { return $this->d; } public function set_data( $d ) { $this->d = $d; } }
+$GLOBALS['wp_posts'] = array();
+function get_post( $id = null ) { return null === $id ? ( $GLOBALS['current_post'] ?? null ) : ( $GLOBALS['wp_posts'][ (int) $id ] ?? null ); }
+function get_post_type( $id ) { return $GLOBALS['types'][ (int) $id ] ?? ( isset( $GLOBALS['meta'][ (int) $id ]['_scout_team'] ) ? 'scout_team' : 'post' ); }
+function get_post_field( $f, $id ) { return isset( $GLOBALS['wp_posts'][ (int) $id ] ) ? $GLOBALS['wp_posts'][ (int) $id ]->$f : ''; }
+function is_admin() { return ! empty( $GLOBALS['is_admin'] ); }
+function is_author() { return ! empty( $GLOBALS['is_author'] ); }
+function in_the_loop() { return ! empty( $GLOBALS['in_loop'] ); }
+function is_singular( $t = '' ) { return isset( $GLOBALS['singular'] ) && ( '' === $t || in_array( $GLOBALS['singular'], (array) $t, true ) ); }
+function get_queried_object_id() { return $GLOBALS['queried'] ?? 0; }
+function count_user_posts( $user, $types = 'post', $public = false ) { $n = 0; foreach ( $GLOBALS['wp_posts'] as $p ) { if ( (int) $p->post_author === (int) $user && in_array( $p->post_type, (array) $types, true ) && 'publish' === $p->post_status ) { $n++; } } return $n; }
 function get_posts( $a ) {
 	$out = array();
 	foreach ( $GLOBALS['meta'] as $id => $m ) {
@@ -85,6 +105,7 @@ require __DIR__ . '/../../scout-team/includes/class-scout-team-changes.php';
 require __DIR__ . '/../../scout-team/includes/class-scout-team-editor.php';
 require __DIR__ . '/../../scout-team/includes/class-scout-team-link.php';
 require __DIR__ . '/../../scout-team/includes/class-scout-team-add.php';
+require __DIR__ . '/../../scout-team/includes/class-scout-team-byline.php';
 $T = 'Scout_Team';
 
 // A profile saved before People: no Shows on, no sources, memberships as plain lines.
@@ -148,6 +169,36 @@ ok( false === strpos( $person, 'Duke University' ) && false !== strpos( $person,
 ok( false === strpos( $person, 'ncbar.org/awards' ) && false === strpos( $person, $T::LEGACY_SOURCE ), 'sources themselves are never printed' );
 $html = Scout_Team_Front::profile_html( 5 );
 ok( false === strpos( $html, '555-0199' ) && false === strpos( $html, 'dana.card@' ), 'the profile page has no card only contact' );
+
+// The Business card box: intro, why talk to them and tags, stored in the profile like the rest.
+ok( array( 'card_intro', 'card_why', 'card_tags' ) === array_values( array_intersect( array_keys( $T::empty_profile() ), array( 'card_intro', 'card_why', 'card_tags' ) ) ) && '' === $T::shape( array() )['card_intro'], 'a profile has card intro, why and tags, empty to start' );
+$card_in = $in + array(
+	'card_phone' => '(919) 555-0199',
+	'card_email' => 'dana.card@firm.test',
+	'card_intro' => "I help owners <b>sell</b> their business.\nCall me first.",
+	'card_why'   => 'Selling or buying a business.',
+	'card_tags'  => 'Contracts, <i>M&A</i>, Leases',
+);
+$GLOBALS['meta'][12][ $T::META ] = Scout_Team_Editor::store( 12, $card_in, null );
+$stored = $GLOBALS['meta'][12][ $T::META ];
+ok( "I help owners sell their business.\nCall me first." === $stored['card_intro'] && 'Selling or buying a business.' === $stored['card_why'] && 'Contracts, M&A, Leases' === $stored['card_tags'], 'the edit screen saves intro, why and tags through the same clean and store path' );
+ok( '(919) 555-0199' === $stored['card_phone'] && 'dana.card@firm.test' === $stored['card_email'], 'the card phone and email save in the same box' );
+$pub = $T::public_profile( $T::shape( $stored ) );
+ok( ! array_intersect( array( 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags' ), array_keys( $pub ) ), 'public_profile() never has the card phone, email, intro, why or tags' );
+ok( array( 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags' ) === $T::card_keys() && ! array_diff( $T::card_keys(), Scout_Team_Front::rest_private_keys() ), 'the REST API keeps every card field back too' );
+$GLOBALS['meta'][12][ $T::META ]['shows']['bio'] = true;
+$html = Scout_Team_Front::profile_html( 12 );
+$person = json_encode( Scout_Team_Schema::person( 12 ) );
+ok( false === strpos( $html, 'Call me first' ) && false === strpos( $html, 'Selling or buying' ) && false === strpos( $html, 'Leases' ), 'the profile page shows none of the card words' );
+ok( false === strpos( $person, 'Call me first' ) && false === strpos( $person, 'Selling or buying' ) && false === strpos( $person, 'Leases' ) && false === strpos( $person, '555-0199' ), 'and neither does the Person schema' );
+ob_start();
+Scout_Team_Editor::render_card( new WP_Post( array( 'ID' => 12, 'post_type' => 'scout_team' ) ) );
+$box = ob_get_clean();
+ok( false !== strpos( $box, 'name="scout_team[card_intro]"' ) && false !== strpos( $box, 'name="scout_team[card_why]"' ) && false !== strpos( $box, 'name="scout_team[card_tags]"' ) && false !== strpos( $box, 'name="scout_team[card_phone]"' ) && false !== strpos( $box, 'name="scout_team[card_email]"' ), 'the Business card box has intro, why, tags, card phone and card email' );
+ok( false !== strpos( $box, 'Selling or buying a business.' ) && false !== strpos( $box, 'Contracts, M&amp;A, Leases' ), 'and is filled in with what is saved' );
+ob_start();
+Scout_Team_Editor::render_shows( new WP_Post( array( 'ID' => 12, 'post_type' => 'scout_team' ) ) );
+ok( false === strpos( ob_get_clean(), 'card_phone' ), 'the card phone and email are no longer in the Shows on box' );
 ok( false !== strpos( $html, 'dana@firm.test' ) && false !== strpos( $html, 'Wake County Bar Association' ), 'the profile page still shows the regular email and the membership' );
 ok( false === strpos( $html, 'Duke University' ) && false === strpos( $html, $T::LEGACY_SOURCE ), 'the profile page shows no unsourced line and no source text' );
 
@@ -227,6 +278,7 @@ ok( false === $L::allow_try( $tok ), 'too many sends in an hour are refused' );
 
 // The page they fill in never offers card only contact, email or phone.
 ok( ! array_intersect( array( 'card_phone', 'card_email', 'email', 'phone', 'user', 'shows' ), $L::fields() ), 'the link page takes no card only contact, email, phone, login or Shows on' );
+ok( array() === array_diff( array( 'intro', 'why', 'tags' ), $L::fields() ), 'the link page takes the card intro, why and tags' );
 $GLOBALS['meta'][40][ $T::META ] = $saved2;
 $page = $L::form_html( 40, $L::prefill( 40 ), array(), $tok, true );
 ok( false === strpos( $page, 'card_' ) && false === strpos( $page, '555-0199' ) && false === strpos( $page, 'dana.card@' ), 'the form has no card only fields and shows no card contact' );
@@ -275,6 +327,170 @@ ok( $L::discard( 41 ) && $GLOBALS['meta'][41][ $T::META ] === $saved2 && ! isset
 ok( in_array( 78, $GLOBALS['deleted'] ?? array(), true ), 'and the photo they uploaded with it' );
 $keep = $L::merge( $T::shape( $saved2 ), array( 'role' => '', 'bio' => '  ' ) );
 ok( 'Partner' === $keep['role'] && $saved2['bio'] === $keep['bio'], 'an empty title or bio keeps what is there' );
+
+// With A business card on, the link page takes their card words too, as pending changes.
+$card_on                          = $stored;
+$card_on['shows']['card']         = true;
+$GLOBALS['meta'][42][ $T::META ]  = $card_on;
+$pre  = $L::prefill( 42 );
+$page = $L::form_html( 42, $pre, array(), $tok, false );
+ok( false !== strpos( $page, 'name="st[intro]"' ) && false !== strpos( $page, 'name="st[why]"' ) && false !== strpos( $page, 'name="st[tags]"' ) && false !== strpos( $page, 'Your business card' ), 'Card on: the form has their card intro, why and tags' );
+ok( false !== strpos( $page, 'Selling or buying a business.' ) && false !== strpos( $page, 'Contracts, M&amp;A, Leases' ), 'filled in with what is there now' );
+ok( false === strpos( $page, 'card_phone' ) && false === strpos( $page, 'card_email' ) && false === strpos( $page, '555-0199' ) && false === strpos( $page, 'dana.card@' ) && false === strpos( $page, '[phone]' ) && false === strpos( $page, '[email]' ), 'and still no card phone, card email, email or phone' );
+$off_page = $L::form_html( 40, $L::prefill( 40 ), array(), $tok, false );
+ok( false === strpos( $off_page, 'name="st[intro]"' ), 'Card off: no card fields on the form' );
+$sent2 = $L::clean( array( 'name' => 'Dana Lee', 'intro' => 'New card intro <b>here</b>.', 'why' => 'Ask about leases.', 'tags' => 'Leases, Contracts', 'card_phone' => '(919) 555-0000', 'card_email' => 'x@firm.test' ) );
+ok( 'New card intro here.' === $sent2['card_intro'] && 'Ask about leases.' === $sent2['card_why'] && 'Leases, Contracts' === $sent2['card_tags'], 'the card words they send are cleaned like the edit screen' );
+ok( ! isset( $sent2['card_phone'] ) && ! isset( $sent2['card_email'] ) && ! isset( $sent2['intro'] ), 'and the card phone and email they try to send are dropped' );
+$L::save_pending( 42, $sent2, 0 );
+ok( $GLOBALS['meta'][42][ $T::META ] === $card_on && 'Selling or buying a business.' === $T::profile( 42 )['card_why'], 'sending card words never touches the live profile' );
+$diff = $L::changes( 42 );
+ok( isset( $diff['Card intro'], $diff['Why talk to them'], $diff['Card tags'] ) && array( 'Selling or buying a business.', 'Ask about leases.' ) === $diff['Why talk to them'], 'the review table lists the card words, now and sent' );
+ok( $L::approve( 42 ), 'approve runs' );
+$p42 = $T::profile( 42 );
+ok( 'New card intro here.' === $p42['card_intro'] && 'Ask about leases.' === $p42['card_why'] && 'Leases, Contracts' === $p42['card_tags'], 'approve copies the card words into the profile' );
+ok( '(919) 555-0199' === $p42['card_phone'] && 'dana.card@firm.test' === $p42['card_email'], 'and leaves the card phone and email alone' );
+$keep = $L::merge( $T::shape( $card_on ), array( 'card_intro' => '', 'card_why' => ' ' ) );
+ok( $card_on['card_intro'] === $keep['card_intro'] && $card_on['card_why'] === $keep['card_why'] && $card_on['card_tags'] === $keep['card_tags'], 'an empty card line, or one not sent, keeps what is there' );
+
+// ---------- Written by: credit people with or without a login ----------
+$F = 'Scout_Team_Front';
+$B = 'Scout_Team_Byline';
+$profile = static function ( array $over ) use ( $T ) {
+	return $T::sanitize_profile( array_merge( array( 'role' => 'Writer', 'bio' => 'Writes.', 'shows' => array( '_sent' => '1', 'bio' => '1', 'byline' => '1' ) ), $over ) );
+};
+$GLOBALS['titles'] = array( 101 => 'Ana Ruiz', 102 => 'Ben Cole', 103 => 'Cal Diaz', 104 => 'Dee Fox' );
+$GLOBALS['meta'][101][ $T::META ] = $profile( array() );                                                   // A guest writer, no login.
+$GLOBALS['meta'][102][ $T::META ] = $profile( array( 'shows' => array( '_sent' => '1', 'byline' => '1' ) ) ); // Own page off.
+$GLOBALS['meta'][103][ $T::META ] = $profile( array( 'shows' => array( '_sent' => '1', 'bio' => '1' ) ) );   // Byline off.
+$GLOBALS['meta'][104][ $T::META ] = $profile( array( 'user' => 9 ) );                                      // Linked to login 9.
+$post = static function ( int $id, int $author, array $picked = array() ) use ( $T ) {
+	$GLOBALS['wp_posts'][ $id ] = new WP_Post( array( 'ID' => $id, 'post_author' => $author ) );
+	$GLOBALS['types'][ $id ]    = 'post';
+	if ( $picked ) {
+		$GLOBALS['meta'][ $id ][ $T::AUTHORS ] = $picked;
+	}
+};
+$post( 500, 9 );                      // By Dee's login, nobody picked.
+$post( 501, 3, array( 101 ) );        // Staff wrote it for Ana.
+$post( 502, 3, array( 101, 102, 104 ) );
+$post( 503, 9, array( 103 ) );        // Cal's byline is off.
+$post( 504, 9, array( 101 ) );        // Dee's login, written for Ana.
+$post( 505, 3 );                      // Staff, nobody picked.
+$post( 506, 3, array( 102 ) );        // Ben's page is off.
+$post( 507, 9, array( 104 ) );        // Dee's login, Dee picked too.
+$on = static function ( int $id ) {
+	$GLOBALS['current_post']    = $GLOBALS['wp_posts'][ $id ];
+	$GLOBALS['authordata']      = (object) array( 'ID' => $GLOBALS['wp_posts'][ $id ]->post_author );
+};
+
+ok( 'Dana' === $T::join_names( array( 'Dana' ) ) && 'Dana & Sam' === $T::join_names( array( 'Dana', 'Sam' ) ) && 'Dana, Sam & Lee' === $T::join_names( array( 'Dana', 'Sam', 'Lee' ) ), 'names join with ", " and " & " before the last' );
+ok( array( 4, 2 ) === $T::clean_ids( array( '4', 0, -1, 'x', 2, 4 ) ) && array() === $T::clean_ids( '' ), 'picked IDs are whole numbers, each once, in order' );
+ok( array( 101, 104 ) === $B::picked( array( '101' ), '104' ) && array( 101 ) === $B::picked( array( '101' ), '101' ) && array() === $B::picked( array(), '' ), 'the classic box keeps the ticked people in order, then the one picked to add' );
+
+// Empty: nothing changes.
+$on( 505 );
+ok( 'Staff Person' === $F::written_by_name( 'Staff Person' ) && 'Staff Person' === $F::written_by_display_name( 'Staff Person', 3 ), 'nobody picked: the author name is what WordPress gave' );
+ok( 'https://firm.test/author/staff/' === $F::written_by_link( 'https://firm.test/author/staff/', 3 ), 'nobody picked: the author link is what WordPress gave' );
+ok( '<a href="https://firm.test/author/staff/">Staff Person</a>' === $F::written_by_posts_link( '<a href="https://firm.test/author/staff/">Staff Person</a>' ), 'nobody picked: the author posts link is untouched' );
+ok( array() === $T::byline_people( 505 ), 'nobody picked and no linked login: byline_people() is empty' );
+$on( 500 );
+ok( 'Dee Login' === $F::written_by_name( 'Dee Login' ) && 'https://firm.test/author/dee/' === $F::written_by_link( 'https://firm.test/author/dee/', 9 ), 'a linked login with nobody picked keeps today\'s output (the linked login filter handles it)' );
+ok( array( 104 ) === $T::byline_people( 500 ), 'byline_people() falls back to the profile linked to the post\'s login' );
+
+// One person.
+$on( 501 );
+ok( 'Ana Ruiz' === $F::written_by_name( 'Staff Person' ) && 'Ana Ruiz' === $F::written_by_display_name( 'Staff Person', 3 ), 'one person picked: their name replaces the author\'s' );
+ok( 'https://firm.test/team/ana-ruiz/' === $F::written_by_link( 'https://firm.test/author/staff/', 3 ), 'and the author link goes to their profile page' );
+ok( '<a href="https://firm.test/team/ana-ruiz/" rel="author">Ana Ruiz</a>' === $F::written_by_posts_link( 'x' ), 'and the author posts link names and links them' );
+ok( array( 101 ) === $T::byline_people( 501 ), 'byline_people() returns the picked person' );
+ok( 'Someone Else' === $F::written_by_display_name( 'Someone Else', 12 ) && 'https://firm.test/author/x/' === $F::written_by_link( 'https://firm.test/author/x/', 12 ), 'a theme asking about another login gets that login, untouched' );
+
+// Several people.
+$on( 502 );
+ok( 'Ana Ruiz, Ben Cole & Dee Fox' === $F::written_by_name( 'Staff Person' ), 'several people: "Ana Ruiz, Ben Cole & Dee Fox"' );
+ok( 'https://firm.test/team/ana-ruiz/' === $F::written_by_link( 'x', 3 ), 'the author link is the first person\'s profile' );
+ok( '<a href="https://firm.test/team/ana-ruiz/" rel="author">Ana Ruiz</a>, Ben Cole &amp; <a href="https://firm.test/team/dee-fox/" rel="author">Dee Fox</a>' === $F::written_by_posts_link( 'x' ), 'each name links to its own page; a page that is off shows a plain name' );
+ok( array( 101, 102, 104 ) === $T::byline_people( 502 ), 'byline_people() keeps the order picked' );
+
+// A link only when the profile page is on.
+$on( 506 );
+ok( 'Ben Cole' === $F::written_by_name( 'Staff Person' ) && '' === $F::written_by_link( 'https://firm.test/author/staff/', 3 ), 'first person\'s page off: their name, and no address' );
+ok( 'Ben Cole' === $F::written_by_posts_link( 'x' ), 'and the author posts link is their name with no link' );
+
+// Byline off: left out, and the post falls back to today.
+$on( 503 );
+ok( 'Dee Login' === $F::written_by_name( 'Dee Login' ) && array() === $T::written_by( 503 ), 'a picked person with their byline off is left out' );
+ok( array( 104 ) === $T::byline_people( 503 ), 'with nobody left, byline_people() falls back to the linked login' );
+
+// Where it never applies.
+$on( 501 );
+$GLOBALS['is_admin'] = true;
+ok( 'Staff Person' === $F::written_by_name( 'Staff Person' ), 'admin screens keep the WordPress author' );
+$GLOBALS['is_admin']  = false;
+$GLOBALS['is_author'] = true;
+ok( 'Staff Person' === $F::written_by_name( 'Staff Person' ), 'an author archive\'s own title stays about that login' );
+$GLOBALS['in_loop'] = true;
+ok( 'Ana Ruiz' === $F::written_by_name( 'Staff Person' ), 'but each post in the archive loop shows its picked people' );
+$GLOBALS['is_author'] = $GLOBALS['in_loop'] = false;
+$GLOBALS['opts']['scout_team']['bylines'] = 0;
+ok( 'Staff Person' === $F::written_by_name( 'Staff Person' ) && 'x' === $F::written_by_link( 'x', 3 ), 'Bylines off in People settings: nothing changes' );
+$GLOBALS['opts']['scout_team']['bylines'] = 1;
+$GLOBALS['wp_posts'][501]->post_type = 'page';
+ok( 'Staff Person' === $F::written_by_name( 'Staff Person' ), 'a post type without the box keeps the WordPress author' );
+$GLOBALS['wp_posts'][501]->post_type = 'post';
+
+// Schema: the author is the existing Person @id, one record per person.
+$article = array( 'business' => array( '@id' => 'https://firm.test/#business' ), 'article' => array( '@type' => 'BlogPosting', 'author' => array( '@type' => 'Person', 'name' => 'Staff Person' ) ) );
+$g = Scout_Team_Schema::with_authors( $article, array() );
+ok( $g === $article, 'nobody to credit: the article schema is untouched' );
+$g = Scout_Team_Schema::with_authors( $article, array( 101 ) );
+ok( array( '@id' => 'https://firm.test/team/ana-ruiz/#person' ) === $g['article']['author'] && 'https://firm.test/team/ana-ruiz/#person' === $g['person_101']['@id'], 'one person: the author is their Person @id, and their Person is in the graph' );
+$g = Scout_Team_Schema::with_authors( $article + array( 'person_101' => array( '@id' => 'https://firm.test/team/ana-ruiz/#person', 'kept' => 1 ) ), array( 101, 102 ) );
+ok( array( array( '@id' => 'https://firm.test/team/ana-ruiz/#person' ), array( '@id' => 'https://firm.test/team/ben-cole/#person' ) ) === $g['article']['author'], 'several people: a list of Person @ids, in order' );
+ok( 1 === $g['person_101']['kept'] && 1 === count( array_filter( array_keys( $g ), static fn( $k ) => 'person_101' === $k ) ) && ! isset( $g['person_102']['url'] ), 'a Person already in the graph is never added twice; a page that is off has no url' );
+$GLOBALS['singular'] = 'post';
+$GLOBALS['queried']  = 505;
+ok( Scout_Team_Schema::extend_graph( $article ) === $article, 'the graph for a post with nobody picked and no linked login is unchanged' );
+$GLOBALS['queried'] = 500;
+$g = Scout_Team_Schema::extend_graph( $article );
+ok( array( '@id' => 'https://firm.test/team/dee-fox/#person' ) === $g['article']['author'] && isset( $g['person_104'] ), 'a linked login with nobody picked: the same Person author as before' );
+$GLOBALS['queried'] = 502;
+$g = Scout_Team_Schema::extend_graph( $article );
+ok( 3 === count( $g['article']['author'] ) && isset( $g['person_101'], $g['person_102'], $g['person_104'] ), 'picked people become the article\'s authors in the schema' );
+unset( $GLOBALS['singular'], $GLOBALS['queried'] );
+
+// The People row count: picked posts plus their login's posts, each once.
+ok( 3 === $B::count_for( 101 ), 'Ana: picked on three posts' );
+ok( 2 === $B::count_for( 102 ), 'Ben: picked on two posts (his page being off does not matter)' );
+ok( 0 === $B::count_for( 103 ), 'Cal: byline off, no posts' );
+ok( 4 === $B::count_for( 104 ), 'Dee: picked on one post, plus her login\'s posts that nobody else took, each once' );
+ok( 2 === $B::tally( 7, 5, 2, array( 1 => array( 5, array( 7 ) ), 2 => array( 3, array( 8 ) ) ) ), 'tally: a post by the login with them picked counts once' );
+
+// ---------- the REST API ----------
+$GLOBALS['caps']['edit_posts'] = false; // A visitor.
+$args = $F::rest_query( array( 'post_type' => 'scout_team', 'post_status' => 'any' ) );
+ok( 'publish' === $args['post_status'] && in_array( 6, $args['post__not_in'], true ) && in_array( 102, $args['post__not_in'], true ) && ! in_array( 101, $args['post__not_in'], true ), 'REST list for visitors: live only, people whose page is off left out' );
+$args = $F::rest_query( array( 'post__in' => array( 6, 101 ) ) );
+ok( array( 101 ) === $args['post__in'], 'asking for IDs directly still leaves out a hidden person' );
+ok( array( 0 ) === $F::rest_query( array( 'post__in' => array( 6 ) ) )['post__in'], 'asking only for a hidden person finds nobody' );
+ok( in_array( 102, $F::rest_search( array( 's' => 'Ben' ) )['post__not_in'], true ), 'the REST search leaves out hidden people too' );
+$hidden = $F::rest_prepare( new Fake_Response( array( 'id' => 102 ) ), new WP_Post( array( 'ID' => 102, 'post_type' => 'scout_team' ) ) );
+ok( $hidden instanceof WP_Error && 404 === $hidden->data['status'], 'one hidden person by ID: "not found"' );
+$draft = $F::rest_prepare( new Fake_Response( array( 'id' => 101 ) ), new WP_Post( array( 'ID' => 101, 'post_type' => 'scout_team', 'post_status' => 'draft' ) ) );
+ok( $draft instanceof WP_Error, 'a draft: "not found"' );
+$res = $F::rest_prepare(
+	new Fake_Response( array( 'id' => 101, 'title' => 'Ana Ruiz', 'card_email' => 'a@x.test', 'meta' => array( '_scout_team' => array( 'card_phone' => '1' ), '_scout_team_pending' => array( 'bio' => 'x' ), '_scout_team_link_hash' => 'h', 'card_phone' => '1', 'other' => 'ok' ) ) ),
+	new WP_Post( array( 'ID' => 101, 'post_type' => 'scout_team' ) )
+);
+$d = $res->get_data();
+ok( 'Ana Ruiz' === $d['title'] && ! isset( $d['card_email'] ) && array( 'other' => 'ok' ) === $d['meta'], 'a visible person: card only contact, waiting details and link data never go out' );
+$GLOBALS['caps']['edit_posts'] = true; // An editor.
+$args = array( 'post_type' => 'scout_team', 'post_status' => 'any' );
+ok( $F::rest_query( $args ) === $args && $F::rest_search( $args ) === $args, 'editors and the block editor see every person, as before' );
+$full = new Fake_Response( array( 'id' => 102, 'meta' => array( 'card_phone' => '1' ) ) );
+ok( $F::rest_prepare( $full, new WP_Post( array( 'ID' => 102, 'post_type' => 'scout_team' ) ) ) === $full, 'and get each one as WordPress sends it' );
+unset( $GLOBALS['caps'] );
 
 echo $fail ? "\n$fail failed\n" : "\nAll passed\n";
 exit( $fail ? 1 : 0 );

@@ -72,7 +72,7 @@ final class Scout_Law_Disclaimers {
 				'places' => array( 'results' ),
 			),
 			'reviews'      => array(
-				'label'  => __( 'Reviews and testimonials', 'scout-law' ),
+				'label'  => __( 'Reviews & testimonials', 'scout-law' ),
 				'help'   => __( 'Printed under the reviews on the site.', 'scout-law' ),
 				'places' => array( 'reviews' ),
 			),

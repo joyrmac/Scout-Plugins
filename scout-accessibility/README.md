@@ -39,12 +39,6 @@ reviewed by hand. It never claims full compliance.
 The email and phone links carry `data-scout-track="accessibility_contact"`
 (label `email` or `phone`), so Scout Analytics reports them when it is active.
 
-Theme styling: the statement inherits the theme's fonts and colors. The
-buttons are outlined in `currentColor`. Override with `--scout-a11y-gap`,
-`--scout-a11y-radius`, `--scout-a11y-border` and `--scout-a11y-muted`.
-The stylesheet loads only on a page that shows the statement or when the
-automatic footer link is on.
-
 ## Footer link
 
 Three ways, use whichever fits the theme:
@@ -82,6 +76,28 @@ page template.
 Options `scout_accessibility`, `scout_accessibility_results`,
 `scout_accessibility_launch` and the weekly event. Uninstall removes them all,
 and removes the Accessibility page only if nobody has edited it.
+
+## What this feature needs from the theme
+
+- **DESIGN.md:** the statement and the footer link take the theme's own
+  font and text color. The contact buttons read the DESIGN.md roles accent
+  (outline), pill corner and muted text (the "last reviewed" line), as
+  `--scout-accent`, `--scout-radius-pill` and `--scout-text-2`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The
+  plugin's own variables still win when the theme sets them:
+  `--scout-a11y-border`, `--scout-a11y-radius`, `--scout-a11y-muted`. With
+  neither, the buttons are outlined in `currentColor`.
+- **Where it lands:** the statement prints where
+  `[scout_accessibility_statement]` sits on the Accessibility page, with H2
+  headings. The footer link goes in a menu, in `[scout_accessibility_link]`,
+  or, when the automatic link is on, as a small centered line after the
+  theme's footer through `wp_footer()`.
+- **Headings:** the theme prints the page title as the H1. The weekly check
+  fails a page whose content carries its own H1.
+- **Styling hooks today:** `--scout-a11y-gap`, `--scout-a11y-radius`,
+  `--scout-a11y-border` and `--scout-a11y-muted` on `.scout-a11y`. The
+  stylesheet loads only on a page that shows the statement or when the
+  automatic footer link is on.
+- **scout-setup.json:** nothing.
 
 <!-- visitor-data:start -->
 ## Visitor data

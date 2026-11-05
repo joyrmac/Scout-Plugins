@@ -177,7 +177,7 @@ final class Scout_Results_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Case results', 'scout-results' ),
-			__( 'Show the firm\'s case results with the firm\'s approval on every one and the disclaimer printed next to each result.', 'scout-results' ),
+			__( 'The firm’s case results, each approved by the firm with the disclaimer beside it.', 'scout-results' ),
 			__( 'Case results', 'scout-results' )
 		);
 		settings_errors( $o );
@@ -187,15 +187,17 @@ final class Scout_Results_Admin {
 		$headline = sprintf( _n( '%d result on the site.', '%d results on the site.', $counts['live'], 'scout-results' ), $counts['live'] );
 		/* translators: %d: number of case results waiting for the firm's approval. */
 		$detail  = sprintf( _n( '%d is waiting for the firm.', '%d are waiting for the firm.', $counts['waiting'], 'scout-results' ), $counts['waiting'] );
-		$detail .= ' ' . __( 'A result goes live once the firm ticks "Approved by the firm" and names the approver. The disclaimer always prints beside it.', 'scout-results' );
 		$go      = '<a class="button" href="' . esc_url( $new ) . '">' . esc_html__( 'Add a case result', 'scout-results' ) . '</a>';
+		if ( ! $counts['waiting'] ) {
+			$detail = __( 'A result goes live once the firm ticks "Approved by the firm".', 'scout-results' );
+		}
 		self::ui_status( $counts['waiting'] ? 'warn' : ( $counts['live'] ? 'good' : 'off' ), $headline, $detail, $go );
 		?>
 
 		<div class="sr-settings">
 			<form method="post" action="options.php" class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Disclaimer', 'scout-results' ); ?></h2>
-				<p><?php esc_html_e( 'Added to every result on its own. Have the firm approve the wording before any result goes live.', 'scout-results' ); ?></p>
+				<p><?php esc_html_e( 'Added to every result. Have the firm approve the wording before any result goes live.', 'scout-results' ); ?></p>
 				<?php settings_fields( 'scout_results_group' ); ?>
 				<table class="form-table" role="presentation">
 					<tr>
@@ -206,7 +208,7 @@ final class Scout_Results_Admin {
 									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $s['state'], $key ); ?>><?php echo esc_html( $label ); ?></option>
 								<?php endforeach; ?>
 							</select>
-							<p class="description"><?php esc_html_e( 'Sets the starting wording. North Carolina, Virginia and Florida each have their own advertising rules, so the firm checks the final text.', 'scout-results' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Sets the starting wording. Each state has its own rules, so the firm checks the final text.', 'scout-results' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -215,7 +217,8 @@ final class Scout_Results_Admin {
 							<textarea id="sr-disclaimer" class="large-text" rows="5" name="<?php echo esc_attr( $o ); ?>[disclaimer]" placeholder="<?php echo esc_attr( Scout_Results::default_disclaimer( $s['state'] ) ); ?>"><?php echo esc_textarea( $s['disclaimer'] ); ?></textarea>
 							<p class="description"><?php esc_html_e( 'Leave blank to use the state\'s starting wording shown in gray.', 'scout-results' ); ?></p>
 							<?php if ( class_exists( 'Scout_Law_Disclaimers' ) && in_array( 'results', Scout_Law_Disclaimers::places_for( 'results' ), true ) ) : ?>
-								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording in Scout → Legal pages → Disclaimers shows next to every result instead.', 'scout-results' ); ?></strong></p>
+								<?php $sr_legal = ( class_exists( 'Scout_Admin_UI' ) && method_exists( 'Scout_Admin_UI', 'label' ) ) ? Scout_Admin_UI::label( 'policies' ) : __( 'Legal pages', 'scout-results' ); ?>
+								<p class="description"><strong><?php echo esc_html( sprintf( /* translators: %s: the menu group that holds Disclaimers, e.g. Legal pages. */ __( 'Law firm tools is on, so the wording in %s → Disclaimers shows next to every result instead.', 'scout-results' ), $sr_legal ) ); ?></strong></p>
 							<?php endif; ?>
 						</td>
 					</tr>

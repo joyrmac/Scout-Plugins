@@ -9,7 +9,8 @@
  *  - Business info: the NAP + identity form (Scout_Core_Business).
  *  - Search settings (tab "seo"): site-wide SEO defaults
  *    (Scout_Core_SEO_Settings). Per-page SEO stays in the Scout SEO box on
- *    each page.
+ *    each page. Below the form, the Searches that found nothing box
+ *    (Scout_SEO_Empty_Searches).
  *  - Page copy (tab "sync"): Site Sync, the theme's page copy (Scout_Sync_Admin).
  * Labels are display text only; the page slug and tab keys never change.
  *
@@ -456,9 +457,15 @@ final class Scout_Core_Admin {
 			}
 			echo '</td></tr>';
 		}
+		if ( class_exists( 'Scout_SEO_Empty_Searches' ) ) {
+			Scout_SEO_Empty_Searches::render_switch();
+		}
 		echo '</tbody></table>';
 		submit_button();
 		echo '</form>';
+		if ( class_exists( 'Scout_SEO_Empty_Searches' ) ) {
+			Scout_SEO_Empty_Searches::render_box();
+		}
 	}
 
 	/* ---------- Branded, scoped admin styles ---------- */

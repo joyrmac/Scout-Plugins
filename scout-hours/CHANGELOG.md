@@ -1,5 +1,11 @@
 # Scout Hours changelog
 
+## 0.1.15 (2026-11-05)
+
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the hours table and the notice bar now read the theme's DESIGN.md line, surface 2, accent fill and on accent (from `design-tokens.css`) when the theme does not set `--scout-hours-*`. Sites that set them, or set neither, look exactly the same.
+- **Hours opens with the status line** ("Hours are on the site." or "Hours aren’t on the site yet.") instead of an amber pill in an amber-bordered box. The confirm box is now "Owner’s OK" with one short line and the tick box.
+- **One filled button.** Save hours is a normal-size primary button, and the holiday reminder's Open Google Business Profile is outlined. A closure shows its date, then Closed or its hours as a tag. "Hours table & Open now line". Shorter lede and help.
+
 ## 0.1.14 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

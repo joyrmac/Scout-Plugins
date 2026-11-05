@@ -433,6 +433,12 @@ final class Scout_Hub_Health {
 		);
 	}
 
+	/** True on Scout's own sites (scoutraleigh.com, Recon), using the agency domain list. */
+	public static function is_own_site(): bool {
+		$agency = array_map( 'strtolower', (array) apply_filters( 'scout_build_agency_domains', array( 'scoutraleigh.com' ) ) );
+		return self::own_site( $agency );
+	}
+
 	/**
 	 * True on Scout's own sites: scout-setup.json says "scout_own_site": true, the
 	 * site's address is on an agency domain, or Business info's email is.
@@ -674,6 +680,11 @@ final class Scout_Hub_Health {
 		$forms = self::form_emails();
 		if ( $forms ) {
 			$out[] = $forms;
+		}
+		// Whether those emails actually went out (Scout_Hub_Form_Mail). No row without Gravity Forms.
+		$sent = class_exists( 'Scout_Hub_Form_Mail' ) ? Scout_Hub_Form_Mail::row() : null;
+		if ( $sent ) {
+			$out[] = $sent;
 		}
 		$out[]   = self::test_builds();
 		$reviews = self::review_totals();

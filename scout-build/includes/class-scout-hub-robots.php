@@ -34,9 +34,13 @@ final class Scout_Hub_Robots {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 	}
 
-	/** A page with no menu item: reached from the Site health card. */
+	/**
+	 * Its own entry, filed under Search & analytics by the kit's group() (Joy,
+	 * 2026-11-05), so the Scout tools "Looking for robots.txt?" line has a screen
+	 * to open. The address stays admin.php?page=site-build-robots.
+	 */
 	public static function menu(): void {
-		add_submenu_page( '', __( 'Search engine rules', 'scout-build' ), '', 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
+		add_submenu_page( Scout_Hub_Admin::parent(), __( 'Search engine rules', 'scout-build' ), __( 'Search engine rules', 'scout-build' ), 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {

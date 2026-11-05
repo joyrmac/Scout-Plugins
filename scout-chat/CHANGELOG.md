@@ -1,5 +1,12 @@
 # Scout Chat changelog
 
+## 0.3.6 (2026-11-05)
+
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the panel's colors and fonts now read the theme's DESIGN.md (the `--scout-*` names from `design-tokens.css`) when the theme's own `--surface`, `--accent` and the rest are not set; white text on the accent reads DESIGN.md's on accent. Sites that set them, or set neither, look exactly the same.
+- **Status line is one sentence (Joy, 2026-11-05).** "On. 2 questions are waiting." plus one line. Whether the AI server is connected moved into More options: AI connection, as its own small status line.
+- **Chat messages pills show their color.** "Yes" is green, "Not yet" is a calm grey pill (it isn't a warning), and a message sent on as a change request says "Sent as a change request" (was "In Requests").
+- **No names on client sites.** The Team names and greeting placeholders are neutral examples ("First names", "Maria from the office") instead of Sean and Joy. The AI connection text says Scout's server on Scout-branded sites and "your web team's" server on white-label sites. Saved settings are unchanged.
+
 ## 0.3.5 (2026-11-05)
 
 - **Privacy tools reach chat messages.** WordPress's Export and Erase Personal Data tools now find a visitor's chat messages by the email they gave, trashed ones included. Erasing deletes the messages. A message left with only a phone number is still deleted by hand.

@@ -32,7 +32,7 @@ a ticket, sign-up or application.
 
 ## Where it lives
 
-**Events, Customer list** (administrators): whether the sync is on, and
+**Events, Contacts** (administrators): whether the sync is on, and
 **Bring them in**, which adds everyone from before it was switched on, tagged
 the same way. People are matched by email, so running it twice changes
 nothing.
@@ -45,6 +45,10 @@ nothing.
   `scout_members_status_changed`.
 
 Needs FluentCRM. Without it the plugin does nothing and says so on its page.
+
+## What this feature needs from the theme
+
+No visitor-facing output, and it reads nothing from the theme.
 
 <!-- visitor-data:start -->
 ## Visitor data

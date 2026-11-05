@@ -88,7 +88,8 @@ final class Scout_Hub_Today {
 				'id'       => 'health-' . sanitize_title( (string) $check['label'] ),
 				/* translators: %s: the health check that failed */
 				'label'    => sprintf( __( 'Fix: %s', 'scout-build' ), (string) $check['label'] ),
-				'why'      => (string) ( $check['note'] ?? '' ),
+				// One line on Today; Site status has the rest under "More".
+				'why'      => self::first_sentence( (string) ( $check['note'] ?? '' ) ),
 				'minutes'  => 5,
 				'url'      => Scout_Hub_Admin::url( 'health' ),
 				'button'   => __( 'See what to do', 'scout-build' ),
@@ -320,7 +321,7 @@ final class Scout_Hub_Today {
 			.sh-today-time{font:500 12px var(--sh-mono);color:var(--sh-text-2);background:var(--sh-surface-2);border-radius:8px;padding:5px 9px;white-space:nowrap}
 			.sh-today-done{padding:12px 22px;color:var(--sh-text-2);font-size:14px}
 			.sh-today-done s{color:var(--sh-text-3)}
-			.sh-today-calm{padding:34px 22px;text-align:center;display:grid;gap:8px;justify-items:center}
+			.sh-today-calm{padding:34px 22px;text-align:left;display:grid;gap:8px;justify-items:start}
 			.sh-today-calm .sh-check-big{width:48px;height:48px;border-radius:50%;border:2px solid var(--sh-good);display:grid;place-items:center;color:var(--sh-good);font-size:24px}
 		</style>
 		<section class="sh-box sh-today" aria-labelledby="sh-today-title">
@@ -414,5 +415,15 @@ final class Scout_Hub_Today {
 		</section>
 		<?php
 		return true;
+	}
+
+	/** A long note cut to its first sentence, so a Today row stays one or two lines. */
+	private static function first_sentence( string $note ): string {
+		$note = trim( $note );
+		if ( strlen( $note ) <= 160 ) {
+			return $note;
+		}
+		$parts = preg_split( '/(?<=[.;])\s+/u', $note, 2 );
+		return rtrim( (string) $parts[0], ';' ) . ( ';' === substr( (string) $parts[0], -1 ) ? '.' : '' );
 	}
 }

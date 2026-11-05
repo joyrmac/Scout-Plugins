@@ -539,7 +539,7 @@ final class Scout_Members_Admin {
 		// Each screen gets its own name (its menu label) and one sentence on what it is for.
 		$heads = array(
 			'overview' => array( __( 'Home', 'scout-members' ), __( 'Applications waiting for you, renewals coming up, and your members-only pages.', 'scout-members' ) ),
-			'members'  => array( __( 'All members', 'scout-members' ), __( 'Everyone on your list. Change a status, plan or renewal date on a row, then press Save on that row.', 'scout-members' ) ),
+			'members'  => array( __( 'All members', 'scout-members' ), __( 'Everyone on your list. Press Edit on a row to change a status, plan or renewal date.', 'scout-members' ) ),
 			'renewals' => array( __( 'Renewals due', 'scout-members' ), __( 'Who renews in the next 30 days, who is past due, and any payment that needs a look from you.', 'scout-members' ) ),
 			'import'   => array( __( 'Add from spreadsheet', 'scout-members' ), __( 'Add your current members from a spreadsheet, such as an export from Squarespace.', 'scout-members' ) ),
 			'settings' => array( __( 'Settings', 'scout-members' ), __( 'Your membership pages, plans, dues, reminder emails and the questions people answer when they apply.', 'scout-members' ) ),
@@ -600,17 +600,15 @@ final class Scout_Members_Admin {
 				'<a class="button" href="' . esc_url( $waiting[0]['url'] ) . '">' . esc_html( $waiting[0]['action'] ) . '</a>'
 			);
 		} else {
-			self::ui_status( 'good', __( 'All caught up.', 'scout-members' ), __( 'No applications to read, no payments to review and no renewals in the next 30 days.', 'scout-members' ) );
+			$plans = count( Scout_Members::plans() );
+			self::ui_status(
+				'good',
+				__( 'All caught up.', 'scout-members' ),
+				/* translators: 1: number of members, 2: number of plans. */
+				sprintf( __( '%1$s on %2$s, and no renewals due in the next 30 days.', 'scout-members' ), sprintf( _n( '%d member', '%d members', count( $current ), 'scout-members' ), count( $current ) ), sprintf( _n( '%d plan', '%d plans', $plans, 'scout-members' ), $plans ) )
+			);
 		}
 		?>
-		<section class="sh-box">
-			<div class="sh-stats">
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $current ); ?></p><p class="sh-note"><?php esc_html_e( 'members', 'scout-members' ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $applied ); ?></p><p class="sh-note"><a href="#sm-applications"><?php esc_html_e( 'applications to read', 'scout-members' ); ?> &rsaquo;</a></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $due ); ?></p><p class="sh-note"><a href="#sm-renewals"><?php esc_html_e( 'renewals in the next 30 days', 'scout-members' ); ?> &rsaquo;</a></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( Scout_Members::plans() ); ?></p><p class="sh-note"><a href="<?php echo esc_url( self::url( 'settings' ) ); ?>"><?php esc_html_e( 'plans', 'scout-members' ); ?> &rsaquo;</a></p></div>
-			</div>
-		</section>
 
 		<?php if ( ! Scout_Members::plans() || ! Scout_Members::settings()['page'] ) : ?>
 			<section class="sh-box sm-setup">
@@ -778,7 +776,7 @@ final class Scout_Members_Admin {
 		?>
 		<section class="sh-box">
 			<div class="sm-box-head">
-				<h2 class="sh-title"><?php esc_html_e( 'Status, plan and renewal date', 'scout-members' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Status, plan & renewal', 'scout-members' ); ?></h2>
 				<a class="button" href="<?php echo esc_url( self::url( 'import' ) ); ?>"><?php esc_html_e( 'Add from spreadsheet', 'scout-members' ); ?></a>
 			</div>
 			<?php if ( $ids ) : ?>
@@ -790,98 +788,139 @@ final class Scout_Members_Admin {
 		<?php
 	}
 
-	/** Members with their status, plan and renewal date, each editable in place. */
+	/**
+	 * Members as the kit's stacked rows (Joy, 2026-11-05): the name and email
+	 * with one Edit button, then status, plan and renewal as tags, and the
+	 * fields under the row. Without scripts the fields simply stay open.
+	 */
 	private static function table( array $ids ): void {
 		$plans = Scout_Members::plans();
+		$pills = array(
+			'active'   => 'is-on',
+			'applied'  => 'is-progress',
+			'approved' => 'is-progress',
+		);
 		?>
-		<div class="sm-table-wrap" role="region" aria-label="<?php esc_attr_e( 'Members', 'scout-members' ); ?>" tabindex="0">
-			<table class="widefat sm-table sm-members-table">
-				<thead>
-					<tr>
-						<th scope="col"><?php esc_html_e( 'Member', 'scout-members' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Status', 'scout-members' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Plan', 'scout-members' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Renews', 'scout-members' ); ?></th>
-						<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Save', 'scout-members' ); ?></span></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					foreach ( $ids as $id ) :
-						$user = get_userdata( $id );
-						if ( ! $user ) {
-							continue;
-						}
-						$m    = Scout_Members::member( $id );
-						$form = 'sm-f-' . $id;
-						$late  = 'active' === $m['status'] && '' !== $m['renews'] && $m['renews'] < Scout_Members::today();
-						$grace = $late && Scout_Members::in_grace( $id );
-						?>
-						<tr id="sm-member-<?php echo (int) $id; ?>">
-							<td>
-								<strong><?php echo esc_html( $user->display_name ); ?></strong><br>
-								<span class="sh-note"><?php echo esc_html( $user->user_email ); ?></span>
-								<?php if ( '' !== $m['since'] ) : ?>
-									<?php /* translators: %s: date. */ ?>
-									<br><span class="sh-note"><?php echo esc_html( sprintf( __( 'Since %s', 'scout-members' ), Scout_Members::date_label( $m['since'] ) ) ); ?></span>
-								<?php endif; ?>
-								<form id="<?php echo esc_attr( $form ); ?>" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-									<input type="hidden" name="action" value="scout_members_update">
-									<input type="hidden" name="member" value="<?php echo (int) $id; ?>">
-									<?php wp_nonce_field( 'scout_members_update_' . $id ); ?>
-								</form>
-							</td>
-							<td>
-								<label class="screen-reader-text" for="sm-s-<?php echo (int) $id; ?>"><?php esc_html_e( 'Status', 'scout-members' ); ?></label>
-								<select id="sm-s-<?php echo (int) $id; ?>" name="status" form="<?php echo esc_attr( $form ); ?>">
-									<?php foreach ( Scout_Members::statuses() as $key => $label ) : ?>
-										<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $m['status'], $key ); ?>><?php echo esc_html( $label ); ?></option>
-									<?php endforeach; ?>
-								</select>
-								<?php if ( $grace ) : ?>
-									<?php /* translators: %s: date. */ ?>
-									<br><span class="sm-chip is-warn"><?php echo esc_html( sprintf( __( 'Past due, open until %s', 'scout-members' ), Scout_Members::date_label( Scout_Members::access_until( $id ) ) ) ); ?></span>
-								<?php elseif ( $late ) : ?>
-									<br><span class="sm-chip is-warn"><?php esc_html_e( 'Lapsed', 'scout-members' ); ?></span>
-								<?php endif; ?>
-								<?php if ( Scout_Members::flagged( $id ) ) : ?>
-									<br><a class="sm-chip is-warn" href="<?php echo esc_url( self::url( 'renewals' ) . '#sm-review' ); ?>"><?php esc_html_e( 'Payment to review', 'scout-members' ); ?></a>
-								<?php endif; ?>
-							</td>
-							<td>
-								<label class="screen-reader-text" for="sm-p-<?php echo (int) $id; ?>"><?php esc_html_e( 'Plan', 'scout-members' ); ?></label>
-								<select id="sm-p-<?php echo (int) $id; ?>" name="plan" form="<?php echo esc_attr( $form ); ?>">
-									<option value=""><?php esc_html_e( 'No plan', 'scout-members' ); ?></option>
-									<?php foreach ( $plans as $slug => $p ) : ?>
-										<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $m['plan'], $slug ); ?>><?php echo esc_html( $p['name'] ); ?></option>
-									<?php endforeach; ?>
-								</select>
-								<label class="sm-comp" for="sm-c-<?php echo (int) $id; ?>"><?php esc_html_e( 'Renewal price', 'scout-members' ); ?></label>
-								<input type="text" inputmode="decimal" class="sm-comp-input" id="sm-c-<?php echo (int) $id; ?>" name="comp" value="<?php echo esc_attr( $m['comp'] ); ?>" placeholder="<?php echo esc_attr( '' !== ( $plans[ $m['plan'] ]['price'] ?? '' ) ? Scout_Members::money( $plans[ $m['plan'] ]['price'] ) : __( 'plan price', 'scout-members' ) ); ?>" form="<?php echo esc_attr( $form ); ?>">
-								<?php if ( '' !== $m['comp'] ) : ?>
-									<br><span class="sm-chip"><?php echo esc_html( 0.0 === (float) $m['comp'] ? __( 'Comped: renews free', 'scout-members' ) : sprintf( /* translators: %s: amount. */ __( 'Comped: renews at %s', 'scout-members' ), Scout_Members::money( $m['comp'] ) ) ); ?></span>
-								<?php elseif ( $m['free_join'] ) : ?>
-									<br><span class="sm-chip"><?php esc_html_e( 'Joined on a $0 order', 'scout-members' ); ?></span>
-								<?php endif; ?>
-							</td>
-							<td>
-								<label class="screen-reader-text" for="sm-r-<?php echo (int) $id; ?>"><?php esc_html_e( 'Renews', 'scout-members' ); ?></label>
-								<input type="date" id="sm-r-<?php echo (int) $id; ?>" name="renews" value="<?php echo esc_attr( $m['renews'] ); ?>" form="<?php echo esc_attr( $form ); ?>">
-								<?php if ( '' !== $m['paid'] ) : ?>
-									<?php /* translators: %s: date. */ ?>
-									<br><span class="sh-note"><?php echo esc_html( sprintf( __( 'Last paid %s', 'scout-members' ), Scout_Members::date_label( $m['paid'] ) ) ); ?></span>
-								<?php endif; ?>
-							</td>
-							<td class="sm-row-actions">
-								<button type="submit" class="button" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Save', 'scout-members' ); ?></button>
-								<button type="submit" class="button sh-quiet" name="paid" value="1" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Paid today', 'scout-members' ); ?></button>
-							</td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
+		<ul class="sh-rows is-stacked sm-members">
+			<?php
+			foreach ( $ids as $id ) :
+				$user = get_userdata( $id );
+				if ( ! $user ) {
+					continue;
+				}
+				$m     = Scout_Members::member( $id );
+				$form  = 'sm-f-' . $id;
+				$late  = 'active' === $m['status'] && '' !== $m['renews'] && $m['renews'] < Scout_Members::today();
+				$grace = $late && Scout_Members::in_grace( $id );
+				$plan  = $plans[ $m['plan'] ]['name'] ?? '';
+				?>
+				<li class="sh-row sm-member" id="sm-member-<?php echo (int) $id; ?>">
+					<div>
+						<p class="sh-row-name"><?php echo esc_html( $user->display_name ); ?></p>
+						<p class="sh-row-sub"><?php echo esc_html( $user->user_email ); ?></p>
+					</div>
+					<div class="sh-row-facts">
+						<span class="sh-pill <?php echo esc_attr( $pills[ $m['status'] ] ?? '' ); ?>"><?php echo esc_html( Scout_Members::statuses()[ $m['status'] ] ?? $m['status'] ); ?></span>
+						<?php if ( $grace ) : ?>
+							<?php /* translators: %s: date. */ ?>
+							<span class="sh-pill is-warn"><?php echo esc_html( sprintf( __( 'Past due, open until %s', 'scout-members' ), Scout_Members::date_label( Scout_Members::access_until( $id ) ) ) ); ?></span>
+						<?php elseif ( $late ) : ?>
+							<span class="sh-pill is-warn"><?php esc_html_e( 'Lapsed', 'scout-members' ); ?></span>
+						<?php endif; ?>
+						<?php if ( Scout_Members::flagged( $id ) ) : ?>
+							<a class="sh-pill is-warn" href="<?php echo esc_url( self::url( 'renewals' ) . '#sm-review' ); ?>"><?php esc_html_e( 'Payment to review', 'scout-members' ); ?></a>
+						<?php endif; ?>
+						<span class="sh-tag"><?php echo esc_html( '' !== $plan ? $plan : __( 'No plan', 'scout-members' ) ); ?></span>
+						<?php if ( '' !== $m['renews'] ) : ?>
+							<?php /* translators: %s: date. */ ?>
+							<span class="sh-tag"><?php echo esc_html( sprintf( __( 'Renews %s', 'scout-members' ), Scout_Members::date_label( $m['renews'] ) ) ); ?></span>
+						<?php endif; ?>
+						<?php if ( '' !== $m['comp'] ) : ?>
+							<span class="sh-tag"><?php echo esc_html( 0.0 === (float) $m['comp'] ? __( 'Comped: renews free', 'scout-members' ) : sprintf( /* translators: %s: amount. */ __( 'Comped: renews at %s', 'scout-members' ), Scout_Members::money( $m['comp'] ) ) ); ?></span>
+						<?php elseif ( $m['free_join'] ) : ?>
+							<span class="sh-tag"><?php esc_html_e( 'Joined on a $0 order', 'scout-members' ); ?></span>
+						<?php endif; ?>
+						<?php if ( '' !== $m['paid'] ) : ?>
+							<?php /* translators: %s: date. */ ?>
+							<span><?php echo esc_html( sprintf( __( 'Last paid %s', 'scout-members' ), Scout_Members::date_label( $m['paid'] ) ) ); ?></span>
+						<?php endif; ?>
+						<?php if ( '' !== $m['since'] ) : ?>
+							<?php /* translators: %s: date. */ ?>
+							<span><?php echo esc_html( sprintf( __( 'Since %s', 'scout-members' ), Scout_Members::date_label( $m['since'] ) ) ); ?></span>
+						<?php endif; ?>
+					</div>
+					<div class="sh-row-go">
+						<button type="button" class="button sm-edit-toggle" aria-expanded="true" aria-controls="sm-edit-<?php echo (int) $id; ?>"><?php esc_html_e( 'Edit', 'scout-members' ); ?><span class="screen-reader-text"> <?php echo esc_html( $user->display_name ); ?></span></button>
+					</div>
+					<div class="sm-edit" id="sm-edit-<?php echo (int) $id; ?>">
+						<form id="<?php echo esc_attr( $form ); ?>" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="scout_members_update">
+							<input type="hidden" name="member" value="<?php echo (int) $id; ?>">
+							<?php wp_nonce_field( 'scout_members_update_' . $id ); ?>
+						</form>
+						<p class="sm-edit-field">
+							<label for="sm-s-<?php echo (int) $id; ?>"><?php esc_html_e( 'Status', 'scout-members' ); ?></label>
+							<select id="sm-s-<?php echo (int) $id; ?>" name="status" form="<?php echo esc_attr( $form ); ?>">
+								<?php foreach ( Scout_Members::statuses() as $key => $label ) : ?>
+									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $m['status'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+						<p class="sm-edit-field">
+							<label for="sm-p-<?php echo (int) $id; ?>"><?php esc_html_e( 'Plan', 'scout-members' ); ?></label>
+							<select id="sm-p-<?php echo (int) $id; ?>" name="plan" form="<?php echo esc_attr( $form ); ?>">
+								<option value=""><?php esc_html_e( 'No plan', 'scout-members' ); ?></option>
+								<?php foreach ( $plans as $slug => $p ) : ?>
+									<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $m['plan'], $slug ); ?>><?php echo esc_html( $p['name'] ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+						<p class="sm-edit-field">
+							<label for="sm-c-<?php echo (int) $id; ?>"><?php esc_html_e( 'Renewal price', 'scout-members' ); ?></label>
+							<input type="text" inputmode="decimal" class="sm-comp-input" id="sm-c-<?php echo (int) $id; ?>" name="comp" value="<?php echo esc_attr( $m['comp'] ); ?>" placeholder="<?php echo esc_attr( '' !== ( $plans[ $m['plan'] ]['price'] ?? '' ) ? Scout_Members::money( $plans[ $m['plan'] ]['price'] ) : __( 'plan price', 'scout-members' ) ); ?>" form="<?php echo esc_attr( $form ); ?>">
+						</p>
+						<p class="sm-edit-field">
+							<label for="sm-r-<?php echo (int) $id; ?>"><?php esc_html_e( 'Renews', 'scout-members' ); ?></label>
+							<input type="date" id="sm-r-<?php echo (int) $id; ?>" name="renews" value="<?php echo esc_attr( $m['renews'] ); ?>" form="<?php echo esc_attr( $form ); ?>">
+						</p>
+						<p class="sm-edit-go">
+							<button type="submit" class="button" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Save', 'scout-members' ); ?></button>
+							<button type="submit" class="button sh-quiet" name="paid" value="1" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Paid today', 'scout-members' ); ?></button>
+						</p>
+					</div>
+				</li>
+			<?php endforeach; ?>
+		</ul>
 		<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() ? __( 'Paid today records cash or a check and moves the renewal date forward. Checkout payments record themselves.', 'scout-members' ) : __( 'Paid today records a payment and moves the renewal date forward. Renewal price: blank uses the plan price.', 'scout-members' ) ); ?></p>
+		<?php
+		self::edit_toggle_script();
+	}
+
+	/** Closes each member's fields until Edit is pressed. Printed once; without it the fields stay open. */
+	private static function edit_toggle_script(): void {
+		static $done = false;
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+		?>
+		<script>
+		( function () {
+			document.querySelectorAll( '.sm-edit-toggle' ).forEach( function ( b ) {
+				var box = document.getElementById( b.getAttribute( 'aria-controls' ) );
+				if ( ! box ) {
+					return;
+				}
+				var open = window.location.hash === '#' + box.parentNode.id;
+				box.hidden = ! open;
+				b.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+				b.addEventListener( 'click', function () {
+					box.hidden = ! box.hidden;
+					b.setAttribute( 'aria-expanded', box.hidden ? 'false' : 'true' );
+				} );
+			} );
+		} )();
+		</script>
 		<?php
 	}
 
@@ -890,7 +929,7 @@ final class Scout_Members_Admin {
 		$m     = Scout_Members::member( $id );
 		$today = Scout_Members::today();
 		if ( 'approved' === $m['status'] ) {
-			return array( __( 'Approved, dues not paid yet', 'scout-members' ), 'is-warn' );
+			return array( __( 'Approved, dues not paid yet', 'scout-members' ), '' );
 		}
 		if ( '' !== $m['paid'] && $m['paid'] >= gmdate( 'Y-m-d', strtotime( $today . ' -30 days' ) ) && ( '' === $m['renews'] || $m['renews'] > $today ) ) {
 			/* translators: %s: date paid. */
@@ -1080,7 +1119,7 @@ final class Scout_Members_Admin {
 		?>
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Choose your file', 'scout-members' ); ?></h2>
-			<p><?php esc_html_e( 'Moving from another system, such as Squarespace? Save your members as a CSV file and add it here. Each person becomes an active member on their plan.', 'scout-members' ); ?></p>
+			<p><?php esc_html_e( 'Save your members as a CSV file, such as a Squarespace export, and add it here.', 'scout-members' ); ?></p>
 			<?php if ( is_array( $report ) ) : ?>
 				<?php delete_transient( 'scout_members_import_' . get_current_user_id() ); ?>
 				<div class="sm-report">
@@ -1173,10 +1212,10 @@ final class Scout_Members_Admin {
 											<?php if ( $prod ) : ?>
 												<br><a href="<?php echo esc_url( (string) get_edit_post_link( $prod->get_id() ) ); ?>"><?php esc_html_e( 'Edit the product', 'scout-members' ); ?></a>
 												<?php if ( 'publish' !== $prod->get_status() || ! $prod->is_purchasable() ) : ?>
-													<br><span class="sm-chip is-warn"><?php esc_html_e( 'Not for sale yet: publish it and give it a price', 'scout-members' ); ?></span>
+													<span class="sh-status is-warn sm-warn-line"><span class="sh-dot" aria-hidden="true"></span><span><?php esc_html_e( 'Not for sale yet: publish it and give it a price', 'scout-members' ); ?></span></span>
 												<?php elseif ( '' !== $plan['price'] && abs( (float) $prod->get_price() - (float) $plan['price'] ) > 0.001 ) : ?>
 													<?php /* translators: 1: product price, 2: plan price. */ ?>
-													<br><span class="sm-chip is-warn"><?php echo esc_html( sprintf( __( 'The checkout charges %1$s; the plan says %2$s', 'scout-members' ), Scout_Members::money( $prod->get_price() ), Scout_Members::money( $plan['price'] ) ) ); ?></span>
+													<span class="sh-status is-warn sm-warn-line"><span class="sh-dot" aria-hidden="true"></span><span><?php echo esc_html( sprintf( __( 'The checkout charges %1$s; the plan says %2$s', 'scout-members' ), Scout_Members::money( $prod->get_price() ), Scout_Members::money( $plan['price'] ) ) ); ?></span></span>
 												<?php endif; ?>
 											<?php else : ?>
 												<br><button type="submit" class="button" form="sm-make-<?php echo esc_attr( $slug ); ?>"><?php esc_html_e( 'Create the product for this plan', 'scout-members' ); ?></button>
@@ -1271,16 +1310,16 @@ final class Scout_Members_Admin {
 				</section>
 
 				<section class="sh-box" id="sm-plans">
-					<h2 class="sh-title"><?php esc_html_e( 'Plans and what happens after approval', 'scout-members' ); ?></h2>
+					<h2 class="sh-title"><?php esc_html_e( 'Plans & approval', 'scout-members' ); ?></h2>
 					<p class="sm-field">
 						<label for="sm-set-plans"><?php esc_html_e( 'Plans, one per line', 'scout-members' ); ?></label>
 						<textarea id="sm-set-plans" name="scout_members[plans]" rows="4" class="large-text code" placeholder="Club Member | 120 | year"><?php echo esc_textarea( $s['plans'] ); ?></textarea>
-						<span class="sh-note"><?php esc_html_e( 'Name | price | month, year or once. People choose one when they apply, and you can change it when you approve them.', 'scout-members' ); ?></span>
+						<span class="sh-note"><?php esc_html_e( 'Name | price | month, year or once. People pick one when they apply.', 'scout-members' ); ?></span>
 					</p>
 					<p class="sm-field">
 						<label for="sm-set-next"><?php esc_html_e( 'Next step after approval', 'scout-members' ); ?></label>
 						<textarea id="sm-set-next" name="scout_members[next_step]" rows="3" class="large-text"><?php echo esc_textarea( $next ); ?></textarea>
-						<span class="sh-note"><?php esc_html_e( 'Goes in the welcome email and on the member page until their first payment is recorded. For example, how and where to pay dues.', 'scout-members' ); ?></span>
+						<span class="sh-note"><?php esc_html_e( 'Shown in the welcome email until their first payment, such as how to pay dues.', 'scout-members' ); ?></span>
 					</p>
 				</section>
 
@@ -1302,7 +1341,7 @@ final class Scout_Members_Admin {
 					<p class="sm-field">
 						<label for="sm-set-notify"><?php esc_html_e( 'Send new applications to', 'scout-members' ); ?></label>
 						<input type="email" id="sm-set-notify" name="scout_members[notify]" value="<?php echo esc_attr( $s['notify'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( Scout_Members::shared_notice_email() ); ?>">
-						<span class="sh-note"><?php esc_html_e( 'Leave it blank to use the notice address in Business info. The email names the applicant only. Their answers stay on the site.', 'scout-members' ); ?></span>
+						<span class="sh-note"><?php esc_html_e( 'Blank uses the notice address in Business info. The email names the applicant only.', 'scout-members' ); ?></span>
 					</p>
 				</section>
 
@@ -1311,7 +1350,10 @@ final class Scout_Members_Admin {
 					<p class="sm-field">
 						<label for="sm-set-q"><?php esc_html_e( 'Application questions, one per line', 'scout-members' ); ?></label>
 						<textarea id="sm-set-q" name="scout_members[questions]" rows="14" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Form::default_questions() ); ?>"><?php echo esc_textarea( $questions ); ?></textarea>
-						<span class="sh-note"><?php esc_html_e( 'Type | Question | extra. Add * after the type to make it required. Types: heading, text, email, tel, date, url, textarea, yesno, choice (options in extra, separated by ;), agree (a statement; extra is the tick-box words), check, address. First name, last name and email are always asked. Left empty, three short questions are used.', 'scout-members' ); ?></span>
+						<span class="sh-note"><?php esc_html_e( 'One question per line. First name, last name and email are always asked.', 'scout-members' ); ?></span>
+						<details class="sh-fold"><summary><?php esc_html_e( 'More', 'scout-members' ); ?></summary>
+							<span class="sh-note"><?php esc_html_e( 'Type | Question | extra. Add * after the type to make it required. Types: heading, text, email, tel, date, url, textarea, yesno, choice (options in extra, separated by ;), agree (a statement; extra is the tick-box words), check, address. Left empty, three short questions are used.', 'scout-members' ); ?></span>
+						</details>
 					</p>
 					<p class="sm-field">
 						<label for="sm-set-iq"><?php esc_html_e( 'Invitation questions, one per line', 'scout-members' ); ?></label>
@@ -1347,7 +1389,7 @@ final class Scout_Members_Admin {
 					<tr><td>[scout_members_home]</td><td><?php esc_html_e( 'The list of members pages and events. The members home shows it already.', 'scout-members' ); ?></td></tr>
 				</table>
 			</div>
-			<p class="sh-note"><?php esc_html_e( 'Members sign in on the site, land on the members home and never see the dashboard. The WordPress password page carries the site\'s logo.', 'scout-members' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Members sign in on the site and land on the members home, never the dashboard.', 'scout-members' ); ?></p>
 		<?php self::ui_fold_close(); ?>
 		<?php
 	}

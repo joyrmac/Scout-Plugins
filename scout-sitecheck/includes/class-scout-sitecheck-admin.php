@@ -165,8 +165,9 @@ final class Scout_Sitecheck_Admin {
 
 	public static function status_label( int $id ): array {
 		$labels = array(
-			'running'     => array( __( 'Running', 'scout-sitecheck' ), 'warn' ),
-			'held'        => array( __( 'Waiting for review', 'scout-sitecheck' ), 'warn' ),
+			// Kit pill tones: progress for normal waiting states, good, and bad for a report that failed.
+			'running'     => array( __( 'Running', 'scout-sitecheck' ), 'progress' ),
+			'held'        => array( __( 'Waiting for review', 'scout-sitecheck' ), 'progress' ),
 			'sent'        => array( __( 'Sent', 'scout-sitecheck' ), 'good' ),
 			'not_sent'    => array( __( 'Not sent', 'scout-sitecheck' ), 'bad' ),
 			'unreachable' => array( __( 'Couldn\'t reach the site', 'scout-sitecheck' ), 'bad' ),
@@ -188,7 +189,7 @@ final class Scout_Sitecheck_Admin {
 			list( $label, $tone ) = self::status_label( $id );
 			echo '<span class="sh-pill is-' . esc_attr( $tone ) . '">' . esc_html( $label ) . '</span>';
 		} elseif ( 'ssc_done' === $col ) {
-			echo get_post_meta( $id, '_ssc_followed', true ) ? '<span class="sh-pill is-good">' . esc_html__( 'Yes', 'scout-sitecheck' ) . '</span>' : '<span class="sh-pill is-warn">' . esc_html__( 'Not yet', 'scout-sitecheck' ) . '</span>';
+			echo get_post_meta( $id, '_ssc_followed', true ) ? '<span class="sh-pill is-good">' . esc_html__( 'Yes', 'scout-sitecheck' ) . '</span>' : '<span class="sh-pill">' . esc_html__( 'Not yet', 'scout-sitecheck' ) . '</span>'; // Calm: not following up yet is not a warning.
 		}
 	}
 
@@ -202,13 +203,14 @@ final class Scout_Sitecheck_Admin {
 		$rows = Scout_Sitecheck::rows( $post->ID );
 		list( $label ) = self::status_label( $post->ID );
 		$url = (string) get_post_meta( $post->ID, '_ssc_url', true );
-		echo '<p><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( $url ) . '</a> &middot; ' . esc_html( $label ) . '</p>';
+		echo '<p><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( $url ) . '</a></p><p>' . esc_html( $label ) . '</p>';
 		if ( null === $rows ) {
 			echo '<p>' . esc_html__( 'The check hasn\'t finished. If the visitor left the page, it finishes on its own within ten minutes.', 'scout-sitecheck' ) . '</p>';
 			return;
 		}
 		$r = Scout_Sitecheck::summary( $post->ID, $rows );
-		echo '<p><strong>' . esc_html( $r['passed'] . ' / ' . $r['total'] ) . '</strong> &middot; ' . esc_html( $r['headline'] ) . '</p>';
+		/* translators: 1: checks passed, 2: total checks */
+		echo '<p><strong>' . esc_html( sprintf( __( '%1$d of %2$d passed', 'scout-sitecheck' ), (int) $r['passed'], (int) $r['total'] ) ) . '</strong></p><p>' . esc_html( $r['headline'] ) . '</p>';
 		echo '<div class="ssc ssc-admin">' . Scout_Sitecheck_Report::rows_html( $rows ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped inside.
 	}
 
@@ -337,9 +339,10 @@ final class Scout_Sitecheck_Admin {
 		settings_errors( $o );
 		?>
 		<?php
+		// The status line: a few words, one sentence, one button. The speed key's state sits under More options.
 		if ( $live ) {
 			$headline = __( 'Live.', 'scout-sitecheck' );
-			$detail   = __( 'The free site check page is on the site.', 'scout-sitecheck' );
+			$detail   = $key ? __( 'The free site check page is on the site.', 'scout-sitecheck' ) : __( 'The page is on the site, but speed checks often fail until you add a Google speed key under More options.', 'scout-sitecheck' );
 		} elseif ( $page ) {
 			$headline = __( 'Draft.', 'scout-sitecheck' );
 			$detail   = __( 'The page is made but not published yet.', 'scout-sitecheck' );
@@ -347,10 +350,9 @@ final class Scout_Sitecheck_Admin {
 			$headline = __( 'Not made yet.', 'scout-sitecheck' );
 			$detail   = __( 'Make the page as a draft, check it, then publish it.', 'scout-sitecheck' );
 		}
-		$detail .= ' ' . ( $key ? __( 'Google speed key saved.', 'scout-sitecheck' ) : __( 'No Google speed key yet, so speed checks often fail. Add one under More options.', 'scout-sitecheck' ) );
 		if ( $n ) {
-			/* translators: %d: number of site checks waiting for follow-up. */
-			$detail .= ' ' . sprintf( _n( '%d check is waiting for follow-up.', '%d checks are waiting for follow-up.', $n, 'scout-sitecheck' ), $n );
+			/* translators: 1: "Live." 2: number of site checks waiting for follow-up. */
+			$headline = sprintf( _n( '%1$s %2$d check is waiting.', '%1$s %2$d checks are waiting.', $n, 'scout-sitecheck' ), $headline, $n );
 		}
 		if ( $page ) {
 			$go = '<a class="button" href="' . esc_url( (string) get_edit_post_link( $page->ID ) ) . '">' . esc_html__( 'Edit the page', 'scout-sitecheck' ) . '</a>';
@@ -360,8 +362,9 @@ final class Scout_Sitecheck_Admin {
 		} else {
 			$go = '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_ssc_page' ), 'scout_ssc_page' ) ) . '">' . esc_html__( 'Make the page (as a draft)', 'scout-sitecheck' ) . '</a>';
 		}
-		$go .= ' <a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Sitecheck::CPT ) ) . '">' . esc_html__( 'Open Check requests', 'scout-sitecheck' ) . '</a>';
-		self::ui_status( ( $live && $key && ! $n ) ? 'good' : 'warn', $headline, $detail, $go );
+		$go .= ' <a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Sitecheck::CPT ) ) . '">' . esc_html__( 'Check requests', 'scout-sitecheck' ) . ' &rsaquo;</a>';
+		// Amber only for a real gap: no page live, or speed checks failing for want of a key.
+		self::ui_status( $live && $key ? 'good' : ( $live || $page ? 'warn' : 'off' ), $headline, $detail, $go );
 		?>
 
 		<form method="post" action="options.php">
@@ -371,7 +374,7 @@ final class Scout_Sitecheck_Admin {
 				<table class="form-table" role="presentation">
 					<?php
 					self::row( __( 'Email new checks to', 'scout-sitecheck' ), self::text( 'notify', $s['notify'], Scout_Sitecheck::notify_to(), 'email' ), __( 'Gets every check and the replies. Leave blank to use Send notices to in Business info.', 'scout-sitecheck' ) );
-					self::row( __( 'Who follows up', 'scout-sitecheck' ), self::text( 'lead_name', $s['lead_name'], 'Sean' ), __( 'The name in the report, like "Sean will walk you through them." Name only someone who agreed.', 'scout-sitecheck' ) );
+					self::row( __( 'Who follows up', 'scout-sitecheck' ), self::text( 'lead_name', $s['lead_name'], __( 'A first name', 'scout-sitecheck' ) ), __( 'The name in the report, like "Maria will walk you through them." Name only someone who agreed.', 'scout-sitecheck' ) );
 					self::row( __( 'Their photo', 'scout-sitecheck' ), self::text( 'lead_photo', $s['lead_photo'], 'https://', 'url' ), __( 'Optional. A JPG or PNG link, since email apps can\'t show WebP.', 'scout-sitecheck' ) );
 					self::row( __( 'Booking page', 'scout-sitecheck' ), self::text( 'book_url', $s['book_url'], Scout_Sitecheck::book_url(), 'url' ), __( 'Where "Book a call" goes. Blank uses the site\'s booking page, or Contact.', 'scout-sitecheck' ) );
 					self::row( __( 'Review before sending', 'scout-sitecheck' ), '<label><input type="checkbox" name="' . esc_attr( $o ) . '[hold]" value="1" ' . checked( $s['hold'], true, false ) . '> ' . esc_html__( 'Hold each report until someone opens it and clicks Send report', 'scout-sitecheck' ) . '</label>', __( 'Off: the report emails right away.', 'scout-sitecheck' ) );
@@ -380,7 +383,7 @@ final class Scout_Sitecheck_Admin {
 			</div>
 			<?php self::ui_fold_open( __( 'More options', 'scout-sitecheck' ) ); ?>
 				<h3><?php esc_html_e( 'Google\'s speed tool', 'scout-sitecheck' ); ?></h3>
-				<p><?php esc_html_e( 'A free PageSpeed Insights key from Google Cloud. Without one, Google often turns speed checks away.', 'scout-sitecheck' ); ?></p>
+				<p class="sh-status<?php echo $key ? '' : ' is-warn'; ?>"><span class="sh-dot" aria-hidden="true"></span><strong><?php echo esc_html( $key ? __( 'Key saved.', 'scout-sitecheck' ) : __( 'No key yet.', 'scout-sitecheck' ) ); ?></strong> <span><?php esc_html_e( 'Without a free PageSpeed Insights key from Google Cloud, Google often turns speed checks away.', 'scout-sitecheck' ); ?></span></p>
 				<table class="form-table" role="presentation">
 					<?php
 					if ( defined( 'SCOUT_SITECHECK_PSI_KEY' ) ) {
@@ -397,7 +400,7 @@ final class Scout_Sitecheck_Admin {
 				<h3><?php esc_html_e( 'Putting it on another page', 'scout-sitecheck' ); ?></h3>
 				<p><?php esc_html_e( 'Add a Shortcode block with [scout_site_check]. Use [scout_site_check sample="no"] to leave out the sample report.', 'scout-sitecheck' ); ?></p>
 			<?php self::ui_fold_close(); ?>
-			<?php submit_button( __( 'Save changes', 'scout-sitecheck' ) ); ?>
+			<?php submit_button( __( 'Save changes', 'scout-sitecheck' ), $page ? 'primary' : 'secondary' ); // One primary: Make the page leads until the page exists. ?>
 		</form>
 		<?php
 		Scout_Admin_UI::close();

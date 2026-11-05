@@ -1,11 +1,13 @@
 /* Scout Partners on the site: the partners block, a logo rail, logos only.
    Fonts and text color come from the theme. Colors a theme can retune:
-   --scout-partners-line, --scout-partners-logo-bg, --scout-partners-radius. */
+   --scout-partners-line, --scout-partners-logo-bg, --scout-partners-radius.
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default. */
 
 .sp-partners {
-	--sp-line: var(--scout-partners-line, rgba(127, 127, 127, .28));
+	--sp-line: var(--scout-partners-line, var(--scout-line, rgba(127, 127, 127, .28)));
 	--sp-logo-bg: var(--scout-partners-logo-bg, #fff);
-	--sp-radius: var(--scout-partners-radius, 14px);
+	--sp-radius: var(--scout-partners-radius, var(--scout-radius-card, 14px));
 	margin: 2em 0;
 }
 .sp-title { margin: 0 0 .75em; text-wrap: balance; }

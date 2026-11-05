@@ -26,7 +26,7 @@ screen or feature, is in `../docs/dashboard-map.md`.
 | **To do** (key `inbox`) | everyone | One list of everything waiting on a person, newest first, with filter chips: chat questions, new reviews, change requests and their status, site check requests, booking requests. Plugins add items with `scout_hub_inbox_items` (or a count row with `scout_hub_inbox`). Each person picks Inbox emails: never, once a day, or every new item. |
 | **Reports** | owner, operator | Recon's numbers, when Recon is on. Empty groups never show to clients. |
 | **Business** | everyone | Facts typed once: Business info, Hours, Team, Case results, a companion plugin's own types. |
-| **Site features** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & Links, Newsletter, Moved pages (redirects), Free site check. |
+| **Site features** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & links, Newsletter, Redirects, Free site check. |
 | **Search** | owner, operator | SEO, AI search, Analytics and the cookie notice, Search engine rules (robots.txt), and later site search and the sitemap. |
 | **Legal pages** | owner, operator | Accessibility statement now; privacy policy, terms and law-firm disclaimers as they arrive. |
 | **Site status** | owner, operator | The whole report (the Site status screen), Search health, Spam protection, the image optimizer. |
@@ -48,6 +48,7 @@ drifts from the map. A screen never moves its address; only where it is filed.
 | `SCOUT_HUB_BRAND` | `true` | Labels the menu **Scout** with the bolt and shows the "Built and looked after by Scout Media" sign-off. **Set to `false` on partner-side or white-label sites**: the menu then says Site Build and nothing mentions Scout. |
 | `SCOUT_HUB_READ_TOKEN` | (none) | Optional. A key of 20+ characters that lets the Scout Client Hub read `scout-build/v1/log`, `/requests` and `/site` (Bearer). Normally operators make the keys on Scout → Site history instead; a constant here wins over those. |
 | `SCOUT_HUB_WRITE_TOKEN` | (none) | Same, plus `POST /log` for note lines (how Scout's tools log work as it ships). Cannot change anything else. |
+| `SCOUT_BRAND_OFF` | `false` | Turns the admin white-label layer off even when the setup file has a `brand` section. |
 | `SCOUT_HUB_LOG_API` | `false` | On a white-label site (`SCOUT_HUB_BRAND` false) the endpoint stays off unless this is true. |
 | `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Updates. See "Theme updates" below. |
 | `DISALLOW_FILE_MODS` | (WordPress) | When true, features that are not installed must be uploaded by hand; on and off still work. |
@@ -106,6 +107,61 @@ Client Hub Sheet, the write key is for Scout's tools. Shown once, stored encrypt
 One-time import: upload the site's file from `docs/site-log-import/` on the
 Site history screen. Spec and the hub it feeds: `../docs/site-log-spec.md`.
 
+## The monthly update to the client
+
+Off until an operator turns it on, in the **Monthly update to the client** box
+on Scout tools, Site history (operators only). Monthly, or quarterly for The
+Partnership. Early in the month the site drafts last month's update from the
+lines marked Client sees (client wording, else the title, plus the measure),
+then **Waiting on your OK** and **Coming up**. Nothing sends by itself: an
+operator presses **Send** or **Skip**. The team address
+(`SCOUT_HUB_REQUEST_EMAIL`) hears when a draft is ready, and once more after
+three days. For text-first clients, **Text, sent by hand** shows a short text to
+copy and an **I texted it** button. **Make a draft** builds one for any of the
+last six months. Sending writes a Site history line.
+
+The email goes to the address typed in the box's Settings, else Business info's
+email (Scout Core), in the site's branded card through Scout Email, with replies
+to the team address. On white-label sites (`SCOUT_HUB_BRAND` false) it never
+names Scout, and the draft warns about any line that does.
+
+## White-label for the WordPress admin (Scout Brand)
+
+Replaces Branda Pro. **Off on every site until the site turns it on**, so a
+client's admin looks the same as before:
+
+- the theme's `scout-setup.json` has a `brand` section (even `"brand": {}`), or
+- the `scout_brand` option is saved with `"on": true` (sites without a setup file).
+
+`"on": false` in the section, or `define( 'SCOUT_BRAND_OFF', true );` in
+wp-config.php, turns it off. Operators see whether it is on, and from where, on
+Scout tools, Features.
+
+```json
+"brand": {
+  "logo":       "assets/img/logo.svg",
+  "logo_width": 220,
+  "color":      "#1A2E5A",
+  "background": "#F6F8FB",
+  "text":       "#1B2150",
+  "message":    "Need a change? Use Request a change in the top bar.",
+  "hide_menus": [ "tools.php", "options-general.php>options-privacy.php" ],
+  "off":        [ "admin_bar" ]
+}
+```
+
+| Part (`off` name) | What it does |
+|---|---|
+| Login screen (`login`) | Logo from `brand.logo`, else the Customizer logo, else the Site Icon; brand color on the button; the logo links to the site; the tab title is the site name. |
+| Admin bar (`admin_bar`) | No WordPress logo menu, "Hi, Name", and the updates counter only for operators. |
+| Footer (`footer`) | "Built and looked after by Scout Media." with Request a change; "your web team" on white-label sites. The WordPress version only for operators. |
+| Hidden menus (`menu`) | Menus in `hide_menus` hidden from everyone but operators. `parent.php>child.php` hides one submenu item. |
+| Dashboard message (`message`) | `message` at the top of the Dashboard until each person dismisses it. |
+
+To switch a site from Branda: add the section, update the theme, check the
+login screen, admin bar and footer, then deactivate Branda. Branda's settings
+are not imported.
+
 ## The feature list
 
 `catalog.json` at the root of this repo, mirrored in `scout-build/catalog.json`
@@ -121,6 +177,25 @@ Turn on and Go back download the `<slug>.zip` asset from this repo's GitHub
 releases (`<slug>-v<version>` tags), the same releases the updater uses. The
 repo's releases must stay public for this to work without a login.
 
+## What this feature needs from the theme
+
+Scout Build has no visitor-facing output. It reads these from the theme:
+
+- **`scout-setup.json`** (child theme first): `features.use` and
+  `features.skip`, `scout_own_site`, and the sections it fills into other
+  plugins (`team`, `reviews`, `chat`, `hours`, `analytics`, `cards`). The
+  `brand` section dresses the login screen and the admin: `logo`,
+  `logo_width`, `color`, `background`, `text`, `message`, `hide_menus`, `off`.
+  Format: `includes/class-scout-hub-setup.php`.
+- **DESIGN.md** through `scout_design()`: `colors.accent_fill` as the
+  detected color on the Email screen, and the pairs `scout_design_issues()`
+  checks (`on_accent` on `accent_fill`, `text` on `bg` and `surface`, `text_2`
+  on `bg`), shown as Design contrast in Site status.
+- **`style.css`:** `Update URI` and `Scout Release` for theme updates (Theme
+  updates, above), and the theme's `CHANGELOG.md` line for the Site log.
+- **`add_theme_support( '<feature slug>' )`** lets a theme named in a
+  feature's `not_with_themes` offer that feature anyway.
+
 <!-- visitor-data:start -->
 ## Visitor data
 
@@ -131,7 +206,7 @@ repo's releases must stay public for this to work without a login.
 | Names or emails and short previews of waiting visitor messages (chat questions, booking requests, new reviews and similar) (only for staff who chose daily or every-item Inbox emails) | Read from the plugins that hold them and listed in Inbox emails. This plugin keeps no copy. | Not kept by this plugin | Emailed to site staff who turned on Inbox emails |
 | Every email the website sends, including form notices, booking and chat emails, and replies to visitors, which can carry what visitors typed (only when the Email screen has a Google address and app password) | Sent through the Google mailbox set on the Email screen. This plugin keeps no copy. | Not kept by this plugin | Google (Gmail), which sends the site's email |
 
-This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent.
+This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent. Site status counts whether form emails went out, keeping only which form and which email, sent or failed, and the time, never who it went to or what it said. The monthly update to the client (off until an operator turns it on) emails the site's owner, not visitors: it goes to the address an operator types in its Settings, kept with the first name for the greeting in the option scout_hub_report_settings, or else to Business info's email.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

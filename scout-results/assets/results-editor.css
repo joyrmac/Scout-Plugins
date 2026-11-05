@@ -8,7 +8,7 @@
 .sr-title-help { margin: 8px 0 0; color: var(--sh-text-2); font-size: 13px; }
 
 .sr-fields { display: grid; gap: 4px; }
-.sr-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 20px; }
+.sr-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(max(240px, calc((100% - 40px) / 3)), 1fr)); gap: 0 20px; }
 .sr-field { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 0; }
 .sr-field > label, .sr-help > label {
 	font-family: var(--sh-mono); font-size: 11px; letter-spacing: 1.2px;

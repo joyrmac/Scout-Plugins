@@ -17,7 +17,7 @@ and Events), and the Scout menu bar on every screen:
 |---|---|
 | Schedule | Requests to approve, the schedule by day or week, paid and unpaid, client details and intake answers, blocked time, the phone calendar link. |
 | Session types | The sessions people can book, one plain form each. |
-| Settings | Booking page, owner email, cancellation window, notice and how far ahead, checkout hold, pay window, booking hours, newsletter box. |
+| Settings | Booking page, owner email, cancellation window, notice and how far ahead, checkout hold, pay window, booking hours, newsletter box, busy times from your calendar. |
 
 Bookings hold clients' personal details, so every screen needs the
 `list_users` capability (administrators), the same rule as Scout Members.
@@ -35,6 +35,7 @@ Bookings hold clients' personal details, so every screen needs the
 | Days and hours | The business hours (below), or the type's own days and hours. |
 | Questions | Up to six short questions, each required or not, short or long answer. Keep health questions out; this form is not built to hold health records. |
 | Note | A line or two shown before booking and in the client's emails. |
+| Video call link | Optional. A fixed room (Google Meet, Zoom), https only. It goes in the booked, moved and reminder emails, and in the calendar invite as the location and link. Meet links are not made for you; that needs a Google sign-in. |
 
 The plugin ships with no session types and no prices. The owner enters them.
 
@@ -52,6 +53,41 @@ Working hours come from, in order:
 3. the booking hours on Settings.
 
 Any booking blocks every session type, because one person runs the practice.
+
+### Busy times from your calendar
+
+Settings, "Busy times from your calendar", takes the private address of up to
+three calendars: the iCal address every Google, Apple and Outlook calendar
+offers (Google: Settings, your calendar, "Secret address in iCal format";
+Apple's `webcal://` addresses work too). No sign-in and no API keys.
+
+- **Reading.** A background job (`scout_booking_busy_refresh`, every 15
+  minutes) reads each address with `wp_remote_get()`: 8 second timeout, https
+  only (redirects followed by hand, at most three, only to https), local
+  addresses refused, 8 MB at most, and the answer must be a calendar file.
+  Visitors never wait: the booking page reads only what the last run saved.
+  A new or replaced address is read right away.
+- **What counts as busy.** Timed events (TZID, UTC or floating; Outlook's
+  Windows zone names too), all-day events unless marked free
+  (`TRANSP:TRANSPARENT`), and repeats: DAILY, WEEKLY with BYDAY, MONTHLY by
+  month day or by weekday (2TU, -1FR), simple YEARLY, with INTERVAL, COUNT,
+  UNTIL, EXDATE and moved single times (RECURRENCE-ID). Events marked free or
+  `STATUS:CANCELLED` are skipped, and so are this site's own bookings if the
+  owner copied one into the calendar.
+- **What is kept.** Only start and end times for the next 60 days
+  (transient `scout_booking_busy`). Never titles, people, places or notes.
+- **Open times.** A slot is not offered when it, plus the session type's
+  buffer after it, overlaps a busy time, and the buffer is also kept clear
+  after the busy time ends. Bookings already made are never changed.
+- **When a read fails,** the busy times from the last good read stay. Settings
+  and the Schedule status line say "Couldn't read your calendar since Nov 5,
+  2:10 pm. Bookings still open, but busy times may be missing." After 24 hours
+  it also shows in Site status, through a WordPress Site Health check
+  (`scout_booking_busy`) that Scout Build's daily WordPress checks list.
+- **The addresses are secrets.** Option `scout_booking_busy_feeds`, not
+  autoloaded, never logged, never sent to the browser in full (the host and
+  the last 6 characters, with Replace and Remove), never exported. Read notes
+  (`scout_booking_busy_state`) are keyed by a hash, never by the address.
 
 ## The booking page
 
@@ -172,18 +208,33 @@ requests unpaid after the pay window, and sends reminders.
 - `scout_booking_types_saved` after session types change.
 - `scout_booking_now` filters the clock (tests).
 
-## Front-end styles
+## What this feature needs from the theme
 
-`assets/scout-booking.css` loads only where the shortcode is. Fonts and text
-color come from the theme. Colors are custom properties a theme can set:
-`--scout-booking-accent`, `--scout-booking-on-accent`, `--scout-booking-line`,
-`--scout-booking-inset`, `--scout-booking-radius`, `--scout-booking-danger`.
+- **DESIGN.md:** fonts and text color come from the theme. Colors read
+  the DESIGN.md roles accent fill (buttons and the chosen day), on accent,
+  line, surface 2 (insets) and the card corner, as `--scout-accent-fill`,
+  `--scout-on-accent`, `--scout-line`, `--scout-surface-2` and
+  `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables still win when the
+  theme sets them: `--scout-booking-accent`, `--scout-booking-on-accent`,
+  `--scout-booking-line`, `--scout-booking-inset`, `--scout-booking-radius`.
+  With neither, neutral defaults (`#1D1D1F`, `#fff`, a soft gray, `14px`).
+  `--scout-booking-danger` (`#B42318`) and the green "done" line stay fixed,
+  since DESIGN.md has no status colors.
+- **Where it lands:** the steps print where `[scout_booking]` sits, at most
+  46rem wide, with H2 and H3 headings under the theme's H1.
+  `assets/scout-booking.css` loads only on that page.
+- **Booking link for other features:** once a booking page is published,
+  Scout Booking defines `scout_booking_url()`, unless the theme already
+  defines its own. Call buttons, Chat and Site Check read it.
+- **scout-setup.json:** nothing.
 
 ## Data
 
 - Table `{prefix}scout_bookings`: one row per booking, request or blocked time.
 - Options `scout_booking` (settings and the feed token), `scout_booking_types`,
-  `scout_booking_db`.
+  `scout_booking_db`, and, not autoloaded, `scout_booking_busy_feeds` (the
+  private calendar addresses) and `scout_booking_busy_state` (when each was
+  read). Transient `scout_booking_busy` holds the busy times.
 - Personal data export and erase (Tools) cover bookings by email.
 - Deleting the plugin removes the table and options. The WooCommerce products
   stay, because past orders point at them.
@@ -193,7 +244,9 @@ color come from the theme. Colors are custom properties a theme can set:
 - Card payments: a real payment service (Stripe, Square or PayPal) plugs into
   the WooCommerce checkout; nothing in this plugin changes.
 - Staff and more than one calendar; group sessions; packages and gift cards.
-- Two-way sync with Google or Apple calendars (the feed is one way).
+- Two-way sync with Google or Apple calendars. The phone calendar link sends
+  bookings out, and busy times come in from the private address, but nothing
+  is written to the owner's calendar.
 - Text message reminders.
 
 <!-- visitor-data:start -->
@@ -207,7 +260,7 @@ color come from the theme. Colors are custom properties a theme can set:
 | Email, first name, the page the form was on, the exact words beside the newsletter box, and the session type (only when the visitor ticks the newsletter box and Scout Newsletter is on) | Handed to the Scout Newsletter plugin. This plugin keeps no separate copy beyond the booking itself. | Not kept separately by this plugin | Scout Newsletter, which sends it to the newsletter service set there |
 | Name, email, phone, the appointment time and the booking's code (only when WooCommerce is on and the session takes a payment online) | WooCommerce's cart, checkout and order records on this website | As long as WooCommerce keeps the order. This plugin never deletes orders. | Nobody |
 
-This plugin sets no cookies itself. When a session takes payment, WooCommerce sets its own cart and session cookies and keeps the order under its own rules.
+This plugin sets no cookies itself. When a session takes payment, WooCommerce sets its own cart and session cookies and keeps the order under its own rules. Busy times from the owner's own calendar are not visitor data: only the start and end of the owner's busy times for the next 60 days are kept, never titles, people, places or notes.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

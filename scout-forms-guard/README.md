@@ -55,6 +55,11 @@ this plugin does nothing.
 The timestamp is signed, so a cached form stays valid for up to a day. The
 honeypot and signature work regardless of caching.
 
+## What this feature needs from the theme
+
+No visitor-facing output. Its hidden fields sit off screen inside each
+Gravity Form with their own inline style, so the theme styles nothing for it.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

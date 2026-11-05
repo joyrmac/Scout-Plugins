@@ -9,8 +9,9 @@
  *   (_scout_team_link_hash), with when it ends (_scout_team_link). It ends
  *   after 14 days, works once, and allows a few tries an hour.
  * - The page has no login. It takes name, title, short bio, a photo and the
- *   credential lines with their sources, and profile links. Never email,
- *   phone or the card only contact.
+ *   credential lines with their sources, and profile links. With A business
+ *   card on, it also takes their card intro, "why talk to them" and tags.
+ *   Never email, phone, card phone or card email.
  * - What they send waits on the person as pending changes (_scout_team_pending).
  *   The live profile, the public pages and the schema never read it. The
  *   owner approves it on the edit screen (it is copied into the profile) or
@@ -212,10 +213,25 @@ final class Scout_Team_Link {
 
 	/**
 	 * The fields the page takes. Everything else on a profile (email, phone,
-	 * the card only contact, the login, where they show) stays with the owner.
+	 * card phone, card email, the login, where they show) stays with the owner.
+	 * intro, why and tags are the card's words (card_intro, card_why, card_tags).
 	 */
 	public static function fields(): array {
-		return array( 'name', 'role', 'bio', 'photo', 'education', 'awards', 'memberships', 'bar', 'same_as' );
+		return array( 'name', 'role', 'bio', 'photo', 'education', 'awards', 'memberships', 'bar', 'same_as', 'intro', 'why', 'tags' );
+	}
+
+	/** The card's words on the page: form name => profile key. */
+	public static function card_words(): array {
+		return array(
+			'intro' => 'card_intro',
+			'why'   => 'card_why',
+			'tags'  => 'card_tags',
+		);
+	}
+
+	/** Does the page offer the card's words for this person? Only with A business card on. */
+	public static function takes_card( array $p ): bool {
+		return Scout_Team::shows( $p, 'card' );
 	}
 
 	/** The credential lists the page shows, and the columns of each, with plain labels for the person filling it in. */
@@ -287,6 +303,14 @@ final class Scout_Team_Link {
 		foreach ( array( 'role', 'bio' ) as $key ) {
 			$raw[ $key ] = is_scalar( $raw[ $key ] ?? '' ) ? (string) ( $raw[ $key ] ?? '' ) : '';
 		}
+		// The card's words, only when the page sent them (it shows them with A business card on).
+		$card = array();
+		foreach ( self::card_words() as $field => $key ) {
+			if ( isset( $in[ $field ] ) ) {
+				$raw[ $key ]  = is_scalar( $in[ $field ] ) ? (string) $in[ $field ] : '';
+				$card[ $key ] = true;
+			}
+		}
 		$p   = Scout_Team::sanitize_profile( $raw );
 		$out = array(
 			'name'        => self::cut( sanitize_text_field( is_scalar( $in['name'] ?? '' ) ? (string) ( $in['name'] ?? '' ) : '' ), 120 ),
@@ -300,6 +324,14 @@ final class Scout_Team_Link {
 		if ( $bar ) {
 			$out['bar'] = $p['bar'];
 		}
+		$max = array(
+			'card_intro' => 400,
+			'card_why'   => 160,
+			'card_tags'  => 160,
+		);
+		foreach ( array_keys( $card ) as $key ) {
+			$out[ $key ] = self::cut( $p[ $key ], $max[ $key ] );
+		}
 		return $out;
 	}
 
@@ -312,16 +344,16 @@ final class Scout_Team_Link {
 	}
 
 	/**
-	 * The profile with what they sent laid over it. An empty title or bio keeps
-	 * what is there; the lists and links are taken as sent, because the page
-	 * starts filled in with what is there now. Nothing else changes.
+	 * The profile with what they sent laid over it. An empty title, bio or card
+	 * line keeps what is there; the lists and links are taken as sent, because
+	 * the page starts filled in with what is there now. Nothing else changes.
 	 *
 	 * @param array $live    The stored profile, full shape.
 	 * @param array $pending What they sent, from clean().
 	 */
 	public static function merge( array $live, array $pending ): array {
 		$out = $live;
-		foreach ( array( 'role', 'bio' ) as $key ) {
+		foreach ( array( 'role', 'bio', 'card_intro', 'card_why', 'card_tags' ) as $key ) {
 			if ( '' !== trim( (string) ( $pending[ $key ] ?? '' ) ) ) {
 				$out[ $key ] = (string) $pending[ $key ];
 			}
@@ -359,7 +391,7 @@ final class Scout_Team_Link {
 
 	/**
 	 * Copy what they sent into the profile: name, title, bio, credentials,
-	 * links and photo. Then the pending changes are gone.
+	 * links, the card's words and photo. Then the pending changes are gone.
 	 *
 	 * @param int $post_id Person post ID.
 	 */
@@ -458,6 +490,9 @@ final class Scout_Team_Link {
 			'bio'     => (string) $p['bio'],
 			'same_as' => (array) $p['same_as'],
 		);
+		foreach ( self::card_words() as $field => $key ) {
+			$out[ $field ] = (string) $p[ $key ];
+		}
 		foreach ( array( 'education', 'awards', 'memberships', 'bar' ) as $group ) {
 			$out[ $group ] = (array) $p[ $group ];
 		}
@@ -558,7 +593,8 @@ final class Scout_Team_Link {
 
 	/**
 	 * The form, as plain markup. Name, title, bio, photo, credentials with
-	 * sources and links. Never email, phone or the card only contact.
+	 * sources and links, and the card's words when A business card is on.
+	 * Never email, phone, card phone or card email.
 	 *
 	 * @param int    $post_id Person post ID.
 	 * @param array  $values  Values to fill in.
@@ -615,6 +651,20 @@ final class Scout_Team_Link {
 				}
 				$h .= '</div>';
 			}
+			$h .= '</fieldset>';
+		}
+
+		if ( self::takes_card( Scout_Team::profile( $post_id ) ) ) {
+			$h .= '<fieldset><legend>' . esc_html__( 'Your business card', 'scout-team' ) . '</legend>';
+			$h .= '<p class="scout-team-details__field"><label for="st-intro">' . esc_html__( 'Intro (optional)', 'scout-team' ) . '</label>'
+				. '<textarea id="st-intro" name="st[intro]" rows="3" maxlength="400" aria-describedby="st-intro-help">' . esc_textarea( (string) ( $values['intro'] ?? '' ) ) . '</textarea>'
+				. '<span class="scout-team-details__help" id="st-intro-help">' . esc_html__( 'One or two sentences in your own voice, on your card.', 'scout-team' ) . '</span></p>';
+			$h .= '<p class="scout-team-details__field"><label for="st-why">' . esc_html__( 'Why talk to you (optional)', 'scout-team' ) . '</label>'
+				. '<input type="text" id="st-why" name="st[why]" value="' . esc_attr( (string) ( $values['why'] ?? '' ) ) . '" maxlength="160" aria-describedby="st-why-help">'
+				. '<span class="scout-team-details__help" id="st-why-help">' . esc_html__( 'One line under your name on the team card.', 'scout-team' ) . '</span></p>';
+			$h .= '<p class="scout-team-details__field"><label for="st-tags">' . esc_html__( 'Tags (optional)', 'scout-team' ) . '</label>'
+				. '<input type="text" id="st-tags" name="st[tags]" value="' . esc_attr( (string) ( $values['tags'] ?? '' ) ) . '" maxlength="160" aria-describedby="st-tags-help">'
+				. '<span class="scout-team-details__help" id="st-tags-help">' . esc_html__( 'Two to four short topics, with commas between.', 'scout-team' ) . '</span></p>';
 			$h .= '</fieldset>';
 		}
 
@@ -806,6 +856,9 @@ final class Scout_Team_Link {
 			'awards'      => __( 'Awards and honors', 'scout-team' ),
 			'memberships' => __( 'Professional memberships', 'scout-team' ),
 			'same_as'     => __( 'Profile links', 'scout-team' ),
+			'card_intro'  => __( 'Card intro', 'scout-team' ),
+			'card_why'    => __( 'Why talk to them', 'scout-team' ),
+			'card_tags'   => __( 'Card tags', 'scout-team' ),
 		);
 		foreach ( $labels as $key => $label ) {
 			if ( $live[ $key ] === $next[ $key ] ) {
@@ -886,7 +939,7 @@ final class Scout_Team_Link {
 				/* translators: %s: date. */
 				echo '<p>' . esc_html( sprintf( __( 'Their last link ended on %s.', 'scout-team' ), $date( (int) $link['expires'] ) ) ) . '</p>';
 			}
-			echo '<p class="description">' . esc_html__( 'They fill in their own name, title, bio, photo, credentials and links. You check it before it goes live.', 'scout-team' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'They fill in their own name, title, bio, photo, credentials, links and card words. You check it before it goes live.', 'scout-team' ) . '</p>';
 			echo '<p><a class="button" href="' . esc_url( self::action_url( $id, 'new' ) ) . '">' . esc_html__( 'Send them a link', 'scout-team' ) . '</a></p>';
 		}
 		echo '</div>';
@@ -995,7 +1048,7 @@ final class Scout_Team_Link {
 		foreach ( self::ids_for( $email ) as $id ) {
 			$pending = self::pending( $id );
 			$rows    = array();
-			foreach ( array( 'name' => __( 'Name', 'scout-team' ), 'role' => __( 'Title', 'scout-team' ), 'bio' => __( 'Short bio', 'scout-team' ) ) as $key => $label ) {
+			foreach ( array( 'name' => __( 'Name', 'scout-team' ), 'role' => __( 'Title', 'scout-team' ), 'bio' => __( 'Short bio', 'scout-team' ), 'card_intro' => __( 'Card intro', 'scout-team' ), 'card_why' => __( 'Why talk to them', 'scout-team' ), 'card_tags' => __( 'Card tags', 'scout-team' ) ) as $key => $label ) {
 				if ( '' !== (string) ( $pending[ $key ] ?? '' ) ) {
 					$rows[] = array( 'name' => $label, 'value' => (string) $pending[ $key ] );
 				}

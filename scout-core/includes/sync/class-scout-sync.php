@@ -200,7 +200,7 @@ final class Scout_Sync {
 			$path = isset( $o['key'] ) ? self::path( (string) $o['key'] ) : '';
 			$ok   = '' === $path ? in_array( $name, self::ALLOWED_OPTIONS, true ) : in_array( $name, self::option_keys(), true );
 			if ( ! $ok || ( isset( $o['key'] ) && '' === $path ) ) {
-				$errors[] = 'Option "' . $name . ( isset( $o['key'] ) ? '.' . $o['key'] : '' ) . '" is not one Site Sync may set.';
+				$errors[] = 'Option "' . $name . ( isset( $o['key'] ) ? '.' . $o['key'] : '' ) . '" is not one Page copy may set.';
 				continue;
 			}
 			$items[] = array( 'kind' => 'option', 'option' => $name, 'key' => $path, 'value' => $o['value'] ?? null, 'source' => $o['source'] ?? null, 'previous' => $o['previous'] ?? array() );
@@ -209,7 +209,7 @@ final class Scout_Sync {
 			$email = sanitize_email( (string) ( $u['email'] ?? '' ) );
 			$field = (string) ( $u['field'] ?? 'description' );
 			if ( ! is_email( $email ) || ! in_array( $field, self::ALLOWED_USER_FIELDS, true ) ) {
-				$errors[] = 'User entry "' . ( $u['email'] ?? '' ) . '" needs an email and a field Site Sync may set (description).';
+				$errors[] = 'User entry "' . ( $u['email'] ?? '' ) . '" needs an email and a field Page copy may set (description).';
 				continue;
 			}
 			$items[] = array( 'kind' => 'user', 'email' => strtolower( $email ), 'field' => $field, 'value' => $u['value'] ?? null, 'source' => $u['source'] ?? null, 'previous' => $u['previous'] ?? array() );

@@ -410,29 +410,32 @@ final class Scout_Core_Policies {
 		$sources = self::sources();
 		$state   = self::state();
 		$date    = (string) get_option( 'date_format' );
-		Scout_Admin_UI::open( 'Privacy & terms', 'Drafted from what this website collects. Send them to your lawyer, mark them approved, then make the page.', 'Legal pages' );
+		Scout_Admin_UI::open( 'Privacy & terms', 'Drafted from what this website collects, for your lawyer to approve before the page goes up.', 'Legal pages' );
 		$msg = get_transient( 'scout_core_policies_msg_' . get_current_user_id() );
 		if ( $msg ) {
 			delete_transient( 'scout_core_policies_msg_' . get_current_user_id() );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( (string) $msg ) . '</p></div>';
 		}
 
+		$primary = false; // One primary button per screen (DESIGN 2 #3): only the first Make the page is filled.
 		foreach ( self::DOCS as $doc ) {
 			$d     = $state[ $doc ];
 			$stale = self::out_of_date( $doc, $d, $sources );
-			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html( self::title( $doc ) ) . '</h2><p class="sh-status">';
+			// The kit's dot and word for each document's state, instead of hand-made glyphs.
+			$look  = $stale ? 'is-warn' : ( 'approved' === $d['status'] ? '' : 'is-off' );
+			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html( self::title( $doc ) ) . '</h2><p class="sh-status ' . esc_attr( $look ) . '"><span class="sh-dot" aria-hidden="true"></span>';
 			if ( $stale ) {
-				echo '<span aria-hidden="true">&#9650;</span> <strong>Changed since approved.</strong> The website changed after your lawyer saw this. Send the new draft, then approve it again.';
+				echo '<strong>Changed since approved.</strong> The website changed after your lawyer saw this, so send the new draft and approve it again.';
 			} elseif ( 'approved' === $d['status'] ) {
-				echo '<span aria-hidden="true">&#10003;</span> <strong>Approved</strong> ' . esc_html( wp_date( $date, (int) $d['approved'] ) ) . '. ' . esc_html( (string) $d['note'] );
+				echo '<strong>Approved</strong> ' . esc_html( wp_date( $date, (int) $d['approved'] ) ) . '. ' . esc_html( (string) $d['note'] );
 				if ( $d['page'] && get_post( (int) $d['page'] ) ) {
 					$live = 'publish' === get_post_status( (int) $d['page'] );
 					echo ' ' . ( $live ? 'The page is live.' : 'The page is a draft: add the lawyer\'s changes, then publish it.' ) . ' <a href="' . esc_url( (string) get_edit_post_link( (int) $d['page'], 'url' ) ) . '">Open the page</a>';
 				}
 			} elseif ( 'sent' === $d['status'] ) {
-				echo '<span aria-hidden="true">&#9675;</span> <strong>With the lawyer</strong> since ' . esc_html( wp_date( $date, (int) $d['sent'] ) ) . '.';
+				echo '<strong>With the lawyer</strong> since ' . esc_html( wp_date( $date, (int) $d['sent'] ) ) . '.';
 			} else {
-				echo '<span aria-hidden="true">&#9675;</span> <strong>Draft.</strong> Not sent for review yet. No page is made until it is approved.';
+				echo '<strong>Draft.</strong> Not sent for review yet, and no page is made until it’s approved.';
 			}
 			echo '</p>';
 			if ( $stale && 'privacy' === $doc ) {
@@ -451,7 +454,8 @@ final class Scout_Core_Policies {
 				echo self::button( $doc, 'approve', 'Mark approved', 'button', '<label for="sp-note-' . esc_attr( $doc ) . '" class="screen-reader-text">Who approved it</label><input type="text" id="sp-note-' . esc_attr( $doc ) . '" name="note" class="regular-text" placeholder="Approved by the client\'s lawyer, by email, Nov 12">' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
 			} else {
 				if ( ! $d['page'] || ! get_post( (int) $d['page'] ) ) {
-					echo self::button( $doc, 'page', 'Make the page', 'button button-primary' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
+					echo self::button( $doc, 'page', 'Make the page', $primary ? 'button' : 'button button-primary' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
+					$primary = true;
 				}
 				echo self::button( $doc, 'reopen', 'Start a new draft', 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
 			}
@@ -462,7 +466,7 @@ final class Scout_Core_Policies {
 		$email = self::email();
 		echo '<section class="sh-box"><h2 class="sh-title">The email for the lawyer</h2>';
 		echo '<p>Send it to the business to forward to their lawyer. Their lawyer decides the final wording.</p>';
-		echo '<textarea id="sp-email" readonly rows="12" style="width:100%;font-family:inherit">' . esc_textarea( $email ) . '</textarea>';
+		echo '<textarea id="sp-email" class="large-text" readonly rows="12">' . esc_textarea( $email ) . '</textarea>';
 		echo '<p><button type="button" class="button" id="sp-copy">Copy the email</button> <span id="sp-copied" class="sh-note" role="status"></span></p>';
 		echo '<script>document.getElementById("sp-copy").addEventListener("click",function(){var t=document.getElementById("sp-email"),s=document.getElementById("sp-copied");function done(){s.textContent="Copied.";}function pick(){t.select();try{document.execCommand("copy");done();}catch(e){s.textContent="Select the text and copy it.";}}if(navigator.clipboard){navigator.clipboard.writeText(t.value).then(done,pick);}else{pick();}});</script>';
 		echo '</section>';
