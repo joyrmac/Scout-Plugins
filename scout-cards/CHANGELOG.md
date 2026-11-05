@@ -1,5 +1,14 @@
 # Scout Cards changelog
 
+## 1.0.26 (2026-11-05)
+
+- **Cards & Links follows the one Scout screen layout.** A status line comes first: whether the cards are live at /card/, how many people have a card, and whether the links page is on, with a View card button.
+- **People is a list, one row each.** Each row shows the photo, name, title, the card link and its Share mode link, with one Edit button that opens that person's fields under the row. The main card is the first row. One empty slot shows as Add a person; opening it reveals the next.
+- **Links page rows have their fields stacked with labels**, instead of a wide four-column table. One empty row shows, and Add another link reveals more.
+- **Settings people rarely change moved into a closed More options box:** the look (mode, accent color, font, share pictures), the main card's intro and heading, the business details (now labeled as overrides of Business info, for the cards and links page only), the page addresses and the on and off switches, and Reset everything to the defaults.
+- Still one form with one Save button at the bottom. Every field name, saved setting and permission is unchanged. The screen's styles live in a new `assets/cards-admin.css` on the admin kit's tokens. Works with an older admin kit too.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 1.0.25 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

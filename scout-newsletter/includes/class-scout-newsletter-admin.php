@@ -15,6 +15,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Newsletter_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** A closed "More options" box (admin kit 1.10.0), with the same fallback. */
+	private static function ui_fold_open( string $title ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 	const SLUG = 'scout-newsletter';
 
 	public static function boot(): void {
@@ -212,40 +251,37 @@ final class Scout_Newsletter_Admin {
 		$conn_ok   = $connected && is_array( $test ) && $test['ok'];
 		$conn_bad  = $connected && is_array( $test ) && ! $test['ok'];
 		?>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box sh-check is-<?php echo esc_attr( $conn_ok ? 'good' : ( $connected && ! $conn_bad ? 'warn' : 'bad' ) ); ?>">
-				<p class="sh-label"><?php esc_html_e( 'Beehiiv', 'scout-newsletter' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $conn_ok ? __( 'Connected', 'scout-newsletter' ) : ( $conn_bad ? __( 'Not working', 'scout-newsletter' ) : ( $connected ? __( 'Not tested yet', 'scout-newsletter' ) : __( 'Not connected', 'scout-newsletter' ) ) ) ); ?></p>
-				<p class="sh-note">
-					<?php
-					if ( $conn_ok && '' !== $test['name'] ) {
-						echo esc_html( $test['name'] );
-					} elseif ( $conn_bad ) {
-						echo esc_html( self::test_error( $test ) );
-					} elseif ( $connected ) {
-						esc_html_e( 'Press Test connection to check the key and publication.', 'scout-newsletter' );
-					} else {
-						esc_html_e( 'Add the API key and publication ID below.', 'scout-newsletter' );
-					}
-					?>
-				</p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo esc_attr( Scout_Newsletter::sending() ? 'good' : 'warn' ); ?>">
-				<p class="sh-label"><?php esc_html_e( 'Sending', 'scout-newsletter' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( Scout_Newsletter::sending() ? __( 'On', 'scout-newsletter' ) : __( 'Off', 'scout-newsletter' ) ); ?></p>
-				<p class="sh-note"><?php echo esc_html( Scout_Newsletter::sending() ? __( 'Ticked boxes go to Beehiiv within a few minutes.', 'scout-newsletter' ) : __( 'Ticked boxes are saved here and wait until sending is on.', 'scout-newsletter' ) ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo esc_attr( $counts['failed'] ? 'bad' : ( $counts['held'] || $counts['retry'] ? 'warn' : 'good' ) ); ?>">
-				<p class="sh-label"><?php esc_html_e( 'Sign-ups', 'scout-newsletter' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( (string) array_sum( $counts ) ); ?></p>
-				<p class="sh-note">
-					<?php
-					/* translators: 1: sent, 2: waiting, 3: held, 4: skipped, 5: failed. */
-					echo esc_html( sprintf( __( '%1$d sent, %2$d in the queue, %3$d held, %4$d skipped, %5$d failed.', 'scout-newsletter' ), $counts['sent'], $waiting, $counts['held'], $counts['skipped'], $counts['failed'] ) );
-					?>
-				</p>
-			</section>
-		</div>
+		<?php
+		$sending = Scout_Newsletter::sending();
+		if ( ! $connected ) {
+			$state    = 'off';
+			$headline = __( 'Not connected.', 'scout-newsletter' );
+			$detail   = __( 'Add the Beehiiv API key and publication ID below.', 'scout-newsletter' );
+		} elseif ( $conn_bad ) {
+			$state    = 'bad';
+			$headline = __( 'Not working.', 'scout-newsletter' );
+			$detail   = self::test_error( $test );
+		} else {
+			$state    = $conn_ok ? 'good' : 'warn';
+			$headline = $conn_ok ? __( 'Connected.', 'scout-newsletter' ) : __( 'Not tested yet.', 'scout-newsletter' );
+			if ( $conn_ok ) {
+				/* translators: %s: Beehiiv publication name. */
+				$detail = sprintf( __( 'Beehiiv publication: %s.', 'scout-newsletter' ), '' !== $test['name'] ? $test['name'] : __( 'your publication', 'scout-newsletter' ) );
+			} else {
+				$detail = __( 'Press Test connection to check the key and publication.', 'scout-newsletter' );
+			}
+		}
+		$detail .= ' ' . ( $sending ? __( 'Sending is on: ticked boxes go to Beehiiv within a few minutes.', 'scout-newsletter' ) : __( 'Sending is off: ticked boxes are saved here and wait until it is on.', 'scout-newsletter' ) );
+		/* translators: 1: total sign-ups, 2: sent, 3: waiting, 4: held, 5: skipped, 6: failed. */
+		$detail .= ' ' . sprintf( __( '%1$d sign-ups: %2$d sent, %3$d in the queue, %4$d held, %5$d skipped, %6$d failed.', 'scout-newsletter' ), array_sum( $counts ), $counts['sent'], $waiting, $counts['held'], $counts['skipped'], $counts['failed'] );
+		if ( 'good' === $state && ( ! $sending || $counts['held'] || $counts['retry'] ) ) {
+			$state = 'warn';
+		}
+		if ( $counts['failed'] ) {
+			$state = 'bad';
+		}
+		self::ui_status( $state, $headline, $detail );
+		?>
 
 		<?php if ( $counts['held'] && $can ) : ?>
 			<section class="sh-box">
@@ -304,10 +340,11 @@ final class Scout_Newsletter_Admin {
 		$have_key = '' !== Scout_Newsletter::key();
 		$labels   = Scout_Newsletter::sources();
 		?>
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Connection', 'scout-newsletter' ); ?></h2>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="scout_newsletter_save">
 			<?php wp_nonce_field( 'scout_newsletter_save' ); ?>
+			<section class="sh-box">
+			<h2 class="sh-title"><?php esc_html_e( 'Beehiiv connection', 'scout-newsletter' ); ?></h2>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="nl-key"><?php esc_html_e( 'Beehiiv API key', 'scout-newsletter' ); ?></label></th>
@@ -339,11 +376,13 @@ final class Scout_Newsletter_Admin {
 				</tr>
 			</table>
 			<p class="sh-actions">
-				<button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-newsletter' ); ?></button>
-				<button type="submit" class="button sh-quiet" form="scout-nl-test"><?php esc_html_e( 'Test connection', 'scout-newsletter' ); ?></button>
+				<button type="submit" class="button" form="scout-nl-test"><?php esc_html_e( 'Test connection', 'scout-newsletter' ); ?></button>
 			</p>
+			<p class="sh-note"><?php esc_html_e( 'Test connection checks the saved key and publication, so save first.', 'scout-newsletter' ); ?></p>
+			</section>
 
-			<h2 class="sh-title" style="margin-top:28px"><?php esc_html_e( 'Tags by where they joined', 'scout-newsletter' ); ?></h2>
+			<?php self::ui_fold_open( __( 'More options: tags, what Beehiiv receives and the box on this site', 'scout-newsletter' ) ); ?>
+			<h3><?php esc_html_e( 'Tags by where they joined', 'scout-newsletter' ); ?></h3>
 			<p><?php esc_html_e( 'The Beehiiv tag each sign-up gets. Separate two tags with a comma, or leave a row empty for no tag. Beehiiv allows 100 tags in all, so tag by type, never one tag per event.', 'scout-newsletter' ); ?></p>
 			<table class="form-table" role="presentation">
 				<?php foreach ( $labels as $key => $label ) : ?>
@@ -354,7 +393,7 @@ final class Scout_Newsletter_Admin {
 				<?php endforeach; ?>
 			</table>
 
-			<h2 class="sh-title" style="margin-top:28px"><?php esc_html_e( 'What Beehiiv receives', 'scout-newsletter' ); ?></h2>
+			<h3 style="margin-top:28px"><?php esc_html_e( 'What Beehiiv receives', 'scout-newsletter' ); ?></h3>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Confirmation email', 'scout-newsletter' ); ?></th>
@@ -403,7 +442,7 @@ final class Scout_Newsletter_Admin {
 				</tr>
 			</table>
 
-			<h2 class="sh-title" style="margin-top:28px"><?php esc_html_e( 'The box on this site', 'scout-newsletter' ); ?></h2>
+			<h3 style="margin-top:28px"><?php esc_html_e( 'The box on this site', 'scout-newsletter' ); ?></h3>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="nl-name"><?php esc_html_e( 'Newsletter name', 'scout-newsletter' ); ?></label></th>
@@ -438,6 +477,7 @@ final class Scout_Newsletter_Admin {
 					</td>
 				</tr>
 			</table>
+			<?php self::ui_fold_close(); ?>
 			<p class="sh-actions"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-newsletter' ); ?></button></p>
 		</form>
 		<form id="scout-nl-test" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -498,8 +538,7 @@ final class Scout_Newsletter_Admin {
 	private static function render_log(): void {
 		$log = array_reverse( (array) get_option( Scout_Newsletter::LOG, array() ) );
 		?>
-		<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Recent activity', 'scout-newsletter' ); ?></h2>
+		<?php self::ui_fold_open( __( 'Recent activity', 'scout-newsletter' ) ); ?>
 			<p><?php esc_html_e( 'What the site sent to Beehiiv and how it went. People show as a short code, never a name or email.', 'scout-newsletter' ); ?></p>
 			<?php if ( $log ) : ?>
 				<div class="scout-nl-scroll" style="overflow-x:auto"><table class="widefat striped">
@@ -518,7 +557,7 @@ final class Scout_Newsletter_Admin {
 			<?php else : ?>
 				<p class="sh-note"><?php esc_html_e( 'Nothing yet.', 'scout-newsletter' ); ?></p>
 			<?php endif; ?>
-		</section>
+		<?php self::ui_fold_close(); ?>
 		<?php
 	}
 }

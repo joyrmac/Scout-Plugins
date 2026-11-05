@@ -18,6 +18,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Core_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
@@ -138,20 +161,52 @@ final class Scout_Core_Admin {
 	public static function tab_dashboard() {
 		$checks = self::checks();
 		$count  = count( array_filter( $checks, static function ( $c ) { return 'good' !== $c['status']; } ) );
-		echo '<section class="sh-box">';
-		echo '<h2>' . esc_html( $count ? sprintf( _n( '%d thing to look at', '%d things to look at', $count, 'scout-core' ), $count ) : 'Your site is healthy' ) . '</h2>';
-		echo '<p>' . esc_html( $count ? 'Your site is running. These would make it stronger.' : 'Business details, search visibility and sharing are all set.' ) . '</p>';
-		echo '</section>';
-		self::render_checks( $checks );
+		self::ui_status(
+			$count ? 'warn' : 'good',
+			$count ? sprintf( _n( '%d thing to look at.', '%d things to look at.', $count, 'scout-core' ), $count ) : 'Your site is healthy.',
+			$count ? 'Your site is running. These would make it stronger.' : 'Business details, search visibility and sharing are all set.'
+		);
+		self::render_checks( $checks, true );
 	}
 
 	/**
-	 * Check cards in the shared Scout style. The Scout Build hub prints the same
-	 * cards on its Site health screen, so both read as one product.
+	 * The search checks. On Search health they are one list, a row each; the
+	 * Scout Build hub prints the same checks as cards on its Site health screen.
 	 *
-	 * @param array<int,array<string,mixed>> $checks From checks().
+	 * @param array<int,array<string,mixed>> $checks  From checks().
+	 * @param bool                           $as_list One row per check instead of cards.
 	 */
-	public static function render_checks( array $checks ) {
+	public static function render_checks( array $checks, bool $as_list = false ) {
+		if ( $as_list ) {
+			echo '<section class="sh-box"><h2 class="sh-title">Search checks</h2><ul class="sh-rows">';
+			foreach ( $checks as $c ) {
+				$state = 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' );
+				echo '<li class="sh-row sh-check is-' . esc_attr( $state ) . '"><div>';
+				echo '<p class="sh-row-name">' . esc_html( $c['label'] ) . '</p>';
+				echo '<p class="sh-row-sub">' . esc_html( $c['message'] ) . '</p>';
+				if ( ! empty( $c['items'] ) ) {
+					echo '<ul class="sh-list">';
+					foreach ( $c['items'] as $item_id ) {
+						$title = get_the_title( $item_id );
+						printf(
+							'<li><a href="%s">%s &rsaquo;</a></li>',
+							esc_url( (string) get_edit_post_link( $item_id ) ),
+							esc_html( '' !== $title ? $title : sprintf( '#%d', $item_id ) )
+						);
+					}
+					echo '</ul>';
+				}
+				echo '</div>';
+				echo '<p class="sh-row-facts"><span class="sh-dot" aria-hidden="true"></span>' . esc_html( 'good' === $state ? 'All set' : 'Needs a look' ) . '</p>';
+				echo '<div class="sh-row-go">';
+				if ( ! empty( $c['action'] ) && ! empty( $c['action_label'] ) ) {
+					printf( '<a class="button" href="%s">%s</a>', esc_url( $c['action'] ), esc_html( $c['action_label'] ) );
+				}
+				echo '</div></li>';
+			}
+			echo '</ul></section>';
+			return;
+		}
 		echo '<div class="sh-grid sh-grid-3">';
 		foreach ( $checks as $c ) {
 			$state = 'good' === $c['status'] ? 'good' : ( 'bad' === $c['status'] ? 'bad' : 'warn' );

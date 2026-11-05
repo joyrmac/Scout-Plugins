@@ -426,11 +426,15 @@ final class Scout_Events_Admin {
 		}
 		$view = in_array( $view, array( 'overview', 'import', 'settings', 'signups', 'volunteers' ), true ) ? $view : 'overview';
 
-		Scout_Admin_UI::open(
-			__( 'Your events', 'scout-events' ),
-			__( 'Everything about your events in one place: what is coming up, what needs you, and every event, session and speaker. Change something here and the site follows.', 'scout-events' ),
-			__( 'Events', 'scout-events' )
+		// Each screen gets its own name (its menu label) and one sentence on what it is for.
+		$heads = array(
+			'overview'   => array( __( 'Overview', 'scout-events' ), __( 'What is coming up, what needs you, and every event, session and speaker. Change something here and the site follows.', 'scout-events' ) ),
+			'signups'    => array( __( 'Sign-ups', 'scout-events' ), __( 'One event\'s door list: who is going, who is checked in, and who is on the waitlist. It works on a phone at the door.', 'scout-events' ) ),
+			'volunteers' => array( __( 'Volunteers', 'scout-events' ), __( 'The volunteer shifts for each event and who has signed up for them.', 'scout-events' ) ),
+			'import'     => array( __( 'Import', 'scout-events' ), __( 'Add many events, speakers, sessions and vendors at once from spreadsheet files.', 'scout-events' ) ),
+			'settings'   => array( __( 'Settings', 'scout-events' ), __( 'The web addresses of event pages, the currency, event schema for Google, and the link to your community agreements.', 'scout-events' ) ),
 		);
+		Scout_Admin_UI::open( $heads[ $view ][0], $heads[ $view ][1], __( 'Events', 'scout-events' ) );
 		self::message();
 		echo '<div class="se-admin">';
 		if ( 'signups' === $view ) {
@@ -542,61 +546,78 @@ final class Scout_Events_Admin {
 	}
 
 	private static function view_settings(): void {
-		$s = Scout_Events::settings();
+		$s    = Scout_Events::settings();
+		$base = home_url( '/' );
+		$can  = current_user_can( 'manage_options' );
+		if ( $s['schema'] ) {
+			self::ui_status( 'good', __( 'Every event has its own page.', 'scout-events' ), __( 'Google also gets each event\'s details as event schema.', 'scout-events' ) );
+		} else {
+			self::ui_status( 'off', __( 'Event schema is off.', 'scout-events' ), __( 'Event pages still show. Google gets event details only if the theme adds its own schema.', 'scout-events' ) );
+		}
+		$slugs = array(
+			'event_slug'   => array( 'se-set-event', __( 'Event page address', 'scout-events' ) ),
+			'session_slug' => array( 'se-set-session', __( 'Session page address', 'scout-events' ) ),
+			'speaker_slug' => array( 'se-set-speaker', __( 'Speaker page address', 'scout-events' ) ),
+		);
 		?>
-		<div class="se-admin-cols">
-			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Showing events on the site', 'scout-events' ); ?></h2>
-				<p><?php esc_html_e( 'Each event already has its own page with the details, schedule and speakers. Paste these on any page to list them there.', 'scout-events' ); ?></p>
-				<table class="sh-table">
-					<tr><td>[scout_events]</td><td><?php esc_html_e( 'Upcoming events, soonest first.', 'scout-events' ); ?></td></tr>
-					<tr><td>[scout_events show="past" limit="6"]</td><td><?php esc_html_e( 'The six most recent past events.', 'scout-events' ); ?></td></tr>
-					<tr><td>[scout_event id="12"]</td><td><?php esc_html_e( 'One event’s details and ticket button. Without an id, the next event.', 'scout-events' ); ?></td></tr>
-					<tr><td>[scout_schedule event="12"]</td><td><?php esc_html_e( 'The schedule, day by day. Add layout="grid" for rooms side by side.', 'scout-events' ); ?></td></tr>
-					<tr><td>[scout_speakers event="12"]</td><td><?php esc_html_e( 'Speaker cards for one event. Without event, every speaker.', 'scout-events' ); ?></td></tr>
-				</table>
-				<p class="sh-note"><?php esc_html_e( 'The event id is the number in the address bar when you edit the event (post=12).', 'scout-events' ); ?></p>
-			</section>
-			<?php if ( current_user_can( 'manage_options' ) ) : ?>
-				<section class="sh-box">
-					<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-events' ); ?></h2>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-settings">
-						<input type="hidden" name="action" value="scout_events_settings">
-						<?php wp_nonce_field( 'scout_events_settings' ); ?>
-						<p class="se-field">
-							<label for="se-set-event"><?php esc_html_e( 'Event page address', 'scout-events' ); ?></label>
-							<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-event" name="scout_events[event_slug]" value="<?php echo esc_attr( $s['event_slug'] ); ?>">/name</span>
+		<?php if ( $can ) : ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="se-settings">
+				<input type="hidden" name="action" value="scout_events_settings">
+				<?php wp_nonce_field( 'scout_events_settings' ); ?>
+
+				<section class="sh-box" id="se-addresses">
+					<h2 class="sh-title"><?php esc_html_e( 'Page addresses', 'scout-events' ); ?></h2>
+					<p><?php esc_html_e( 'The word in the web address before each event, session or speaker name. A new word changes the address of every page of that kind, so set these before you share links.', 'scout-events' ); ?></p>
+					<?php foreach ( $slugs as $key => $f ) : ?>
+						<p class="se-field se-slug-field">
+							<label for="<?php echo esc_attr( $f[0] ); ?>"><?php echo esc_html( $f[1] ); ?></label>
+							<span class="se-slug-base" id="<?php echo esc_attr( $f[0] . '-base' ); ?>"><?php echo esc_html( $base ); ?></span>
+							<input type="text" id="<?php echo esc_attr( $f[0] ); ?>" name="scout_events[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $s[ $key ] ); ?>" aria-describedby="<?php echo esc_attr( $f[0] . '-base ' . $f[0] . '-end' ); ?>" spellcheck="false" autocomplete="off">
+							<span class="sh-note" id="<?php echo esc_attr( $f[0] . '-end' ); ?>"><?php esc_html_e( 'Then a slash and the name, like /name.', 'scout-events' ); ?></span>
 						</p>
-						<p class="se-field">
-							<label for="se-set-session"><?php esc_html_e( 'Session page address', 'scout-events' ); ?></label>
-							<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-session" name="scout_events[session_slug]" value="<?php echo esc_attr( $s['session_slug'] ); ?>">/name</span>
-						</p>
-						<p class="se-field">
-							<label for="se-set-speaker"><?php esc_html_e( 'Speaker page address', 'scout-events' ); ?></label>
-							<span class="se-slug"><?php echo esc_html( home_url( '/' ) ); ?><input type="text" id="se-set-speaker" name="scout_events[speaker_slug]" value="<?php echo esc_attr( $s['speaker_slug'] ); ?>">/name</span>
-						</p>
-						<p class="se-field">
-							<label for="se-set-currency"><?php esc_html_e( 'Currency code', 'scout-events' ); ?></label>
-							<input type="text" id="se-set-currency" name="scout_events[currency]" value="<?php echo esc_attr( $s['currency'] ); ?>" maxlength="3" class="se-short-input">
-						</p>
-						<p class="se-field">
-							<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Add event schema for Google', 'scout-events' ); ?></label>
-							<span class="sh-note"><?php esc_html_e( 'Turn off only if the theme already prints its own event schema.', 'scout-events' ); ?></span>
-						</p>
-						<p class="se-field">
-							<label for="se-set-agree-url"><?php esc_html_e( 'Link to your community agreements', 'scout-events' ); ?></label>
-							<input type="url" id="se-set-agree-url" name="scout_events[agreements_url]" value="<?php echo esc_attr( $s['agreements_url'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( home_url( '/community-agreements/' ) ); ?>">
-							<span class="sh-note"><?php esc_html_e( 'Events that ask people to agree link to this page next to the tick box.', 'scout-events' ); ?></span>
-						</p>
-						<p class="se-field">
-							<label for="se-set-agree-label"><?php esc_html_e( 'What that page is called', 'scout-events' ); ?></label>
-							<input type="text" id="se-set-agree-label" name="scout_events[agreements_label]" value="<?php echo esc_attr( $s['agreements_label'] ); ?>" class="regular-text">
-						</p>
-						<p><button type="submit" class="button"><?php esc_html_e( 'Save settings', 'scout-events' ); ?></button></p>
-					</form>
+					<?php endforeach; ?>
 				</section>
-			<?php endif; ?>
-		</div>
+
+				<section class="sh-box" id="se-details">
+					<h2 class="sh-title"><?php esc_html_e( 'Prices and Google', 'scout-events' ); ?></h2>
+					<p class="se-field">
+						<label for="se-set-currency"><?php esc_html_e( 'Currency code', 'scout-events' ); ?></label>
+						<input type="text" id="se-set-currency" name="scout_events[currency]" value="<?php echo esc_attr( $s['currency'] ); ?>" maxlength="3" class="se-short-input">
+					</p>
+					<p class="se-field">
+						<label for="se-set-schema"><input type="checkbox" id="se-set-schema" name="scout_events[schema]" value="1" <?php checked( $s['schema'] ); ?>> <?php esc_html_e( 'Add event schema for Google', 'scout-events' ); ?></label>
+						<span class="sh-note"><?php esc_html_e( 'Turn off only if the theme already prints its own event schema.', 'scout-events' ); ?></span>
+					</p>
+				</section>
+
+				<section class="sh-box" id="se-agreements">
+					<h2 class="sh-title"><?php esc_html_e( 'Community agreements', 'scout-events' ); ?></h2>
+					<p><?php esc_html_e( 'Events that ask people to agree link to this page next to the tick box.', 'scout-events' ); ?></p>
+					<p class="se-field">
+						<label for="se-set-agree-url"><?php esc_html_e( 'Link to your community agreements', 'scout-events' ); ?></label>
+						<input type="url" id="se-set-agree-url" name="scout_events[agreements_url]" value="<?php echo esc_attr( $s['agreements_url'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( home_url( '/community-agreements/' ) ); ?>">
+					</p>
+					<p class="se-field">
+						<label for="se-set-agree-label"><?php esc_html_e( 'What that page is called', 'scout-events' ); ?></label>
+						<input type="text" id="se-set-agree-label" name="scout_events[agreements_label]" value="<?php echo esc_attr( $s['agreements_label'] ); ?>" class="regular-text">
+					</p>
+				</section>
+
+				<p class="se-save"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-events' ); ?></button></p>
+			</form>
+		<?php endif; ?>
+
+		<?php self::ui_fold_open( __( 'Shortcodes for your pages', 'scout-events' ), ! $can, 'se-shortcodes' ); ?>
+			<p><?php esc_html_e( 'Each event already has its own page with the details, schedule and speakers. Paste these on any page to list them there.', 'scout-events' ); ?></p>
+			<table class="sh-table se-codes">
+				<tr><td>[scout_events]</td><td><?php esc_html_e( 'Upcoming events, soonest first.', 'scout-events' ); ?></td></tr>
+				<tr><td>[scout_events show="past" limit="6"]</td><td><?php esc_html_e( 'The six most recent past events.', 'scout-events' ); ?></td></tr>
+				<tr><td>[scout_event id="12"]</td><td><?php esc_html_e( 'One event’s details and ticket button. Without an id, the next event.', 'scout-events' ); ?></td></tr>
+				<tr><td>[scout_schedule event="12"]</td><td><?php esc_html_e( 'The schedule, day by day. Add layout="grid" for rooms side by side.', 'scout-events' ); ?></td></tr>
+				<tr><td>[scout_speakers event="12"]</td><td><?php esc_html_e( 'Speaker cards for one event. Without event, every speaker.', 'scout-events' ); ?></td></tr>
+			</table>
+			<p class="sh-note"><?php esc_html_e( 'The event id is the number in the address bar when you edit the event (post=12).', 'scout-events' ); ?></p>
+		<?php self::ui_fold_close(); ?>
 		<?php
 	}
 
@@ -664,4 +685,45 @@ final class Scout_Events_Admin {
 		</table>
 		<?php
 	}
+
+	/* ---------- kit wrappers ---------- */
+
+	/**
+	 * The kit's status line, or the same markup when an older kit (before
+	 * 1.10.0, without status()) is the copy that loaded first.
+	 */
+	public static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** The kit's closed "More options" box, or the same markup on an older kit. */
+	public static function ui_fold_open( string $title, bool $open = false, string $id = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title, $open, $id );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . ( $open ? ' open' : '' ) . '><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	/** Closes ui_fold_open(). */
+	public static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 }

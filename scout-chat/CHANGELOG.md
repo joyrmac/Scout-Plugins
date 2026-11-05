@@ -1,5 +1,10 @@
 # Scout Chat changelog
 
+## 0.3.3 (2026-11-05)
+
+- **The Chat assistant screen opens with one status line.** The three status cards are now one line: on or off, whether AI answers, how many questions wait for an answer, and an Open Chat questions button. The AI connection moves into a closed More options box. Same fields and option.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.3.2 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

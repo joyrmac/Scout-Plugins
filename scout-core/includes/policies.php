@@ -463,13 +463,21 @@ final class Scout_Core_Policies {
 		echo '<section class="sh-box"><h2 class="sh-title">The email for the lawyer</h2>';
 		echo '<p>Copy it and send it to the business. They forward it to their own lawyer. Scout drafts the wording; the business\'s lawyer decides what it says.</p>';
 		echo '<textarea id="sp-email" readonly rows="12" style="width:100%;font-family:inherit">' . esc_textarea( $email ) . '</textarea>';
-		echo '<p><button type="button" class="button button-primary" id="sp-copy">Copy the email</button> <span id="sp-copied" class="sh-note" role="status"></span></p>';
+		echo '<p><button type="button" class="button" id="sp-copy">Copy the email</button> <span id="sp-copied" class="sh-note" role="status"></span></p>';
 		echo '<script>document.getElementById("sp-copy").addEventListener("click",function(){var t=document.getElementById("sp-email"),s=document.getElementById("sp-copied");function done(){s.textContent="Copied.";}function pick(){t.select();try{document.execCommand("copy");done();}catch(e){s.textContent="Select the text and copy it.";}}if(navigator.clipboard){navigator.clipboard.writeText(t.value).then(done,pick);}else{pick();}});</script>';
 		echo '</section>';
 
-		echo '<aside class="sh-box"><h2 class="sh-title">Where the list comes from</h2><p>Each Scout feature that is on says what it keeps about visitors. ';
-		echo esc_html( $sources ? 'This site: ' . implode( ', ', wp_list_pluck( $sources, 'name' ) ) . '.' : 'No feature on this site keeps anything about visitors.' );
-		echo ' Anything else the site uses, such as an outside booking tool, is for the business and its lawyer to add.</p></aside>';
+		echo '<aside class="sh-box"><h2 class="sh-title">Where the list comes from</h2><p>Each Scout feature that is on says what it keeps about visitors. Anything else the site uses, such as an outside booking tool, is for the business and its lawyer to add.</p>';
+		if ( $sources ) {
+			echo '<p class="sh-note">On this site:</p><ul class="sh-meta" style="list-style:none;padding:0" aria-label="Features that keep something about visitors">';
+			foreach ( wp_list_pluck( $sources, 'name' ) as $name ) {
+				echo '<li class="sh-tag">' . esc_html( (string) $name ) . '</li>';
+			}
+			echo '</ul>';
+		} else {
+			echo '<p class="sh-note">No feature on this site keeps anything about visitors.</p>';
+		}
+		echo '</aside>';
 		Scout_Admin_UI::close();
 	}
 }

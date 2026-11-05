@@ -12,6 +12,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Accessibility_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+
 	const SLUG   = 'scout-accessibility';
 	const CHECKS = 'scout-accessibility-checks';
 
@@ -534,17 +557,23 @@ final class Scout_Accessibility_Admin {
 		);
 		self::messages();
 		?>
-		<section class="sh-box sh-check is-<?php echo $url ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Statement page', 'scout-accessibility' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $url ? esc_html__( 'Published', 'scout-accessibility' ) : esc_html__( 'Not created yet', 'scout-accessibility' ); ?></p>
-				<p class="sh-note">
-					<?php if ( $url ) : ?>
-						<a href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'View the page', 'scout-accessibility' ); ?></a>
-					<?php else : ?>
-						<a href="#sa-statement"><?php esc_html_e( 'Fill in the statement below to create it', 'scout-accessibility' ); ?></a>
-					<?php endif; ?>
-				</p>
-			</section>
+		<?php
+		if ( $url ) {
+			self::ui_status(
+				'good',
+				__( 'Published.', 'scout-accessibility' ),
+				__( 'The statement page is live and tells visitors how to report a barrier.', 'scout-accessibility' ),
+				'<a class="button" href="' . esc_url( $url ) . '">' . esc_html__( 'View the page', 'scout-accessibility' ) . '</a>'
+			);
+		} else {
+			self::ui_status(
+				'warn',
+				__( 'Not created yet.', 'scout-accessibility' ),
+				__( 'Fill in the statement below and save to create the page.', 'scout-accessibility' ),
+				'<a class="button sh-quiet" href="#sa-statement">' . esc_html__( 'Go to the statement', 'scout-accessibility' ) . '</a>'
+			);
+		}
+		?>
 
 		<?php /* ---------------------------------------------- Statement */ ?>
 		<div class="sh-section-head" id="sa-statement">

@@ -1,5 +1,10 @@
 # Scout Newsletter changelog
 
+## 0.1.5 (2026-11-05)
+
+- **The Newsletter screen opens with one status line.** The three status cards are now one line: the Beehiiv connection, whether sending is on, and the sign-up counts. The Beehiiv connection stays in view; tags, what Beehiiv receives and the box on this site move into a closed More options box. The settings form has one Save settings button (it had two), and Test connection is an outlined button. Recent activity is a closed box under the consent records. Same fields, actions and nonces.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.1.4 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

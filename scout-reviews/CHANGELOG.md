@@ -1,5 +1,14 @@
 # Scout Reviews: Changelog
 
+## 0.5.10 (2026-11-05)
+
+- **Ask for reviews, Review inbox and Review settings now use the one Scout screen layout.** Each opens with the Scout bar, breadcrumb and section list, then one status line, then the thing you use most, then lists, with rarely changed settings in a closed "More options" box at the bottom. One column throughout, so nothing squeezes beside the section list.
+- **Ask for reviews.** The status line says whether your review link is ready, and links to Review settings when it isn't. Your review link comes first, with Copy link as the screen's one main button. The QR code and the three printed card layouts are one list, each with a small preview and an outlined Print or Download button. The text and email messages sit one above the other. The page settings moved into More options, which opens on its own when the review page is off. The screen no longer loads its own fonts or colors: it uses the shared Scout look, and the printed cards still use the client's brand fonts and colors.
+- **Review inbox.** The status line says how many new reviews are waiting, with "Add all with suggested pages" beside it. Each review is one row: who, stars, platform, date, a short line of the text, and one outlined Approve and add to site (or Mark as read for a private note), with Skip as a text button. "Read it all and pick pages" opens the full text, the page checkboxes (suggested ones still ticked) and Featured.
+- **Review settings.** A status line says which platforms have a "leave a review" link and when the totals were last updated. Each platform is one row showing its rating and review count; click it to change the rating, count and both links, stacked so they fit any screen width. The wide five-column table is gone. The Google sync box matches the other boxes, with outlined Connect and Sync now buttons. Built-in design and On delete moved into More options, and the shortcode help into its own closed box.
+- Nothing about how the screens work changed: the same fields, buttons, links and saved settings.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.5.9 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

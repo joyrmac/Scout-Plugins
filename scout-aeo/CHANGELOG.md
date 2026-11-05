@@ -1,5 +1,10 @@
 # Scout AI Search changelog
 
+## 0.2.9 (2026-11-05)
+
+- **The AI search screen opens with one status line.** It says whether AI search tools can read the site, plus training, the /llms.txt guide, instant updates and how many pages have questions and answers. The staging note is part of that line now. What the guide says (description, pages, recent posts) moves into a closed More options box. The page list box uses the kit's surface color instead of a typed white.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.2.8 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

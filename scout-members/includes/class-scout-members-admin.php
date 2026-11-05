@@ -523,11 +523,15 @@ final class Scout_Members_Admin {
 			return;
 		}
 		$view = in_array( $view, array( 'overview', 'members', 'renewals', 'import', 'settings' ), true ) ? $view : 'overview';
-		Scout_Admin_UI::open(
-			__( 'Your members', 'scout-members' ),
-			__( 'Who has applied, who is a member and when each membership renews. Approve someone here and members-only pages and events open for them.', 'scout-members' ),
-			__( 'Members', 'scout-members' )
+		// Each screen gets its own name (its menu label) and one sentence on what it is for.
+		$heads = array(
+			'overview' => array( __( 'Overview', 'scout-members' ), __( 'Applications waiting for you, renewals coming up, and the pages only members can open. Approve someone here and members-only pages and events open for them.', 'scout-members' ) ),
+			'members'  => array( __( 'All members', 'scout-members' ), __( 'Everyone on your list. Change a status, plan or renewal date on a row, then press Save on that row.', 'scout-members' ) ),
+			'renewals' => array( __( 'Renewals', 'scout-members' ), __( 'Who renews in the next 30 days, who is past due, and any payment that needs a look from you.', 'scout-members' ) ),
+			'import'   => array( __( 'Import', 'scout-members' ), __( 'Bring your current members in from a spreadsheet, such as an export from Squarespace.', 'scout-members' ) ),
+			'settings' => array( __( 'Settings', 'scout-members' ), __( 'Your membership pages, plans, dues, reminder emails and the questions people answer when they apply.', 'scout-members' ) ),
 		);
+		Scout_Admin_UI::open( $heads[ $view ][0], $heads[ $view ][1], __( 'Members', 'scout-members' ) );
 		self::message();
 		echo '<div class="sm-admin">';
 		if ( 'members' === $view ) {
@@ -574,6 +578,17 @@ final class Scout_Members_Admin {
 		$applied = Scout_Members::ids( 'applied' );
 		$due     = Scout_Members::renewals_due();
 		$waiting = self::waiting();
+		if ( $waiting ) {
+			self::ui_status(
+				'warn',
+				/* translators: %d: number of things waiting. */
+				sprintf( _n( '%d thing needs you.', '%d things need you.', count( $waiting ), 'scout-members' ), count( $waiting ) ),
+				$waiting[0]['text'],
+				'<a class="button" href="' . esc_url( $waiting[0]['url'] ) . '">' . esc_html( $waiting[0]['action'] ) . '</a>'
+			);
+		} else {
+			self::ui_status( 'good', __( 'All caught up.', 'scout-members' ), __( 'No applications to read, no payments to review and no renewals in the next 30 days.', 'scout-members' ) );
+		}
 		?>
 		<section class="sh-box">
 			<div class="sh-stats">
@@ -583,8 +598,6 @@ final class Scout_Members_Admin {
 				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( Scout_Members::plans() ); ?></p><p class="sh-note"><a href="<?php echo esc_url( self::url( 'settings' ) ); ?>"><?php esc_html_e( 'plans', 'scout-members' ); ?> &rsaquo;</a></p></div>
 			</div>
 		</section>
-
-		<?php self::area(); ?>
 
 		<?php if ( ! Scout_Members::plans() || ! Scout_Members::settings()['page'] ) : ?>
 			<section class="sh-box sm-setup">
@@ -624,6 +637,8 @@ final class Scout_Members_Admin {
 				<p class="sm-allclear"><?php esc_html_e( 'No memberships renew in the next 30 days.', 'scout-members' ); ?></p>
 			<?php endif; ?>
 		</section>
+
+		<?php self::area(); ?>
 		<?php
 		unset( $waiting );
 	}
@@ -720,8 +735,8 @@ final class Scout_Members_Admin {
 							</select>
 						</label>
 					<?php endif; ?>
-					<button type="submit" name="approve" value="1" class="button button-primary"><?php esc_html_e( 'Approve and welcome', 'scout-members' ); ?></button>
-					<button type="submit" name="decline" value="1" class="button sm-quiet"><?php esc_html_e( 'Not accepted', 'scout-members' ); ?></button>
+					<button type="submit" name="approve" value="1" class="button"><?php esc_html_e( 'Approve and welcome', 'scout-members' ); ?></button>
+					<button type="submit" name="decline" value="1" class="button sh-quiet"><?php esc_html_e( 'Not accepted', 'scout-members' ); ?></button>
 				</form>
 				<?php if ( $m['prepaid'] ) : ?>
 					<?php /* translators: %d: order number. */ ?>
@@ -735,10 +750,22 @@ final class Scout_Members_Admin {
 
 	private static function view_members(): void {
 		$ids = Scout_Members::ids( array( 'approved', 'active', 'paused', 'ended', 'declined' ) );
+		if ( $ids ) {
+			$current = count( array_filter( $ids, static fn( $id ) => Scout_Members::is_member( $id ) ) );
+			self::ui_status(
+				'good',
+				/* translators: %d: number of members. */
+				sprintf( _n( '%d current member.', '%d current members.', $current, 'scout-members' ), $current ),
+				/* translators: %d: number of people. */
+				sprintf( _n( '%d person on this list in all, counting past members and people not accepted.', '%d people on this list in all, counting past members and people not accepted.', count( $ids ), 'scout-members' ), count( $ids ) )
+			);
+		} else {
+			self::ui_status( 'off', __( 'No members yet.', 'scout-members' ), __( 'Approve an application, or bring your current members in from a spreadsheet.', 'scout-members' ) );
+		}
 		?>
 		<section class="sh-box">
 			<div class="sm-box-head">
-				<h2 class="sh-title"><?php esc_html_e( 'All members', 'scout-members' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Status, plan and renewal date', 'scout-members' ); ?></h2>
 				<a class="button" href="<?php echo esc_url( self::url( 'import' ) ); ?>"><?php esc_html_e( 'Bring members in', 'scout-members' ); ?></a>
 			</div>
 			<?php if ( $ids ) : ?>
@@ -754,8 +781,8 @@ final class Scout_Members_Admin {
 	private static function table( array $ids ): void {
 		$plans = Scout_Members::plans();
 		?>
-		<div class="sm-table-wrap">
-			<table class="widefat striped sm-table">
+		<div class="sm-table-wrap" role="region" aria-label="<?php esc_attr_e( 'Members', 'scout-members' ); ?>" tabindex="0">
+			<table class="widefat sm-table sm-members-table">
 				<thead>
 					<tr>
 						<th scope="col"><?php esc_html_e( 'Member', 'scout-members' ); ?></th>
@@ -834,7 +861,7 @@ final class Scout_Members_Admin {
 							</td>
 							<td class="sm-row-actions">
 								<button type="submit" class="button" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Save', 'scout-members' ); ?></button>
-								<button type="submit" class="button sm-quiet" name="paid" value="1" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Paid today', 'scout-members' ); ?></button>
+								<button type="submit" class="button sh-quiet" name="paid" value="1" form="<?php echo esc_attr( $form ); ?>"><?php esc_html_e( 'Paid today', 'scout-members' ); ?></button>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -881,6 +908,26 @@ final class Scout_Members_Admin {
 		$ids    = Scout_Members_Renewals::list_ids();
 		$woo    = Scout_Members_Woo::active();
 		$s      = Scout_Members::settings();
+		$due    = count( Scout_Members::renewals_due() );
+		$remind = 'off' === $s['reminders'] ? __( 'Reminder emails are off in Settings.', 'scout-members' ) : __( 'Reminder emails are on.', 'scout-members' );
+		if ( $review ) {
+			self::ui_status(
+				'warn',
+				/* translators: %d: number of payments. */
+				sprintf( _n( '%d payment to review.', '%d payments to review.', count( $review ), 'scout-members' ), count( $review ) ),
+				__( 'A refund, or a payment nobody matched. Nothing here changed anyone\'s access.', 'scout-members' ),
+				'<a class="button" href="#sm-review">' . esc_html__( 'Review payments', 'scout-members' ) . '</a>'
+			);
+		} elseif ( $due ) {
+			self::ui_status(
+				'good',
+				/* translators: %d: number of members. */
+				sprintf( _n( '%d membership renews within 30 days or is past due.', '%d memberships renew within 30 days or are past due.', $due, 'scout-members' ), $due ),
+				$remind
+			);
+		} else {
+			self::ui_status( 'good', __( 'No renewals due.', 'scout-members' ), __( 'Nobody renews in the next 30 days and nobody is past due.', 'scout-members' ) . ' ' . $remind );
+		}
 		?>
 		<?php if ( $review ) : ?>
 			<section class="sh-box sm-review" id="sm-review">
@@ -905,13 +952,13 @@ final class Scout_Members_Admin {
 								<input type="hidden" name="order" value="<?php echo (int) $r['order']; ?>">
 								<?php wp_nonce_field( 'scout_members_review_' . (int) $r['member'] . '_' . (int) $r['order'] ); ?>
 								<?php if ( $r['order'] && $woo ) : ?>
-									<a class="button" href="<?php echo esc_url( self::order_link( $r['order'] ) ); ?>"><?php esc_html_e( 'Open the order', 'scout-members' ); ?></a>
+									<a class="button sh-quiet" href="<?php echo esc_url( self::order_link( $r['order'] ) ); ?>"><?php esc_html_e( 'Open the order', 'scout-members' ); ?></a>
 								<?php endif; ?>
 								<?php if ( $user && ! in_array( Scout_Members::member( $r['member'] )['status'], array( 'active', 'approved', 'paused' ), true ) ) : ?>
-									<button type="submit" class="button button-primary"><?php esc_html_e( 'Done, take it off the list', 'scout-members' ); ?></button>
+									<button type="submit" class="button"><?php esc_html_e( 'Done, take it off the list', 'scout-members' ); ?></button>
 								<?php elseif ( $user ) : ?>
-									<button type="submit" class="button button-primary"><?php esc_html_e( 'Keep the membership', 'scout-members' ); ?></button>
-									<button type="submit" name="end" value="1" class="button sm-quiet"><?php esc_html_e( 'End the membership', 'scout-members' ); ?></button>
+									<button type="submit" class="button"><?php esc_html_e( 'Keep the membership', 'scout-members' ); ?></button>
+									<button type="submit" name="end" value="1" class="button sh-quiet"><?php esc_html_e( 'End the membership', 'scout-members' ); ?></button>
 								<?php else : ?>
 									<button type="submit" class="button"><?php esc_html_e( 'Done, take it off the list', 'scout-members' ); ?></button>
 								<?php endif; ?>
@@ -946,8 +993,8 @@ final class Scout_Members_Admin {
 				?>
 			</p>
 			<?php if ( $ids ) : ?>
-				<div class="sm-table-wrap">
-					<table class="widefat striped sm-table sm-renewals">
+				<div class="sm-table-wrap" role="region" aria-label="<?php esc_attr_e( 'Renewals due', 'scout-members' ); ?>" tabindex="0">
+					<table class="widefat sm-table sm-renewals">
 						<thead>
 							<tr>
 								<th scope="col"><?php esc_html_e( 'Member', 'scout-members' ); ?></th>
@@ -1065,8 +1112,8 @@ final class Scout_Members_Admin {
 		$plans = Scout_Members::plans();
 		$woo   = Scout_Members_Woo::active();
 		?>
-		<fieldset class="sm-dues" id="sm-dues">
-			<legend class="sh-title"><?php esc_html_e( 'Dues and renewals', 'scout-members' ); ?></legend>
+		<section class="sh-box sm-dues" id="sm-dues">
+			<h2 class="sh-title"><?php esc_html_e( 'Dues and renewals', 'scout-members' ); ?></h2>
 			<?php if ( $woo ) : ?>
 				<p class="sm-field">
 					<span class="sm-label"><?php esc_html_e( 'When new members pay', 'scout-members' ); ?></span>
@@ -1147,7 +1194,7 @@ final class Scout_Members_Admin {
 				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="all" <?php checked( $s['reminders'], 'all' ); ?>> <?php esc_html_e( 'To every member (without a dues product, the email carries your next-step note)', 'scout-members' ); ?></label>
 				<label class="sm-radio"><input type="radio" name="scout_members[reminders]" value="off" <?php checked( $s['reminders'], 'off' ); ?>> <?php esc_html_e( 'Off', 'scout-members' ); ?></label>
 			</p>
-		</fieldset>
+		</section>
 		<?php
 	}
 
@@ -1155,97 +1202,129 @@ final class Scout_Members_Admin {
 		$s         = Scout_Members::settings();
 		$questions = (string) get_option( 'scout_members_questions', '' );
 		$next      = (string) get_option( 'scout_members_next_step', '' );
+		if ( Scout_Members::plans() && $s['page'] ) {
+			self::ui_status(
+				'good',
+				__( 'Membership is open.', 'scout-members' ),
+				/* translators: %s: page title. */
+				sprintf( __( 'People apply on "%s".', 'scout-members' ), get_the_title( (int) $s['page'] ) )
+			);
+		} else {
+			self::ui_status(
+				'warn',
+				__( 'Membership is not open yet.', 'scout-members' ),
+				! $s['page'] ? __( 'Choose the membership page below, then add your plans.', 'scout-members' ) : __( 'Add your plans below and save.', 'scout-members' )
+			);
+		}
 		?>
-		<div class="sm-admin-cols">
-			<?php if ( current_user_can( 'manage_options' ) ) : ?>
-				<section class="sh-box">
-					<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-members' ); ?></h2>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sm-settings">
-						<input type="hidden" name="action" value="scout_members_settings">
-						<?php wp_nonce_field( 'scout_members_settings' ); ?>
-						<p class="sm-field">
-							<label for="sm-set-page"><?php esc_html_e( 'Membership page', 'scout-members' ); ?></label>
-							<?php
-							wp_dropdown_pages(
-								array(
-									'name'              => 'scout_members[page]',
-									'id'                => 'sm-set-page',
-									'selected'          => (int) $s['page'],
-									'show_option_none'  => esc_html__( 'Choose a page', 'scout-members' ),
-									'option_none_value' => '0',
-								)
-							);
-							?>
-							<span class="sh-note"><?php esc_html_e( 'The page with [scout_membership] on it. Join links and emails point here.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-home"><?php esc_html_e( 'Members home', 'scout-members' ); ?></label>
-							<?php
-							wp_dropdown_pages(
-								array(
-									'name'              => 'scout_members[home]',
-									'id'                => 'sm-set-home',
-									'selected'          => (int) $s['home'],
-									'show_option_none'  => esc_html__( 'None yet', 'scout-members' ),
-									'option_none_value' => '0',
-								)
-							);
-							?>
-							<span class="sh-note"><?php esc_html_e( 'Where members land after signing in. It and every page under it are members only, and it lists those pages for each member. Use a different page from the membership page.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-plans"><?php esc_html_e( 'Plans, one per line', 'scout-members' ); ?></label>
-							<textarea id="sm-set-plans" name="scout_members[plans]" rows="4" class="large-text code" placeholder="Club Member | 120 | year"><?php echo esc_textarea( $s['plans'] ); ?></textarea>
-							<span class="sh-note"><?php esc_html_e( 'Name | price | month, year or once. People choose one when they apply, and you can change it when you approve them.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-next"><?php esc_html_e( 'Next step after approval', 'scout-members' ); ?></label>
-							<textarea id="sm-set-next" name="scout_members[next_step]" rows="3" class="large-text"><?php echo esc_textarea( $next ); ?></textarea>
-							<span class="sh-note"><?php esc_html_e( 'Goes in the welcome email and on the member page until their first payment is recorded. For example, how and where to pay dues.', 'scout-members' ); ?></span>
-						</p>
-						<?php self::dues_settings( $s ); ?>
-						<p class="sm-field">
-							<label for="sm-set-agree"><?php esc_html_e( 'Community agreements link (optional)', 'scout-members' ); ?></label>
-							<input type="url" id="sm-set-agree" name="scout_members[agreements_url]" value="<?php echo esc_attr( $s['agreements_url'] ); ?>" class="regular-text">
-							<span class="sh-note"><?php esc_html_e( 'When set, applicants must tick that they have read them.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-age"><?php esc_html_e( 'Minimum age (optional)', 'scout-members' ); ?></label>
-							<input type="number" id="sm-set-age" name="scout_members[min_age]" value="<?php echo (int) $s['min_age']; ?>" min="0" max="99" class="small-text">
-							<span class="sh-note"><?php esc_html_e( 'When set, applicants must confirm their age. 0 leaves it out.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-notify"><?php esc_html_e( 'Send new applications to', 'scout-members' ); ?></label>
-							<input type="email" id="sm-set-notify" name="scout_members[notify]" value="<?php echo esc_attr( $s['notify'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>">
-							<span class="sh-note"><?php esc_html_e( 'The email names the applicant only. Their answers stay on the site.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-q"><?php esc_html_e( 'Application questions, one per line', 'scout-members' ); ?></label>
-							<textarea id="sm-set-q" name="scout_members[questions]" rows="14" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Form::default_questions() ); ?>"><?php echo esc_textarea( $questions ); ?></textarea>
-							<span class="sh-note"><?php esc_html_e( 'Type | Question | extra. Add * after the type to make it required. Types: heading, text, email, tel, date, url, textarea, yesno, choice (options in extra, separated by ;), agree (a statement; extra is the tick-box words), check, address. First name, last name and email are always asked. Left empty, three short questions are used.', 'scout-members' ); ?></span>
-						</p>
-						<p class="sm-field">
-							<label for="sm-set-iq"><?php esc_html_e( 'Invitation questions, one per line', 'scout-members' ); ?></label>
-							<textarea id="sm-set-iq" name="scout_members[invitation_questions]" rows="8" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Invitations::default_questions() ); ?>"><?php echo esc_textarea( (string) get_option( Scout_Members_Invitations::OPTION, '' ) ); ?></textarea>
-							<span class="sh-note"><?php esc_html_e( 'What members answer when they post an invitation with [scout_invitations]. Same format as the application. The title is always asked. Left empty, four short questions are used.', 'scout-members' ); ?></span>
-						</p>
-						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-members' ); ?></button></p>
-					</form>
-					<?php
-					// "Create the product" buttons sit in the settings form but submit these, since forms cannot nest.
-					if ( Scout_Members_Woo::active() ) {
-						foreach ( array_keys( Scout_Members::plans() ) as $slug ) {
-							echo '<form id="sm-make-' . esc_attr( $slug ) . '" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" hidden><input type="hidden" name="action" value="scout_members_product"><input type="hidden" name="plan" value="' . esc_attr( $slug ) . '">';
-							wp_nonce_field( 'scout_members_product_' . $slug );
-							echo '</form>';
-						}
-					}
-					?>
+		<?php if ( current_user_can( 'manage_options' ) ) : ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sm-settings">
+				<input type="hidden" name="action" value="scout_members_settings">
+				<?php wp_nonce_field( 'scout_members_settings' ); ?>
+
+				<section class="sh-box" id="sm-pages">
+					<h2 class="sh-title"><?php esc_html_e( 'Membership pages', 'scout-members' ); ?></h2>
+					<p><?php esc_html_e( 'Where people apply, and where members land once they sign in.', 'scout-members' ); ?></p>
+					<p class="sm-field">
+						<label for="sm-set-page"><?php esc_html_e( 'Membership page', 'scout-members' ); ?></label>
+						<?php
+						wp_dropdown_pages(
+							array(
+								'name'              => 'scout_members[page]',
+								'id'                => 'sm-set-page',
+								'selected'          => (int) $s['page'],
+								'show_option_none'  => esc_html__( 'Choose a page', 'scout-members' ),
+								'option_none_value' => '0',
+							)
+						);
+						?>
+						<span class="sh-note"><?php esc_html_e( 'The page with [scout_membership] on it. Join links and emails point here.', 'scout-members' ); ?></span>
+					</p>
+					<p class="sm-field">
+						<label for="sm-set-home"><?php esc_html_e( 'Members home', 'scout-members' ); ?></label>
+						<?php
+						wp_dropdown_pages(
+							array(
+								'name'              => 'scout_members[home]',
+								'id'                => 'sm-set-home',
+								'selected'          => (int) $s['home'],
+								'show_option_none'  => esc_html__( 'None yet', 'scout-members' ),
+								'option_none_value' => '0',
+							)
+						);
+						?>
+						<span class="sh-note"><?php esc_html_e( 'Where members land after signing in. It and every page under it are members only, and it lists those pages for each member. Use a different page from the membership page.', 'scout-members' ); ?></span>
+					</p>
 				</section>
-			<?php endif; ?>
-			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Using it on the site', 'scout-members' ); ?></h2>
-				<table class="sh-table">
+
+				<section class="sh-box" id="sm-plans">
+					<h2 class="sh-title"><?php esc_html_e( 'Plans and what happens after approval', 'scout-members' ); ?></h2>
+					<p class="sm-field">
+						<label for="sm-set-plans"><?php esc_html_e( 'Plans, one per line', 'scout-members' ); ?></label>
+						<textarea id="sm-set-plans" name="scout_members[plans]" rows="4" class="large-text code" placeholder="Club Member | 120 | year"><?php echo esc_textarea( $s['plans'] ); ?></textarea>
+						<span class="sh-note"><?php esc_html_e( 'Name | price | month, year or once. People choose one when they apply, and you can change it when you approve them.', 'scout-members' ); ?></span>
+					</p>
+					<p class="sm-field">
+						<label for="sm-set-next"><?php esc_html_e( 'Next step after approval', 'scout-members' ); ?></label>
+						<textarea id="sm-set-next" name="scout_members[next_step]" rows="3" class="large-text"><?php echo esc_textarea( $next ); ?></textarea>
+						<span class="sh-note"><?php esc_html_e( 'Goes in the welcome email and on the member page until their first payment is recorded. For example, how and where to pay dues.', 'scout-members' ); ?></span>
+					</p>
+				</section>
+
+				<?php self::dues_settings( $s ); ?>
+
+				<section class="sh-box" id="sm-apply">
+					<h2 class="sh-title"><?php esc_html_e( 'Applying', 'scout-members' ); ?></h2>
+					<p><?php esc_html_e( 'What applicants agree to, and who hears about a new application.', 'scout-members' ); ?></p>
+					<p class="sm-field">
+						<label for="sm-set-agree"><?php esc_html_e( 'Community agreements link (optional)', 'scout-members' ); ?></label>
+						<input type="url" id="sm-set-agree" name="scout_members[agreements_url]" value="<?php echo esc_attr( $s['agreements_url'] ); ?>" class="regular-text">
+						<span class="sh-note"><?php esc_html_e( 'When set, applicants must tick that they have read them.', 'scout-members' ); ?></span>
+					</p>
+					<p class="sm-field">
+						<label for="sm-set-age"><?php esc_html_e( 'Minimum age (optional)', 'scout-members' ); ?></label>
+						<input type="number" id="sm-set-age" name="scout_members[min_age]" value="<?php echo (int) $s['min_age']; ?>" min="0" max="99" class="small-text">
+						<span class="sh-note"><?php esc_html_e( 'When set, applicants must confirm their age. 0 leaves it out.', 'scout-members' ); ?></span>
+					</p>
+					<p class="sm-field">
+						<label for="sm-set-notify"><?php esc_html_e( 'Send new applications to', 'scout-members' ); ?></label>
+						<input type="email" id="sm-set-notify" name="scout_members[notify]" value="<?php echo esc_attr( $s['notify'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>">
+						<span class="sh-note"><?php esc_html_e( 'The email names the applicant only. Their answers stay on the site.', 'scout-members' ); ?></span>
+					</p>
+				</section>
+
+				<section class="sh-box" id="sm-questions">
+					<h2 class="sh-title"><?php esc_html_e( 'Questions people answer', 'scout-members' ); ?></h2>
+					<p class="sm-field">
+						<label for="sm-set-q"><?php esc_html_e( 'Application questions, one per line', 'scout-members' ); ?></label>
+						<textarea id="sm-set-q" name="scout_members[questions]" rows="14" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Form::default_questions() ); ?>"><?php echo esc_textarea( $questions ); ?></textarea>
+						<span class="sh-note"><?php esc_html_e( 'Type | Question | extra. Add * after the type to make it required. Types: heading, text, email, tel, date, url, textarea, yesno, choice (options in extra, separated by ;), agree (a statement; extra is the tick-box words), check, address. First name, last name and email are always asked. Left empty, three short questions are used.', 'scout-members' ); ?></span>
+					</p>
+					<p class="sm-field">
+						<label for="sm-set-iq"><?php esc_html_e( 'Invitation questions, one per line', 'scout-members' ); ?></label>
+						<textarea id="sm-set-iq" name="scout_members[invitation_questions]" rows="8" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Invitations::default_questions() ); ?>"><?php echo esc_textarea( (string) get_option( Scout_Members_Invitations::OPTION, '' ) ); ?></textarea>
+						<span class="sh-note"><?php esc_html_e( 'What members answer when they post an invitation with [scout_invitations]. Same format as the application. The title is always asked. Left empty, four short questions are used.', 'scout-members' ); ?></span>
+					</p>
+				</section>
+
+				<p class="sm-save"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-members' ); ?></button></p>
+			</form>
+			<?php
+			// "Create the product" buttons sit in the settings form but submit these, since forms cannot nest.
+			if ( Scout_Members_Woo::active() ) {
+				foreach ( array_keys( Scout_Members::plans() ) as $slug ) {
+					echo '<form id="sm-make-' . esc_attr( $slug ) . '" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" hidden><input type="hidden" name="action" value="scout_members_product"><input type="hidden" name="plan" value="' . esc_attr( $slug ) . '">';
+					wp_nonce_field( 'scout_members_product_' . $slug );
+					echo '</form>';
+				}
+			}
+			?>
+		<?php endif; ?>
+
+		<?php self::ui_fold_open( __( 'Shortcodes for your pages', 'scout-members' ), false, 'sm-shortcodes' ); ?>
+			<p><?php esc_html_e( 'Paste these on a page to show the membership on the site.', 'scout-members' ); ?></p>
+			<div class="sm-table-wrap">
+				<table class="sh-table sm-codes">
 					<tr><td>[scout_membership]</td><td><?php esc_html_e( 'The membership page: the application for new people, the account for members.', 'scout-members' ); ?></td></tr>
 					<tr><td>[scout_members_only] … [/scout_members_only]</td><td><?php esc_html_e( 'Hides the part in between from everyone but members. Add plan="VIP Member" to limit it to a plan.', 'scout-members' ); ?></td></tr>
 					<tr><td><?php esc_html_e( 'Members only box', 'scout-members' ); ?></td><td><?php esc_html_e( 'On any page, post or event. Ticked, only members can read it or buy tickets. Tick plans to limit a page to them.', 'scout-members' ); ?></td></tr>
@@ -1254,9 +1333,50 @@ final class Scout_Members_Admin {
 					<tr><td>[scout_invitations]</td><td><?php esc_html_e( 'Member invitations: the ones you have published, a form to post one, and each member\'s own with a way to take it down. Put it on a members page. New ones wait under Members, Invitations.', 'scout-members' ); ?></td></tr>
 					<tr><td>[scout_members_home]</td><td><?php esc_html_e( 'The list of members pages and events. The members home adds it under its own words by itself; place it to put the list somewhere else on the page.', 'scout-members' ); ?></td></tr>
 				</table>
-				<p class="sh-note"><?php esc_html_e( 'Members sign in on the site, land on the members home and never see the dashboard. The WordPress password page carries the site\'s logo.', 'scout-members' ); ?></p>
-			</section>
-		</div>
+			</div>
+			<p class="sh-note"><?php esc_html_e( 'Members sign in on the site, land on the members home and never see the dashboard. The WordPress password page carries the site\'s logo.', 'scout-members' ); ?></p>
+		<?php self::ui_fold_close(); ?>
 		<?php
 	}
+
+	/* ---------- kit wrappers ---------- */
+
+	/**
+	 * The kit's status line, or the same markup when an older kit (before
+	 * 1.10.0, without status()) is the copy that loaded first.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** The kit's closed "More options" box, or the same markup on an older kit. */
+	private static function ui_fold_open( string $title, bool $open = false, string $id = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title, $open, $id );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . ( $open ? ' open' : '' ) . '><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	/** Closes ui_fold_open(). */
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 }

@@ -12,6 +12,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Team_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** A closed "More options" box (admin kit 1.10.0), with the same fallback. */
+	private static function ui_fold_open( string $title ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 	const SLUG = 'scout-team';
 
 	public static function boot(): void {
@@ -122,28 +161,20 @@ final class Scout_Team_Admin {
 		);
 		settings_errors( $o );
 		?>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box sh-check is-<?php echo $people ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'People', 'scout-team' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( (string) count( $people ) ); ?></p>
-				<p class="sh-note"><?php echo $people ? esc_html__( 'Each one has a profile page under /team/.', 'scout-team' ) : esc_html__( 'Add the first person to start the team page.', 'scout-team' ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo ( $people && count( $people ) === $complete ) ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Complete profiles', 'scout-team' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>
-					<?php
-					/* translators: 1: complete profiles, 2: all profiles. */
-					echo esc_html( sprintf( __( '%1$d of %2$d', 'scout-team' ), $complete, count( $people ) ) );
-					?>
-				</p>
-				<p class="sh-note"><?php esc_html_e( 'Complete means a real photo, a role and bio, a byline, education and profile links.', 'scout-team' ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-good">
-				<p class="sh-label"><?php esc_html_e( 'Law firm details', 'scout-team' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $law ? __( 'On', 'scout-team' ) : __( 'Off', 'scout-team' ) ); ?></p>
-				<p class="sh-note"><?php echo esc_html( $law ? __( 'Bar admissions show for anyone marked as an attorney.', 'scout-team' ) : __( 'Bar admissions are hidden. Turn this on below for a law firm.', 'scout-team' ) ); ?></p>
-			</section>
-		</div>
+		<?php
+		$total = count( $people );
+		if ( $people ) {
+			/* translators: %d: number of people on the team. */
+			$headline = sprintf( _n( '%d person on the team.', '%d people on the team.', $total, 'scout-team' ), $total );
+			/* translators: 1: complete profiles, 2: all profiles. */
+			$detail = sprintf( __( '%1$d of %2$d profiles are complete: a real photo, a role and bio, a byline, education and profile links.', 'scout-team' ), $complete, $total );
+		} else {
+			$headline = __( 'No one yet.', 'scout-team' );
+			$detail   = __( 'Add the first person to start the team page.', 'scout-team' );
+		}
+		$detail .= ' ' . ( $law ? __( 'Law firm details are on, so bar admissions show for anyone marked as an attorney.', 'scout-team' ) : __( 'Law firm details are off, so bar admissions are hidden.', 'scout-team' ) );
+		self::ui_status( ! $people ? 'off' : ( $total === $complete ? 'good' : 'warn' ), $headline, $detail );
+		?>
 
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'The team', 'scout-team' ); ?></h2>
@@ -191,8 +222,9 @@ final class Scout_Team_Admin {
 			</p>
 		</section>
 
-		<form method="post" action="options.php" class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-team' ); ?></h2>
+		<?php self::ui_fold_open( __( 'More options', 'scout-team' ) ); ?>
+		<form method="post" action="options.php">
+			<h3><?php esc_html_e( 'Profiles, bylines and the grid', 'scout-team' ); ?></h3>
 			<?php settings_fields( 'scout_team_group' ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
@@ -225,11 +257,10 @@ final class Scout_Team_Admin {
 						<p class="description"><?php esc_html_e( 'Phones always show one column.', 'scout-team' ); ?></p></td>
 				</tr>
 			</table>
-			<?php submit_button(); ?>
+			<?php submit_button( __( 'Save changes', 'scout-team' ) ); ?>
 		</form>
 
-		<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Show the team on a page', 'scout-team' ); ?></h2>
+			<h3><?php esc_html_e( 'Show the team on a page', 'scout-team' ); ?></h3>
 			<p><?php esc_html_e( 'Paste this shortcode where the team grid should go, for example on the About page. Each card links to that person\'s profile.', 'scout-team' ); ?></p>
 			<table class="sh-table">
 				<tr><td>[scout_team]</td><td><?php esc_html_e( 'Everyone who is live, in order.', 'scout-team' ); ?></td></tr>
@@ -238,7 +269,7 @@ final class Scout_Team_Admin {
 				<tr><td>[scout_team bio="no"]</td><td><?php esc_html_e( 'Photo, name and role only.', 'scout-team' ); ?></td></tr>
 			</table>
 			<p class="description"><?php esc_html_e( 'With Scout Analytics on, profile opens, calls and emails report as team_profile_click, team_profile_view, team_call and team_email.', 'scout-team' ); ?></p>
-		</section>
+		<?php self::ui_fold_close(); ?>
 		<?php
 		Scout_Admin_UI::close();
 	}

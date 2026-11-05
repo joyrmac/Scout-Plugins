@@ -1,5 +1,15 @@
 # Scout Members changelog
 
+## 0.4.5 (2026-11-05)
+
+- **Every Members screen has its own name.** Overview, All members, Renewals, Import and Settings each show their own title and one sentence on what they are for, instead of "Your members" on all five.
+- **A status line on top.** Overview says what needs you (or that you are all caught up), All members gives the count, Renewals leads with payments to review or renewals due, and Settings says whether the membership is open.
+- **Settings is one column.** The form is split into boxes with real topics (Membership pages, Plans, Dues and renewals, Applying, Questions people answer) with one Save at the bottom. The shortcode list moved into a closed "Shortcodes for your pages" box.
+- **No more blue buttons on every row.** Approve and welcome, Keep the membership and Done are outlined; Not accepted, End the membership, Paid today and Open the order are quiet text buttons.
+- **Tables scroll inside their own box** on a narrow screen, and lose the zebra stripes. On Overview, applications and renewals now come before the members area map.
+- The Members colors now come from the shared kit tokens instead of typed hex values. Nothing about saving, emails or access changed.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.4.4 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

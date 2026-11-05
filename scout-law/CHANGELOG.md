@@ -1,5 +1,9 @@
 # Scout Law Firm Tools changelog
 
+## 0.4.1 (2026-11-05)
+
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.4.0 (2026-11-04)
 
 - **Form entries delete themselves (Scout → Policies → Form entries).** Each night, Gravity Forms entries older than 90 days are deleted from the website, with any files uploaded with them, in every status (active, spam and trash). The firm can pick 30, 60, 90, 180 or 365 days, turn deleting off, or keep every entry from chosen forms. On by default on law-firm sites (Joy, 2026-11-04).

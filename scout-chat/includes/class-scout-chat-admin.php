@@ -11,6 +11,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Chat_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** A closed "More options" box (admin kit 1.10.0), with the same fallback. */
+	private static function ui_fold_open( string $title ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 	const SLUG = 'scout-chat';
 
 	public static function boot(): void {
@@ -211,24 +250,22 @@ final class Scout_Chat_Admin {
 		$n  = self::unanswered();
 		Scout_Admin_UI::open( __( 'Chat assistant', 'scout-chat' ), __( 'A chat in the corner of the site. It answers the common questions, books calls and takes change requests, and saves every visitor question to Chat questions.', 'scout-chat' ), __( 'Chat', 'scout-chat' ) );
 		settings_errors( $o );
+		if ( $s['enabled'] ) {
+			$headline = __( 'On.', 'scout-chat' );
+			$detail   = __( 'Visitors see the chat button on every page.', 'scout-chat' );
+		} else {
+			$headline = __( 'Off.', 'scout-chat' );
+			$detail   = __( 'The chat is hidden. Fill in the details below, then tick Show the chat on the site.', 'scout-chat' );
+		}
+		$detail .= ' ' . ( $ai ? __( 'AI is connected and answers free-text questions.', 'scout-chat' ) : __( 'Common questions are answered right away; anything else is saved with the visitor\'s email for you to answer.', 'scout-chat' ) );
+		if ( $n ) {
+			/* translators: %d: number of chat questions waiting for an answer. */
+			$detail .= ' ' . sprintf( _n( '%d question is waiting for an answer.', '%d questions are waiting for an answer.', $n, 'scout-chat' ), $n );
+		}
+		$state = ! $s['enabled'] ? 'off' : ( $n ? 'warn' : 'good' );
+		$go    = '<a class="button" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ) . '">' . esc_html__( 'Open Chat questions', 'scout-chat' ) . '</a>';
+		self::ui_status( $state, $headline, $detail, $go );
 		?>
-		<div class="sh-grid sh-grid-3">
-			<section class="sh-box sh-check is-<?php echo $s['enabled'] ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'On the site', 'scout-chat' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $s['enabled'] ? esc_html__( 'Showing', 'scout-chat' ) : esc_html__( 'Hidden', 'scout-chat' ); ?></p>
-				<p class="sh-note"><?php echo $s['enabled'] ? esc_html__( 'Visitors see the chat button on every page.', 'scout-chat' ) : esc_html__( 'Fill in the details below, then tick Show the chat on the site.', 'scout-chat' ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo $ai ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Answers', 'scout-chat' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo $ai ? esc_html__( 'AI connected', 'scout-chat' ) : esc_html__( 'Collecting questions', 'scout-chat' ); ?></p>
-				<p class="sh-note"><?php echo $ai ? esc_html__( 'Free-text questions get an AI answer. If the AI server is down, questions are collected instead.', 'scout-chat' ) : esc_html__( 'Common questions are answered right away. Anything else is saved with the visitor\'s email for you to answer.', 'scout-chat' ); ?></p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo $n ? 'warn' : 'good'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'Waiting for an answer', 'scout-chat' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( (string) $n ); ?></p>
-				<p class="sh-note"><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ); ?>"><?php esc_html_e( 'Open Chat questions', 'scout-chat' ); ?> &rsaquo;</a></p>
-			</section>
-		</div>
 
 		<form method="post" action="options.php">
 			<?php settings_fields( 'scout_chat_group' ); ?>
@@ -256,8 +293,7 @@ final class Scout_Chat_Admin {
 					?>
 				</table>
 			</div>
-			<div class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'AI connection', 'scout-chat' ); ?></h2>
+			<?php self::ui_fold_open( __( 'More options: AI connection', 'scout-chat' ) ); ?>
 				<p><?php esc_html_e( 'Sean\'s AI server answers free-text questions. The AI company\'s key stays on that server and never touches this site. Leave blank to keep collecting questions.', 'scout-chat' ); ?></p>
 				<table class="form-table" role="presentation">
 					<?php
@@ -274,8 +310,8 @@ final class Scout_Chat_Admin {
 					}
 					?>
 				</table>
-			</div>
-			<?php submit_button(); ?>
+			<?php self::ui_fold_close(); ?>
+			<?php submit_button( __( 'Save changes', 'scout-chat' ) ); ?>
 		</form>
 		<?php
 		Scout_Admin_UI::close();

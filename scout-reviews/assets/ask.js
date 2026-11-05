@@ -120,8 +120,9 @@
 		var wrap   = sheet.closest( '.srk' );
 		// The client's colors and fonts ride along as the wrapper's own style.
 		var brand  = wrap ? ( wrap.getAttribute( 'style' ) || '' ).replace( /"/g, '&quot;' ) : '';
+		// The kit stylesheet rides along too: the cards use its color tokens.
 		var links  = Array.prototype.map.call(
-			document.querySelectorAll( 'link[rel="stylesheet"][id^="scout-reviews-"]' ),
+			document.querySelectorAll( 'link[rel="stylesheet"][id^="scout-reviews-"], link[rel="stylesheet"]#scout-admin-css' ),
 			function ( l ) { return '<link rel="stylesheet" href="' + l.href + '">'; }
 		).join( '' );
 		var old = document.getElementById( 'srk-print-frame' );
@@ -138,7 +139,7 @@
 		doc.write(
 			'<!doctype html><html><head><meta charset="utf-8"><title>Review cards</title>' + links +
 			'<style>@page{size:letter;margin:.4in}html,body{margin:0;padding:0;background:#fff}</style></head>' +
-			'<body class="srk-print-frame"><div class="srk recon-theme" style="max-width:none;margin:0;padding:0;background:#fff;' + brand + '">' +
+			'<body class="srk-print-frame"><div class="sh srk" style="max-width:none;margin:0;padding:0;background:#fff;' + brand + '">' +
 			sheet.outerHTML + '</div></body></html>'
 		);
 		doc.close();

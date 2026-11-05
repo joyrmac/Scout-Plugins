@@ -1,0 +1,51 @@
+/*
+ * Scout Build: styles for its own screens (Site log, Your site, Email).
+ * The kit (scout-admin.css) does the rest. Tokens only: never type a hex here.
+ */
+
+/* ---- Site log (operator view) ---- */
+.sh-log-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.sh-log-filters select { min-width: 120px; }
+.sh-log-links { margin: 0 0 6px; }
+.sh-log-list { margin-top: 6px; }
+.sh-log-list .sh-row-sub + .sh-row-sub { margin-top: 4px; }
+.sh-log-flag { color: var(--sh-warn); }
+.sh-log-date { font-family: var(--sh-mono); }
+.sh-log-edit { display: none; grid-column: 1 / -1; gap: 6px; max-width: 640px; padding: 12px 0 4px; }
+.sh-log-edit.is-open { display: grid; }
+.sh-log-edit input[type="text"] { width: 100%; }
+.sh-log-edit label { font-weight: 600; }
+.sh-log-edit label:has(input[type="checkbox"]) { font-weight: 400; }
+.sh-log-pager { margin-top: 10px; }
+
+/* Add a note: one column, two fields side by side only when the column is wide. */
+.sh-log-note .sh-form { max-width: 720px; gap: 6px 14px; }
+.sh-log-note .sh-form input[type="text"], .sh-log-note .sh-form input[type="date"] { width: 100%; }
+.sh-log-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px 14px; }
+.sh-log-pair > div { display: grid; gap: 6px; align-content: start; }
+.sh-log-pair label { font-weight: 600; margin-top: 8px; }
+.sh-log-pair label:has(input[type="checkbox"]) { font-weight: 400; }
+@container shmain (min-width: 641px) { .sh-log-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+/* More options: export, keys and import, one after another. */
+.sh-log-part + .sh-log-part { border-top: 1px solid var(--sh-border); margin-top: 18px; padding-top: 18px; }
+.sh-log-part h3 { font-size: var(--sh-fs-base); font-weight: 600; margin: 0 0 4px; color: var(--sh-text); }
+.sh-log-part form { margin-top: 10px; }
+.sh-log-warn { color: var(--sh-warn); }
+.sh-log-key { user-select: all; word-break: break-all; }
+
+/* ---- Email ---- */
+.sm-steps { list-style: none; padding: 0; margin: 12px 0 0; }
+.sm-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; max-width: 560px; }
+.sm-fields label { display: grid; gap: 6px; font-weight: 600; }
+.sm-fields input { width: 100%; }
+.sm-color { display: grid; gap: 6px; align-content: start; }
+.sm-color > label { font-weight: 600; }
+.sm-color-row { display: flex; gap: 8px; align-items: center; }
+.sm-chip { flex: 0 0 36px; height: 36px; border-radius: var(--sh-r-chip); border: 1px solid var(--sh-border-strong); }
+.sm-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.sm-swatch { width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 2px solid var(--sh-surface); box-shadow: 0 0 0 1px var(--sh-border-strong); cursor: pointer; }
+.sm-swatch:hover, .sm-swatch:focus { box-shadow: 0 0 0 2px var(--sh-accent); outline: none; }
+.sm-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 14px; }
+.sm-actions label { display: grid; gap: 6px; font-weight: 600; flex: 1 1 240px; max-width: 420px; }
+.sm-note { margin-top: 10px; }

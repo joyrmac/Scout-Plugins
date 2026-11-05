@@ -209,9 +209,43 @@
 .sh-inline { display: inline-flex; align-items: center; gap: 8px; margin: 0; }
 
 .sh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 16px; }
-.sh-grid-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
-.sh-grid-3 { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.sh-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sh-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .sh-grid > .sh-box { margin-top: 0; }
+
+/* The main column decides when side-by-side boxes stack, not the window (kit 1.10.0).
+   Beside the section list the column is often 700 to 900px wide on a laptop, so two
+   boxes side by side squeeze their text. Plugin layouts use the same container. */
+.sh-main { container: shmain / inline-size; }
+@container shmain (max-width: 860px) { .sh-grid-2 { grid-template-columns: minmax(0, 1fr); } }
+@container shmain (max-width: 600px) { .sh-grid-3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* One status line at the top of a screen: a shape, a few bold words, then the detail. */
+.sh-status { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 0; font-size: var(--sh-fs-base); line-height: 1.5; color: var(--sh-text-2); }
+.sh-status strong { color: var(--sh-text); }
+.sh-status .sh-dot { align-self: center; }
+.sh-status.is-off .sh-dot { background: var(--sh-border-strong); }
+.sh-status.is-warn .sh-dot { background: var(--sh-warn-mark); }
+.sh-status.is-bad .sh-dot { background: var(--sh-bad-mark); }
+.sh-status .sh-status-go { margin-left: auto; }
+
+/* A closed box for what people rarely change: settings, import, export. */
+.sh-fold > summary { cursor: pointer; list-style: none; margin: 0; }
+.sh-fold > summary::-webkit-details-marker { display: none; }
+.sh-fold > summary::after { content: " \203A"; color: var(--sh-accent-text); }
+.sh-fold[open] > summary { margin-bottom: 12px; }
+.sh-fold[open] > summary::after { content: " \2039"; }
+
+/* A list of things, one row each: name and one line, then facts, then one main button and More. */
+.sh-rows { list-style: none; margin: 0; padding: 0; }
+.sh-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--sh-border); margin: 0; }
+.sh-row:first-child { border-top: 0; }
+.sh-row-name { margin: 0; font-weight: 600; color: var(--sh-text); }
+.sh-row-sub { margin: 2px 0 0; font-size: var(--sh-fs-note); color: var(--sh-text-2); }
+.sh-row-facts { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
+.sh-row-go { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.sh-row-go form { margin: 0; }
+@container shmain (max-width: 640px) { .sh-row { grid-template-columns: minmax(0, 1fr); } .sh-row-go { justify-content: flex-start; } }
 
 .sh-card { background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: var(--sh-r-card); padding: var(--sh-pad); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .sh-card.is-on { border-color: var(--sh-accent-line); }

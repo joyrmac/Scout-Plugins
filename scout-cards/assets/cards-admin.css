@@ -1,0 +1,55 @@
+/* Cards & Links screen (Scout Cards). Loads after the admin kit (scout-admin.css)
+   and uses only its var(--sh-*) tokens. One column; the kit's container query
+   name `shmain` stacks anything wider. */
+
+.scc-form [hidden] { display: none !important; }
+
+/* People rows: photo, name, one line, card links, one Edit. */
+.scc-who { display: flex; align-items: center; gap: var(--sh-space-3); min-width: 0; }
+.scc-who > div { min-width: 0; }
+.scc-avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; width: var(--sh-tap); height: var(--sh-tap); border-radius: 50%; object-fit: cover; background: var(--sh-surface-2); color: var(--sh-text-2); font-weight: 600; }
+.scc-row .sh-row-facts a { color: var(--sh-accent-text); text-decoration: none; font-weight: 500; }
+.scc-row .sh-row-facts a:hover { text-decoration: underline; }
+.scc-row .sh-row-facts code { padding: 0; background: none; font-family: var(--sh-mono); font-size: var(--sh-fs-note); color: inherit; }
+.scc-spare .sh-row-name { color: var(--sh-text-2); }
+
+/* The Edit panel opens under its row, across the full width. */
+.scc-panel { grid-column: 1 / -1; margin-top: var(--sh-space-2); padding: var(--sh-space-1) var(--sh-space-5); background: var(--sh-bg); border-radius: var(--sh-r-control); }
+.scc-js .scc-row > .scc-panel { display: none; }
+.scc-js .scc-row.is-open > .scc-panel { display: block; }
+.scc-js .scc-spare:not(.is-shown) { display: none; }
+.sh .scc-form .scc-js-only { display: none; }
+.sh .scc-form.scc-js .scc-js-only:not([hidden]) { display: inline-flex; }
+
+/* Photo pickers. */
+.scc-thumb { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: var(--sh-space-2); }
+.scc-spot-head th { padding-bottom: 0; }
+.scc-spot-head .description { font-weight: 400; }
+
+/* Links: one row per link, inputs stacked with their labels. */
+.scc-boxhead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sh-space-2) var(--sh-space-4); }
+.sh .scc-boxhead .sh-title { margin: 0; }
+.sh .sh-rows.scc-links { margin-top: var(--sh-space-4); }
+.sh .scc-link { grid-template-columns: minmax(0, 1fr); }
+.scc-link fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.scc-legend { margin: 0 0 var(--sh-space-2); padding: 0; font-family: var(--sh-mono); font-size: var(--sh-fs-label); letter-spacing: 1.2px; text-transform: uppercase; color: var(--sh-text-3); }
+.scc-link-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sh-space-3) var(--sh-space-5); }
+.scc-link-fields p { margin: 0; }
+.scc-link-fields label { display: block; margin-bottom: var(--sh-space-1); font-weight: 600; color: var(--sh-text); }
+.scc-link-fields .scc-check label { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); font-weight: 400; }
+.scc-link-fields .description { display: block; margin-top: var(--sh-space-1); }
+.scc-more { margin: var(--sh-space-2) 0 0; }
+
+/* More options. */
+.sh .scc-sub { margin: var(--sh-space-6) 0 var(--sh-space-1); font-size: var(--sh-fs-card); font-weight: 600; color: var(--sh-text); }
+.sh .sh-fold > .scc-sub:first-of-type { margin-top: 0; }
+.scc-reset { margin: var(--sh-space-5) 0 0; padding-top: var(--sh-space-4); border-top: 1px solid var(--sh-border); }
+
+/* Narrow column: one field per line, labels above. */
+@container shmain (max-width: 640px) {
+	.scc-link-fields { grid-template-columns: minmax(0, 1fr); }
+	.scc-form .form-table th, .scc-form .form-table td { display: block; width: auto; padding-left: 0; padding-right: 0; }
+	.scc-form .form-table th { padding-bottom: 0; }
+	.scc-form .form-table tr + tr td { border-top: 0; }
+	.scc-panel { padding: var(--sh-space-1) var(--sh-space-3); }
+}

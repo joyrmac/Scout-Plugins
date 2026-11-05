@@ -1,5 +1,15 @@
 # Scout Build changelog
 
+## 0.12.2 (2026-11-05)
+
+- **Four screens follow the one layout.** Request a change, the Site log, Your site and Email now read top to bottom in one column: a status line first, then the thing people use most, then lists, with rare settings in a closed More options box. Each screen has at most one main (filled) button. Nothing they do has changed: the same forms, fields and buttons, in a new order.
+  - **Request a change.** The status line says how many requests are open and where the newest one stands. The new-request form comes next, then the list, one row per request with its date, who sent it, the page and a status pill. Operators still change a status from the row.
+  - **Site log.** The status line counts this month's lines and what is waiting on the client, with a link to see it as the client. The log is a list now, one row per line with its date, who wrote it, tags for kind and topic, a "Client sees" tag and the version. Edit wording opens under the row, and its Save is no longer a filled button. Add a note is one box below the log, and Add to the log is the screen's one main button. Export, the Hub keys and Import history sit in More options, which opens by itself when new keys are shown or an import is asked for. The keys note now says Scout's tools, not Claude.
+  - **Your site (the client's view).** The status line says whether anything needs their OK. Then come the lines waiting for an OK (Approve is an outlined button, with "Ask for a change first" beside it), this month, their requests and what is coming up.
+  - **Email.** The status line says whether email goes through Google, and as which address. Then the three setup steps as a numbered list, the settings with one Save, and Send a test as an outlined button.
+- These screens' styles moved out of the page into `assets/admin.css`, using the kit's color tokens only.
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.12.1 (2026-11-05)
 
 - **One Site health, not two (Joy, 2026-11-05).** Scout now runs WordPress's own Site Health checks once a day, with its daily check, and lists what they found by name in Scout's Site health under **WordPress checks**, with plain advice where there is some. Items only the host can change (disk space, opcode cache, object cache and similar) are listed once as "for the host, nothing to do here" and do not count. WordPress's own badge is kept in step. Tools > Site Health no longer needs opening to be current.

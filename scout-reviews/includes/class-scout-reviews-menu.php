@@ -81,6 +81,52 @@ class Scout_Reviews_Menu {
 		add_submenu_page( $build, __( 'Reviews', 'scout-reviews' ), __( 'Reviews', 'scout-reviews' ), 'edit_posts', self::list_slug() );
 	}
 
+	/*
+	 * Kit wrappers. The admin kit class comes from whichever Scout plugin loads
+	 * first, so mid-update an older copy (before kit 1.10.0) may be the one in
+	 * use. These call the kit when it has the method and print the same markup
+	 * when it does not.
+	 */
+
+	/**
+	 * One status line at the top of a screen.
+	 *
+	 * @param string $state good, warn, bad or off.
+	 * @param string $go    Optional button HTML, already escaped.
+	 */
+	public static function status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** Open a closed "More options" box. Close it with fold_close(). */
+	public static function fold_open( string $title, bool $open = false, string $id = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title, $open, $id );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . ( $open ? ' open' : '' ) . '><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	public static function fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 	/** @return string[] */
 	private static function pages(): array {
 		return array( Scout_Reviews_Settings::PAGE, Scout_Reviews_Requests::PAGE, Scout_Reviews_Inbox::PAGE );

@@ -111,6 +111,7 @@ final class Scout_Hub_Mail {
 	public static function assets( string $hook ): void {
 		if ( false !== strpos( $hook, self::PAGE ) ) {
 			Scout_Admin_UI::enqueue( SCOUT_HUB_URL . 'assets/scout-admin.css' );
+			wp_enqueue_style( 'scout-build-admin', SCOUT_HUB_URL . 'assets/admin.css', array( 'scout-admin' ), SCOUT_HUB_VERSION );
 		}
 	}
 
@@ -503,53 +504,44 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 		if ( function_exists( 'wp_mail_smtp' ) || defined( 'WPMS_PLUGIN_VER' ) ) {
 			echo '<div class="notice notice-warning"><p>' . esc_html__( 'WP Mail SMTP is also installed. Scout Email takes over once it is set up here, so you can delete WP Mail SMTP.', 'scout-build' ) . '</p></div>';
 		}
-		$last = $s['last'];
-		?>
-		<style>
-			.sm-steps{margin:0; padding-left:20px; display:grid; gap:6px}
-			.sm-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
-			.sm-row label{display:grid; gap:6px; font-weight:600}
-			.sm-row input{width:100%}
-			.sm-color{display:grid; gap:6px; align-content:start}
-			.sm-color > label{font-weight:600}
-			.sm-color-row{display:flex; gap:8px; align-items:center}
-			.sm-chip{flex:0 0 36px; height:36px; border-radius:8px; border:1px solid #dcdcde}
-			.sm-swatches{display:flex; flex-wrap:wrap; gap:6px}
-			.sm-swatch{width:28px; height:28px; padding:0; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #c3c4c7; cursor:pointer}
-			.sm-swatch:hover,.sm-swatch:focus{box-shadow:0 0 0 2px #0A78C2; outline:none}
-			.sm-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin-top:14px}
-			.sm-actions label{display:grid; gap:6px; font-weight:600; flex:1 1 240px}
-		</style>
-		<div class="sh-grid sh-grid-2">
-			<section class="sh-box sh-check is-<?php echo esc_attr( $ready ? ( isset( $last['ok'] ) && ! $last['ok'] ? 'bad' : 'good' ) : 'warn' ); ?>">
-				<p class="sh-label"><?php esc_html_e( 'Status', 'scout-build' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span><?php echo esc_html( $ready ? __( 'Sending through Google', 'scout-build' ) : __( 'Not set up: the host sends', 'scout-build' ) ); ?></p>
-				<p class="sh-note">
-					<?php
-					if ( ! empty( $last['at'] ) ) {
-						/* translators: 1: result, 2: address, 3: date */
-						echo esc_html( sprintf( __( 'Last test %1$s to %2$s, %3$s.', 'scout-build' ), $last['ok'] ? __( 'sent', 'scout-build' ) : __( 'failed', 'scout-build' ), $last['to'], wp_date( 'M j, g:i a', (int) $last['at'] ) ) );
-					} else {
-						esc_html_e( 'No test sent yet.', 'scout-build' );
-					}
-					?>
-				</p>
-			</section>
-			<section class="sh-box">
-				<p class="sh-label"><?php esc_html_e( 'Set it up once', 'scout-build' ); ?></p>
-				<ol class="sm-steps">
-					<li><?php esc_html_e( 'Sign in to Google as the address the site should send from.', 'scout-build' ); ?></li>
-					<li><?php echo wp_kses( __( 'Open <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a>, name it after this site, and copy the 16 letters.', 'scout-build' ), array( 'a' => array( 'href' => true, 'target' => true, 'rel' => true ) ) ); ?></li>
-					<li><?php esc_html_e( 'Paste them below, Save, then Send test.', 'scout-build' ); ?></li>
-				</ol>
-			</section>
-		</div>
+		$last   = $s['last'];
+		$failed = isset( $last['ok'] ) && ! $last['ok'];
+		if ( ! empty( $last['at'] ) ) {
+			/* translators: 1: result, 2: address, 3: date */
+			$tested = sprintf( __( 'Last test %1$s to %2$s, %3$s.', 'scout-build' ), $last['ok'] ? __( 'sent', 'scout-build' ) : __( 'failed', 'scout-build' ), $last['to'], wp_date( 'M j, g:i a', (int) $last['at'] ) );
+		} else {
+			$tested = __( 'No test sent yet.', 'scout-build' );
+		}
 
-		<section class="sh-box" style="margin-top:14px">
+		// One status line: sending through Google as who, or not set up.
+		if ( ! $ready ) {
+			Scout_Hub_Admin::status_line( 'warn', __( 'Not set up.', 'scout-build' ), __( 'The host sends the site\'s email for now, which often lands it in junk. Follow the three steps below.', 'scout-build' ) );
+		} else {
+			Scout_Hub_Admin::status_line(
+				$failed ? 'bad' : ( empty( $last ) ? 'warn' : 'good' ),
+				/* translators: %s: email address */
+				sprintf( __( 'Sending through Google as %s.', 'scout-build' ), $s['email'] ),
+				$tested
+			);
+		}
+		?>
+		<section class="sh-box">
+			<h2 class="sh-title"><?php esc_html_e( 'Set it up once', 'scout-build' ); ?></h2>
+			<p><?php esc_html_e( 'Google gives the site its own app password for sending, so your main password stays private.', 'scout-build' ); ?></p>
+			<ol class="sh-steps sm-steps">
+				<li class="sh-step"><span><?php esc_html_e( 'Sign in to Google as the address the site should send from.', 'scout-build' ); ?></span></li>
+				<li class="sh-step"><span><?php echo wp_kses( __( 'Open <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a>, name it after this site, and copy the 16 letters.', 'scout-build' ), array( 'a' => array( 'href' => true, 'target' => true, 'rel' => true ) ) ); ?></span></li>
+				<li class="sh-step"><span><?php esc_html_e( 'Paste them below, Save, then Send test.', 'scout-build' ); ?></span></li>
+			</ol>
+		</section>
+
+		<section class="sh-box">
+			<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-build' ); ?></h2>
+			<p><?php esc_html_e( 'Every email the site sends goes out as this address. When a form asks to send as someone else, that address becomes the reply-to, so replies still reach them.', 'scout-build' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( self::SAVE ); ?>">
 				<?php wp_nonce_field( self::SAVE ); ?>
-				<div class="sm-row">
+				<div class="sm-fields">
 					<label><?php esc_html_e( 'Send from (Gmail or Google Workspace)', 'scout-build' ); ?>
 						<input type="email" name="email" value="<?php echo esc_attr( $s['email'] ); ?>" placeholder="name@gmail.com" autocomplete="off">
 					</label>
@@ -583,27 +575,28 @@ foreach ( array_values( $buttons ) as $i => $b ) {
 					} );
 				} )();
 				</script>
-				<p class="sh-note" style="margin-top:10px"><?php esc_html_e( 'Every email the site sends goes out as this address. When a form asks to send as someone else, that address becomes the reply-to, so replies still reach them.', 'scout-build' ); ?></p>
 				<div class="sm-actions">
 					<button type="submit" class="button button-primary"><?php esc_html_e( 'Save', 'scout-build' ); ?></button>
 					<?php if ( '' !== $s['email'] || '' !== $s['password'] ) : ?>
-						<button type="submit" name="clear" value="1" class="button" onclick="return confirm('<?php echo esc_js( __( 'Turn off Email and go back to the host\'s mail?', 'scout-build' ) ); ?>');"><?php esc_html_e( 'Turn off', 'scout-build' ); ?></button>
+						<button type="submit" name="clear" value="1" class="button sh-quiet" onclick="return confirm('<?php echo esc_js( __( 'Turn off Email and go back to the host\'s mail?', 'scout-build' ) ); ?>');"><?php esc_html_e( 'Turn off', 'scout-build' ); ?></button>
 					<?php endif; ?>
 				</div>
 			</form>
 		</section>
 
-		<section class="sh-box" style="margin-top:14px">
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sm-actions" style="margin-top:0">
+		<section class="sh-box">
+			<h2 class="sh-title"><?php esc_html_e( 'Send a test', 'scout-build' ); ?></h2>
+			<p><?php echo esc_html( $tested ); ?></p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sm-actions">
 				<input type="hidden" name="action" value="<?php echo esc_attr( self::TEST ); ?>">
 				<?php wp_nonce_field( self::TEST ); ?>
 				<label><?php esc_html_e( 'Send a test to', 'scout-build' ); ?>
 					<input type="email" name="to" value="<?php echo esc_attr( (string) ( $last['to'] ?? wp_get_current_user()->user_email ) ); ?>">
 				</label>
-				<button type="submit" class="button button-primary"><?php esc_html_e( 'Send test', 'scout-build' ); ?></button>
+				<button type="submit" class="button"><?php esc_html_e( 'Send test', 'scout-build' ); ?></button>
 			</form>
 			<?php if ( ! empty( $last['error'] ) ) : ?>
-				<p class="sh-note" style="margin-top:10px"><?php echo esc_html( __( 'Google said: ', 'scout-build' ) . $last['error'] ); ?></p>
+				<p class="sh-note sm-note"><?php echo esc_html( __( 'Google said: ', 'scout-build' ) . $last['error'] ); ?></p>
 			<?php endif; ?>
 		</section>
 		<?php

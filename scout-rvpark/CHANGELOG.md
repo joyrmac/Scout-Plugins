@@ -1,5 +1,9 @@
 # Scout — North Crest RV Park — Changelog
 
+## 0.2.1 (2026-11-05)
+
+- **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.
+
 ## 0.2.0 (2026-11-04)
 
 - **One RV park section.** Amenities and Site Types now sit inside a single RV park section in the sidebar, with a small "+ Plus" tag, instead of two separate menus. Its first screen is an overview: every site type with hookups, nightly and monthly rates and max rig length, and every amenity, each linking to its edit screen. Custom content is a Plus module (dashboard redesign, Joy 2026-11-04).

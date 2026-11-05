@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Writing
  * Description:       A private writing room in the dashboard: the client's writing prompts in steps, a place to answer each one that saves as they type, voice memos, Send to Scout, and a welcome at the top of the dashboard with their next prompt. Prompts and brand come from the theme's scout-setup.json.
- * Version:           0.1.4
+ * Version:           0.1.5
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_WRITING_VERSION', '0.1.4' );
+define( 'SCOUT_WRITING_VERSION', '0.1.5' );
 define( 'SCOUT_WRITING_FILE', __FILE__ );
 
 // Self-updating from the Scout Plugins releases (see includes/class-scout-plugin-updater.php).

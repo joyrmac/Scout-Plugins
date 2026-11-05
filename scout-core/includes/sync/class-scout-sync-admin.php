@@ -15,6 +15,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Scout_Sync_Admin {
 
+	/**
+	 * One status line at the top of the screen (admin kit 1.10.0). An older kit
+	 * copy may be the one loaded mid-update, so fall back to the same markup.
+	 *
+	 * @param string $go Button markup, escaped by the caller.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+
 	const ACTION = 'scout_sync';
 
 	public static function init() {
@@ -95,20 +118,40 @@ final class Scout_Sync_Admin {
 			Scout_Sync::MISSING  => array( 'Page not found', 'bad' ),
 			Scout_Sync::CREATE   => array( 'Will be created', 'good' ),
 		);
-		echo '<div class="sh-grid sh-grid-3">';
+		$num     = static function ( $key ) use ( $state ) {
+			return count( $state[ $key ] ?? array() );
+		};
+		$ready   = $num( Scout_Sync::UPDATE ) + $num( Scout_Sync::CREATE );
+		$decide  = $num( Scout_Sync::EDITED ) + $num( Scout_Sync::CONFLICT );
+		$missing_n = $num( Scout_Sync::MISSING );
+		if ( $missing_n ) {
+			$level    = 'bad';
+			$headline = sprintf( _n( '%d page is missing.', '%d pages are missing.', $missing_n, 'scout-core' ), $missing_n );
+		} elseif ( $decide ) {
+			$level    = 'warn';
+			$headline = sprintf( _n( '%d item needs a look.', '%d items need a look.', $decide, 'scout-core' ), $decide );
+		} elseif ( $ready ) {
+			$level    = 'good';
+			$headline = sprintf( _n( '%d update is ready from the theme.', '%d updates are ready from the theme.', $ready, 'scout-core' ), $ready );
+		} else {
+			$level    = 'good';
+			$headline = 'Everything is in sync.';
+		}
+		self::ui_status( $plan['errors'] ? 'bad' : $level, $headline, 'Site Sync keeps pages in step with the copy this theme ships. It never overwrites an edit made in WordPress on its own.' );
+
+		echo '<section class="sh-box"><div class="sh-stats">';
 		foreach ( $counts as $key => $meta ) {
-			$n = count( $state[ $key ] ?? array() );
+			$n = $num( $key );
 			if ( ! $n && in_array( $key, array( Scout_Sync::MISSING, Scout_Sync::CONFLICT, Scout_Sync::CREATE ), true ) ) {
 				continue;
 			}
 			printf(
-				'<section class="sh-box sh-check is-%s"><p class="sh-label">%s</p><p class="sh-value">%d</p></section>',
-				esc_attr( $n && 'good' !== $meta[1] ? $meta[1] : 'good' ),
-				esc_html( $meta[0] ),
-				(int) $n
+				'<div class="sh-stat"><p class="sh-num">%d</p><p class="sh-note">%s</p></div>',
+				(int) $n,
+				esc_html( $meta[0] )
 			);
 		}
-		echo '</div>';
+		echo '</div></section>';
 
 		foreach ( $plan['errors'] as $error ) {
 			echo '<div class="notice notice-error inline"><p>' . esc_html( $error ) . '</p></div>';
@@ -143,9 +186,7 @@ final class Scout_Sync_Admin {
 			echo '</ul></section>';
 		}
 
-		if ( ! $updates && ! $review && ! $missing && ! $plan['errors'] ) {
-			echo '<section class="sh-box"><h2>Everything is in sync</h2><p>Every page matches the copy in this theme. When a theme update changes the copy, the untouched pages update on their own.</p></section>';
-		}
+		// When everything matches, the status line at the top says so; no second box.
 
 		$journal = get_option( Scout_Sync::JOURNAL, array() );
 		if ( in_array( $journal['state'] ?? '', array( 'applied', 'failed', 'applying' ), true ) ) {

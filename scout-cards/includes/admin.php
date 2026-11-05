@@ -67,7 +67,47 @@ final class Scout_Cards_Admin {
 		if ( false !== strpos( (string) $hook, self::SLUG ) || false !== strpos( (string) $hook, 'site-build' ) ) {
 			wp_enqueue_media();
 			Scout_Admin_UI::enqueue( SCOUT_CARDS_URL . 'assets/scout-admin.css' );
+			wp_enqueue_style( 'scout-cards-admin', SCOUT_CARDS_URL . 'assets/cards-admin.css', array( 'scout-admin' ), SCOUT_CARDS_VERSION );
 		}
+	}
+
+	/**
+	 * The kit's status line. On a site mid-update an older kit (1.9.x) may be the one
+	 * loaded, without status(), so the same markup is printed here instead.
+	 *
+	 * @param string $go Optional button HTML, already escaped.
+	 */
+	private static function status( $state, $headline, $detail = '', $go = '' ) {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** The kit's closed "More options" box, with the same markup when an older kit is loaded. */
+	private static function fold_open( $title ) {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	private static function fold_close() {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
 	}
 
 	private static function field( $name, $value, $label, $type = 'text', $help = '' ) {
@@ -87,15 +127,15 @@ final class Scout_Cards_Admin {
 	private static function photo( $name, $photo_id, $label, $help ) {
 		$src = $photo_id ? wp_get_attachment_image_url( $photo_id, 'thumbnail' ) : '';
 		echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td class="scc-photo-field">'
-			. '<img src="' . esc_url( (string) $src ) . '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;vertical-align:middle;' . ( $src ? '' : 'display:none;' ) . '" alt=""> '
+			. '<img class="scc-thumb" src="' . esc_url( (string) $src ) . '" alt=""' . ( $src ? '' : ' hidden' ) . '> '
 			. '<input type="hidden" name="' . esc_attr( $name ) . '" value="' . esc_attr( $photo_id ? $photo_id : '' ) . '">'
-			. '<button type="button" class="button scc-pick">Choose photo</button> <button type="button" class="button-link scc-clear">Remove</button>'
+			. '<button type="button" class="button scc-pick">Choose photo</button> <button type="button" class="button sh-quiet scc-clear">Remove</button>'
 			. '<p class="description">' . esc_html( $help ) . '</p></td></tr>';
 	}
 
 	/** Spotlight fields: an optional block under the card. Leave all blank to hide it. */
 	private static function spot_fields( $base, $v ) {
-		echo '<tr><th scope="row" colspan="2" style="padding-bottom:0">Spotlight <span class="description" style="font-weight:400">(optional block under the card, such as a product or booking page)</span></th></tr>';
+		echo '<tr class="scc-spot-head"><th scope="row" colspan="2">Spotlight <span class="description">(optional block under the card, such as a product or booking page)</span></th></tr>';
 		self::field( "{$base}[spot_heading]", $v['spot_heading'] ?? '', 'Spotlight heading' );
 		self::field( "{$base}[spot_text]", $v['spot_text'] ?? '', 'Spotlight note', 'textarea' );
 		self::field( "{$base}[spot_label]", $v['spot_label'] ?? '', 'Button text' );
@@ -114,6 +154,46 @@ final class Scout_Cards_Admin {
 		);
 	}
 
+	/**
+	 * One row in the People list: photo, name, one line, the card links, and one
+	 * outlined Edit button that opens this card's fields under the row.
+	 *
+	 * @param string $id     Panel id.
+	 * @param string $photo  Photo URL, or '' for the first letter.
+	 * @param string $name   Name shown on the row.
+	 * @param string $sub    One line under the name.
+	 * @param array  $card   The card from Scout_Cards_Settings::people(), or empty when it has no link yet.
+	 * @param string $button Button words.
+	 * @param string $class  Extra row classes.
+	 * @param callable $fields Prints the panel's form table rows.
+	 */
+	private static function person_row( $id, $photo, $name, $sub, $card, $button, $class, $fields ) {
+		echo '<li class="sh-row scc-row' . ( $class ? ' ' . esc_attr( $class ) : '' ) . '">';
+		echo '<div class="scc-who">';
+		if ( $photo ) {
+			echo '<img class="scc-avatar" src="' . esc_url( $photo ) . '" alt="">';
+		} else {
+			$letter = function_exists( 'mb_substr' ) ? mb_substr( trim( (string) $name ), 0, 1 ) : substr( trim( (string) $name ), 0, 1 );
+			echo '<span class="scc-avatar" aria-hidden="true">' . esc_html( '' !== $letter ? strtoupper( $letter ) : '+' ) . '</span>';
+		}
+		echo '<div><p class="sh-row-name">' . esc_html( $name ) . '</p>';
+		if ( '' !== $sub ) {
+			echo '<p class="sh-row-sub">' . esc_html( $sub ) . '</p>';
+		}
+		echo '</div></div>';
+		echo '<div class="sh-row-facts">';
+		if ( $card ) {
+			$path = (string) wp_parse_url( $card['url'], PHP_URL_PATH );
+			echo '<a href="' . esc_url( $card['url'] ) . '" target="_blank" rel="noopener"><code>' . esc_html( '' !== $path ? $path : $card['url'] ) . '</code></a>';
+			echo '<a href="' . esc_url( $card['share'] ) . '" target="_blank" rel="noopener">Share mode</a>';
+		}
+		echo '</div>';
+		echo '<div class="sh-row-go"><button type="button" class="button scc-edit" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '">' . esc_html( $button ) . '</button></div>';
+		echo '<div class="scc-panel" id="' . esc_attr( $id ) . '"><table class="form-table" role="presentation">';
+		call_user_func( $fields );
+		echo '</table></div></li>';
+	}
+
 	public static function render() {
 		if ( ! current_user_can( 'edit_pages' ) ) {
 			return;
@@ -121,6 +201,9 @@ final class Scout_Cards_Admin {
 		$s      = Scout_Cards_Settings::get();
 		$n      = Scout_Cards_Settings::OPTION;
 		$people = Scout_Cards_Settings::people();
+		$count  = count( $people ) - 1; // 'team' is the main card, not a person.
+		$card   = Scout_Cards_Settings::card_url();
+		$links  = home_url( '/' . $s['links_base'] . '/' );
 		Scout_Admin_UI::open( 'Cards & Links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
@@ -130,36 +213,141 @@ final class Scout_Cards_Admin {
 		}
 		foreach ( array( $s['card_base'], $s['links_base'] ) as $slug ) {
 			if ( get_page_by_path( $slug ) ) {
-				echo '<div class="notice notice-warning"><p>A WordPress Page already uses <code>/' . esc_html( $slug ) . '/</code>. Scout Cards will show at that address instead of the Page. Change the address below, or rename that Page.</p></div>';
+				echo '<div class="notice notice-warning"><p>A WordPress Page already uses <code>/' . esc_html( $slug ) . '/</code>. Scout Cards will show at that address instead of the Page. Change the address under More options, or rename that Page.</p></div>';
 			}
 		}
 		if ( ! class_exists( 'Scout_Core_Business' ) ) {
-			echo '<div class="notice notice-info"><p>Scout Core is not active, so fill in the business details below. With Scout Core, they come from its Business screen automatically.</p></div>';
+			echo '<div class="notice notice-info"><p>Scout Core is not active, so fill in the business details under More options. With Scout Core, they come from its Business screen automatically.</p></div>';
 		}
 
-		echo '<p>Your digital business cards and your social "link in bio" page. ';
-		echo '<a class="button" href="' . esc_url( Scout_Cards_Settings::card_url() ) . '" target="_blank">View card</a> ';
-		echo '<a class="button" href="' . esc_url( home_url( '/' . $s['links_base'] . '/' ) ) . '" target="_blank">View links</a></p>';
-
-		echo '<h2>Share mode links</h2><p>Open your link on your phone, then add it to your home screen (iPhone: Share, then Add to Home Screen). It opens like an app with a big QR code and share buttons.</p><ul>';
-		foreach ( $people as $p ) {
-			echo '<li><strong>' . esc_html( $p['name'] ) . ':</strong> <a href="' . esc_url( $p['share'] ) . '" target="_blank"><code>' . esc_html( $p['share'] ) . '</code></a></li>';
+		// Status line: where the cards live, how many people, and whether the links page is on.
+		$who = 0 === $count ? 'the main card only' : ( 1 === $count ? 'the main card and 1 person' : 'the main card and ' . $count . ' people' );
+		if ( $s['enable_cards'] ) {
+			self::status(
+				'good',
+				'Cards are live.',
+				'At /' . $s['card_base'] . '/ with ' . $who . '. The links page is ' . ( $s['enable_links'] ? 'on at /' . $s['links_base'] . '/.' : 'off.' ),
+				'<a class="button" href="' . esc_url( $card ) . '" target="_blank" rel="noopener">View card</a>'
+			);
+		} elseif ( $s['enable_links'] ) {
+			self::status(
+				'off',
+				'Business cards are off.',
+				'The links page is on at /' . $s['links_base'] . '/. Turn cards on under More options.',
+				'<a class="button" href="' . esc_url( $links ) . '" target="_blank" rel="noopener">View links</a>'
+			);
+		} else {
+			self::status( 'off', 'Cards and links are off.', 'Turn them on under More options.' );
 		}
-		echo '</ul>';
 
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		echo '<form method="post" class="scc-form" id="scc-form" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		// With JavaScript, the Edit panels and spare rows start closed; without it, every field shows.
+		echo '<script>document.getElementById("scc-form").classList.add("scc-js");</script>';
 		wp_nonce_field( 'scout_cards_save' );
 		echo '<input type="hidden" name="action" value="scout_cards_save">';
 
-		echo '<h2>Look</h2><table class="form-table" role="presentation">';
+		// People: the main card, then one row per person.
+		echo '<section class="sh-box"><h2 class="sh-title">People</h2>';
+		echo '<p>Each person gets their own card and shows on the main card. Share mode opens a big QR code: open it on your phone and add it to your home screen (iPhone: Share, then Add to Home Screen), so it opens like an app.</p>';
+		echo '<ul class="sh-rows">';
+		$team = $people['team'];
+		self::person_row(
+			'scc-person-main',
+			(string) $team['photo'],
+			(string) $s['name'],
+			'Main card. It shows everyone below.',
+			$team,
+			'Edit',
+			'',
+			static function () use ( $n, $s ) {
+				self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
+				self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Logo for the links and share pages', 'Optional. When the card shows a person, the links page and share page can show the logo instead.' );
+				self::spot_fields( $n, $s );
+			}
+		);
+		$spare = false;
+		for ( $i = 0; $i < Scout_Cards_Settings::MAX_PEOPLE; $i++ ) {
+			$p      = $s['people'][ $i ] ?? array( 'slug' => '', 'name' => '', 'title' => '', 'email' => '', 'intro' => '', 'pick' => '', 'tags' => '', 'photo_id' => 0 );
+			$filled = '' !== trim( (string) $p['name'] );
+			$key    = sanitize_title( (string) ( $p['slug'] ?? '' ) );
+			$class  = '';
+			if ( ! $filled ) {
+				$class = 'scc-spare' . ( $spare ? '' : ' is-shown' ); // One empty slot shows; Add a person reveals the next.
+				$spare = true;
+			}
+			$photo = $filled && ! empty( $p['photo_id'] ) ? (string) wp_get_attachment_image_url( (int) $p['photo_id'], 'thumbnail' ) : '';
+			self::person_row(
+				'scc-person-' . $i,
+				$photo,
+				$filled ? (string) $p['name'] : 'Add a person',
+				$filled ? (string) ( $p['title'] ?? '' ) : 'Fill in a name to give someone their own card.',
+				$filled && isset( $people[ $key ] ) ? $people[ $key ] : array(),
+				$filled ? 'Edit' : 'Add a person',
+				$class,
+				static function () use ( $n, $s, $p, $i, $filled ) {
+					self::field( "{$n}[people][$i][name]", $p['name'], 'Full name', 'text', $filled ? 'To take this person off, clear the name and save.' : '' );
+					self::field( "{$n}[people][$i][slug]", $p['slug'], 'Link name', 'text', 'Lowercase, no spaces. "alex" makes /' . $s['card_base'] . '/alex/. Blank uses the first name.' );
+					self::field( "{$n}[people][$i][title]", $p['title'], 'Title' );
+					self::field( "{$n}[people][$i][email]", $p['email'], 'Email', 'email' );
+					self::field( "{$n}[people][$i][intro]", $p['intro'], 'Intro (on their card, in their voice)', 'textarea' );
+					self::field( "{$n}[people][$i][pick]", $p['pick'], 'Why talk to them (on the main card)', 'textarea' );
+					self::field( "{$n}[people][$i][tags]", $p['tags'], 'Tags', 'text', 'Comma separated, two to four short topics.' );
+					self::photo( "{$n}[people][$i][photo_id]", (int) $p['photo_id'], 'Photo', 'A square headshot works best.' );
+					self::photo( "{$n}[people][$i][share_id]", (int) ( $p['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this person\'s card link is texted or posted. 1200 by 630 pixels.' );
+					self::spot_fields( "{$n}[people][$i]", $p );
+				}
+			);
+		}
+		echo '</ul></section>';
+
+		// Links page: the intro, the newest post switch, then one row per link.
+		echo '<section class="sh-box"><div class="scc-boxhead"><h2 class="sh-title">Links page</h2>';
+		echo '<a class="button sh-quiet" href="' . esc_url( $links ) . '" target="_blank" rel="noopener">View links</a></div>';
+		echo '<p>Your "link in bio" page. Rows show in this order, and blank rows are skipped.</p>';
+		echo '<table class="form-table" role="presentation">';
+		self::field( "{$n}[links_intro]", $s['links_intro'], 'Intro', 'textarea' );
+		echo '<tr><th scope="row">Newest blog post</th><td><label><input type="hidden" name="' . esc_attr( $n ) . '[links_latest]" value="0"><input type="checkbox" name="' . esc_attr( $n ) . '[links_latest]" value="1"' . checked( $s['links_latest'], 1, false ) . '> Show the newest post first (updates by itself)</label></td></tr>';
+		echo '</table><ol class="sh-rows scc-links">';
+		$spares = 0;
+		for ( $i = 0; $i < Scout_Cards_Settings::MAX_LINKS; $i++ ) {
+			$l     = $s['links'][ $i ] ?? array( 'label' => '', 'sub' => '', 'url' => '', 'external' => 0 );
+			$class = '';
+			if ( '' === trim( (string) $l['label'] ) && '' === trim( (string) $l['url'] ) ) {
+				$class = ' scc-spare' . ( $spares ? '' : ' is-shown' ); // One empty row shows; Add another link reveals the next.
+				++$spares;
+			}
+			$id = 'scc-link-' . $i;
+			echo '<li class="sh-row scc-link' . esc_attr( $class ) . '"><fieldset><legend class="scc-legend">Link ' . ( $i + 1 ) . '</legend><div class="scc-link-fields">';
+			echo '<p><label for="' . esc_attr( $id ) . '-label">Button text</label><input class="widefat" id="' . esc_attr( $id ) . '-label" name="' . esc_attr( "{$n}[links][$i][label]" ) . '" value="' . esc_attr( $l['label'] ) . '"></p>';
+			echo '<p><label for="' . esc_attr( $id ) . '-sub">Small line under it</label><input class="widefat" id="' . esc_attr( $id ) . '-sub" name="' . esc_attr( "{$n}[links][$i][sub]" ) . '" value="' . esc_attr( $l['sub'] ) . '"></p>';
+			echo '<p><label for="' . esc_attr( $id ) . '-url">Link</label><input class="widefat" id="' . esc_attr( $id ) . '-url" name="' . esc_attr( "{$n}[links][$i][url]" ) . '" value="' . esc_attr( $l['url'] ) . '" placeholder="/contact/ or https://..."><span class="description">Start with / for a page on this site.</span></p>';
+			echo '<p class="scc-check"><label><input type="checkbox" name="' . esc_attr( "{$n}[links][$i][external]" ) . '" value="1"' . checked( ! empty( $l['external'] ), true, false ) . '> Open in a new tab</label></p>';
+			echo '</div></fieldset></li>';
+		}
+		echo '</ol><p class="scc-more"><button type="button" class="button sh-quiet scc-js-only" data-scc-more=".scc-link"' . ( $spares > 1 ? '' : ' hidden' ) . '>Add another link</button></p></section>';
+
+		// Rarely changed: look, main card words, business detail overrides, addresses.
+		self::fold_open( 'More options' );
+		echo '<h3 class="scc-sub">Look</h3><table class="form-table" role="presentation">';
 		echo '<tr><th scope="row">Mode</th><td><label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="dark"' . checked( $s['mode'], 'dark', false ) . '> Dark</label> &nbsp; <label><input type="radio" name="' . esc_attr( $n ) . '[mode]" value="light"' . checked( $s['mode'], 'light', false ) . '> Light</label></td></tr>';
-		echo '<tr><th scope="row"><label for="scc-accent">Accent color</label></th><td><input type="color" id="scc-accent" name="' . esc_attr( $n ) . '[accent]" value="' . esc_attr( $s['accent'] ) . '"><p class="description">The brand color for buttons, links, and tags.</p></td></tr>';
+		echo '<tr><th scope="row"><label for="scc-accent">Accent color</label></th><td><input type="color" id="scc-accent" name="' . esc_attr( $n ) . '[accent]" value="' . esc_attr( $s['accent'] ) . '"><p class="description">The brand color for buttons, links, and tags on the card.</p></td></tr>';
 		self::field( "{$n}[font]", $s['font'], 'Font (optional)', 'text', 'Leave blank to use the site\'s own font. Or a CSS font list, e.g. "Hanken Grotesk", sans-serif.' );
 		self::photo( "{$n}[share_card_id]", (int) $s['share_card_id'], 'Share picture: card', 'Shows when someone texts or posts the card link. 1200 by 630 pixels.' );
 		self::photo( "{$n}[share_links_id]", (int) $s['share_links_id'], 'Share picture: links page', 'Shows when the links page is shared. Blank uses the card\'s.' );
 		echo '</table>';
 
-		echo '<h2>Business details</h2><table class="form-table" role="presentation">';
+		echo '<h3 class="scc-sub">Main card words</h3><table class="form-table" role="presentation">';
+		self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
+		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
+		echo '</table>';
+
+		echo '<h3 class="scc-sub">Business details for the cards</h3>';
+		if ( class_exists( 'Scout_Core_Business' ) ) {
+			echo '<p class="sh-note">These override your Business info, on the cards and links page only. Leave a field blank to use Business info.</p>';
+		} else {
+			echo '<p class="sh-note">Scout Core is not active, so the cards use only what you type here.</p>';
+		}
+		echo '<table class="form-table" role="presentation">';
 		self::field( "{$n}[name]", $s['name'], 'Business name' );
 		self::field( "{$n}[phone]", $s['phone'], 'Phone', 'text', 'Used for Call, Text, and the saved contact.' );
 		self::field( "{$n}[email]", $s['email'], 'Main email', 'email' );
@@ -169,67 +357,67 @@ final class Scout_Cards_Admin {
 		self::field( "{$n}[socials]", $s['socials'], 'Social profiles', 'textarea', 'One URL per line. Facebook, Instagram, LinkedIn, X, Threads, YouTube, TikTok, and Pinterest show as icons.' );
 		self::field( "{$n}[footer]", $s['footer'], 'Footer line', 'text', 'Shown at the bottom of every card and the links page.' );
 		self::field( "{$n}[note]", $s['note'], 'Contact note', 'textarea', 'Saved in the Notes field of the phone contact.' );
-		echo '</table><p class="description">Blank fields use the details from Scout -> Business.</p>';
-
-		echo '<h2>Main card</h2><table class="form-table" role="presentation">';
-		self::field( "{$n}[team_intro]", $s['team_intro'], 'Intro', 'textarea' );
-		self::field( "{$n}[pick_heading]", $s['pick_heading'], 'Heading above the people' );
-		self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
-		self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Logo for the links and share pages', 'Optional. When the card shows a person, the links page and share page can show the logo instead.' );
-		self::spot_fields( $n, $s );
 		echo '</table>';
 
-		echo '<h2>People</h2><p>Each person gets their own card, and shows on the main card. Leave the name blank to hide a slot.</p>';
-		for ( $i = 0; $i < Scout_Cards_Settings::MAX_PEOPLE; $i++ ) {
-			$p = $s['people'][ $i ] ?? array( 'slug' => '', 'name' => '', 'title' => '', 'email' => '', 'intro' => '', 'pick' => '', 'tags' => '', 'photo_id' => 0 );
-			echo '<details' . ( $p['name'] || 0 === $i ? ' open' : '' ) . '><summary style="cursor:pointer;font-weight:600;margin:10px 0">Person ' . ( $i + 1 ) . ( $p['name'] ? ': ' . esc_html( $p['name'] ) : '' ) . '</summary><table class="form-table" role="presentation">';
-			self::field( "{$n}[people][$i][name]", $p['name'], 'Full name' );
-			self::field( "{$n}[people][$i][slug]", $p['slug'], 'Link name', 'text', 'Lowercase, no spaces. "alex" makes /' . $s['card_base'] . '/alex/. Blank uses the first name.' );
-			self::field( "{$n}[people][$i][title]", $p['title'], 'Title' );
-			self::field( "{$n}[people][$i][email]", $p['email'], 'Email', 'email' );
-			self::field( "{$n}[people][$i][intro]", $p['intro'], 'Intro (on their card, in their voice)', 'textarea' );
-			self::field( "{$n}[people][$i][pick]", $p['pick'], 'Why talk to them (on the main card)', 'textarea' );
-			self::field( "{$n}[people][$i][tags]", $p['tags'], 'Tags', 'text', 'Comma separated, two to four short topics.' );
-			self::photo( "{$n}[people][$i][photo_id]", (int) $p['photo_id'], 'Photo', 'A square headshot works best.' );
-			self::photo( "{$n}[people][$i][share_id]", (int) ( $p['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this person\'s card link is texted or posted. 1200 by 630 pixels.' );
-			self::spot_fields( "{$n}[people][$i]", $p );
-			echo '</table></details>';
-		}
-
-		echo '<h2>Links page</h2><table class="form-table" role="presentation">';
-		self::field( "{$n}[links_intro]", $s['links_intro'], 'Intro', 'textarea' );
-		echo '<tr><th scope="row">Newest blog post</th><td><label><input type="hidden" name="' . esc_attr( $n ) . '[links_latest]" value="0"><input type="checkbox" name="' . esc_attr( $n ) . '[links_latest]" value="1"' . checked( $s['links_latest'], 1, false ) . '> Show the newest post first (updates by itself)</label></td></tr>';
-		echo '</table><table class="widefat striped" style="max-width:1100px"><thead><tr><th>Button text</th><th>Small line under it</th><th>Link (start with / for a page on this site)</th><th>New tab</th></tr></thead><tbody>';
-		for ( $i = 0; $i < Scout_Cards_Settings::MAX_LINKS; $i++ ) {
-			$l = $s['links'][ $i ] ?? array( 'label' => '', 'sub' => '', 'url' => '', 'external' => 0 );
-			echo '<tr><td><input class="widefat" name="' . esc_attr( "{$n}[links][$i][label]" ) . '" value="' . esc_attr( $l['label'] ) . '"></td>'
-				. '<td><input class="widefat" name="' . esc_attr( "{$n}[links][$i][sub]" ) . '" value="' . esc_attr( $l['sub'] ) . '"></td>'
-				. '<td><input class="widefat" name="' . esc_attr( "{$n}[links][$i][url]" ) . '" value="' . esc_attr( $l['url'] ) . '" placeholder="/contact/ or https://..."></td>'
-				. '<td><input type="checkbox" name="' . esc_attr( "{$n}[links][$i][external]" ) . '" value="1"' . checked( ! empty( $l['external'] ), true, false ) . '></td></tr>';
-		}
-		echo '</tbody></table><p class="description">Blank rows are skipped. Rows show in this order.</p>';
-
-		echo '<h2>Addresses</h2><table class="form-table" role="presentation">';
+		echo '<h3 class="scc-sub">Addresses</h3><table class="form-table" role="presentation">';
 		echo '<tr><th scope="row">Turn on</th><td><label><input type="hidden" name="' . esc_attr( $n ) . '[enable_cards]" value="0"><input type="checkbox" name="' . esc_attr( $n ) . '[enable_cards]" value="1"' . checked( $s['enable_cards'], 1, false ) . '> Business cards</label> &nbsp; <label><input type="hidden" name="' . esc_attr( $n ) . '[enable_links]" value="0"><input type="checkbox" name="' . esc_attr( $n ) . '[enable_links]" value="1"' . checked( $s['enable_links'], 1, false ) . '> Links page</label></td></tr>';
 		self::field( "{$n}[card_base]", $s['card_base'], 'Card address', 'text', 'The word after your domain. Default: card.' );
 		self::field( "{$n}[links_base]", $s['links_base'], 'Links address', 'text', 'Default: links.' );
 		echo '</table>';
+		echo '<p class="scc-reset"><button type="submit" form="scc-reset" class="button sh-quiet sh-danger">Reset everything to the defaults</button></p>';
+		self::fold_close();
 
 		submit_button( 'Save cards and links' );
 		echo '</form>';
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'Reset every field to the defaults?\');">';
+		// Its button sits under More options, tied to this form by its id.
+		echo '<form method="post" id="scc-reset" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'Reset every field to the defaults?\');">';
 		wp_nonce_field( 'scout_cards_reset' );
-		echo '<input type="hidden" name="action" value="scout_cards_reset"><button class="button-link-delete">Reset to defaults</button></form>';
+		echo '<input type="hidden" name="action" value="scout_cards_reset"></form>';
 		?>
 		<script>
 		jQuery(function($){
-		  $('.scc-pick').on('click',function(e){e.preventDefault();var td=$(this).closest('td');
+		  $('.scc-pick').on('click',function(e){e.preventDefault();var td=$(this).closest('.scc-photo-field');
 		    var f=wp.media({title:'Choose a photo',library:{type:'image'},multiple:false});
 		    f.on('select',function(){var a=f.state().get('selection').first().toJSON();
-		      td.find('input[type=hidden]').val(a.id);td.find('img').attr('src',(a.sizes&&a.sizes.thumbnail?a.sizes.thumbnail.url:a.url)).show();});
+		      td.find('input[type=hidden]').val(a.id);td.find('img').attr('src',(a.sizes&&a.sizes.thumbnail?a.sizes.thumbnail.url:a.url)).prop('hidden',false);});
 		    f.open();});
-		  $('.scc-clear').on('click',function(e){e.preventDefault();var td=$(this).closest('td');td.find('input[type=hidden]').val('');td.find('img').hide();});
+		  $('.scc-clear').on('click',function(e){e.preventDefault();var td=$(this).closest('.scc-photo-field');td.find('input[type=hidden]').val('');td.find('img').prop('hidden',true);});
 		});
+		(function(){
+		  var form=document.getElementById('scc-form');
+		  if(!form){return;}
+		  function nextSpare(row){
+		    var n=row.nextElementSibling;
+		    while(n&&!n.classList.contains('scc-spare')){n=n.nextElementSibling;}
+		    return n;
+		  }
+		  function toggle(btn,open){
+		    var row=btn.closest('.scc-row');
+		    row.classList.toggle('is-open',open);
+		    btn.setAttribute('aria-expanded',open?'true':'false');
+		    if(open&&row.classList.contains('scc-spare')){
+		      var n=nextSpare(row);if(n){n.classList.add('is-shown');}
+		    }
+		  }
+		  form.addEventListener('click',function(e){
+		    var edit=e.target.closest('.scc-edit');
+		    if(edit){toggle(edit,edit.getAttribute('aria-expanded')!=='true');if(edit.getAttribute('aria-expanded')==='true'){var f=document.getElementById(edit.getAttribute('aria-controls')).querySelector('input:not([type=hidden]),textarea');if(f){f.focus();}}return;}
+		    var more=e.target.closest('[data-scc-more]');
+		    if(more){
+		      var hidden=form.querySelector(more.getAttribute('data-scc-more')+'.scc-spare:not(.is-shown)');
+		      if(hidden){hidden.classList.add('is-shown');var i=hidden.querySelector('input');if(i){i.focus();}}
+		      if(!form.querySelector(more.getAttribute('data-scc-more')+'.scc-spare:not(.is-shown)')){more.hidden=true;}
+		    }
+		  });
+		  // A field the browser flags (a bad email, say) may sit in a closed panel or More options: open it first.
+		  form.addEventListener('invalid',function(e){
+		    var el=e.target;
+		    var row=el.closest('.scc-row');
+		    if(row){row.classList.add('is-open','is-shown');var b=row.querySelector('.scc-edit');if(b){b.setAttribute('aria-expanded','true');}}
+		    var d=el.closest('details');if(d){d.open=true;}
+		    var l=el.closest('.scc-link');if(l){l.classList.add('is-shown');}
+		  },true);
+		})();
 		</script>
 		<?php
 		Scout_Admin_UI::close();
