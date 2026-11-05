@@ -84,10 +84,10 @@
     },
     {
       "slug": "scout-team",
-      "name": "Team credentials",
-      "summary": "A profile page for each person with their real credentials, such as bar admissions, education, awards and military service, plus a team grid that tells Google who your people are.",
+      "name": "People",
+      "summary": "One profile for each person the public sees: the team, speakers, writers and listed members. Their bio page, the team page, bylines and business cards all read from it, and credentials show only with a source.",
       "tier": "build",
-      "law": true,
+      "law": false,
       "requires": []
     },
     {
@@ -109,7 +109,7 @@
     {
       "slug": "scout-chat",
       "name": "Chat assistant",
-      "summary": "A chat in the corner of your site that answers common questions, books calls and takes change requests. Every other question lands in your inbox with the visitor's email, and AI answers start once it's connected.",
+      "summary": "A chat in the corner of your site that answers common questions, books calls and takes change requests. Every other question lands in To do with the visitor's email, and AI answers start once it's connected.",
       "tier": "bonus",
       "law": false,
       "requires": []
@@ -148,7 +148,7 @@
     {
       "slug": "scout-sitecheck",
       "name": "Free site check",
-      "summary": "A free website check visitors run from your site. They see the results right away and get the full report by email, and every request lands in your inbox so you can follow up.",
+      "summary": "A free website check visitors run from your site. They see the results right away and get the full report by email, and every request lands in To do so you can follow up.",
       "tier": "build",
       "law": false,
       "requires": [],
