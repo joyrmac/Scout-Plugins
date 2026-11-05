@@ -258,7 +258,7 @@ final class Scout_Chat {
 		$to      = self::notify_to();
 		if ( is_email( $to ) ) {
 			$body = $kinds[ $kind ] . "\n" . $name . ' ' . $contact . "\n" . ( '' !== $phone ? __( 'Tap to text:', 'scout-chat' ) . ' sms:+' . $phone . "\n" : '' ) . ( $page ? __( 'Page:', 'scout-chat' ) . ' ' . $page . "\n" : '' )
-				. "\n" . implode( "\n\n", $lines ) . "\n\n" . __( 'Open the inbox:', 'scout-chat' ) . ' ' . admin_url( 'edit.php?post_type=' . self::CPT );
+				. "\n" . implode( "\n\n", $lines ) . "\n\n" . __( 'Open Chat messages:', 'scout-chat' ) . ' ' . admin_url( 'edit.php?post_type=' . self::CPT );
 			wp_mail( $to, sprintf( /* translators: %s: question title */ __( 'New chat: %s', 'scout-chat' ), $title ), $body, '' !== $email ? array( 'Reply-To: ' . $name . ' <' . $email . '>' ) : array() );
 		}
 		// A short alert for a phone: the carrier's email-to-text address, or any address.

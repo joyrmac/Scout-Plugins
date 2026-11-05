@@ -709,7 +709,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			} elseif ( preg_match( '/^scout-(team|people)\b|post_type=scout_team\b|taxonomy=scout_people_group\b/', $s ) ) {
 				$group = 'people'; // Everyone the public sees: team, speakers, writers, listed members (kit 1.11.0, Joy 2026-11-05).
 			} elseif ( preg_match( '/scout-(contact|redirects|cards|newsletter|sitecheck|reviews-settings|reviews-ask|chat)\b|post_type=scout_review\b/', $s ) ) {
-				$group = 'website'; // Call buttons, Redirects, Cards & Links, Newsletter, Site check settings, Reviews, Ask for reviews, Chat.
+				$group = 'website'; // Call buttons, Redirects, Cards and links, Newsletter, Site check settings, Reviews, Ask for reviews, Chat.
 			} else {
 				$group = 'business'; // Business info, Hours, Case results, a companion's own types, and each Plus section's own screens.
 			}

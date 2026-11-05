@@ -382,7 +382,7 @@ final class Scout_Redirects_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Moved pages', 'scout-redirects' ),
-			__( 'When a page moves or goes away, a redirect sends visitors and search engines to the new page. This screen also lists the missing pages people tried to open, so you can forward each one in one click.', 'scout-redirects' ),
+			__( 'Send visitors from an old page address to the new one, and catch missing pages people try to open.', 'scout-redirects' ),
 			__( 'Moved pages', 'scout-redirects' )
 		);
 		self::messages();
@@ -433,13 +433,13 @@ final class Scout_Redirects_Admin {
 					<?php endif; ?>
 				</div>
 			</form>
-			<p class="sh-note sr-hint"><?php esc_html_e( 'The old address is a path on this site. The new address can be a path, like /services/, or a full web address. Capital letters and a closing slash on the old address do not matter.', 'scout-redirects' ); ?></p>
+			<p class="sh-note sr-hint"><?php esc_html_e( 'The old address is a path on this site. The new one can be a path or a full web address.', 'scout-redirects' ); ?></p>
 		</section>
 
 		<?php if ( $internal ) : ?>
 		<section class="sh-box" id="scout-broken">
 			<h2 class="sh-title"><?php esc_html_e( 'Broken links on your pages', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'A visitor clicked a link on one of these pages and found nothing. These also show in Site health.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'Visitors clicked these links and found nothing. They also show in Site status.', 'scout-redirects' ); ?></p>
 			<ul class="sr-list">
 				<?php
 				foreach ( $internal as $row ) :
@@ -476,7 +476,7 @@ final class Scout_Redirects_Admin {
 
 		<section class="sh-box" id="scout-missing">
 			<h2 class="sh-title"><?php esc_html_e( 'Missing pages people asked for', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'Addresses that are not on the site, most visited first. Bots, file requests and break-in attempts (like /.env or /wp-login) are left out.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'Addresses visitors tried that aren\'t on the site, most visited first. Bots and file probes are left out.', 'scout-redirects' ); ?></p>
 			<?php if ( ! $s['watch_404'] ) : ?>
 				<p class="sr-empty"><?php esc_html_e( 'Watching for missing pages is turned off in More options below.', 'scout-redirects' ); ?></p>
 			<?php elseif ( ! $missing ) : ?>
@@ -534,7 +534,7 @@ final class Scout_Redirects_Admin {
 
 		<section class="sh-box" id="scout-list">
 			<h2 class="sh-title"><?php esc_html_e( 'Your moved pages', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'Old addresses and where they go now. Permanent (301) is right for pages that moved for good; search engines then pass the old page\'s standing to the new one.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'Old addresses and where they go now. Use Permanent (301) for pages that moved for good.', 'scout-redirects' ); ?></p>
 			<?php if ( $total > self::PER_PAGE || '' !== $search ) : ?>
 				<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' === self::parent() ? 'options-general.php' : 'admin.php' ) ); ?>" class="sr-search" role="search">
 					<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG ); ?>">
@@ -640,7 +640,7 @@ final class Scout_Redirects_Admin {
 
 			<section class="sr-pane" id="scout-io">
 				<h2 class="sh-title"><?php esc_html_e( 'Import and export', 'scout-redirects' ); ?></h2>
-				<p><?php esc_html_e( 'Move redirects in and out as a CSV file, the kind any spreadsheet opens. Columns: from, to, and an optional type (301 or 302). A header row is fine.', 'scout-redirects' ); ?></p>
+				<p><?php esc_html_e( 'A CSV file any spreadsheet opens, with columns from, to and an optional type (301 or 302).', 'scout-redirects' ); ?></p>
 				<form method="post" action="<?php echo esc_url( $post_url ); ?>" enctype="multipart/form-data" class="sr-import">
 					<input type="hidden" name="action" value="scout_redirects_import">
 					<?php wp_nonce_field( 'scout_redirects_import' ); ?>

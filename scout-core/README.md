@@ -253,7 +253,7 @@ every client site at the next automatic update. CI checks them
 | API | Used by | For |
 |---|---|---|
 | `Scout_Core_Business::get()` (keys `name`, `phone`, `email`, `city`, `region`, `postal`, `same_as`) | scout-cards | Business details on the cards and in the saved contact |
-| The `scout` admin menu slug | scout-cards | Puts Cards & Links inside the Scout menu |
+| The `scout` admin menu slug | scout-cards | Puts Cards and links inside the Scout menu |
 | `Scout_SEO_Head::output` on `wp_head` priority 1 | scout-cards | Removed on card pages, which print their own tags |
 | `scout_design()`, `scout_design_css()`, `scout_design_issues()` | scout-build and every plugin with a front-end look | The site's colors, fonts, corners, logo and mark from the theme's DESIGN.md |
 | `scout_core_owns( $job )` | every Scout theme (via the theme kit) | Whether a plugin does a job here, so a theme fallback stands down |
