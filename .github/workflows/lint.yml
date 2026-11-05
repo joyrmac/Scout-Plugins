@@ -103,6 +103,8 @@ jobs:
         run: php tools/visitor-data.php --check
       - name: Approval hold, live sites wait for Scout's OK (no WordPress needed)
         run: php tools/tests/approval-hold.php
+      - name: Privacy policy and terms drafted from the visitor data lists (no WordPress needed)
+        run: php tools/tests/core-policies.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)

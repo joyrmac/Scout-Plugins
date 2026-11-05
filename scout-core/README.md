@@ -256,11 +256,9 @@ Every change to this plugin:
 <!-- visitor-data:start -->
 ## Visitor data
 
-| Cookie | Why | How long |
-|---|---|---|
-| `scoutSections:<screen name> (browser storage)` | Remembers which sections of an edit screen a signed-in editor left open. It is used only inside the site's dashboard, never on public pages, and holds no personal information. | Until the browser's saved site data is cleared |
+This plugin keeps nothing about the people who visit the site and sets no cookies.
 
-Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing.
+Scout Core keeps no information about visitors. Its email guard only changes how email addresses are written into the page, and it stores nothing. The dashboard remembers which sections a staff member opened, in their own browser (scoutSections), which never touches visitors.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->
