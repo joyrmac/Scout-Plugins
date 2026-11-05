@@ -6,7 +6,7 @@ one click.
 
 ## What it does
 
-- **Your moved pages** (Scout → Your website → Moved pages). Add, edit and delete permanent (301) and temporary (302)
+- **Your moved pages** (Scout → Site features → Moved pages). Add, edit and delete permanent (301) and temporary (302)
   redirects from an old path to a new path or a full web address. Each one
   shows its hit count and when it was last used. Old addresses are matched
   without regard to capital letters or a closing slash, and a visitor's query

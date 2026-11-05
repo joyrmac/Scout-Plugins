@@ -36,9 +36,9 @@ long enough for the host to cut it off. The last step to land finishes the
 report and sends it, exactly once. If the visitor closes the tab, a scheduled
 job finishes the run ten minutes later.
 
-## Settings: Scout → Your website → Free site check
+## Settings: Scout → Site features → Free site check
 
-Requests land in **Check requests** in the Inbox.
+Requests land in **Check requests** in To do.
 
 - **Make the page (as a draft):** a "Free website check" page at `/site-check/`
   with the shortcode. Publish it when it's ready.

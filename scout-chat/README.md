@@ -30,13 +30,13 @@ Nothing is rebuilt between the modes. Fill in the AI connection and it switches.
 - **AI server address** and **connection key**. The key can instead be
   defined in `wp-config.php` as `SCOUT_CHAT_AI_KEY`, which wins.
 
-## Inbox: Scout Build → Chat messages
+## Messages: Scout Build → Chat messages
 
 Each saved conversation shows who asked, the type (Question, Change request,
 Wants a person), whether it's answered, the page it was asked on, and the
 whole transcript. "Reply by email" opens a reply; tick Answered when done. The
 sidebar shows the unanswered count. A change request that also went to Scout
-Build's request list shows "In Requests" and is tracked there, so the Inbox
+Build's request list shows "In Requests" and is tracked there, so To do
 lists it once.
 
 ## For Sean: the AI server contract
