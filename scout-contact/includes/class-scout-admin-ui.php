@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.10.0';
+		const VERSION = '1.11.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -375,6 +375,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 			'inbox'    => 'Inbox',
 			'reports'  => 'Reports',
 			'business' => 'Your business',
+			'people'   => 'People',
 			'website'  => 'Your website',
 			'search'   => 'Get found',
 			'policies' => 'Policies',
@@ -705,10 +706,12 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'search';
 			} elseif ( preg_match( '/scout-recon/', $page ) || 'reports' === $l ) {
 				$group = 'reports';
+			} elseif ( preg_match( '/^scout-(team|people)\b|post_type=scout_team\b|taxonomy=scout_people_group\b/', $s ) ) {
+				$group = 'people'; // Everyone the public sees: team, speakers, writers, listed members (kit 1.11.0, Joy 2026-11-05).
 			} elseif ( preg_match( '/scout-(contact|redirects|cards|newsletter|sitecheck|reviews-settings|reviews-ask|chat)\b|post_type=scout_review\b/', $s ) ) {
 				$group = 'website'; // Call buttons, Redirects, Cards & Links, Newsletter, Site check settings, Reviews, Ask for reviews, Chat.
 			} else {
-				$group = 'business'; // Business info, Hours, Team, Case results, a companion's own types, and each Plus section's own screens.
+				$group = 'business'; // Business info, Hours, Case results, a companion's own types, and each Plus section's own screens.
 			}
 			$group = (string) apply_filters( 'scout_admin_nav_group', $group, $slug, $label );
 			$group = self::ALIASES[ $group ] ?? $group;
