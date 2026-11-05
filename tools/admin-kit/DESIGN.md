@@ -140,6 +140,7 @@ Text uses the text token, and CI checks it passes 4.5:1 on its own tint. A dot u
 |---|---|---|
 | Screen wrapper | `.sh` | Holds the tokens. Every Scout screen prints it. `Scout_Admin_UI::open()` and `close()` do it for you. |
 | Header bar | `.sh-bar`, `.sh-crumb`, `.sh-find` | One white bar, edge to edge: breadcrumb (Scout › section › screen), Find anything (Ctrl or Cmd + K), one button. The button is Request a change unless the screen sets its own with `bar_action()`. |
+| Page column | `.sh-page` | Pinned to the left, beside the WordPress menu, never centered in the window. The section list and the content line up with the menu on every screen width (kit 1.11.0). |
 | Section list | `.sh-local` | The section's screens on the left, current one with a cerulean inset bar. Shows when the section has more than one screen or a "Looking for" link. On WordPress's own list screens it becomes a row of pills (`.is-row`). The WordPress sidebar is the only menu: no tab rows across the top. |
 | Looking for | `.sh-looking` | One quiet line at the bottom of the section list that opens a screen in its home group ("Looking for the cookie notice? It's in Get found ›"). At most two per group, set in `Scout_Admin_UI::LOOKING`. |
 | Page head | `.sh-pagehead`, `h1`, `.sh-lede`, `.sh-eyebrow` | The screen name as the h1, one sentence under it. Home sets a sentence headline with `page_head()` ("Good morning. Two things need you today.") in a 1040px column. |
