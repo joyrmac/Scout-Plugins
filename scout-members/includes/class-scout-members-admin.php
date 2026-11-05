@@ -629,7 +629,7 @@ final class Scout_Members_Admin {
 		<section class="sh-box" id="sm-renewals">
 			<div class="sm-box-head">
 				<h2 class="sh-title"><?php esc_html_e( 'Renewing soon', 'scout-members' ); ?></h2>
-				<a class="button" href="<?php echo esc_url( self::url( 'renewals' ) ); ?>"><?php esc_html_e( 'Renewals and payments', 'scout-members' ); ?></a>
+				<a class="button" href="<?php echo esc_url( self::url( 'renewals' ) ); ?>"><?php esc_html_e( 'Renewals & payments', 'scout-members' ); ?></a>
 			</div>
 			<?php if ( $due ) : ?>
 				<?php self::table( $due ); ?>
@@ -1113,7 +1113,7 @@ final class Scout_Members_Admin {
 		$woo   = Scout_Members_Woo::active();
 		?>
 		<section class="sh-box sm-dues" id="sm-dues">
-			<h2 class="sh-title"><?php esc_html_e( 'Dues and renewals', 'scout-members' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Dues & renewals', 'scout-members' ); ?></h2>
 			<?php if ( $woo ) : ?>
 				<p class="sm-field">
 					<span class="sm-label"><?php esc_html_e( 'When new members pay', 'scout-members' ); ?></span>

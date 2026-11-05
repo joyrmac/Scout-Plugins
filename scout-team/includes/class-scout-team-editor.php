@@ -169,7 +169,7 @@ final class Scout_Team_Editor {
 			</div>
 
 			<fieldset class="st-group">
-				<legend><?php esc_html_e( 'Contact and byline', 'scout-team' ); ?></legend>
+				<legend><?php esc_html_e( 'Contact & byline', 'scout-team' ); ?></legend>
 				<div class="st-grid">
 					<p class="st-field">
 						<label for="st-email"><?php esc_html_e( 'Email (optional)', 'scout-team' ); ?></label>
@@ -197,7 +197,7 @@ final class Scout_Team_Editor {
 					<span class="description"><?php esc_html_e( 'Pick their login. Their posts then link to this profile.', 'scout-team' ); ?></span>
 				</p>
 				<?php if ( ! Scout_Team::settings()['contact'] ) : ?>
-					<p class="description"><?php esc_html_e( 'Hidden on their page unless "Email and phone" is on in People settings.', 'scout-team' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Hidden on their page unless "Email & phone" is on in People settings.', 'scout-team' ); ?></p>
 				<?php endif; ?>
 			</fieldset>
 		</div>

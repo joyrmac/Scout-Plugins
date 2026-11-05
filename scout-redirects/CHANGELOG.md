@@ -1,7 +1,8 @@
 # Scout Redirects changelog
 
-## Unreleased (2026-11-05)
+## 0.1.16 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Plainer names.** The menu item and screen title are both "Moved pages" (was "Redirects" and "Old pages, forwarded to new ones"), the list box is "Your moved pages", and the opening sentence is plainer. The Site Health link reads "Open Moved pages". Same address, settings and redirects.
 - **Shorter, plainer help text** (Sean's voice, admin kit DESIGN.md 2a). The opening line says what a redirect is in one line, and the form, missing pages, list and import help are one short sentence each. Broken links point to Site status, the new name for Site health.
 

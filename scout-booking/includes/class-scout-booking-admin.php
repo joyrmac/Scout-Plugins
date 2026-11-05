@@ -547,7 +547,7 @@ final class Scout_Booking_Admin {
 			<?php wp_nonce_field( 'scout_booking_settings' ); ?>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Page and emails', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Page & emails', 'scout-booking' ); ?></h2>
 				<p class="sbk-field">
 					<label for="sbk-page"><?php esc_html_e( 'Booking page', 'scout-booking' ); ?></label>
 					<?php
@@ -568,7 +568,7 @@ final class Scout_Booking_Admin {
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Changes and cancellations', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Changes & cancellations', 'scout-booking' ); ?></h2>
 				<?php $num( 'cancel_hours', __( 'Cancellation window, in hours', 'scout-booking' ), __( 'Clients can change or cancel online until this many hours before the session.', 'scout-booking' ), 0, 720, $s['cancel_hours'] ); ?>
 				<fieldset class="sbk-field">
 					<legend><?php esc_html_e( 'Inside the window', 'scout-booking' ); ?></legend>

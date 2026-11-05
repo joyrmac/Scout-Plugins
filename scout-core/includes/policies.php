@@ -38,7 +38,7 @@ final class Scout_Core_Policies {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( Scout_Core_Admin::parent(), 'Privacy and terms', 'Privacy and terms', 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( Scout_Core_Admin::parent(), 'Privacy & terms', 'Privacy & terms', 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( $hook ): void {
@@ -410,7 +410,7 @@ final class Scout_Core_Policies {
 		$sources = self::sources();
 		$state   = self::state();
 		$date    = (string) get_option( 'date_format' );
-		Scout_Admin_UI::open( 'Privacy and terms', 'Drafted from what this website collects. Send them to your lawyer, mark them approved, then make the page.', 'Legal pages' );
+		Scout_Admin_UI::open( 'Privacy & terms', 'Drafted from what this website collects. Send them to your lawyer, mark them approved, then make the page.', 'Legal pages' );
 		$msg = get_transient( 'scout_core_policies_msg_' . get_current_user_id() );
 		if ( $msg ) {
 			delete_transient( 'scout_core_policies_msg_' . get_current_user_id() );

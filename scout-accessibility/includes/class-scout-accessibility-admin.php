@@ -361,7 +361,7 @@ final class Scout_Accessibility_Admin {
 					echo esc_html( sprintf( __( '%1$d of %2$d reviewed', 'scout-accessibility' ), $launch_done, count( $items ) ) );
 					?>
 				</p>
-				<p class="sh-note"><a href="#sa-launch"><?php esc_html_e( 'Color contrast and keyboard use', 'scout-accessibility' ); ?></a></p>
+				<p class="sh-note"><a href="#sa-launch"><?php esc_html_e( 'Color contrast & keyboard use', 'scout-accessibility' ); ?></a></p>
 			</section>
 		</div>
 

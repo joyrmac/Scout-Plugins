@@ -983,7 +983,7 @@ final class Scout_Hub_Admin {
 			),
 		);
 		?>
-		<div class="sh-section-head"><p class="sh-eyebrow"><?php esc_html_e( 'Content and settings', 'scout-build' ); ?></p></div>
+		<div class="sh-section-head"><p class="sh-eyebrow"><?php esc_html_e( 'Content & settings', 'scout-build' ); ?></p></div>
 		<div class="sh-grid">
 			<?php foreach ( $cards as $card ) : ?>
 				<article class="sh-card">

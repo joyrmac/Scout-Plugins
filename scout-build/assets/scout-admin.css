@@ -410,3 +410,8 @@ body.sh-calm .sh *, body.sh-calm .sh *::before, body.sh-calm .sh *::after { tran
 @media (prefers-reduced-motion: reduce) {
 	.sh *, .sh *::before, .sh *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* Type details (Joy, 2026-11-05): ligatures where the font has them. Headings also allow the
+   fancier joined letters (like tt or st) when the font draws them; body text keeps the plain set. */
+.sh { font-variant-ligatures: common-ligatures contextual; text-rendering: optimizeLegibility; }
+.sh h1, .sh h2, .sh .sh-title { font-variant-ligatures: common-ligatures discretionary-ligatures contextual; }

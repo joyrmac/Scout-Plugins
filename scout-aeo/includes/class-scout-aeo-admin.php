@@ -204,7 +204,7 @@ final class Scout_AEO_Admin {
 				<?php submit_button( __( 'Save changes', 'scout-aeo' ) ); ?>
 			</form>
 			<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Questions and answers', 'scout-aeo' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Questions & answers', 'scout-aeo' ); ?></h2>
 			<p><?php esc_html_e( 'Add them in the "Questions this page answers" box on any page or post. They show at the end of the page.', 'scout-aeo' ); ?></p>
 			<?php
 			if ( $with ) {

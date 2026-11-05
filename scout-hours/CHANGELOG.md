@@ -1,7 +1,8 @@
 # Scout Hours changelog
 
-## Unreleased (2026-11-05)
+## 0.1.14 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **The screen title matches the menu.** The Hours screen is now titled Hours (was "When you’re open"), the same as its menu item. In the "Where it updates" box, the "Schema" line is now called "Google listing". Same page address and settings. Visitors see no change.
 - **Shorter, plainer words.** The intro and help lines are one short sentence each, and "schema" now reads "your Google listing".
 

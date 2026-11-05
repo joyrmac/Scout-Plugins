@@ -301,7 +301,7 @@ final class Scout_Chat_Admin {
 					<?php
 					self::row( __( 'Email new questions to', 'scout-chat' ), self::text( 'notify', $s['notify'], Scout_Chat::notify_to(), 'email' ), __( 'Leave blank to use Send notices to in Business info.', 'scout-chat' ) );
 					self::row( __( 'Text me new questions', 'scout-chat' ), self::text( 'alert', $s['alert'], '9195551234@vtext.com', 'email' ) . '<details class="sh-more"><summary>' . esc_html__( 'More', 'scout-chat' ) . '</summary><p class="description">' . esc_html__( 'Your cell number at your carrier: @vtext.com (Verizon), @tmomail.net (T-Mobile), @msg.fi.google.com (Google Fi). AT&T stopped this in 2025.', 'scout-chat' ) . '</p></details>', __( 'Your phone\'s email-to-text address gets a short text for each new question. Blank: no text.', 'scout-chat' ) );
-					self::row( __( 'Booking page', 'scout-chat' ), self::text( 'book_url', $s['book_url'], function_exists( 'scout_booking_url' ) ? scout_booking_url() : home_url( '/contact/' ), 'url' ), __( 'Blank uses the site\'s booking page, or Contact.', 'scout-chat' ) );
+					self::row( __( 'Booking page', 'scout-chat' ), self::text( 'book_url', $s['book_url'], Scout_Chat::site_booking_url(), 'url' ), __( 'Blank uses the site\'s booking page, or Contact.', 'scout-chat' ) );
 					self::row( __( 'Our work page', 'scout-chat' ), self::text( 'work_url', $s['work_url'], 'https://', 'url' ), __( 'Blank hides "Show me your work".', 'scout-chat' ) );
 					?>
 				</table>

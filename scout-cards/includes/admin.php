@@ -50,9 +50,9 @@ final class Scout_Cards_Admin {
 		$own = 'site-build' === $parent && ! isset( $admin_page_hooks['site-build'] );
 		if ( $own ) {
 			add_menu_page( 'Site Build', 'Site Build', 'edit_pages', 'site-build', array( __CLASS__, 'render' ), 'dashicons-id-alt', 3 );
-			add_submenu_page( 'site-build', 'Cards and links', 'Cards and links', 'edit_pages', 'site-build', array( __CLASS__, 'render' ) );
+			add_submenu_page( 'site-build', 'Cards & links', 'Cards & links', 'edit_pages', 'site-build', array( __CLASS__, 'render' ) );
 		}
-		add_submenu_page( $parent, 'Cards and links', 'Cards and links', 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, 'Cards & links', 'Cards & links', 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
 		if ( $own ) {
 			remove_submenu_page( 'site-build', self::SLUG ); // the section's first item already opens this screen
 		}
@@ -204,7 +204,7 @@ final class Scout_Cards_Admin {
 		$count  = count( $people ) - 1; // 'team' is the main card, not a person.
 		$card   = Scout_Cards_Settings::card_url();
 		$links  = home_url( '/' . $s['links_base'] . '/' );
-		Scout_Admin_UI::open( 'Cards and links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
+		Scout_Admin_UI::open( 'Cards & links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
 		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
 		}

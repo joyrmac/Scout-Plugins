@@ -1,7 +1,8 @@
 # Scout Case Results changelog
 
-## Unreleased (2026-11-05)
+## 0.1.15 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Plainer labels.** Case results settings is now Case results, in the menu and on the screen, so the pair in the menu reads Case results and All case results. The closed box with the shortcodes is now Add to a page. Page addresses and saved settings are unchanged.
 - **Shorter, plainer help text.** Screen notes are one short sentence each, and the Law firm note points to Scout → Legal pages → Disclaimers. The disclaimer visitors read is unchanged.
 

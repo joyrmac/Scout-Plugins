@@ -1,7 +1,8 @@
 # Scout Cards changelog
 
-## Unreleased (2026-11-05)
+## 1.0.27 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Plainer labels.** Cards & Links is now Cards and links, in the menu and on the screen. The People box is now Card people, ready for its move to People later. The page address and saved settings are unchanged.
 - **Shorter status lines.** "Cards are live." is now "Live." and "Cards and links are off." is now "Off."
 

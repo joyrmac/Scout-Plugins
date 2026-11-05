@@ -1,7 +1,9 @@
 # Scout Chat changelog
 
-## Unreleased (2026-11-05)
+## 0.3.4 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
+- **The booking link is never empty.** When Scout Booking has no booking page (or it was removed), the chat's "See open times" link and the Booking page placeholder use the Contact page.
 - **A chat change request shows once in the Inbox.** When a visitor asks for a change in the chat and it joins Scout Build's request list, the saved chat message is now marked as handled, so To do, the menu count and Today list it once, as the request. Older change requests already in the request list are left out of the count too. The chat message is still saved, and its list now says "In Requests".
 - **Chat emails can use the shared notice address.** "Email new questions to" is now an optional override. When it is blank, new chats go to Send notices to in Business info (or the site email when Scout Core is older). An address already saved here keeps working.
 - **Plainer names.** The settings screen and its menu item are both "Chat" (was "Chat settings" and "Chat assistant"), and the list of saved chats is "Chat messages" (was "Chat questions"). Same addresses and settings.

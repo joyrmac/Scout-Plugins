@@ -1,7 +1,8 @@
 # Scout Booking changelog
 
-## Unreleased (2026-11-05)
+## 0.2.0 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Booking link for the whole site.** Scout Booking now gives the site its booking page address (`scout_booking_url()`), so Call buttons, Chat and Free site check send "Book" to your booking page. It only does this once a booking page is set and published, and a theme that already has its own booking link keeps it.
 - **One newsletter ask per booking.** With Scout Newsletter on, a checkout that only pays for bookings skips Newsletter's checkout box when the booking form already asked. One box, one consent record.
 - **Notices go to the shared address.** When "Send booking emails for you to" is blank, booking emails now go to the notice address in Business info instead of the site email (the site email is still used without Scout Core). Clients see that address when a change is too late to make online.

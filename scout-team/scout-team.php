@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout People
  * Description:       One profile for each person the public sees: your team, speakers, writers and members who want to be listed. Sort people into groups and choose where each one shows: a profile page, the team page, a byline, a business card. Credentials show where they came from, and each person gets Person schema.
- * Version:           0.1.14
+ * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_TEAM_VERSION', '0.1.14' );
+define( 'SCOUT_TEAM_VERSION', '0.2.0' );
 define( 'SCOUT_TEAM_FILE', __FILE__ );
 define( 'SCOUT_TEAM_URL', plugin_dir_url( __FILE__ ) );
 

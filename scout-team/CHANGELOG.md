@@ -1,6 +1,6 @@
 # Scout Team changelog
 
-## Unreleased (2026-11-05)
+## 0.2.0 (2026-11-05)
 
 - **Plainer words on the People screens.** Help text cut to one short sentence each, in the dashboard word rules (admin kit DESIGN.md 2a). "Full list (bulk edit and trash)" now reads "Edit many at once". Labels only; nothing visitors see changes.
 

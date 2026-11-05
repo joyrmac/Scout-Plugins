@@ -1,7 +1,8 @@
 # Scout Law Firm Tools changelog
 
-## Unreleased (2026-11-05)
+## 0.4.2 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Plainer labels.** Page reviews is now Attorney sign-offs, and Approvals is now Firm approvals, in the menu and on each screen. Page addresses, saved settings and the approval records are unchanged.
 - **Shorter, plainer help text.** Screen notes are one short sentence each, and "in the Inbox" now reads "in To do", the new menu name. The disclaimer wording visitors read is unchanged.
 

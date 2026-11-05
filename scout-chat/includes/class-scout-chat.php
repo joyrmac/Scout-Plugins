@@ -74,6 +74,12 @@ final class Scout_Chat {
 		return defined( 'SCOUT_CHAT_AI_KEY' ) ? (string) SCOUT_CHAT_AI_KEY : self::settings()['ai_key'];
 	}
 
+	/** The site's booking page from Scout Booking, or Contact when there is none (or it was removed). */
+	public static function site_booking_url(): string {
+		$url = function_exists( 'scout_booking_url' ) ? (string) scout_booking_url() : '';
+		return '' !== $url ? $url : home_url( '/contact/' );
+	}
+
 	public static function ai_connected(): bool {
 		$url = self::settings()['ai_url'];
 		return '' !== self::ai_key() && 0 === strpos( $url, 'https://' );
@@ -115,7 +121,7 @@ final class Scout_Chat {
 		}
 		wp_enqueue_style( 'scout-chat', SCOUT_CHAT_URL . 'assets/chat.css', array(), SCOUT_CHAT_VERSION );
 		wp_enqueue_script( 'scout-chat', SCOUT_CHAT_URL . 'assets/chat.js', array(), SCOUT_CHAT_VERSION, array( 'in_footer' => true, 'strategy' => 'defer' ) );
-		$book = '' !== $s['book_url'] ? $s['book_url'] : ( function_exists( 'scout_booking_url' ) ? scout_booking_url() : home_url( '/contact/' ) );
+		$book = '' !== $s['book_url'] ? $s['book_url'] : self::site_booking_url();
 		$name = '' !== $s['name'] ? $s['name'] : sprintf( /* translators: %s: site name */ __( '%s assistant', 'scout-chat' ), self::short_site_name() );
 		wp_localize_script(
 			'scout-chat',

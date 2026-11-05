@@ -76,7 +76,7 @@ final class Scout_Analytics_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Visits and cookies', 'scout-analytics' ), __( 'Visits and cookies', 'scout-analytics' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Visits & cookies', 'scout-analytics' ), __( 'Visits & cookies', 'scout-analytics' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -126,9 +126,9 @@ final class Scout_Analytics_Admin {
 		$o   = Scout_Analytics::OPTION;
 		$tag = Scout_Analytics::tag();
 		Scout_Admin_UI::open(
-			__( 'Visits and cookies', 'scout-analytics' ),
+			__( 'Visits & cookies', 'scout-analytics' ),
 			__( 'Counts visits with Google Tag Manager and shows visitors a small cookie notice.', 'scout-analytics' ),
-			__( 'Visits and cookies', 'scout-analytics' )
+			__( 'Visits & cookies', 'scout-analytics' )
 		);
 		settings_errors( $o );
 		if ( 'gtm' === $tag ) {
@@ -150,7 +150,7 @@ final class Scout_Analytics_Admin {
 		<form method="post" action="options.php">
 			<?php settings_fields( 'scout_analytics_group' ); ?>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Tracking and privacy', 'scout-analytics' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Tracking & privacy', 'scout-analytics' ); ?></h2>
 				<p class="sh-note"><?php esc_html_e( 'Google consent mode is set before any tag runs. Browsers that send Global Privacy Control count as a no.', 'scout-analytics' ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>

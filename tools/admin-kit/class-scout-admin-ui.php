@@ -386,6 +386,22 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/** Retired group keys, mapped to where their screens live now. */
 		const ALIASES = array( 'content' => 'website' );
 
+		/**
+		 * The menu a plugin screen nests under: the site's Scout menu, or Settings
+		 * when there is none. One copy for every plugin (kit 1.11.0). Plugins still
+		 * keep their own copy until every site runs kit 1.11.0 or later, because the
+		 * first kit copy loaded wins; call it through method_exists() until then.
+		 */
+		public static function parent(): string {
+			global $admin_page_hooks;
+			foreach ( array( 'scout-build', 'recon-build', 'site-build', 'scout' ) as $slug ) {
+				if ( isset( $admin_page_hooks[ $slug ] ) ) {
+					return $slug;
+				}
+			}
+			return 'options-general.php';
+		}
+
 		/** A group's label for this site: Scout tools reads Build tools on a white-label site. */
 		public static function label( string $key ): string {
 			if ( 'build' === $key && ! self::branded() ) {

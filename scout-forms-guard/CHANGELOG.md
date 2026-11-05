@@ -1,7 +1,8 @@
 # Scout Forms Guard — Changelog
 
-## Unreleased (2026-11-05)
+## 0.3.6 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **One name in its messages.** The hidden upload warning and its health check now call this feature Spam protection, the same name the rest of the dashboard uses. The checks themselves are unchanged.
 - **Shorter warning.** The hidden upload warning says the problem and the fix in two short lines.
 

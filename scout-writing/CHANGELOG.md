@@ -1,7 +1,8 @@
 # Scout Writing changelog
 
-## Unreleased (2026-11-05)
+## 0.1.6 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Plainer labels.** Writing (all) is now All writing, and Writing settings is now Settings, in the Your Writing menu and on each screen. Page addresses and saved settings are unchanged.
 - **Shorter, plainer messages.** The room's intro and its sign-in and error messages drop the extra words.
 

@@ -213,7 +213,7 @@ final class Scout_Booking_Types_Admin {
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Time and price', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Time & price', 'scout-booking' ); ?></h2>
 				<div class="sbk-pair">
 					<p class="sbk-field"><label for="sbt-length"><?php esc_html_e( 'Length, in minutes', 'scout-booking' ); ?></label><input type="number" id="sbt-length" name="<?php echo esc_attr( $f( 'length' ) ); ?>" min="15" max="720" step="5" value="<?php echo (int) $t['length']; ?>" class="small-text"></p>
 					<p class="sbk-field"><label for="sbt-buffer"><?php esc_html_e( 'Buffer after, in minutes', 'scout-booking' ); ?></label><input type="number" id="sbt-buffer" name="<?php echo esc_attr( $f( 'buffer' ) ); ?>" min="0" max="240" step="5" value="<?php echo (int) $t['buffer']; ?>" class="small-text"><span class="description"><?php esc_html_e( 'Time to reset the room before the next session.', 'scout-booking' ); ?></span></p>
@@ -233,7 +233,7 @@ final class Scout_Booking_Types_Admin {
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Days and hours', 'scout-booking' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Days & hours', 'scout-booking' ); ?></h2>
 				<fieldset class="sbk-field">
 					<legend class="screen-reader-text"><?php esc_html_e( 'Which hours this session follows', 'scout-booking' ); ?></legend>
 					<label><input type="radio" name="<?php echo esc_attr( $f( 'schedule' ) ); ?>" value="default" <?php checked( 'default', $t['schedule'] ); ?>> <?php echo esc_html( Scout_Booking::scout_hours_on() ? __( 'Your business hours from Scout Hours', 'scout-booking' ) : __( 'The booking hours on the Settings screen', 'scout-booking' ) ); ?></label><br>

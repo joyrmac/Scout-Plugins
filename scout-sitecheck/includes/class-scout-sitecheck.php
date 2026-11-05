@@ -75,7 +75,9 @@ final class Scout_Sitecheck {
 		if ( '' !== $u ) {
 			return $u;
 		}
-		return function_exists( 'scout_booking_url' ) ? (string) scout_booking_url() : home_url( '/contact/' );
+		// Scout Booking's page, or Contact when there is none (or it was removed later).
+		$booking = function_exists( 'scout_booking_url' ) ? (string) scout_booking_url() : '';
+		return '' !== $booking ? $booking : home_url( '/contact/' );
 	}
 
 	public static function register_type(): void {

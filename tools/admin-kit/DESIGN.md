@@ -49,6 +49,8 @@ Straight, short and plain. Say it once. Someone who has never run a website shou
 7. **Same thing, same word.** The menu name, the screen title and the button that opens it use the same words.
 8. **Calm and certain.** Don't hedge with "might" or "you may want to" when we know. Contractions are fine.
 9. **Scout-branded.** Never name Claude or a partner agency. On white-label sites say "your web team", not Scout.
+10. **"&" in names, "and" in sentences.** Menu names, screen titles, box titles and field labels that pair two nouns use "&": "Cards & links", "Visits & cookies", "Privacy & terms". Buttons that do two things keep "and" ("Approve and welcome"). Text visitors see does not change.
+11. **Real characters when they help.** Curly quotes and apostrophes (’ “ ”), the ellipsis (…), × for sizes, › and → for "go here". Ligatures are on (kit CSS), with the fancier joined letters only in headings and only where the font has them. Never an em dash.
 
 Before and after: "Get found" became "Search". "Your website" became "Site features". "Keep tabs on how your site is doing across a range of important checks" becomes "Is the site working? Green means yes."
 

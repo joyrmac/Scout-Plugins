@@ -1,7 +1,8 @@
 # Scout — North Crest RV Park — Changelog
 
-## Unreleased (2026-11-05)
+## 0.2.2 (2026-11-05)
 
+- **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
 - **Plainer label.** Overview is now Home in the RV park menu. The screen keeps "RV park" as its heading. The page address is unchanged.
 
 ## 0.2.1 (2026-11-05)

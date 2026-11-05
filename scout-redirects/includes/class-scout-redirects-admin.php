@@ -639,7 +639,7 @@ final class Scout_Redirects_Admin {
 			</form>
 
 			<section class="sr-pane" id="scout-io">
-				<h2 class="sh-title"><?php esc_html_e( 'Import and export', 'scout-redirects' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Import & export', 'scout-redirects' ); ?></h2>
 				<p><?php esc_html_e( 'A CSV file any spreadsheet opens, with columns from, to and an optional type (301 or 302).', 'scout-redirects' ); ?></p>
 				<form method="post" action="<?php echo esc_url( $post_url ); ?>" enctype="multipart/form-data" class="sr-import">
 					<input type="hidden" name="action" value="scout_redirects_import">

@@ -1,6 +1,6 @@
 # Scout Build changelog
 
-## Unreleased (2026-11-05)
+## 0.12.3 (2026-11-05)
 
 - **A chat change request shows once in To do.** A change request from the site chat already shows as a request; To do no longer lists the same chat as a chat message too.
 - **New group names on screen** (admin kit 1.11.0). The Inbox screen and menu item are "To do", and the health report screen and menu item are "Site status", matching their groups. The Home link, the admin bar, the dashboard widget button and the To do emails use the new names. In To do, chat items are "Chat messages" and site check items are "Check requests", matching those plugins' screens.

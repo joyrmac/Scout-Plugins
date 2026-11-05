@@ -499,7 +499,7 @@ final class Scout_Team_Admin {
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Email and phone', 'scout-team' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Email & phone', 'scout-team' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[contact]" value="1" <?php checked( $s['contact'] ); ?>> <?php esc_html_e( 'Show each person\'s email and phone on their profile page', 'scout-team' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Off: visitors see the main business contact instead. Card-only phone and email never show here.', 'scout-team' ); ?></p></td>
 					</tr>
