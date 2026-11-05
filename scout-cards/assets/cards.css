@@ -1,7 +1,11 @@
 /* Scout Cards: card, share mode, and link-in-bio pages.
    Everything is scoped under .scc so a client theme's styles cannot reshape it.
    Brand comes from two settings: --scc-accent (the client's color) and the page
-   mode (dark or light). The font is inherited from the theme unless set. */
+   mode (dark or light). Those two are settings on purpose, so the sheet reads no
+   theme color tokens. It does read the Scout design tokens for the font
+   (--scout-font-body, when the Font setting is blank) and the radii
+   (--scout-radius-pill, -card, -control, -chip), with the theme's older
+   --font-sans as a fallback for one release and the fixed values after that. */
 
 body.scc-page { margin: 0; background: #0B0B0B; }
 body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
@@ -10,8 +14,10 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
   --scc-bg: #0B0B0B; --scc-surface: #161616; --scc-surface-2: #1E1E1E;
   --scc-text: #F5F5F7; --scc-text-2: #B5B5B8; --scc-text-3: #86868B;
   --scc-line: rgba(255,255,255,.10); --scc-on-accent: #FFFFFF;
+  --scc-r-pill: var(--scout-radius-pill, 980px); --scc-r-card: var(--scout-radius-card, 18px);
+  --scc-r-control: var(--scout-radius-control, 12px); --scc-r-chip: var(--scout-radius-chip, 8px);
   display: block; min-height: 100vh; background: var(--scc-bg); color: var(--scc-text);
-  font-family: var(--scc-font, inherit); font-size: 16px; line-height: 1.5;
+  font-family: var(--scc-font, var(--scout-font-body, var(--font-sans, inherit))); font-size: 16px; line-height: 1.5;
   -webkit-font-smoothing: antialiased; text-align: left;
 }
 .scc[data-mode="light"] {
@@ -28,7 +34,7 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-wrap { max-width: 480px; margin: 0 auto; padding: 28px 16px 40px; display: flex; flex-direction: column; gap: 18px; }
 .scc-brand { align-self: center; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
 
-.scc-card { background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: 18px; padding: 28px 22px 22px; text-align: center; }
+.scc-card { background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: var(--scc-r-card); padding: 28px 22px 22px; text-align: center; }
 .scc-avatar { width: 112px; height: 112px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto 16px; border: 2px solid var(--scc-line); }
 .scc-logo { object-fit: contain; background: #fff; padding: 10px; }
 .scc-avatar-mark { display: grid; place-items: center; background: var(--scc-accent); color: var(--scc-on-accent); font-size: 44px; font-weight: 600; border: 0; }
@@ -38,11 +44,11 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-intro { color: var(--scc-text-2); margin: 14px 0 20px !important; font-size: 16px; line-height: 1.55; text-wrap: pretty; }
 .scc-intro-last { margin-bottom: 0 !important; }
 
-.scc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; border-radius: 980px; background: var(--scc-accent); color: var(--scc-on-accent) !important; font-weight: 600; font-size: 16px; transition: filter .15s ease, transform .15s ease; }
+.scc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; border-radius: var(--scc-r-pill); background: var(--scc-accent); color: var(--scc-on-accent) !important; font-weight: 600; font-size: 16px; transition: filter .15s ease, transform .15s ease; }
 .scc-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
 .scc-actions { display: flex; gap: 8px; margin: 12px 0 18px; }
-.scc-actions a { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; border-radius: 12px; background: var(--scc-surface-2); font-size: 13px; font-weight: 500; transition: color .15s ease, transform .15s ease; }
+.scc-actions a { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; border-radius: var(--scc-r-control); background: var(--scc-surface-2); font-size: 13px; font-weight: 500; transition: color .15s ease, transform .15s ease; }
 .scc-actions a:hover { color: var(--scc-accent); transform: translateY(-1px); }
 
 .scc-details { text-align: left; border-top: 1px solid var(--scc-line); }
@@ -52,7 +58,7 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 
 .scc-pick { display: flex; flex-direction: column; gap: 10px; }
 .scc-pick h2 { font-size: 20px; letter-spacing: -0.02em; margin: 6px 2px 2px; }
-.scc-person { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: 18px; transition: border-color .15s ease, transform .15s ease; }
+.scc-person { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: var(--scc-r-card); transition: border-color .15s ease, transform .15s ease; }
 .scc-person:hover { border-color: var(--scc-accent); transform: translateY(-1px); }
 .scc-person-photo { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: none; }
 .scc-person-photo.scc-avatar-mark { font-size: 26px; }
@@ -60,14 +66,14 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-person-body strong { font-weight: 600; font-size: 17px; }
 .scc-person-pick { color: var(--scc-text-2); font-size: 14.5px; line-height: 1.45; text-wrap: pretty; }
 .scc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.scc-tags span { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.1px; color: var(--scc-accent); border: 1px solid var(--scc-line); border-radius: 8px; padding: 3px 7px; }
+.scc-tags span { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.1px; color: var(--scc-accent); border: 1px solid var(--scc-line); border-radius: var(--scc-r-chip); padding: 3px 7px; }
 .scc-person > svg, .scc-link > svg { color: var(--scc-text-3); }
 
 .scc-spot { display: flex; flex-direction: column; gap: 10px; }
 .scc-spot h2 { font-size: 20px; letter-spacing: -0.02em; margin: 6px 2px 0; text-wrap: balance; }
 .scc-spot-text { color: var(--scc-text-2); margin: 0 2px 4px !important; font-size: 16px; line-height: 1.6; text-wrap: pretty; }
 /* Note panel and spotlight link: the card's one rich moment, tinted with the client's accent. */
-.scc-spot.is-note { position: relative; gap: 14px; padding: 26px 22px 22px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--scc-accent) 30%, transparent); background: radial-gradient(120% 70% at 100% 0%, color-mix(in srgb, var(--scc-accent) 20%, transparent), transparent 60%), var(--scc-surface); overflow: hidden; }
+.scc-spot.is-note { position: relative; gap: 14px; padding: 26px 22px 22px; border-radius: var(--scc-r-card); border: 1px solid color-mix(in srgb, var(--scc-accent) 30%, transparent); background: radial-gradient(120% 70% at 100% 0%, color-mix(in srgb, var(--scc-accent) 20%, transparent), transparent 60%), var(--scc-surface); overflow: hidden; }
 .scc-spot.is-note::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--scc-accent), transparent); }
 .scc-spot-eyebrow { color: var(--scc-accent); font-size: 11.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; }
 .scc-spot.is-note h2 { font-size: 26px; line-height: 1.12; letter-spacing: -0.03em; margin: 0; }
@@ -88,7 +94,7 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 .scc-backlink { text-align: center; color: var(--scc-accent) !important; font-size: 15px; }
 
 .scc-share { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.scc-share-btn { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--scc-line); color: var(--scc-text); border-radius: 980px; padding: 10px 18px; font: inherit; font-size: 15px; cursor: pointer; }
+.scc-share-btn { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--scc-line); color: var(--scc-text); border-radius: var(--scc-r-pill); padding: 10px 18px; font: inherit; font-size: 15px; cursor: pointer; }
 .scc-share-btn:hover { border-color: var(--scc-accent); color: var(--scc-accent); }
 .scc-qr { text-align: center; }
 .scc-qr summary { cursor: pointer; color: var(--scc-accent); font-size: 14px; list-style: none; }
@@ -101,7 +107,7 @@ body.scc-page:has(.scc[data-mode="light"]) { background: #F5F5F7; }
 /* Themes often style every <nav> (a centered header row). Keep the list full width either way. */
 .scc nav.scc-linklist { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; }
 .scc nav.scc-linklist > a.scc-link { width: 100%; margin: 0; color: inherit; font-size: inherit; font-weight: inherit; text-transform: none; letter-spacing: normal; }
-.scc-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: 18px; transition: border-color .15s ease, transform .15s ease; }
+.scc-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; background: var(--scc-surface); border: 1px solid var(--scc-line); border-radius: var(--scc-r-card); transition: border-color .15s ease, transform .15s ease; }
 .scc-link:hover { border-color: var(--scc-accent); transform: translateY(-1px); }
 .scc-link > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .scc-link strong { font-weight: 600; font-size: 16px; }

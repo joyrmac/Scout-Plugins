@@ -1,5 +1,11 @@
 # Scout Reviews: Changelog
 
+## 0.5.13 (2026-11-05)
+
+- **The stylesheet reads the `--scout-*` design tokens** (Client Design Playbook, decision 3: one variable name standard for every Scout plugin stylesheet). `--scout-surface`, `--scout-line`, `--scout-text-2`, `--scout-font-label` and `--scout-radius-card` come first in each `var()` chain; the theme's older `--surface`, `--line`, `--text-2`, `--text-3`, `--accent-text`, `--font-mono` and `--r-card` stay as the fallback for one release, so a theme that has not run the design build looks the same as before.
+- **Links use the accent fill.** Scout Core does not write an accent-text token yet, so the link color reads `--scout-accent-text`, then `--scout-accent-fill` (the button fill, which already passes 4.5:1 on the surface), then the theme's `--accent-text`. Scout Core writes no text-3 token either, so faint text (dates, the disclaimer) is the muted text color thinned to 75% when the theme has no `--text-3`.
+- README: the Design section names the `--scout-*` variables.
+
 ## 0.5.12 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** The private note form asks for no email, so WordPress's privacy tools cannot find a note. The list now says to delete one by hand in New reviews. No code changed.

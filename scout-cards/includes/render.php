@@ -38,7 +38,15 @@ final class Scout_Cards_Render {
 
 		$bg     = 'light' === $s['mode'] ? '#F5F5F7' : '#0B0B0B';
 		$accent = sanitize_hex_color( $s['accent'] ) ? sanitize_hex_color( $s['accent'] ) : '#0E8FE6';
-		$font   = $s['font'] ? $s['font'] : 'inherit';
+		// The brand variables. A blank Font setting prints nothing, so the stylesheet
+		// falls through to the theme's --scout-font-body. The font is a CSS font list,
+		// so it keeps its quotes and commas and loses everything else (same allowlist
+		// as Scout_Core_Design::css()); esc_html() would turn the quotes into entities,
+		// which a <style> block does not decode.
+		$vars = '--scc-accent:' . $accent;
+		if ( $s['font'] ) {
+			$vars .= ';--scc-font:' . preg_replace( '/[^\w\s,"\'-]/', '', (string) $s['font'] );
+		}
 		?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -69,7 +77,7 @@ final class Scout_Cards_Render {
 <link rel="apple-touch-icon" href="<?php echo esc_url( get_site_icon_url( 180 ) ); ?>">
 <?php endif; ?>
 <?php endif; ?>
-<style>.scc{--scc-accent:<?php echo esc_html( $accent ); ?>;--scc-font:<?php echo esc_html( $font ); ?>}</style>
+<style>.scc{<?php echo $vars; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a hex color and an allowlisted font list, built above. ?>}</style>
 <?php wp_head(); ?>
 </head>
 <body <?php body_class( 'scc-page ' . $body_class ); ?>>

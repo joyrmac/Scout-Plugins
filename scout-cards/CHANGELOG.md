@@ -1,5 +1,12 @@
 # Scout Cards changelog
 
+## 1.0.28 (2026-11-05)
+
+- **The stylesheet reads the `--scout-*` design tokens where it reads the theme at all** (Client Design Playbook, decision 3: one variable name standard for every Scout plugin stylesheet). With the Font setting blank, the card uses `--scout-font-body`, then the theme's older `--font-sans` as a fallback for one release, then the inherited font as before. Corners read `--scout-radius-pill`, `--scout-radius-card`, `--scout-radius-control` and `--scout-radius-chip`, each with its old fixed value as the fallback.
+- **The accent color and the light or dark mode stay settings.** The card's palette is picked per card, not per theme, so the sheet reads no theme color tokens. Before this release it read none either: its only inputs were the inline `--scc-accent` and `--scc-font` from the Cards and links screen.
+- **A Font setting with quotes now works.** The card printed the font list through HTML escaping, so `"Hanken Grotesk", sans-serif` reached the browser as entities inside the style block and the font fell back. The value is now filtered to the characters a CSS font list uses (letters, digits, spaces, commas, quotes and hyphens) and printed as is.
+- README: the brand bullet names the `--scout-*` variables.
+
 ## 1.0.27 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

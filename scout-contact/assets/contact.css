@@ -1,22 +1,29 @@
 /* Scout Call Buttons. Design: Scout features DESIGN.md 5.9 (screen 4b).
-   Reads the site's tokens when they exist (Scout themes) and falls back to
-   the Scout dark palette, so a client theme can restyle it with --scc-*. */
+   Reads the Scout design tokens (--scout-surface, --scout-text, --scout-accent,
+   --scout-accent-fill and the rest), as written by the theme's design build
+   (tools/design-build.php) or Scout_Core_Design::css(). The theme's older names
+   (--surface, --text, --accent, --accent-fill...) still work as a fallback for
+   one release. With neither, it falls back to the Scout dark palette. A client
+   theme can restyle it with --scc-*. */
 .scc {
-  --scc-surface: var(--surface, #161616); --scc-surface-2: var(--surface-2, #1E1E1E);
-  --scc-text: var(--text, #F5F5F7); --scc-text-2: var(--text-2, #B5B5B8);
-  --scc-line: var(--line, rgba(255,255,255,.10)); --scc-accent: var(--accent, #0E8FE6);
-  --scc-fill: var(--accent-fill, #0A78C2); --scc-on: var(--on-accent, #FFFFFF); --scc-accent-text: var(--accent-text, #5FB8F2);
-  --scc-mono: var(--font-mono, 'Geist Mono', ui-monospace, Menlo, monospace);
-  font: 16px/1.4 var(--font-sans, 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif);
+  --scc-surface: var(--scout-surface, var(--surface, #161616)); --scc-surface-2: var(--scout-surface-2, var(--surface-2, #1E1E1E));
+  --scc-text: var(--scout-text, var(--text, #F5F5F7)); --scc-text-2: var(--scout-text-2, var(--text-2, #B5B5B8));
+  --scc-line: var(--scout-line, var(--line, rgba(255,255,255,.10))); --scc-accent: var(--scout-accent, var(--accent, #0E8FE6));
+  --scc-fill: var(--scout-accent-fill, var(--accent-fill, #0A78C2)); --scc-on: var(--scout-on-accent, var(--on-accent, #FFFFFF));
+  /* Scout Core writes no accent-text token yet: accent text uses the accent fill, which already passes 4.5:1 on the surface. */
+  --scc-accent-text: var(--scout-accent-text, var(--scout-accent-fill, var(--accent-text, #5FB8F2)));
+  --scc-mono: var(--scout-font-label, var(--font-mono, 'Geist Mono', ui-monospace, Menlo, monospace));
+  --scc-r-pill: var(--scout-radius-pill, 980px); --scc-r-card: var(--scout-radius-card, 18px); --scc-r-control: var(--scout-radius-control, 12px);
+  font: 16px/1.4 var(--scout-font-body, var(--font-sans, 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif));
 }
 .scc *, .scc *::before, .scc *::after { box-sizing: border-box; }
 .scc-bar {
   position: fixed; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 9997;
-  display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 980px;
+  display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: var(--scc-r-pill);
   background: rgba(30,30,30,.85); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
   border: 1px solid rgba(255,255,255,.10); box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
-.scc-btn, .scc-main { min-height: 48px; border-radius: 980px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; }
+.scc-btn, .scc-main { min-height: 48px; border-radius: var(--scc-r-pill); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; }
 .scc-btn { flex: 1 1 0; color: #F5F5F7; padding: 0 14px; }
 .scc-btn svg { color: var(--scc-accent-text); }
 .scc-btn:hover, .scc-btn:focus-visible { background: rgba(255,255,255,.08); color: #F5F5F7; }
@@ -43,10 +50,10 @@
 .scc-titles p { margin: 4px 0 0; color: var(--scc-text-2); font-size: 15px; }
 .scc-close { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--scc-line); background: transparent; color: var(--scc-text-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .scc-opts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.scc-opt { display: flex; align-items: center; gap: 14px; padding: 14px; min-height: 72px; border-radius: 18px; background: var(--scc-surface-2); border: 1px solid transparent; color: var(--scc-text); text-decoration: none; }
+.scc-opt { display: flex; align-items: center; gap: 14px; padding: 14px; min-height: 72px; border-radius: var(--scc-r-card); background: var(--scc-surface-2); border: 1px solid transparent; color: var(--scc-text); text-decoration: none; }
 .scc-opt:hover, .scc-opt:focus-visible { border-color: var(--scc-accent); color: var(--scc-text); }
 .scc-opt.is-book { border-color: var(--scc-accent); }
-.scc-n { flex: none; width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font: 500 15px/1 var(--scc-mono); color: var(--scc-accent-text); background: rgba(14,143,230,.14); }
+.scc-n { flex: none; width: 44px; height: 44px; border-radius: var(--scc-r-control); display: inline-flex; align-items: center; justify-content: center; font: 500 15px/1 var(--scc-mono); color: var(--scc-accent-text); background: rgba(14,143,230,.14); }
 .scc-opt.is-book .scc-n { background: var(--scc-fill); color: var(--scc-on); }
 .scc-txt { display: flex; flex-direction: column; gap: 2px; }
 .scc-txt strong { font-weight: 600; font-size: 17px; }

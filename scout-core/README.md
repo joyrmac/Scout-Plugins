@@ -218,6 +218,16 @@ Order of truth: Scout's defaults, then the active theme's `theme.json`
 palette and fonts, then the parent theme's `DESIGN.md`, then the child's. A
 theme without DESIGN.md still gets sensible tokens.
 
+**The variable name standard (Client Design Playbook, decision 3, Joy
+2026-11-05):** plugin stylesheets read `--scout-*` only, the names
+`tools/design-build.php` writes to the theme's `assets/css/design-tokens.css`
+and `scout_design_css()` prints. A theme's own names (`--surface`, `--accent`,
+`--font-mono`, `--r-card` and the like) may sit after the `--scout-*` name in a
+`var()` chain as a fallback for one release while the theme catches up, then
+go. Scout Core writes no `accent-text` or `text-3` token: a plugin that needs
+accent-colored text reads `--scout-accent-fill`, and derives faint text from
+`--scout-text-2`.
+
 `scout_core_owns( 'hours' )` tells a theme whether a plugin does a job on this
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours
 line runs only while `! scout_core_owns( 'hours' )`.

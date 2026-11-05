@@ -1,5 +1,12 @@
 # Scout Call Buttons changelog
 
+## 0.1.18 (2026-11-05)
+
+- **The stylesheet reads the `--scout-*` design tokens** (Client Design Playbook, decision 3: one variable name standard for every Scout plugin stylesheet). `--scout-surface`, `--scout-surface-2`, `--scout-text`, `--scout-text-2`, `--scout-line`, `--scout-accent`, `--scout-accent-fill`, `--scout-on-accent`, `--scout-font-body` and `--scout-font-label` come first in each `var()` chain; the theme's older `--surface`, `--text`, `--accent`, `--accent-fill`, `--font-sans` and `--font-mono` names stay as the fallback for one release, so a theme that has not run the design build looks the same as before.
+- **Accent text uses the accent fill.** Scout Core does not write an accent-text token yet, so the icon and number color reads `--scout-accent-text`, then `--scout-accent-fill` (the button fill, which already passes 4.5:1 on the surface), then the theme's `--accent-text`.
+- **Radii follow the theme.** The bar and buttons read `--scout-radius-pill`, the sheet rows `--scout-radius-card` and the number badges `--scout-radius-control`, each with its old fixed value as the fallback.
+- README: the Restyle line names the `--scout-*` variables.
+
 ## 0.1.17 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

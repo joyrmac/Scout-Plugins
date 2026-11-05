@@ -13,7 +13,7 @@ Design: Scout features DESIGN.md 5.9 (screen 4b).
 - **Tracking:** with Scout Analytics on, taps send `contact_call`, `contact_text`, `contact_book`, `contact_open`.
   In Tag Manager, widen the click trigger regex to `^(card|links|contact)_`.
 - **Filter:** `scout_contact_active` (bool) turns the bar on or off for the current page.
-- **Restyle:** the sheet reads the theme's `--surface`, `--text`, `--accent` and `--accent-fill` tokens when they exist.
+- **Restyle:** the sheet reads the Scout design tokens: `--scout-surface`, `--scout-surface-2`, `--scout-text`, `--scout-text-2`, `--scout-line`, `--scout-accent`, `--scout-accent-fill`, `--scout-on-accent`, `--scout-font-body`, `--scout-font-label` and the `--scout-radius-*` set. Accent text reads `--scout-accent-fill` until Scout Core writes `--scout-accent-text`. The theme's design build (`php tools/design-build.php <theme>`) writes these to `assets/css/design-tokens.css`. The older theme names (`--surface`, `--text`, `--accent`, `--accent-fill`...) still work as a fallback for one release. Override any `--scc-*` variable on `.scc` to restyle by hand.
 
 <!-- visitor-data:start -->
 ## Visitor data

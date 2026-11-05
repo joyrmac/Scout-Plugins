@@ -25,8 +25,13 @@ No WordPress Pages are needed; the plugin owns these addresses. The words
 - **Dashboard:** Scout -> **Cards and links** when Scout Core is active, otherwise a
   top-level **Site Build** section (the dashboard standard in the Scout playbook).
 - **Matches each brand:** the page loads the theme's stylesheet, so the card uses
-  the site's own font. The accent color and light or dark mode are settings.
-  Card components are styled under `.scc`, so theme CSS cannot reshape them.
+  the site's own font: with the Font setting blank, the sheet reads the Scout
+  design token `--scout-font-body` (the theme's older `--font-sans` as a
+  fallback for one release, then the inherited font). Corners read
+  `--scout-radius-pill`, `--scout-radius-card`, `--scout-radius-control` and
+  `--scout-radius-chip`. The accent color and light or dark mode are settings
+  on purpose, so the sheet reads no theme color tokens. Card components are
+  styled under `.scc`, so theme CSS cannot reshape them.
 - **SEO:** the card pages print their own title, canonical, and robots tags and
   switch off Scout Core's head output there, so no page gets a wrong canonical.
 

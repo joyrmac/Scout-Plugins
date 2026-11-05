@@ -133,10 +133,15 @@ review deleted on Google comes off the site on the next sync.
 
 ## Design
 
-The stylesheet reads Scout design tokens when the theme has them (`--surface`,
-`--line`, `--text-2`, `--accent-text`, `--font-mono`, `--r-card`) and
-otherwise mixes colors from the page's text color, so it fits light and dark
-themes. To restyle:
+The stylesheet reads the Scout design tokens, `--scout-surface`, `--scout-line`,
+`--scout-text-2`, `--scout-accent-fill` (for links, until Scout Core writes
+`--scout-accent-text`), `--scout-font-label` and `--scout-radius-card`. The
+theme's design build (`php tools/design-build.php <theme>`) writes them to
+`assets/css/design-tokens.css`, and `scout_design_css()` prints the same block.
+The older theme names (`--surface`, `--line`, `--text-2`, `--text-3`,
+`--accent-text`, `--font-mono`, `--r-card`) still work as a fallback for one
+release. With neither, the sheet mixes colors from the page's text color, so it
+fits light and dark themes. To restyle:
 
 - Override the `--sr-*` variables on `.scout-reviews`.
 - Replace markup by copying `templates/section.php`, `summary.php`, or

@@ -1,23 +1,28 @@
 /*
  * Scout Reviews: default design.
  *
- * Reads the Scout design tokens when the theme defines them (--surface,
- * --line, --text-2, --accent-text, --font-mono, --r-card), and falls back to
- * colors mixed from the text color, so it sits correctly on any light or dark
- * theme. Override any --sr-* variable on .scout-reviews to restyle.
+ * Reads the Scout design tokens (--scout-surface, --scout-line, --scout-text-2,
+ * --scout-accent-fill, --scout-font-label, --scout-radius-card), as written by
+ * the theme's design build (tools/design-build.php) or Scout_Core_Design::css().
+ * The theme's older names (--surface, --line, --text-2, --text-3, --accent-text,
+ * --font-mono, --r-card) still work as a fallback for one release. With neither,
+ * colors are mixed from the text color, so it sits correctly on any light or
+ * dark theme. Override any --sr-* variable on .scout-reviews to restyle.
  */
 
 .scout-reviews,
 .scout-reviews-summary {
-	--sr-surface: var(--surface, color-mix(in srgb, currentColor 4%, transparent));
-	--sr-line: var(--line, color-mix(in srgb, currentColor 12%, transparent));
-	--sr-muted: var(--text-2, color-mix(in srgb, currentColor 68%, transparent));
-	--sr-faint: var(--text-3, color-mix(in srgb, currentColor 50%, transparent));
-	--sr-link: var(--accent-text, #0a6fb4);
+	--sr-surface: var(--scout-surface, var(--surface, color-mix(in srgb, currentColor 4%, transparent)));
+	--sr-line: var(--scout-line, var(--line, color-mix(in srgb, currentColor 12%, transparent)));
+	--sr-muted: var(--scout-text-2, var(--text-2, color-mix(in srgb, currentColor 68%, transparent)));
+	/* Scout Core writes no text-3 token: faint text is the muted color, thinned. */
+	--sr-faint: var(--text-3, color-mix(in srgb, var(--sr-muted) 75%, transparent));
+	/* Scout Core writes no accent-text token yet: links use the accent fill, which already passes 4.5:1 on the surface. */
+	--sr-link: var(--scout-accent-text, var(--scout-accent-fill, var(--accent-text, #0a6fb4)));
 	--sr-star: #fbb024;
 	--sr-star-empty: color-mix(in srgb, currentColor 18%, transparent);
-	--sr-mono: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace);
-	--sr-radius: var(--r-card, 18px);
+	--sr-mono: var(--scout-font-label, var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace));
+	--sr-radius: var(--scout-radius-card, var(--r-card, 18px));
 	--sr-gap: 20px;
 }
 
