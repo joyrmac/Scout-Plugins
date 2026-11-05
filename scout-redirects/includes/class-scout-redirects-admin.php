@@ -382,7 +382,7 @@ final class Scout_Redirects_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Moved pages', 'scout-redirects' ),
-			__( 'Send visitors from an old page address to the new one, and catch missing pages people try to open.', 'scout-redirects' ),
+			__( 'A redirect sends visitors from an old page address to the new one. Missing pages people try show here too.', 'scout-redirects' ),
 			__( 'Moved pages', 'scout-redirects' )
 		);
 		self::messages();
