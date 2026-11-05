@@ -442,11 +442,14 @@ final class Scout_Team {
 	 * @param array  $p      Profile in the full shape.
 	 * @param bool   $photo  Has a photo (featured image).
 	 * @param string $status Post status.
+	 * @param bool   $alt    The photo has alt text set in the media library.
 	 */
-	public static function look_reasons( array $p, bool $photo, string $status ): array {
+	public static function look_reasons( array $p, bool $photo, string $status, bool $alt = true ): array {
 		$out = array();
 		if ( ! $photo ) {
 			$out['photo'] = __( 'No photo', 'scout-team' );
+		} elseif ( ! $alt ) {
+			$out['alt'] = __( 'Photo needs alt text', 'scout-team' );
 		}
 		$n = self::unsourced( $p );
 		if ( $n ) {
@@ -460,13 +463,15 @@ final class Scout_Team {
 	}
 
 	/**
-	 * Why this person needs a look: no photo, a credential line with no source,
-	 * or not live yet.
+	 * Why this person needs a look: no photo, a photo with no alt text, a
+	 * credential line with no source, or not live yet.
 	 *
 	 * @param int $post_id Person post ID.
 	 */
 	public static function needs_look( int $post_id ): array {
-		return self::look_reasons( self::profile( $post_id ), has_post_thumbnail( $post_id ), (string) get_post_status( $post_id ) );
+		$thumb = (int) get_post_thumbnail_id( $post_id );
+		$alt   = $thumb && '' !== trim( (string) get_post_meta( $thumb, '_wp_attachment_image_alt', true ) );
+		return self::look_reasons( self::profile( $post_id ), $thumb > 0, (string) get_post_status( $post_id ), $alt );
 	}
 
 	/**

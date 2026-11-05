@@ -9,6 +9,8 @@
  * the plugin prints its own small graph on profile pages.
  *
  * Military service has no schema.org property, so it shows on the page only.
+ * The Person is built from Scout_Team::public_profile(): card only contact
+ * never goes in, and neither does a credential line without a source.
  *
  * @package Scout_Team
  */
@@ -39,14 +41,16 @@ final class Scout_Team_Schema {
 	 * @param int $post_id Team member post ID.
 	 */
 	public static function person( int $post_id ): array {
-		$p    = Scout_Team::profile( $post_id );
-		$url  = get_permalink( $post_id );
+		$p    = Scout_Team::public_profile( Scout_Team::profile( $post_id ) );
 		$node = array(
 			'@type' => 'Person',
 			'@id'   => self::person_id( $post_id ),
 			'name'  => html_entity_decode( wp_strip_all_tags( get_the_title( $post_id ) ), ENT_QUOTES, 'UTF-8' ),
-			'url'   => $url,
 		);
+		// No profile page for visitors: no address to point at.
+		if ( Scout_Team::shows( $p, 'bio' ) ) {
+			$node['url'] = get_permalink( $post_id );
+		}
 		if ( '' !== $p['role'] ) {
 			$node['jobTitle'] = $p['role'];
 		}
@@ -129,10 +133,10 @@ final class Scout_Team_Schema {
 
 		if ( $p['memberships'] ) {
 			$node['memberOf'] = array_map(
-				static function ( $name ) {
+				static function ( $row ) {
 					return array(
 						'@type' => 'Organization',
-						'name'  => $name,
+						'name'  => $row['name'],
 					);
 				},
 				$p['memberships']

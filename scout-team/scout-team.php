@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       Scout Team
- * Description:       Team profiles with real credentials: role, photo, short bio, bar admissions, education, memberships, awards, military service, languages and profile links. Each person gets a profile page and Person schema, and a grid shortcode shows the whole team.
+ * Plugin Name:       Scout People
+ * Description:       One profile for each person the public sees: your team, speakers, writers and members who want to be listed. Sort people into groups and choose where each one shows: a profile page, the team page, a byline, a business card. Credentials show where they came from, and each person gets Person schema.
  * Version:           0.1.14
  * Requires at least: 6.5
  * Requires PHP:      8.0
@@ -39,17 +39,20 @@ require_once __DIR__ . '/includes/class-scout-team-editor.php';
 require_once __DIR__ . '/includes/class-scout-team-front.php';
 require_once __DIR__ . '/includes/class-scout-team-schema.php';
 require_once __DIR__ . '/includes/class-scout-team-admin.php';
+require_once __DIR__ . '/includes/class-scout-team-changes.php';
 
 Scout_Team::boot();
 Scout_Team_Editor::boot();
 Scout_Team_Front::boot();
 Scout_Team_Schema::boot();
 Scout_Team_Admin::boot();
+Scout_Team_Changes::boot();
 
 register_activation_hook(
 	__FILE__,
 	static function () {
 		Scout_Team::register_post_type();
+		Scout_Team::register_taxonomy();
 		flush_rewrite_rules();
 	}
 );
