@@ -133,6 +133,8 @@ jobs:
         run: php tools/tests/people.php
       - name: Business cards read from People (no WordPress needed)
         run: php tools/tests/cards-people.php
+      - name: Cards take over from a theme that made its own (no WordPress needed)
+        run: php tools/tests/cards-theme-import.php
       - name: Privacy export and erase tools (no WordPress needed)
         run: php tools/tests/privacy-tools.php
       - name: Booking busy times from the owner's calendar (no WordPress needed)

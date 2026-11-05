@@ -48,6 +48,9 @@ final class Scout_Cards_Render_Theme {
 				// The theme showed the team photo only when one was chosen, else its bolt mark.
 				$p['photo'] = (int) $p['photo_id'] ? $p['photo'] : '';
 				$p['pick_heading'] = $s['pick_heading'];
+			} elseif ( '' === $p['photo'] ) {
+				// No photo on the card or in People: the theme's own photo for that link name, as the theme's cards used.
+				$p['photo'] = self::theme_img( 'team-' . sanitize_file_name( $k ) . '.webp' );
 			}
 			if ( $p['spot'] ) {
 				$p['spot']['external'] = '' !== $p['spot']['href'] && 0 !== strpos( $p['spot']['url'], '/' );

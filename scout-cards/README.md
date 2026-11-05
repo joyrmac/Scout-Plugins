@@ -126,6 +126,32 @@ recorded by the `scout_cards_people_db` option:
    People that has the Business card box. Sites already past the first move run only
    this step. The note says how many profiles got them.
 
+## Moving from a theme's own cards
+
+The Scout Media theme drew its own cards before this plugin (`inc/card.php`, the
+`scout_cards` option). Scout Cards stands down while the theme still draws them (its
+`scout_cards_admin_page()` and `scout_card_people()` are both loaded); filter
+`scout_cards_theme_has_cards` to decide. Scout Media 1.54.0 and later load their cards
+only while this plugin is off, so activating the plugin takes over, with nothing
+changing for visitors (Site Standard rule 20):
+
+1. **The one-time copy** (`includes/theme-import.php`, gated by `scout_cards_theme_import`)
+   reads what the theme's cards showed and fills only empty plugin settings. A value that
+   matches Business info stays empty. Each theme card person becomes a card record, and the
+   People move links it to a People profile. The theme's option is left alone.
+2. **The theme's own card look** (`includes/render-theme.php`, setting `look` = `theme`)
+   prints the theme's card markup, styled by the theme's own stylesheet, and hands the
+   title, description, canonical and robots to the theme's head through
+   `$GLOBALS['scout_seo']`. It renders as the page template, and loads the card and links
+   addresses as the theme's `/card/` and `/links/` Pages, so head tags and body classes
+   match. It is on only while the theme keeps `scout_card_settings()`; switch to the Scout
+   Cards look under More options.
+3. **Photos:** a person's photo comes from People. With no photo there, the theme look uses
+   the theme's own `assets/img/team-<link name>.webp`, and the contact file uses
+   `assets/img/card-photo-<link name>.jpg`, as the theme's cards did.
+
+Release order: Scout Cards first (it rests while the old theme runs), then the theme.
+
 ## Settings
 
 One option, `scout_cards_settings`. Blank fields fall back to Scout Core's
@@ -139,6 +165,8 @@ the option.
 - `includes/routes.php`: rewrite rules and dispatch
 - `includes/vcard.php`: the vCard builder and photo conversion
 - `includes/render.php`: the card, share, links pages, and the web app manifest
+- `includes/render-theme.php`, `includes/theme-template.php`: the theme's own card look
+- `includes/theme-import.php`: the one-time copy from the theme's card settings
 - `includes/admin.php`: the Cards and links screen
 - `assets/cards.css`: card styles (scoped to `.scc`)
 - `assets/qrcode.min.js`: qrcode-generator 1.4.4 by Kazuhiko Arase (MIT)
