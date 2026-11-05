@@ -24,20 +24,20 @@ person came to do, and the menu stays the same on every site.
 | Group key | Label | Who sees it | What goes here | The test question |
 |---|---|---|---|---|
 | `overview` | Home | everyone | The first screen: what needs you today, site health at a glance, this month's numbers, shortcuts | Is this the first thing a person should see? |
-| `inbox` | Inbox | everyone | Anything a person sent, or anything waiting on a person: chat questions, new reviews, change requests and their status, site check requests, booking requests | Did someone send this, or is it waiting on someone? |
+| `inbox` | To do (was Inbox) | everyone | Anything a person sent, or anything waiting on a person: chat questions, new reviews, change requests and their status, site check requests, booking requests | Did someone send this, or is it waiting on someone? |
 | `reports` | Reports | owner, operator | Recon's numbers and reports (shows only when Recon is on) | Is this Recon data? |
-| `business` | Your business | everyone | Facts typed once that show up everywhere: Business info, Hours, Case results, a companion plugin's own content types | Is this a fact about the business? |
+| `business` | Business | everyone | Facts typed once that show up everywhere: Business info, Hours, Case results, a companion plugin's own content types | Is this a fact about the business? |
 | `people` | People | everyone | One profile per person the public sees: the team, speakers, writers and members who chose to be listed. Bio pages, the team page, bylines, speaker pages and business cards read from it (kit 1.11.0, Joy 2026-11-05) | Is this about a person? |
-| `website` | Your website | owner, operator | What visitors see and use: Call buttons, Chat and its settings, Reviews on the site, Ask for reviews, Cards and links, Newsletter, Redirects | Is this something visitors see or use? |
-| `search` | Get found | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, site search and the sitemap | Does this help Google, AI tools or visitors find things? |
-| `policies` | Policies | owner, operator | Trust and legal pages reviewed every year: accessibility statement, law-firm disclaimers (Scout Law Firm Tools), and later the privacy policy and terms | Is this a trust or legal page? |
-| `health` | Site health | owner, operator | Reports on whether things are working: the health report, Search health, Spam protection, the image optimizer, accessibility checks | Does this tell us if something is working? |
+| `website` | Site features | owner, operator | What visitors see and use: Call buttons, Chat and its settings, Reviews on the site, Ask for reviews, Cards and links, Newsletter, Redirects | Is this something visitors see or use? |
+| `search` | Search | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, site search and the sitemap | Does this help Google, AI tools or visitors find things? |
+| `policies` | Legal pages | owner, operator | Trust and legal pages reviewed every year: accessibility statement, law-firm disclaimers (Scout Law Firm Tools), and later the privacy policy and terms | Is this a trust or legal page? |
+| `health` | Site status | owner, operator | Reports on whether things are working: the health report, Search health, Spam protection, the image optimizer, accessibility checks | Does this tell us if something is working? |
 | `build` | Scout tools (Build tools on white-label sites) | operators only | Features and plan, Updates, Site log, Email, Site Sync, the Change log, a theme's own screen. The client's own "What's new on your site" view of the Site log sits under Home. | Is this only for Sean and Joy? |
 
 Plus modules are not in this menu. Each one is its own sidebar section (see
 "Plus sections" below).
 
-Keys stay stable even when labels change, so filters keep working. The retired
+Labels renamed 2026-11-05 to plain words (Joy; voice rules in `tools/admin-kit/DESIGN.md` 2a). Older notes below may use the old names. Keys stay stable even when labels change, so filters keep working. The retired
 key `content` maps to `website`.
 
 ### Placements Joy decided (2026-11-04)

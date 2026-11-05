@@ -13,7 +13,7 @@
  *   Scout_Admin_UI::close();
  *
  * open() also prints the section nav, read live from WordPress's own menu: a
- * short row of groups (Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health, Scout tools) with the open
+ * short row of groups (Home, To do, Reports, Business, People, Site features, Search, Legal pages, Site status, Scout tools) with the open
  * group's screens as tabs underneath. Every Scout screen shows the same nav,
  * and a new plugin lands in the right group without anyone editing a list
  * (scout_admin_nav_group moves a screen to another group).
@@ -367,19 +367,19 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/**
 		 * The nav groups, in the order they show (dashboard redesign, Joy 2026-11-04).
 		 * Keys stay stable so filters keep working: overview is shown as Home, search
-		 * as Get found, build as Scout tools. Plus modules (Bookings, Events, Members,
+		 * as Search, build as Scout tools. Plus modules (Bookings, Events, Members,
 		 * Partners, Writing room) keep their own sidebar sections and are not listed here.
 		 */
 		const GROUPS = array(
 			'overview' => 'Home',
-			'inbox'    => 'Inbox',
+			'inbox'    => 'To do',
 			'reports'  => 'Reports',
-			'business' => 'Your business',
+			'business' => 'Business',
 			'people'   => 'People',
-			'website'  => 'Your website',
-			'search'   => 'Get found',
-			'policies' => 'Policies',
-			'health'   => 'Site health',
+			'website'  => 'Site features',
+			'search'   => 'Search',
+			'policies' => 'Legal pages',
+			'health'   => 'Site status',
 			'build'    => 'Scout tools',
 		);
 
@@ -402,7 +402,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/**
 		 * Groups this person does not see. Scout tools is for operators only.
 		 * Staff (anyone who cannot manage the site's settings) see Home, Inbox
-		 * and Your business, plus any Plus section they work in. The
+		 * and Business, plus any Plus section they work in. The
 		 * scout_admin_hidden_groups filter adjusts it.
 		 */
 		public static function hidden(): array {
@@ -514,7 +514,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 		/**
 		 * Shorten a long Scout sidebar menu to one link per group (Home, Inbox,
-		 * Reports, Your business, Your website, Get found, Policies, Site health,
+		 * Reports, Business, People, Site features, Search, Legal pages, Site status,
 		 * Scout tools). Every screen stays registered and
 		 * reachable; the others are hidden from the sidebar only, and the
 		 * section nav on each screen leads to them.
@@ -721,7 +721,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		/**
 		 * Where this screen sits: its section's name and screens, every group's
 		 * screens (for Find anything), and the Scout menu it belongs to. A Scout
-		 * menu is sorted into the groups (Home, Inbox, Your business...); any other
+		 * menu is sorted into the groups (Home, To do, Business...); any other
 		 * menu, like a Plus section, is one section of its own.
 		 *
 		 * @param string $current Sidebar slug to highlight; defaults to the screen being viewed.
