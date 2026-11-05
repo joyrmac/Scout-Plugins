@@ -51,8 +51,11 @@ date are kept on each result as the record.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. The grid inherits the theme's fonts and colors.
-  Custom properties on `.scout-results`: `--scout-results-surface`
+- **DESIGN.md:** the grid inherits the theme's fonts and text color.
+  Cards read the DESIGN.md roles surface, line, accent and the card corner, as
+  `--scout-surface`, `--scout-line`, `--scout-accent` and
+  `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables on `.scout-results`
+  still win when the theme sets them: `--scout-results-surface`
   (transparent), `--scout-results-border`, `--scout-results-accent`
   (`currentColor`), `--scout-results-radius` (`12px`), `--scout-results-gap`
   (`1.25rem`).

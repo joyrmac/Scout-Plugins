@@ -1,13 +1,14 @@
 /* Scout Call Buttons. Design: Scout features DESIGN.md 5.9 (screen 4b).
    Reads the site's tokens when they exist (Scout themes) and falls back to
-   the Scout dark palette, so a client theme can restyle it with --scc-*. */
+   the Scout dark palette, so a client theme can restyle it with --scc-*.
+   Order: the theme's own token, then DESIGN.md's --scout-* name, then the default. */
 .scc {
-  --scc-surface: var(--surface, #161616); --scc-surface-2: var(--surface-2, #1E1E1E);
-  --scc-text: var(--text, #F5F5F7); --scc-text-2: var(--text-2, #B5B5B8);
-  --scc-line: var(--line, rgba(255,255,255,.10)); --scc-accent: var(--accent, #0E8FE6);
-  --scc-fill: var(--accent-fill, #0A78C2); --scc-on: var(--on-accent, #FFFFFF); --scc-accent-text: var(--accent-text, #5FB8F2);
-  --scc-mono: var(--font-mono, 'Geist Mono', ui-monospace, Menlo, monospace);
-  font: 16px/1.4 var(--font-sans, 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif);
+  --scc-surface: var(--surface, var(--scout-surface, #161616)); --scc-surface-2: var(--surface-2, var(--scout-surface-2, #1E1E1E));
+  --scc-text: var(--text, var(--scout-text, #F5F5F7)); --scc-text-2: var(--text-2, var(--scout-text-2, #B5B5B8));
+  --scc-line: var(--line, var(--scout-line, rgba(255,255,255,.10))); --scc-accent: var(--accent, var(--scout-accent, #0E8FE6));
+  --scc-fill: var(--accent-fill, var(--scout-accent-fill, #0A78C2)); --scc-on: var(--on-accent, var(--scout-on-accent, #FFFFFF)); --scc-accent-text: var(--accent-text, var(--scout-accent-text, var(--scout-accent, #5FB8F2)));
+  --scc-mono: var(--font-mono, var(--scout-font-label, 'Geist Mono', ui-monospace, Menlo, monospace));
+  font: 16px/1.4 var(--font-sans, var(--scout-font-body, 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif));
 }
 .scc *, .scc *::before, .scc *::after { box-sizing: border-box; }
 .scc-bar {

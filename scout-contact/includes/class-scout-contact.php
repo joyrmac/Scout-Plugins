@@ -133,7 +133,7 @@ final class Scout_Contact {
 		}
 		// The bar is on screen from the first paint, so its styles can't load late,
 		// and a separate file held up the first paint (PageSpeed: 150 ms). The
-		// stylesheet is under 5 KB, so it prints inline in <head> instead.
+		// stylesheet is about 5 KB, so it prints inline in <head> instead.
 		$css = (string) @file_get_contents( plugin_dir_path( SCOUT_CONTACT_FILE ) . 'assets/contact.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		if ( '' !== $css && apply_filters( 'scout_contact_inline_css', true ) ) {
 			wp_register_style( 'scout-contact', false, array(), SCOUT_CONTACT_VERSION );

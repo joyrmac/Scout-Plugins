@@ -4,7 +4,9 @@
      --scout-a11y-gap      space between blocks (default 1em)
      --scout-a11y-radius   button corners (default 980px, a pill)
      --scout-a11y-border   button border color (default currentColor)
-     --scout-a11y-muted    the "last reviewed" line color (default inherits) */
+     --scout-a11y-muted    the "last reviewed" line color (default inherits)
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default. */
 
 .scout-a11y { font: inherit; color: inherit; }
 .scout-a11y > * + * { margin-top: var(--scout-a11y-gap, 1em); }
@@ -16,15 +18,15 @@
 .scout-a11y-button {
 	display: inline-flex; align-items: center; justify-content: center;
 	min-height: 44px; padding: .55em 1.4em;
-	border: 2px solid var(--scout-a11y-border, currentColor);
-	border-radius: var(--scout-a11y-radius, 980px);
+	border: 2px solid var(--scout-a11y-border, var(--scout-accent, currentColor));
+	border-radius: var(--scout-a11y-radius, var(--scout-radius-pill, 980px));
 	color: inherit; font-weight: 600; text-decoration: none;
 	overflow-wrap: anywhere; text-align: center;
 	transition: background-color .15s ease;
 }
 .scout-a11y-button:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
 .scout-a11y-button:focus-visible, .scout-a11y-link:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
-.scout-a11y-reviewed { color: var(--scout-a11y-muted, inherit); font-size: .9em; }
+.scout-a11y-reviewed { color: var(--scout-a11y-muted, var(--scout-text-2, inherit)); font-size: .9em; }
 .scout-a11y-footer { text-align: center; margin: 0; padding: 12px 16px; font-size: .9em; }
 .scout-a11y-footer .scout-a11y-link { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
 

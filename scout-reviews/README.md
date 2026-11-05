@@ -133,11 +133,15 @@ review deleted on Google comes off the site on the next sync.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. On the site, the stylesheet reads the theme's own
-  CSS custom properties when they exist (`--surface`, `--line`, `--text-2`,
-  `--text-3`, `--accent-text`, `--font-mono`, `--r-card`) and otherwise mixes
-  shades from the page's text color, so it fits light and dark themes. The
-  stars are a fixed amber, `#fbb024`.
+- **DESIGN.md:** on the site, the stylesheet reads the DESIGN.md roles
+  surface, line, muted text, accent (links, or `accent_text` when a DESIGN.md
+  adds it), the card corner and the label font, as `--scout-surface`,
+  `--scout-line`, `--scout-text-2`, `--scout-accent-text`, `--scout-accent`,
+  `--scout-radius-card` and `--scout-font-label`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The names it read
+  before still win when the theme sets them: `--surface`, `--line`,
+  `--text-2`, `--text-3`, `--accent-text`, `--font-mono`, `--r-card`. With
+  neither, it mixes shades from the page's text color, so it fits light and
+  dark themes. The stars are a fixed amber, `#fbb024`.
 - **Where it lands:** where the **Scout Reviews** block, `[scout_reviews]`,
   `[scout_review_summary]` or `scout_reviews_slot()` sits (Theme
   integration, above). A slot prints nothing when there is nothing to show,

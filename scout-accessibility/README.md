@@ -79,8 +79,13 @@ and removes the Accessibility page only if nobody has edited it.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. The statement and the footer link take the theme's
-  own font and text color, and the buttons are outlined in `currentColor`.
+- **DESIGN.md:** the statement and the footer link take the theme's own
+  font and text color. The contact buttons read the DESIGN.md roles accent
+  (outline), pill corner and muted text (the "last reviewed" line), as
+  `--scout-accent`, `--scout-radius-pill` and `--scout-text-2`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The
+  plugin's own variables still win when the theme sets them:
+  `--scout-a11y-border`, `--scout-a11y-radius`, `--scout-a11y-muted`. With
+  neither, the buttons are outlined in `currentColor`.
 - **Where it lands:** the statement prints where
   `[scout_accessibility_statement]` sits on the Accessibility page, with H2
   headings. The footer link goes in a menu, in `[scout_accessibility_link]`,

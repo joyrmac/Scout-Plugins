@@ -383,11 +383,16 @@ from `scout-setup.json` (Scout Build needs an `events` section first).
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
-  are custom properties with neutral defaults: `--scout-events-accent`
-  (`#1D1D1F`), `--scout-events-on-accent` (`#fff`), `--scout-events-line`,
-  `--scout-events-muted`, `--scout-events-inset`, `--scout-events-radius`
-  (`14px`).
+- **DESIGN.md:** fonts and text color come from the theme. Colors read
+  the DESIGN.md roles accent fill (buttons and chosen chips), on accent, line,
+  muted text, surface 2 (insets) and the card corner, as `--scout-accent-fill`,
+  `--scout-on-accent`, `--scout-line`, `--scout-text-2`, `--scout-surface-2`
+  and `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables still win when
+  the theme sets them: `--scout-events-accent`, `--scout-events-on-accent`,
+  `--scout-events-line`, `--scout-events-muted`, `--scout-events-inset`,
+  `--scout-events-radius`. With neither, neutral defaults (`#1D1D1F`, `#fff`,
+  a soft gray, `14px`). The red and green status lines and the white plate
+  behind logos stay fixed.
 - **Where it lands:** event, session and speaker pages (`scout_event`,
   `scout_session`, `scout_speaker`) fill themselves in through `the_content`.
   The theme's single templates print the title as the H1 and call

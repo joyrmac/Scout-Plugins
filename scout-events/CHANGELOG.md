@@ -2,6 +2,7 @@
 
 ## Unreleased (2026-11-05)
 
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** event cards, the ticket and the portals now read the theme's DESIGN.md (accent fill, on accent, line, muted text, surface 2 and card corner, from `design-tokens.css`) when the theme does not set `--scout-events-*`. Sites that set them, or set neither, look exactly the same.
 - **Events home opens with the status line** ("4 things need you. Next up: Spring Summit, …" with a See what button) instead of five number cards. The counts of events, sessions and speakers are one line in Coming up. The overview table has no zebra stripes. A Postponed or Moved event shows a plain tag, and Cancelled a red one, instead of amber.
 - **Sign-ups rows stack** (the kit's stacked rows): name and email with Check in and a quiet Cancel on the right, then guests, check-in time, ticket, agreement and photo tags, the order link and the signature under it. No more " · " lists.
 - **Volunteers.** A status line ("3 of 5 spots filled. 2 volunteers signed up.") replaces the three numbers, and each shift shows "2 open" in grey or "Full" in green instead of an amber "3 / 5". Email and phone are separated by a comma, and a shift's note sits on its own line.

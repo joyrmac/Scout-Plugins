@@ -2,6 +2,7 @@
 
 ## Unreleased (2026-11-05)
 
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** result cards now read the theme's DESIGN.md surface, line, accent and card corner (from `design-tokens.css`) when the theme does not set `--scout-results-*`. Sites that set them, or set neither, look exactly the same.
 - **Status line is a headline and one sentence.** The Law note names the menu group from the kit (Legal pages → Disclaimers) instead of "Scout → Legal pages → Disclaimers". Shorter lede and help. The editor's field grid stops at three across.
 
 ## 0.1.15 (2026-11-05)

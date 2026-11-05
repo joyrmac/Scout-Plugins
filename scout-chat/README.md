@@ -87,12 +87,17 @@ Through Scout Analytics: `chat_open`, `chip_click`, `handoff`,
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. The panel reads the theme's own CSS custom
-  properties when they exist and falls back to Scout's dark palette: `--bg`,
-  `--surface`, `--surface-2`, `--text`, `--text-2`, `--text-3`, `--line`,
-  `--accent`, `--accent-text`, `--font-mono`, `--font-sans`. These are the
-  Scout themes' names; tokens built from DESIGN.md are named `--scout-*`, so a
-  theme with only those gets the dark fallback.
+- **DESIGN.md:** the panel reads the DESIGN.md roles page, surface,
+  surface 2, text, muted text, line, accent, accent fill (link button hover),
+  on accent (text on the accent) and the body and label fonts, as `--scout-bg`,
+  `--scout-surface`, `--scout-surface-2`, `--scout-text`, `--scout-text-2`,
+  `--scout-line`, `--scout-accent`, `--scout-accent-fill`, `--scout-on-accent`,
+  `--scout-font-body` and `--scout-font-label` (links use `--scout-accent-text`
+  when a DESIGN.md adds `accent_text`, else `--scout-accent`). These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The names
+  it read before still win when the theme sets them: `--bg`, `--surface`,
+  `--surface-2`, `--text`, `--text-2`, `--text-3`, `--line`, `--accent`,
+  `--accent-text`, `--font-mono`, `--font-sans`. With neither, Scout's dark
+  palette. The green "online" dot and the red error line stay fixed.
 - **Where it lands:** a launcher fixed to the bottom right of every public
   page (20px from the edges, `z-index: 9998`), added at the end of `<body>` by
   its script, with the panel opening above it. On phones it moves up to clear

@@ -2,6 +2,7 @@
 
 ## Unreleased (2026-11-05)
 
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the call sheet's colors and fonts now read the theme's DESIGN.md (the `--scout-*` names from `design-tokens.css`) when the theme's own `--surface`, `--accent` and the rest are not set. Sites that set them, or set neither, look exactly the same.
 - **Status line is a headline and one sentence.** The note about computers and the analytics event names sit behind More under the buttons. "More options: wording & photos". Shorter help.
 
 ## 0.1.17 (2026-11-05)

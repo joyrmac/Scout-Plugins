@@ -16,11 +16,17 @@ Design: Scout features DESIGN.md 5.9 (screen 4b).
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. The sheet reads the theme's own CSS custom
-  properties when they exist and falls back to Scout's dark palette:
-  `--surface`, `--surface-2`, `--text`, `--text-2`, `--line`, `--accent`,
-  `--accent-fill`, `--on-accent`, `--accent-text`, `--font-mono`,
-  `--font-sans`. The bar itself is dark glass with light text on every site.
+- **DESIGN.md:** the sheet reads the DESIGN.md roles surface, surface 2,
+  text, muted text, line, accent, accent fill, on accent and the body and label
+  fonts, as `--scout-surface`, `--scout-surface-2`, `--scout-text`,
+  `--scout-text-2`, `--scout-line`, `--scout-accent`, `--scout-accent-fill`,
+  `--scout-on-accent`, `--scout-font-body` and `--scout-font-label` (links use
+  `--scout-accent-text` when a DESIGN.md adds `accent_text`, else
+  `--scout-accent`). These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The names it read before still win when the theme
+  sets them: `--surface`, `--surface-2`, `--text`, `--text-2`, `--line`,
+  `--accent`, `--accent-fill`, `--on-accent`, `--accent-text`, `--font-mono`,
+  `--font-sans`. With neither, Scout's dark palette. The bar itself is dark
+  glass with light text on every site.
 - **Where it lands:** printed through `wp_footer()` and fixed to the bottom of
   the screen on phones (12px from the sides, 14px above the bottom plus the
   phone's safe area, `z-index: 9997`). Hidden from 761px up.

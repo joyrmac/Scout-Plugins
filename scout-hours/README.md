@@ -68,10 +68,16 @@ All three are removed when the plugin is deleted.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
-  are custom properties: `--scout-hours-open`, `--scout-hours-closed`,
+- **DESIGN.md:** fonts and text color come from the theme. The table
+  lines, today's row and the notice bar read the DESIGN.md roles line,
+  surface 2, accent fill and on accent, as `--scout-line`,
+  `--scout-surface-2`, `--scout-accent-fill` and `--scout-on-accent`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file.
+  The plugin's own variables still win when the theme sets them:
   `--scout-hours-line`, `--scout-hours-today`, `--scout-hours-bar-bg`,
-  `--scout-hours-bar-text`.
+  `--scout-hours-bar-text`. With neither, neutral defaults (a soft gray, a
+  `#1D1D1F` bar with white text). The open and closed dots stay green and red
+  (`--scout-hours-open`, `--scout-hours-closed`), since DESIGN.md has no
+  status colors.
 - **Hours and the status line:** print where `[scout_hours]` sits or where the
   theme calls `scout_hours_html()`, at most 32rem wide. A theme's own hours
   line runs only while `! scout_core_owns( 'hours' )` (rule 6).

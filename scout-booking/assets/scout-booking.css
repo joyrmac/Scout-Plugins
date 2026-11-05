@@ -2,14 +2,16 @@
    page. Fonts and text color come from the theme. Every color that matters is
    a custom property a theme can retune:
    --scout-booking-accent, --scout-booking-on-accent, --scout-booking-line,
-   --scout-booking-inset, --scout-booking-radius, --scout-booking-danger. */
+   --scout-booking-inset, --scout-booking-radius, --scout-booking-danger.
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default. */
 
 .sb {
-	--sb-accent: var(--scout-booking-accent, #1D1D1F);
-	--sb-on-accent: var(--scout-booking-on-accent, #fff);
-	--sb-line: var(--scout-booking-line, rgba(127, 127, 127, .3));
-	--sb-inset: var(--scout-booking-inset, rgba(127, 127, 127, .08));
-	--sb-radius: var(--scout-booking-radius, 14px);
+	--sb-accent: var(--scout-booking-accent, var(--scout-accent-fill, #1D1D1F));
+	--sb-on-accent: var(--scout-booking-on-accent, var(--scout-on-accent, #fff));
+	--sb-line: var(--scout-booking-line, var(--scout-line, rgba(127, 127, 127, .3)));
+	--sb-inset: var(--scout-booking-inset, var(--scout-surface-2, rgba(127, 127, 127, .08)));
+	--sb-radius: var(--scout-booking-radius, var(--scout-radius-card, 14px));
 	--sb-danger: var(--scout-booking-danger, #B42318);
 	max-width: 46rem;
 	scroll-margin-top: 2em;

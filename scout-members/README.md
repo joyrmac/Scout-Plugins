@@ -154,10 +154,15 @@ person's membership record. Deleting the plugin keeps member accounts.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
-  are custom properties with neutral defaults: `--scout-members-accent`
-  (`#1D1D1F`), `--scout-members-on-accent` (`#fff`), `--scout-members-line`,
-  `--scout-members-inset`, `--scout-members-radius` (`14px`).
+- **DESIGN.md:** fonts and text color come from the theme. Colors read
+  the DESIGN.md roles accent fill (buttons), on accent, line, surface 2
+  (insets) and the card corner, as `--scout-accent-fill`, `--scout-on-accent`,
+  `--scout-line`, `--scout-surface-2` and `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The
+  plugin's own variables still win when the theme sets them:
+  `--scout-members-accent`, `--scout-members-on-accent`,
+  `--scout-members-line`, `--scout-members-inset`, `--scout-members-radius`.
+  With neither, neutral defaults (`#1D1D1F`, `#fff`, a soft gray, `14px`). The
+  red and green note lines stay fixed.
 - **Where it lands:** where its shortcodes sit, and on the members home
   through `the_content`. Headings start at H2 under the theme's H1
   (`scout_members_heading_level`, or `level=""` on a shortcode).

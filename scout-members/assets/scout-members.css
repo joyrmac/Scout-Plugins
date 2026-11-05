@@ -2,14 +2,16 @@
    and the members-only note. Fonts and text color come from the theme. Every
    color that matters is a custom property a theme can retune:
    --scout-members-accent, --scout-members-on-accent, --scout-members-line,
-   --scout-members-inset, --scout-members-radius. */
+   --scout-members-inset, --scout-members-radius.
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default. */
 
 .sm-portal, .sm-gate, .sm-home, .sm-signin-form, .sm-invitations, .sm-thanks {
-	--sm-accent: var(--scout-members-accent, #1D1D1F);
-	--sm-on-accent: var(--scout-members-on-accent, #fff);
-	--sm-line: var(--scout-members-line, rgba(127, 127, 127, .28));
-	--sm-inset: var(--scout-members-inset, rgba(127, 127, 127, .08));
-	--sm-radius: var(--scout-members-radius, 14px);
+	--sm-accent: var(--scout-members-accent, var(--scout-accent-fill, #1D1D1F));
+	--sm-on-accent: var(--scout-members-on-accent, var(--scout-on-accent, #fff));
+	--sm-line: var(--scout-members-line, var(--scout-line, rgba(127, 127, 127, .28)));
+	--sm-inset: var(--scout-members-inset, var(--scout-surface-2, rgba(127, 127, 127, .08)));
+	--sm-radius: var(--scout-members-radius, var(--scout-radius-card, 14px));
 	scroll-margin-top: 2em;
 }
 
@@ -73,8 +75,8 @@
 /* The members home: one link per members page. */
 .sm-home { margin-top: 2em; }
 .sm-perks { list-style: none; margin: 0 0 1.5em; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1em; }
-.sm-perk a { display: flex; flex-direction: column; gap: .4em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); color: inherit; text-decoration: none; }
-.sm-perk a:hover, .sm-perk a:focus-visible { border-color: var(--scout-members-accent, currentColor); }
+.sm-perk a { display: flex; flex-direction: column; gap: .4em; height: 100%; box-sizing: border-box; padding: 1.1em 1.25em; border: 1px solid var(--sm-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: var(--scout-members-radius, var(--scout-radius-card, 14px)); color: inherit; text-decoration: none; }
+.sm-perk a:hover, .sm-perk a:focus-visible { border-color: var(--scout-members-accent, var(--scout-accent-fill, currentColor)); }
 .sm-perk-title { font-weight: 600; text-wrap: balance; }
 .sm-perk-tag { justify-self: start; align-self: flex-start; font-size: .75em; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
 .sm-perk-text { font-size: .92em; opacity: .85; text-wrap: pretty; }
@@ -84,7 +86,7 @@
 
 /* Member invitations. */
 .sm-invite-list { display: grid; gap: 1.25em; margin: 0 0 1.5em; }
-.sm-invite { padding: 1.25em 1.5em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
+.sm-invite { padding: 1.25em 1.5em; border: 1px solid var(--sm-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: var(--scout-members-radius, var(--scout-radius-card, 14px)); }
 .sm-invite-title { margin: 0 0 .2em; font-size: 1.17em; text-wrap: balance; }
 .sm-invite-meta { margin: 0 0 1em; font-size: .85em; opacity: .75; }
 .sm-invite-answers { margin: 0; display: grid; gap: .9em; }
@@ -93,12 +95,12 @@
 .sm-invite-answers dd p { margin: 0 0 .6em; text-wrap: pretty; overflow-wrap: anywhere; }
 .sm-invite-answers dd p:last-child { margin: 0; }
 .sm-mine { list-style: none; margin: 0 0 1.5em; padding: 0; display: grid; gap: .5em; }
-.sm-mine li { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1em; padding: .7em 1em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: 10px; }
+.sm-mine li { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1em; padding: .7em 1em; border: 1px solid var(--sm-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: 10px; }
 .sm-mine-title { font-weight: 600; }
 .sm-mine-status { font-size: .85em; opacity: .75; }
 .sm-mine-drop { margin: 0 0 0 auto; }
 .sm-link-button { background: none; border: 0; padding: 0; font: inherit; font-size: .9em; color: inherit; text-decoration: underline; cursor: pointer; }
-.sm-invite-new { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line, rgba(127, 127, 127, .28)); border-radius: var(--scout-members-radius, 14px); }
+.sm-invite-new { margin: 1.5em 0 0; padding: 1em 1.25em; border: 1px solid var(--sm-line, var(--scout-line, rgba(127, 127, 127, .28))); border-radius: var(--scout-members-radius, var(--scout-radius-card, 14px)); }
 .sm-invite-new summary { cursor: pointer; font-weight: 600; }
 .sm-invite-form { margin-top: 1em; }
 .sm-invite-heading { margin: .5em 0 0; }

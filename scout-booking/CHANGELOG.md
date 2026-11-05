@@ -2,6 +2,7 @@
 
 ## Unreleased (2026-11-05)
 
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the booking steps now read the theme's DESIGN.md (accent fill, on accent, line, surface 2 and card corner, from `design-tokens.css`) when the theme does not set `--scout-booking-*`. Sites that set them, or set neither, look exactly the same.
 - **Schedule** keeps its status line and drops the box of three numbers that repeated it; the counts (booked in the next 7 days, waiting for payment) are one line under the week. The status line no longer repeats the calendar's state when it's fine (the calendar box says it). Rows show name, email and phone, and money and the order link, as separate items instead of " · " lists. A blocked time's note is its own line. The phone calendar how-to sits behind How to add it.
 - **Session types rows stack**: the name and where its hours come from, with Edit on the right, then tags for on or off, length, price and how it's paid. "By request" is a grey tag, no longer an amber pill. The Id shows to your web team only.
 - **Normal-size Save buttons** on Settings and on a session type (no more oversized buttons). "Policy shown before booking and in every email" is now "Cancellation policy", with the rest as its help line.

@@ -210,11 +210,16 @@ requests unpaid after the pay window, and sends reminders.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. Fonts and text color come from the theme. Colors
-  are custom properties with neutral defaults: `--scout-booking-accent`
-  (`#1D1D1F`), `--scout-booking-on-accent` (`#fff`), `--scout-booking-line`,
-  `--scout-booking-inset`, `--scout-booking-radius` (`14px`),
-  `--scout-booking-danger` (`#B42318`).
+- **DESIGN.md:** fonts and text color come from the theme. Colors read
+  the DESIGN.md roles accent fill (buttons and the chosen day), on accent,
+  line, surface 2 (insets) and the card corner, as `--scout-accent-fill`,
+  `--scout-on-accent`, `--scout-line`, `--scout-surface-2` and
+  `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables still win when the
+  theme sets them: `--scout-booking-accent`, `--scout-booking-on-accent`,
+  `--scout-booking-line`, `--scout-booking-inset`, `--scout-booking-radius`.
+  With neither, neutral defaults (`#1D1D1F`, `#fff`, a soft gray, `14px`).
+  `--scout-booking-danger` (`#B42318`) and the green "done" line stay fixed,
+  since DESIGN.md has no status colors.
 - **Where it lands:** the steps print where `[scout_booking]` sits, at most
   46rem wide, with H2 and H3 headings under the theme's H1.
   `assets/scout-booking.css` loads only on that page.

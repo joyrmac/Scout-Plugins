@@ -2,6 +2,7 @@
 
 ## Unreleased (2026-11-05)
 
+- **Colors and fonts from DESIGN.md (Site Standard rule 3):** the form and report rows now read the theme's DESIGN.md (the `--scout-*` names from `design-tokens.css`) when the theme's own `--surface`, `--accent-fill` and the rest are not set; button text reads DESIGN.md's on accent. Sites that set them, or set neither, look exactly the same. The emailed report is unchanged.
 - **Status line is one sentence and one button (Joy, 2026-11-05).** "Not made yet." with Make the page as the one primary button, or Edit the page once it exists, and quiet View and Check requests links. Waiting checks show in the headline. Whether the Google speed key is saved moved into More options as its own small status line; the status line only mentions it when the page is live and checks are failing for want of it.
 - **One primary button.** Save changes is outlined while Make the page is showing.
 - **Check requests pills show their color.** Running and Waiting for review are calm blue, Sent is green, Not sent and Couldn't reach the site are red, and "Not yet" followed up is a calm grey pill.

@@ -3,7 +3,9 @@
    restyle it by setting, for example:
      --scout-hours-open: #0B7F5D; --scout-hours-closed: #B3261E;
      --scout-hours-line: rgba(0,0,0,.12); --scout-hours-today: rgba(0,0,0,.05);
-     --scout-hours-bar-bg: #1D1D1F; --scout-hours-bar-text: #FFFFFF; */
+     --scout-hours-bar-bg: #1D1D1F; --scout-hours-bar-text: #FFFFFF;
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default. */
 
 .scout-hours {
 	margin: 0 0 1.5em;
@@ -62,7 +64,7 @@
 .scout-hours-table td {
 	padding: .5em .75em .5em 0;
 	border: 0;
-	border-bottom: 1px solid var(--scout-hours-line, rgba(127, 127, 127, .25));
+	border-bottom: 1px solid var(--scout-hours-line, var(--scout-line, rgba(127, 127, 127, .25)));
 	text-align: left;
 	vertical-align: baseline;
 	background: none;
@@ -82,7 +84,7 @@
 
 .scout-hours-table tr.is-today th,
 .scout-hours-table tr.is-today td {
-	background: var(--scout-hours-today, rgba(127, 127, 127, .1));
+	background: var(--scout-hours-today, var(--scout-surface-2, rgba(127, 127, 127, .1)));
 }
 
 .scout-hours-table th:first-child {
@@ -103,7 +105,7 @@
 
 .scout-hours-special li {
 	padding: .4em 0;
-	border-bottom: 1px solid var(--scout-hours-line, rgba(127, 127, 127, .25));
+	border-bottom: 1px solid var(--scout-hours-line, var(--scout-line, rgba(127, 127, 127, .25)));
 }
 
 .scout-hours-special-date {
@@ -117,7 +119,7 @@
 
 .scout-hours-pending {
 	padding: .75em 1em;
-	border: 1px dashed var(--scout-hours-line, rgba(127, 127, 127, .45));
+	border: 1px dashed var(--scout-hours-line, var(--scout-line, rgba(127, 127, 127, .45)));
 	border-radius: 8px;
 	font-size: .9em;
 }
@@ -132,8 +134,8 @@
 	gap: .75em;
 	padding: .5em 3.5em .5em 1em;
 	min-height: 44px;
-	background: var(--scout-hours-bar-bg, #1D1D1F);
-	color: var(--scout-hours-bar-text, #FFFFFF);
+	background: var(--scout-hours-bar-bg, var(--scout-accent-fill, #1D1D1F));
+	color: var(--scout-hours-bar-text, var(--scout-on-accent, #FFFFFF));
 	font-size: .95em;
 	line-height: 1.4;
 	text-align: center;

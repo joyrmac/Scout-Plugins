@@ -39,9 +39,12 @@ per month, for two years.
 
 ## What this feature needs from the theme
 
-- **DESIGN.md:** none yet. Fonts and text color come from the theme. Custom
-  properties: `--scout-partners-line`, `--scout-partners-logo-bg` (`#fff`
-  behind each logo), `--scout-partners-radius` (`14px`).
+- **DESIGN.md:** fonts and text color come from the theme. The card
+  border and corner read the DESIGN.md roles line and card corner, as
+  `--scout-line` and `--scout-radius-card`. These are the `--scout-*` variables `tools/design-build.php` writes to the theme's `assets/css/design-tokens.css` from DESIGN.md, so the theme loads that file. The plugin's own variables
+  still win when the theme sets them: `--scout-partners-line`,
+  `--scout-partners-radius` (`14px`). The plate behind each logo stays white
+  (`--scout-partners-logo-bg`, `#fff`) so every logo reads.
 - **Where it lands:** where `[scout_partners]` sits, and on event pages
   through `the_content` when Settings or a region puts partners there.
   `title=""` adds an H2; level names are H3.

@@ -8,14 +8,16 @@
      --scout-results-accent: #0a78c2;
      --scout-results-radius: 12px;
    }
+   Order for each value: the variable above when the theme sets it, then the
+   theme's DESIGN.md (the --scout-* names in design-tokens.css), then the default.
 */
 
 .scout-results {
 	text-align: start;
-	--sr-surface: var(--scout-results-surface, transparent);
-	--sr-border: var(--scout-results-border, rgba(127, 127, 127, .35));
-	--sr-accent: var(--scout-results-accent, currentColor);
-	--sr-radius: var(--scout-results-radius, 12px);
+	--sr-surface: var(--scout-results-surface, var(--scout-surface, transparent));
+	--sr-border: var(--scout-results-border, var(--scout-line, rgba(127, 127, 127, .35)));
+	--sr-accent: var(--scout-results-accent, var(--scout-accent, currentColor));
+	--sr-radius: var(--scout-results-radius, var(--scout-radius-card, 12px));
 	--sr-gap: var(--scout-results-gap, 1.25rem);
 	margin: 0 0 2rem;
 }
