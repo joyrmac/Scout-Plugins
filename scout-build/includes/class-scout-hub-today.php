@@ -55,10 +55,10 @@ final class Scout_Hub_Today {
 		}
 		$minutes = array(
 			'Change requests'     => 2,
-			'Chat questions'      => 3,
+			'Chat messages'       => 3,
 			'New reviews'         => 2,
 			'Booking requests'    => 3,
-			'Site check requests' => 5,
+			'Check requests'      => 5,
 		);
 		// The same list the Inbox shows, so Today, the bubble and the Inbox agree.
 		$inbox = class_exists( 'Scout_Hub_Inbox' ) ? Scout_Hub_Inbox::rows( Scout_Hub_Inbox::items() ) : Scout_Hub_Admin::waiting_on_you();
@@ -70,7 +70,7 @@ final class Scout_Hub_Today {
 			$label   = (string) $row['label'];
 			$items[] = array(
 				'id'       => 'inbox-' . sanitize_title( $label ),
-				/* translators: 1: what (for example "Chat questions"), 2: how many */
+				/* translators: 1: what (for example "Chat messages"), 2: how many */
 				'label'    => sprintf( __( '%1$s (%2$d)', 'scout-build' ), $label, $count ),
 				'why'      => (string) ( $row['note'] ?? '' ),
 				'minutes'  => max( 1, (int) ( $minutes[ $label ] ?? 3 ) ) * min( $count, 5 ),

@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **The screen title matches the menu.** The Hours screen is now titled Hours (was "When you’re open"), the same as its menu item. In the "Where it updates" box, the "Schema" line is now called "Google listing". Same page address and settings. Visitors see no change.
+- **Shorter, plainer words.** The intro and help lines are one short sentence each, and "schema" now reads "your Google listing".
 
 ## 0.1.13 (2026-11-05)
 

@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **The phone number reads Business info live.** The Phone number field on Call buttons is now an optional override. Leave it blank and the call bar uses the phone in Business info at the moment the page shows, so a change there reaches the bar at once. Before, the screen copied Business info's number into its own setting the first time it was saved, and the two could drift apart. A number already saved here keeps showing exactly as before. The field's hint now reads "Leave blank to use Business info." and shows that number as its placeholder.
+- **Shorter help text.** The screen's intro and the phone hint are one short sentence each.
 
 ## 0.1.16 (2026-11-05)
 

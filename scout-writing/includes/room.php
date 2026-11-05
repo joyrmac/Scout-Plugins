@@ -460,7 +460,7 @@ function scout_writing_payload( int $user_id, string $pid, string $note = '' ): 
 function scout_writing_do( string $do, array $req ) {
 	$user_id = get_current_user_id();
 	if ( ! $user_id || ! current_user_can( 'edit_posts' ) ) {
-		return new WP_Error( 'sw_cap', 'Please sign in again to keep writing.' );
+		return new WP_Error( 'sw_cap', 'Sign in again to keep writing.' );
 	}
 	$pid    = scout_writing_clean_id( $req['pid'] ?? '' );
 	$prompt = scout_writing_prompt( $pid );
@@ -499,7 +499,7 @@ function scout_writing_do( string $do, array $req ) {
 			}
 			$note = scout_writing_send( $user_id, $entry )
 				? 'Sent. Scout has it now. You can keep adding to it, and send again any time.'
-				: 'Marked Sent to Scout, but the email did not go out from this site. Please let Joy or Sean know.';
+				: 'Marked Sent to Scout, but the email did not go out from this site. Let Joy or Sean know.';
 			break;
 		case 'draft':
 			if ( ! scout_writing_can_draft( $prompt ) ) {
@@ -948,10 +948,10 @@ function scout_writing_flash(): string {
 		'send'      => 'Sent. Scout has it now.',
 		'draft'     => 'A draft post is waiting in Posts for Scout to shape.',
 		'sw_empty' => 'Write a little (or add a voice memo) first.',
-		'sw_cap'   => 'Please sign in again.',
+		'sw_cap'   => 'Sign in again.',
 	);
 	if ( $err ) {
-		return '<div class="sw-flash is-err" role="alert">' . esc_html( $text[ $err ] ?? 'That did not work. Please try again.' ) . '</div>';
+		return '<div class="sw-flash is-err" role="alert">' . esc_html( $text[ $err ] ?? 'That didn\'t work. Try again.' ) . '</div>';
 	}
 	return $msg && isset( $text[ $msg ] ) ? '<div class="sw-flash" role="status">' . esc_html( $text[ $msg ] ) . '</div>' : '';
 }
@@ -1009,7 +1009,7 @@ function scout_writing_render() {
 	$label = scout_writing_menu_label();
 	if ( ! $total ) {
 		// Only administrators reach this: writers have no menu until there are prompts.
-		Scout_Admin_UI::open( $label, 'The writing room opens for your writers as soon as it has a prompts file. Until then, only administrators can see this screen.' );
+		Scout_Admin_UI::open( $label, 'The writing room opens for writers once it has a prompts file. Until then, only administrators see this.' );
 		scout_writing_status_line( 'off', 'No prompts yet.', 'Writers see nothing until there are prompts.' );
 		echo '<section class="sh-box sw"><h2 class="sh-title">Two ways to add prompts</h2><ol class="sw-setup">';
 		echo '<li><b>From the theme.</b> Add a <code>writing</code> section to the theme\'s <code>scout-setup.json</code> that names the prompts file, for example <code>{ "writing": { "prompts": "writing-prompts.json" } }</code>. It then updates with every theme release.</li>';
@@ -1056,7 +1056,7 @@ function scout_writing_render() {
 	if ( method_exists( 'Scout_Admin_UI', 'page_head' ) ) {
 		Scout_Admin_UI::page_head( 'Your writing room', (string) scout_writing_copy( 'kicker' ) );
 	}
-	Scout_Admin_UI::open( $label, 'Every prompt from your writing plan, with a place to answer it right here. You never have to do all of it. Pick one, write it in your own words, and send it to Scout when it feels ready.' );
+	Scout_Admin_UI::open( $label, 'Every prompt from your writing plan. Pick one, write it in your own words, and send it to Scout when it\'s ready.' );
 	echo '<div class="sw">';
 	// Status line, the kit's markup with live numbers the script keeps up to date.
 	echo '<section class="sh-box"><p class="sh-status is-' . ( $written ? 'good' : 'off' ) . '"><span class="sh-dot" aria-hidden="true"></span>';

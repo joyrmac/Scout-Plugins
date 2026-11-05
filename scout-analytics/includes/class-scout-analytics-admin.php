@@ -99,11 +99,11 @@ final class Scout_Analytics_Admin {
 		$gtm = strtoupper( preg_replace( '/\s+/', '', (string) ( $in['gtm'] ?? '' ) ) );
 		$ga4 = strtoupper( preg_replace( '/\s+/', '', (string) ( $in['ga4'] ?? '' ) ) );
 		if ( '' !== $gtm && ! Scout_Analytics::valid_gtm( $gtm ) ) {
-			add_settings_error( Scout_Analytics::OPTION, 'gtm', __( 'That Tag Manager ID does not look right. It starts with GTM- (Tag Manager, Admin, Container ID).', 'scout-analytics' ) );
+			add_settings_error( Scout_Analytics::OPTION, 'gtm', __( 'That Google tracking code does not look right. A Tag Manager code starts with GTM-.', 'scout-analytics' ) );
 			$gtm = Scout_Analytics::settings()['gtm'];
 		}
 		if ( '' !== $ga4 && ! Scout_Analytics::valid_ga4( $ga4 ) ) {
-			add_settings_error( Scout_Analytics::OPTION, 'ga4', __( 'That GA4 ID does not look right. It starts with G- (GA4, Admin, Data streams).', 'scout-analytics' ) );
+			add_settings_error( Scout_Analytics::OPTION, 'ga4', __( 'That Google tracking code does not look right. A GA4 code starts with G-.', 'scout-analytics' ) );
 			$ga4 = Scout_Analytics::settings()['ga4'];
 		}
 		return array(
@@ -127,7 +127,7 @@ final class Scout_Analytics_Admin {
 		$tag = Scout_Analytics::tag();
 		Scout_Admin_UI::open(
 			__( 'Visits and cookies', 'scout-analytics' ),
-			__( 'Loads Google Tag Manager on the live site, with Google consent mode set up first and a small cookie notice for visitors.', 'scout-analytics' ),
+			__( 'Counts visits with Google Tag Manager and shows visitors a small cookie notice.', 'scout-analytics' ),
 			__( 'Visits and cookies', 'scout-analytics' )
 		);
 		settings_errors( $o );
@@ -141,7 +141,7 @@ final class Scout_Analytics_Admin {
 			$detail = sprintf( __( 'GA4 %s loads directly on the live site. Add a Tag Manager container to manage tags in one place.', 'scout-analytics' ), $s['ga4'] );
 		} else {
 			$headline = __( 'Not set up.', 'scout-analytics' );
-			$detail   = __( 'Nothing is counted yet. Add the Tag Manager container ID below.', 'scout-analytics' );
+			$detail   = __( 'Nothing is counted yet. Add the Google tracking code below.', 'scout-analytics' );
 		}
 		$detail .= ' ' . ( 'optin' === $s['mode'] ? __( 'Consent: count nothing until a visitor says yes.', 'scout-analytics' ) : __( 'Consent: count the visit, with a "No thanks" button.', 'scout-analytics' ) );
 		$detail .= ' ' . __( 'Never on staging or local copies.', 'scout-analytics' );
@@ -156,7 +156,7 @@ final class Scout_Analytics_Admin {
 					<tr>
 						<th scope="row"><label for="sa-gtm"><?php esc_html_e( 'Google tracking code', 'scout-analytics' ); ?></label></th>
 						<td><input id="sa-gtm" type="text" class="regular-text code" placeholder="GTM-XXXXXXX" name="<?php echo esc_attr( $o ); ?>[gtm]" value="<?php echo esc_attr( $s['gtm'] ); ?>">
-							<p class="description"><?php esc_html_e( 'Your Google Tag Manager container ID, which starts with GTM-. Our standard for every site. Find it in Tag Manager, Admin, Container ID. Put the GA4 tag and any conversion tags inside the container.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Your Tag Manager container ID, starting with GTM-. Put the GA4 tag and other tags inside the container.', 'scout-analytics' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Before a visitor chooses', 'scout-analytics' ); ?></th>
@@ -173,7 +173,7 @@ final class Scout_Analytics_Admin {
 					<tr>
 						<th scope="row"><label for="sa-privacy"><?php esc_html_e( 'Privacy policy page', 'scout-analytics' ); ?></label></th>
 						<td><?php wp_dropdown_pages( array( 'name' => esc_attr( $o ) . '[privacy_page]', 'id' => 'sa-privacy', 'selected' => (int) $s['privacy_page'], 'show_option_none' => esc_html__( 'None', 'scout-analytics' ), 'option_none_value' => '0' ) ); ?>
-							<p class="description"><?php esc_html_e( 'Linked from the notice. Put [scout_privacy_choices] in the footer or on that page so visitors can change their mind.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Linked from the notice. Put [scout_privacy_choices] on that page so visitors can change their answer.', 'scout-analytics' ); ?></p></td>
 					</tr>
 				</table>
 			</section>
@@ -183,7 +183,7 @@ final class Scout_Analytics_Admin {
 					<tr>
 						<th scope="row"><label for="sa-ga4"><?php esc_html_e( 'Google tracking code', 'scout-analytics' ); ?></label></th>
 						<td><input id="sa-ga4" type="text" class="regular-text code" placeholder="G-XXXXXXXXXX" name="<?php echo esc_attr( $o ); ?>[ga4]" value="<?php echo esc_attr( $s['ga4'] ); ?>">
-							<p class="description"><?php esc_html_e( 'A Google Analytics 4 (GA4) measurement ID, which starts with G-. Use it only on a site with no Tag Manager. It is ignored while a Tag Manager ID is set, so the visit is never counted twice.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'A GA4 measurement ID, starting with G-, for a site with no Tag Manager. Ignored while a Tag Manager ID is set.', 'scout-analytics' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Ad signals', 'scout-analytics' ); ?></th>
@@ -197,7 +197,7 @@ final class Scout_Analytics_Admin {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Page speed', 'scout-analytics' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[late]" value="1" <?php checked( $s['late'] ); ?>> <?php esc_html_e( 'Load Tag Manager after the page shows (recommended)', 'scout-analytics' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Tag Manager starts once the page has loaded, or at the visitor\'s first tap, scroll or key. The page shows faster on phones. A visitor who leaves in the first second or two is not counted.', 'scout-analytics' ); ?></p></td>
+						<p class="description"><?php esc_html_e( 'Pages show faster on phones. A visitor who leaves in the first second or two is not counted.', 'scout-analytics' ); ?></p></td>
 					</tr>
 				</table>
 

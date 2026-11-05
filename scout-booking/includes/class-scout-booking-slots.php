@@ -47,7 +47,7 @@ final class Scout_Booking_Slots {
 		if ( 'own' === $type['schedule'] ) {
 			return __( 'Its own hours', 'scout-booking' );
 		}
-		return Scout_Booking::scout_hours_on() ? __( 'Your business hours (Scout Hours)', 'scout-booking' ) : __( 'Booking hours (Booking settings)', 'scout-booking' );
+		return Scout_Booking::scout_hours_on() ? __( 'Your business hours (Scout Hours)', 'scout-booking' ) : __( 'Booking hours (Bookings, Settings)', 'scout-booking' );
 	}
 
 	/** First and last day a client may book. */

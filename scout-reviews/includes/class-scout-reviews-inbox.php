@@ -75,7 +75,7 @@ final class Scout_Reviews_Inbox {
 
 		Scout_Admin_UI::open(
 			__( 'New reviews', 'scout-reviews' ),
-			__( 'New Google reviews and notes from your review page wait here. Check the pages each one belongs on (we pre-check the ones that match), then add it to the site. Skipped items stay saved as hidden drafts under All reviews.', 'scout-reviews' )
+			__( 'New Google reviews and notes from your review page wait here. Pick the pages for each one, then add it.', 'scout-reviews' )
 		);
 
 		if ( ! $items ) {
@@ -84,7 +84,7 @@ final class Scout_Reviews_Inbox {
 				__( 'All caught up.', 'scout-reviews' ),
 				Scout_Reviews_Google::is_ready()
 					? __( 'New Google reviews show up here after the next daily sync. Notes from your review page arrive the moment someone sends one.', 'scout-reviews' )
-					: __( 'Notes from your review page arrive here the moment someone sends one. Google reviews join them once you connect Google in Review settings. Yelp and Facebook reviews can be added by hand under Add review.', 'scout-reviews' )
+					: __( 'Notes from your review page show up here. Google reviews join them once Google is connected in Review settings.', 'scout-reviews' )
 			);
 			Scout_Admin_UI::close();
 			return;
@@ -99,7 +99,7 @@ final class Scout_Reviews_Inbox {
 			/* translators: %d: number of new reviews and notes. */
 			sprintf( _n( '%d new review waiting.', '%d new reviews waiting.', $count, 'scout-reviews' ), $count ),
 			$count > 1
-				? __( 'Look over each one below, or add every one that may be shown, each on its suggested pages.', 'scout-reviews' )
+				? __( 'Check each one below, or add every one that can be shown to its suggested pages.', 'scout-reviews' )
 				: __( 'Look it over below, then add it to the site or skip it.', 'scout-reviews' ),
 			$all
 		);

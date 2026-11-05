@@ -78,8 +78,8 @@ final class Scout_Law_Entries_Admin {
 		$date     = get_option( 'date_format' );
 		Scout_Admin_UI::open(
 			__( 'Form entries', 'scout-law' ),
-			__( 'What people send through the website\'s forms is kept for a set time, then deleted from the website. Fewer old entries means less to protect.', 'scout-law' ),
-			__( 'Policies', 'scout-law' )
+			__( 'What people send through the site\'s forms is kept for a set time, then deleted. Less kept means less to protect.', 'scout-law' ),
+			__( 'Legal pages', 'scout-law' )
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a message flag only.
 		if ( isset( $_GET['scout-law'] ) && 'saved' === sanitize_key( wp_unslash( $_GET['scout-law'] ) ) ) {
@@ -98,7 +98,7 @@ final class Scout_Law_Entries_Admin {
 					<span aria-hidden="true">&#9650;</span> <strong><?php esc_html_e( 'Starts soon.', 'scout-law' ); ?></strong>
 					<?php
 					/* translators: 1: date, 2: days */
-					echo esc_html( sprintf( __( 'From %1$s, entries older than %2$d days are deleted each night. Save any old entry you need before then, or star it in Gravity Forms to keep it.', 'scout-law' ), wp_date( $date, $starts ), $settings['days'] ) );
+					echo esc_html( sprintf( __( 'From %1$s, entries older than %2$d days are deleted each night. Star an entry in Gravity Forms to keep it.', 'scout-law' ), wp_date( $date, $starts ), $settings['days'] ) );
 					?>
 				<?php else : ?>
 					<span aria-hidden="true">&#10003;</span> <strong><?php esc_html_e( 'On.', 'scout-law' ); ?></strong>
@@ -171,7 +171,7 @@ final class Scout_Law_Entries_Admin {
 						<?php endforeach; ?>
 					</fieldset>
 				<?php endif; ?>
-				<p class="sh-note"><?php esc_html_e( 'If you change the time, the privacy policy page should say the same.', 'scout-law' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'If you change the time, change the privacy policy to match.', 'scout-law' ); ?></p>
 				<?php submit_button( __( 'Save', 'scout-law' ), 'secondary' ); ?>
 			</form>
 		</details>

@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **Plainer labels.** Writing (all) is now All writing, and Writing settings is now Settings, in the Your Writing menu and on each screen. Page addresses and saved settings are unchanged.
+- **Shorter, plainer messages.** The room's intro and its sign-in and error messages drop the extra words.
 
 ## 0.1.5 (2026-11-05)
 

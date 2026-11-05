@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **Plain labels.** The screen and its menu item are now called Visits and cookies (was Analytics). The first box is Tracking and privacy (was Tag and consent). Both ID fields are labeled Google tracking code; the help text under each says which kind it takes (a Tag Manager container ID starting with GTM-, or a GA4 measurement ID starting with G- for sites with no Tag Manager). Same page address, same saved settings. Visitors see no change.
+- **Shorter, plainer words.** The intro and help lines are one short sentence each, and the status line and error messages say Google tracking code, the same as the fields.
 
 ## 0.1.20 (2026-11-05)
 

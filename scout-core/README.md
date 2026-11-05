@@ -211,7 +211,7 @@ theme already says:
 $d = scout_design();                       // mode, colors, fonts, radius, logo, mark (+ logo_url, mark_url)
 $d = scout_design( 'call buttons' );       // the "## Feature: call buttons" section laid over the tokens
 echo '<style>' . scout_design_css() . '</style>';   // :root{--scout-bg:...;--scout-accent-fill:...;--scout-radius-card:...}
-scout_design_issues();                     // contrast pairs that fail 4.5:1 (Scout Build shows them in Site health)
+scout_design_issues();                     // contrast pairs that fail 4.5:1 (Scout Build shows them in Site status)
 ```
 
 Order of truth: Scout's defaults, then the active theme's `theme.json`
@@ -229,7 +229,7 @@ line runs only while `! scout_core_owns( 'hours' )`.
   `BreadcrumbList` schema. Remove the theme's own breadcrumb schema in the same release.
   Adjust the trail with `scout_core_breadcrumb_trail`, for example to put a page that acts
   as an archive (Work, Services) before its items.
-- **Verification:** Get found → Search settings, "Google Search Console verification code" and
+- **Verification:** Search → Search settings, "Google Search Console verification code" and
   "Bing Webmaster Tools verification code". The tags print on the front page only.
 - **Thank-you pages:** `noindex` and out of the sitemap. These are Gravity Forms
   confirmation pages, plus the addresses thank-you and thanks. Add more with

@@ -187,7 +187,7 @@ final class Scout_Results_Admin {
 		$headline = sprintf( _n( '%d result on the site.', '%d results on the site.', $counts['live'], 'scout-results' ), $counts['live'] );
 		/* translators: %d: number of case results waiting for the firm's approval. */
 		$detail  = sprintf( _n( '%d is waiting for the firm.', '%d are waiting for the firm.', $counts['waiting'], 'scout-results' ), $counts['waiting'] );
-		$detail .= ' ' . __( 'A result goes live once the firm ticks "Approved by the firm" and adds the approver\'s name. The disclaimer prints beside every result and cannot be switched off for one.', 'scout-results' );
+		$detail .= ' ' . __( 'A result goes live once the firm ticks "Approved by the firm" and names the approver. The disclaimer always prints beside it.', 'scout-results' );
 		$go      = '<a class="button" href="' . esc_url( $new ) . '">' . esc_html__( 'Add a case result', 'scout-results' ) . '</a>';
 		self::ui_status( $counts['waiting'] ? 'warn' : ( $counts['live'] ? 'good' : 'off' ), $headline, $detail, $go );
 		?>
@@ -213,9 +213,9 @@ final class Scout_Results_Admin {
 						<th scope="row"><label for="sr-disclaimer"><?php esc_html_e( 'Disclaimer wording', 'scout-results' ); ?></label></th>
 						<td>
 							<textarea id="sr-disclaimer" class="large-text" rows="5" name="<?php echo esc_attr( $o ); ?>[disclaimer]" placeholder="<?php echo esc_attr( Scout_Results::default_disclaimer( $s['state'] ) ); ?>"><?php echo esc_textarea( $s['disclaimer'] ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'Leave blank to use the state\'s starting wording shown in gray. A blank disclaimer is never printed; the starting wording is used instead.', 'scout-results' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Leave blank to use the state\'s starting wording shown in gray.', 'scout-results' ); ?></p>
 							<?php if ( class_exists( 'Scout_Law_Disclaimers' ) && in_array( 'results', Scout_Law_Disclaimers::places_for( 'results' ), true ) ) : ?>
-								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording set on Scout → Policies → Disclaimers prints next to every result instead of this box.', 'scout-results' ); ?></strong></p>
+								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording in Scout → Legal pages → Disclaimers shows next to every result instead.', 'scout-results' ); ?></strong></p>
 							<?php endif; ?>
 						</td>
 					</tr>

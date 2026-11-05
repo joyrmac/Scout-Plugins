@@ -160,7 +160,7 @@ final class Scout_Events_Volunteers {
 		$taken  = 'auto-draft' === $post->post_status ? array() : self::taken( (int) $post->ID );
 		wp_nonce_field( 'scout_shifts_save', self::NONCE );
 		?>
-		<p class="se-help"><?php esc_html_e( 'List the jobs this event needs. Put [scout_volunteer event="this event\'s address word"] on a page and volunteers pick shifts there. To remove a shift, clear its job name.', 'scout-events' ); ?></p>
+		<p class="se-help"><?php esc_html_e( 'The jobs this event needs. Volunteers pick shifts on a page with [scout_volunteer]. Clear a job name to remove it.', 'scout-events' ); ?></p>
 		<div class="se-shifts-wrap">
 			<table class="se-shifts">
 				<thead>
@@ -573,7 +573,7 @@ final class Scout_Events_Volunteers {
 	public static function view(): void {
 		$events = array_values( array_filter( array_map( 'intval', get_posts( array( 'post_type' => Scout_Events::EVENT, 'post_status' => array( 'publish', 'draft', 'future' ), 'posts_per_page' => 200, 'fields' => 'ids' ) ) ), static fn( $id ) => (bool) self::shifts( $id ) ) );
 		if ( ! $events ) {
-			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Volunteers', 'scout-events' ) . '</h2><p>' . esc_html__( 'No event has volunteer shifts yet. Open an event, fill in the Volunteer shifts box below the description, and update. Then put [scout_volunteer] on a page.', 'scout-events' ) . '</p></section>';
+			echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Volunteers', 'scout-events' ) . '</h2><p>' . esc_html__( 'No event has volunteer shifts yet. Add them in the Volunteer shifts box on an event.', 'scout-events' ) . '</p></section>';
 			return;
 		}
 		usort( $events, static fn( $a, $b ) => strcmp( (string) get_post_meta( $a, '_scout_event_start', true ), (string) get_post_meta( $b, '_scout_event_start', true ) ) );

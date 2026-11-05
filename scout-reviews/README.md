@@ -35,7 +35,7 @@ menu, with the same screens under it.
 Options: `layout` (grid, row, list), `count`, `source`, `featured`,
 `min_rating`, `summary`, `topic`, `fallback`.
 
-## Inbox and topics (0.3.0)
+## New reviews and topics (0.3.0)
 
 New Google reviews land in **New reviews**. Each card has the pages it
 belongs on pre-checked (from each topic's keywords). Click **Add to site** and

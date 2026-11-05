@@ -274,7 +274,7 @@ final class Scout_Hub_Health {
 				'label' => __( 'Search engines', 'scout-build' ),
 				'value' => __( 'Kept out on staging', 'scout-build' ),
 				'state' => 'good',
-				'note'  => __( 'This staging copy is behind the host\'s password or tells search engines not to index it, so it stays out of Google. Search engine visibility in WordPress stays on, ready for the live site.', 'scout-build' ),
+				'note'  => __( 'This staging copy is hidden from Google by a password or a no-index setting.', 'scout-build' ),
 			);
 		}
 		if ( $staging ) {
@@ -282,7 +282,7 @@ final class Scout_Hub_Health {
 				'label' => __( 'Search engines', 'scout-build' ),
 				'value' => __( 'Allowed on staging', 'scout-build' ),
 				'state' => 'warn',
-				'note'  => __( 'This is a staging copy, and search engines are allowed to index it. Turn on your host\'s password protection for staging. Leave Search engine visibility alone in WordPress: that setting can travel to the live site with the next copy.', 'scout-build' ),
+				'note'  => __( 'Google can index this staging copy. Turn on the host\'s staging password, and leave WordPress\'s Search engine visibility alone.', 'scout-build' ),
 			);
 		}
 		return array(
@@ -405,7 +405,7 @@ final class Scout_Hub_Health {
 				$notes[] = sprintf( __( '%1$s %2$s has no release yet, so it is a test build. It will not update until a release comes out.', 'scout-build' ), $name, $v );
 			} elseif ( is_string( $known ) && '' !== $known && version_compare( $v, $known, '>' ) ) {
 				/* translators: 1: plugin name, 2: installed version, 3: newest release */
-				$notes[] = sprintf( __( '%1$s %2$s is newer than the newest release (%3$s), so it is a test build. It will not update the normal way until %2$s or newer is released.', 'scout-build' ), $name, $v, $known );
+				$notes[] = sprintf( __( '%1$s %2$s is newer than the latest release (%3$s), so it\'s a test build. It updates once %2$s is out.', 'scout-build' ), $name, $v, $known );
 			}
 			if ( count( $notes ) > $was ) {
 				$names[] = $name . ' ' . $v;
@@ -575,7 +575,7 @@ final class Scout_Hub_Health {
 				'label' => __( 'Review totals', 'scout-build' ),
 				'value' => __( 'Not known', 'scout-build' ),
 				'state' => 'warn',
-				'note'  => __( 'The site does not know when the review counts were last checked. Update the totals once to start tracking.', 'scout-build' ),
+				'note'  => __( 'Nobody has checked the review counts yet. Update the totals once to start.', 'scout-build' ),
 			) + $link;
 		}
 		$days = (int) floor( ( time() - $stamp ) / DAY_IN_SECONDS );
@@ -585,7 +585,7 @@ final class Scout_Hub_Health {
 			/* translators: %d: days */
 			'value' => 0 === $days ? __( 'Today', 'scout-build' ) : sprintf( _n( '%d day ago', '%d days ago', $days, 'scout-build' ), $days ),
 			'state' => $old ? 'warn' : 'good',
-			'note'  => $old ? __( 'The review counts on the site have not been updated in over a month. Check each platform and type in its current rating and count.', 'scout-build' ) : __( 'The review counts on the site were updated in the last month.', 'scout-build' ),
+			'note'  => $old ? __( 'Review counts are over a month old. Type in each platform\'s current rating and count.', 'scout-build' ) : __( 'The review counts on the site were updated in the last month.', 'scout-build' ),
 		) + ( $old ? $link : array() );
 	}
 
@@ -655,7 +655,7 @@ final class Scout_Hub_Health {
 		);
 		$https = 0 === strpos( home_url(), 'https://' );
 		$out[] = array(
-			'label' => __( 'Security lock', 'scout-build' ),
+			'label' => __( 'Secure connection (HTTPS)', 'scout-build' ),
 			'value' => $https ? __( 'On', 'scout-build' ) : __( 'Off', 'scout-build' ),
 			'state' => $https ? 'good' : 'bad',
 			'note'  => $https ? __( 'The site loads over HTTPS.', 'scout-build' ) : __( 'The site address is not HTTPS.', 'scout-build' ),
@@ -712,7 +712,7 @@ final class Scout_Hub_Health {
 				'label'     => __( 'AI crawlers', 'scout-build' ),
 				'value'     => $safe ? __( 'File in the way', 'scout-build' ) : __( 'Check by hand', 'scout-build' ),
 				'state'     => 'warn',
-				'note'      => $safe ? __( 'A robots.txt file on the server hides WordPress\'s version and everything Scout adds to it. Switching is safe: no rule would be lost.', 'scout-build' ) : __( 'A robots.txt file on the server overrides WordPress, and it has rules of its own. Review it before switching.', 'scout-build' ),
+				'note'      => $safe ? __( 'A robots.txt file on the server blocks what Scout adds. Switching is safe.', 'scout-build' ) : __( 'A robots.txt file on the server overrides WordPress, and it has rules of its own. Review it before switching.', 'scout-build' ),
 				'link'      => Scout_Hub_Robots::url(),
 				'link_text' => $safe ? __( 'Switch to WordPress\'s robots.txt', 'scout-build' ) : __( 'Review the file', 'scout-build' ),
 			);
@@ -721,7 +721,7 @@ final class Scout_Hub_Health {
 			$out[] = array( 'label' => __( 'AI crawlers', 'scout-build' ), 'value' => __( 'Blocked', 'scout-build' ), 'state' => 'bad', 'note' => sprintf( __( 'robots.txt blocks %s.', 'scout-build' ), implode( ', ', $blocked ) ), 'link' => $set, 'link_text' => $set_tx );
 		} else {
 			$named = $aeo || function_exists( 'scout_llms_txt' );
-			$out[] = array( 'label' => __( 'AI crawlers', 'scout-build' ), 'value' => __( 'Welcome', 'scout-build' ), 'state' => 'good', 'note' => $named ? __( 'robots.txt names the AI search tools and lets them in.', 'scout-build' ) : __( 'Nothing blocks them. Turning on AI search names them outright.', 'scout-build' ) );
+			$out[] = array( 'label' => __( 'AI crawlers', 'scout-build' ), 'value' => __( 'Allowed', 'scout-build' ), 'state' => 'good', 'note' => $named ? __( 'robots.txt names the AI search tools and lets them in.', 'scout-build' ) : __( 'Nothing blocks them. Turning on AI search names them outright.', 'scout-build' ) );
 		}
 
 		// 2. The plain-text guide.
@@ -762,7 +762,7 @@ final class Scout_Hub_Health {
 		if ( null === $scan ) {
 			$out[] = array( 'label' => __( 'Direct answers', 'scout-build' ), 'value' => __( 'Checking', 'scout-build' ), 'state' => 'warn', 'note' => __( 'Looking through the main pages for questions and answers. Refresh in a minute.', 'scout-build' ) );
 		} elseif ( ! $scan['checked'] ) {
-			$out[] = array( 'label' => __( 'Direct answers', 'scout-build' ), 'value' => __( 'Could not check', 'scout-build' ), 'state' => 'warn', 'note' => __( 'The site could not load its own pages (a password or firewall on staging does this). It tries again in 30 minutes.', 'scout-build' ) );
+			$out[] = array( 'label' => __( 'Direct answers', 'scout-build' ), 'value' => __( 'Could not check', 'scout-build' ), 'state' => 'warn', 'note' => __( 'The site couldn\'t load its own pages, often a staging password. It tries again in 30 minutes.', 'scout-build' ) );
 		} else {
 			$good  = $scan['found'] >= min( 3, $scan['checked'] ) || $hub >= 5;
 			$bits  = array(

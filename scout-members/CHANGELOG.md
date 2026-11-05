@@ -1,5 +1,10 @@
 # Scout Members changelog
 
+## Unreleased (2026-11-05)
+
+- **Notices go to the shared address.** When "Send new applications to" is blank, application and invitation notices now go to the notice address in Business info instead of the site email (the site email is still used without Scout Core).
+- **Plainer words.** "Overview" is now "Home", "Renewals" is now "Renewals due", "Import" is now "Add from spreadsheet", "Membership settings" is now "Settings", and the browser tab says Members. "Shortcodes for your pages" is now "Add to a page". Long help text is cut to one short line.
+
 ## 0.4.5 (2026-11-05)
 
 - **Every Members screen has its own name.** Overview, All members, Renewals, Import and Settings each show their own title and one sentence on what they are for, instead of "Your members" on all five.

@@ -99,7 +99,7 @@ final class Scout_Hub_Requests {
 			array(
 				'parent' => 'scout-hub',
 				'id'     => 'scout-hub-health',
-				'title'  => __( 'Site health', 'scout-build' ),
+				'title'  => __( 'Site status', 'scout-build' ),
 				'href'   => Scout_Hub_Admin::url( 'health' ),
 			)
 		);

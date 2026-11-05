@@ -139,7 +139,7 @@ final class Scout_Events_RSVP_Admin {
 			?>
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'How to start taking sign-ups', 'scout-events' ); ?></h2>
-				<p><?php esc_html_e( 'No event takes sign-ups or sells tickets yet. Open an event, tick "Take sign-ups on this site" under Tickets (or create a ticket in "Tickets from the shop"), and save. People then get a ticket with a QR code.', 'scout-events' ); ?></p>
+				<p><?php esc_html_e( 'No event takes sign-ups yet. Open an event and tick "Take sign-ups on this site" under Tickets.', 'scout-events' ); ?></p>
 			</section>
 			<?php
 			return;
@@ -196,7 +196,7 @@ final class Scout_Events_RSVP_Admin {
 					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_events_signups_csv&event=' . $event ), 'scout_events_signups_csv_' . $event ) ); ?>"><?php esc_html_e( 'Download list', 'scout-events' ); ?></a>
 				</span>
 			</div>
-			<p class="sh-note"><?php esc_html_e( 'At the door, scan each ticket with your phone camera while signed in here, and tap Check in. Use this list for anyone without their ticket.', 'scout-events' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'At the door, scan each ticket with your phone and tap Check in. Use this list for anyone without one.', 'scout-events' ); ?></p>
 			<?php if ( $owed ) : ?>
 				<?php /* translators: %d: number of people. */ ?>
 				<p class="se-door-flag"><?php echo esc_html( sprintf( _n( '%d person going has not agreed yet. Their ticket page asks them; at the door, ask them to open it.', '%d people going have not agreed yet. Their ticket pages ask them; at the door, ask them to open it.', $owed, 'scout-events' ), $owed ) ); ?></p>

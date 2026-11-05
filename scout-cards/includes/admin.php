@@ -217,7 +217,7 @@ final class Scout_Cards_Admin {
 			}
 		}
 		if ( ! class_exists( 'Scout_Core_Business' ) ) {
-			echo '<div class="notice notice-info"><p>Scout Core is not active, so fill in the business details under More options. With Scout Core, they come from its Business screen automatically.</p></div>';
+			echo '<div class="notice notice-info"><p>Scout Core is off, so fill in the business details under More options.</p></div>';
 		}
 
 		// Status line: where the cards live, how many people, and whether the links page is on.
@@ -225,19 +225,19 @@ final class Scout_Cards_Admin {
 		if ( $s['enable_cards'] ) {
 			self::status(
 				'good',
-				'Cards are live.',
+				'Live.',
 				'At /' . $s['card_base'] . '/ with ' . $who . '. The links page is ' . ( $s['enable_links'] ? 'on at /' . $s['links_base'] . '/.' : 'off.' ),
 				'<a class="button" href="' . esc_url( $card ) . '" target="_blank" rel="noopener">View card</a>'
 			);
 		} elseif ( $s['enable_links'] ) {
 			self::status(
 				'off',
-				'Business cards are off.',
+				'Cards off.',
 				'The links page is on at /' . $s['links_base'] . '/. Turn cards on under More options.',
 				'<a class="button" href="' . esc_url( $links ) . '" target="_blank" rel="noopener">View links</a>'
 			);
 		} else {
-			self::status( 'off', 'Cards and links are off.', 'Turn them on under More options.' );
+			self::status( 'off', 'Off.', 'Turn cards and links on under More options.' );
 		}
 
 		echo '<form method="post" class="scc-form" id="scc-form" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';

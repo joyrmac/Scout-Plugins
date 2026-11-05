@@ -107,7 +107,7 @@ final class Scout_Sync_Admin {
 
 		if ( ! $plan['manifest'] ) {
 			echo '<section class="sh-box"><h2>This theme does not bundle any copy yet</h2>';
-			echo '<p>This screen keeps pages in step with the copy a theme ships in its <code>scout-sync.json</code> file. This theme has none, so there is nothing to sync and nothing will change.</p></section>';
+			echo '<p>This theme has no page copy file (<code>scout-sync.json</code>), so nothing here will change.</p></section>';
 			return;
 		}
 
@@ -138,7 +138,7 @@ final class Scout_Sync_Admin {
 			$level    = 'good';
 			$headline = 'Everything is in sync.';
 		}
-		self::ui_status( $plan['errors'] ? 'bad' : $level, $headline, 'This screen keeps pages in step with the copy this theme ships. It never overwrites an edit made in WordPress on its own.' );
+		self::ui_status( $plan['errors'] ? 'bad' : $level, $headline, 'Edits made in WordPress are never overwritten on their own.' );
 
 		echo '<section class="sh-box"><div class="sh-stats">';
 		foreach ( $counts as $key => $meta ) {
@@ -161,7 +161,7 @@ final class Scout_Sync_Admin {
 		$updates = array_merge( $state[ Scout_Sync::UPDATE ] ?? array(), $state[ Scout_Sync::CREATE ] ?? array() );
 		if ( $updates ) {
 			echo '<section class="sh-box"><h2>' . esc_html( sprintf( _n( '%d update from the theme', '%d updates from the theme', count( $updates ), 'scout-core' ), count( $updates ) ) ) . '</h2>';
-			echo '<p>Nobody has edited these in WordPress since the last sync, so the theme copy can go straight in. Pages marked "Will be created" are new to the site: pages publish, posts arrive as drafts. Each page keeps a revision, and you can undo the whole sync below.</p>';
+			echo '<p>Nobody edited these in WordPress, so the theme copy can go straight in.</p><p>New pages publish and new posts arrive as drafts. You can undo it below.</p>';
 			self::rows( $updates, false );
 			self::form( 'safe', $plan['hash'], 'Sync these now' );
 			echo '</section>';
@@ -170,7 +170,7 @@ final class Scout_Sync_Admin {
 		$review = array_merge( $state[ Scout_Sync::EDITED ] ?? array(), $state[ Scout_Sync::CONFLICT ] ?? array() );
 		if ( $review ) {
 			echo '<section class="sh-box"><h2>Changes made in WordPress</h2>';
-			echo '<p>These differ from the theme copy. They are never overwritten on their own. Tick the ones to decide on, then choose. "Keep the WordPress copy" also means the edit should go back into the client repo so the next theme carries it.</p>';
+			echo '<p>These were edited in WordPress, so they wait for you. Tick the ones to decide on, then choose.</p><p>If you keep the WordPress copy, add the edit to the theme too so the next update carries it.</p>';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 			self::rows( $review, true );
 			self::hidden( 'pick', $plan['hash'] );

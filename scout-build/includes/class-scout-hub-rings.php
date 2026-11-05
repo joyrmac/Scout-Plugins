@@ -228,7 +228,7 @@ final class Scout_Hub_Rings {
 			echo '</form>';
 			/* translators: %s: place in the update order, like "two days later (client sites)" */
 			echo '<p class="sh-note">' . esc_html( sprintf( __( 'Suggested for this address: %s.', 'scout-build' ), self::RINGS[ self::guess() ][0] ?? '' ) ) . '</p>';
-			echo '<p class="sh-note">' . esc_html__( 'A pause stops automatic updates on this site only. To hold a release on every site, add it to "hold" in catalog.json. Update now always works.', 'scout-build' ) . ( $locked ? ' ' . esc_html__( 'The update order is set in wp-config.php (SCOUT_HUB_RING).', 'scout-build' ) : '' ) . '</p>';
+			echo '<p class="sh-note">' . esc_html__( 'A pause stops automatic updates on this site only. Update now still works.', 'scout-build' ) . ( $locked ? ' ' . esc_html__( 'The update order is set in wp-config.php (SCOUT_HUB_RING).', 'scout-build' ) : '' ) . '</p>';
 		}
 		echo '</section>';
 	}

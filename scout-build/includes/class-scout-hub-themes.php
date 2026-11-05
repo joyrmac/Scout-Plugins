@@ -247,7 +247,7 @@ final class Scout_Hub_Themes {
 		}
 		$token = self::token();
 		if ( '' === $token ) {
-			return new WP_Error( 'scout_theme_key', __( 'This site has no key for its theme updates. Add it on Scout → Build.', 'scout-build' ) );
+			return new WP_Error( 'scout_theme_key', __( 'This site has no key for its theme updates. Add it on Scout tools, Updates.', 'scout-build' ) );
 		}
 		if ( $upgrader instanceof WP_Upgrader && isset( $upgrader->skin ) ) {
 			$upgrader->skin->feedback( 'downloading_package', $package );
@@ -276,7 +276,7 @@ final class Scout_Hub_Themes {
 			}
 		}
 		/* translators: %d: HTTP status code. */
-		return new WP_Error( 'scout_theme_download', sprintf( __( 'GitHub would not hand over the theme file (status %d). Check the key on Scout → Build.', 'scout-build' ), $code ) );
+		return new WP_Error( 'scout_theme_download', sprintf( __( 'GitHub would not hand over the theme file (status %d). Check the key on Scout tools, Updates.', 'scout-build' ), $code ) );
 	}
 
 	private static function api_headers( string $token, string $accept ): array {
@@ -337,7 +337,7 @@ final class Scout_Hub_Themes {
 				echo '<button type="submit" name="forget" value="1" class="button sh-quiet sh-danger">' . esc_html__( 'Remove key', 'scout-build' ) . '</button>';
 			}
 			/* translators: %s: owner/repo. */
-			echo '</form><p class="sh-note">' . esc_html( sprintf( __( 'A GitHub fine-grained token with read-only Contents access to %s. It is stored encrypted and only ever sent to GitHub.', 'scout-build' ), $src['repo'] ) ) . '</p></details>';
+			echo '</form><p class="sh-note">' . esc_html( sprintf( __( 'A read-only GitHub token for %s. It\'s stored encrypted and only sent to GitHub.', 'scout-build' ), $src['repo'] ) ) . '</p></details>';
 		}
 		echo '</section>';
 	}

@@ -186,8 +186,8 @@ final class Scout_Hub_Dashboard {
 		</form>
 		<p class="sd-links">
 			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'overview' ) ); ?>"><?php esc_html_e( 'Open Scout', 'scout-build' ); ?></a>
-			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'health' ) ); ?>"><?php esc_html_e( 'Site health', 'scout-build' ); ?></a>
-			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'requests' ) ); ?>"><?php esc_html_e( 'Your requests', 'scout-build' ); ?></a>
+			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'health' ) ); ?>"><?php esc_html_e( 'Site status', 'scout-build' ); ?></a>
+			<a class="button" href="<?php echo esc_url( Scout_Hub_Admin::url( 'requests' ) ); ?>"><?php esc_html_e( 'Request a change', 'scout-build' ); ?></a>
 		</p>
 		<?php
 	}

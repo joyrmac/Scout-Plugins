@@ -1,7 +1,7 @@
 <?php
 /**
  * The Members hub: its own sidebar item with the Scout bolt, beside Events.
- * Overview (numbers, applications to read, renewals coming up), the members
+ * Home (numbers, applications to read, renewals coming up), the members
  * list, a spreadsheet import for members moving from another system, and
  * settings. Member records are personal, so only people who can list users
  * (administrators) see any of it.
@@ -51,14 +51,14 @@ final class Scout_Members_Admin {
 	}
 
 	public static function menu(): void {
-		add_menu_page( __( 'Scout Members', 'scout-members' ), __( 'Members', 'scout-members' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.2' );
-		add_submenu_page( self::SLUG, __( 'Scout Members', 'scout-members' ), __( 'Overview', 'scout-members' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ) );
+		add_menu_page( __( 'Members', 'scout-members' ), __( 'Members', 'scout-members' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ), self::icon(), '3.2' );
+		add_submenu_page( self::SLUG, __( 'Members', 'scout-members' ), __( 'Home', 'scout-members' ), self::CAP, self::SLUG, array( __CLASS__, 'render' ) );
 		add_submenu_page( self::SLUG, __( 'All members', 'scout-members' ), __( 'All members', 'scout-members' ), self::CAP, self::SLUG . '-members', array( __CLASS__, 'render_members' ) );
 		$review = count( self::to_review() );
-		$label  = __( 'Renewals', 'scout-members' ) . ( $review ? ' <span class="awaiting-mod">' . (int) $review . '</span>' : '' );
+		$label  = __( 'Renewals due', 'scout-members' ) . ( $review ? ' <span class="awaiting-mod">' . (int) $review . '</span>' : '' );
 		add_submenu_page( self::SLUG, __( 'Renewals due', 'scout-members' ), $label, self::CAP, self::SLUG . '-renewals', array( __CLASS__, 'render_renewals' ) );
-		add_submenu_page( self::SLUG, __( 'Bring members in', 'scout-members' ), __( 'Import', 'scout-members' ), self::CAP, self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
-		add_submenu_page( self::SLUG, __( 'Membership settings', 'scout-members' ), __( 'Settings', 'scout-members' ), self::CAP, self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
+		add_submenu_page( self::SLUG, __( 'Add from spreadsheet', 'scout-members' ), __( 'Add from spreadsheet', 'scout-members' ), self::CAP, self::SLUG . '-import', array( __CLASS__, 'render_import' ) );
+		add_submenu_page( self::SLUG, __( 'Settings', 'scout-members' ), __( 'Settings', 'scout-members' ), self::CAP, self::SLUG . '-settings', array( __CLASS__, 'render_settings' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -251,7 +251,7 @@ final class Scout_Members_Admin {
 				echo '<p class="description">' . esc_html( sprintf( __( 'Now: %s only, from a parent page.', 'scout-members' ), Scout_Members::plan_names( $inherited ) ) ) . '</p>';
 			}
 		}
-		echo '<p class="description">' . esc_html__( 'Everyone else sees a short note with the sign-in form and a link to join, and search engines leave it out. Tick no plans and every member can read it.', 'scout-members' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Everyone else sees a sign-in form and a link to join. Tick no plans and every member can read it.', 'scout-members' ) . '</p>';
 	}
 
 	public static function save_box( $post_id, $post ): void {
@@ -525,10 +525,10 @@ final class Scout_Members_Admin {
 		$view = in_array( $view, array( 'overview', 'members', 'renewals', 'import', 'settings' ), true ) ? $view : 'overview';
 		// Each screen gets its own name (its menu label) and one sentence on what it is for.
 		$heads = array(
-			'overview' => array( __( 'Overview', 'scout-members' ), __( 'Applications waiting for you, renewals coming up, and the pages only members can open. Approve someone here and members-only pages and events open for them.', 'scout-members' ) ),
+			'overview' => array( __( 'Home', 'scout-members' ), __( 'Applications waiting for you, renewals coming up, and your members-only pages.', 'scout-members' ) ),
 			'members'  => array( __( 'All members', 'scout-members' ), __( 'Everyone on your list. Change a status, plan or renewal date on a row, then press Save on that row.', 'scout-members' ) ),
-			'renewals' => array( __( 'Renewals', 'scout-members' ), __( 'Who renews in the next 30 days, who is past due, and any payment that needs a look from you.', 'scout-members' ) ),
-			'import'   => array( __( 'Import', 'scout-members' ), __( 'Bring your current members in from a spreadsheet, such as an export from Squarespace.', 'scout-members' ) ),
+			'renewals' => array( __( 'Renewals due', 'scout-members' ), __( 'Who renews in the next 30 days, who is past due, and any payment that needs a look from you.', 'scout-members' ) ),
+			'import'   => array( __( 'Add from spreadsheet', 'scout-members' ), __( 'Add your current members from a spreadsheet, such as an export from Squarespace.', 'scout-members' ) ),
 			'settings' => array( __( 'Settings', 'scout-members' ), __( 'Your membership pages, plans, dues, reminder emails and the questions people answer when they apply.', 'scout-members' ) ),
 		);
 		Scout_Admin_UI::open( $heads[ $view ][0], $heads[ $view ][1], __( 'Members', 'scout-members' ) );
@@ -660,7 +660,7 @@ final class Scout_Members_Admin {
 				<?php endif; ?>
 			</div>
 			<?php if ( ! $home ) : ?>
-				<p><?php esc_html_e( 'Choose a members home in Settings: the page members land on after signing in. Every page under it is members only and shows up on it as a link.', 'scout-members' ); ?> <a href="<?php echo esc_url( self::url( 'settings' ) ); ?>"><?php esc_html_e( 'Open Settings', 'scout-members' ); ?></a></p>
+				<p><?php esc_html_e( 'Choose a members home in Settings. It is the page members see after signing in.', 'scout-members' ); ?> <a href="<?php echo esc_url( self::url( 'settings' ) ); ?>"><?php esc_html_e( 'Open Settings', 'scout-members' ); ?></a></p>
 			<?php endif; ?>
 			<?php if ( $ids ) : ?>
 				<table class="sh-table sm-area">
@@ -742,7 +742,7 @@ final class Scout_Members_Admin {
 					<?php /* translators: %d: order number. */ ?>
 					<p class="sm-chip is-good"><?php echo esc_html( sprintf( __( 'Dues paid with the application (order #%d). Approving starts their year today.', 'scout-members' ), $m['prepaid'] ) ); ?></p>
 				<?php endif; ?>
-				<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() && Scout_Members_Woo::links() ? __( 'Approving sends a welcome email with how to sign in. When the plan has a dues product, it carries a Pay your dues link and members-only pages open once they pay. Not accepted sends nothing.', 'scout-members' ) : __( 'Approving sends a welcome email with how to sign in, and your next-step note from Settings. Not accepted sends nothing.', 'scout-members' ) ); ?></p>
+				<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() && Scout_Members_Woo::links() ? __( 'Approve sends a welcome email, with a Pay your dues link when the plan has dues. Not accepted sends nothing.', 'scout-members' ) : __( 'Approving sends a welcome email with how to sign in, and your next-step note from Settings. Not accepted sends nothing.', 'scout-members' ) ); ?></p>
 			</details>
 		</li>
 		<?php
@@ -766,7 +766,7 @@ final class Scout_Members_Admin {
 		<section class="sh-box">
 			<div class="sm-box-head">
 				<h2 class="sh-title"><?php esc_html_e( 'Status, plan and renewal date', 'scout-members' ); ?></h2>
-				<a class="button" href="<?php echo esc_url( self::url( 'import' ) ); ?>"><?php esc_html_e( 'Bring members in', 'scout-members' ); ?></a>
+				<a class="button" href="<?php echo esc_url( self::url( 'import' ) ); ?>"><?php esc_html_e( 'Add from spreadsheet', 'scout-members' ); ?></a>
 			</div>
 			<?php if ( $ids ) : ?>
 				<?php self::table( $ids ); ?>
@@ -868,7 +868,7 @@ final class Scout_Members_Admin {
 				</tbody>
 			</table>
 		</div>
-		<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() ? __( 'Dues paid through the checkout are recorded by themselves. Paid today records a payment made another way (cash, a check) and moves the renewal date forward one plan period. Renewal price: leave empty for the plan price, 0 to renew free, or another amount for this member only.', 'scout-members' ) : __( 'Paid today records a payment and moves the renewal date forward one plan period. Renewal price: leave empty for the plan price, 0 to renew free, or another amount for this member only.', 'scout-members' ) ); ?></p>
+		<p class="sh-note"><?php echo esc_html( Scout_Members_Woo::active() ? __( 'Paid today records cash or a check and moves the renewal date forward. Checkout payments record themselves.', 'scout-members' ) : __( 'Paid today records a payment and moves the renewal date forward. Renewal price: blank uses the plan price.', 'scout-members' ) ); ?></p>
 		<?php
 	}
 
@@ -979,9 +979,9 @@ final class Scout_Members_Admin {
 				if ( 'off' === $s['reminders'] ) {
 					echo '<strong>' . esc_html__( 'Reminder emails are off in Settings.', 'scout-members' ) . '</strong> ';
 				} elseif ( 'all' === $s['reminders'] ) {
-					echo esc_html__( 'Every member gets a reminder 30 days (yearly plans) and 7 days before their renewal date: with a Renew now link when their plan has a dues product, else with your next-step note.', 'scout-members' ) . ' ';
+					echo esc_html__( 'Every member gets a reminder 30 days (yearly plans) and 7 days before renewal.', 'scout-members' ) . ' ';
 				} else {
-					echo esc_html__( 'Members whose plan has a dues product get a reminder with a Renew now link 30 days (yearly plans) and 7 days before their renewal date. Others get none; Settings can change that.', 'scout-members' ) . ' ';
+					echo esc_html__( 'Members on plans with dues get a Renew now reminder 30 days (yearly plans) and 7 days before renewal.', 'scout-members' ) . ' ';
 				}
 				echo esc_html( $woo ? __( 'Members renew with a fresh checkout; no cards are saved.', 'scout-members' ) : __( 'Record payments with Paid today on All members.', 'scout-members' ) );
 				if ( $s['grace'] > 0 ) {
@@ -1066,17 +1066,17 @@ final class Scout_Members_Admin {
 		$report = get_transient( 'scout_members_import_' . get_current_user_id() );
 		?>
 		<section class="sh-box">
-			<h2 class="sh-title"><?php esc_html_e( 'Bring members in', 'scout-members' ); ?></h2>
-			<p><?php esc_html_e( 'Moving members from another system, such as Squarespace? Export their orders or members as a CSV and bring the file in here. Each person becomes an active member on the plan named in the file, with a renewal date one period after their latest payment. Running the same file again changes nothing.', 'scout-members' ); ?></p>
+			<h2 class="sh-title"><?php esc_html_e( 'Choose your file', 'scout-members' ); ?></h2>
+			<p><?php esc_html_e( 'Moving from another system, such as Squarespace? Save your members as a CSV file and add it here. Each person becomes an active member on their plan.', 'scout-members' ); ?></p>
 			<?php if ( is_array( $report ) ) : ?>
 				<?php delete_transient( 'scout_members_import_' . get_current_user_id() ); ?>
 				<div class="sm-report">
-					<p><strong><?php echo esc_html( $report['dry'] ? __( 'Preview. Nothing has changed yet.', 'scout-members' ) : __( 'Import finished.', 'scout-members' ) ); ?></strong></p>
+					<p><strong><?php echo esc_html( $report['dry'] ? __( 'Preview. Nothing has changed yet.', 'scout-members' ) : __( 'Done. Your file was added.', 'scout-members' ) ); ?></strong></p>
 					<?php /* translators: 1: new members, 2: updated members. */ ?>
 					<p><?php echo esc_html( sprintf( $report['dry'] ? __( '%1$d new and %2$d updated members.', 'scout-members' ) : __( '%1$d added and %2$d updated members.', 'scout-members' ), $report['created'], $report['updated'] ) ); ?></p>
 					<?php if ( ! empty( $report['free'] ) ) : ?>
 						<?php /* translators: %d: number of members. */ ?>
-						<p><?php echo esc_html( sprintf( _n( '%d of them joined on a $0 order (a full-value code). They are marked "Joined on a $0 order" on All members: set a renewal price for each one there (0 renews free), or leave it empty for the plan price.', '%d of them joined on a $0 order (a full-value code). They are marked "Joined on a $0 order" on All members: set a renewal price for each one there (0 renews free), or leave it empty for the plan price.', $report['free'], 'scout-members' ), $report['free'] ) ); ?></p>
+						<p><?php echo esc_html( sprintf( _n( '%d of them joined on a $0 order. Set a renewal price for each on All members, or leave it blank for the plan price.', '%d of them joined on a $0 order. Set a renewal price for each on All members, or leave it blank for the plan price.', $report['free'], 'scout-members' ), $report['free'] ) ); ?></p>
 					<?php endif; ?>
 					<?php if ( $report['notes'] ) : ?>
 						<ul>
@@ -1086,7 +1086,7 @@ final class Scout_Members_Admin {
 						</ul>
 					<?php endif; ?>
 					<?php if ( $report['dry'] ) : ?>
-						<p><?php esc_html_e( 'If that looks right, choose the same file again, tick "Bring them in", and import.', 'scout-members' ); ?></p>
+						<p><?php esc_html_e( 'If that looks right, choose the same file again, tick "Add them now", and press Add from spreadsheet.', 'scout-members' ); ?></p>
 					<?php endif; ?>
 				</div>
 			<?php endif; ?>
@@ -1094,11 +1094,11 @@ final class Scout_Members_Admin {
 				<input type="hidden" name="action" value="scout_members_import">
 				<?php wp_nonce_field( 'scout_members_import' ); ?>
 				<p class="sm-field"><label for="sm-file"><?php esc_html_e( 'Members file (CSV)', 'scout-members' ); ?></label><input type="file" id="sm-file" name="sm_file" accept=".csv,text/csv"></p>
-				<p class="sm-field"><label><input type="checkbox" name="sm_welcome" value="1"> <?php esc_html_e( 'Email each new member a link to set their password', 'scout-members' ); ?></label><span class="sh-note"><?php esc_html_e( 'Leave unticked to bring them in quietly and invite them later.', 'scout-members' ); ?></span></p>
-				<p class="sm-field"><label><input type="checkbox" id="sm-apply" name="sm_apply" value="1"> <?php esc_html_e( 'Bring them in (leave unticked to preview)', 'scout-members' ); ?></label></p>
-				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'scout-members' ); ?></button></p>
+				<p class="sm-field"><label><input type="checkbox" name="sm_welcome" value="1"> <?php esc_html_e( 'Email each new member a link to set their password', 'scout-members' ); ?></label><span class="sh-note"><?php esc_html_e( 'Leave unticked to add them quietly and invite them later.', 'scout-members' ); ?></span></p>
+				<p class="sm-field"><label><input type="checkbox" id="sm-apply" name="sm_apply" value="1"> <?php esc_html_e( 'Add them now (leave unticked to preview)', 'scout-members' ); ?></label></p>
+				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Add from spreadsheet', 'scout-members' ); ?></button></p>
 			</form>
-			<p class="sh-note"><?php esc_html_e( 'Columns are matched by name: Email, and First Name and Last Name or Name, Pricing Plan or Plan, Order Date or Date, Total, and an optional Renews. A person who appears on several rows keeps their latest payment. Plans are matched to the plans in Settings by name.', 'scout-members' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Columns used: Email, Name (or First Name and Last Name), Plan, Date, Total, and Renews if you have it.', 'scout-members' ); ?></p>
 		</section>
 		<?php
 	}
@@ -1123,7 +1123,7 @@ final class Scout_Members_Admin {
 				<p class="sm-field">
 					<label for="sm-set-receipt"><?php esc_html_e( 'Name on receipts', 'scout-members' ); ?></label>
 					<input type="text" id="sm-set-receipt" name="scout_members[receipt]" value="<?php echo esc_attr( $s['receipt'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( Scout_Members::receipt_name() ); ?>">
-					<span class="sh-note"><?php esc_html_e( 'New dues products start with these words, then the plan and how long it lasts, so the card statement and receipt read plainly. Products you already made keep their names; rename them in Products.', 'scout-members' ); ?></span>
+					<span class="sh-note"><?php esc_html_e( 'New dues products start with these words, then the plan and its length. Older products keep their names.', 'scout-members' ); ?></span>
 				</p>
 				<?php if ( $plans ) : ?>
 					<?php
@@ -1176,17 +1176,17 @@ final class Scout_Members_Admin {
 							</tbody>
 						</table>
 					</div>
-					<p class="sh-note"><?php esc_html_e( 'Members pay with whatever payment methods the shop has turned on (WooCommerce, Settings, Payments). The checkout ties each payment to the member, makes them active and moves their renewal date forward one period.', 'scout-members' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'Members pay with the shop\'s payment methods. Paying makes them active and moves the renewal date forward.', 'scout-members' ); ?></p>
 				<?php else : ?>
 					<p class="sh-note"><?php esc_html_e( 'Add your plans above and save, then link each one to a product here.', 'scout-members' ); ?></p>
 				<?php endif; ?>
 			<?php else : ?>
-				<p class="sh-note"><?php esc_html_e( 'Members can pay dues through the site\'s own checkout once WooCommerce is installed and active. Until then, record payments with Paid today on All members.', 'scout-members' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Online dues need WooCommerce. Until then, record payments with Paid today on All members.', 'scout-members' ); ?></p>
 			<?php endif; ?>
 			<p class="sm-field">
 				<label for="sm-set-grace"><?php esc_html_e( 'Grace period (days)', 'scout-members' ); ?></label>
 				<input type="number" id="sm-set-grace" name="scout_members[grace]" value="<?php echo (int) $s['grace']; ?>" min="0" max="90" class="small-text">
-				<span class="sh-note"><?php esc_html_e( 'How long members keep access after their renewal date while they renew. 0 closes it the day after. New sites start at 14; sites that had memberships before this version start at 0, as before.', 'scout-members' ); ?></span>
+				<span class="sh-note"><?php esc_html_e( 'Days members keep access after their renewal date. 0 closes it the next day.', 'scout-members' ); ?></span>
 			</p>
 			<p class="sm-field">
 				<span class="sm-label"><?php esc_html_e( 'Renewal reminders (30 days before for yearly plans, and 7 days before)', 'scout-members' ); ?></span>
@@ -1253,7 +1253,7 @@ final class Scout_Members_Admin {
 							)
 						);
 						?>
-						<span class="sh-note"><?php esc_html_e( 'Where members land after signing in. It and every page under it are members only, and it lists those pages for each member. Use a different page from the membership page.', 'scout-members' ); ?></span>
+						<span class="sh-note"><?php esc_html_e( 'Where members land after signing in. It and every page under it are members only.', 'scout-members' ); ?></span>
 					</p>
 				</section>
 
@@ -1303,7 +1303,7 @@ final class Scout_Members_Admin {
 					<p class="sm-field">
 						<label for="sm-set-iq"><?php esc_html_e( 'Invitation questions, one per line', 'scout-members' ); ?></label>
 						<textarea id="sm-set-iq" name="scout_members[invitation_questions]" rows="8" class="large-text code" placeholder="<?php echo esc_attr( Scout_Members_Invitations::default_questions() ); ?>"><?php echo esc_textarea( (string) get_option( Scout_Members_Invitations::OPTION, '' ) ); ?></textarea>
-						<span class="sh-note"><?php esc_html_e( 'What members answer when they post an invitation with [scout_invitations]. Same format as the application. The title is always asked. Left empty, four short questions are used.', 'scout-members' ); ?></span>
+						<span class="sh-note"><?php esc_html_e( 'What members answer when they post an invitation. Same format as the application questions.', 'scout-members' ); ?></span>
 					</p>
 				</section>
 
@@ -1321,7 +1321,7 @@ final class Scout_Members_Admin {
 			?>
 		<?php endif; ?>
 
-		<?php self::ui_fold_open( __( 'Shortcodes for your pages', 'scout-members' ), false, 'sm-shortcodes' ); ?>
+		<?php self::ui_fold_open( __( 'Add to a page', 'scout-members' ), false, 'sm-shortcodes' ); ?>
 			<p><?php esc_html_e( 'Paste these on a page to show the membership on the site.', 'scout-members' ); ?></p>
 			<div class="sm-table-wrap">
 				<table class="sh-table sm-codes">
@@ -1329,9 +1329,9 @@ final class Scout_Members_Admin {
 					<tr><td>[scout_members_only] … [/scout_members_only]</td><td><?php esc_html_e( 'Hides the part in between from everyone but members. Add plan="VIP Member" to limit it to a plan.', 'scout-members' ); ?></td></tr>
 					<tr><td><?php esc_html_e( 'Members only box', 'scout-members' ); ?></td><td><?php esc_html_e( 'On any page, post or event. Ticked, only members can read it or buy tickets. Tick plans to limit a page to them.', 'scout-members' ); ?></td></tr>
 					<tr><td>[scout_member_signin]</td><td><?php esc_html_e( 'The sign-in form, anywhere on the site.', 'scout-members' ); ?></td></tr>
-					<tr><td>[scout_member_link]</td><td><?php esc_html_e( 'A link that reads "Member sign in", or "Members home" once a member is signed in. In a menu, add a custom link to #scout-member-link.', 'scout-members' ); ?></td></tr>
-					<tr><td>[scout_invitations]</td><td><?php esc_html_e( 'Member invitations: the ones you have published, a form to post one, and each member\'s own with a way to take it down. Put it on a members page. New ones wait under Members, Invitations.', 'scout-members' ); ?></td></tr>
-					<tr><td>[scout_members_home]</td><td><?php esc_html_e( 'The list of members pages and events. The members home adds it under its own words by itself; place it to put the list somewhere else on the page.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_member_link]</td><td><?php esc_html_e( 'A "Member sign in" link that becomes "Members home" once signed in. In a menu, link to #scout-member-link.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_invitations]</td><td><?php esc_html_e( 'Member invitations and a form to post one. Put it on a members page.', 'scout-members' ); ?></td></tr>
+					<tr><td>[scout_members_home]</td><td><?php esc_html_e( 'The list of members pages and events. The members home shows it already.', 'scout-members' ); ?></td></tr>
 				</table>
 			</div>
 			<p class="sh-note"><?php esc_html_e( 'Members sign in on the site, land on the members home and never see the dashboard. The WordPress password page carries the site\'s logo.', 'scout-members' ); ?></p>

@@ -46,7 +46,7 @@ final class Scout_Hub_Inbox {
 			'reviews'   => __( 'Reviews', 'scout-build' ),
 			'requests'  => __( 'Requests', 'scout-build' ),
 			'bookings'  => __( 'Bookings', 'scout-build' ),
-			'sitecheck' => __( 'Site checks', 'scout-build' ),
+			'sitecheck' => __( 'Check requests', 'scout-build' ),
 			'other'     => __( 'Other', 'scout-build' ),
 		);
 	}
@@ -114,7 +114,7 @@ final class Scout_Hub_Inbox {
 				$items[] = array(
 					'id'      => 'chat-' . $post->ID,
 					'kind'    => 'chat',
-					'label'   => __( 'Chat question', 'scout-build' ),
+					'label'   => __( 'Chat message', 'scout-build' ),
 					'from'    => '' !== $name ? $name : ( '' !== $email ? $email : __( 'A visitor', 'scout-build' ) ),
 					'preview' => self::preview( '' !== $post->post_content ? (string) $post->post_content : get_the_title( $post ) ),
 					'when'    => (int) get_post_time( 'U', true, $post ),
@@ -166,7 +166,7 @@ final class Scout_Hub_Inbox {
 				$items[] = array(
 					'id'      => 'sitecheck-' . $post->ID,
 					'kind'    => 'sitecheck',
-					'label'   => __( 'Site check request', 'scout-build' ),
+					'label'   => __( 'Check request', 'scout-build' ),
 					'from'    => get_the_title( $post ),
 					'preview' => self::preview( (string) $post->post_content ),
 					'when'    => (int) get_post_time( 'U', true, $post ),
@@ -200,7 +200,7 @@ final class Scout_Hub_Inbox {
 
 		// Queues other plugins add as count rows (scout_hub_inbox), such as law-firm approvals,
 		// show as one item each, so nothing that waits on a person drops out of the list.
-		$built_in = array( __( 'Change requests', 'scout-build' ), __( 'Chat questions', 'scout-build' ), __( 'New reviews', 'scout-build' ) );
+		$built_in = array( __( 'Change requests', 'scout-build' ), __( 'Chat messages', 'scout-build' ), __( 'New reviews', 'scout-build' ) );
 		foreach ( Scout_Hub_Admin::waiting_on_you() as $row ) {
 			$count = (int) ( $row['count'] ?? 0 );
 			if ( ! $count || in_array( (string) $row['label'], $built_in, true ) ) {
@@ -279,11 +279,11 @@ final class Scout_Hub_Inbox {
 	 */
 	public static function rows( array $items ): array {
 		$names = array(
-			'chat'      => array( __( 'Chat questions', 'scout-build' ), __( 'Questions visitors asked the chat that it could not answer.', 'scout-build' ) ),
+			'chat'      => array( __( 'Chat messages', 'scout-build' ), __( 'Chat messages waiting for a reply.', 'scout-build' ) ),
 			'reviews'   => array( __( 'New reviews', 'scout-build' ), __( 'Reviews that arrived since you last looked. Pick the ones to show.', 'scout-build' ) ),
 			'requests'  => array( __( 'Change requests', 'scout-build' ), __( 'Things you asked Scout for, with where each one stands.', 'scout-build' ) ),
 			'bookings'  => array( __( 'Booking requests', 'scout-build' ), __( 'People waiting to hear if their time works.', 'scout-build' ) ),
-			'sitecheck' => array( __( 'Site check requests', 'scout-build' ), __( 'People who asked for a site check and are waiting on a reply.', 'scout-build' ) ),
+			'sitecheck' => array( __( 'Check requests', 'scout-build' ), __( 'People waiting on a reply about their site check.', 'scout-build' ) ),
 		);
 		$rows = array();
 		foreach ( self::waiting( $items ) as $item ) {
@@ -377,12 +377,12 @@ final class Scout_Hub_Inbox {
 	private static function send( string $to, array $items ): void {
 		$site = wp_specialchars_decode( (string) get_option( 'blogname' ), ENT_QUOTES );
 		/* translators: 1: site name, 2: how many */
-		$subject = sprintf( _n( '%1$s: %2$d thing is waiting in your Inbox', '%1$s: %2$d things are waiting in your Inbox', count( $items ), 'scout-build' ), $site, count( $items ) );
+		$subject = sprintf( _n( '%1$s: %2$d thing is waiting in To do', '%1$s: %2$d things are waiting in To do', count( $items ), 'scout-build' ), $site, count( $items ) );
 		$lines   = array();
 		foreach ( array_slice( $items, 0, 20 ) as $i ) {
 			$lines[] = '- ' . $i['label'] . ': ' . $i['from'] . ( '' !== $i['preview'] ? ' (' . $i['preview'] . ')' : '' );
 		}
-		$body = implode( "\n", $lines ) . "\n\n" . __( 'Open your Inbox:', 'scout-build' ) . ' ' . Scout_Hub_Admin::url( 'inbox' ) . "\n\n" . __( 'Change how often you get these emails on the Inbox screen.', 'scout-build' );
+		$body = implode( "\n", $lines ) . "\n\n" . __( 'Open To do:', 'scout-build' ) . ' ' . Scout_Hub_Admin::url( 'inbox' ) . "\n\n" . __( 'Change how often you get these emails on the To do screen.', 'scout-build' );
 		wp_mail( $to, $subject, $body );
 	}
 
@@ -565,7 +565,7 @@ final class Scout_Hub_Inbox {
 		<?php if ( ! $list || ! $sel ) : ?>
 			<div class="sh-box sh-calm">
 				<p style="margin:0;font-size:22px;font-weight:600"><?php esc_html_e( 'Nothing is waiting', 'scout-build' ); ?></p>
-				<p class="sh-note" style="margin:0;font-size:16px"><?php esc_html_e( 'Chat questions, reviews, bookings and your change requests show up here as they come in.', 'scout-build' ); ?></p>
+				<p class="sh-note" style="margin:0;font-size:16px"><?php esc_html_e( 'Chat messages, reviews, bookings and your requests show up here as they come in.', 'scout-build' ); ?></p>
 			</div>
 		<?php else : ?>
 			<div class="sh-panes">

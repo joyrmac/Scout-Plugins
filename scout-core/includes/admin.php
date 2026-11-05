@@ -149,11 +149,11 @@ final class Scout_Core_Admin {
 		$tab   = self::current_tab();
 		$tabs  = self::tabs();
 		$ledes = array(
-			'dashboard' => 'A quick check that search engines and AI tools can find the business and read it correctly.',
-			'business'  => 'Your name, address, phone and profiles, entered once. They feed your search listing and every page that shows them. Keep them identical to your Google Business Profile.',
-			'sync'      => 'Keeps each page in step with the copy the theme ships. Pages nobody has edited update on their own after a theme update; anything changed in WordPress waits for you.',
-			'protect'   => 'Switches that keep spam and break-in attempts away from the site. All are on unless you turn them off.',
-			'seo'       => 'Site-wide search settings. Each page can set its own title and description in its SEO box, and your sitemap is built automatically at /wp-sitemap.xml.',
+			'dashboard' => 'Can Google and AI tools find the business and read it right? Green means yes.',
+			'business'  => 'Your name, address, phone and profiles. Keep them the same as your Google Business Profile.',
+			'sync'      => 'Pages get the theme\'s latest copy on their own. Anything edited in WordPress waits for you.',
+			'protect'   => 'Switches that keep spam and break-in attempts away. All are on unless you turn them off.',
+			'seo'       => 'Settings for the whole site. Each page sets its own title and description in its SEO box.',
 		);
 		self::styles();
 		Scout_Admin_UI::open( $tabs[ $tab ], $ledes[ $tab ] ?? '', $tabs[ $tab ] );
@@ -283,9 +283,9 @@ final class Scout_Core_Admin {
 			'status'       => $type ? 'good' : 'warn',
 			'message'      => $type
 				? 'Search engines and AI get a clear description of your business.'
-				: 'Set your business type (e.g. LegalService, Restaurant) so your listing is specific.',
+				: 'Set the type of business, like LegalService or Restaurant, so your listing is specific.',
 			'action'       => $type ? '' : $base . '&tab=business',
-			'action_label' => $type ? '' : 'Set business type',
+			'action_label' => $type ? '' : 'Set type of business',
 		);
 
 		// 3. Pages missing a written description. Name them, so nobody has to hunt.
@@ -408,7 +408,7 @@ final class Scout_Core_Admin {
 					echo '<tr><th scope="row">' . esc_html__( 'Hours', 'scout-core' ) . '</th><td><p class="description">'
 						. sprintf(
 							/* translators: %s: link to the Hours screen */
-							esc_html__( 'Hours live under Your business, %s, and show in the schema, the footer and the hours block from there.', 'scout-core' ),
+							esc_html__( 'Set hours on the %s screen under Business.', 'scout-core' ),
 							'<a href="' . esc_url( admin_url( 'admin.php?page=scout-hours' ) ) . '">' . esc_html__( 'Hours', 'scout-core' ) . '</a>'
 						)
 						. '</p></td></tr>';
@@ -449,8 +449,8 @@ final class Scout_Core_Admin {
 			} elseif ( in_array( $key, array( 'google_verify', 'bing_verify' ), true ) ) {
 				printf( '<input type="text" id="%s" name="%s" value="%s" class="regular-text" autocomplete="off" spellcheck="false" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
 				echo '<p class="description">' . esc_html( 'google_verify' === $key
-					? __( 'In Search Console, add the site as a URL prefix and choose "HTML tag". Paste the tag or just its code. Leave it empty if the domain is verified through DNS.', 'scout-core' )
-					: __( 'In Bing Webmaster Tools, choose "HTML Meta Tag". Paste the tag or just its code. Leave it empty if you imported the site from Search Console.', 'scout-core' ) ) . '</p>';
+					? __( 'In Search Console, pick URL prefix, then HTML tag, and paste it here. Leave empty if DNS verifies the domain.', 'scout-core' )
+					: __( 'In Bing Webmaster Tools, pick HTML Meta Tag and paste it here. Leave empty if you imported from Search Console.', 'scout-core' ) ) . '</p>';
 			} else {
 				printf( '<input type="url" id="%s" name="%s" value="%s" class="regular-text" placeholder="https://" />', esc_attr( $id ), esc_attr( $name ), esc_attr( $values[ $key ] ) );
 			}

@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **Plainer label.** Optimize existing images is now Shrink older photos, on the button and on its screen. The page address is unchanged.
+- **Shorter help text.** The Image optimizer and Shrink older photos screens say each thing once, and the link back reads Image optimizer, the same as the menu.
 
 ## 0.9.8 (2026-11-05)
 

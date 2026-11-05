@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **Plainer label.** The "Tags it uses" box on Customer list is now "Labels it adds". The tags themselves are unchanged.
+- **Shorter help text** on Customer list.
 
 ## 0.1.3 (2026-11-05)
 

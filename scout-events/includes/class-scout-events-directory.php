@@ -87,7 +87,7 @@ final class Scout_Events_Directory {
 
 	/** Events, Topics: right after Speakers. */
 	public static function menu(): void {
-		add_submenu_page( Scout_Events_Admin::SLUG, __( 'Speaker topics', 'scout-events' ), __( 'Topics', 'scout-events' ), 'manage_categories', 'edit-tags.php?taxonomy=' . self::TOPIC . '&post_type=' . Scout_Events::SPEAKER );
+		add_submenu_page( Scout_Events_Admin::SLUG, __( 'Speaker topics', 'scout-events' ), __( 'Speaker topics', 'scout-events' ), 'manage_categories', 'edit-tags.php?taxonomy=' . self::TOPIC . '&post_type=' . Scout_Events::SPEAKER );
 		global $submenu;
 		$slug = Scout_Events_Admin::SLUG;
 		if ( empty( $submenu[ $slug ] ) ) {

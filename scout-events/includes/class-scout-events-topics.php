@@ -127,7 +127,7 @@ final class Scout_Events_Topics {
 		$slug = sanitize_title( $atts['topic'] );
 		$term = '' !== $slug ? get_term_by( 'slug', $slug, Scout_Events_Directory::TOPIC ) : false;
 		if ( ! $term ) {
-			return current_user_can( 'edit_pages' ) ? '<p class="se-empty">' . esc_html__( 'This topic was not found. Check the topic in the shortcode against Events, Topics.', 'scout-events' ) . '</p>' : '';
+			return current_user_can( 'edit_pages' ) ? '<p class="se-empty">' . esc_html__( 'This topic was not found. Check the topic in the shortcode against Events, Speaker topics.', 'scout-events' ) . '</p>' : '';
 		}
 		wp_enqueue_style( 'scout-events' );
 		$out  = '<div class="se-topic">';
@@ -265,7 +265,7 @@ final class Scout_Events_Topics {
 			echo '<p><label><input type="checkbox" name="se_topic_make" value="1"> ' . esc_html__( 'Make a draft page for this topic', 'scout-events' ) . '</label></p>';
 		}
 		/* translators: 1: classes, 2: speakers, 3: vendors. */
-		echo '<p class="description">' . esc_html( sprintf( __( 'A public page listing everything on this topic, for people searching for it. It has %1$d classes, %2$d speakers and %3$d vendors now. The description above becomes the page\'s introduction and search description.', 'scout-events' ), $n['classes'], $n['speakers'], $n['vendors'] ) ) . '</p></td></tr>';
+		echo '<p class="description">' . esc_html( sprintf( __( 'A public page for this topic. It has %1$d classes, %2$d speakers and %3$d vendors. The description above opens the page.', 'scout-events' ), $n['classes'], $n['speakers'], $n['vendors'] ) ) . '</p></td></tr>';
 	}
 
 	public static function field_new(): void {

@@ -151,7 +151,7 @@ final class Scout_Events_Editor {
 				<div class="se-signup-set">
 					<p class="se-field se-wide">
 						<label for="se-signup"><input type="checkbox" id="se-signup" name="scout_event[signup]" value="1" <?php checked( (bool) $e['signup'] ); ?>> <?php esc_html_e( 'Take sign-ups on this site', 'scout-events' ); ?></label>
-						<span class="se-help"><?php esc_html_e( 'People sign up on the event page and get a ticket with a QR code by email. Scan it at the door to check them in. Uses Capacity below, and Sales open and close above. For a free event, or one paid at the door.', 'scout-events' ); ?></span>
+						<span class="se-help"><?php esc_html_e( 'For free events or pay at the door. People sign up on the event page and get a QR ticket by email.', 'scout-events' ); ?></span>
 					</p>
 					<?php self::field( 'number', $n, 'signup_guests', __( 'Guests each person may bring', 'scout-events' ), (string) $e['signup_guests'], '', __( '0 for none, up to 9.', 'scout-events' ) ); ?>
 				</div>
@@ -166,9 +166,9 @@ final class Scout_Events_Editor {
 						<?php
 						if ( '' !== $set['agreements_url'] ) {
 							/* translators: %s: name of the site's agreements page. */
-							echo esc_html( sprintf( __( 'On the sign-up form and at checkout, each ticket holder ticks that they agree to the %s and the waiver below, and types their name to sign. The date, time and the exact words they agreed to are kept with their ticket.', 'scout-events' ), $set['agreements_label'] ) );
+							echo esc_html( sprintf( __( 'Each ticket holder agrees to the %s and the waiver below and types their name. The words they agreed to are kept.', 'scout-events' ), $set['agreements_label'] ) );
 						} else {
-							esc_html_e( 'On the sign-up form and at checkout, each ticket holder ticks that they agree to the waiver below and types their name to sign. The date, time and the exact words are kept with their ticket. Add the link to your community agreements under Events, Settings.', 'scout-events' );
+							esc_html_e( 'Each ticket holder agrees to the waiver below and types their name. Add your community agreements link in Events, Settings.', 'scout-events' );
 						}
 						echo ' ';
 						esc_html_e( 'With a Minimum age set below, they also confirm their age.', 'scout-events' );
@@ -178,7 +178,7 @@ final class Scout_Events_Editor {
 				<p class="se-field se-wide">
 					<label for="se-waiver"><?php esc_html_e( 'Waiver (optional)', 'scout-events' ); ?></label>
 					<textarea id="se-waiver" name="scout_event[waiver]" rows="6" aria-describedby="se-waiver-help"><?php echo esc_textarea( $e['waiver'] ); ?></textarea>
-					<span class="se-help" id="se-waiver-help"><?php esc_html_e( 'Write it in your own words, or paste the one your lawyer gave you. People read it in a box above the tick box. Changing it later starts a new version; everyone keeps the version they signed.', 'scout-events' ); ?></span>
+					<span class="se-help" id="se-waiver-help"><?php esc_html_e( 'Your own words, or the one your lawyer gave you. Each person keeps the version they signed.', 'scout-events' ); ?></span>
 				</p>
 				<p class="se-field se-wide">
 					<label for="se-photo-ask"><input type="checkbox" id="se-photo-ask" name="scout_event[photo_ask]" value="1" <?php checked( (bool) $e['photo_ask'] ); ?>> <?php esc_html_e( 'Ask each person whether they can be in photos and video', 'scout-events' ); ?></label>

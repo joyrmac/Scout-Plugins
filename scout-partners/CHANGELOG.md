@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **Plainer labels.** Overview is now Home in the Partners menu, and the browser tab reads Partners instead of Scout Partners. The Home screen keeps "Your partners" as its heading. The settings screen is now called Settings, to match its menu item. Page addresses and saved settings are unchanged.
+- **Shorter help text** on the click count and the placements box.
 
 ## 0.1.7 (2026-11-05)
 

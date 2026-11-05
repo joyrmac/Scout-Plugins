@@ -288,7 +288,7 @@ final class Scout_Law_Entries {
 				'id'       => 'law-entries-start',
 				/* translators: 1: days, 2: date */
 				'label'    => sprintf( __( 'Form entries older than %1$d days start deleting on %2$s', 'scout-law' ), $settings['days'], wp_date( get_option( 'date_format' ), $starts ) ),
-				'why'      => __( 'Save any old entry you need first, or star it in Gravity Forms to keep it. The emails you already got stay in your inbox.', 'scout-law' ),
+				'why'      => __( 'Star any old entry you need in Gravity Forms to keep it. Emails already sent to you are not touched.', 'scout-law' ),
 				'minutes'  => 5,
 				'url'      => Scout_Law_Entries_Admin::url(),
 				'button'   => __( 'See what gets deleted', 'scout-law' ),

@@ -141,6 +141,6 @@ final class Scout_Core_Staging {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'Staging copy.', 'scout-core' ) . '</strong> ' . esc_html__( 'Emails go only to Scout, and newsletter, texting and payment services are switched off, so nothing here reaches a real customer.', 'scout-core' ) . '</p></div>';
+		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'Staging copy.', 'scout-core' ) . '</strong> ' . esc_html__( 'Emails go only to Scout, and newsletter, texting and payment services are off, so no real customer is reached.', 'scout-core' ) . '</p></div>';
 	}
 }

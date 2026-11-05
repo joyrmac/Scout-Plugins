@@ -155,7 +155,7 @@ final class Scout_Reviews_Settings {
 		Scout_Admin_UI::open( __( 'Review settings', 'scout-reviews' ), __( 'Your profile on each review platform, how reviews look on the site, and where to put them.', 'scout-reviews' ) );
 
 		if ( ! $with_link ) {
-			Scout_Reviews_Menu::status( 'warn', __( 'No "leave a review" link yet.', 'scout-reviews' ), __( 'Add one below so the review page and the printed cards have somewhere to send people.', 'scout-reviews' ) );
+			Scout_Reviews_Menu::status( 'warn', __( 'No review link.', 'scout-reviews' ), __( 'Add one below so the review page and printed cards have somewhere to send people.', 'scout-reviews' ) );
 		} else {
 			$detail = Scout_Reviews_Google::is_ready()
 				? __( 'Google syncs once a day.', 'scout-reviews' )
@@ -179,7 +179,7 @@ final class Scout_Reviews_Settings {
 
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Your profile on each platform', 'scout-reviews' ); ?></h2>
-				<p><?php esc_html_e( 'Copy the overall rating and total review count exactly as each platform shows them. The rating summary on the site uses these numbers, so visitors see your real totals, not just the reviews you picked. Leave a platform empty to skip it.', 'scout-reviews' ); ?></p>
+				<p><?php esc_html_e( 'Copy each platform\'s overall rating and review count exactly. The rating summary on the site uses them. Leave blank to skip one.', 'scout-reviews' ); ?></p>
 				<ul class="sh-rows srk-platforms">
 					<?php
 					foreach ( $sources as $slug => $info ) :
@@ -270,16 +270,16 @@ final class Scout_Reviews_Settings {
 						<th scope="row"><label for="scout-reviews-disclaimer"><?php esc_html_e( 'Disclaimer (optional)', 'scout-reviews' ); ?></label></th>
 						<td>
 							<textarea id="scout-reviews-disclaimer" class="large-text" rows="3" name="<?php echo esc_attr( $name . '[disclaimer]' ); ?>"><?php echo esc_textarea( $settings['disclaimer'] ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'Shown under every reviews section. Law firms: your state bar may require one with testimonials, for example "Past results do not guarantee a similar outcome." Check your state\'s rules.', 'scout-reviews' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Shown under every reviews section. Some state bars require one with testimonials, so check your state\'s rules.', 'scout-reviews' ); ?></p>
 							<?php if ( class_exists( 'Scout_Law_Disclaimers' ) && in_array( 'reviews', Scout_Law_Disclaimers::places_for( 'reviews' ), true ) ) : ?>
-								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording set on Scout → Policies → Disclaimers prints under the reviews instead of this box.', 'scout-reviews' ); ?></strong></p>
+								<p class="description"><strong><?php esc_html_e( 'Law firm tools is on, so the wording in Scout → Legal pages → Disclaimers shows under the reviews instead.', 'scout-reviews' ); ?></strong></p>
 							<?php endif; ?>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'New 5-star reviews', 'scout-reviews' ); ?></th>
 						<td>
-							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[auto_add_five]' ); ?>" value="1" <?php checked( ! empty( $settings['auto_add_five'] ) ); ?> /> <?php esc_html_e( 'Add new 5-star Google reviews to the site automatically, on the pages they match. Everything else still waits in New reviews.', 'scout-reviews' ); ?></label>
+							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[auto_add_five]' ); ?>" value="1" <?php checked( ! empty( $settings['auto_add_five'] ) ); ?> /> <?php esc_html_e( 'Add new 5-star Google reviews to the pages they match. The rest wait in New reviews.', 'scout-reviews' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Leave off for law firms: bar rules expect a person to approve each testimonial.', 'scout-reviews' ); ?></p>
 						</td>
 					</tr>

@@ -4,6 +4,7 @@
 
 - **Private notes use the shared notice address.** "Send private notes to" is now an optional override. When it is blank, notes go to the notice address in Business info (its "Send notices to" email, else its email, else the site admin email). Before, a blank field always meant the site admin email. An address already saved here keeps getting the notes. The hint now reads "Leave blank to use Business info."
 - **Plainer labels.** Review inbox is now New reviews (menu and screen). The Google box is now Bring in Google reviews, the Display box is now How reviews look, and the closed box with the shortcodes is now Add to a page. Page addresses and saved settings are unchanged.
+- **Shorter, plainer help text.** Screen notes and status lines say one thing each, for example "Your review link is ready." is now "Ready." and the Google box opens with one setup step. The Law firm note now points to Scout → Legal pages → Disclaimers, the new menu name.
 
 ## 0.5.10 (2026-11-05)
 

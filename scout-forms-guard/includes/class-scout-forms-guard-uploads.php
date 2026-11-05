@@ -344,11 +344,11 @@ final class Scout_Forms_Guard_Uploads {
 			return;
 		}
 		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Fix your forms: a hidden file upload field is a security risk.', 'scout-forms-guard' ) . '</strong></p>';
-		echo '<p>' . esc_html__( 'Gravity Forms has a reported security flaw, with no fix yet, that can let a stranger put a harmful file on this site through any File Upload field set to Hidden. These fields need fixing:', 'scout-forms-guard' ) . '</p><ul style="list-style:disc;margin-left:20px">';
+		echo '<p>' . esc_html__( 'A known Gravity Forms flaw lets strangers upload harmful files through File Upload fields set to Hidden. Fix these:', 'scout-forms-guard' ) . '</p><ul style="list-style:disc;margin-left:20px">';
 		foreach ( $found as $f ) {
 			echo '<li><a href="' . esc_url( self::edit_url( $f['form_id'] ) ) . '">' . esc_html( $f['form_title'] ) . '</a>: ' . esc_html( $f['field_label'] ) . ' ' . esc_html( sprintf( /* translators: %d: field id */ __( '(field %d)', 'scout-forms-guard' ), $f['field_id'] ) ) . '</li>';
 		}
-		echo '</ul><p>' . esc_html__( 'To fix one, open the form, click the field, and in its Advanced settings set Visibility to Visible. If the form does not need the field, delete it instead. Save the form, and this message goes away.', 'scout-forms-guard' ) . '</p>';
+		echo '</ul><p>' . esc_html__( 'Open the form, click the field, and set Visibility to Visible under Advanced, or delete it. Then save the form.', 'scout-forms-guard' ) . '</p>';
 		echo '<p>' . ( self::enabled()
 			? esc_html__( 'Until then, Spam protection refuses any file sent to these fields.', 'scout-forms-guard' )
 			: esc_html__( 'Spam protection\'s upload blocking is switched off on this site, so these fields are open until they are fixed.', 'scout-forms-guard' ) ) . '</p></div>';
@@ -383,7 +383,7 @@ final class Scout_Forms_Guard_Uploads {
 		}
 		$note = sprintf(
 			/* translators: %s: form names */
-			__( 'A File Upload field set to Hidden is open to a reported Gravity Forms security flaw. Fix: %s. Set the field\'s Visibility to Visible, or delete it.', 'scout-forms-guard' ),
+			__( 'A File Upload field set to Hidden is open to a known Gravity Forms flaw. Fix: %s. Set it to Visible, or delete it.', 'scout-forms-guard' ),
 			implode( ', ', $titles )
 		);
 		$note .= ' ' . ( self::enabled()

@@ -4,6 +4,7 @@
 
 - **One FAQ system in the schema.** With Scout Core active, a page's questions and answers now go into Core's schema graph instead of a second FAQPage block in the footer. On Core's own FAQ page the questions join Core's FAQPage, skipping any it already asks, so a page never carries two FAQPage entries. The FAQ entry also carries the page's name and dates. Without Scout Core, the separate block prints exactly as before. The answers visitors see do not change; this is a change to the data Google reads.
 - **Plain labels.** "Guide for AI tools" is now "AI guide page" and "View robots.txt" is now "View search engine rules". Same setting, same links.
+- **Shorter, plainer words on the AI search screen.** The intro, status line and help lines are one short sentence each, the guide is called the AI guide page everywhere (status, button and setting), and the fold is plain More options.
 
 ## 0.2.9 (2026-11-05)
 

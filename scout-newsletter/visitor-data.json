@@ -20,7 +20,7 @@
       "where": "The WooCommerce order in this website's database",
       "kept": "Until someone deletes it",
       "shared": "",
-      "when": "only when the checkout box setting is on"
+      "when": "only when the checkout box setting is on, or the cart holds event tickets"
     },
     {
       "what": "A log of sends: the time, a short one-way code made from the email (not the email itself), what was done and how it went",

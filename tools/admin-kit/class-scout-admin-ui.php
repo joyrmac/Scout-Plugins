@@ -692,7 +692,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				$group = 'inbox';
 			} elseif ( $hub && false !== strpos( $s, 'tab=health' ) ) {
 				$group = 'health';
-			} elseif ( 'search health' === $l ) {
+			} elseif ( in_array( $l, array( 'google checks', 'search health' ), true ) ) {
 				$group = 'health';
 			} elseif ( preg_match( '/tab=(changes|sync)\b/', $s ) || 'scout-mail' === $page || false !== strpos( $l, 'theme' ) ) {
 				$group = 'build'; // Operator tools: Email, Chat settings, Site Sync, the Change log, a theme's own screen.

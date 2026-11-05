@@ -1,5 +1,11 @@
 # Scout Newsletter changelog
 
+## Unreleased (2026-11-05)
+
+- **Newsletter owns the one checkout box.** While Scout Newsletter is on, Scout Events prints no ticket box of its own. Newsletter's box shows on any checkout with event tickets, even with the checkout box setting off, and skips a checkout that only pays for bookings already asked on the booking form. One box, one consent record. New `scout_newsletter_checkout_box` filter.
+- **Fixed a wrong consent record on ticket orders.** An order ticked in Scout Events' old box was recorded with a time where the words belong, and could be recorded twice. It is now recorded once, with the words "Send me the newsletter". Ticket orders also keep the event's address word as the campaign.
+- **Plainer words.** "Beehiiv connection" is now "Email list connection" (the help line names Beehiiv), "Consent records" is now "Who said yes", the long More options title is now "More options", "Download every record (CSV)" is now "Download spreadsheet", and "Save settings" is now "Save". Long help text is cut to one short line.
+
 ## 0.1.5 (2026-11-05)
 
 - **The Newsletter screen opens with one status line.** The three status cards are now one line: the Beehiiv connection, whether sending is on, and the sign-up counts. The Beehiiv connection stays in view; tags, what Beehiiv receives and the box on this site move into a closed More options box. The settings form has one Save settings button (it had two), and Test connection is an outlined button. Recent activity is a closed box under the consent records. Same fields, actions and nonces.

@@ -283,7 +283,7 @@ final class Scout_Newsletter_Sources {
 					'name'    => 'scout_newsletter_field',
 					'type'    => 'select',
 					'label'   => __( 'Newsletter consent field', 'scout-newsletter' ),
-					'tooltip' => __( 'When this box is ticked, the person is sent to the newsletter with the words they saw. Use an optional Consent or Checkboxes field that starts unticked.', 'scout-newsletter' ),
+					'tooltip' => __( 'A tick sends the person to the newsletter. Use an optional, unticked Consent or Checkboxes field.', 'scout-newsletter' ),
 					'choices' => $choices,
 				),
 				array(

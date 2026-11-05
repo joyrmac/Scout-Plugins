@@ -104,7 +104,7 @@ final class Scout_Events_Woo {
 				'order'   => 'ASC',
 			)
 		);
-		echo '<p class="description">' . esc_html__( 'Tick the shop products that are tickets for this event: one per ticket type, each with its own price and stock. The event page then lists them with Add to cart, and the event shows as sold out on its own when they are all gone. Leave all unticked to use the ticket link above instead.', 'scout-events' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Tick the shop products that are tickets for this event, one per ticket type. Leave all unticked to use the ticket link above.', 'scout-events' ) . '</p>';
 		self::create_form( $post, ! $all );
 		if ( ! $all ) {
 			return;
@@ -126,7 +126,7 @@ final class Scout_Events_Woo {
 	private static function create_form( $post, bool $open ): void {
 		$e = Scout_Events::event( (int) $post->ID );
 		echo '<details class="se-woo-new"' . ( $open ? ' open' : '' ) . '><summary><strong>' . esc_html__( 'Create a ticket', 'scout-events' ) . '</strong></summary>';
-		echo '<p class="description">' . esc_html__( 'Makes a ticket in the shop for this event and ticks it here. Each buyer names every ticket holder at checkout and gets a QR ticket for each by email.', 'scout-events' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Makes a shop ticket for this event. Buyers name each ticket holder and get a QR ticket for each by email.', 'scout-events' ) . '</p>';
 		echo '<div class="se-grid">';
 		$f = static function ( string $key, string $label, string $type = 'text', string $value = '', string $help = '', string $extra = '' ): void {
 			$id = 'se-new-' . $key;

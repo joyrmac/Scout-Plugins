@@ -271,7 +271,7 @@ final class Scout_Partners_Admin {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p class="sh-note"><?php esc_html_e( 'A click is counted when someone follows a partner\'s logo or name to their website. Search engines and link checkers are left out. No visitor details are kept.', 'scout-partners' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Counts clicks on a partner\'s logo or name. Bots are left out, and no visitor details are kept.', 'scout-partners' ); ?></p>
 			</section>
 		<?php endif; ?>
 		<?php
@@ -298,7 +298,7 @@ final class Scout_Partners_Admin {
 				<textarea id="sp-levels" name="sp[levels]" rows="4" class="large-text code"><?php echo esc_textarea( $s['levels'] ); ?></textarea></p>
 				<p><label for="sp-places"><strong><?php esc_html_e( 'Places partners can appear, one per line', 'scout-partners' ); ?></strong></label><br>
 				<textarea id="sp-places" name="sp[placements]" rows="5" class="large-text code"><?php echo esc_textarea( $s['placements'] ); ?></textarea>
-				<span class="sh-note"><?php esc_html_e( 'Each one becomes a tick box on every partner. Show a place with [scout_partners placement="home-page"], using the name in lower case with dashes.', 'scout-partners' ); ?></span></p>
+				<span class="sh-note"><?php esc_html_e( 'Each becomes a tick box on every partner. Show one with [scout_partners placement="home-page"] (lower case, dashes).', 'scout-partners' ); ?></span></p>
 				<?php if ( class_exists( 'Scout_Events' ) ) : ?>
 					<p><label><input type="checkbox" name="sp[on_events]" value="1" <?php checked( $s['on_events'] ); ?>> <?php esc_html_e( 'Show partners on each event page (those placed on "Event pages", from the event\'s region and the national ones)', 'scout-partners' ); ?></label></p>
 				<?php endif; ?>

@@ -90,7 +90,7 @@ final class Scout_Law_Reviews_Admin {
 		Scout_Admin_UI::open(
 			__( 'Attorney sign-offs', 'scout-law' ),
 			__( 'An attorney reads each page on a schedule and signs it. The page then shows who reviewed it and when.', 'scout-law' ),
-			__( 'Policies', 'scout-law' )
+			__( 'Legal pages', 'scout-law' )
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a message flag only.
 		$flag = isset( $_GET['scout-law'] ) ? sanitize_key( wp_unslash( $_GET['scout-law'] ) ) : '';
@@ -198,7 +198,7 @@ final class Scout_Law_Reviews_Admin {
 			<ul class="sh-list">
 				<li><?php esc_html_e( 'Under each reviewed page\'s words: "Reviewed by" the attorney, linked to their profile, with the date.', 'scout-law' ); ?></li>
 				<li><?php esc_html_e( 'In the page\'s search listing data, so Google and AI tools can see who reviewed it.', 'scout-law' ); ?></li>
-				<li><?php esc_html_e( 'On Home and in the Inbox when pages are due.', 'scout-law' ); ?></li>
+				<li><?php esc_html_e( 'On Home and in To do when pages are due.', 'scout-law' ); ?></li>
 			</ul>
 		</aside>
 

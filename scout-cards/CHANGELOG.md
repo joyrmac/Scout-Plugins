@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **Plainer labels.** Cards & Links is now Cards and links, in the menu and on the screen. The People box is now Card people, ready for its move to People later. The page address and saved settings are unchanged.
+- **Shorter status lines.** "Cards are live." is now "Live." and "Cards and links are off." is now "Off."
 
 ## 1.0.26 (2026-11-05)
 

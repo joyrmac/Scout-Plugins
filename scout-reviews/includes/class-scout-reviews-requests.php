@@ -356,11 +356,11 @@ final class Scout_Reviews_Requests {
 
 		Scout_Admin_UI::open(
 			__( 'Ask for reviews', 'scout-reviews' ),
-			__( 'One link for every review request. Share it by text, by email, or on a printed card with a QR code. If your review link ever changes, update it in Review settings and every card and message keeps working.', 'scout-reviews' )
+			__( 'One link for every review request: by text, by email or on a printed card.', 'scout-reviews' )
 		);
 
 		if ( ! $s['enabled'] ) {
-			Scout_Reviews_Menu::status( 'off', __( 'The review page is off.', 'scout-reviews' ), __( 'Turn it on in More options at the bottom of this screen.', 'scout-reviews' ) );
+			Scout_Reviews_Menu::status( 'off', __( 'Off.', 'scout-reviews' ), __( 'Turn the review page on in More options at the bottom.', 'scout-reviews' ) );
 		} elseif ( ! $links ) {
 			Scout_Reviews_Menu::status(
 				'bad',
@@ -374,7 +374,7 @@ final class Scout_Reviews_Requests {
 				? sprintf( __( 'It goes straight to your %s review box.', 'scout-reviews' ), $target['label'] )
 				/* translators: %s: platform */
 				: sprintf( __( 'It opens your review page, with a button to your %s review box.', 'scout-reviews' ), $target['label'] );
-			Scout_Reviews_Menu::status( 'good', __( 'Your review link is ready.', 'scout-reviews' ), $where, $test );
+			Scout_Reviews_Menu::status( 'good', __( 'Ready.', 'scout-reviews' ), $where, $test );
 		}
 		?>
 		<div class="srk" style="<?php echo esc_attr( Scout_Reviews_Brand::card_vars( $s ) ); ?>">
@@ -389,13 +389,13 @@ final class Scout_Reviews_Requests {
 				<?php if ( $s['notes'] ) : ?>
 					<p class="srk-sublabel"><?php esc_html_e( 'Private note form', 'scout-reviews' ); ?></p>
 					<div class="srk-link"><code><?php echo esc_html( self::note_link() ); ?></code></div>
-					<p class="sh-note"><?php esc_html_e( 'Linked quietly at the bottom of the review page. Notes land in New reviews and only go on the site when the client said yes.', 'scout-reviews' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'At the bottom of the review page. Notes wait in New reviews and go on the site only with the client\'s OK.', 'scout-reviews' ); ?></p>
 				<?php endif; ?>
 			</section>
 
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'QR code and printed cards', 'scout-reviews' ); ?></h2>
-				<p><?php esc_html_e( 'Put the QR code where clients finish with you. Print on card stock: each layout prints on its own letter-size page with light cut lines. The same QR code works on invoices.', 'scout-reviews' ); ?></p>
+				<p><?php esc_html_e( 'Put the QR code where clients finish with you. Each layout prints on its own letter-size page.', 'scout-reviews' ); ?></p>
 				<ul class="sh-rows srk-print-rows">
 					<li class="sh-row">
 						<div class="srk-rowmain">

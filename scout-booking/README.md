@@ -15,7 +15,7 @@ and Events), and the Scout menu bar on every screen:
 
 | Screen | What it does |
 |---|---|
-| Schedule | Requests to approve, the schedule by day or week, paid and unpaid, client details and intake answers, blocked time, the calendar feed. |
+| Schedule | Requests to approve, the schedule by day or week, paid and unpaid, client details and intake answers, blocked time, the phone calendar link. |
 | Session types | The sessions people can book, one plain form each. |
 | Settings | Booking page, owner email, cancellation window, notice and how far ahead, checkout hold, pay window, booking hours, newsletter box. |
 
@@ -136,7 +136,7 @@ owner writes their own.
   phone, paid and unpaid ("Deposit paid: $50.00 of $200.00. $150.00 due at
   the session."), coupon codes, the order link, intake answers, and Cancel.
 - Block time: a day, a range of days, or hours on a day, with a note.
-- The private calendar feed: subscribe to it in a phone calendar; it refreshes
+- The phone calendar link (a private calendar feed): subscribe to it in a phone calendar; it refreshes
   about hourly. "Make a new address" retires the old one.
 - A count of requests on the sidebar item and in the Scout menu, and a line in
   Scout Events' "Needs you" list.

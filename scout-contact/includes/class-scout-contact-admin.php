@@ -136,7 +136,7 @@ final class Scout_Contact_Admin {
 		$n = count( array_filter( $a ) );
 		Scout_Admin_UI::open(
 			__( 'Call buttons', 'scout-contact' ),
-			__( 'A bar pinned to the bottom of the screen on phones, so a visitor can call, text or book a time with one tap from any page.', 'scout-contact' ),
+			__( 'A bar at the bottom of the screen on phones, so visitors can call, text or book with one tap.', 'scout-contact' ),
 			__( 'Call buttons', 'scout-contact' )
 		);
 		settings_errors( $o );
@@ -168,7 +168,7 @@ final class Scout_Contact_Admin {
 					<tr>
 						<th scope="row"><label for="scc-phone"><?php esc_html_e( 'Phone number', 'scout-contact' ); ?></label></th>
 						<td><input id="scc-phone" type="text" class="regular-text" name="<?php echo esc_attr( $o ); ?>[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( '' !== $biz ? $biz : '(919) 555-0100' ); ?>">
-							<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-contact' ); ?> <?php esc_html_e( 'A number typed here is shown in the sheet exactly as typed. Use the same format as the rest of the site.', 'scout-contact' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-contact' ); ?> <?php esc_html_e( 'A number typed here shows exactly as typed.', 'scout-contact' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="scc-text"><?php esc_html_e( 'Texting number', 'scout-contact' ); ?></label></th>

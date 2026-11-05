@@ -3,6 +3,7 @@
 ## Unreleased (2026-11-05)
 
 - **One name in its messages.** The hidden upload warning and its health check now call this feature Spam protection, the same name the rest of the dashboard uses. The checks themselves are unchanged.
+- **Shorter warning.** The hidden upload warning says the problem and the fix in two short lines.
 
 ## 0.3.5 (2026-11-05)
 

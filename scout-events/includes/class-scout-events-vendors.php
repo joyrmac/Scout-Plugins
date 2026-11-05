@@ -438,7 +438,7 @@ final class Scout_Events_Vendors {
 					<p class="se-help"><?php esc_html_e( 'No upcoming events yet.', 'scout-events' ); ?></p>
 				<?php endif; ?>
 			</fieldset>
-			<p class="se-help"><?php esc_html_e( 'The description above is what visitors read. The logo or photo is the featured image. Publish to approve them; they get an email saying they are in.', 'scout-events' ); ?></p>
+			<p class="se-help"><?php esc_html_e( 'Visitors read the description above. Publish to approve, and they get an email saying they are in.', 'scout-events' ); ?></p>
 		</div>
 		<?php
 	}

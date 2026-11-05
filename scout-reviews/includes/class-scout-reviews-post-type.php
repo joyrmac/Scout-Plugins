@@ -100,7 +100,7 @@ final class Scout_Reviews_Post_Type {
 			return;
 		}
 		echo '<p class="description" style="margin:12px 0 4px;">'
-			. esc_html__( 'Paste the review text below exactly as the reviewer wrote it. Published reviews show on the site; save as a draft to keep one hidden.', 'scout-reviews' )
+			. esc_html__( 'Paste the review exactly as the reviewer wrote it. Save it as a draft to keep it hidden.', 'scout-reviews' )
 			. '</p>';
 	}
 
@@ -151,14 +151,14 @@ final class Scout_Reviews_Post_Type {
 							</option>
 						<?php endfor; ?>
 					</select>
-					<p class="description"><?php esc_html_e( 'Use the rating the reviewer actually gave. Facebook uses recommendations instead of stars.', 'scout-reviews' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Use the rating the reviewer gave. Facebook uses recommendations, not stars.', 'scout-reviews' ); ?></p>
 				</td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="scout-review-url"><?php esc_html_e( 'Link to the review', 'scout-reviews' ); ?></label></th>
 				<td>
 					<input type="url" id="scout-review-url" class="large-text" name="scout_review[url]" value="<?php echo esc_attr( $url ); ?>" placeholder="https://" <?php disabled( $locked ); ?> />
-					<p class="description"><?php esc_html_e( 'The page where anyone can read the original. It becomes the "View on Google" link on the card. Leave empty for a direct client testimonial.', 'scout-reviews' ); ?></p>
+					<p class="description"><?php esc_html_e( 'The page with the original, for the "View on Google" link. Leave blank for a direct client testimonial.', 'scout-reviews' ); ?></p>
 				</td>
 			</tr>
 			<tr>

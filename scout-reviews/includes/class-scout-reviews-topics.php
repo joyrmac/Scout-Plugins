@@ -231,7 +231,7 @@ final class Scout_Reviews_Topics {
 			<th scope="row"><label for="scout-keywords"><?php esc_html_e( 'Keywords', 'scout-reviews' ); ?></label></th>
 			<td>
 				<input type="text" id="scout-keywords" name="scout_keywords" value="<?php echo esc_attr( $value ); ?>" placeholder="<?php echo esc_attr( $theme ); ?>" />
-				<p class="description"><?php esc_html_e( 'Comma separated. When a new review mentions one of these, the inbox suggests this topic. Leave empty to use the theme\'s list (shown in gray).', 'scout-reviews' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Comma separated. A new review that mentions one gets this topic suggested. Leave blank to use the theme\'s list.', 'scout-reviews' ); ?></p>
 			</td>
 		</tr>
 		<?php
