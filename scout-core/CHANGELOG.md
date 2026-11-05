@@ -1,5 +1,10 @@
 # Scout Core — Changelog
 
+## 1.10.0 (2026-11-05)
+
+- **More design tokens from the theme's DESIGN.md (Joy, 2026-11-05, Client Design Playbook decision 2).** `scout_design()` now also reads `colors.night`, `on_night`, `on_night_2` (a dark band and its text), `colors.highlight` and `highlight_text` (a second brand color and its readable text shade), `colors.good`, `warn`, `bad` (meaning colors), a `type` scale (`hero`, `h2`, `h3`, `body`, `small`, `label`), a `space` scale (`1` to `8`, `container`, `gutter`) and `motion` (`dur_fast`, `dur_enter`, `ease_out`, `ease_in`). Every key is optional; a DESIGN.md without them keeps working on Scout's defaults, and the highlight pair follows the theme's accent instead of Scout's blue. `scout_design_css()` and `tools/design-build.php` write them as `--scout-night`, `--scout-highlight-text`, `--scout-fs-hero`, `--scout-space-1`, `--scout-container`, `--scout-dur-fast`, `--scout-ease-out` and so on. The build adds the new colors to the theme.json palette (Night, On night, Muted on night, Highlight, Highlight text, Good, Warn, Bad); the scales stay out of theme.json.
+- **More contrast checks.** Text on the dark band and highlight text on the page and on cards must pass 4.5:1 (the build fails otherwise); muted text on the dark band and good, warn and bad as text on cards warn under 4.5:1. The original four pairs are unchanged. New helpers `Scout_Core_Design::derive()`, `variables()` and `text_shade()`.
+
 ## 1.9.0 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

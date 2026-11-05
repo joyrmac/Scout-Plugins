@@ -7,14 +7,17 @@
  *
  * One source: the front matter on top of DESIGN.md. From it:
  *   - theme.json (block themes, or any theme that already has one): the palette slugs
- *     bg, surface, surface-2, text, text-2, line, accent, accent-fill, on-accent; the
- *     font families heading, body, label (with @font-face when a file is named); and
+ *     bg, surface, surface-2, text, text-2, line, accent, accent-fill, on-accent, night,
+ *     on-night, on-night-2, highlight, highlight-text, good, warn, bad; the font families
+ *     heading, body, label (with @font-face when a file is named); and
  *     settings.custom.scout (mode, radius, logo, mark). Entries the theme already has
- *     under other slugs are kept as they are.
- *   - assets/css/design-tokens.css: a :root block of --scout-* variables (classic themes
- *     enqueue it; block themes may too).
+ *     under other slugs are kept as they are. The type, space and motion scales stay
+ *     out of theme.json.
+ *   - assets/css/design-tokens.css: a :root block of --scout-* variables, scales included
+ *     (classic themes enqueue it; block themes may too).
  * The contrast pairs §4 requires must pass 4.5:1 or nothing is written and the build
- * fails: button text on the accent fill, text on the page, text on cards.
+ * fails: button text on the accent fill, text on the page, text on cards, text on the
+ * dark band, highlight text on the page and on cards.
  *
  * Uses Scout Core's own reader (scout-core/includes/design.php), so the theme and
  * the plugins can never read the same file two ways. Needs PHP only, no WordPress.
@@ -47,6 +50,7 @@ if ( null === $parsed ) {
 	exit( 1 );
 }
 $tokens = Scout_Core_Design::merge( Scout_Core_Design::defaults(), $parsed['tokens'] );
+$tokens = Scout_Core_Design::derive( $tokens, (array) ( $parsed['tokens']['colors'] ?? array() ) );
 if ( empty( $parsed['tokens']['colors'] ) ) {
 	echo "::error file={$design_md}::DESIGN.md has no colors block in its front matter (see Site Standard §4 for the format).\n";
 	exit( 1 );
@@ -91,6 +95,14 @@ if ( $is_block ) {
 		'accent'      => 'Accent',
 		'accent_fill' => 'Accent fill',
 		'on_accent'   => 'On accent',
+		'night'          => 'Night',
+		'on_night'       => 'On night',
+		'on_night_2'     => 'Muted on night',
+		'highlight'      => 'Highlight',
+		'highlight_text' => 'Highlight text',
+		'good'           => 'Good',
+		'warn'           => 'Warn',
+		'bad'            => 'Bad',
 	);
 	$palette = (array) ( $tj['settings']['color']['palette'] ?? array() );
 	$by_slug = array();
@@ -174,27 +186,12 @@ if ( $is_block ) {
 /* ---------- assets/css/design-tokens.css ---------- */
 $css_dir  = $dir . '/assets/css';
 $css_path = $css_dir . '/design-tokens.css';
-// css() reads the live site; build the block from these tokens instead.
-$vars = array();
-foreach ( (array) $tokens['colors'] as $k => $v ) {
-	$vars[ '--scout-' . str_replace( '_', '-', $k ) ] = (string) $v;
-}
-foreach ( (array) $tokens['radius'] as $k => $v ) {
-	$vars[ '--scout-radius-' . $k ] = (string) $v;
-}
-foreach ( (array) $tokens['fonts'] as $role => $f ) {
-	if ( ! empty( $f['family'] ) ) {
-		$generic = ( false !== stripos( (string) $f['family'], 'mono' ) ) ? 'monospace' : 'sans-serif';
-		$vars[ '--scout-font-' . $role ] = '"' . str_replace( '"', '', (string) $f['family'] ) . '", ' . $generic;
-	}
-	if ( ! empty( $f['weight'] ) ) {
-		$vars[ '--scout-weight-' . $role ] = (string) (int) $f['weight'];
-	}
-}
-$vars['--scout-mode'] = (string) $tokens['mode'];
-$css  = "/* Generated from DESIGN.md by Scout-Plugins/tools/design-build.php. Edit DESIGN.md, not this file. */\n:root {\n";
+// css() reads the live site; build the block from these tokens instead, the same way.
+$vars                 = Scout_Core_Design::variables( $tokens );
+$vars['--scout-mode'] = preg_replace( '/[^\w-]/', '', (string) $tokens['mode'] );
+$css                  = "/* Generated from DESIGN.md by Scout-Plugins/tools/design-build.php. Edit DESIGN.md, not this file. */\n:root {\n";
 foreach ( $vars as $name => $value ) {
-	$css .= "\t{$name}: " . preg_replace( '/[^\w\s#,.()%"\'-]/', '', $value ) . ";\n";
+	$css .= "\t{$name}: {$value};\n";
 }
 $css .= "}\n";
 $old_css = file_exists( $css_path ) ? (string) file_get_contents( $css_path ) : null;

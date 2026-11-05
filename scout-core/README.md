@@ -208,15 +208,40 @@ every plugin the same tokens, so no plugin carries a color picker for what the
 theme already says:
 
 ```php
-$d = scout_design();                       // mode, colors, fonts, radius, logo, mark (+ logo_url, mark_url)
+$d = scout_design();                       // mode, colors, fonts, radius, type, space, motion, logo, mark (+ logo_url, mark_url)
 $d = scout_design( 'call buttons' );       // the "## Feature: call buttons" section laid over the tokens
-echo '<style>' . scout_design_css() . '</style>';   // :root{--scout-bg:...;--scout-accent-fill:...;--scout-radius-card:...}
+echo '<style>' . scout_design_css() . '</style>';   // :root{--scout-bg:...;--scout-accent-fill:...;--scout-radius-card:...;--scout-fs-hero:...}
 scout_design_issues();                     // contrast pairs that fail 4.5:1 (Scout Build shows them in Site status)
 ```
 
 Order of truth: Scout's defaults, then the active theme's `theme.json`
 palette and fonts, then the parent theme's `DESIGN.md`, then the child's. A
 theme without DESIGN.md still gets sensible tokens.
+
+The front-matter keys, every one optional (1.10.0 added the second group):
+
+- `colors`: `bg`, `surface`, `surface_2`, `text`, `text_2`, `line`, `accent`,
+  `accent_fill`, `on_accent`; plus `night`, `on_night`, `on_night_2` (a dark band
+  and its text), `highlight`, `highlight_text` (a second brand color and the shade
+  of it that reads as text), `good`, `warn`, `bad` (meaning colors). Left out,
+  `highlight` follows the accent and `highlight_text` is the accent fill, or the
+  accent stepped toward the text color until it reads at 4.5:1 on the page and on
+  cards.
+- `fonts` (`heading`, `body`, `label`), `radius` (`pill`, `card`, `control`,
+  `chip`), `logo`, `mark`, `mode`.
+- `type`: `hero`, `h2`, `h3`, `body`, `small`, `label`, as CSS lengths (`clamp()`
+  welcome). Written as `--scout-fs-hero` and so on.
+- `space`: `1` to `8` on an 8px scale, plus `container` (1160px) and `gutter`
+  (24px). Written as `--scout-space-1`, `--scout-container`, `--scout-gutter`.
+- `motion`: `dur_fast` (200ms), `dur_enter` (280ms), `ease_out`, `ease_in`.
+  Written as `--scout-dur-fast`, `--scout-ease-out` and so on.
+
+Contrast pairs checked: button text on the accent fill, text on the page, text on
+cards, text on the dark band, and highlight text on the page and on cards must
+pass 4.5:1. Muted text on the page and on the dark band, and good, warn and bad as
+text on cards, warn under 4.5:1. `tools/design-build.php` writes the colors to the
+theme.json palette and every token to `assets/css/design-tokens.css`; the scales
+stay out of theme.json.
 
 `scout_core_owns( 'hours' )` tells a theme whether a plugin does a job on this
 site, for the few fallbacks the standard allows (rule 6): the theme's own hours

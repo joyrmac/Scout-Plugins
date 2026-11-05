@@ -3,7 +3,7 @@
  * The site's design, read from the theme's DESIGN.md (Site Standard §4), and
  * which jobs a plugin owns on this site (rule 6).
  *
- *   $d = scout_design();                 // tokens: mode, colors, fonts, radius, logo, mark
+ *   $d = scout_design();                 // tokens: mode, colors, fonts, radius, type, space, motion, logo, mark
  *   $d = scout_design( 'call buttons' ); // the "## Feature: call buttons" section merged over the tokens
  *   echo scout_design_css();             // a :root block of --scout-* variables for inline styles
  *   scout_design_issues();               // contrast pairs that fail (rule 10)
@@ -70,7 +70,8 @@ final class Scout_Core_Design {
 		$tokens   = self::defaults();
 		$features = array();
 		$sources  = array();
-		$tokens   = self::merge( $tokens, self::from_theme_json() );
+		$named    = self::from_theme_json();
+		$tokens   = self::merge( $tokens, $named );
 		$dirs     = array();
 		if ( function_exists( 'get_template_directory' ) ) {
 			$dirs[] = get_template_directory();
@@ -85,8 +86,10 @@ final class Scout_Core_Design {
 			}
 			$sources[] = $dir . '/' . self::FILE;
 			$tokens    = self::merge( $tokens, $parsed['tokens'] );
+			$named     = self::merge( $named, $parsed['tokens'] );
 			$features  = array_merge( $features, $parsed['features'] );
 		}
+		$tokens            = self::derive( $tokens, (array) ( $named['colors'] ?? array() ) );
 		$tokens['sources'] = $sources;
 		$tokens            = self::resolve_files( $tokens, $dirs );
 		self::$cache[ $sheet ] = array( 'tokens' => $tokens, 'features' => $features );
@@ -114,6 +117,18 @@ final class Scout_Core_Design {
 				'accent'      => '#0E8FE6',
 				'accent_fill' => '#0A78C2',
 				'on_accent'   => '#FFFFFF',
+				// A dark band (a footer, a quote strip) and its text.
+				'night'          => '#0B0B0B',
+				'on_night'       => '#F5F5F7',
+				'on_night_2'     => '#B5B5B8',
+				// A second brand color and a shade of it that reads as text. Both follow
+				// the accent unless DESIGN.md names them (see derive()).
+				'highlight'      => '#0E8FE6',
+				'highlight_text' => '#0A78C2',
+				// Meaning colors: a pass, a caution, a problem.
+				'good'           => '#0E9E73',
+				'warn'           => '#FBB024',
+				'bad'            => '#F2553D',
 			),
 			'fonts'  => array(
 				'heading' => array( 'family' => 'Hanken Grotesk', 'weight' => 600, 'file' => '' ),
@@ -121,6 +136,35 @@ final class Scout_Core_Design {
 				'label'   => array( 'family' => 'Geist Mono', 'weight' => 500, 'file' => '', 'case' => 'upper', 'tracking' => '1.4px' ),
 			),
 			'radius' => array( 'pill' => '980px', 'card' => '18px', 'control' => '12px', 'chip' => '8px' ),
+			// The type scale, as CSS lengths (clamp() welcome).
+			'type'   => array(
+				'hero'  => 'clamp(40px, 7vw, 72px)',
+				'h2'    => 'clamp(30px, 4.4vw, 46px)',
+				'h3'    => 'clamp(22px, 2.6vw, 28px)',
+				'body'  => '17px',
+				'small' => '15px',
+				'label' => '12px',
+			),
+			// Spacing on an 8px scale, plus the page width and its side gutter.
+			'space'  => array(
+				'1'         => '8px',
+				'2'         => '16px',
+				'3'         => '24px',
+				'4'         => '32px',
+				'5'         => '40px',
+				'6'         => '48px',
+				'7'         => '56px',
+				'8'         => '64px',
+				'container' => '1160px',
+				'gutter'    => '24px',
+			),
+			// How long and how things move.
+			'motion' => array(
+				'dur_fast'  => '200ms',
+				'dur_enter' => '280ms',
+				'ease_out'  => 'cubic-bezier(.2,.8,.2,1)',
+				'ease_in'   => 'cubic-bezier(.4,0,1,1)',
+			),
 			'logo'   => '',
 			'mark'   => '',
 		);
@@ -202,7 +246,7 @@ final class Scout_Core_Design {
 				break;
 			}
 			++$i;
-			if ( ! preg_match( '/^([A-Za-z_][\w-]*)\s*:\s*(.*)$/', $text, $m ) ) {
+			if ( ! preg_match( '/^([A-Za-z0-9_][\w-]*)\s*:\s*(.*)$/', $text, $m ) ) {
 				continue; // Lists and odd lines are not part of the token format.
 			}
 			$key   = self::key( $m[1] );
@@ -318,6 +362,78 @@ final class Scout_Core_Design {
 	}
 
 	/**
+	 * Fill the highlight pair from the accent when no source named one, so a
+	 * one-color site stays one color and never shows Scout's own blue.
+	 *
+	 * highlight_text is the accent fill (or the named highlight) when that reads at
+	 * 4.5:1 on the page and on cards; otherwise the highlight is stepped toward the
+	 * text color until it does.
+	 *
+	 * @param array                $tokens The merged tokens.
+	 * @param array<string,string> $named  The colors DESIGN.md or theme.json set themselves.
+	 */
+	public static function derive( array $tokens, array $named = array() ): array {
+		$c = (array) ( $tokens['colors'] ?? array() );
+		if ( empty( $c['accent'] ) ) {
+			return $tokens;
+		}
+		$own_highlight = ! empty( $named['highlight'] );
+		if ( ! $own_highlight ) {
+			$tokens['colors']['highlight'] = $c['accent'];
+		}
+		if ( empty( $named['highlight_text'] ) ) {
+			$brand = (string) $tokens['colors']['highlight'];
+			$first = $own_highlight ? $brand : (string) ( $c['accent_fill'] ?? $c['accent'] );
+			$tokens['colors']['highlight_text'] = self::text_shade(
+				$first,
+				$brand,
+				(string) ( $c['text'] ?? '#000000' ),
+				array( (string) ( $c['bg'] ?? '' ), (string) ( $c['surface'] ?? '' ) )
+			);
+		}
+		return $tokens;
+	}
+
+	/**
+	 * A shade of $brand that reads as text on every background given: $first when
+	 * it already passes, else $brand mixed toward $toward in 5% steps until it does.
+	 * Backgrounds this cannot read (rgba, names) are skipped.
+	 */
+	public static function text_shade( string $first, string $brand, string $toward, array $backgrounds, float $need = 4.5 ): string {
+		$backgrounds = array_filter( $backgrounds, array( __CLASS__, 'rgb' ) );
+		$passes      = static function ( string $color ) use ( $backgrounds, $need ): bool {
+			foreach ( $backgrounds as $bg ) {
+				if ( self::contrast( $color, $bg ) < $need ) {
+					return false;
+				}
+			}
+			return true;
+		};
+		if ( $passes( $first ) ) {
+			return $first;
+		}
+		$from = self::rgb( $brand );
+		$to   = self::rgb( $toward );
+		if ( null === $from || null === $to ) {
+			return $first;
+		}
+		$shade = $first;
+		for ( $step = 1; $step <= 20; $step++ ) {
+			$k     = $step / 20;
+			$shade = sprintf(
+				'#%02X%02X%02X',
+				(int) round( $from[0] + ( $to[0] - $from[0] ) * $k ),
+				(int) round( $from[1] + ( $to[1] - $from[1] ) * $k ),
+				(int) round( $from[2] + ( $to[2] - $from[2] ) * $k )
+			);
+			if ( $passes( $shade ) ) {
+				return $shade;
+			}
+		}
+		return $shade;
+	}
+
+	/**
 	 * Tokens a block theme's theme.json already states: palette slugs named
 	 * like ours (bg, surface, text, accent...) or like WordPress's usual ones
 	 * (base, contrast, primary), and the heading and body font families.
@@ -344,6 +460,14 @@ final class Scout_Core_Design {
 			'accent'      => array( 'accent', 'primary', 'brand' ),
 			'accent_fill' => array( 'accent_fill', 'accent_dark', 'primary_dark' ),
 			'on_accent'   => array( 'on_accent', 'on_primary' ),
+			'night'          => array( 'night' ),
+			'on_night'       => array( 'on_night' ),
+			'on_night_2'     => array( 'on_night_2' ),
+			'highlight'      => array( 'highlight', 'secondary' ),
+			'highlight_text' => array( 'highlight_text' ),
+			'good'           => array( 'good', 'success' ),
+			'warn'           => array( 'warn', 'warning' ),
+			'bad'            => array( 'bad', 'error', 'danger' ),
 		);
 		foreach ( $want as $token => $slugs ) {
 			foreach ( $slugs as $slug ) {
@@ -400,15 +524,30 @@ final class Scout_Core_Design {
 
 	/** A :root block of custom properties (--scout-bg, --scout-accent, --scout-radius-card, --scout-font-heading...). */
 	public static function css( string $prefix = '--scout-', string $selector = ':root' ): string {
-		$t    = self::get();
+		$css = '';
+		foreach ( self::variables( self::get(), $prefix ) as $name => $value ) {
+			$css .= $name . ':' . $value . ';';
+		}
+		return $selector . '{' . $css . '}';
+	}
+
+	/**
+	 * The custom properties for a token set, name => value, values already made
+	 * safe for CSS. Colors are --scout-<name>; radius-, font- and weight- carry
+	 * their role; the type scale is fs-, spacing is space- (container and gutter
+	 * bare), motion is dur- and ease-. Underscores become hyphens throughout.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function variables( array $t, string $prefix = '--scout-' ): array {
 		$vars = array();
-		foreach ( (array) $t['colors'] as $k => $v ) {
-			$vars[ $prefix . str_replace( '_', '-', $k ) ] = (string) $v;
+		foreach ( (array) ( $t['colors'] ?? array() ) as $k => $v ) {
+			$vars[ $prefix . self::dash( $k ) ] = (string) $v;
 		}
-		foreach ( (array) $t['radius'] as $k => $v ) {
-			$vars[ $prefix . 'radius-' . $k ] = (string) $v;
+		foreach ( (array) ( $t['radius'] ?? array() ) as $k => $v ) {
+			$vars[ $prefix . 'radius-' . self::dash( $k ) ] = (string) $v;
 		}
-		foreach ( (array) $t['fonts'] as $role => $f ) {
+		foreach ( (array) ( $t['fonts'] ?? array() ) as $role => $f ) {
 			$family = (string) ( $f['family'] ?? '' );
 			if ( '' !== $family ) {
 				$generic = ( false !== stripos( $family, 'mono' ) ) ? 'monospace' : 'sans-serif';
@@ -418,11 +557,30 @@ final class Scout_Core_Design {
 				$vars[ $prefix . 'weight-' . $role ] = (string) (int) $f['weight'];
 			}
 		}
-		$css = '';
-		foreach ( $vars as $name => $value ) {
-			$css .= $name . ':' . preg_replace( '/[^\w\s#,.()%"\'-]/', '', $value ) . ';';
+		foreach ( (array) ( $t['type'] ?? array() ) as $k => $v ) {
+			$vars[ $prefix . 'fs-' . self::dash( $k ) ] = self::length( $v );
 		}
-		return $selector . '{' . $css . '}';
+		foreach ( (array) ( $t['space'] ?? array() ) as $k => $v ) {
+			$name = in_array( (string) $k, array( 'container', 'gutter' ), true ) ? self::dash( $k ) : 'space-' . self::dash( $k );
+			$vars[ $prefix . $name ] = self::length( $v );
+		}
+		foreach ( (array) ( $t['motion'] ?? array() ) as $k => $v ) {
+			$vars[ $prefix . self::dash( $k ) ] = (string) $v;
+		}
+		foreach ( $vars as $name => $value ) {
+			$vars[ $name ] = (string) preg_replace( '/[^\w\s#,.()%"\'-]/', '', $value );
+		}
+		return $vars;
+	}
+
+	/** on_night_2 becomes on-night-2. */
+	private static function dash( $key ): string {
+		return str_replace( '_', '-', (string) $key );
+	}
+
+	/** A bare number in a length slot means pixels. */
+	private static function length( $v ): string {
+		return is_int( $v ) || is_float( $v ) ? $v . 'px' : (string) $v;
 	}
 
 	/** WCAG contrast ratio of two colors (hex or rgb()); 0 when one cannot be read. */
@@ -471,8 +629,10 @@ final class Scout_Core_Design {
 
 	/**
 	 * The pairs DESIGN.md must keep readable (§4): white text on the accent fill,
-	 * and body text on the page and on cards, all at 4.5:1. Muted text on the page
-	 * is checked too, as a warning. Each row: pair, ratio, need, ok, level.
+	 * body text on the page and on cards, text on the dark band, and the highlight
+	 * text shade on the page and on cards, all at 4.5:1. Muted text on the page and
+	 * on the dark band, and the meaning colors as text on cards, are checked too, as
+	 * warnings. Each row: pair, ratio, need, ok, level.
 	 *
 	 * @return array<int,array{pair:string,ratio:float,need:float,ok:bool,level:string}>
 	 */
@@ -483,6 +643,13 @@ final class Scout_Core_Design {
 			array( 'text', 'bg', 4.5, 'fail', 'Text on the page' ),
 			array( 'text', 'surface', 4.5, 'fail', 'Text on cards' ),
 			array( 'text_2', 'bg', 4.5, 'warn', 'Muted text on the page' ),
+			array( 'on_night', 'night', 4.5, 'fail', 'Text on the dark band' ),
+			array( 'on_night_2', 'night', 4.5, 'warn', 'Muted text on the dark band' ),
+			array( 'highlight_text', 'bg', 4.5, 'fail', 'Highlight text on the page' ),
+			array( 'highlight_text', 'surface', 4.5, 'fail', 'Highlight text on cards' ),
+			array( 'good', 'surface', 4.5, 'warn', 'Good as text on cards' ),
+			array( 'warn', 'surface', 4.5, 'warn', 'Warn as text on cards' ),
+			array( 'bad', 'surface', 4.5, 'warn', 'Bad as text on cards' ),
 		);
 		$out = array();
 		foreach ( $pairs as list( $fg, $bg, $need, $level, $label ) ) {
