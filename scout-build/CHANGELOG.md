@@ -2,7 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
-- **A chat change request shows once in the Inbox.** A change request from the site chat already shows as a request; the Inbox no longer lists the same chat as a chat question too.
+- **A chat change request shows once in To do.** A change request from the site chat already shows as a request; To do no longer lists the same chat as a chat message too.
+- **New group names on screen** (admin kit 1.11.0). The Inbox screen and menu item are "To do", and the health report screen and menu item are "Site status", matching their groups. The Home link, the admin bar, the dashboard widget button and the To do emails use the new names. In To do, chat items are "Chat messages" and site check items are "Check requests", matching those plugins' screens.
 - **Plainer names on screen.** Only the words people read changed; addresses, settings and saved values are the same.
   - The Site log is "Site history" for everyone, in the menu and the title. The client's view was called "Your site" and now uses the same name. Links, the approval email and the Hub keys line say Site history too.
   - Release rings read as the update order: "Update order: first", "a day later" or "two days later", with a plain Save button. The Updates box, the saved message, the "Installs by itself" line and the wp-config note use the same words.
@@ -11,6 +12,7 @@
   - Export CSV and Download CSV on Site history are "Download spreadsheet".
   - The Email screen's Settings box is "Sending address".
   - On Updates, the Site Sync box is "Page copy", with an Open Page copy button.
+- **Shorter, plainer help text everywhere** (Sean's voice, admin kit DESIGN.md 2a). Screen openings, notes and statuses are one short sentence. Buttons match what they open: Fill from theme, Import posts, Open Change log, Request a change. "Security lock" reads "Secure connection (HTTPS)", and the AI crawlers "Welcome" status reads "Allowed". The AI search note no longer names a specific AI company in its list. Theme key errors point to Scout tools, Updates.
 
 ## 0.12.2 (2026-11-05)
 
