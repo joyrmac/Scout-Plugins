@@ -55,6 +55,7 @@ require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-themes.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-rings.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-approval.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-watch.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-wp-health.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-log.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-log-api.php';
 
@@ -72,6 +73,7 @@ Scout_Hub_Themes::boot();
 Scout_Hub_Rings::boot();
 Scout_Hub_Approval::boot();
 Scout_Hub_Watch::boot();
+Scout_Hub_WP_Health::boot();
 Scout_Hub_Log::boot();
 Scout_Hub_Log_API::boot();
 

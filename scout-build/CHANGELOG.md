@@ -2,6 +2,7 @@
 
 ## 0.12.1 (2026-11-05)
 
+- **One Site health, not two (Joy, 2026-11-05).** Scout now runs WordPress's own Site Health checks once a day, with its daily check, and lists what they found by name in Scout's Site health under **WordPress checks**, with plain advice where there is some. Items only the host can change (disk space, opcode cache, object cache and similar) are listed once as "for the host, nothing to do here" and do not count. WordPress's own badge is kept in step. Tools > Site Health no longer needs opening to be current.
 - **Form emails on Scout's own sites.** Site health no longer says a form "emails only Scout, not the business" on Scout's own sites, where Scout is the business. A site counts as Scout's own when scout-setup.json says `"scout_own_site": true`, its address is on scoutraleigh.com, or Business info's email is a scoutraleigh.com address. Found on scoutraleigh.com right after the 0.12.0 release.
 
 ## 0.12.0 (2026-11-04)

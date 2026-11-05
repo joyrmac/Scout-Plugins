@@ -681,25 +681,8 @@ final class Scout_Hub_Health {
 			$out[] = $reviews;
 		}
 
-		$health = json_decode( (string) get_transient( 'health-check-site-status-result' ), true );
-		if ( is_array( $health ) ) {
-			$critical = (int) ( $health['critical'] ?? 0 );
-			$advised  = (int) ( $health['recommended'] ?? 0 );
-			$out[]    = array(
-				'label' => __( 'Site Health', 'scout-build' ),
-				'value' => $critical ? __( 'Needs attention', 'scout-build' ) : __( 'Good', 'scout-build' ),
-				'state' => $critical ? 'bad' : ( $advised > 3 ? 'warn' : 'good' ),
-				/* translators: 1: critical count, 2: recommended count */
-				'note'  => sprintf( __( '%1$d critical, %2$d recommended (WordPress Site Health).', 'scout-build' ), $critical, $advised ),
-			);
-		} else {
-			$out[] = array(
-				'label' => __( 'Site Health', 'scout-build' ),
-				'value' => __( 'Not checked yet', 'scout-build' ),
-				'state' => 'warn',
-				'note'  => __( 'Open Tools, Site Health once to run WordPress\'s own check.', 'scout-build' ),
-			);
-		}
+		// WordPress's own Site Health, run daily by Scout and listed by name (Scout_Hub_WP_Health).
+		$out[] = Scout_Hub_WP_Health::row();
 		return $out;
 	}
 
