@@ -1119,7 +1119,7 @@ final class Scout_Members_Admin {
 		?>
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Choose your file', 'scout-members' ); ?></h2>
-			<p><?php esc_html_e( 'Moving from another system, such as Squarespace? Save your members as a CSV file and add it here. Each person becomes an active member on their plan.', 'scout-members' ); ?></p>
+			<p><?php esc_html_e( 'Save your members as a CSV file, such as a Squarespace export, and add it here.', 'scout-members' ); ?></p>
 			<?php if ( is_array( $report ) ) : ?>
 				<?php delete_transient( 'scout_members_import_' . get_current_user_id() ); ?>
 				<div class="sm-report">

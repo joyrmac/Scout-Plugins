@@ -129,7 +129,7 @@ final class Scout_RVPark_Admin {
 
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Where this shows', 'scout-rvpark' ); ?></h2>
-			<p class="sh-note"><?php esc_html_e( 'Every page on your site that lists sites, rates or amenities reads from here, so a new rate only needs changing once.', 'scout-rvpark' ); ?></p>
+			<p class="sh-note"><?php esc_html_e( 'Every page that lists sites, rates or amenities reads from here.', 'scout-rvpark' ); ?></p>
 		</section>
 		<?php
 		Scout_Admin_UI::close();

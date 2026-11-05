@@ -108,7 +108,7 @@ final class Scout_Partners_Admin {
 			. '<label>' . esc_html__( 'until', 'scout-partners' ) . ' <input type="date" name="sp[ends]" value="' . esc_attr( $p['ends'] ) . '"></label></p>'
 			. '<p class="description">' . esc_html__( 'Outside these dates the partner comes off the site by itself. Leave both empty to run until you change it.', 'scout-partners' ) . '</p>';
 		if ( taxonomy_exists( 'scout_region' ) ) {
-			echo '<p class="description">' . esc_html__( 'Regions: tick them in the Regions box. A partner with no region shows everywhere; one with regions shows beside those regions\' events.', 'scout-partners' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'A partner with no region ticked shows everywhere.', 'scout-partners' ) . '</p>';
 		}
 		$clicks = Scout_Partners::clicks( (int) $post->ID );
 		if ( $clicks ) {

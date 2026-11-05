@@ -151,8 +151,7 @@ final class Scout_Contact_Admin {
 			$headline = __( 'Off.', 'scout-contact' );
 			$detail   = $n ? __( 'Tick Show the call bar on phones below.', 'scout-contact' ) : __( 'Add a phone number in Business info or below, or a booking link below.', 'scout-contact' );
 		}
-		$detail .= ' ' . __( 'It stays hidden on computers, where the header already shows the phone number and booking button.', 'scout-contact' );
-		$detail .= ' ' . ( class_exists( 'Scout_Analytics' ) ? __( 'Taps are counted in Analytics as contact_call, contact_text, contact_book or contact_open.', 'scout-contact' ) : __( 'Taps are not counted until Scout Analytics is on.', 'scout-contact' ) );
+		// Headline plus one sentence (DESIGN 2a #2). The rest sits in More under the buttons.
 		self::ui_status( $on ? 'good' : 'off', $headline, $detail );
 		?>
 
@@ -168,13 +167,13 @@ final class Scout_Contact_Admin {
 					<tr>
 						<th scope="row"><label for="scc-phone"><?php esc_html_e( 'Phone number', 'scout-contact' ); ?></label></th>
 						<td><input id="scc-phone" type="text" class="regular-text" name="<?php echo esc_attr( $o ); ?>[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( '' !== $biz ? $biz : '(919) 555-0100' ); ?>">
-							<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-contact' ); ?> <?php esc_html_e( 'A number typed here shows exactly as typed.', 'scout-contact' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Blank uses Business info. A number typed here shows as typed.', 'scout-contact' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="scc-text"><?php esc_html_e( 'Texting number', 'scout-contact' ); ?></label></th>
 						<td><input id="scc-text" type="text" class="regular-text" name="<?php echo esc_attr( $o ); ?>[text]" value="<?php echo esc_attr( $s['text'] ); ?>" placeholder="<?php esc_attr_e( 'Same as the phone number', 'scout-contact' ); ?>">
 							<p><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[text_off]" value="1" <?php checked( $s['text_off'] ); ?>> <?php esc_html_e( 'This number cannot receive texts, so leave Text off', 'scout-contact' ); ?></label></p>
-							<p class="description"><?php esc_html_e( 'Landlines usually cannot receive texts. Turn Text off unless someone reads texts at this number.', 'scout-contact' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Landlines usually can’t get texts, so turn Text off unless someone reads them.', 'scout-contact' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="scc-book"><?php esc_html_e( 'Booking link', 'scout-contact' ); ?></label></th>
@@ -187,9 +186,13 @@ final class Scout_Contact_Admin {
 							<p class="description"><?php esc_html_e( 'Pages that already have their own buttons, by the first part of their address, separated by commas.', 'scout-contact' ); ?></p></td>
 					</tr>
 				</table>
+				<details class="sh-fold"><summary><?php esc_html_e( 'More', 'scout-contact' ); ?></summary>
+					<p class="description"><?php esc_html_e( 'The bar stays hidden on computers, where the header already shows the phone number and booking button.', 'scout-contact' ); ?></p>
+					<p class="description"><?php echo esc_html( class_exists( 'Scout_Analytics' ) ? __( 'Taps are counted in Analytics as contact_call, contact_text, contact_book or contact_open.', 'scout-contact' ) : __( 'Taps are not counted until Scout Analytics is on.', 'scout-contact' ) ); ?></p>
+				</details>
 			</section>
 
-			<?php self::ui_fold_open( __( 'More options: wording and photos', 'scout-contact' ) ); ?>
+			<?php self::ui_fold_open( __( 'More options: wording & photos', 'scout-contact' ) ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="scc-label"><?php esc_html_e( 'Main button', 'scout-contact' ); ?></label></th>

@@ -389,7 +389,7 @@ final class Scout_Reviews_Requests {
 				<?php if ( $s['notes'] ) : ?>
 					<p class="srk-sublabel"><?php esc_html_e( 'Private note form', 'scout-reviews' ); ?></p>
 					<div class="srk-link"><code><?php echo esc_html( self::note_link() ); ?></code></div>
-					<p class="sh-note"><?php esc_html_e( 'At the bottom of the review page. Notes wait in New reviews and go on the site only with the client\'s OK.', 'scout-reviews' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'At the bottom of the review page. Notes go on the site only with the client\'s OK.', 'scout-reviews' ); ?></p>
 				<?php endif; ?>
 			</section>
 

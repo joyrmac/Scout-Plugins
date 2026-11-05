@@ -166,7 +166,7 @@ final class Scout_Events_Editor {
 						<?php
 						if ( '' !== $set['agreements_url'] ) {
 							/* translators: %s: name of the site's agreements page. */
-							echo esc_html( sprintf( __( 'Each ticket holder agrees to the %s and the waiver below and types their name. The words they agreed to are kept.', 'scout-events' ), $set['agreements_label'] ) );
+							echo esc_html( sprintf( __( 'Ticket holders agree to the %s and the waiver below by typing their name, and the words are kept.', 'scout-events' ), $set['agreements_label'] ) );
 						} else {
 							esc_html_e( 'Each ticket holder agrees to the waiver below and types their name. Add your community agreements link in Events, Settings.', 'scout-events' );
 						}
@@ -355,7 +355,7 @@ final class Scout_Events_Editor {
 				self::field( 'url', $n, 'website', __( 'Website', 'scout-events' ), $p['website'], 'se-wide' );
 				?>
 			</div>
-			<p class="se-help"><?php esc_html_e( 'Public contact. Shown only in a members directory ([scout_directory contact="yes"]), never on the public speaker page. Use only what they publish for clients.', 'scout-events' ); ?></p>
+			<p class="se-help"><?php esc_html_e( 'Public contact, shown only in a members directory ([scout_directory contact="yes"]). Use only what they publish.', 'scout-events' ); ?></p>
 			<div class="se-grid">
 				<?php
 				self::field( 'text', $n, 'city', __( 'Where they work (city, state or Online)', 'scout-events' ), $p['city'] );

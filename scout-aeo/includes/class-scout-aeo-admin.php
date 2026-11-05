@@ -130,13 +130,9 @@ final class Scout_AEO_Admin {
 				$headline = __( 'Off.', 'scout-aeo' );
 				$detail   = __( 'AI search tools are asked not to read the site, so AI answers will rarely quote it.', 'scout-aeo' );
 			}
-			$detail .= ' ' . ( $s['training'] ? __( 'Model training is allowed.', 'scout-aeo' ) : __( 'Model training is switched off.', 'scout-aeo' ) );
-			$detail .= ' ' . ( $s['llms'] ? __( 'The AI guide page is on.', 'scout-aeo' ) : __( 'The AI guide page is off.', 'scout-aeo' ) );
-			$detail .= ' ' . ( $s['indexnow'] ? __( 'Bing hears about changes right away.', 'scout-aeo' ) : __( 'Instant updates to Bing are off.', 'scout-aeo' ) );
-			/* translators: %d: number of pages with questions and answers. */
-			$detail .= ' ' . sprintf( _n( '%d page has questions and answers.', '%d pages have questions and answers.', count( $with ), 'scout-aeo' ), count( $with ) );
-			if ( ! $live ) {
-				$detail .= ' ' . __( 'This copy of the site is not live, so its search engine rules (robots.txt) stay as they are. The settings below work on the live site.', 'scout-aeo' );
+			// Headline plus one sentence (DESIGN 2a #2). Each switch below shows its own state.
+			if ( ! $live && $s['search'] ) {
+				$detail = __( 'This copy of the site isn’t live, so the settings below take effect on the live site.', 'scout-aeo' );
 			}
 			$go = $s['llms'] ? '<a class="button" href="' . esc_url( home_url( '/llms.txt' ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'View the AI guide page', 'scout-aeo' ) . '</a>' : '';
 			self::ui_status( ! $s['search'] ? 'off' : ( $live ? 'good' : 'warn' ), $headline, $detail, $go );
@@ -149,24 +145,25 @@ final class Scout_AEO_Admin {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'AI search tools', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[search]" value="1" <?php checked( $s['search'] ); ?>> <?php esc_html_e( 'Let AI search tools read the site to answer people\'s questions', 'scout-aeo' ); ?></label>
-							<p class="description"><?php esc_html_e( 'This is how the site gets quoted and linked in AI answers. Leave it on.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'How the site gets quoted and linked in AI answers. Leave it on.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'AI model training', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[training]" value="1" <?php checked( $s['training'] ); ?>> <?php esc_html_e( 'Let AI companies learn from the site\'s public pages', 'scout-aeo' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Helps the AI know the business by name. Switching it off does not affect AI search above.', 'scout-aeo' ); ?></p>
-							<p class="description"><?php esc_html_e( 'Both choices also go into the search engine rules (robots.txt), which tell AI companies how pages may be used.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Helps the AI know the business by name. It doesn’t change AI search above.', 'scout-aeo' ); ?></p>
+							<details class="sh-fold"><summary><?php esc_html_e( 'More', 'scout-aeo' ); ?></summary><p class="description"><?php esc_html_e( 'Both choices also go into the search engine rules (robots.txt), which tell AI companies how pages may be used.', 'scout-aeo' ); ?></p></details></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Instant updates', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[indexnow]" value="1" <?php checked( $s['indexnow'] ); ?>> <?php esc_html_e( 'Tell Bing and Copilot right away when a page is published or updated (IndexNow)', 'scout-aeo' ); ?></label>
-							<p class="description"><?php esc_html_e( 'ChatGPT search also draws on Bing, so changes reach AI answers sooner. Runs on the live site only.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'ChatGPT search draws on Bing too, so changes reach AI answers sooner. Live site only.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'AI guide page', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[llms]" value="1" <?php checked( $s['llms'] ); ?>> <?php esc_html_e( 'Publish a plain-text guide to the site for AI tools, at /llms.txt', 'scout-aeo' ); ?></label>
 							<?php if ( $s['llms'] ) : ?>
-								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the AI guide page', 'scout-aeo' ); ?></a> · <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View search engine rules', 'scout-aeo' ); ?></a></p>
+								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the AI guide page', 'scout-aeo' ); ?></a></p>
+								<p class="description"><a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View search engine rules', 'scout-aeo' ); ?></a></p>
 							<?php endif; ?></td>
 					</tr>
 				</table>
@@ -183,7 +180,7 @@ final class Scout_AEO_Admin {
 					<tr>
 						<th scope="row"><label for="scout-aeo-intro"><?php esc_html_e( 'Short description', 'scout-aeo' ); ?></label></th>
 						<td><textarea id="scout-aeo-intro" name="<?php echo esc_attr( $o ); ?>[intro]" rows="4" class="large-text" placeholder="<?php echo esc_attr( Scout_AEO::summary() ); ?>"><?php echo esc_textarea( $s['intro'] ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'Two or three plain sentences: who the business is, what it does and where. Leave empty to use the business details.', 'scout-aeo' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Two or three plain sentences: who, what and where. Empty uses the business details.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Pages to list', 'scout-aeo' ); ?></th>
@@ -205,7 +202,7 @@ final class Scout_AEO_Admin {
 			</form>
 			<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Questions & answers', 'scout-aeo' ); ?></h2>
-			<p><?php esc_html_e( 'Add them in the "Questions this page answers" box on any page or post. They show at the end of the page.', 'scout-aeo' ); ?></p>
+			<p><?php esc_html_e( 'Add them in the "Questions this page answers" box on any page or post.', 'scout-aeo' ); ?></p>
 			<?php
 			if ( $with ) {
 				echo '<ul style="list-style:disc;padding-left:20px;margin:0">';

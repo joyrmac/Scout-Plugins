@@ -160,7 +160,7 @@ final class Scout_Events_Volunteers {
 		$taken  = 'auto-draft' === $post->post_status ? array() : self::taken( (int) $post->ID );
 		wp_nonce_field( 'scout_shifts_save', self::NONCE );
 		?>
-		<p class="se-help"><?php esc_html_e( 'The jobs this event needs. Volunteers pick shifts on a page with [scout_volunteer event="this event\'s address word"]. Clear a job name to remove it.', 'scout-events' ); ?></p>
+		<p class="se-help"><?php esc_html_e( 'The jobs this event needs. Volunteers sign up on a page with [scout_volunteer event="this event\'s address word"].', 'scout-events' ); ?></p>
 		<div class="se-shifts-wrap">
 			<table class="se-shifts">
 				<thead>

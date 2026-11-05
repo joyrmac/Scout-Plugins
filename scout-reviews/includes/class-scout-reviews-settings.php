@@ -179,7 +179,7 @@ final class Scout_Reviews_Settings {
 
 			<section class="sh-box">
 				<h2 class="sh-title"><?php esc_html_e( 'Your profile on each platform', 'scout-reviews' ); ?></h2>
-				<p><?php esc_html_e( 'Copy each platform\'s overall rating and review count exactly. The rating summary on the site uses them. Leave blank to skip one.', 'scout-reviews' ); ?></p>
+				<p><?php esc_html_e( 'Copy each platform\'s overall rating and review count exactly. Blank skips one.', 'scout-reviews' ); ?></p>
 				<ul class="sh-rows srk-platforms">
 					<?php
 					foreach ( $sources as $slug => $info ) :
@@ -260,7 +260,7 @@ final class Scout_Reviews_Settings {
 						</li>
 					<?php endforeach; ?>
 				</ul>
-				<p class="sh-note"><?php esc_html_e( 'Google\'s "leave a review" link is in your Business Profile under "Ask for reviews." It takes clients straight to the review box.', 'scout-reviews' ); ?></p>
+				<p class="sh-note"><?php esc_html_e( 'Google\'s "leave a review" link is in your Business Profile under "Ask for reviews."', 'scout-reviews' ); ?></p>
 			</section>
 
 			<section class="sh-box">
