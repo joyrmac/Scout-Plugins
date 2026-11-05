@@ -374,10 +374,13 @@ final class Scout_Redirects_Admin {
 		$rows     = Scout_Redirects_Store::page( self::PER_PAGE, ( $paged - 1 ) * self::PER_PAGE, $search );
 		$week     = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
 		$missing7 = Scout_Redirects_Store::log_count_since( $week );
+		// Checked again before counting, so the count and the list agree.
+		$internal = Scout_Redirects::broken_links( 10 );
 		$broken   = Scout_Redirects_Store::log_count_since( '1970-01-01 00:00:00', true );
-		$missing  = Scout_Redirects_Store::log_list( $all_404 ? $s['log_cap'] : 10 );
+		// Visits from search and broken links on the site first, then the rest by visits.
+		$missing  = Scout_Redirects::sort_missing( Scout_Redirects_Store::log_list( $s['log_cap'] ) );
+		$missing  = $all_404 ? $missing : array_slice( $missing, 0, 10 );
 		$logged   = Scout_Redirects_Store::log_count_since( '1970-01-01 00:00:00' );
-		$internal = Scout_Redirects_Store::log_list( 10, true );
 		$post_url = admin_url( 'admin-post.php' );
 
 		Scout_Admin_UI::open(
@@ -439,7 +442,7 @@ final class Scout_Redirects_Admin {
 		<?php if ( $internal ) : ?>
 		<section class="sh-box" id="scout-broken">
 			<h2 class="sh-title"><?php esc_html_e( 'Broken links on your pages', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'Visitors clicked these links and found nothing. They also show in Site status.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'These links are on your pages or menus and lead to a missing page. They also show in Site status.', 'scout-redirects' ); ?></p>
 			<ul class="sr-list">
 				<?php
 				foreach ( $internal as $row ) :
@@ -476,7 +479,7 @@ final class Scout_Redirects_Admin {
 
 		<section class="sh-box" id="scout-missing">
 			<h2 class="sh-title"><?php esc_html_e( 'Missing pages people asked for', 'scout-redirects' ); ?></h2>
-			<p><?php esc_html_e( 'Addresses visitors tried that aren\'t on the site, most visited first. Bots and file probes are left out.', 'scout-redirects' ); ?></p>
+			<p><?php esc_html_e( 'Addresses visitors tried that aren\'t on the site, with visits from search and your own pages first. Bot probes are left out.', 'scout-redirects' ); ?></p>
 			<?php if ( ! $s['watch_404'] ) : ?>
 				<p class="sr-empty"><?php esc_html_e( 'Watching for missing pages is turned off in More options below.', 'scout-redirects' ); ?></p>
 			<?php elseif ( ! $missing ) : ?>
@@ -502,7 +505,7 @@ final class Scout_Redirects_Admin {
 								<?php
 								if ( '' === $row->referrer ) {
 									echo '<span class="sr-muted">' . esc_html__( 'Typed or bookmarked', 'scout-redirects' ) . '</span>';
-								} elseif ( (int) $row->internal ) {
+								} elseif ( (int) $row->internal || Scout_Redirects::is_home_url( $row->referrer ) ) {
 									/* translators: %s: page address on this site */
 									echo esc_html( sprintf( __( 'Your page %s', 'scout-redirects' ), Scout_Redirects::normalize_source( $row->referrer ) ) );
 								} else {

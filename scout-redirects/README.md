@@ -13,13 +13,27 @@ one click.
   string (campaign tags) is carried over when the new address has none.
 - **Missing pages.** Requests that end on the missing-page screen are logged
   with path, visits, last seen and referrer. Crawlers and scripts, WordPress's
-  own folders, `.php` and other file probes, favicons and asset requests are
-  left out. The log is capped (500 by default, 50 to 2,000), dropping the
-  oldest, least visited entries first. "Forward it" turns an entry into a
-  redirect; "Ignore" and "Clear the list" tidy it.
-- **Broken links on your pages.** A missing page whose referrer is the site
-  itself means a link on that page is broken. Those are listed with an "Edit
-  the page" link and reported in Tools, Site Health.
+  own folders, favicons, and scanner probes are left out (the list is in
+  `Scout_Redirects::NOISE_PATTERNS`: hidden files like `/.env`, any file other
+  than an `.html` or `.htm` page, `index.php` in a folder, log-in guesses, and
+  folders such as `/actuator`, `/api`, `/auth`, `/ckfinder`, `/wk`, `/files`,
+  `/vendor`, `/cgi-bin`, `/phpmyadmin`, `/server-status`, `/console`,
+  `/portal`, `/onboarding`, `/register`, `/forgot-password`, `/settings`,
+  `/api-docs`, `/swagger`, `/graphql`, and WordPress's demo `/sample-page` and
+  `/hello-world`). An address saved as a redirect's old address is never
+  left out. Visits from a search engine and broken links on the site sort
+  first, then the rest by visits. The log is capped (500 by default, 50 to
+  2,000), dropping the oldest, least visited entries first. "Forward it" turns
+  an entry into a redirect; "Ignore" and "Clear the list" tidy it.
+- **Broken links on your pages.** Scanners fake the referrer, so a missing
+  page counts as a broken link only when the referring page's content, or one
+  of the site's menus (classic menus and block theme navigation), really links
+  to it. A referrer on another site, the missing address itself, a sitemap or
+  other file, or a page that is missing too never counts. The list is checked
+  again before it shows and once per version, and anything that fails stays as
+  a plain missing page. Real ones are listed with an "Edit the page" link and
+  reported in Site status (Tools, Site Health). Links typed into a theme's own
+  template files are not checked, so those show as missing pages only.
 - **Pages that move.** When a published page's address changes (new slug or
   new parent), the old address and its child pages' old addresses forward to
   the new ones, redirects that pointed at the old address are updated so
@@ -62,6 +76,9 @@ Build section.
 
 - `scout_redirects_target( $url, $row )`: change where a redirect goes, or
   return `''` to skip it.
+- `scout_redirects_noise_patterns( $patterns )`: the noise list, keyed by
+  name. A site with a real page that matches one removes that entry:
+  `add_filter( 'scout_redirects_noise_patterns', fn( $p ) => array_diff_key( $p, array( 'portal' => 1 ) ) );`
 - `scout_redirects_is_noise( $is_noise, $path )`: decide whether a missing
   address is left out of the log.
 

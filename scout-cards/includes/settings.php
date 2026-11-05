@@ -27,8 +27,36 @@ final class Scout_Cards_Settings {
 		);
 	}
 
+	/**
+	 * What the team card can take from Business info (Scout Core), guarded: the
+	 * name, email, logo (an attachment ID under `logo_id` or `logo`, when Business
+	 * info has one) and description (when it has one). Blanks when Scout Core is off.
+	 */
+	public static function business() {
+		$b    = function_exists( 'scout_core_business' ) ? (array) scout_core_business() : array();
+		$logo = 0;
+		foreach ( array( 'logo_id', 'logo' ) as $k ) {
+			if ( isset( $b[ $k ] ) && is_numeric( $b[ $k ] ) && (int) $b[ $k ] > 0 ) {
+				$logo = (int) $b[ $k ];
+				break;
+			}
+		}
+		return array(
+			'name'        => trim( (string) ( $b['name'] ?? '' ) ),
+			'email'       => trim( (string) ( $b['email'] ?? '' ) ),
+			'logo'        => $logo,
+			'description' => trim( (string) ( $b['description'] ?? '' ) ),
+		);
+	}
+
+	/** The team card's photo: its own, else the Business info logo, else 0 (the Site Icon then shows). */
+	public static function team_photo_id( array $s ) {
+		return (int) $s['photo_id'] ? (int) $s['photo_id'] : self::business()['logo'];
+	}
+
 	public static function defaults() {
 		$id = self::identity();
+		$bi = self::business();
 		return array(
 			'enable_cards' => 1,
 			'enable_links' => 1,
@@ -46,7 +74,7 @@ final class Scout_Cards_Settings {
 			'socials'      => $id['same_as'],
 			'footer'       => trim( $id['city'] . ( $id['region'] ? ', ' . $id['region'] : '' ) ),
 			'note'         => get_bloginfo( 'description' ),
-			'team_intro'   => get_bloginfo( 'description' ),
+			'team_intro'   => '' !== $bi['description'] ? $bi['description'] : get_bloginfo( 'description' ),
 			'pick_heading' => 'Who would you like to talk to?',
 			'photo_id'     => 0,
 			'logo_id'        => 0,
@@ -136,7 +164,8 @@ final class Scout_Cards_Settings {
 	 * Everything each card needs, keyed 'team' then each person's link name.
 	 *
 	 * A card linked to a People profile (`profile_id`) reads its name, title, photo,
-	 * card phone, card email, links and bio from People; it is left out (so its
+	 * card phone, card email, intro, "why talk to them", tags, links and bio from
+	 * People (an empty intro, why or tags uses the card's own); it is left out (so its
 	 * address answers "not found") when the person is not live or Card is off. With
 	 * Scout People off, or the profile gone, the card uses its own saved details as
 	 * before. After the move to People, anyone live with Card on gets a card too.
@@ -158,8 +187,8 @@ final class Scout_Cards_Settings {
 				'intro'    => $s['team_intro'],
 				'pick'     => '',
 				'tags'     => array(),
-				'photo_id' => (int) $s['photo_id'],
-				'photo'    => self::photo_url( (int) $s['photo_id'], true ),
+				'photo_id' => self::team_photo_id( $s ),
+				'photo'    => self::photo_url( self::team_photo_id( $s ), true ),
 				'alt'      => $s['name'],
 				'bio'      => '',
 				'links'    => array(),
@@ -228,6 +257,9 @@ final class Scout_Cards_Settings {
 			'bio'      => '',
 			'links'    => array(),
 			'profile'  => 0,
+			'intro'    => '',
+			'why'      => '',
+			'tags'     => '',
 		);
 	}
 
@@ -243,13 +275,22 @@ final class Scout_Cards_Settings {
 			'bio'      => (string) $c['bio'],
 			'links'    => (array) $c['links'],
 			'profile'  => (int) $c['id'],
+			'intro'    => (string) ( $c['intro'] ?? '' ),
+			'why'      => (string) ( $c['why'] ?? '' ),
+			'tags'     => (string) ( $c['tags'] ?? '' ),
 		);
+	}
+
+	/** The profile's words when it has them, else the card's own saved ones. */
+	private static function word( $people, $card ) {
+		return '' !== trim( (string) $people ) ? (string) $people : (string) $card;
 	}
 
 	/**
 	 * One person's card. $f holds who they are (from People or the card's own saved
-	 * details); $rec holds the card's own settings. A blank card email or phone uses
-	 * the business one, as cards always have. A field switched off on the card is blank.
+	 * details); $rec holds the card's own settings, and its intro, why and tags are
+	 * the fallback when People has none. A blank card email or phone uses the
+	 * business one, as cards always have. A field switched off on the card is blank.
 	 */
 	private static function person( $slug, array $f, array $rec, array $s ) {
 		$show  = Scout_Cards_People::show( $rec );
@@ -262,9 +303,9 @@ final class Scout_Cards_Settings {
 			'title'    => $f['title'],
 			'email'    => $show['email'] ? ( '' !== $f['email'] ? $f['email'] : $s['email'] ) : '',
 			'phone'    => $show['phone'] ? ( '' !== $f['phone'] ? $f['phone'] : $s['phone'] ) : '',
-			'intro'    => $rec['intro'] ?? '',
-			'pick'     => $rec['pick'] ?? '',
-			'tags'     => array_values( array_filter( array_map( 'trim', explode( ',', $rec['tags'] ?? '' ) ) ) ),
+			'intro'    => $show['intro'] ? self::word( $f['intro'], $rec['intro'] ?? '' ) : '',
+			'pick'     => self::word( $f['why'], $rec['pick'] ?? '' ),
+			'tags'     => $show['tags'] ? array_values( array_filter( array_map( 'trim', explode( ',', self::word( $f['tags'], $rec['tags'] ?? '' ) ) ) ) ) : array(),
 			'photo_id' => $f['photo_id'],
 			'photo'    => self::photo_url( $f['photo_id'], false ),
 			'alt'      => '' !== $f['alt'] ? $f['alt'] : $f['name'],

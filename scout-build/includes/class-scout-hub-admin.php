@@ -1099,7 +1099,7 @@ final class Scout_Hub_Admin {
 		?>
 		<li class="sh-row" id="sh-plugin-<?php echo esc_attr( $row['slug'] ); ?>">
 			<div>
-				<p class="sh-row-name"><?php echo esc_html( $row['name'] ); ?><?php if ( ! $row['on'] ) : ?> <span class="sh-pill is-off"><?php esc_html_e( 'Off', 'scout-build' ); ?></span><?php endif; ?></p>
+				<p class="sh-row-name"><?php echo esc_html( $row['name'] ); ?><?php if ( Scout_Hub_Update_Report::CORE === $row['slug'] && false === stripos( $row['name'], 'Scout Core' ) ) : ?> <span class="sh-row-sub">(<?php esc_html_e( 'Scout Core', 'scout-build' ); ?>)</span><?php endif; ?><?php if ( ! $row['on'] ) : ?> <span class="sh-pill is-off"><?php esc_html_e( 'Off', 'scout-build' ); ?></span><?php endif; ?></p>
 				<?php if ( '' !== $row['sub'] ) : ?><p class="sh-row-sub"><?php echo esc_html( $row['sub'] ); ?></p><?php endif; ?>
 			</div>
 			<div class="sh-row-facts">

@@ -660,7 +660,7 @@ final class Scout_Cards_Admin {
 			if ( '' === $slug ) {
 				$slug = sanitize_title( (string) ( $old['slug'] ?? ( $row['key'] ?? '' ) ) );
 			}
-			$new = array_merge(
+			$new  = array_merge(
 				$old,
 				array(
 					'slug'     => $slug,

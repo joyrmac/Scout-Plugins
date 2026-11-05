@@ -133,6 +133,8 @@ jobs:
         run: php tools/tests/privacy-tools.php
       - name: Booking busy times from the owner's calendar (no WordPress needed)
         run: php tools/tests/booking-busy.php
+      - name: Redirects leave out bot probes and check broken links (no WordPress needed)
+        run: php tools/tests/redirects-noise.php
 
   slop-check:
     name: Code slop check

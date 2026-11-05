@@ -64,8 +64,9 @@
 .scout-team-form .st-checks .st-check { margin: 0; }
 .scout-team-form .st-checks .st-check label { font-weight: 500; min-height: var(--sh-tap); }
 .scout-team-form.st-shows > .description, .scout-team-form.st-groups > .description { margin: var(--sh-space-2) 0 0; color: var(--sh-text-2); }
-.scout-team-form .st-card-only { margin-top: var(--sh-space-4); padding: var(--sh-space-3) var(--sh-space-3) var(--sh-space-1); }
-.scout-team-form .st-card-only .st-field input { min-height: var(--sh-tap); }
+/* Business card box (under Profile): card only words and contact. */
+.scout-team-form.st-card-box > .description { margin: 0 0 var(--sh-space-2); }
+.scout-team-form.st-card-box textarea { min-height: 64px; }
 
 @media (max-width: 782px) {
 	.st-row { grid-template-columns: 1fr; }

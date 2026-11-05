@@ -1,8 +1,9 @@
 <?php
 /**
- * The person edit screen: a Profile box under the name, then the optional
- * full bio. On the side: Shows on (where this person shows, plus card only
- * contact), Groups, a live preview card and the trust checklist. Uses the
+ * The person edit screen: a Profile box under the name, a Business card box
+ * (what their card says: intro, why talk to them, tags, card phone and card
+ * email), then the optional full bio. On the side: Shows on, Groups, a live
+ * preview card and the trust checklist. Uses the
  * classic screen so the layout matches the Scout design and every field is a
  * plain, labelled input.
  *
@@ -67,6 +68,7 @@ final class Scout_Team_Editor {
 
 	public static function boxes(): void {
 		add_meta_box( 'scout-team-profile', __( 'Profile', 'scout-team' ), array( __CLASS__, 'render_profile' ), Scout_Team::POST_TYPE, 'scout_team_top', 'high' );
+		add_meta_box( 'scout-team-card', __( 'Business card', 'scout-team' ), array( __CLASS__, 'render_card' ), Scout_Team::POST_TYPE, 'scout_team_top', 'default' );
 		add_meta_box( 'scout-team-shows', __( 'Shows on', 'scout-team' ), array( __CLASS__, 'render_shows' ), Scout_Team::POST_TYPE, 'side', 'high' );
 		add_meta_box( 'scout-team-groups', __( 'Groups', 'scout-team' ), array( __CLASS__, 'render_groups' ), Scout_Team::POST_TYPE, 'side', 'high' );
 		add_meta_box( 'scout-team-preview', __( 'Preview', 'scout-team' ), array( __CLASS__, 'render_preview' ), Scout_Team::POST_TYPE, 'side', 'high' );
@@ -285,9 +287,42 @@ final class Scout_Team_Editor {
 		?>
 		<div class="sh scout-team-form st-shows">
 			<?php self::shows_fields( $p['shows'] ); ?>
+		</div>
+		<?php
+	}
 
-			<fieldset class="st-group st-card-only">
-				<legend><?php esc_html_e( 'Card only', 'scout-team' ); ?></legend>
+	/**
+	 * The Business card box: what their card says. Card only, so none of it is
+	 * on their page, the team page, the schema or the REST API. Scout Cards
+	 * reads it through Scout_Team::card(); the Cards screen keeps only the
+	 * switches for what each card shows.
+	 *
+	 * @param WP_Post $post The person.
+	 */
+	public static function render_card( $post ): void {
+		$p  = Scout_Team::profile( (int) $post->ID );
+		$on = Scout_Team::shows( $p, 'card' );
+		?>
+		<div class="sh scout-team-form st-card-box">
+			<p class="sh-note"><?php echo esc_html( $on ? __( 'What their business card says. Never on their page, the team page or in search.', 'scout-team' ) : __( 'Used when A business card is on under Shows on. Never on their page or in search.', 'scout-team' ) ); ?></p>
+			<p class="st-field">
+				<label for="st-card-intro"><?php esc_html_e( 'Intro', 'scout-team' ); ?></label>
+				<textarea id="st-card-intro" name="scout_team[card_intro]" rows="2" aria-describedby="st-card-intro-help"><?php echo esc_textarea( $p['card_intro'] ); ?></textarea>
+				<span class="description" id="st-card-intro-help"><?php esc_html_e( 'One or two sentences in their own voice, on their card.', 'scout-team' ); ?></span>
+			</p>
+			<div class="st-grid">
+				<p class="st-field">
+					<label for="st-card-why"><?php esc_html_e( 'Why talk to them', 'scout-team' ); ?></label>
+					<input id="st-card-why" type="text" name="scout_team[card_why]" value="<?php echo esc_attr( $p['card_why'] ); ?>" aria-describedby="st-card-why-help">
+					<span class="description" id="st-card-why-help"><?php esc_html_e( 'One line under their name on the team card.', 'scout-team' ); ?></span>
+				</p>
+				<p class="st-field">
+					<label for="st-card-tags"><?php esc_html_e( 'Tags', 'scout-team' ); ?></label>
+					<input id="st-card-tags" type="text" name="scout_team[card_tags]" value="<?php echo esc_attr( $p['card_tags'] ); ?>" placeholder="<?php esc_attr_e( 'Estate planning, Wills', 'scout-team' ); ?>" aria-describedby="st-card-tags-help">
+					<span class="description" id="st-card-tags-help"><?php esc_html_e( 'Two to four short topics, with commas between.', 'scout-team' ); ?></span>
+				</p>
+			</div>
+			<div class="st-grid">
 				<p class="st-field">
 					<label for="st-card-phone"><?php esc_html_e( 'Card phone', 'scout-team' ); ?></label>
 					<input id="st-card-phone" type="tel" name="scout_team[card_phone]" value="<?php echo esc_attr( $p['card_phone'] ); ?>">
@@ -296,8 +331,8 @@ final class Scout_Team_Editor {
 					<label for="st-card-email"><?php esc_html_e( 'Card email', 'scout-team' ); ?></label>
 					<input id="st-card-email" type="email" name="scout_team[card_email]" value="<?php echo esc_attr( $p['card_email'] ); ?>">
 				</p>
-				<p class="description"><?php esc_html_e( 'Business card only. Never on their page, the team page or in search.', 'scout-team' ); ?></p>
-			</fieldset>
+			</div>
+			<p class="description"><?php esc_html_e( 'A blank card phone or email uses the business one.', 'scout-team' ); ?></p>
 		</div>
 		<?php
 	}

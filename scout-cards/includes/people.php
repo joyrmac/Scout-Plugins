@@ -1,17 +1,21 @@
 <?php
 /**
  * Cards read from People. One profile per person: the name, title, photo,
- * card phone, card email, profile links and bio live in Scout People
- * (scout-team), and each card keeps only its own look and links settings
- * (link name, intro, "why talk to them", tags, share picture, spotlight and
- * which profile fields show on the card).
+ * card phone, card email, card intro, "why talk to them", tags, profile links
+ * and bio live in Scout People (scout-team), and each card keeps only its own
+ * settings (link name, share picture, spotlight and which profile fields show
+ * on the card).
  *
  * A card record in `scout_cards_settings['people']` points at its profile with
- * `profile_id`. Its old name, title, email and photo stay saved, and the card
- * falls back to them when Scout People is off or the profile is gone.
+ * `profile_id`. Its old name, title, email, photo, intro, "why talk to them"
+ * and tags stay saved, and the card falls back to them when Scout People is
+ * off, the profile is gone, or the profile field is empty.
  *
- * The one-time move (gated by `scout_cards_people_db`) links every card person
- * to their People profile, or makes one that shows on the card only.
+ * The one-time moves, gated by `scout_cards_people_db`:
+ * 1. Link every card person to their People profile, or make one that shows
+ *    on the card only.
+ * 2. Copy each card's intro, "why talk to them" and tags into the profile,
+ *    only where the profile field is empty. Nothing is overwritten.
  *
  * @package Scout_Cards
  */
@@ -23,7 +27,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Scout_Cards_People {
 
 	const DB_OPTION  = 'scout_cards_people_db';
-	const DB_VERSION = 1;
+	const DB_VERSION = 2;
+
+	/** The version where cards link to People (move 1). Cards read People from here on. */
+	const LINKED = 1;
+
+	/** Card record key => People profile key, for the card's words (move 2). */
+	const WORDS = array(
+		'intro' => 'card_intro',
+		'pick'  => 'card_why',
+		'tags'  => 'card_tags',
+	);
 	const NOTE       = 'scout_cards_people_note';
 	const LOCK       = 'scout_cards_people_moving';
 
@@ -31,6 +45,8 @@ final class Scout_Cards_People {
 	const SHOW = array(
 		'phone' => 1,
 		'email' => 1,
+		'intro' => 1,
+		'tags'  => 1,
 		'links' => 0,
 		'bio'   => 0,
 		'save'  => 1,
@@ -45,9 +61,19 @@ final class Scout_Cards_People {
 		return class_exists( 'Scout_Team' ) && method_exists( 'Scout_Team', 'card' ) && method_exists( 'Scout_Team', 'card_ids' );
 	}
 
-	/** Has the one-time move run? */
+	/** Has the one-time move to People (move 1) run? */
 	public static function upgraded() {
+		return (int) get_option( self::DB_OPTION, 0 ) >= self::LINKED;
+	}
+
+	/** Have the card's words been copied into People (move 2)? */
+	public static function words_copied() {
 		return (int) get_option( self::DB_OPTION, 0 ) >= self::DB_VERSION;
+	}
+
+	/** Does this Scout People keep the card's words on the profile? (Older versions do not.) */
+	public static function people_has_words() {
+		return self::available() && method_exists( 'Scout_Team', 'empty_profile' ) && array_key_exists( 'card_intro', (array) Scout_Team::empty_profile() );
 	}
 
 	/** Cards read People: Scout People is on and the move has run. */
@@ -248,6 +274,10 @@ final class Scout_Cards_People {
 		if ( $list ) {
 			$lines[] = 'These cards now show what People has: ' . implode( '; ', $list ) . '.';
 		}
+		$copied = (int) ( $n['copied'] ?? 0 );
+		if ( $copied ) {
+			$lines[] = sprintf( 1 === $copied ? 'Card intro, why talk to them and tags for %d person now live on their People profile, under Business card.' : 'Card intros, why talk to them and tags for %d people now live on their People profiles, under Business card.', $copied );
+		}
 		$off = (array) ( $n['off'] ?? array() );
 		if ( $off ) {
 			$lines[] = 'Card was on in People for ' . implode( ', ', $off ) . ', with no card yet, so it was switched off and nothing new shows. Turn it on in People to give them a card.';
@@ -333,11 +363,58 @@ final class Scout_Cards_People {
 	}
 
 	/**
-	 * The one-time move. Runs once Scout People is on and has done its own move.
+	 * The card's words to copy into a profile: People key => the card's value,
+	 * only where the profile field is empty and the card has a value. A People
+	 * value is never overwritten.
+	 *
+	 * @param array $p   The profile in the full shape.
+	 * @param array $rec The saved card record.
+	 */
+	public static function words_to_copy( array $p, array $rec ) {
+		$out = array();
+		foreach ( self::WORDS as $from => $to ) {
+			$have = (string) ( $p[ $to ] ?? '' );
+			$card = (string) ( $rec[ $from ] ?? '' );
+			if ( '' === trim( $have ) && '' !== trim( $card ) ) {
+				$out[ $to ] = $card;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Move 2: copy each linked card's intro, "why talk to them" and tags into its
+	 * People profile where the profile has none. The card keeps its own copy for
+	 * the fallback. Returns how many profiles got something.
+	 */
+	public static function copy_words() {
+		$raw     = get_option( Scout_Cards_Settings::OPTION );
+		$records = is_array( $raw ) && is_array( $raw['people'] ?? null ) ? $raw['people'] : array();
+		$done    = array();
+		foreach ( $records as $rec ) {
+			$id = (int) ( $rec['profile_id'] ?? 0 );
+			if ( ! $id || in_array( $id, $done, true ) || ! Scout_Team::card( $id ) ) {
+				continue;
+			}
+			$p    = Scout_Team::profile( $id );
+			$copy = self::words_to_copy( $p, (array) $rec );
+			if ( $copy ) {
+				update_post_meta( $id, Scout_Team::META, array_merge( $p, $copy ) );
+				$done[] = $id;
+			}
+		}
+		if ( $done ) {
+			Scout_Cards_Settings::flush();
+		}
+		return count( $done );
+	}
+
+	/**
+	 * The one-time moves. Run once Scout People is on and has done its own move.
 	 * Never on a form post, so no other screen's fields can reach a new profile.
 	 */
 	public static function maybe_upgrade() {
-		if ( self::upgraded() || ! self::available() || get_transient( self::LOCK ) ) {
+		if ( self::words_copied() || ! self::available() || get_transient( self::LOCK ) ) {
 			return;
 		}
 		if ( method_exists( 'Scout_Team', 'upgraded' ) && ! Scout_Team::upgraded() ) {
@@ -347,11 +424,23 @@ final class Scout_Cards_People {
 			return;
 		}
 		set_transient( self::LOCK, 1, 5 * MINUTE_IN_SECONDS );
-		$note = self::run();
-		if ( $note ) {
-			update_option( self::NOTE, $note, false );
+		$note = array();
+		if ( ! self::upgraded() ) {
+			$note = self::run();
+			update_option( self::DB_OPTION, self::LINKED, false );
 		}
-		update_option( self::DB_OPTION, self::DB_VERSION, false );
+		// Move 2 waits for a Scout People that keeps the card's words.
+		if ( self::people_has_words() ) {
+			$copied = self::copy_words();
+			if ( $copied ) {
+				$note['copied'] = $copied;
+			}
+			update_option( self::DB_OPTION, self::DB_VERSION, false );
+		}
+		if ( $note ) {
+			$old = get_option( self::NOTE );
+			update_option( self::NOTE, is_array( $old ) ? array_merge( $old, $note ) : $note, false );
+		}
 		delete_transient( self::LOCK );
 	}
 

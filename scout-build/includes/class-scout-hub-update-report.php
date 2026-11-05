@@ -128,7 +128,9 @@ final class Scout_Hub_Update_Report {
 			$lines[] = 'Update Scout Core first.';
 		}
 		foreach ( $plugins as $p ) {
-			$name    = (string) ( $p['name'] ?? $p['slug'] ?? '' ) . ( empty( $p['on'] ) ? ' (off)' : '' );
+			// The folder name too: the catalog name of Scout Core is "Business info and SEO".
+			$slug    = (string) ( $p['slug'] ?? '' );
+			$name    = (string) ( $p['name'] ?? $slug ) . ( '' !== $slug ? ' [' . $slug . ']' : '' ) . ( empty( $p['on'] ) ? ' (off)' : '' );
 			$version = (string) ( $p['installed'] ?? '' );
 			$new     = (string) ( $p['available'] ?? '' );
 			$line    = '- ' . $name . ' ' . $version . ( '' !== $new ? ', new ' . $new : '' );
