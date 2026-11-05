@@ -76,7 +76,7 @@ final class Scout_Reviews_Google_Admin {
 				<p>
 					<?php
 					/* translators: %s: business name on Google. */
-					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones land in Reviews &gt; Inbox, where one click adds each to the right pages.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
+					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones land in the Review inbox, where one click adds each to the right pages.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
 					?>
 				</p>
 				<p>

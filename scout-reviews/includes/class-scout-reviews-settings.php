@@ -174,7 +174,7 @@ final class Scout_Reviews_Settings {
 		do_action( 'scout_reviews_settings_top' );
 		?>
 
-		<form method="post" action="options.php">
+		<form method="post" action="options.php" novalidate><?php // Fields sit in closed boxes, where a browser cannot show a field error; the values are cleaned on save. ?>
 			<?php settings_fields( self::PAGE ); ?>
 
 			<section class="sh-box">
