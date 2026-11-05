@@ -1,0 +1,38 @@
+{
+  "plugin": "scout-booking",
+  "items": [
+    {
+      "what": "Booking details: first and last name, email, phone, the session and time picked, answers to the session's intake questions, whether the newsletter box was ticked, and the price, amount due, amount paid and order number",
+      "where": "This website's database, in the bookings table (the Bookings screen)",
+      "kept": "Until someone deletes it. The hourly check only changes a booking's status and never deletes it. The WordPress personal data eraser removes a person's bookings by email address, and deleting the plugin removes the whole table.",
+      "shared": "Emailed to the site's own booking notice address (the site admin email unless another is set), with the intake answers"
+    },
+    {
+      "what": "Name, email and phone of each booking from the last 30 days and the next 400 days",
+      "where": "The owner's private calendar feed, a secret address on this website",
+      "kept": "Built fresh each time the feed is read; nothing extra is stored",
+      "shared": "Whatever calendar app the owner adds the feed to"
+    },
+    {
+      "what": "What the visitor typed in the booking form, when the form has to be sent back to fix a mistake",
+      "where": "A temporary record in this website's database",
+      "kept": "10 minutes",
+      "when": "only when the form is sent back with a problem, such as a missing field"
+    },
+    {
+      "what": "Email, first name, the page the form was on, the exact words beside the newsletter box, and the session type",
+      "where": "Handed to the Scout Newsletter plugin. This plugin keeps no separate copy beyond the booking itself.",
+      "kept": "Not kept separately by this plugin",
+      "shared": "Scout Newsletter, which sends it to the newsletter service set there",
+      "when": "only when the visitor ticks the newsletter box and Scout Newsletter is on"
+    },
+    {
+      "what": "Name, email, phone, the appointment time and the booking's code",
+      "where": "WooCommerce's cart, checkout and order records on this website",
+      "kept": "As long as WooCommerce keeps the order. This plugin never deletes orders.",
+      "when": "only when WooCommerce is on and the session takes a payment online"
+    }
+  ],
+  "cookies": [],
+  "notes": "This plugin sets no cookies itself. When a session takes payment, WooCommerce sets its own cart and session cookies and keeps the order under its own rules."
+}

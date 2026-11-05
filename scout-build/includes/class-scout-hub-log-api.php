@@ -16,7 +16,9 @@
  * unless SCOUT_HUB_LOG_API is true, so a partner's site never answers Scout's
  * puller by accident.
  *
- * Nothing here returns visitor data, form entries, attachments or keys. The
+ * Nothing here returns form entries, attachments or keys. A change request a
+ * visitor sent through the chat keeps their name, but its email addresses and
+ * phone numbers are blanked before it leaves the site. The
  * write key can add note lines only: no feature switch, request or setting
  * changes.
  *
@@ -311,7 +313,7 @@ final class Scout_Hub_Log_API {
 				'id'     => (int) $post->ID,
 				'date'   => get_the_date( 'Y-m-d', $post ),
 				'title'  => (string) $post->post_title,
-				'what'   => (string) $post->post_content,
+				'what'   => self::without_contact( (string) $post->post_content ),
 				'page'   => (string) get_post_meta( $post->ID, Scout_Hub_Requests::META_PAGE, true ),
 				'when'   => Scout_Hub_Requests::WHEN[ $when ] ?? '',
 				'status' => $status,
@@ -386,5 +388,11 @@ final class Scout_Hub_Log_API {
 
 	private static function site_name(): string {
 		return wp_specialchars_decode( (string) get_option( 'blogname' ), ENT_QUOTES );
+	}
+
+	/** Blank email addresses and phone numbers, so a request a visitor sent never carries them off the site. */
+	public static function without_contact( string $text ): string {
+		$text = (string) preg_replace( '/<?[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}>?/', '[email]', $text );
+		return (string) preg_replace( '/(?<!\d)(?:\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}(?!\d)/', '[phone]', $text );
 	}
 }

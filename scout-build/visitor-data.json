@@ -1,0 +1,35 @@
+{
+  "plugin": "scout-build",
+  "items": [
+    {
+      "what": "Change requests visitors send through Scout Chat: the request in their words, their name, email and phone, and the page",
+      "where": "This website's database, as private change request posts (the Requests screen)",
+      "kept": "Until someone deletes it. Deleting the plugin keeps the request list.",
+      "shared": "Scout's Client Hub reads the request and the visitor's name through the site's Hub key, with email addresses and phone numbers blanked first. Only when a Hub key is set.",
+      "when": "only when Scout Chat is on and a visitor asks for a change there"
+    },
+    {
+      "what": "The visitor's name and the first words of a chat change request, as a line in the Site log",
+      "where": "This website's database, as a private Site log line",
+      "kept": "Until someone deletes it. Deleting the plugin keeps the Site log.",
+      "shared": "Scout's Client Hub, which reads the Site log through the site's Hub key, only when a Hub key is set",
+      "when": "only when Scout Chat is on and a visitor asks for a change there"
+    },
+    {
+      "what": "Names or emails and short previews of waiting visitor messages (chat questions, booking requests, new reviews and similar)",
+      "where": "Read from the plugins that hold them and listed in Inbox emails. This plugin keeps no copy.",
+      "kept": "Not kept by this plugin",
+      "shared": "Emailed to site staff who turned on Inbox emails",
+      "when": "only for staff who chose daily or every-item Inbox emails"
+    },
+    {
+      "what": "Every email the website sends, including form notices, booking and chat emails, and replies to visitors, which can carry what visitors typed",
+      "where": "Sent through the Google mailbox set on the Email screen. This plugin keeps no copy.",
+      "kept": "Not kept by this plugin",
+      "shared": "Google (Gmail), which sends the site's email",
+      "when": "only when the Email screen has a Google address and app password"
+    }
+  ],
+  "cookies": [],
+  "notes": "This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent."
+}

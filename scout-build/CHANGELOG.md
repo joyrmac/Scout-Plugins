@@ -9,6 +9,7 @@
   - **Security fixes skip the wait:** a `"security"` entry in catalog.json lets a site still below that version install it at once. Once the site has the fix, later releases wait for an OK again.
   - Operators get one Inbox row, "Updates waiting for your OK". Clients never see it.
   - On by default on live sites, off on staging and local copies. One button on the Updates screen switches it for a site; `SCOUT_HUB_APPROVAL` in wp-config.php sets it too.
+- **Visitor contact details stay on the site.** The Hub key's request list now blanks email addresses and phone numbers in a request a visitor sent through the chat. The visitor's name and the request itself still come through.
 - **A calmer Updates screen (Joy, 2026-11-04).**
   - The plugin list comes first, then "When updates install" (the ring and the pause), then the theme.
   - The theme is one line, "Theme · name version · Up to date", with its key in a closed "Theme key" row that has Replace and Remove key.
