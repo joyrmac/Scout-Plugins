@@ -376,34 +376,27 @@ final class Scout_Booking_Admin {
 		// Busy times from the owner's calendar: a short note when fine, the look state when it can't be read.
 		$cal      = Scout_Booking_Busy::summary();
 		$cal_bad  = $cal && 'warn' === $cal['state'];
-		$cal_text = $cal ? ' ' . $cal['headline'] . ' ' . $cal['detail'] : '';
+		// The calendar's own box says when it's fine; the status line only carries it when it can't be read.
 		if ( $reqs ) {
 			self::ui_status(
 				'warn',
 				/* translators: %d: number of requests. */
 				sprintf( _n( '%d request is waiting for you.', '%d requests are waiting for you.', count( $reqs ), 'scout-booking' ), count( $reqs ) ),
-				$next_words . $cal_text,
+				$next_words,
 				'<a class="button" href="#sb-requests">' . esc_html__( 'Read requests', 'scout-booking' ) . '</a>'
 			);
 		} elseif ( $cal_bad ) {
 			self::ui_status(
 				'warn',
 				$cal['headline'],
-				$cal['detail'] . ' ' . __( 'No requests waiting.', 'scout-booking' ) . ' ' . $next_words,
+				$cal['detail'],
 				'<a class="button" href="' . esc_url( self::url( array(), 'sb-busy', 'settings' ) ) . '">' . esc_html__( 'Check the calendar', 'scout-booking' ) . '</a>'
 			);
 		} else {
-			self::ui_status( 'good', __( 'No requests waiting.', 'scout-booking' ), $next_words . $cal_text );
+			self::ui_status( 'good', __( 'No requests waiting.', 'scout-booking' ), $next_words );
 		}
 		self::setup_notes();
 		?>
-		<section class="sh-box">
-			<div class="sh-stats">
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $reqs ); ?></p><p class="sh-note"><a href="#sb-requests"><?php esc_html_e( 'Requests to approve', 'scout-booking' ); ?></a></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $week ); ?></p><p class="sh-note"><?php esc_html_e( 'Booked in the next 7 days', 'scout-booking' ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) count( $await ); ?></p><p class="sh-note"><?php esc_html_e( 'Waiting for payment', 'scout-booking' ); ?></p></div>
-			</div>
-		</section>
 
 		<div class="sbk-layout">
 			<div class="sbk-main">
@@ -447,6 +440,14 @@ final class Scout_Booking_Admin {
 							</span>
 						</nav>
 					</div>
+					<p class="sh-note">
+						<?php
+						echo esc_html(
+							/* translators: 1: bookings in the next 7 days, 2: bookings waiting for payment. */
+							sprintf( __( '%1$s in the next 7 days, %2$s.', 'scout-booking' ), sprintf( _n( '%d booked', '%d booked', count( $week ), 'scout-booking' ), count( $week ) ), sprintf( _n( '%d waiting for payment', '%d waiting for payment', count( $await ), 'scout-booking' ), count( $await ) ) )
+						);
+						?>
+					</p>
 					<?php
 					$by_day = array();
 					foreach ( $rows as $r ) {
@@ -515,7 +516,10 @@ final class Scout_Booking_Admin {
 		echo '<p class="sbk-time">' . esc_html( $deciding ? Scout_Booking::when_label( $r ) : Scout_Booking::time_range_label( $r ) ) . '</p>';
 		echo '<div class="sbk-body">';
 		if ( 'blocked' === $status ) {
-			echo '<p class="sbk-what">' . esc_html__( 'Blocked', 'scout-booking' ) . ( '' !== (string) $r['note'] ? ' · ' . esc_html( $r['note'] ) : '' ) . '</p>';
+			echo '<p class="sbk-what">' . esc_html__( 'Blocked', 'scout-booking' ) . '</p>';
+			if ( '' !== (string) $r['note'] ) {
+				echo '<p class="sh-note">' . esc_html( $r['note'] ) . '</p>';
+			}
 			if ( substr( $r['start_at'], 0, 10 ) !== substr( $r['end_at'], 0, 10 ) ) {
 				/* translators: %s: end date and time. */
 				echo '<p class="sh-note">' . esc_html( sprintf( __( 'Until %s', 'scout-booking' ), wp_date( 'l, F j g:i a', Scout_Booking::at( $r['end_at'] )->getTimestamp() ) ) ) . '</p>';
@@ -526,16 +530,16 @@ final class Scout_Booking_Admin {
 			return;
 		}
 		echo '<p class="sbk-what">' . esc_html( $r['type_name'] ) . ' <span class="sh-pill ' . esc_attr( $pill ) . '">' . esc_html( Scout_Booking::statuses()[ $status ] ?? $status ) . '</span></p>';
-		echo '<p class="sbk-who"><strong>' . esc_html( Scout_Booking::client_name( $r ) ) . '</strong> · <a href="mailto:' . esc_attr( $r['email'] ) . '">' . esc_html( $r['email'] ) . '</a>';
+		echo '<p class="sbk-who"><strong>' . esc_html( Scout_Booking::client_name( $r ) ) . '</strong> <a href="mailto:' . esc_attr( $r['email'] ) . '">' . esc_html( $r['email'] ) . '</a>';
 		if ( '' !== $r['phone'] ) {
-			echo ' · <a href="tel:' . esc_attr( preg_replace( '/[^0-9+]/', '', $r['phone'] ) ) . '">' . esc_html( $r['phone'] ) . '</a>';
+			echo ' <a href="tel:' . esc_attr( preg_replace( '/[^0-9+]/', '', $r['phone'] ) ) . '">' . esc_html( $r['phone'] ) . '</a>';
 		}
-		echo '</p><p class="sbk-money">' . esc_html( self::money_words( $r ) );
+		echo '</p><p class="sbk-money"><span>' . esc_html( self::money_words( $r ) ) . '</span>';
 		if ( $r['order_id'] && class_exists( 'Scout_Booking_Woo' ) && Scout_Booking::payments_on() ) {
 			$u = Scout_Booking_Woo::order_url( $r['order_id'] );
 			if ( '' !== $u ) {
 				/* translators: %d: order number. */
-				echo ' · <a href="' . esc_url( $u ) . '">' . esc_html( sprintf( __( 'Order #%d', 'scout-booking' ), $r['order_id'] ) ) . '</a>';
+				echo ' <a href="' . esc_url( $u ) . '">' . esc_html( sprintf( __( 'Order #%d', 'scout-booking' ), $r['order_id'] ) ) . '</a>';
 			}
 		}
 		echo '</p>';
@@ -599,7 +603,9 @@ final class Scout_Booking_Admin {
 			<h2 class="sh-title"><?php esc_html_e( 'Phone calendar link', 'scout-booking' ); ?></h2>
 			<p><?php esc_html_e( 'Add this link to your phone calendar to see every booking there. It updates about once an hour.', 'scout-booking' ); ?></p>
 			<p><label class="screen-reader-text" for="sbk-feed"><?php esc_html_e( 'Phone calendar link', 'scout-booking' ); ?></label><input type="text" id="sbk-feed" class="large-text code" readonly value="<?php echo esc_attr( $url ); ?>" onclick="this.select()"></p>
-			<p class="sh-note"><?php esc_html_e( 'iPhone: Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar. Google Calendar: Other calendars, From URL.', 'scout-booking' ); ?></p>
+			<details class="sh-fold"><summary><?php esc_html_e( 'How to add it', 'scout-booking' ); ?></summary>
+				<p class="sh-note"><?php esc_html_e( 'iPhone: Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar. Google Calendar: Other calendars, From URL.', 'scout-booking' ); ?></p>
+			</details>
 			<p class="sh-note"><?php esc_html_e( 'Anyone with this link can see your bookings, so keep it private.', 'scout-booking' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="scout_booking_feed_reset">
@@ -711,7 +717,7 @@ final class Scout_Booking_Admin {
 					?>
 					<span class="description"><?php esc_html_e( 'Links in booking emails lead here. Set by itself the first time the form is shown.', 'scout-booking' ); ?></span>
 				</p>
-				<p class="sbk-field"><label for="sbk-notify"><?php esc_html_e( 'Send booking emails for you to', 'scout-booking' ); ?></label><input type="email" id="sbk-notify" name="sb[notify]" class="regular-text" value="<?php echo esc_attr( $s['notify'] ); ?>" placeholder="<?php echo esc_attr( Scout_Booking::shared_notice_email() ); ?>"><span class="description"><?php esc_html_e( 'Leave it blank to use the notice address in Business info. Clients see this address when a change is too late to make online.', 'scout-booking' ); ?></span></p>
+				<p class="sbk-field"><label for="sbk-notify"><?php esc_html_e( 'Send booking emails for you to', 'scout-booking' ); ?></label><input type="email" id="sbk-notify" name="sb[notify]" class="regular-text" value="<?php echo esc_attr( $s['notify'] ); ?>" placeholder="<?php echo esc_attr( Scout_Booking::shared_notice_email() ); ?>"><span class="description"><?php esc_html_e( 'Blank uses the notice address in Business info. Clients see it when a change is too late to make online.', 'scout-booking' ); ?></span></p>
 				<p class="sbk-check"><label><input type="checkbox" name="sb[reminders]" value="1" <?php checked( $s['reminders'] ); ?>> <?php esc_html_e( 'Email each client a reminder the day before their session.', 'scout-booking' ); ?></label></p>
 			</section>
 
@@ -723,7 +729,7 @@ final class Scout_Booking_Admin {
 					<label><input type="radio" name="sb[late]" value="block" <?php checked( 'block', $s['late'] ); ?>> <?php esc_html_e( 'Clients email you; nothing changes online', 'scout-booking' ); ?></label><br>
 					<label><input type="radio" name="sb[late]" value="allow" <?php checked( 'allow', $s['late'] ); ?>> <?php esc_html_e( 'Clients can still cancel online, and the deposit is kept', 'scout-booking' ); ?></label>
 				</fieldset>
-				<p class="sbk-field"><label for="sbk-policy"><?php esc_html_e( 'Policy shown before booking and in every email', 'scout-booking' ); ?></label><textarea id="sbk-policy" name="sb[policy]" rows="2" class="large-text" placeholder="<?php echo esc_attr( Scout_Booking::policy() ); ?>"><?php echo esc_textarea( $s['policy'] ); ?></textarea><span class="description"><?php esc_html_e( 'Empty uses the line shown, worked out from the window.', 'scout-booking' ); ?></span></p>
+				<p class="sbk-field"><label for="sbk-policy"><?php esc_html_e( 'Cancellation policy', 'scout-booking' ); ?></label><textarea id="sbk-policy" name="sb[policy]" rows="2" class="large-text" placeholder="<?php echo esc_attr( Scout_Booking::policy() ); ?>"><?php echo esc_textarea( $s['policy'] ); ?></textarea><span class="description"><?php esc_html_e( 'Shown before booking and in every email. Empty uses the line shown.', 'scout-booking' ); ?></span></p>
 			</section>
 
 			<section class="sh-box">
@@ -765,7 +771,7 @@ final class Scout_Booking_Admin {
 				<p class="sbk-field"><label for="sbk-optin-label"><?php esc_html_e( 'Words beside the box', 'scout-booking' ); ?></label><input type="text" id="sbk-optin-label" name="sb[optin_label]" class="regular-text" value="<?php echo esc_attr( $s['optin_label'] ); ?>" placeholder="<?php esc_attr_e( 'Send me the newsletter', 'scout-booking' ); ?>"></p>
 			</section>
 
-			<p><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Save settings', 'scout-booking' ); ?></button></p>
+			<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'scout-booking' ); ?></button></p>
 		</form>
 		<?php
 		self::busy_box();

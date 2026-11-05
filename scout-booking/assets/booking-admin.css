@@ -20,6 +20,7 @@
 .sbk-time { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 .sbk-body p { margin: 0 0 3px; }
 .sbk-what { font-weight: 600; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sbk-who, .sbk-money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
 .sbk-who a, .sbk-money a { color: var(--sh-accent-text); text-decoration: none; }
 .sbk-money { color: var(--sh-text-2); }
 .sbk-answers, .sbk-more { margin-top: 6px; }

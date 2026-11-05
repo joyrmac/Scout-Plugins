@@ -673,7 +673,9 @@ final class Scout_Hub_Admin {
 		$group = sanitize_key( (string) ( $_GET['group'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( '' !== $group && class_exists( 'Scout_Admin_UI' ) && isset( Scout_Admin_UI::GROUPS[ $group ] ) ) {
 			/* translators: %s: nav group name, e.g. Reviews */
-			printf( '<div class="notice notice-info"><p>%s</p></div>', esc_html( sprintf( __( 'Nothing in %s is on yet. Turn on a feature below and the group fills in.', 'scout-build' ), Scout_Admin_UI::GROUPS[ $group ] ) ) );
+			// The group's name for this site: Scout tools reads Build tools on a white-label site.
+			$group_name = method_exists( 'Scout_Admin_UI', 'label' ) ? Scout_Admin_UI::label( $group ) : Scout_Admin_UI::GROUPS[ $group ];
+			printf( '<div class="notice notice-info"><p>%s</p></div>', esc_html( sprintf( __( 'Nothing in %s is on yet. Turn on a feature below and the group fills in.', 'scout-build' ), $group_name ) ) );
 		}
 		$states   = array(
 			'missing' => __( 'Not installed', 'scout-build' ),
@@ -721,56 +723,25 @@ final class Scout_Hub_Admin {
 		$ai    = Scout_Hub_Health::ai_checks();
 		$ready = count( array_filter( $ai, static fn( $c ) => 'good' === $c['state'] ) );
 		?>
-		<section class="sh-box sh-overview">
-			<div class="sh-stats">
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) count( $groups['on'] ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'features on', 'scout-build' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo (int) ( count( $groups['picked'] ) + count( $groups['ready'] ) ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'ready to add', 'scout-build' ); ?></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num"><?php echo esc_html( $ready . '/' . count( $ai ) ); ?></p>
-					<p class="sh-note"><a href="<?php echo esc_url( self::url( 'health' ) . '#ai-search' ); ?>"><?php esc_html_e( 'ready for AI search', 'scout-build' ); ?> &rsaquo;</a></p>
-				</div>
-				<div class="sh-stat">
-					<p class="sh-num sh-num-text"><?php echo esc_html( $plan ? Scout_Hub_Access::PLANS[ $plan ] ?? __( 'Not set', 'scout-build' ) : __( 'Not set', 'scout-build' ) ); ?></p>
-					<p class="sh-note"><?php esc_html_e( 'this site\'s plan', 'scout-build' ); ?></p>
-				</div>
-			</div>
-			<?php if ( $operator ) : ?>
-				<div class="sh-ops">
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
-						<input type="hidden" name="action" value="<?php echo esc_attr( self::PLAN_ACTION ); ?>">
-						<input type="hidden" name="do" value="plan">
-						<?php wp_nonce_field( self::PLAN_ACTION ); ?>
-						<label for="sh-plan" class="screen-reader-text"><?php esc_html_e( 'This site\'s plan', 'scout-build' ); ?></label>
-						<select id="sh-plan" name="plan">
-							<option value=""><?php esc_html_e( 'Plan not set', 'scout-build' ); ?></option>
-							<?php foreach ( Scout_Hub_Access::PLANS as $key => $label ) : ?>
-								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $plan, $key ); ?>><?php echo esc_html( $label ); ?></option>
-							<?php endforeach; ?>
-						</select>
-						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
-					</form>
-				</div>
-				<p class="sh-note"><?php
-					echo esc_html(
-						'ff' === $plan
-							? __( 'Core features plus anything you add below. Plus modules can go on any plan.', 'scout-build' )
-							: __( 'Everything without a label is in this plan. Add Plus modules from each feature\'s More menu.', 'scout-build' )
-					);
-				?></p>
-				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
-					<p class="sh-note"><?php esc_html_e( 'This site blocks installs from the dashboard, so upload new features by hand.', 'scout-build' ); ?></p>
-				<?php endif; ?>
-				<?php if ( class_exists( 'Scout_Hub_Brand' ) ) : // Operators only: is the white-label layer on, and from where. ?>
-					<p class="sh-note sh-brand-status"><?php echo esc_html( Scout_Hub_Brand::status_text() ); ?></p>
-				<?php endif; ?>
-			<?php endif; ?>
-		</section>
+		<?php
+		// One status line instead of four stat cards (kit 1.10.0).
+		$to_add = count( $groups['picked'] ) + count( $groups['ready'] );
+		$detail = $to_add
+			/* translators: 1: features ready to add, 2: AI checks passed, 3: total AI checks */
+			? sprintf( _n( '%1$d more is ready to add, and the site is ready for AI search on %2$d of %3$d checks.', '%1$d more are ready to add, and the site is ready for AI search on %2$d of %3$d checks.', $to_add, 'scout-build' ), $to_add, $ready, count( $ai ) )
+			/* translators: 1: AI checks passed, 2: total AI checks */
+			: sprintf( __( 'The site is ready for AI search on %1$d of %2$d checks.', 'scout-build' ), $ready, count( $ai ) );
+		self::status_line(
+			$groups['on'] ? 'good' : 'off',
+			/* translators: %d: features on */
+			sprintf( _n( '%d feature on.', '%d features on.', count( $groups['on'] ), 'scout-build' ), count( $groups['on'] ) ),
+			$detail,
+			'<a class="button sh-quiet" href="' . esc_url( self::url( 'health' ) . '#ai-search' ) . '">' . esc_html__( 'AI search checks', 'scout-build' ) . ' &rsaquo;</a>'
+		);
+		if ( $operator && ! Scout_Hub_Access::can_install() ) {
+			echo '<p class="sh-note">' . esc_html__( 'This site blocks installs from the dashboard, so upload new features by hand.', 'scout-build' ) . '</p>';
+		}
+		?>
 
 		<?php
 		$titles = array(
@@ -786,7 +757,7 @@ final class Scout_Hub_Admin {
 			$step = 0;
 			?>
 			<div class="sh-section-head">
-				<p class="sh-eyebrow"><?php echo esc_html( $title . ' · ' . count( $groups[ $key ] ) ); ?></p>
+				<p class="sh-eyebrow"><?php echo esc_html( $title . ' (' . count( $groups[ $key ] ) . ')' ); ?></p>
 			</div>
 			<section class="sh-box sh-flist-box<?php echo 'skip' === $key ? ' sh-skip' : ''; ?>">
 				<ul class="sh-flist">
@@ -808,8 +779,8 @@ final class Scout_Hub_Admin {
 		.sh-fmeta .sh-ver{font-family:var(--sh-mono)}
 		.sh-fact{display:flex;gap:8px;align-items:center;justify-content:flex-end}
 		.sh-fact .button{min-height:36px;line-height:34px;padding:0 14px}
-		.sh-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sh-border-strong);margin-right:10px;vertical-align:2px}
-		.sh-frow.is-on .sh-dot{background:var(--sh-good)}
+		.sh-frow .sh-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sh-border-strong);margin-right:10px;vertical-align:2px}
+		.sh-frow.is-on .sh-dot{background:var(--sh-good-mark)}
 		.sh-more{position:relative}
 		.sh-more>summary{list-style:none;cursor:pointer;color:var(--sh-accent-text);padding:6px 10px;border-radius:var(--sh-r-control)}
 		.sh-more>summary::-webkit-details-marker{display:none}
@@ -832,6 +803,39 @@ final class Scout_Hub_Admin {
 					<?php endforeach; ?>
 				</ul>
 			</section>
+		<?php endif; ?>
+		<?php if ( $operator ) : ?>
+			<?php
+			$plan_name = $plan ? ( Scout_Hub_Access::PLANS[ $plan ] ?? __( 'Not set', 'scout-build' ) ) : __( 'Not set', 'scout-build' );
+			/* translators: %s: plan name, e.g. The Build */
+			self::fold_open( sprintf( __( 'More options: plan (%s)', 'scout-build' ), $plan_name ), false, 'sh-plan-fold' );
+			?>
+				<div class="sh-ops">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
+						<input type="hidden" name="action" value="<?php echo esc_attr( self::PLAN_ACTION ); ?>">
+						<input type="hidden" name="do" value="plan">
+						<?php wp_nonce_field( self::PLAN_ACTION ); ?>
+						<label for="sh-plan" class="screen-reader-text"><?php esc_html_e( 'This site\'s plan', 'scout-build' ); ?></label>
+						<select id="sh-plan" name="plan">
+							<option value=""><?php esc_html_e( 'Plan not set', 'scout-build' ); ?></option>
+							<?php foreach ( Scout_Hub_Access::PLANS as $key => $label ) : ?>
+								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $plan, $key ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
+					</form>
+				</div>
+				<p class="sh-note"><?php
+					echo esc_html(
+						'ff' === $plan
+							? __( 'Core features plus anything you add below. Plus modules can go on any plan.', 'scout-build' )
+							: __( 'Everything without a label is in this plan. Add Plus modules from each feature\'s More menu.', 'scout-build' )
+					);
+				?></p>
+				<?php if ( class_exists( 'Scout_Hub_Brand' ) ) : // Operators only: is the white-label layer on, and from where. ?>
+					<p class="sh-note sh-brand-status"><?php echo esc_html( Scout_Hub_Brand::status_text() ); ?></p>
+				<?php endif; ?>
+			<?php self::fold_close(); ?>
 		<?php endif; ?>
 		<?php
 	}
@@ -1552,7 +1556,7 @@ final class Scout_Hub_Admin {
 			$update   = $s['update'] ? Scout_Hub_Features::update_url( $slug ) : '';
 			$settings = 'on' === $s['state'] ? self::settings_url( $slug ) : '';
 			if ( '' !== $update ) {
-				$main = '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
+				$main = '<a class="button" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
 			}
 			if ( 'on' === $s['state'] ) {
 				if ( '' !== $settings ) {
@@ -1569,7 +1573,7 @@ final class Scout_Hub_Admin {
 					$more[] = Scout_Hub_Features::button( $slug, 'back', sprintf( __( 'Go back to v%s', 'scout-build' ), $s['previous'] ) );
 				}
 			} else {
-				$main .= Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ), 'button button-primary' );
+				$main .= Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ) ); // Outlined: one main button a row, never a row of primaries (DESIGN 8).
 			}
 			$picked_now = in_array( $slug, Scout_Hub_Access::picks(), true );
 			// Only offer "add to the plan" when the plan does not already include it.
