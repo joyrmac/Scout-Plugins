@@ -17,11 +17,8 @@ body[class*="scout-redirects"] .sh .button:focus-visible { outline: 2px solid va
 .sr-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sh-accent); flex: none; }
 .sr-stat-num { margin: 8px 0 0; font-size: 40px; line-height: 1; font-weight: 600; letter-spacing: -.03em; color: var(--sh-text); font-variant-numeric: tabular-nums; }
 
-/* Two columns: the redirect list and the watch panels */
-.sr-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.sr-layout > .sh-box, .sr-side > .sh-box { margin-top: 16px; }
-.sr-side { min-width: 0; }
-@media (max-width: 1400px) { .sr-layout { grid-template-columns: 1fr; gap: 0; } }
+/* One column: add, broken links, missing pages, the list, then More options */
+.sh-main > .sh-box + .sh-box, .sh-main > .sr-stats + .sh-box, .sh-main > .sh-box + .sr-more { margin-top: 16px; }
 
 .sr-path { font-family: var(--sh-mono); font-size: 13px; color: var(--sh-text); overflow-wrap: anywhere; }
 .sr-empty { margin: 4px 0 0; padding: 16px; border-radius: 12px; background: var(--sh-surface-2); color: var(--sh-text-2); }
@@ -84,6 +81,21 @@ body[class*="scout-redirects"] .sh .button:focus-visible { outline: 2px solid va
 	.sr-list li { flex-wrap: wrap; }
 	.sr-list-actions { width: 100%; justify-content: flex-start; }
 }
+
+/* Missing pages table */
+.sr-missing .sr-from { font-size: 13px; color: var(--sh-text-2); overflow-wrap: anywhere; }
+.sr-muted { color: var(--sh-text-3); }
+.sr-table td.sr-path { width: 34%; }
+.sr-table td.sr-actions .button { min-height: 36px; padding: 0 14px; }
+.sr-table td.sr-actions form { display: inline; margin: 0 0 0 6px; }
+
+/* More options */
+.sr-more > summary { cursor: pointer; list-style: none; margin: 0; }
+.sr-more > summary::-webkit-details-marker { display: none; }
+.sr-more > summary::after { content: " \203A"; color: var(--sh-accent-text); }
+.sr-more[open] > summary::after { content: " \2039"; }
+.sr-more .sh-grid { margin-top: 12px; }
+.sr-pane { min-width: 0; }
 
 /* Settings and import */
 .sr-check { margin: 14px 0 0; }
