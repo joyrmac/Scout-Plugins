@@ -770,7 +770,7 @@ final class Scout_Team {
 	public static function clean_ids( $raw ): array {
 		$out = array();
 		foreach ( is_array( $raw ) ? $raw : array() as $id ) {
-			$id = is_scalar( $id ) ? absint( $id ) : 0;
+			$id = is_scalar( $id ) && is_numeric( $id ) ? (int) $id : 0;
 			if ( $id > 0 && ! in_array( $id, $out, true ) ) {
 				$out[] = $id;
 			}

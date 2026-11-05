@@ -239,13 +239,15 @@
 
 /* A list of things, one row each: name and one line, then facts, then one main button and More. */
 .sh-rows { list-style: none; margin: 0; padding: 0; }
-.sh-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--sh-border); margin: 0; }
+.sh-row { display: grid; grid-template-columns: minmax(240px, 1.3fr) minmax(0, 1fr) auto; gap: 6px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--sh-border); margin: 0; }
 .sh-row:first-child { border-top: 0; }
 .sh-row-name { margin: 0; font-weight: 600; color: var(--sh-text); }
 .sh-row-sub { margin: 2px 0 0; font-size: var(--sh-fs-note); color: var(--sh-text-2); }
-.sh-row-facts { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
-.sh-row-go { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.sh-row-facts { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; min-width: 0; font-size: var(--sh-fs-note); color: var(--sh-text-3); }
+.sh-row-go { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; white-space: nowrap; }
 .sh-row-go form { margin: 0; }
+.sh-row:not(:has(> .sh-row-facts)) { grid-template-columns: minmax(0, 1fr) auto; }
+@container shmain (max-width: 820px) { .sh-row { grid-template-columns: minmax(0, 1fr) auto; } .sh-row > .sh-row-facts { grid-column: 1 / -1; grid-row: 2; } }
 @container shmain (max-width: 640px) { .sh-row { grid-template-columns: minmax(0, 1fr); } .sh-row-go { justify-content: flex-start; } }
 
 .sh-card { background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: var(--sh-r-card); padding: var(--sh-pad); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
