@@ -641,7 +641,7 @@ final class Scout_Team_Front {
 
 	/** Keys that never go to the public REST API, at the top level or under meta. */
 	public static function rest_private_keys(): array {
-		return array( Scout_Team::META, Scout_Team::PENDING, '_scout_team_link', '_scout_team_link_hash', 'scout_team', 'card_phone', 'card_email', 'pending', 'link' );
+		return array( Scout_Team::META, Scout_Team::PENDING, '_scout_team_link', '_scout_team_link_hash', 'scout_team', 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags', 'pending', 'link' );
 	}
 
 	/**

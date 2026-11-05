@@ -324,6 +324,9 @@ final class Scout_Team {
 			'phone'           => '',
 			'card_phone'      => '',
 			'card_email'      => '',
+			'card_intro'      => '',
+			'card_why'        => '',
+			'card_tags'       => '',
 			'user'            => 0,
 			'attorney'        => 0,
 			'military_branch' => '',
@@ -438,23 +441,32 @@ final class Scout_Team {
 
 	/**
 	 * What the public may see of a profile: the profile page, the team page and
-	 * the Person schema all read this, never the stored profile. Card only
-	 * contact is taken out, and credential lines without a source are left out.
+	 * the Person schema all read this, never the stored profile. The business
+	 * card fields (card phone, card email, intro, why talk to them, tags) are
+	 * taken out, and credential lines without a source are left out.
 	 *
 	 * @param array $p Profile in the full shape.
 	 */
 	public static function public_profile( array $p ): array {
-		unset( $p['card_phone'], $p['card_email'] );
+		foreach ( self::card_keys() as $key ) {
+			unset( $p[ $key ] );
+		}
 		foreach ( array_keys( self::groups() ) as $group ) {
 			$p[ $group ] = array_values( array_filter( (array) $p[ $group ], array( __CLASS__, 'sourced' ) ) );
 		}
 		return $p;
 	}
 
+	/** The profile fields that belong to the business card only. Never on the profile page, the team page, the schema or the REST API. */
+	public static function card_keys(): array {
+		return array( 'card_phone', 'card_email', 'card_intro', 'card_why', 'card_tags' );
+	}
+
 	/**
 	 * What a business card may show of a person, for Scout Cards. Null when the
-	 * post is not a person. The card only phone and email are here, because
-	 * they are for the card; credential lines are not. Role, bio and links come
+	 * post is not a person. The card only phone, email, intro, "why talk to
+	 * them" and tags are here, because they are for the card; credential lines
+	 * are not. Role, bio and links come
 	 * through public_profile(), so the card shows nothing the profile page
 	 * would hide. 'on' is true when the person is live with Card switched on.
 	 *
@@ -480,6 +492,9 @@ final class Scout_Team {
 			'user'       => (int) $p['user'],
 			'phone'      => (string) $p['card_phone'],
 			'card_email' => (string) $p['card_email'],
+			'intro'      => (string) $p['card_intro'],
+			'why'        => (string) $p['card_why'],
+			'tags'       => (string) $p['card_tags'],
 			'links'      => array_values( (array) $pub['same_as'] ),
 			'photo_id'   => $thumb,
 			'alt'        => $thumb ? trim( (string) get_post_meta( $thumb, '_wp_attachment_image_alt', true ) ) : '',
@@ -628,6 +643,9 @@ final class Scout_Team {
 		$out['phone']           = self::clean_phone( (string) ( $in['phone'] ?? '' ) );
 		$out['card_email']      = sanitize_email( (string) ( $in['card_email'] ?? '' ) );
 		$out['card_phone']      = self::clean_phone( (string) ( $in['card_phone'] ?? '' ) );
+		$out['card_intro']      = sanitize_textarea_field( (string) ( $in['card_intro'] ?? '' ) );
+		$out['card_why']        = sanitize_textarea_field( (string) ( $in['card_why'] ?? '' ) );
+		$out['card_tags']       = sanitize_text_field( (string) ( $in['card_tags'] ?? '' ) );
 		$out['user']            = absint( $in['user'] ?? 0 );
 		$out['attorney']        = ! empty( $in['attorney'] ) ? 1 : 0;
 		$branch                 = sanitize_key( (string) ( $in['military_branch'] ?? '' ) );
