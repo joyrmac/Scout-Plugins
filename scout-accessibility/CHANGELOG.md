@@ -1,5 +1,9 @@
 # Scout Accessibility changelog
 
+## Unreleased (2026-11-05)
+
+- **The Accessibility statement screen opens with one status line.** Published with a View the page button, or not created yet with a link to the statement. It replaces the single status card.
+
 ## 0.1.16 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

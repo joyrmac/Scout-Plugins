@@ -1,6 +1,10 @@
 # Scout Site Check changelog
 
 
+## Unreleased (2026-11-05)
+
+- **The Free site check screen opens with one status line.** The three status cards are now one line: the page (live, draft or not made), the Google speed key, checks waiting for follow-up, and the page button. The speed key and the shortcode note move into a closed More options box. One Save changes button. Same fields and option.
+
 ## 0.2.8 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

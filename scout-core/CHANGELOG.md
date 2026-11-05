@@ -1,5 +1,11 @@
 # Scout Core — Changelog
 
+## Unreleased (2026-11-05)
+
+- **Search health opens with one status line, and the checks are a list.** Without the Scout Build hub, the checks show one row each (name, what to do, All set or Needs a look, and its button) instead of a grid of cards. The hub's Site health still shows them as cards.
+- **Site Sync opens with one status line and a row of counts.** The six count boxes are now one line (in sync, updates ready, items that need a look, or missing pages) and a compact row of numbers.
+- **Privacy and terms: the features list is tags, and Copy the email is an outlined button.** The features that keep something about visitors show as tags instead of one comma line. Make the page stays the one main button for a document, and only when it shows.
+
 ## 1.8.0 (2026-11-04)
 
 Numbered 1.8.0 because the Change log branch (`claude/change-log`) already claims 1.7.0. Merge that one first, or renumber it above this.

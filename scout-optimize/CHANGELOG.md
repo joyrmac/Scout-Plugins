@@ -1,5 +1,9 @@
 # Changelog — scout-optimize
 
+## Unreleased (2026-11-05)
+
+- **The Image optimizer screen opens with one status line.** It says whether new uploads are optimized, the size limit and quality, which smaller copies are made, and whether visitors get them. Optimizing images already in the library and what the server can do now come before the settings.
+
 ## 0.9.7 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).
