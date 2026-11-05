@@ -367,6 +367,7 @@ final class Scout_Redirects_Admin {
 		$to      = '' !== $pre_to ? $pre_to : ( $editing ? $editing->target : '' );
 		$type    = $editing ? (int) $editing->type : 301;
 
+		Scout_Redirects::sweep_noise();
 		$s        = Scout_Redirects::settings();
 		$total    = Scout_Redirects_Store::count();
 		$listed   = '' !== $search ? Scout_Redirects_Store::search_count( $search ) : $total;
@@ -404,234 +405,225 @@ final class Scout_Redirects_Admin {
 			</section>
 		</div>
 
-		<div class="sr-layout">
-			<section class="sh-box sr-main" id="scout-list">
-				<h2 class="sh-title"><?php esc_html_e( 'Redirect list', 'scout-redirects' ); ?></h2>
-				<p><?php esc_html_e( 'Old addresses and where they go now. Use permanent for pages that moved for good; search engines then move the old page\'s standing to the new one.', 'scout-redirects' ); ?></p>
-
-				<form method="post" action="<?php echo esc_url( $post_url ); ?>" class="sr-add" id="scout-add">
-					<input type="hidden" name="action" value="scout_redirects_save">
-					<input type="hidden" name="id" value="<?php echo esc_attr( (string) ( $editing ? (int) $editing->id : 0 ) ); ?>">
-					<?php wp_nonce_field( 'scout_redirects_save' ); ?>
-					<div class="sr-field">
-						<label for="sr-from"><?php esc_html_e( 'Old address', 'scout-redirects' ); ?></label>
-						<input id="sr-from" name="from" type="text" class="code" placeholder="/old-page" value="<?php echo esc_attr( $from ); ?>" required autocomplete="off" spellcheck="false">
-					</div>
-					<div class="sr-field">
-						<label for="sr-to"><?php esc_html_e( 'New address', 'scout-redirects' ); ?></label>
-						<input id="sr-to" name="to" type="text" class="code" placeholder="/services/" value="<?php echo esc_attr( $to ); ?>" required autocomplete="off" spellcheck="false"<?php echo ( '' !== $prefill && '' === $to ) ? ' data-sr-focus="1"' : ''; ?>>
-					</div>
-					<div class="sr-field sr-field-type">
-						<label for="sr-type"><?php esc_html_e( 'Type', 'scout-redirects' ); ?></label>
-						<select id="sr-type" name="type">
-							<option value="301" <?php selected( 301, $type ); ?>><?php esc_html_e( 'Permanent (301)', 'scout-redirects' ); ?></option>
-							<option value="302" <?php selected( 302, $type ); ?>><?php esc_html_e( 'Temporary (302)', 'scout-redirects' ); ?></option>
-						</select>
-					</div>
-					<div class="sr-field sr-field-go">
-						<button type="submit" class="button button-primary"><?php echo $editing ? esc_html__( 'Save changes', 'scout-redirects' ) : esc_html__( 'Add redirect', 'scout-redirects' ); ?></button>
-						<?php if ( $editing || '' !== $prefill ) : ?>
-							<a class="button sh-quiet" href="<?php echo esc_url( self::url() ); ?>"><?php esc_html_e( 'Cancel', 'scout-redirects' ); ?></a>
-						<?php endif; ?>
-					</div>
-				</form>
-				<p class="sh-note sr-hint"><?php esc_html_e( 'The old address is a path on this site. The new address can be a path, like /services/, or a full web address. Capital letters and a closing slash on the old address do not matter.', 'scout-redirects' ); ?></p>
-
-				<?php if ( $total > self::PER_PAGE || '' !== $search ) : ?>
-					<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' === self::parent() ? 'options-general.php' : 'admin.php' ) ); ?>" class="sr-search" role="search">
-						<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG ); ?>">
-						<label for="sr-search" class="screen-reader-text"><?php esc_html_e( 'Search redirects', 'scout-redirects' ); ?></label>
-						<input id="sr-search" type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search old or new addresses', 'scout-redirects' ); ?>">
-						<button type="submit" class="button"><?php esc_html_e( 'Search', 'scout-redirects' ); ?></button>
-					</form>
-				<?php endif; ?>
-
-				<?php if ( ! $rows ) : ?>
-					<p class="sr-empty">
-						<?php
-						echo '' !== $search
-							? esc_html__( 'No redirects match that search.', 'scout-redirects' )
-							: esc_html__( 'No redirects yet. Add an old address above, or import the list from an old site as a CSV file below.', 'scout-redirects' );
-						?>
-					</p>
-				<?php else : ?>
-					<table class="sr-table">
-						<thead>
-							<tr>
-								<th scope="col"><?php esc_html_e( 'From', 'scout-redirects' ); ?></th>
-								<th scope="col"><?php esc_html_e( 'To', 'scout-redirects' ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Type', 'scout-redirects' ); ?></th>
-								<th scope="col" class="sr-num"><?php esc_html_e( 'Hits', 'scout-redirects' ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Last used', 'scout-redirects' ); ?></th>
-								<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'scout-redirects' ); ?></span></th>
-							</tr>
-						</thead>
-						<tbody>
-						<?php foreach ( $rows as $row ) : ?>
-							<tr<?php echo $editing && (int) $editing->id === (int) $row->id ? ' class="is-editing"' : ''; ?>>
-								<td class="sr-path" data-label="<?php esc_attr_e( 'From', 'scout-redirects' ); ?>">
-									<?php echo esc_html( $row->source ); ?>
-									<?php if ( 'auto' === $row->origin ) : ?>
-										<span class="sr-tag"><?php esc_html_e( 'Page moved', 'scout-redirects' ); ?></span>
-									<?php elseif ( 'import' === $row->origin ) : ?>
-										<span class="sr-tag"><?php esc_html_e( 'Imported', 'scout-redirects' ); ?></span>
-									<?php endif; ?>
-								</td>
-								<td class="sr-path" data-label="<?php esc_attr_e( 'To', 'scout-redirects' ); ?>"><a href="<?php echo esc_url( Scout_Redirects::target_url( $row->target ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $row->target ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'scout-redirects' ); ?></span></a></td>
-								<td data-label="<?php esc_attr_e( 'Type', 'scout-redirects' ); ?>"><span class="sr-chip" title="<?php echo 301 === (int) $row->type ? esc_attr__( 'Permanent', 'scout-redirects' ) : esc_attr__( 'Temporary', 'scout-redirects' ); ?>"><?php echo esc_html( (string) (int) $row->type ); ?></span></td>
-								<td class="sr-num" data-label="<?php esc_attr_e( 'Hits', 'scout-redirects' ); ?>"><?php echo esc_html( number_format_i18n( (int) $row->hits ) ); ?></td>
-								<td class="sr-when" data-label="<?php esc_attr_e( 'Last used', 'scout-redirects' ); ?>"><?php echo esc_html( self::ago( $row->last_hit ) ); ?></td>
-								<td class="sr-actions">
-									<a class="button sh-quiet" href="<?php echo esc_url( self::url( array( 'edit' => (int) $row->id ) ) . '#scout-add' ); ?>"><?php esc_html_e( 'Edit', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row->source ); ?></span></a>
-									<?php
-									self::action_form(
-										'delete',
-										(int) $row->id,
-										esc_html__( 'Delete', 'scout-redirects' ) . '<span class="screen-reader-text"> ' . esc_html( $row->source ) . '</span>',
-										'button sh-quiet sh-danger',
-										/* translators: %s: old address */
-										sprintf( __( 'Stop forwarding %s?', 'scout-redirects' ), $row->source )
-									);
-									?>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-						</tbody>
-					</table>
-					<?php
-					$pages = (int) ceil( $listed / self::PER_PAGE );
-					if ( $pages > 1 ) :
-						?>
-						<nav class="sr-pager" aria-label="<?php esc_attr_e( 'Redirect pages', 'scout-redirects' ); ?>">
-							<?php
-							echo wp_kses_post(
-								paginate_links(
-									array(
-										'base'      => add_query_arg( 'paged', '%#%', self::url( '' !== $search ? array( 's' => rawurlencode( $search ) ) : array() ) ),
-										'format'    => '',
-										'current'   => $paged,
-										'total'     => $pages,
-										'prev_text' => __( 'Previous', 'scout-redirects' ),
-										'next_text' => __( 'Next', 'scout-redirects' ),
-									)
-								)
-							);
-							?>
-						</nav>
+		<section class="sh-box" id="scout-add-box">
+			<h2 class="sh-title"><?php echo $editing ? esc_html__( 'Change a redirect', 'scout-redirects' ) : esc_html__( 'Add a redirect', 'scout-redirects' ); ?></h2>
+			<form method="post" action="<?php echo esc_url( $post_url ); ?>" class="sr-add" id="scout-add">
+				<input type="hidden" name="action" value="scout_redirects_save">
+				<input type="hidden" name="id" value="<?php echo esc_attr( (string) ( $editing ? (int) $editing->id : 0 ) ); ?>">
+				<?php wp_nonce_field( 'scout_redirects_save' ); ?>
+				<div class="sr-field">
+					<label for="sr-from"><?php esc_html_e( 'Old address', 'scout-redirects' ); ?></label>
+					<input id="sr-from" name="from" type="text" class="code" placeholder="/old-page" value="<?php echo esc_attr( $from ); ?>" required autocomplete="off" spellcheck="false">
+				</div>
+				<div class="sr-field">
+					<label for="sr-to"><?php esc_html_e( 'New address', 'scout-redirects' ); ?></label>
+					<input id="sr-to" name="to" type="text" class="code" placeholder="/services/" value="<?php echo esc_attr( $to ); ?>" required autocomplete="off" spellcheck="false"<?php echo ( '' !== $prefill && '' === $to ) ? ' data-sr-focus="1"' : ''; ?>>
+				</div>
+				<div class="sr-field sr-field-type">
+					<label for="sr-type"><?php esc_html_e( 'Type', 'scout-redirects' ); ?></label>
+					<select id="sr-type" name="type">
+						<option value="301" <?php selected( 301, $type ); ?>><?php esc_html_e( 'Permanent (301)', 'scout-redirects' ); ?></option>
+						<option value="302" <?php selected( 302, $type ); ?>><?php esc_html_e( 'Temporary (302)', 'scout-redirects' ); ?></option>
+					</select>
+				</div>
+				<div class="sr-field sr-field-go">
+					<button type="submit" class="button button-primary"><?php echo $editing ? esc_html__( 'Save changes', 'scout-redirects' ) : esc_html__( 'Add redirect', 'scout-redirects' ); ?></button>
+					<?php if ( $editing || '' !== $prefill ) : ?>
+						<a class="button sh-quiet" href="<?php echo esc_url( self::url() ); ?>"><?php esc_html_e( 'Cancel', 'scout-redirects' ); ?></a>
 					<?php endif; ?>
-				<?php endif; ?>
-			</section>
+				</div>
+			</form>
+			<p class="sh-note sr-hint"><?php esc_html_e( 'The old address is a path on this site. The new address can be a path, like /services/, or a full web address. Capital letters and a closing slash on the old address do not matter.', 'scout-redirects' ); ?></p>
+		</section>
 
-			<div class="sr-side">
-				<section class="sh-box" id="scout-missing">
-					<h2 class="sh-title"><?php esc_html_e( 'Missing pages', 'scout-redirects' ); ?></h2>
-					<p><?php esc_html_e( 'Addresses people asked for that are not on the site, most visited first. Search engine crawlers, bots and file requests are left out.', 'scout-redirects' ); ?></p>
-					<?php if ( ! $s['watch_404'] ) : ?>
-						<p class="sr-empty"><?php esc_html_e( 'Watching for missing pages is turned off in the settings below.', 'scout-redirects' ); ?></p>
-					<?php elseif ( ! $missing ) : ?>
-						<p class="sr-empty"><?php esc_html_e( 'Nothing missing so far. When someone asks for a page that is not here, it shows up in this list.', 'scout-redirects' ); ?></p>
-					<?php else : ?>
-						<ul class="sr-list">
-							<?php foreach ( $missing as $row ) : ?>
-								<li>
-									<div class="sr-list-text">
-										<p class="sr-path"><?php echo esc_html( $row->path ); ?></p>
-										<p class="sh-note">
-											<?php
-											echo esc_html(
-												sprintf(
-													/* translators: 1: number of visits, 2: time since */
-													_n( '%1$s visit, last seen %2$s', '%1$s visits, last seen %2$s', (int) $row->hits, 'scout-redirects' ),
-													number_format_i18n( (int) $row->hits ),
-													self::ago( $row->last_seen )
-												)
-											);
-											?>
-										</p>
-										<?php if ( '' !== $row->referrer ) : ?>
-											<p class="sh-note sr-ref">
-												<?php
-												echo esc_html(
-													(int) $row->internal
-														/* translators: %s: page address on this site */
-														? sprintf( __( 'Linked from your page %s', 'scout-redirects' ), Scout_Redirects::normalize_source( $row->referrer ) )
-														/* translators: %s: other website */
-														: sprintf( __( 'Came from %s', 'scout-redirects' ), (string) wp_parse_url( $row->referrer, PHP_URL_HOST ) )
-												);
-												?>
-											</p>
-										<?php endif; ?>
-									</div>
-									<div class="sr-list-actions">
-										<a class="button" href="<?php echo esc_url( self::url( array( 'from' => rawurlencode( $row->path ) ) ) . '#scout-add' ); ?>"><?php esc_html_e( 'Forward it', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row->path ); ?></span></a>
-										<?php self::action_form( 'ignore', (int) $row->id, esc_html__( 'Ignore', 'scout-redirects' ) . '<span class="screen-reader-text"> ' . esc_html( $row->path ) . '</span>', 'button sh-quiet' ); ?>
-									</div>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-						<div class="sr-foot">
-							<?php if ( ! $all_404 && $logged > count( $missing ) ) : ?>
-								<a class="button sh-quiet" href="<?php echo esc_url( self::url( array( 'missing' => 'all' ) ) . '#scout-missing' ); ?>">
-									<?php
-									echo esc_html(
-										sprintf(
-											/* translators: %s: number of missing pages */
-											__( 'Show all %s', 'scout-redirects' ),
-											number_format_i18n( $logged )
-										)
-									);
-									?>
-								</a>
-							<?php endif; ?>
-							<?php self::action_form( 'clear', 0, esc_html__( 'Clear the list', 'scout-redirects' ), 'button sh-quiet sh-danger', __( 'Clear every missing page from the list? Redirects are not affected.', 'scout-redirects' ) ); ?>
-						</div>
-					<?php endif; ?>
-				</section>
-
-				<section class="sh-box" id="scout-broken">
-					<h2 class="sh-title"><?php esc_html_e( 'Broken links on your pages', 'scout-redirects' ); ?></h2>
-					<p><?php esc_html_e( 'A visitor clicked a link on one of these pages and found nothing. These also show in Tools, Site Health.', 'scout-redirects' ); ?></p>
-					<?php if ( ! $internal ) : ?>
-						<p class="sr-empty"><?php esc_html_e( 'No broken links found yet. Your pages link to pages that exist.', 'scout-redirects' ); ?></p>
-					<?php else : ?>
-						<ul class="sr-list">
-							<?php
-							foreach ( $internal as $row ) :
-								$page    = Scout_Redirects::normalize_source( $row->referrer );
-								$page_id = url_to_postid( $row->referrer );
-								$edit    = $page_id ? get_edit_post_link( $page_id ) : '';
+		<?php if ( $internal ) : ?>
+		<section class="sh-box" id="scout-broken">
+			<h2 class="sh-title"><?php esc_html_e( 'Broken links on your pages', 'scout-redirects' ); ?></h2>
+			<p><?php esc_html_e( 'A visitor clicked a link on one of these pages and found nothing. These also show in Site health.', 'scout-redirects' ); ?></p>
+			<ul class="sr-list">
+				<?php
+				foreach ( $internal as $row ) :
+					$page    = Scout_Redirects::normalize_source( $row->referrer );
+					$page_id = url_to_postid( $row->referrer );
+					$edit    = $page_id ? get_edit_post_link( $page_id ) : '';
+					?>
+					<li>
+						<span class="sr-flag" aria-hidden="true">!</span>
+						<div class="sr-list-text">
+							<p class="sr-strong">
+								<?php
+								printf(
+									/* translators: 1: page with the link, 2: missing address */
+									esc_html__( '%1$s links to %2$s', 'scout-redirects' ),
+									'<span class="sr-path">' . esc_html( $page ) . '</span>',
+									'<span class="sr-path">' . esc_html( $row->path ) . '</span>'
+								);
 								?>
-								<li>
-									<span class="sr-flag" aria-hidden="true">!</span>
-									<div class="sr-list-text">
-										<p class="sr-strong">
-											<?php
-											printf(
-												/* translators: 1: page with the link, 2: missing address */
-												esc_html__( '%1$s links to %2$s', 'scout-redirects' ),
-												'<span class="sr-path">' . esc_html( $page ) . '</span>',
-												'<span class="sr-path">' . esc_html( $row->path ) . '</span>'
-											);
-											?>
-										</p>
-										<p class="sh-note"><?php esc_html_e( 'Fix it by adding a redirect or editing the link.', 'scout-redirects' ); ?></p>
-									</div>
-									<div class="sr-list-actions">
-										<a class="button" href="<?php echo esc_url( self::url( array( 'from' => rawurlencode( $row->path ) ) ) . '#scout-add' ); ?>"><?php esc_html_e( 'Add redirect', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row->path ); ?></span></a>
-										<?php if ( $edit ) : ?>
-											<a class="button sh-quiet" href="<?php echo esc_url( $edit ); ?>"><?php esc_html_e( 'Edit the page', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $page ); ?></span></a>
-										<?php endif; ?>
-									</div>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					<?php endif; ?>
-				</section>
-			</div>
-		</div>
+							</p>
+							<p class="sh-note"><?php esc_html_e( 'Fix it by adding a redirect or editing the link.', 'scout-redirects' ); ?></p>
+						</div>
+						<div class="sr-list-actions">
+							<a class="button" href="<?php echo esc_url( self::url( array( 'from' => rawurlencode( $row->path ) ) ) . '#scout-add' ); ?>"><?php esc_html_e( 'Add redirect', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row->path ); ?></span></a>
+							<?php if ( $edit ) : ?>
+								<a class="button sh-quiet" href="<?php echo esc_url( $edit ); ?>"><?php esc_html_e( 'Edit the page', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $page ); ?></span></a>
+							<?php endif; ?>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+		<?php endif; ?>
 
-		<div class="sh-grid sh-grid-2">
-			<form method="post" action="<?php echo esc_url( $post_url ); ?>" class="sh-box" id="scout-settings">
+		<section class="sh-box" id="scout-missing">
+			<h2 class="sh-title"><?php esc_html_e( 'Missing pages people asked for', 'scout-redirects' ); ?></h2>
+			<p><?php esc_html_e( 'Addresses that are not on the site, most visited first. Bots, file requests and break-in attempts (like /.env or /wp-login) are left out.', 'scout-redirects' ); ?></p>
+			<?php if ( ! $s['watch_404'] ) : ?>
+				<p class="sr-empty"><?php esc_html_e( 'Watching for missing pages is turned off in More options below.', 'scout-redirects' ); ?></p>
+			<?php elseif ( ! $missing ) : ?>
+				<p class="sr-empty"><?php esc_html_e( 'Nothing missing so far. When someone asks for a page that is not here, it shows up in this list.', 'scout-redirects' ); ?></p>
+			<?php else : ?>
+				<table class="sr-table sr-missing">
+					<thead>
+						<tr>
+							<th scope="col"><?php esc_html_e( 'Address', 'scout-redirects' ); ?></th>
+							<th scope="col" class="sr-num"><?php esc_html_e( 'Visits', 'scout-redirects' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Last seen', 'scout-redirects' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Came from', 'scout-redirects' ); ?></th>
+							<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'scout-redirects' ); ?></span></th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php foreach ( $missing as $row ) : ?>
+						<tr>
+							<td class="sr-path" data-label="<?php esc_attr_e( 'Address', 'scout-redirects' ); ?>"><?php echo esc_html( $row->path ); ?></td>
+							<td class="sr-num" data-label="<?php esc_attr_e( 'Visits', 'scout-redirects' ); ?>"><?php echo esc_html( number_format_i18n( (int) $row->hits ) ); ?></td>
+							<td class="sr-when" data-label="<?php esc_attr_e( 'Last seen', 'scout-redirects' ); ?>"><?php echo esc_html( self::ago( $row->last_seen ) ); ?></td>
+							<td class="sr-from" data-label="<?php esc_attr_e( 'Came from', 'scout-redirects' ); ?>">
+								<?php
+								if ( '' === $row->referrer ) {
+									echo '<span class="sr-muted">' . esc_html__( 'Typed or bookmarked', 'scout-redirects' ) . '</span>';
+								} elseif ( (int) $row->internal ) {
+									/* translators: %s: page address on this site */
+									echo esc_html( sprintf( __( 'Your page %s', 'scout-redirects' ), Scout_Redirects::normalize_source( $row->referrer ) ) );
+								} else {
+									echo esc_html( (string) wp_parse_url( $row->referrer, PHP_URL_HOST ) );
+								}
+								?>
+							</td>
+							<td class="sr-actions">
+								<a class="button" href="<?php echo esc_url( self::url( array( 'from' => rawurlencode( $row->path ) ) ) . '#scout-add' ); ?>"><?php esc_html_e( 'Forward it', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row->path ); ?></span></a>
+								<?php self::action_form( 'ignore', (int) $row->id, esc_html__( 'Ignore', 'scout-redirects' ) . '<span class="screen-reader-text"> ' . esc_html( $row->path ) . '</span>', 'button sh-quiet' ); ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+				<div class="sr-foot">
+					<?php if ( ! $all_404 && $logged > count( $missing ) ) : ?>
+						<a class="button sh-quiet" href="<?php echo esc_url( self::url( array( 'missing' => 'all' ) ) . '#scout-missing' ); ?>">
+							<?php
+							/* translators: %s: number of missing pages */
+							echo esc_html( sprintf( __( 'Show all %s', 'scout-redirects' ), number_format_i18n( $logged ) ) );
+							?>
+						</a>
+					<?php endif; ?>
+					<?php self::action_form( 'clear', 0, esc_html__( 'Clear the list', 'scout-redirects' ), 'button sh-quiet sh-danger', __( 'Clear every missing page from the list? Redirects are not affected.', 'scout-redirects' ) ); ?>
+				</div>
+			<?php endif; ?>
+		</section>
+
+		<section class="sh-box" id="scout-list">
+			<h2 class="sh-title"><?php esc_html_e( 'Redirect list', 'scout-redirects' ); ?></h2>
+			<p><?php esc_html_e( 'Old addresses and where they go now. Permanent (301) is right for pages that moved for good; search engines then pass the old page\'s standing to the new one.', 'scout-redirects' ); ?></p>
+			<?php if ( $total > self::PER_PAGE || '' !== $search ) : ?>
+				<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' === self::parent() ? 'options-general.php' : 'admin.php' ) ); ?>" class="sr-search" role="search">
+					<input type="hidden" name="page" value="<?php echo esc_attr( self::SLUG ); ?>">
+					<label for="sr-search" class="screen-reader-text"><?php esc_html_e( 'Search redirects', 'scout-redirects' ); ?></label>
+					<input id="sr-search" type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search old or new addresses', 'scout-redirects' ); ?>">
+					<button type="submit" class="button"><?php esc_html_e( 'Search', 'scout-redirects' ); ?></button>
+				</form>
+			<?php endif; ?>
+
+			<?php if ( ! $rows ) : ?>
+				<p class="sr-empty">
+					<?php
+					echo '' !== $search
+						? esc_html__( 'No redirects match that search.', 'scout-redirects' )
+						: esc_html__( 'No redirects yet. Add an old address above, or import the list from an old site as a CSV file below.', 'scout-redirects' );
+					?>
+				</p>
+			<?php else : ?>
+				<table class="sr-table">
+					<thead>
+						<tr>
+							<th scope="col"><?php esc_html_e( 'From', 'scout-redirects' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'To', 'scout-redirects' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Type', 'scout-redirects' ); ?></th>
+							<th scope="col" class="sr-num"><?php esc_html_e( 'Hits', 'scout-redirects' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Last used', 'scout-redirects' ); ?></th>
+							<th scope="col"><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'scout-redirects' ); ?></span></th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php foreach ( $rows as $row ) : ?>
+						<tr<?php echo $editing && (int) $editing->id === (int) $row->id ? ' class="is-editing"' : ''; ?>>
+							<td class="sr-path" data-label="<?php esc_attr_e( 'From', 'scout-redirects' ); ?>">
+								<?php echo esc_html( $row->source ); ?>
+								<?php if ( 'auto' === $row->origin ) : ?>
+									<span class="sr-tag"><?php esc_html_e( 'Page moved', 'scout-redirects' ); ?></span>
+								<?php elseif ( 'import' === $row->origin ) : ?>
+									<span class="sr-tag"><?php esc_html_e( 'Imported', 'scout-redirects' ); ?></span>
+								<?php endif; ?>
+							</td>
+							<td class="sr-path" data-label="<?php esc_attr_e( 'To', 'scout-redirects' ); ?>"><a href="<?php echo esc_url( Scout_Redirects::target_url( $row->target ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $row->target ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'scout-redirects' ); ?></span></a></td>
+							<td data-label="<?php esc_attr_e( 'Type', 'scout-redirects' ); ?>"><span class="sr-chip" title="<?php echo 301 === (int) $row->type ? esc_attr__( 'Permanent', 'scout-redirects' ) : esc_attr__( 'Temporary', 'scout-redirects' ); ?>"><?php echo esc_html( (string) (int) $row->type ); ?></span></td>
+							<td class="sr-num" data-label="<?php esc_attr_e( 'Hits', 'scout-redirects' ); ?>"><?php echo esc_html( number_format_i18n( (int) $row->hits ) ); ?></td>
+							<td class="sr-when" data-label="<?php esc_attr_e( 'Last used', 'scout-redirects' ); ?>"><?php echo esc_html( self::ago( $row->last_hit ) ); ?></td>
+							<td class="sr-actions">
+								<a class="button sh-quiet" href="<?php echo esc_url( self::url( array( 'edit' => (int) $row->id ) ) . '#scout-add' ); ?>"><?php esc_html_e( 'Edit', 'scout-redirects' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row->source ); ?></span></a>
+								<?php
+								self::action_form(
+									'delete',
+									(int) $row->id,
+									esc_html__( 'Delete', 'scout-redirects' ) . '<span class="screen-reader-text"> ' . esc_html( $row->source ) . '</span>',
+									'button sh-quiet sh-danger',
+									/* translators: %s: old address */
+									sprintf( __( 'Stop forwarding %s?', 'scout-redirects' ), $row->source )
+								);
+								?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+				<?php
+				$pages = (int) ceil( $listed / self::PER_PAGE );
+				if ( $pages > 1 ) :
+					?>
+					<nav class="sr-pager" aria-label="<?php esc_attr_e( 'Redirect pages', 'scout-redirects' ); ?>">
+						<?php
+						echo wp_kses_post(
+							paginate_links(
+								array(
+									'base'      => add_query_arg( 'paged', '%#%', self::url( '' !== $search ? array( 's' => rawurlencode( $search ) ) : array() ) ),
+									'format'    => '',
+									'current'   => $paged,
+									'total'     => $pages,
+									'prev_text' => __( 'Previous', 'scout-redirects' ),
+									'next_text' => __( 'Next', 'scout-redirects' ),
+								)
+							)
+						);
+						?>
+					</nav>
+				<?php endif; ?>
+			<?php endif; ?>
+		</section>
+
+		<details class="sh-box sr-more">
+			<summary class="sh-title"><?php esc_html_e( 'More options: settings, import and export', 'scout-redirects' ); ?></summary>
+			<div class="sh-grid sh-grid-2">
+			<form method="post" action="<?php echo esc_url( $post_url ); ?>" class="sr-pane" id="scout-settings">
 				<h2 class="sh-title"><?php esc_html_e( 'Settings', 'scout-redirects' ); ?></h2>
 				<input type="hidden" name="action" value="scout_redirects_settings">
 				<?php wp_nonce_field( 'scout_redirects_settings' ); ?>
@@ -646,7 +638,7 @@ final class Scout_Redirects_Admin {
 				<?php submit_button( __( 'Save settings', 'scout-redirects' ) ); ?>
 			</form>
 
-			<section class="sh-box" id="scout-io">
+			<section class="sr-pane" id="scout-io">
 				<h2 class="sh-title"><?php esc_html_e( 'Import and export', 'scout-redirects' ); ?></h2>
 				<p><?php esc_html_e( 'Move redirects in and out as a CSV file, the kind any spreadsheet opens. Columns: from, to, and an optional type (301 or 302). A header row is fine.', 'scout-redirects' ); ?></p>
 				<form method="post" action="<?php echo esc_url( $post_url ); ?>" enctype="multipart/form-data" class="sr-import">
@@ -661,7 +653,8 @@ final class Scout_Redirects_Admin {
 					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_redirects_export' ), 'scout_redirects_export' ) ); ?>"><?php esc_html_e( 'Download all redirects', 'scout-redirects' ); ?></a>
 				</p>
 			</section>
-		</div>
+			</div>
+		</details>
 		<?php
 		Scout_Admin_UI::close();
 	}

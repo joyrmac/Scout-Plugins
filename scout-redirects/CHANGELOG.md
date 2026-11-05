@@ -1,5 +1,11 @@
 # Scout Redirects changelog
 
+## 0.1.14 (2026-11-05)
+
+- **A cleaner Redirects screen (Joy, 2026-11-05).** One column, top to bottom: Add a redirect, Broken links on your pages (only when there are some), Missing pages people asked for, the Redirect list, then More options (settings, import and export, closed until opened). The two side-by-side columns are gone, so addresses no longer wrap one letter per line.
+- **Missing pages are a table** with Address, Visits, Last seen and Came from ("Typed or bookmarked", one of your pages, or another website), then Forward it and Ignore.
+- **Break-in attempts are left out.** Dot paths like `/.env.local` and `/.git/config`, and log-in or admin probes like `/admin`, `/login`, `/wp-login.php` and `/administrator`, are never logged as missing pages. Ones an older version logged are cleared the first time the screen opens.
+
 ## 0.1.13 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

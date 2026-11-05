@@ -237,7 +237,8 @@ final class Scout_Redirects {
 		if ( self::is_reserved( $path ) ) {
 			return true;
 		}
-		$noise = '#^/(\.well-known|\.git|\.env|\.aws|cgi-bin|phpmyadmin)(/|$)|^/(apple-touch-icon|favicon|browserconfig|mstile)|\.(php\d?|aspx?|jsp|cgi|env|ini|sql|bak|old|zip|gz|tar|rar|log|yml|yaml|xml|txt|json|map|css|js|mjs|ico|woff2?|ttf|eot|otf|svg|png|jpe?g|gif|webp|avif|bmp|mp4|webm|mp3)$#';
+		// Dot paths (/.env.local, /.git/config), log-in and admin probes, and server-file guesses are break-in attempts, never pages.
+		$noise = '#^/\.|^/(wp-login|wp-admin|admin|administrator|login|user/login|xmlrpc|wp-config|wp-includes|vendor|node_modules)(/|$)|^/(\.well-known|\.git|\.env|\.aws|cgi-bin|phpmyadmin)(/|$)|^/(apple-touch-icon|favicon|browserconfig|mstile)|\.(php\d?|aspx?|jsp|cgi|env|ini|sql|bak|old|zip|gz|tar|rar|log|yml|yaml|xml|txt|json|map|css|js|mjs|ico|woff2?|ttf|eot|otf|svg|png|jpe?g|gif|webp|avif|bmp|mp4|webm|mp3)$#';
 		/**
 		 * Filters whether a missing address is left out of the log.
 		 *
@@ -245,6 +246,22 @@ final class Scout_Redirects {
 		 * @param string $path     The normalized path.
 		 */
 		return (bool) apply_filters( 'scout_redirects_is_noise', (bool) preg_match( $noise, $path ), $path );
+	}
+
+	/**
+	 * Drop entries the noise rules now leave out (break-in attempts logged by an
+	 * older version), once per version, so the list shows only real misses.
+	 */
+	public static function sweep_noise(): void {
+		if ( get_option( 'scout_redirects_noise_swept' ) === SCOUT_REDIRECTS_VERSION ) {
+			return;
+		}
+		foreach ( Scout_Redirects_Store::log_list( 2000 ) as $row ) {
+			if ( self::is_noise( (string) $row->path ) ) {
+				Scout_Redirects_Store::log_delete( (int) $row->id );
+			}
+		}
+		update_option( 'scout_redirects_noise_swept', SCOUT_REDIRECTS_VERSION, false );
 	}
 
 	public static function maybe_log_404(): void {
