@@ -188,7 +188,9 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 				echo '<button type="button" class="sh-find" data-sh-find aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span>' . esc_html__( 'Find anything', 'scout-build' ) . '</span><kbd data-sh-keys>Ctrl K</kbd></button>';
 			}
 			$action = self::$action;
-			if ( ! $action ) {
+			// Scout's own sites have no one to ask, so no Request a change button there (Joy, 2026-11-05).
+			$own = class_exists( 'Scout_Hub_Health', false ) && method_exists( 'Scout_Hub_Health', 'is_own_site' ) && Scout_Hub_Health::is_own_site();
+			if ( ! $action && ! $own ) {
 				// Request a change on every screen (Joy, 2026-11-04); its status shows in the Inbox.
 				foreach ( $d['all'] as $entries ) {
 					foreach ( $entries as $e ) {

@@ -244,6 +244,14 @@ final class Scout_Hub_Mail {
 	}
 
 	/**
+	 * The same card for other parts of Scout Build (the monthly update to the
+	 * client). Same arguments as card(); the body is escaped by the caller.
+	 */
+	public static function branded_card( string $eyebrow, string $title, string $body, array $buttons, string $footer ): string {
+		return self::card( $eyebrow, $title, $body, $buttons, $footer );
+	}
+
+	/**
 	 * One email card in the site's own color with its icon: the test email and
 	 * every form message use it. Inline styles only, so it renders the same in
 	 * Gmail, Apple Mail and Outlook.

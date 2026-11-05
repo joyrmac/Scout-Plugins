@@ -428,10 +428,13 @@ final class Scout_Team_Admin {
 		if ( Scout_Team::shows( $p, 'card' ) ) {
 			$tags[] = __( 'Card', 'scout-team' );
 		}
-		if ( Scout_Team::shows( $p, 'byline' ) && $r['login'] ) {
-			$n = (int) count_user_posts( (int) $p['user'], 'post', true );
-			/* translators: %d: number of published posts. */
-			$tags[] = sprintf( _n( 'Byline, %d post', 'Byline, %d posts', $n, 'scout-team' ), $n );
+		// Posts that credit them: picked in "Written by", or by their login. Each post once.
+		$n = Scout_Team_Byline::count_for( $id );
+		if ( $n > 0 ) {
+			/* translators: %d: number of live posts. */
+			$tags[] = sprintf( _n( 'Byline on %d post', 'Byline on %d posts', $n, 'scout-team' ), $n );
+		} elseif ( Scout_Team::shows( $p, 'byline' ) && $r['login'] ) {
+			$tags[] = __( 'Byline', 'scout-team' );
 		}
 		if ( Scout_Team::shows( $p, 'speaker' ) ) {
 			$tags[] = __( 'Speaker page', 'scout-team' );

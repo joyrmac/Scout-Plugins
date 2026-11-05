@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
+- **No Request a change button on Scout's own sites.** scoutraleigh.com and Recon have no one to ask, so the header button stays off there on every Scout screen (shared admin kit). Client sites keep it.
+
 - **Form emails sent, in Site status.** A new row right after "Form emails go to" says whether Gravity Forms notifications actually went out: "14 sent" with "14 sent in the last 7 days, none failed", or "2 of 14 failed" naming the last one (form, notification, date and the error) with a link to that form's notifications. A failure in the last 24 hours is a fix, so it reaches Today on Home; older failures in the week want a look. When forms got entries but no email went out, the row asks whether notifications are off. Sites without Gravity Forms don't get the row. Each try is noted in the option `scout_hub_form_mail` (not autoloaded): the form id, the notification's name, sent or failed, the error with email addresses taken out, and the time, for the last 50 tries, plus a count per form per day for 30 days. Never the recipient, subject, message or entry. Counting starts when this version first loads, so older entries never read as missed emails.
   - Operators get a **Send a test** button on Site status (admin-post `scout_hub_form_mail_test`). It sends a plain email through WordPress to the shared notice address (Business info's "Send notices to", else the admin email), notes the result as a test, and shows it after the page reloads. It submits no form and saves no entry.
   - Why: on Nov 5 Scout's own Contact form said sent, but the notice never reached the inbox, and nobody knew until it was checked by hand.

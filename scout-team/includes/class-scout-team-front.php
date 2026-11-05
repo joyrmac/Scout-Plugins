@@ -1,8 +1,9 @@
 <?php
 /**
  * The front end: the profile on each /team/<name>/ page, the [scout_team]
- * grid, excerpts from the short bio, and author links that point at the
- * person's profile.
+ * grid, excerpts from the short bio, author names and links that point at
+ * the person's profile (a linked login, or the people picked in a post's
+ * "Written by" box), and what the REST API shows of people to visitors.
  *
  * Everything a visitor sees goes through Scout_Team::public_profile(), so
  * card only contact and credential lines without a source never print here.

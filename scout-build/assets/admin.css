@@ -67,3 +67,16 @@
 .sh-log-more { color: var(--sh-accent-text); }
 .sh-log-fold[open] .sh-log-more, .sh-log-fold details[open] .sh-log-more { visibility: hidden; }
 .sh-log-fold .sh-log-list { margin: 8px 0 0 14px; padding-left: 14px; border-left: 2px solid var(--sh-border); }
+
+/* Monthly update to the client (Site history, operators only). */
+.sh-report .sh-status { margin: 4px 0 6px; }
+.sh-report-draft { border-top: 1px solid var(--sh-border); margin-top: 16px; padding-top: 16px; }
+.sh-report-draft h3 { font-size: var(--sh-fs-base); font-weight: 600; margin: 0 0 6px; color: var(--sh-text); }
+.sh-report-preview { max-width: 640px; margin: 10px 0; padding: 16px 18px; border: 1px solid var(--sh-border); border-radius: var(--sh-r-control); background: var(--sh-surface-2); color: var(--sh-text); }
+.sh-report-preview ul { list-style: disc; }
+.sh-report-draft .sh-form, .sh-report-more .sh-form { max-width: 640px; }
+.sh-report-text { width: 100%; max-width: 640px; }
+.sh-report-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+.sh-report-more { margin-top: 16px; }
+.sh-report-more summary { cursor: pointer; color: var(--sh-accent-text); }
+.sh-report-more input[type="email"], .sh-report-more input[type="text"] { width: 100%; }

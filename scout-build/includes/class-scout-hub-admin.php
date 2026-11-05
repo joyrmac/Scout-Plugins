@@ -775,6 +775,9 @@ final class Scout_Hub_Admin {
 				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
 					<p class="sh-note"><?php esc_html_e( 'This site blocks installs from the dashboard, so upload new features by hand.', 'scout-build' ); ?></p>
 				<?php endif; ?>
+				<?php if ( class_exists( 'Scout_Hub_Brand' ) ) : // Operators only: is the white-label layer on, and from where. ?>
+					<p class="sh-note sh-brand-status"><?php echo esc_html( Scout_Hub_Brand::status_text() ); ?></p>
+				<?php endif; ?>
 			<?php endif; ?>
 		</section>
 
@@ -1508,6 +1511,11 @@ final class Scout_Hub_Admin {
 				: __( 'Nothing is waiting on the client.', 'scout-build' ),
 			'<a class="button sh-quiet" href="' . esc_url( self::url( 'log', array( 'view' => 'client' ) ) ) . '">' . esc_html__( 'See it as the client', 'scout-build' ) . ' &rsaquo;</a>'
 		);
+		// The monthly update to the client: first when a draft waits on someone, else after Add a note.
+		$report_first = class_exists( 'Scout_Hub_Report' ) && (bool) Scout_Hub_Report::drafts();
+		if ( $report_first ) {
+			Scout_Hub_Report::panel();
+		}
 		?>
 		<section class="sh-box">
 			<h2 class="sh-title"><?php esc_html_e( 'Every change to this site', 'scout-build' ); ?></h2>
@@ -1687,6 +1695,12 @@ final class Scout_Hub_Admin {
 				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Add to the log', 'scout-build' ); ?></button></p>
 			</form>
 		</section>
+
+		<?php
+		if ( ! $report_first && class_exists( 'Scout_Hub_Report' ) ) {
+			Scout_Hub_Report::panel();
+		}
+		?>
 
 		<?php self::fold_open( __( 'More options', 'scout-build' ), $open_more, 'sh-log-more' ); ?>
 			<div class="sh-log-part" id="sh-log-export">

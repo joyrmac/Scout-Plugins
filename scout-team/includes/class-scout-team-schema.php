@@ -4,8 +4,9 @@
  *
  * With Scout Core active, the Person (and a ProfilePage wrapping it) joins
  * Scout Core's single @graph through its public `scout_schema_graph` filter,
- * and worksFor points at the business entity, home_url( '/#business' ). Blog
- * posts by a linked author get that Person as their author. Without Scout Core,
+ * and worksFor points at the business entity, home_url( '/#business' ). A
+ * post's author is the Person of each person picked in its "Written by" box,
+ * or else of the profile linked to its login. Without Scout Core,
  * the plugin prints its own small graph on profile pages.
  *
  * Military service has no schema.org property, so it shows on the page only.

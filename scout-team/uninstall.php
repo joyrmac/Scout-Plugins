@@ -16,6 +16,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 delete_option( 'scout_team' );
 delete_transient( 'scout_updater_scout-team' );
+delete_transient( 'scout_team_bylines' );
 
 // Links people fill in their own details with, and details that were still
 // waiting for an OK: a link must never outlive the plugin that checks it.
@@ -38,6 +39,9 @@ foreach ( $scout_team_ids as $scout_team_id ) {
 
 // Any profile meta left behind (for example on revisions).
 delete_metadata( 'post', 0, '_scout_team', '', true );
+
+// "Written by" picks on posts point at the profiles just deleted.
+delete_metadata( 'post', 0, '_scout_people_authors', '', true );
 
 // The record that the move to People ran. It stays when profiles stay, so a
 // reinstall never puts people back in groups someone took them out of.

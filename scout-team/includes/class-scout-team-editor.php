@@ -319,7 +319,8 @@ final class Scout_Team_Editor {
 			<?php endforeach; ?>
 		</fieldset>
 		<p class="description"><?php esc_html_e( 'Own page off: visitors get "page not found". You can still see it.', 'scout-team' ); ?></p>
-		<p class="description"><?php esc_html_e( 'Team page needs the Team group. Byline needs "Writes posts as". Card, speakers and chat need those features on.', 'scout-team' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Team page needs the Team group. Card, speakers and chat need those features on.', 'scout-team' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Byline: pick them in "Written by" on a post, or link their login under "Writes posts as".', 'scout-team' ); ?></p>
 		<?php
 	}
 

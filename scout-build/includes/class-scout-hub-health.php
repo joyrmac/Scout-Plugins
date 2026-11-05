@@ -433,6 +433,12 @@ final class Scout_Hub_Health {
 		);
 	}
 
+	/** True on Scout's own sites (scoutraleigh.com, Recon), using the agency domain list. */
+	public static function is_own_site(): bool {
+		$agency = array_map( 'strtolower', (array) apply_filters( 'scout_build_agency_domains', array( 'scoutraleigh.com' ) ) );
+		return self::own_site( $agency );
+	}
+
 	/**
 	 * True on Scout's own sites: scout-setup.json says "scout_own_site": true, the
 	 * site's address is on an agency domain, or Business info's email is.

@@ -188,7 +188,7 @@ final class Scout_Team_Byline {
 			$by_id[ $c['id'] ] = $c;
 		}
 		wp_nonce_field( self::NONCE, self::NONCE_FIELD );
-		echo '<div class="scout-people-byline" data-spb>';
+		echo '<div class="scout-people-byline" data-spb data-spb-offnote="' . esc_attr( $text['offNote'] ) . '">';
 		echo '<p class="description">' . esc_html( $text['help'] ) . '</p>';
 		if ( '' !== $text['setting'] ) {
 			echo '<p class="description"><strong>' . esc_html( $text['setting'] ) . '</strong></p>';
@@ -313,7 +313,7 @@ final class Scout_Team_Byline {
 		if ( ! $screen || 'post' !== $screen->base || ! in_array( (string) $screen->post_type, Scout_Team::byline_post_types(), true ) || ! self::has_panel( (string) $screen->post_type ) ) {
 			return;
 		}
-		wp_enqueue_script( 'scout-people-byline', SCOUT_TEAM_URL . 'assets/scout-people-byline.js', array( 'wp-plugins', 'wp-editor', 'wp-element', 'wp-components', 'wp-data' ), SCOUT_TEAM_VERSION, true );
+		wp_enqueue_script( 'scout-people-byline', SCOUT_TEAM_URL . 'assets/scout-people-byline.js', array( 'wp-plugins', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-components', 'wp-data' ), SCOUT_TEAM_VERSION, true );
 		wp_add_inline_script( 'scout-people-byline', 'window.scoutPeopleByline = ' . wp_json_encode( self::script_data() ) . ';', 'before' );
 	}
 
