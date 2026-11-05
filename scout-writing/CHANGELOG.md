@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
+- **Writing room names Scout only on Scout-branded sites.** "Send to Scout", "Sent to Scout", the private note and the email subject say "your web team" on white-label sites. "Let Joy or Sean know" is now "Let Scout know" (or "your web team").
+
 - **My writing rows stack**: the prompt with Keep writing on the right, then status, step, group and word-count tags and the last edit. No more "Step 2 · group".
 - **Settings.** Upload is outlined so Save is the one filled button. The theme-file how-to (scout-setup.json, README) sits behind More. The Send to Scout box is now "Where sent writing goes", which reads right on any site.
 - **Styles.** An error message uses the red tint instead of amber, the guest and inventory grids stop at three across, and the empty search result is no longer centered.
