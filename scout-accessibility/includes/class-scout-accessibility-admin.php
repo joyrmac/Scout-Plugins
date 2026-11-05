@@ -277,7 +277,7 @@ final class Scout_Accessibility_Admin {
 	private static function row( string $title, string $state, string $detail, array $items = array() ): void {
 		$pill = array(
 			'pass' => array( 'is-done', __( 'Pass', 'scout-accessibility' ) ),
-			'fix'  => array( 'is-received', __( 'Fix', 'scout-accessibility' ) ),
+			'fix'  => array( 'is-warn', __( 'Fix', 'scout-accessibility' ) ),
 			'none' => array( '', __( 'Not checked', 'scout-accessibility' ) ),
 		)[ $state ];
 		?>
@@ -321,49 +321,34 @@ final class Scout_Accessibility_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'Accessibility checks', 'scout-accessibility' ),
-			__( 'Weekly checks for the common issues a computer can find, and a short checklist for what needs a person at launch.', 'scout-accessibility' ),
+			__( 'Weekly checks a computer can run, and a short launch checklist for a person.', 'scout-accessibility' ),
 			__( 'Site status · Accessibility checks', 'scout-accessibility' )
 		);
 		self::messages();
 		?>
-		<div class="sh-grid sh-grid-2">
-			<section class="sh-box sh-check is-<?php echo ! $ran ? 'warn' : ( $to_fix ? 'warn' : 'good' ); ?>">
-				<p class="sh-label"><?php esc_html_e( 'Weekly checks', 'scout-accessibility' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>
-					<?php
-					if ( ! $ran ) {
-						esc_html_e( 'Not run yet', 'scout-accessibility' );
-					} elseif ( $to_fix ) {
-						/* translators: %d: number of checks */
-						echo esc_html( sprintf( _n( '%d check to fix', '%d checks to fix', $to_fix, 'scout-accessibility' ), $to_fix ) );
-					} else {
-						esc_html_e( 'All four pass', 'scout-accessibility' );
-					}
-					?>
-				</p>
-				<p class="sh-note">
-					<?php
-					$next = wp_next_scheduled( Scout_Accessibility_Checks::CRON );
-					if ( $next ) {
-						/* translators: %s: date */
-						echo esc_html( sprintf( __( 'Next run %s', 'scout-accessibility' ), wp_date( get_option( 'date_format' ), $next ) ) );
-					} else {
-						esc_html_e( 'Runs once a week.', 'scout-accessibility' );
-					}
-					?>
-				</p>
-			</section>
-			<section class="sh-box sh-check is-<?php echo count( $items ) === $launch_done ? 'good' : 'warn'; ?>">
-				<p class="sh-label"><?php esc_html_e( 'At launch', 'scout-accessibility' ); ?></p>
-				<p class="sh-value"><span class="sh-dot" aria-hidden="true"></span>
-					<?php
-					/* translators: 1: done, 2: total */
-					echo esc_html( sprintf( __( '%1$d of %2$d reviewed', 'scout-accessibility' ), $launch_done, count( $items ) ) );
-					?>
-				</p>
-				<p class="sh-note"><a href="#sa-launch"><?php esc_html_e( 'Color contrast & keyboard use', 'scout-accessibility' ); ?></a></p>
-			</section>
-		</div>
+		<?php
+		// One status line instead of two status cards (DESIGN 8).
+		$all_launch = count( $items ) === $launch_done;
+		if ( ! $ran ) {
+			$state    = 'off';
+			$headline = __( 'Weekly checks haven’t run yet.', 'scout-accessibility' );
+		} elseif ( $to_fix ) {
+			$state = 'warn';
+			/* translators: %d: number of checks */
+			$headline = sprintf( _n( '%d check to fix.', '%d checks to fix.', $to_fix, 'scout-accessibility' ), $to_fix );
+		} else {
+			$state    = $all_launch ? 'good' : 'warn';
+			$headline = __( 'All four weekly checks pass.', 'scout-accessibility' );
+		}
+		/* translators: 1: done, 2: total */
+		$detail = sprintf( __( '%1$d of %2$d launch checks reviewed.', 'scout-accessibility' ), $launch_done, count( $items ) );
+		$go     = $all_launch ? '' : '<a class="button" href="#sa-launch">' . esc_html__( 'Review launch checks', 'scout-accessibility' ) . '</a>';
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+		} else {
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong> <span>' . esc_html( $detail ) . '</span>' . ( '' !== $go ? ' <span class="sh-status-go">' . $go . '</span>' : '' ) . '</p></section>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $go is built from escaped parts.
+		}
+		?>
 
 		<?php /* ------------------------------------------------ Weekly */ ?>
 		<div class="sh-section-head sa-head" id="sa-weekly">
