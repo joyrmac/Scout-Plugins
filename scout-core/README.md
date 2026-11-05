@@ -244,6 +244,37 @@ line runs only while `! scout_core_owns( 'hours' )`.
   Rocket caches purge by themselves (`scout_core_purge_after_update`). Cloudflare is
   still purged by hand.
 
+## Language versions (hreflang, unreleased)
+
+For a site with the same page in two languages, such as a Spanish copy of a
+service page. Without links between them, Google treats the two as duplicates
+or shows the wrong one.
+
+- **Where:** the Scout SEO box on a page or post, under "Other language
+  versions". Set the page's own language (blank means the site language), then
+  pick each other version with its language code: es, en, fr, pt, zh, vi, ko,
+  or any simple BCP 47 code such as pt-BR or zh-Hant.
+- **Both ways:** saving on one page writes the same group onto every linked
+  page. Taking a page out of the group, on any page, takes it out everywhere.
+  Deleting a page takes it out too.
+- **Stored:** `_scout_hreflang` (language => post ID, the other pages in the
+  group) and `_scout_lang` (the page's own language) on each post.
+- **Head:** on a linked page, one `<link rel="alternate" hreflang>` for the
+  page and each version that is published and not hidden from search, plus
+  `x-default` for the version in the site language. Pages nobody has linked
+  print nothing new. The tags print even when the theme writes its own head.
+- **`<html lang>`:** a page whose own language is not the site's gets that
+  language in the attribute. Pages in the site language keep WordPress's.
+- **Google checks:** a "Language versions" row shows once any page is linked.
+  It asks for a look and names the pages when a version is not live, is hidden
+  from search, or does not link back.
+- **Translation plugins:** with WPML, Polylang, TranslatePress or Weglot active,
+  Core prints nothing, shows no check and the box only says the plugin handles
+  it. A site can also stand down with `scout_core_hreflang_stand_down`.
+- **Sitemap:** not changed. WordPress's own sitemap has no place for
+  alternates, and the head tags are what Google needs.
+- Test: `php tools/tests/core-hreflang.php`.
+
 ## APIs other plugins depend on
 
 These are a contract. Renaming or removing one breaks the plugin that uses it on

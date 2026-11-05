@@ -70,7 +70,7 @@ final class Scout_Booking_Busy {
 	private static $memo = null;
 
 	public static function boot(): void {
-		add_filter( 'cron_schedules', array( __CLASS__, 'schedules' ) ); // phpcs:ignore WordPress.WP.CronInterval -- 15 minutes, the shortest the owner's calendar is read.
+		add_filter( 'cron_schedules', array( __CLASS__, 'schedules' ) );
 		add_action( 'init', array( __CLASS__, 'schedule' ) );
 		add_action( self::HOOK, array( __CLASS__, 'refresh' ) );
 		add_filter( 'site_status_tests', array( __CLASS__, 'site_tests' ) );
@@ -120,8 +120,9 @@ final class Scout_Booking_Busy {
 		return array_slice( $out, 0, self::MAX );
 	}
 
-	/** Save the addresses (not autoloaded) and read them now, so the status is right away. */
+	/** Save the addresses (not autoloaded) and read the new ones now, so the status is right away. */
 	public static function save_feeds( array $feeds ): void {
+		$old   = array_map( array( __CLASS__, 'key' ), self::feeds() );
 		$clean = array();
 		foreach ( $feeds as $url ) {
 			$url = self::clean_url( (string) $url );
@@ -140,7 +141,7 @@ final class Scout_Booking_Busy {
 			delete_option( self::FEEDS );
 		}
 		self::$memo = null;
-		self::refresh( true );
+		self::refresh( array_values( array_diff( array_map( array( __CLASS__, 'key' ), $clean ), $old ) ) );
 		self::schedule();
 	}
 
@@ -172,10 +173,13 @@ final class Scout_Booking_Busy {
 	}
 
 	/**
-	 * Read each address that is due (every 15 minutes, or now when forced).
+	 * Read each address that is due (every 15 minutes). An address just added
+	 * or replaced is read now: pass its key in $force (true reads them all).
 	 * A failed read keeps the busy times from the last good one.
+	 *
+	 * @param bool|string[] $force
 	 */
-	public static function refresh( bool $force = false ): void {
+	public static function refresh( $force = false ): void {
 		$feeds = self::feeds();
 		if ( ! $feeds ) {
 			delete_transient( self::CACHE );
@@ -201,7 +205,7 @@ final class Scout_Booking_Busy {
 			$st = self::state_row( $state[ $k ] ?? array() );
 			$bl = array_values( array_filter( (array) ( $cache[ $k ] ?? array() ), static fn( $b ) => is_array( $b ) && (int) ( $b[1] ?? 0 ) > $now ) );
 			// A few seconds of slack, so the 15-minute job is never skipped for being early.
-			if ( $force || $st['try_at'] <= $now - self::EVERY + 60 ) {
+			if ( true === $force || ( is_array( $force ) && in_array( $k, $force, true ) ) || $st['try_at'] <= $now - self::EVERY + 60 ) {
 				$st['try_at'] = $now;
 				$got          = self::fetch( $url );
 				if ( $got['ok'] ) {
@@ -391,7 +395,7 @@ final class Scout_Booking_Busy {
 			$end     = isset( $e['DTEND'] ) ? self::moment( $e['DTEND'], $tz, $start['dt']->getTimezone() ) : null;
 			if ( $end ) {
 				if ( $allday ) {
-					$days = (int) $start['dt']->diff( $end['dt']->setTime( 0, 0 ) )->format( '%r%a' );
+					$days = self::day_count( $start['dt'], $end['dt'] );
 				} else {
 					$seconds = $end['dt']->getTimestamp() - $start['dt']->getTimestamp();
 				}
@@ -544,6 +548,14 @@ final class Scout_Booking_Busy {
 		) : null;
 	}
 
+	/** Whole days from one date to another, counted on the calendar (daylight saving never shortens a day). */
+	private static function day_count( DateTimeImmutable $a, DateTimeImmutable $b ): int {
+		$utc = new DateTimeZone( 'UTC' );
+		$x   = DateTimeImmutable::createFromFormat( '!Ymd', $a->format( 'Ymd' ), $utc );
+		$y   = DateTimeImmutable::createFromFormat( '!Ymd', $b->format( 'Ymd' ), $utc );
+		return (int) round( ( $y->getTimestamp() - $x->getTimestamp() ) / 86400 );
+	}
+
 	/** Seconds in an iCal DURATION such as PT1H30M or P1D. */
 	public static function duration( string $value ): int {
 		if ( ! preg_match( '/^([+-])?P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/', strtoupper( trim( $value ) ), $m ) ) {
@@ -565,8 +577,9 @@ final class Scout_Booking_Busy {
 			foreach ( explode( ',', (string) $prop[1] ) as $one ) {
 				$m = self::moment( array( $prop[0], $one ), $tz, $local );
 				if ( $m ) {
+					$day                                     = 'd' . ( $m['date'] ? $m['dt']->format( 'Ymd' ) : $m['dt']->setTimezone( $local )->format( 'Ymd' ) );
 					$out[ self::occ_key( $m['dt'], false ) ] = true;
-					$out[ 'd' . $m['dt']->setTimezone( $local )->format( 'Ymd' ) ] = $m['date'];
+					$out[ $day ]                             = ! empty( $out[ $day ] ) || $m['date'];
 				}
 			}
 		}
@@ -816,7 +829,7 @@ final class Scout_Booking_Busy {
 	/**
 	 * The calendar's status line, or null when no address is saved.
 	 *
-	 * @return array{state:string, headline:string, detail:string}|null
+	 * @return array{state:string, headline:string, detail:string, since:int}|null
 	 */
 	public static function summary(): ?array {
 		$rows = self::rows();
@@ -887,6 +900,16 @@ final class Scout_Booking_Busy {
 			return array(
 				'label'       => __( 'Bookings can’t read your calendar', 'scout-booking' ),
 				'status'      => 'recommended',
+				'badge'       => $badge,
+				'description' => '<p>' . esc_html( $s['headline'] . ' ' . $s['detail'] ) . '</p>',
+				'actions'     => $link,
+				'test'        => 'scout_booking_busy',
+			);
+		}
+		if ( $s && 'warn' === $s['state'] ) {
+			return array(
+				'label'       => __( 'Bookings will try your calendar again soon', 'scout-booking' ),
+				'status'      => 'good',
 				'badge'       => $badge,
 				'description' => '<p>' . esc_html( $s['headline'] . ' ' . $s['detail'] ) . '</p>',
 				'actions'     => $link,

@@ -50,6 +50,12 @@ final class Scout_Booking_Emails {
 		return sprintf( __( 'Session price: %s, paid at your appointment.', 'scout-booking' ), Scout_Booking::money( $row['price'] ) ) . "\n";
 	}
 
+	/** "Join the video call:" and the session type's room, or ''. Only in booked emails. */
+	private static function video_line( array $row ): string {
+		$url = Scout_Booking::video( $row );
+		return '' !== $url ? __( 'Join the video call:', 'scout-booking' ) . "\n" . $url . "\n\n" : '';
+	}
+
 	private static function policy_line(): string {
 		$p = Scout_Booking::policy();
 		return '' !== $p ? "\n" . $p . "\n" : '';
@@ -131,7 +137,7 @@ final class Scout_Booking_Emails {
 		$body = sprintf( /* translators: %s: first name. */ __( 'Hi %s,', 'scout-booking' ), $row['first_name'] ) . "\n\n"
 			. __( 'You are booked. Here are the details.', 'scout-booking' ) . "\n\n"
 			. self::facts( $row ) . "\n" . self::money_line( $row )
-			. self::links( $row ) . self::policy_line() . self::sign_off();
+			. self::video_line( $row ) . self::links( $row ) . self::policy_line() . self::sign_off();
 		/* translators: 1: session name, 2: date. */
 		self::send( $row['email'], sprintf( __( 'Booked: %1$s on %2$s', 'scout-booking' ), $row['type_name'], wp_date( 'F j', Scout_Booking::at( $row['start_at'] )->getTimestamp() ) ), $body, $files );
 		self::cleanup( $files );
@@ -144,7 +150,7 @@ final class Scout_Booking_Emails {
 	public static function reminder( array $row ): void {
 		$body = sprintf( /* translators: %s: first name. */ __( 'Hi %s,', 'scout-booking' ), $row['first_name'] ) . "\n\n"
 			. __( 'A reminder of your session.', 'scout-booking' ) . "\n\n"
-			. self::facts( $row ) . "\n" . self::money_line( $row ) . self::links( $row ) . self::policy_line() . self::sign_off();
+			. self::facts( $row ) . "\n" . self::money_line( $row ) . self::video_line( $row ) . self::links( $row ) . self::policy_line() . self::sign_off();
 		/* translators: %s: session name. */
 		self::send( $row['email'], sprintf( __( 'See you soon: %s', 'scout-booking' ), $row['type_name'] ), $body );
 	}
@@ -155,7 +161,7 @@ final class Scout_Booking_Emails {
 			. self::facts( $row ) . "\n"
 			/* translators: %s: the old date and time. */
 			. sprintf( __( 'It was %s.', 'scout-booking' ), $was ) . "\n\n"
-			. self::links( $row ) . self::policy_line() . self::sign_off();
+			. self::video_line( $row ) . self::links( $row ) . self::policy_line() . self::sign_off();
 		$files = array();
 		$ics   = self::ics_file( $row );
 		if ( '' !== $ics ) {
@@ -236,15 +242,17 @@ final class Scout_Booking_Emails {
 	/** A Google Calendar "add event" link. */
 	public static function google_url( array $row ): string {
 		$f = 'Ymd\THis\Z';
-		return add_query_arg(
-			array(
-				'action'  => 'TEMPLATE',
-				'text'    => rawurlencode( $row['type_name'] . ' · ' . self::site() ),
-				'dates'   => gmdate( $f, Scout_Booking::at( $row['start_at'] )->getTimestamp() ) . '/' . gmdate( $f, Scout_Booking::at( $row['end_at'] )->getTimestamp() ),
-				'details' => rawurlencode( __( 'Change the time or cancel:', 'scout-booking' ) . ' ' . Scout_Booking_Front::manage_url( $row ) ),
-			),
-			'https://calendar.google.com/calendar/render'
+		$args  = array(
+			'action'  => 'TEMPLATE',
+			'text'    => rawurlencode( $row['type_name'] . ' · ' . self::site() ),
+			'dates'   => gmdate( $f, Scout_Booking::at( $row['start_at'] )->getTimestamp() ) . '/' . gmdate( $f, Scout_Booking::at( $row['end_at'] )->getTimestamp() ),
+			'details' => rawurlencode( __( 'Change the time or cancel:', 'scout-booking' ) . ' ' . Scout_Booking_Front::manage_url( $row ) ),
 		);
+		$video = 'blocked' !== ( $row['status'] ?? '' ) ? Scout_Booking::video( $row ) : '';
+		if ( '' !== $video ) {
+			$args['location'] = rawurlencode( $video );
+		}
+		return add_query_arg( $args, 'https://calendar.google.com/calendar/render' );
 	}
 
 	/* ---------- calendar files ---------- */
@@ -283,6 +291,10 @@ final class Scout_Booking_Emails {
 		} else {
 			$summary = $row['type_name'] . ' · ' . self::site();
 			$desc    = __( 'Change the time or cancel:', 'scout-booking' ) . ' ' . Scout_Booking_Front::manage_url( $row );
+			$video   = Scout_Booking::video( $row );
+			if ( '' !== $video ) {
+				$desc = __( 'Join the video call:', 'scout-booking' ) . ' ' . $video . "\n" . $desc;
+			}
 		}
 		$lines = array(
 			'BEGIN:VEVENT',
@@ -294,6 +306,10 @@ final class Scout_Booking_Emails {
 		);
 		if ( '' !== $desc ) {
 			$lines[] = 'DESCRIPTION:' . self::esc_ics( $desc );
+		}
+		if ( ! $owner && 'blocked' !== $row['status'] && '' !== Scout_Booking::video( $row ) ) {
+			$lines[] = 'LOCATION:' . self::esc_ics( Scout_Booking::video( $row ) );
+			$lines[] = 'URL:' . Scout_Booking::video( $row );
 		}
 		if ( 'cancelled' === $row['status'] ) {
 			$lines[] = 'STATUS:CANCELLED';

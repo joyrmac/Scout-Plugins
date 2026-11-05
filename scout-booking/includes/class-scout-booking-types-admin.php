@@ -4,7 +4,8 @@
  *
  * Each type: name, name on receipts, length, price, what is paid to book
  * (the full price, a deposit, or nothing online), buffer after, hours, "by
- * request only", short intake questions, and a note shown before booking.
+ * request only", short intake questions, a note shown before booking, and an
+ * optional video call link for the booked email and calendar invite.
  * Saving a type keeps its WooCommerce product in step (Scout_Booking_Woo).
  *
  * @package Scout_Booking
@@ -67,6 +68,7 @@ final class Scout_Booking_Types_Admin {
 				'request'        => ! empty( $in['request'] ),
 				'questions'      => $questions,
 				'note'           => (string) ( $in['note'] ?? '' ),
+				'video'          => (string) ( $in['video'] ?? '' ),
 				'active'         => ! empty( $in['active'] ),
 				'product_id'     => $old ? $old['product_id'] : 0,
 			)
@@ -210,6 +212,7 @@ final class Scout_Booking_Types_Admin {
 				<p class="sbk-field"><label for="sbt-receipt"><?php esc_html_e( 'Name on receipts (optional)', 'scout-booking' ); ?></label><input type="text" id="sbt-receipt" name="<?php echo esc_attr( $f( 'receipt' ) ); ?>" class="regular-text" value="<?php echo esc_attr( $t['receipt'] ); ?>"><span class="description"><?php esc_html_e( 'What the checkout and receipt show, such as "Private session, 2 hours". Blank uses the name.', 'scout-booking' ); ?></span></p>
 				<p class="sbk-check"><label><input type="checkbox" name="<?php echo esc_attr( $f( 'active' ) ); ?>" value="1" <?php checked( $t['active'] ); ?>> <?php esc_html_e( 'Show this session on the booking page', 'scout-booking' ); ?></label></p>
 				<p class="sbk-field"><label for="sbt-note"><?php esc_html_e( 'Note shown before booking (optional)', 'scout-booking' ); ?></label><textarea id="sbt-note" name="<?php echo esc_attr( $f( 'note' ) ); ?>" rows="3" class="large-text"><?php echo esc_textarea( $t['note'] ); ?></textarea><span class="description"><?php esc_html_e( 'A line or two the client reads before picking a time, and again in their emails.', 'scout-booking' ); ?></span></p>
+				<p class="sbk-field"><label for="sbt-video"><?php esc_html_e( 'Video call link (optional)', 'scout-booking' ); ?></label><input type="url" id="sbt-video" name="<?php echo esc_attr( $f( 'video' ) ); ?>" class="large-text code" value="<?php echo esc_attr( $t['video'] ); ?>" placeholder="https://meet.google.com/abc-defg-hij" pattern="https://.+"><span class="description"><?php esc_html_e( 'A fixed Google Meet or Zoom room, sent in the booked email and the calendar invite.', 'scout-booking' ); ?></span></p>
 			</section>
 
 			<section class="sh-box">

@@ -1,5 +1,12 @@
 # Scout Booking changelog
 
+## Unreleased (2026-11-05)
+
+- **Busy times from your calendar.** Settings has a new box for the private address of up to three calendars (the iCal address Google, Apple and Outlook all offer; Google: Settings, your calendar, "Secret address in iCal format"). Every 15 minutes, in the background, Booking reads them and stops offering times you're busy, keeping the session's buffer clear on both sides. Events marked free, cancelled events and all-day events marked free don't block anything. Repeating events (daily, weekly by day, monthly, with end dates, counts and skipped dates) are handled. Only start and end times for the next 60 days are kept: never titles, people, places or notes. Bookings already made are not touched.
+- **The address stays private.** It's kept out of the settings that load on every page, never shown back in full (only the host and the last 6 characters, with Replace and Remove), never logged, and never in an export. Deleting the plugin removes it.
+- **Status in words.** Settings and the Schedule status line say "Calendar connected. Last read 4 minutes ago, 12 busy times in the next 60 days." or, when a read fails, "Couldn't read your calendar since Nov 5, 2:10 pm. Bookings still open, but busy times may be missing." After a full day of failed reads, Site status lists it under WordPress checks, with a link to the address.
+- **Video call link per session type.** An optional fixed Google Meet or Zoom room goes in the booked, moved and reminder emails and in the calendar invite (location and link). Meet links aren't made for you.
+
 ## 0.2.1 (2026-11-05)
 
 - **Privacy tools keep paid bookings.** WordPress's Erase Personal Data tool still deletes a person's unpaid bookings. A booking that took money now stays as the payment record, with the name, email, phone and answers taken out, and the tool says so. The export also lists the amount paid, the order number and whether the newsletter box was ticked.

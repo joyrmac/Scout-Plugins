@@ -2,6 +2,14 @@
 
 ## Unreleased (2026-11-05)
 
+- **Language versions (hreflang).** The Scout SEO box on pages and posts has a new "Other language versions" part: set the page's language and pick the same page in another language (es, en, fr, pt, zh, vi, ko, or any simple code like pt-BR). Google then shows each visitor the right one instead of treating the two as duplicates. Nothing changes for visitors until someone links a page.
+  - Links are saved on every page in the group (`_scout_hreflang`), so they always run both ways, and removing a version on one page removes it on all of them. Each page also keeps its own language (`_scout_lang`), the site language by default.
+  - On a linked page the head gets one `<link rel="alternate" hreflang>` per live version and `x-default` for the site language version. Drafts, pages hidden from search, thank-you pages and pages whose canonical points elsewhere are left out.
+  - A page in another language gets that language in `<html lang>`.
+  - Google checks has a "Language versions" row once any page is linked. It names pages whose versions are not live or do not link back.
+  - With WPML, Polylang, TranslatePress or Weglot active, Core stands down (or through `scout_core_hreflang_stand_down`). The sitemap is not changed.
+  - Deleting the plugin with "remove all Scout data" on also removes the two new keys. No visitor data.
+
 - **Searches that found nothing.** When a visitor uses the site's own search box and gets no results, Scout Core counts the search words, so you can see what people look for and can't find. Search settings shows the top 20 with how many times and the last day each was searched, a "Clear the list" button, and the hint "Add a page or an FAQ answer for the top ones." Nothing changes for visitors, and no search box is added to any page.
   - Only the words are kept, lowercased and cut to 80 characters, with a count and the first and last day seen. No IP address, browser or time of the search. Words with an @, seven or more digits in a row (phone numbers however they are written), a web address, or more than 8 words are never kept.
   - Not counted for people logged in to edit the site, for bots, inside the dashboard, on page two of results, or when the search found something. One visitor's repeat search within 30 minutes counts once, through a short-lived record named by a scrambled copy of the words and IP address.

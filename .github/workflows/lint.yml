@@ -101,6 +101,8 @@ jobs:
         run: php tools/tests/core-seo-gaps.php
       - name: Scout Core searches that found nothing (no WordPress needed)
         run: php tools/tests/core-empty-search.php
+      - name: Language versions (no WordPress needed)
+        run: php tools/tests/core-hreflang.php
       - name: Every plugin lists the visitor data it keeps (Site Standard rule 24)
         run: php tools/visitor-data.php --check
       - name: Approval hold, live sites wait for Scout's OK (no WordPress needed)
@@ -125,6 +127,8 @@ jobs:
         run: php tools/tests/cards-people.php
       - name: Privacy export and erase tools (no WordPress needed)
         run: php tools/tests/privacy-tools.php
+      - name: Booking busy times from the owner's calendar (no WordPress needed)
+        run: php tools/tests/booking-busy.php
 
   slop-check:
     name: Code slop check

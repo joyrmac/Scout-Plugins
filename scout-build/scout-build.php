@@ -61,6 +61,8 @@ require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-security.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-log.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-log-api.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-privacy.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-brand.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-report.php';
 
 Scout_Hub_Features::boot();
 Scout_Hub_Requests::boot();
@@ -82,6 +84,9 @@ Scout_Hub_Security::boot();
 Scout_Hub_Log::boot();
 Scout_Hub_Log_API::boot();
 Scout_Hub_Privacy::boot();
+Scout_Hub_Brand::boot();
+Scout_Hub_Report::boot();
 
 register_deactivation_hook( __FILE__, array( 'Scout_Hub_Watch', 'unschedule' ) );
 register_deactivation_hook( __FILE__, array( 'Scout_Hub_Inbox', 'unschedule' ) );
+register_deactivation_hook( __FILE__, array( 'Scout_Hub_Report', 'unschedule' ) );

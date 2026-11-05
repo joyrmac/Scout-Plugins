@@ -44,6 +44,13 @@ final class Scout_Team_Front {
 		add_filter( 'post_thumbnail_html', array( __CLASS__, 'drop_theme_photo' ), 10, 2 );
 		add_filter( 'get_the_excerpt', array( __CLASS__, 'excerpt' ), 10, 2 );
 		add_filter( 'author_link', array( __CLASS__, 'author_link' ), 10, 2 );
+		add_filter( 'author_link', array( __CLASS__, 'written_by_link' ), 20, 2 );
+		add_filter( 'the_author', array( __CLASS__, 'written_by_name' ), 20 );
+		add_filter( 'get_the_author_display_name', array( __CLASS__, 'written_by_display_name' ), 20, 2 );
+		add_filter( 'the_author_posts_link', array( __CLASS__, 'written_by_posts_link' ), 20 );
+		add_filter( 'rest_' . Scout_Team::POST_TYPE . '_query', array( __CLASS__, 'rest_query' ), 10, 2 );
+		add_filter( 'rest_prepare_' . Scout_Team::POST_TYPE, array( __CLASS__, 'rest_prepare' ), 10, 2 );
+		add_filter( 'rest_post_search_query', array( __CLASS__, 'rest_search' ), 10, 2 );
 		add_shortcode( 'scout_team', array( __CLASS__, 'grid' ) );
 	}
 
@@ -476,5 +483,192 @@ final class Scout_Team_Front {
 			return $link;
 		}
 		return (string) get_permalink( $member );
+	}
+
+	/* ---------- Written by ---------- */
+
+	/**
+	 * The people picked in "Written by" on the post being printed, when the
+	 * theme is asking about that post's author. Empty in every other case, so
+	 * WordPress and the linked login work as they always did.
+	 *
+	 * @param int $user_id The author the theme asked about, or -1 for "the current author".
+	 */
+	private static function written_by_here( int $user_id ): array {
+		if ( is_admin() || ! Scout_Team::settings()['bylines'] ) {
+			return array();
+		}
+		$post = get_post();
+		if ( ! $post || ! in_array( $post->post_type, Scout_Team::byline_post_types(), true ) ) {
+			return array();
+		}
+		if ( $user_id >= 0 && $user_id !== (int) $post->post_author ) {
+			return array();
+		}
+		// An author archive's own title is about that login, not the first post on it.
+		if ( is_author() && ! in_the_loop() ) {
+			return array();
+		}
+		return Scout_Team::written_by( (int) $post->ID );
+	}
+
+	/** The login WordPress is printing the author of, or -1 when it has none. */
+	private static function current_author_id(): int {
+		global $authordata;
+		return is_object( $authordata ) && isset( $authordata->ID ) ? (int) $authordata->ID : -1;
+	}
+
+	/**
+	 * Names for a byline, joined: "Dana Lee", "Dana Lee & Sam Park".
+	 *
+	 * @param int[] $members Person post IDs.
+	 */
+	public static function byline_names( array $members ): string {
+		return Scout_Team::join_names( array_map( array( 'Scout_Team', 'name' ), $members ) );
+	}
+
+	/**
+	 * A byline with each name linked to its profile page. A person whose page
+	 * is off shows as a plain name.
+	 *
+	 * @param int[] $members Person post IDs.
+	 */
+	public static function byline_html( array $members ): string {
+		$parts = array();
+		foreach ( $members as $member ) {
+			$name = esc_html( Scout_Team::name( (int) $member ) );
+			$url  = Scout_Team::profile_url( (int) $member );
+			$parts[] = '' !== $url ? '<a href="' . esc_url( $url ) . '" rel="author">' . $name . '</a>' : $name;
+		}
+		if ( count( $parts ) < 2 ) {
+			return (string) ( $parts[0] ?? '' );
+		}
+		$last = array_pop( $parts );
+		return implode( ', ', $parts ) . ' &amp; ' . $last;
+	}
+
+	/** the_author: the picked names. */
+	public static function written_by_name( $name ) {
+		$people = self::written_by_here( self::current_author_id() );
+		return $people ? self::byline_names( $people ) : $name;
+	}
+
+	/** get_the_author_meta( 'display_name' ) for the post's author: the picked names. */
+	public static function written_by_display_name( $name, $user_id = 0 ) {
+		$people = self::written_by_here( (int) $user_id );
+		return $people ? self::byline_names( $people ) : $name;
+	}
+
+	/**
+	 * The author link for the post's author: the first picked person's
+	 * profile page, or no address when their page is off.
+	 */
+	public static function written_by_link( $link, $author_id ) {
+		$people = self::written_by_here( (int) $author_id );
+		return $people ? Scout_Team::profile_url( (int) $people[0] ) : $link;
+	}
+
+	/** the_author_posts_link: every picked name, each linked to its own page. */
+	public static function written_by_posts_link( $link ) {
+		$people = self::written_by_here( self::current_author_id() );
+		return $people ? self::byline_html( $people ) : $link;
+	}
+
+	/* ---------- the REST API ---------- */
+
+	/** Someone who may see every profile through the REST API: editors and the block editor. */
+	private static function rest_trusted(): bool {
+		return current_user_can( 'edit_posts' );
+	}
+
+	/**
+	 * The people list in the REST API (/wp-json/wp/v2/scout_team): for
+	 * anyone who cannot edit posts, only live people whose own page is on.
+	 *
+	 * @param array $args WP_Query arguments.
+	 */
+	public static function rest_query( $args, $request = null ) {
+		unset( $request );
+		if ( ! is_array( $args ) || self::rest_trusted() ) {
+			return $args;
+		}
+		$args['post_status'] = 'publish';
+		return self::without_hidden( $args );
+	}
+
+	/**
+	 * Leave hidden profiles out of a query. A list of IDs (post__in) wins over
+	 * post__not_in in WP_Query, so hidden IDs are taken out of it directly.
+	 *
+	 * @param array $args WP_Query arguments.
+	 */
+	public static function without_hidden( array $args ): array {
+		$hidden = Scout_Team::hidden_profiles();
+		if ( ! $hidden ) {
+			return $args;
+		}
+		if ( ! empty( $args['post__in'] ) ) {
+			$keep             = array_values( array_diff( array_map( 'intval', (array) $args['post__in'] ), $hidden ) );
+			$args['post__in'] = $keep ? $keep : array( 0 );
+			return $args;
+		}
+		$args['post__not_in'] = array_merge( isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array(), $hidden );
+		return $args;
+	}
+
+	/**
+	 * One person in the REST API. For anyone who cannot edit posts, a person
+	 * whose own page is off, or who is not live, is "not found", the same as
+	 * their page. Card only contact, details waiting for an OK and link data
+	 * are never sent to them, whatever registered it.
+	 *
+	 * @param WP_REST_Response $response The response.
+	 * @param WP_Post          $post     The person.
+	 */
+	public static function rest_prepare( $response, $post ) {
+		if ( self::rest_trusted() || ! $post instanceof WP_Post ) {
+			return $response;
+		}
+		if ( 'publish' !== $post->post_status || ! Scout_Team::shows( Scout_Team::profile( (int) $post->ID ), 'bio' ) ) {
+			return new WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.', 'scout-team' ), array( 'status' => 404 ) );
+		}
+		if ( is_object( $response ) && method_exists( $response, 'get_data' ) && method_exists( $response, 'set_data' ) ) {
+			$response->set_data( self::rest_public_data( (array) $response->get_data() ) );
+		}
+		return $response;
+	}
+
+	/** Keys that never go to the public REST API, at the top level or under meta. */
+	public static function rest_private_keys(): array {
+		return array( Scout_Team::META, Scout_Team::PENDING, '_scout_team_link', '_scout_team_link_hash', 'scout_team', 'card_phone', 'card_email', 'pending', 'link' );
+	}
+
+	/**
+	 * A person's REST data with the private keys taken out.
+	 *
+	 * @param array $data Response data.
+	 */
+	public static function rest_public_data( array $data ): array {
+		foreach ( self::rest_private_keys() as $key ) {
+			unset( $data[ $key ] );
+			if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
+				unset( $data['meta'][ $key ] );
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * The REST search (/wp-json/wp/v2/search): hidden profiles stay out for
+	 * anyone who cannot edit posts, the same as the site's own search.
+	 *
+	 * @param array $args WP_Query arguments.
+	 */
+	public static function rest_search( $args, $request = null ) {
+		unset( $request );
+		if ( ! is_array( $args ) || self::rest_trusted() ) {
+			return $args;
+		}
+		return self::without_hidden( $args );
 	}
 }

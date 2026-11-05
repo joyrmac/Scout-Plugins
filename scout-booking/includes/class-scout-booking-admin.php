@@ -3,7 +3,8 @@
  * The Bookings hub: its own sidebar item with the Scout bolt, beside Members
  * and Events. The schedule by day or week, requests to approve, paid and
  * unpaid at a glance, client details and intake answers, blocked time, the
- * private calendar feed, and the settings.
+ * private calendar feed, and the settings, with busy times from the owner's
+ * own calendar.
  *
  * Bookings hold clients' personal details, so only people who can list users
  * (administrators) see any of it, the same rule as Scout Members.
@@ -23,7 +24,7 @@ final class Scout_Booking_Admin {
 	public static function boot(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 31 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
-		foreach ( array( 'decide', 'cancel', 'block', 'unblock', 'settings', 'feed_reset' ) as $a ) {
+		foreach ( array( 'decide', 'cancel', 'block', 'unblock', 'settings', 'feed_reset', 'busy' ) as $a ) {
 			add_action( 'admin_post_scout_booking_' . $a, array( __CLASS__, $a ) );
 		}
 		add_filter( 'plugin_action_links_' . plugin_basename( SCOUT_BOOKING_FILE ), array( __CLASS__, 'action_link' ) );
@@ -225,6 +226,71 @@ final class Scout_Booking_Admin {
 		self::back( 'feed', 'sb-feed' );
 	}
 
+	/**
+	 * Add, replace or remove a private calendar address. The address is a
+	 * secret: it is never logged and never printed back in full.
+	 */
+	public static function busy(): void {
+		self::guard( 'scout_booking_busy' );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- checked in guard().
+		$do = sanitize_key( wp_unslash( $_POST['do'] ?? '' ) );
+		$n  = isset( $_POST['n'] ) ? absint( $_POST['n'] ) : -1;
+		// Not sanitize_text_field(): it strips the %40 in Google's addresses. clean_url() checks every line.
+		$typed = isset( $_POST['address'] ) ? (string) wp_unslash( $_POST['address'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:enable
+		$feeds = Scout_Booking_Busy::feeds();
+		$lines = array_values( array_filter( array_map( 'trim', (array) preg_split( '/\R/', $typed ) ) ) );
+		if ( 'remove' === $do ) {
+			if ( isset( $feeds[ $n ] ) ) {
+				unset( $feeds[ $n ] );
+				Scout_Booking_Busy::save_feeds( $feeds );
+			}
+			self::back( 'busy-removed', 'sb-busy' );
+		}
+		if ( 'replace' === $do ) {
+			$url = Scout_Booking_Busy::clean_url( $lines[0] ?? '' );
+			if ( '' === $url || ! isset( $feeds[ $n ] ) ) {
+				self::back( 'busy-bad', 'sb-busy' );
+			}
+			$feeds[ $n ] = $url;
+			Scout_Booking_Busy::save_feeds( $feeds );
+			self::back( self::busy_result( array( $url ) ), 'sb-busy' );
+		}
+		$added = array();
+		$bad   = 0;
+		$over  = 0;
+		foreach ( $lines as $line ) {
+			$url = Scout_Booking_Busy::clean_url( $line );
+			if ( '' === $url ) {
+				++$bad;
+			} elseif ( in_array( $url, $feeds, true ) ) {
+				continue;
+			} elseif ( count( $feeds ) >= Scout_Booking_Busy::MAX ) {
+				++$over;
+			} else {
+				$feeds[] = $url;
+				$added[] = $url;
+			}
+		}
+		if ( ! $added ) {
+			self::back( $over ? 'busy-full' : 'busy-bad', 'sb-busy' );
+		}
+		Scout_Booking_Busy::save_feeds( $feeds );
+		self::back( $over ? 'busy-full' : ( $bad ? 'busy-somebad' : self::busy_result( $added ) ), 'sb-busy' );
+	}
+
+	/** After saving: read fine, or saved but not read yet. */
+	private static function busy_result( array $urls ): string {
+		$keys = array_map( array( 'Scout_Booking_Busy', 'key' ), $urls );
+		$rows = Scout_Booking_Busy::rows();
+		foreach ( Scout_Booking_Busy::feeds() as $n => $url ) {
+			if ( in_array( Scout_Booking_Busy::key( $url ), $keys, true ) && ! empty( $rows[ $n ]['fail_since'] ) ) {
+				return 'busy-unread';
+			}
+		}
+		return 'busy-saved';
+	}
+
 	/* ---------- screens ---------- */
 
 	private static function message(): void {
@@ -242,6 +308,12 @@ final class Scout_Booking_Admin {
 			'saved'          => array( 'success', __( 'Settings saved.', 'scout-booking' ) ),
 			'feed'           => array( 'success', __( 'New calendar address made. The old one stops working, so subscribe again with the new one.', 'scout-booking' ) ),
 			'gone'           => array( 'error', __( 'That booking has already changed. Here is the latest.', 'scout-booking' ) ),
+			'busy-saved'     => array( 'success', __( 'Calendar saved and read. Times you’re busy there aren’t offered for booking.', 'scout-booking' ) ),
+			'busy-unread'    => array( 'warning', __( 'Calendar saved, but it couldn’t be read yet. The reason is below.', 'scout-booking' ) ),
+			'busy-bad'       => array( 'error', __( 'That isn’t a private calendar address. It starts with https:// or webcal://.', 'scout-booking' ) ),
+			'busy-somebad'   => array( 'warning', __( 'Calendar saved. One line wasn’t a calendar address, so it was left out.', 'scout-booking' ) ),
+			'busy-full'      => array( 'warning', __( 'Three calendars is the most. Remove one to add another.', 'scout-booking' ) ),
+			'busy-removed'   => array( 'success', __( 'Calendar removed. Its busy times no longer block bookings.', 'scout-booking' ) ),
 		);
 		if ( isset( $texts[ $msg ] ) ) {
 			printf( '<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>', esc_attr( $texts[ $msg ][0] ), esc_html( $texts[ $msg ][1] ) );
@@ -301,16 +373,27 @@ final class Scout_Booking_Admin {
 			/* translators: 1: session name, 2: client name, 3: day and time. */
 			? sprintf( __( 'Next: %1$s with %2$s, %3$s.', 'scout-booking' ), $next['type_name'], Scout_Booking::client_name( $next ), Scout_Booking::when_label( $next ) )
 			: __( 'Nothing booked in the next 7 days.', 'scout-booking' );
+		// Busy times from the owner's calendar: a short note when fine, the look state when it can't be read.
+		$cal      = Scout_Booking_Busy::summary();
+		$cal_bad  = $cal && 'warn' === $cal['state'];
+		$cal_text = $cal ? ' ' . $cal['headline'] . ' ' . $cal['detail'] : '';
 		if ( $reqs ) {
 			self::ui_status(
 				'warn',
 				/* translators: %d: number of requests. */
 				sprintf( _n( '%d request is waiting for you.', '%d requests are waiting for you.', count( $reqs ), 'scout-booking' ), count( $reqs ) ),
-				$next_words,
+				$next_words . $cal_text,
 				'<a class="button" href="#sb-requests">' . esc_html__( 'Read requests', 'scout-booking' ) . '</a>'
 			);
+		} elseif ( $cal_bad ) {
+			self::ui_status(
+				'warn',
+				$cal['headline'],
+				$cal['detail'] . ' ' . __( 'No requests waiting.', 'scout-booking' ) . ' ' . $next_words,
+				'<a class="button" href="' . esc_url( self::url( array(), 'sb-busy', 'settings' ) ) . '">' . esc_html__( 'Check the calendar', 'scout-booking' ) . '</a>'
+			);
 		} else {
-			self::ui_status( 'good', __( 'No requests waiting.', 'scout-booking' ), $next_words );
+			self::ui_status( 'good', __( 'No requests waiting.', 'scout-booking' ), $next_words . $cal_text );
 		}
 		self::setup_notes();
 		?>
@@ -527,6 +610,71 @@ final class Scout_Booking_Admin {
 		<?php
 	}
 
+	/**
+	 * Busy times from the owner's calendar. Each address has its own small
+	 * forms, so Enter in a settings field never removes a calendar. Only the
+	 * host and the last 6 characters of an address are ever shown.
+	 */
+	private static function busy_box(): void {
+		$rows = Scout_Booking_Busy::rows();
+		$sum  = Scout_Booking_Busy::summary();
+		$now  = Scout_Booking::now()->getTimestamp();
+		$post = admin_url( 'admin-post.php' );
+		?>
+		<section class="sh-box sbk-settings" id="sb-busy">
+			<h2 class="sh-title"><?php esc_html_e( 'Busy times from your calendar', 'scout-booking' ); ?></h2>
+			<p><?php esc_html_e( 'Times you’re busy in your own calendar aren’t offered on the booking page.', 'scout-booking' ); ?></p>
+			<?php if ( $sum ) : ?>
+				<p class="sh-status is-<?php echo esc_attr( $sum['state'] ); ?>"><span class="sh-dot" aria-hidden="true"></span><strong><?php echo esc_html( $sum['headline'] ); ?></strong> <span><?php echo esc_html( $sum['detail'] ); ?></span></p>
+			<?php endif; ?>
+			<?php if ( $rows ) : ?>
+				<ul class="sh-rows">
+					<?php foreach ( $rows as $n => $row ) : ?>
+						<li class="sh-row">
+							<div>
+								<p class="sh-row-name"><?php echo esc_html( $row['mask'] ); ?></p>
+								<p class="sh-row-sub"><?php echo esc_html( Scout_Booking_Busy::row_words( $row, $now ) ); ?></p>
+							</div>
+							<details class="sbk-more">
+								<summary><?php esc_html_e( 'Replace', 'scout-booking' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row['mask'] ); ?></span></summary>
+								<form method="post" action="<?php echo esc_url( $post ); ?>">
+									<input type="hidden" name="action" value="scout_booking_busy">
+									<input type="hidden" name="do" value="replace">
+									<input type="hidden" name="n" value="<?php echo (int) $n; ?>">
+									<?php wp_nonce_field( 'scout_booking_busy' ); ?>
+									<p class="sbk-field"><label for="sbk-busy-r<?php echo (int) $n; ?>"><?php esc_html_e( 'New private address', 'scout-booking' ); ?></label><input type="text" id="sbk-busy-r<?php echo (int) $n; ?>" name="address" class="large-text code" inputmode="url" autocomplete="off" spellcheck="false" required></p>
+									<p><button type="submit" class="button"><?php esc_html_e( 'Save new address', 'scout-booking' ); ?></button></p>
+								</form>
+							</details>
+							<form method="post" action="<?php echo esc_url( $post ); ?>" class="sh-row-go">
+								<input type="hidden" name="action" value="scout_booking_busy">
+								<input type="hidden" name="do" value="remove">
+								<input type="hidden" name="n" value="<?php echo (int) $n; ?>">
+								<?php wp_nonce_field( 'scout_booking_busy' ); ?>
+								<button type="submit" class="button sh-quiet"><?php esc_html_e( 'Remove', 'scout-booking' ); ?><span class="screen-reader-text"> <?php echo esc_html( $row['mask'] ); ?></span></button>
+							</form>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<p class="sh-note"><?php esc_html_e( 'Only the end of each address shows here, to keep it private.', 'scout-booking' ); ?></p>
+			<?php endif; ?>
+			<?php if ( count( $rows ) < Scout_Booking_Busy::MAX ) : ?>
+				<form method="post" action="<?php echo esc_url( $post ); ?>">
+					<input type="hidden" name="action" value="scout_booking_busy">
+					<input type="hidden" name="do" value="add">
+					<?php wp_nonce_field( 'scout_booking_busy' ); ?>
+					<p class="sbk-field">
+						<label for="sbk-busy-add"><?php echo esc_html( $rows ? __( 'Add another private calendar address', 'scout-booking' ) : __( 'Private calendar addresses, one per line', 'scout-booking' ) ); ?></label>
+						<textarea id="sbk-busy-add" name="address" rows="2" class="large-text code" autocomplete="off" spellcheck="false" required></textarea>
+						<span class="description"><?php esc_html_e( 'In Google Calendar it’s under Settings, your calendar, “Secret address in iCal format”. Up to three.', 'scout-booking' ); ?></span>
+					</p>
+					<p><button type="submit" class="button"><?php esc_html_e( 'Add calendar', 'scout-booking' ); ?></button></p>
+				</form>
+			<?php endif; ?>
+		</section>
+		<?php
+	}
+
 	public static function render_settings(): void {
 		if ( ! current_user_can( self::CAP ) ) {
 			return;
@@ -620,6 +768,7 @@ final class Scout_Booking_Admin {
 			<p><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Save settings', 'scout-booking' ); ?></button></p>
 		</form>
 		<?php
+		self::busy_box();
 		self::feed_box();
 		Scout_Admin_UI::close();
 	}

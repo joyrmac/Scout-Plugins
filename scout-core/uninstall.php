@@ -10,7 +10,8 @@
  * - The business identity (`scout_business`): the NAP, hours, geo, and profile
  *   URLs. Typed in once, read by the schema graph and the head tags everywhere.
  * - The per-page SEO overrides (`_scout_seo_*`): every custom title, meta
- *   description, canonical, and noindex flag on the site.
+ *   description, canonical, and noindex flag on the site, plus the language
+ *   versions (`_scout_hreflang`, `_scout_lang`).
  *
  * Losing either is invisible after the fact. The pages still exist, they just
  * quietly stop saying what they were set up to say, which is worse than an
@@ -46,7 +47,7 @@ delete_option( 'scout_core_policies' );
 delete_option( 'scout_seo_sitemap_found' );
 wp_clear_scheduled_hook( 'scout_seo_sitemap_check' );
 
-foreach ( array( '_scout_seo_title', '_scout_seo_desc', '_scout_seo_canonical', '_scout_seo_noindex' ) as $scout_core_meta_key ) {
+foreach ( array( '_scout_seo_title', '_scout_seo_desc', '_scout_seo_canonical', '_scout_seo_noindex', '_scout_hreflang', '_scout_lang' ) as $scout_core_meta_key ) {
 	delete_post_meta_by_key( $scout_core_meta_key );
 }
 

@@ -34,6 +34,7 @@ add_action(
 require_once __DIR__ . '/includes/class-scout-admin-ui.php';
 require_once __DIR__ . '/includes/class-scout-booking.php';
 require_once __DIR__ . '/includes/class-scout-booking-slots.php';
+require_once __DIR__ . '/includes/class-scout-booking-busy.php';
 require_once __DIR__ . '/includes/class-scout-booking-emails.php';
 require_once __DIR__ . '/includes/class-scout-booking-front.php';
 require_once __DIR__ . '/includes/class-scout-booking-woo.php';
@@ -41,6 +42,7 @@ require_once __DIR__ . '/includes/class-scout-booking-admin.php';
 require_once __DIR__ . '/includes/class-scout-booking-types-admin.php';
 
 Scout_Booking::boot();
+Scout_Booking_Busy::boot();
 Scout_Booking_Front::boot();
 Scout_Booking_Admin::boot();
 Scout_Booking_Types_Admin::boot();

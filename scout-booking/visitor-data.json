@@ -34,5 +34,5 @@
     }
   ],
   "cookies": [],
-  "notes": "This plugin sets no cookies itself. When a session takes payment, WooCommerce sets its own cart and session cookies and keeps the order under its own rules."
+  "notes": "This plugin sets no cookies itself. When a session takes payment, WooCommerce sets its own cart and session cookies and keeps the order under its own rules. Busy times from the owner's own calendar are not visitor data: only the start and end of the owner's busy times for the next 60 days are kept, never titles, people, places or notes."
 }
