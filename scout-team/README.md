@@ -78,9 +78,10 @@ became a membership with that same source.
 
 ## Needs a look
 
-A person needs a look when they have no photo, their photo has no alt text in
-the media library, a credential line has no source, or they are not live yet
-(draft or pending). `Scout_Team::needs_look( $post_id )` returns the reasons in
+A person needs a look when they sent their details through a link and those
+wait for an OK, they have no photo, their photo has no alt text in the media
+library, a credential line has no source, or they are not live yet (draft or
+pending). `Scout_Team::needs_look( $post_id )` returns the reasons in
 plain words.
 
 ## What each person has
@@ -115,14 +116,66 @@ person's name wherever a theme prints it.
 status line (how many people, how many on the team page, cards on, how many
 need a look), filter chips (Everyone, each group, Needs a look), then one row
 per person with their photo or initials, title, groups, where they show,
-what needs a look, and an Edit button. In the Everyone view the rows come in
+what needs a look, an Edit button and Send them a link. In the Everyone view the rows come in
 sections: Runs the site (people whose login can manage the site), Team,
 Speakers, Writers, Members (listed), then Everyone else. Rows follow the
 team page order: the Order number on each person, then name.
 
 The edit screen has the Profile fields under the name, the optional full bio
 below, and on the side: Shows on (with the card only phone and email), Groups,
-a preview card and a trust checklist.
+a preview card, a trust checklist and Send them a link.
+
+## Add a person
+
+**Add a person** on the People screen opens a short walkthrough in the People
+section (`?page=scout-people&add=1`), three steps on one screen with a
+numbered progress row:
+
+1. **Who they are:** name, title or role, groups (Team ticked).
+2. **Photo & short bio:** a photo from the media library, its alt text (empty
+   uses their name) and the short bio.
+3. **Where they show:** the same Shows on switches and defaults as the edit
+   screen, and "Writes posts as", which turns the byline on.
+
+**Save as draft** or **Publish** saves through the edit screen's own code
+(`Scout_Team_Editor::store()`): the same cleaning, the same `_scout_team`
+value, the same group rules. **Save and send them a link** saves a draft and
+makes their link. Each one then opens the full edit screen with "Add
+credentials and links here when you have them." Without JavaScript all three
+steps show at once, the photo is a plain upload, and the form still posts
+everything. "Use the full editor" opens WordPress's own Add screen.
+
+## Send them a link
+
+**Send them a link** (on each row of the People screen, on the edit screen,
+and at the end of Add a person) makes a one-time link,
+`/?scout_people=<token>`, to a page where the person fills in their own name,
+title, short bio, photo, credentials with sources, and profile links. The
+owner copies the link and sends it; the plugin sends no email. The page never
+asks for email, phone or the card only contact.
+
+- **The link:** 48 random hex characters. Only a keyed hash is stored
+  (`_scout_team_link_hash`), with when it was made and when it ends
+  (`_scout_team_link`). It ends after 14 days, works once, and takes at most
+  8 sends an hour. A new link turns off the old one; the edit screen can turn
+  it off. The full link shows once, to whoever made it.
+- **The page:** the theme's own header and footer, plain markup, a small
+  stylesheet that takes the button color from the theme's DESIGN.md through
+  Scout Core. It has a nonce, a hidden honeypot field, checks the photo (JPG,
+  PNG or WebP, 5 MB at most), cleans every field the way the edit screen does,
+  and is never listed by search engines, cached, or tracked by the analytics
+  tag. An ended or wrong link says so and nothing more.
+- **What they send waits** in `_scout_team_pending`. The profile page, the
+  team page and the schema never read it. The person shows under **Needs a
+  look** ("Sent their details, waiting for your OK") and in To do. On the
+  edit screen, **Sent their details** shows each field now and as sent:
+  **Approve** copies it into the profile (an empty title or bio keeps what is
+  there; credentials and links are taken as sent, because the page starts
+  filled in with what is there), **Discard** deletes it and the photo sent
+  with it.
+- WordPress's **Export** and **Erase Personal Data** tools cover waiting
+  details, found by the email on the profile, its card email, or the login it
+  writes posts as.
 
 When a live person's address changes, Scout Redirects (when it is on, and its
 "forward a page automatically" setting is on) gets a 301 from the old
@@ -174,7 +227,8 @@ With Scout Analytics active: `team_profile_click` (grid card),
 
 ## Uninstall
 
-Deleting the plugin removes the settings. Profiles and groups stay, because
+Deleting the plugin removes the settings, every link and any details still
+waiting for an OK. Profiles and groups stay, because
 they are content someone typed in. To remove profiles too, define
 `SCOUT_PURGE_ON_UNINSTALL` as `true` in wp-config.php before deleting.
 Photos always stay in the media library, and groups are never deleted.
@@ -185,8 +239,10 @@ Photos always stay in the media library, and groups are never deleted.
 | What | Where it is kept | How long | Shared with |
 |---|---|---|---|
 | Which team member's profile a visitor views, and when they click a team member's profile, phone number or email link (the team member's name and the link clicked) (Only when the Scout Analytics plugin is installed and its tag is on the page.) | Not saved by this website. It is handed to the site's analytics tag in the visitor's browser. | Not kept by this plugin. How long Google keeps it depends on the site's Google account settings. | Google Analytics or Google Tag Manager, through the Scout Analytics plugin |
+| Details a person sends about themselves through a one-time link the site owner gave them: name, title, short bio, photo, credentials with where to check each one, and profile links (Only when the site owner sends someone a link and they fill it in.) | This website's database, on that person's profile, as changes waiting for the owner's OK. The photo goes in the media library. | Until the owner approves them (they become the public profile) or discards them (they and the photo are deleted). | Nobody |
+| How many times a link's form was sent, to stop abuse (Only when someone sends the link's form.) | This website's database, as a short-lived count tied to the link, not to a person | One hour | Nobody |
 
-Team profiles are written by site staff. The plugin has no form and saves nothing about visitors.
+Team profiles are written by site staff, or by the person through a one-time link the owner sends them. The link page asks for no email or phone, sets no cookies, is never listed by search engines and keeps the site's analytics tag off. WordPress's export and erase tools find waiting details by the email on the person's profile or on their login.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

@@ -1,5 +1,9 @@
 # Scout Reviews: Changelog
 
+## 0.5.12 (2026-11-05)
+
+- **Visitor data list covers privacy requests.** The private note form asks for no email, so WordPress's privacy tools cannot find a note. The list now says to delete one by hand in New reviews. No code changed.
+
 ## 0.5.11 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

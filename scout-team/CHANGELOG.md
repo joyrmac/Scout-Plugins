@@ -1,5 +1,13 @@
 # Scout Team changelog
 
+## 0.3.0 (2026-11-05)
+
+- **Add a person is a short walkthrough.** The People screen's Add a person button now opens three steps on one screen inside the People section, with a numbered progress row: who they are (name, title, groups with Team ticked), photo and short bio (a photo from the media library, its alt text, which uses their name when empty), and where they show (the same Shows on switches and defaults, plus Writes posts as, which turns the byline on). Save as draft, Publish, or Save and send them a link. It saves through the edit screen's own code, so the profile, groups and defaults are the same, then opens the full edit screen with "Add credentials and links here when you have them." It works without JavaScript too: all three steps show and the photo is a plain upload. "Use the full editor" still opens WordPress's own Add screen.
+- **Send them a link.** On each row of the People screen, on the edit screen and at the end of Add a person. It makes a one-time link the owner copies and sends; nothing is emailed. The person fills in their own name, title, short bio, photo, credentials with sources and profile links, with no login. The page never asks for email, phone or the card only contact. The link ends after 14 days, works once, allows a few tries an hour, and only a keyed hash of it is stored. The page has a nonce and a honeypot field, takes JPG, PNG or WebP photos up to 5 MB, cleans every field, is never listed by search engines or cached, and keeps the analytics tag off. It uses the theme's header and footer.
+- **What they send waits for your OK.** It is kept apart from the live profile, so nothing visitors see changes until it is approved. The person shows under Needs a look and in To do as "Sent their details, waiting for your OK". The edit screen shows each field now and as sent, with Approve (copies it into the profile) and Discard (deletes it and the photo sent with it).
+- **Privacy tools.** WordPress's export and erase tools cover details waiting for an OK, found by the email on the person's profile or their login. The visitor data list says what the link page keeps.
+- **Nothing changes for visitors.** Existing pages, the team page, the grid and the schema read only the live profile. The only new public page is the link page, reachable only with a working link. Deleting the plugin now also removes every link and any details still waiting.
+
 ## 0.2.0 (2026-11-05)
 
 - **Plainer words on the People screens.** Help text cut to one short sentence each, in the dashboard word rules (admin kit DESIGN.md 2a). "Full list (bulk edit and trash)" now reads "Edit many at once". Labels only; nothing visitors see changes.

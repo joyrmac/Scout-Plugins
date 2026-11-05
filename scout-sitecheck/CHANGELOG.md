@@ -1,5 +1,9 @@
 # Scout Site Check changelog
 
+## 0.2.11 (2026-11-05)
+
+- **Privacy tools reach check requests.** WordPress's Export and Erase Personal Data tools now find a person's check requests by email. Erasing deletes them and clears the count that limits checks per email.
+
 ## 0.2.10 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

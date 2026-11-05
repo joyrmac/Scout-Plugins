@@ -1,5 +1,9 @@
 # Scout Members changelog
 
+## 0.4.7 (2026-11-05)
+
+- **Fuller privacy export.** Export Personal Data now includes staff notes and any payment flagged for review. Erasing now says the login stays.
+
 ## 0.4.6 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

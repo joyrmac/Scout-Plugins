@@ -638,6 +638,18 @@ final class Scout_Booking {
 					'name'  => __( 'Phone', 'scout-booking' ),
 					'value' => $r['phone'],
 				),
+				array(
+					'name'  => __( 'Paid', 'scout-booking' ),
+					'value' => $r['paid'] > 0 ? self::money( $r['paid'] ) : '',
+				),
+				array(
+					'name'  => __( 'Order', 'scout-booking' ),
+					'value' => $r['order_id'] ? '#' . $r['order_id'] : '',
+				),
+				array(
+					'name'  => __( 'Newsletter box ticked', 'scout-booking' ),
+					'value' => ! empty( $r['optin'] ) ? __( 'Yes', 'scout-booking' ) : '',
+				),
 			);
 			foreach ( $r['answers'] as $a ) {
 				$fields[] = array(
@@ -666,13 +678,42 @@ final class Scout_Booking {
 		return $erasers;
 	}
 
+	/**
+	 * Unpaid bookings are deleted. A booking that took money stays as the
+	 * business's record of the payment (the session, time, amounts and order
+	 * number) with the person's name, email, phone and answers taken out.
+	 */
 	public static function erase_data( string $email ): array {
 		global $wpdb;
-		$n = (int) $wpdb->delete( self::table(), array( 'email' => strtolower( $email ) ), array( '%s' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, paid, order_id FROM ' . self::table() . ' WHERE email = %s', strtolower( $email ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+		$kept = 0;
+		foreach ( $rows as $r ) {
+			if ( (float) $r['paid'] > 0 || (int) $r['order_id'] > 0 ) {
+				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					self::table(),
+					array(
+						'first_name' => wp_privacy_anonymize_data( 'text' ),
+						'last_name'  => '',
+						'email'      => '',
+						'phone'      => '',
+						'answers'    => wp_json_encode( array() ),
+					),
+					array( 'id' => (int) $r['id'] )
+				);
+				++$kept;
+			} else {
+				$wpdb->delete( self::table(), array( 'id' => (int) $r['id'] ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		}
+		$messages = array();
+		if ( $kept ) {
+			/* translators: %d: number of paid bookings. */
+			$messages[] = sprintf( _n( '%d paid booking was kept as a payment record, without the person’s name, email, phone or answers.', '%d paid bookings were kept as payment records, without the person’s name, email, phone or answers.', $kept, 'scout-booking' ), $kept );
+		}
 		return array(
-			'items_removed'  => $n > 0,
-			'items_retained' => false,
-			'messages'       => array(),
+			'items_removed'  => (bool) $rows,
+			'items_retained' => $kept > 0,
+			'messages'       => $messages,
 			'done'           => true,
 		);
 	}

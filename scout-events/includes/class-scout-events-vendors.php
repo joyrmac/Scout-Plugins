@@ -533,8 +533,8 @@ final class Scout_Events_Vendors {
 					get_posts(
 						array(
 							'post_type'      => self::TYPE,
-							'post_status'    => 'any',
-							'posts_per_page' => 200,
+							'post_status'    => array( 'any', 'trash' ),
+							'posts_per_page' => -1, // Every vendor, so no application is missed on a busy site.
 							'fields'         => 'ids',
 						)
 					)
@@ -596,10 +596,15 @@ final class Scout_Events_Vendors {
 		foreach ( $ids as $id ) {
 			delete_post_meta( $id, self::PRIVATE );
 		}
+		$messages = array();
+		foreach ( $ids as $id ) {
+			/* translators: %s: business name. */
+			$messages[] = sprintf( __( 'The vendor listing for %s stays, without the contact person’s details. Edit or delete it under Vendors if they asked for that too.', 'scout-events' ), get_the_title( $id ) );
+		}
 		return array(
 			'items_removed'  => (bool) $ids,
-			'items_retained' => false,
-			'messages'       => array(),
+			'items_retained' => (bool) $ids,
+			'messages'       => $messages,
 			'done'           => true,
 		);
 	}

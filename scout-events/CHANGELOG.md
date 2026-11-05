@@ -1,5 +1,12 @@
 # Scout Events changelog
 
+## 0.16.7 (2026-11-05)
+
+- **Privacy tools reach presenters.** Export Personal Data now lists a presenter's application, profile, private details and changes waiting for approval, found by their login email or the profile's contact email. Erasing removes the private details and waiting changes. The public profile and the login stay for staff to remove by hand, and the tool says so.
+- **Paid tickets stay after a privacy erase.** Erasing a person still deletes their free sign-ups. A paid ticket now stays with its order, so counts and orders still add up, without the holder's name, email, signature or account. The ticket holder list on the order loses them too. Other people on the same order are not touched. The export also shows each ticket's order number.
+- **The vendor privacy lookup finds every vendor.** It looked at only the first 200 vendors and now looks at all of them, trashed ones included. Erasing says the listing stays.
+- **No ticket or reminder email to a sign-up with no address.** Before, the email was built and sent nowhere.
+
 ## 0.16.6 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

@@ -17,6 +17,13 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'scout_team' );
 delete_transient( 'scout_updater_scout-team' );
 
+// Links people fill in their own details with, and details that were still
+// waiting for an OK: a link must never outlive the plugin that checks it.
+// Photos sent with them stay in the media library, like every photo.
+delete_metadata( 'post', 0, '_scout_team_link_hash', '', true );
+delete_metadata( 'post', 0, '_scout_team_link', '', true );
+delete_metadata( 'post', 0, '_scout_team_pending', '', true );
+
 if ( ! defined( 'SCOUT_PURGE_ON_UNINSTALL' ) || ! SCOUT_PURGE_ON_UNINSTALL ) {
 	return;
 }

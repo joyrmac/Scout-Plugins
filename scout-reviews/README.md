@@ -169,7 +169,7 @@ themes. To restyle:
 | The visitor's IP address and browser details, seen by Google when a review card shows a Google reviewer's photo (When a page shows a Google review that has a profile photo.) | Not kept by this website. The photo loads straight from Google's servers, without telling Google which page it is on. | Not kept by this website | Google |
 | The visitor's IP address and browser details, seen by Google Fonts when the review pages load their fonts (On the /review/ and /review/note/ pages, when a font from the list is chosen in the Reviews settings (Hanken Grotesk and Geist Mono are the defaults).) | Not kept by this website | Not kept by this website | Google Fonts |
 
-Deleting the plugin keeps the reviews, notes and visit totals unless "Remove all reviews and settings when the plugin is deleted" is ticked.
+Deleting the plugin keeps the reviews, notes and visit totals unless "Remove all reviews and settings when the plugin is deleted" is ticked. The private note form asks for no email, so the site's privacy tools cannot find a note; staff delete one by hand in Reviews > New reviews.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

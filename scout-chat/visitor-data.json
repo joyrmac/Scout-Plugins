@@ -4,7 +4,7 @@
     {
       "what": "Name, email, phone, the chat conversation (up to the last 30 messages), the page the chat was on, and what kind of message it is",
       "where": "This website's database, as private Chat message posts",
-      "kept": "Until someone deletes it. Deleting the plugin keeps these posts.",
+      "kept": "Until someone deletes it. Deleting the plugin keeps these posts. The site's privacy tools export and delete a person's messages by the email they gave; a message left with only a phone number is deleted by hand.",
       "shared": "Emailed to the address set on the Chat screen, or when that is blank, to Send notices to in Business info (the site admin email by default), plus a short text alert to the alert address if one is set",
       "when": "only when the visitor leaves their name and a phone number or email in the chat"
     },

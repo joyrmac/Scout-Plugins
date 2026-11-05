@@ -145,6 +145,12 @@ final class Scout_Team_Admin {
 		}
 		if ( false !== strpos( $hook, self::PEOPLE ) ) {
 			wp_enqueue_style( 'scout-people', SCOUT_TEAM_URL . 'assets/scout-people.css', array( 'scout-admin' ), SCOUT_TEAM_VERSION );
+			if ( Scout_Team_Add::is_open() ) {
+				if ( current_user_can( 'upload_files' ) ) {
+					wp_enqueue_media();
+				}
+				wp_enqueue_script( 'scout-team-add', SCOUT_TEAM_URL . 'assets/scout-team-add.js', array(), SCOUT_TEAM_VERSION, true );
+			}
 		}
 		if ( self::in_scout_menu() && self::own_screen() ) {
 			Scout_Admin_UI::enqueue( SCOUT_TEAM_URL . 'assets/scout-admin.css' );
@@ -209,6 +215,10 @@ final class Scout_Team_Admin {
 
 	public static function render_people(): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
+			return;
+		}
+		if ( Scout_Team_Add::is_open() ) {
+			Scout_Team_Add::render();
 			return;
 		}
 		$posts = get_posts(
@@ -276,7 +286,7 @@ final class Scout_Team_Admin {
 			$group = '';
 		}
 
-		$add_url = admin_url( 'post-new.php?post_type=' . Scout_Team::POST_TYPE );
+		$add_url = Scout_Team_Add::url();
 		Scout_Admin_UI::open(
 			__( 'People', 'scout-team' ),
 			__( 'Everyone visitors see on the site. One profile per person. You pick where each one shows.', 'scout-team' )
@@ -449,6 +459,9 @@ final class Scout_Team_Admin {
 		if ( $r['login'] ) {
 			echo '<span class="sh-tag st-signin">' . esc_html__( 'Can sign in', 'scout-team' ) . '</span>';
 		}
+		if ( Scout_Team_Link::active( $id ) ) {
+			echo '<span class="sh-tag st-signin">' . esc_html__( 'Link sent', 'scout-team' ) . '</span>';
+		}
 		if ( $tags ) {
 			echo '<span class="screen-reader-text">' . esc_html__( 'Shows on:', 'scout-team' ) . '</span>';
 			foreach ( $tags as $tag ) {
@@ -462,6 +475,9 @@ final class Scout_Team_Admin {
 		echo '<div class="sh-row-go">';
 		if ( $edit ) {
 			echo '<a class="button" href="' . esc_url( $edit ) . '">' . esc_html__( 'Edit', 'scout-team' ) . '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span></a>';
+			if ( current_user_can( 'edit_post', $id ) ) {
+				echo '<a class="button sh-quiet" href="' . esc_url( Scout_Team_Link::action_url( $id, 'new' ) ) . '">' . esc_html__( 'Send them a link', 'scout-team' ) . '<span class="screen-reader-text"> ' . esc_html( $name ) . '</span></a>';
+			}
 		}
 		echo '</div>';
 		echo '</li>';

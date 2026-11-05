@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Scout Chat
  * Description:       A chat assistant in the corner of the site. Answers the common questions, books calls, takes change requests, and saves every visitor question to an inbox. Gives AI answers once it is connected to an AI server.
- * Version:           0.3.4
+ * Version:           0.3.5
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SCOUT_CHAT_VERSION', '0.3.4' );
+define( 'SCOUT_CHAT_VERSION', '0.3.5' );
 define( 'SCOUT_CHAT_FILE', __FILE__ );
 define( 'SCOUT_CHAT_URL', plugin_dir_url( __FILE__ ) );
 
@@ -36,6 +36,8 @@ add_action(
 require_once __DIR__ . '/includes/class-scout-admin-ui.php';
 require_once __DIR__ . '/includes/class-scout-chat.php';
 require_once __DIR__ . '/includes/class-scout-chat-admin.php';
+require_once __DIR__ . '/includes/class-scout-chat-privacy.php';
 
 Scout_Chat::boot();
 Scout_Chat_Admin::boot();
+Scout_Chat_Privacy::boot();

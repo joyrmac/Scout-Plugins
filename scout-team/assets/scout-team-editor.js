@@ -1,5 +1,5 @@
 /* Scout People: add and remove repeatable rows, keep the preview card live,
-   and tick "Byline on their posts" when a login is picked. */
+   tick "Byline on their posts" when a login is picked, and copy a new link. */
 ( function () {
 	'use strict';
 
@@ -21,6 +21,23 @@
 			var first = last && last.querySelector( 'input' );
 			if ( first ) {
 				first.focus();
+			}
+			return;
+		}
+		var copy = e.target.closest( '[data-st-copy]' );
+		if ( copy ) {
+			var field = document.getElementById( copy.getAttribute( 'data-st-copy' ) );
+			if ( ! field ) {
+				return;
+			}
+			field.select();
+			var done = function () {
+				copy.textContent = copy.getAttribute( 'data-st-done' ) || copy.textContent;
+			};
+			if ( navigator.clipboard && navigator.clipboard.writeText ) {
+				navigator.clipboard.writeText( field.value ).then( done, function () {} );
+			} else if ( document.execCommand && document.execCommand( 'copy' ) ) {
+				done();
 			}
 			return;
 		}

@@ -1,5 +1,9 @@
 # Scout Newsletter changelog
 
+## 0.1.7 (2026-11-05)
+
+- **Privacy tools reach Who said yes.** WordPress's Export and Erase Personal Data tools now find a person's newsletter records by email. Erasing keeps each record as proof of the yes, with the email replaced by a one-way code and the first name and extra fields removed, and stops any send still waiting. Beehiiv keeps its own copy, so remove the person there too.
+
 ## 0.1.6 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

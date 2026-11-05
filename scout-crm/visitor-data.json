@@ -24,5 +24,5 @@
     }
   ],
   "cookies": [],
-  "notes": "New people are added as transactional contacts, for receipts and event notes only; they get marketing emails only if they subscribe themselves. Staff can also bring in everyone from before the sync was switched on. Nothing here is sent outside this website."
+  "notes": "New people are added as transactional contacts, for receipts and event notes only; they get marketing emails only if they subscribe themselves. Staff can also bring in everyone from before the sync was switched on. Nothing here is sent outside this website. FluentCRM holds these contacts, so WordPress's privacy tools do not reach them through this plugin. To export or erase one person, find the contact in FluentCRM and export or delete it there."
 }

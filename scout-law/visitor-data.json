@@ -10,5 +10,5 @@
     }
   ],
   "cookies": [],
-  "notes": "Scout Law collects nothing from visitors itself. Its nightly log keeps only how many entries were deleted, never names or messages."
+  "notes": "Scout Law collects nothing from visitors itself. Its nightly log keeps only how many entries were deleted, never names or messages. Gravity Forms decides whether WordPress's privacy export and erase tools reach form entries: turn on its Personal Data setting on each form and pick the email field."
 }

@@ -1,5 +1,19 @@
 # Scout Build changelog
 
+## 0.12.4 (2026-11-05)
+
+- **Privacy tools reach chat change requests.** WordPress's Export and Erase Personal Data tools now find change requests a visitor sent through Scout Chat, by the email they gave. Erasing keeps the request as a work item and takes out their name, email and phone, and the Site log line that named them now says Scout Chat. Requests staff send from the dashboard are not touched.
+
+- Restore test and Uptime alert show only to Scout, since only Scout can set them. Clients see the other six security rows.
+
+- **Security in Site status (Site Standard rule 22).** Site status has a new Security section, and the copied report a SECURITY block, with eight rows that only read: XML-RPC, File editing, Admins, Two-step login, Backups, Restore test, Uptime alert and Security headers. Each is "ok" or "look", never a fix, and the look rows count on Home and in the dashboard widget like the other checks. Only people who can manage the site see the section, because it lists admins by display name (never email).
+  - XML-RPC is ok when off, or on because Jetpack needs it (as Spam protection already allows). File editing is ok when `DISALLOW_FILE_EDIT` (or `DISALLOW_FILE_MODS`) is set; otherwise the row gives the wp-config.php line.
+  - Admins flags generic names (admin, administrator, test, user) and anyone with no sign-in in 180 days. Scout now notes when an administrator signs in (user meta `scout_hub_last_login`); someone with no sign-in on record is flagged only after 180 days of noting.
+  - Two-step login finds Two Factor, Wordfence, WP 2FA, miniOrange and Solid Security, and names admins who haven't set it up where the plugin says. Where it doesn't, the row reads "Can't tell from here".
+  - Backups are ok on WP Engine (other hosts can answer through the `scout_hub_backups` filter). Operators type the last restore test date and the uptime alert on Site status (option `scout_hub_security`, admin-post `scout_hub_security`); a restore over 92 days old, or none, wants a look.
+  - Security headers loads the home page's headers in the background (5 seconds at most, kept 12 hours, refreshed with the daily checks) and names any of HSTS, X-Content-Type-Options, X-Frame-Options (or CSP frame-ancestors) and Referrer-Policy that are missing. It never adds or changes a header.
+- Visitors notice nothing: no page, header or setting changes.
+
 ## 0.12.3 (2026-11-05)
 
 - **A chat change request shows once in To do.** A change request from the site chat already shows as a request; To do no longer lists the same chat as a chat message too.

@@ -1,5 +1,9 @@
 # Scout Chat changelog
 
+## 0.3.5 (2026-11-05)
+
+- **Privacy tools reach chat messages.** WordPress's Export and Erase Personal Data tools now find a visitor's chat messages by the email they gave, trashed ones included. Erasing deletes the messages. A message left with only a phone number is still deleted by hand.
+
 ## 0.3.4 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

@@ -454,6 +454,19 @@ final class Scout_Members_Admin {
 						'value' => $a,
 					);
 				}
+				if ( '' !== $m['note'] ) {
+					$rows[] = array(
+						'name'  => __( 'Staff notes', 'scout-members' ),
+						'value' => $m['note'],
+					);
+				}
+				$flag = Scout_Members::flagged( $user->ID );
+				if ( $flag ) {
+					$rows[] = array(
+						'name'  => __( 'Payment flagged for review', 'scout-members' ),
+						'value' => trim( $flag['on'] . ': ' . $flag['reason'], ': ' ),
+					);
+				}
 				foreach ( Scout_Members::history( $user->ID ) as $line ) {
 					$rows[] = array(
 						'name'  => __( 'History', 'scout-members' ) . ' ' . $line['on'],
@@ -494,8 +507,8 @@ final class Scout_Members_Admin {
 		}
 		return array(
 			'items_removed'  => $removed,
-			'items_retained' => false,
-			'messages'       => array(),
+			'items_retained' => $removed,
+			'messages'       => $removed ? array( __( 'The membership record is gone. Their login stays; delete it under Users if they asked for that too.', 'scout-members' ) ) : array(),
 			'done'           => true,
 		);
 	}

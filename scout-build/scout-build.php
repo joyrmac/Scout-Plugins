@@ -3,7 +3,7 @@
  * Plugin Name:       Scout Build
  * Plugin URI:        https://scoutraleigh.com
  * Description:       The Scout menu on every site: Home with the Today list, an Inbox with everything waiting on a person, Site health, and for operators Scout tools: features, every update in one place, and the Site log.
- * Version:           0.12.3
+ * Version:           0.12.4
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Scout Media & Consulting
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Prefixed SCOUT_HUB_ on purpose: the Scout Media theme already defines a
 // SCOUT_BUILD_MENU constant for its own menu.
-define( 'SCOUT_HUB_VERSION', '0.12.3' );
+define( 'SCOUT_HUB_VERSION', '0.12.4' );
 define( 'SCOUT_HUB_FILE', __FILE__ );
 define( 'SCOUT_HUB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SCOUT_HUB_URL', plugin_dir_url( __FILE__ ) );
@@ -56,8 +56,10 @@ require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-rings.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-approval.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-watch.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-wp-health.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-security.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-log.php';
 require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-log-api.php';
+require_once SCOUT_HUB_DIR . 'includes/class-scout-hub-privacy.php';
 
 Scout_Hub_Features::boot();
 Scout_Hub_Requests::boot();
@@ -74,8 +76,10 @@ Scout_Hub_Rings::boot();
 Scout_Hub_Approval::boot();
 Scout_Hub_Watch::boot();
 Scout_Hub_WP_Health::boot();
+Scout_Hub_Security::boot();
 Scout_Hub_Log::boot();
 Scout_Hub_Log_API::boot();
+Scout_Hub_Privacy::boot();
 
 register_deactivation_hook( __FILE__, array( 'Scout_Hub_Watch', 'unschedule' ) );
 register_deactivation_hook( __FILE__, array( 'Scout_Hub_Inbox', 'unschedule' ) );
