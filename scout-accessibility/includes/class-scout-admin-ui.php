@@ -39,7 +39,7 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 
 	final class Scout_Admin_UI {
 
-		const VERSION = '1.9.2';
+		const VERSION = '1.10.0';
 
 		/** Show the Scout mark and sign-off. */
 		public static function branded(): bool {
@@ -861,6 +861,34 @@ if ( ! class_exists( 'Scout_Admin_UI', false ) ) :
 		}
 
 		/** Close a screen with the Scout sign-off. */
+		/**
+		 * One status line at the top of a screen (kit 1.10.0): a shape, a few bold
+		 * words, then the detail, with at most one button. Replaces rows of status cards.
+		 *
+		 * @param string $state good, warn, bad or off.
+		 * @param string $go    Optional button HTML, already escaped.
+		 */
+		public static function status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+			$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+			echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+			if ( '' !== $detail ) {
+				echo ' <span>' . esc_html( $detail ) . '</span>';
+			}
+			if ( '' !== $go ) {
+				echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+			}
+			echo '</p></section>';
+		}
+
+		/** Open a closed box for what people rarely change (kit 1.10.0). Close it with fold_close(). */
+		public static function fold_open( string $title, bool $open = false, string $id = '' ): void {
+			echo '<details class="sh-box sh-fold"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . ( $open ? ' open' : '' ) . '><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+		}
+
+		public static function fold_close(): void {
+			echo '</details>';
+		}
+
 		public static function close(): void {
 			// Preview on a phone (Joy, 2026-11-04): the live site in a phone-sized window.
 			$home = esc_url( home_url( '/' ) );

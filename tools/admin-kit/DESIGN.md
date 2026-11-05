@@ -3,7 +3,7 @@ name: Scout dashboard
 scope: ".sh (every Scout screen inside a client's WordPress dashboard)"
 tokens: tools/admin-kit/tokens.json
 css: tools/admin-kit/scout-admin.css
-kit: 1.9.2
+kit: 1.10.0
 design-system-branch: Dashboard (project/tokens/dashboard.css in the Scout design system)
 ---
 
@@ -146,7 +146,10 @@ Text uses the text token, and CI checks it passes 4.5:1 on its own tint. A dot u
 | Find anything | `.sh-finder` | Ctrl or Cmd + K: "Do it now" (Today's items, the `scout_admin_finder_items` filter) and "Go to" (every screen this person can open). Arrow keys, Enter, Esc. |
 | Big tabs | `.sh-tabs` | Two to four choices, each with a live hint. One column on phones. |
 | Box | `.sh-box` | One topic. Title `h2.sh-title`, then a sentence, then the fields. |
-| Card grid | `.sh-grid`, `.sh-grid-2`, `.sh-card` | Cards line up their buttons at the bottom (`.sh-actions`). `.is-on` gets the cerulean border. |
+| Card grid | `.sh-grid`, `.sh-grid-2`, `.sh-card` | Cards line up their buttons at the bottom (`.sh-actions`). `.is-on` gets the cerulean border. Side by side only while the main column is wide: `.sh-grid-2` stacks below 860px of column, `.sh-grid-3` below 600px (container queries on `.sh-main`, kit 1.10.0). A plugin's own two-column layout uses `@container shmain (...)`, never a window-width media query. |
+| Status line | `Scout_Admin_UI::status( $state, $headline, $detail, $go )`, `.sh-status.is-warn / .is-bad / .is-off` | The first thing on a screen: a dot, a few bold words, the detail, at most one button. Replaces a row of three status cards (kit 1.10.0). |
+| Rows | `.sh-rows > .sh-row`, `.sh-row-name`, `.sh-row-sub`, `.sh-row-facts`, `.sh-row-go` | A list of things, one row each: the name and one line, then facts, then one main button and a More menu. Stacks below 640px of column. The Features screen is the model. |
+| More options | `Scout_Admin_UI::fold_open( $title )` and `fold_close()`, `.sh-fold` | A closed box at the bottom for what people rarely change: settings, import, export. |
 | Status pill | `.sh-pill.is-on / .is-done / .is-progress / .is-received` | Word plus dot. |
 | Tag | `.sh-tag.is-current / .is-update / .is-held` | Small facts on a card. |
 | Health check | `.sh-check.is-warn / .is-bad`, `.sh-dot`, `.sh-value` | Dot plus a word value. |
@@ -172,6 +175,10 @@ Text uses the text token, and CI checks it passes 4.5:1 on its own tint. A dot u
 - Never show state by color alone. Every status has a word.
 
 ## 8. Don't
+
+- Don't open a screen with a row of status cards. Use the status line.
+- Don't put a primary button on every row of a list. One main button per row, outlined; the screen's one primary is the action people came for.
+- Don't put the settings above the thing people use. Settings go in More options unless the screen is only settings.
 
 - Don't use a hex where a token exists, or invent a new color. Add a token to `tokens.json` instead.
 - Don't put white text on `--sh-accent` or on any mark color.

@@ -39,7 +39,7 @@
 .sr-preview .scout-result__headline { color: #F5F5F7; font-size: 22px; letter-spacing: -.01em; }
 
 /* Settings screen. */
-.sr-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+.sr-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .sr-settings > .sh-box { margin-top: 16px; }
 .sr-sample { position: relative; padding: 18px; border-radius: 14px; background: #F5F5F7; color: #1D1D1F; }
 .sr-sample .scout-result { --scout-results-surface: #fff; --scout-results-border: rgba(0, 0, 0, .1); }
@@ -53,3 +53,6 @@
 	.sh .sr-shortcodes td { border-bottom: 0; padding: 2px 0; }
 	.sr-shortcodes tr { padding: 8px 0; border-bottom: 1px solid rgba(0, 0, 0, .08); }
 }
+
+/* The main column decides, not the window (admin kit 1.10.0). */
+@container shmain (max-width: 860px) { .sr-settings { grid-template-columns: minmax(0, 1fr); } }

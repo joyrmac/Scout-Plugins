@@ -72,4 +72,5 @@
 .sm-review-list li:last-child { border-bottom: 0; }
 .sm-review-list p { margin: 0 0 8px; }
 
-@media (max-width: 1100px) { .sm-admin-cols { grid-template-columns: 1fr; } .sm-answers > div { grid-template-columns: 1fr; } }
+/* The main column decides, not the window (admin kit 1.10.0). */
+@container shmain (max-width: 1000px) { .sm-admin-cols { grid-template-columns: 1fr; } .sm-answers > div { grid-template-columns: 1fr; } }

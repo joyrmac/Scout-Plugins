@@ -64,7 +64,7 @@
 .se-overview td, .se-overview th { padding: 12px; vertical-align: top; }
 .se-row-title { font-weight: 600; margin-right: 6px; }
 .se-empty-admin { color: var(--se-text-2); }
-.se-admin-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-top: 18px; align-items: start; }
+.se-admin-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; align-items: start; }
 .se-settings .se-field label { display: flex; gap: 8px; align-items: center; }
 .se-slug { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; font-family: var(--se-mono); font-size: 12px; color: var(--se-text-3); }
 .se-slug input { width: 140px; min-height: 36px; font-size: 14px; }
@@ -139,3 +139,6 @@
 .se-woo-new summary { cursor: pointer; }
 .se-woo-new .se-grid { margin-top: 8px; }
 .se-woo-new textarea { width: 100%; }
+
+/* The main column decides, not the window (admin kit 1.10.0). */
+@container shmain (max-width: 860px) { .se-admin-cols { grid-template-columns: minmax(0, 1fr); } }

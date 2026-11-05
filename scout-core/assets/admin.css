@@ -25,3 +25,6 @@ details.scout-section > summary .scout-section__hint { font-weight: 400; color: 
 @media (max-width: 782px) { .scout-section__body { grid-template-columns: 1fr; } }
 /* Settings group pages reuse the same section chrome inside the Scout admin. */
 .scout-admin .scout-fieldset { max-width: 900px; }
+
+/* On a Scout screen the main column decides, not the window (admin kit 1.10.0). */
+@container shmain (max-width: 860px) { .scout-section__body { grid-template-columns: 1fr; } }
