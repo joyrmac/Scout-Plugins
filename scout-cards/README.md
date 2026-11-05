@@ -152,6 +152,15 @@ changing for visitors (Site Standard rule 20):
 
 Release order: Scout Cards first (it rests while the old theme runs), then the theme.
 
+## What this feature needs from the theme
+
+- **DESIGN.md: none yet.** The card's own look takes its accent, font and light or dark mode from the Cards screen (`accent`, `font`, `mode`, default cerulean `#0E8FE6` and dark), printed as `--scc-accent` and `--scc-font`. Moving these to DESIGN.md is on the Site Standard list (gap 11).
+- **Where it lands:** its own pages at `/card/`, `/card/<name>/`, each card's `/share/` page, and `/links/`. They are standalone, so the theme's header and footer do not print there. Nothing lands on the theme's other pages.
+- **Logo:** the site icon (Settings → General) for the main card when no photo is set.
+- **Photos and words:** each person's photo, intro, why talk to them and tags come from their People profile; the main card's name and email come from Business info.
+- **Theme look (moving sites only):** while a theme still carries its own card settings (`scout_card_settings()`), "The theme's own card look" prints the theme's `bc-` markup inside the theme's header and footer, styled by the theme's stylesheet.
+- Nothing else.
+
 ## Settings
 
 One option, `scout_cards_settings`. Blank fields fall back to Scout Core's

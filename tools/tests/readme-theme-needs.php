@@ -12,8 +12,6 @@ $title = '## What this feature needs from the theme';
 
 // Allowed to be missing for now. Remove a slug once its README has the section.
 $later = array(
-	// Scout Cards is being reworked in a separate change that owns its README.
-	'scout-cards' => true,
 );
 
 $fail = 0;
