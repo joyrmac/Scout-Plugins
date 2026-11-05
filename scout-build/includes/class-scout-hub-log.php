@@ -122,7 +122,7 @@ final class Scout_Hub_Log {
 		return $rows;
 	}
 
-	/** The Site log screen is "Your site" under Overview for everyone who is not an operator. */
+	/** The Site history screen sits under Home for everyone who is not an operator. */
 	public static function nav_group( $group, $slug ) {
 		if ( false !== strpos( (string) $slug, 'tab=log' ) && ! Scout_Hub_Access::is_operator() ) {
 			return 'overview';
@@ -134,7 +134,7 @@ final class Scout_Hub_Log {
 		register_post_type(
 			self::TYPE,
 			array(
-				'labels'       => array( 'name' => __( 'Site log', 'scout-build' ) ),
+				'labels'       => array( 'name' => __( 'Site history', 'scout-build' ) ),
 				'public'       => false,
 				'show_ui'      => false,
 				'rewrite'      => false,
@@ -703,7 +703,7 @@ final class Scout_Hub_Log {
 			/* translators: 1: site, 2: what was approved */
 			sprintf( __( '[%1$s] Approved: %2$s', 'scout-build' ), $site, wp_trim_words( $what, 10, '…' ) ),
 			/* translators: 1: person, 2: what, 3: date, 4: admin URL */
-			sprintf( __( "%1\$s approved this on the site:\n\n%2\$s\n\n%3\$s\nSite log: %4\$s", 'scout-build' ), $name, $what, current_time( 'F j, Y g:i a' ), Scout_Hub_Admin::url( 'log' ) )
+			sprintf( __( "%1\$s approved this on the site:\n\n%2\$s\n\n%3\$s\nSite history: %4\$s", 'scout-build' ), $name, $what, current_time( 'F j, Y g:i a' ), Scout_Hub_Admin::url( 'log' ) )
 		);
 		return true;
 	}
@@ -779,7 +779,7 @@ final class Scout_Hub_Log {
 			set_transient( 'scout_hub_keys_show_' . get_current_user_id(), $keys, 5 * MINUTE_IN_SECONDS );
 			self::add(
 				array(
-					'title'       => __( 'Hub keys made on the Site log screen', 'scout-build' ),
+					'title'       => __( 'Hub keys made on the Site history screen', 'scout-build' ),
 					'kind'        => 'setup',
 					'topic'       => 'setup',
 					'show_client' => false,

@@ -594,20 +594,20 @@ final class Scout_Accessibility_Admin {
 						<p class="description">
 							<?php
 							echo Scout_Accessibility::has_core()
-								? esc_html__( 'From the business info in Scout Core. Change it there.', 'scout-accessibility' )
+								? esc_html__( 'From Business info. Change it there.', 'scout-accessibility' )
 								: esc_html__( 'The site title, from Settings, General.', 'scout-accessibility' );
 							?>
 						</p></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="sa-email"><?php esc_html_e( 'Email for barrier reports', 'scout-accessibility' ); ?></label></th>
-					<td><input id="sa-email" type="email" class="regular-text" name="sa[email]" value="<?php echo esc_attr( $s['email'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::email() ); ?>">
-						<p class="description"><?php esc_html_e( 'Leave blank to use the email in the business info. Use an inbox someone reads.', 'scout-accessibility' ); ?></p></td>
+					<td><input id="sa-email" type="email" class="regular-text" name="sa[email]" value="<?php echo esc_attr( $s['email'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::business_email() ); ?>">
+						<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-accessibility' ); ?> <?php esc_html_e( 'Use an inbox someone reads.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="sa-phone"><?php esc_html_e( 'Phone', 'scout-accessibility' ); ?></label></th>
-					<td><input id="sa-phone" type="tel" class="regular-text" name="sa[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::phone() ); ?>">
-						<p class="description"><?php esc_html_e( 'Leave blank to use the phone in the business info. A second way to reach you helps people who cannot use email.', 'scout-accessibility' ); ?></p></td>
+					<td><input id="sa-phone" type="tel" class="regular-text" name="sa[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( Scout_Accessibility::business_phone() ); ?>">
+						<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-accessibility' ); ?> <?php esc_html_e( 'A second way to reach you helps people who cannot use email.', 'scout-accessibility' ); ?></p></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="sa-days"><?php esc_html_e( 'Reply within', 'scout-accessibility' ); ?></label></th>
@@ -646,7 +646,7 @@ final class Scout_Accessibility_Admin {
 				<?php if ( ! $page ) : ?>
 					<p><?php esc_html_e( 'Create the statement page first.', 'scout-accessibility' ); ?></p>
 				<?php elseif ( ! $menus ) : ?>
-					<p><?php esc_html_e( 'This site has no classic menus. Use the shortcode instead.', 'scout-accessibility' ); ?></p>
+					<p><?php esc_html_e( 'This site has no classic menus. Use Add it to a page instead.', 'scout-accessibility' ); ?></p>
 				<?php else : ?>
 					<p><?php esc_html_e( 'Pick the footer menu. It counts as linked once that menu is shown in a menu location.', 'scout-accessibility' ); ?></p>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sa-inline-form">
@@ -663,7 +663,7 @@ final class Scout_Accessibility_Admin {
 				<?php endif; ?>
 			</section>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Use the shortcode', 'scout-accessibility' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Add it to a page', 'scout-accessibility' ); ?></h2>
 				<p><?php esc_html_e( 'Put this in a footer widget, a Shortcode block in the footer template, or any page.', 'scout-accessibility' ); ?></p>
 				<p><code>[<?php echo esc_html( Scout_Accessibility::LINK_CODE ); ?>]</code></p>
 			</section>

@@ -1,5 +1,9 @@
 # Scout Case Results changelog
 
+## Unreleased (2026-11-05)
+
+- **Plainer labels.** Case results settings is now Case results, in the menu and on the screen, so the pair in the menu reads Case results and All case results. The closed box with the shortcodes is now Add to a page. Page addresses and saved settings are unchanged.
+
 ## 0.1.14 (2026-11-05)
 
 - **The Case results screen opens with one status line.** The three status cards are now one line: results on the site, results waiting for the firm, the disclaimer rule, and an Add a case result button. The shortcode list moves into a closed More options box. Save disclaimer is the screen's one main button.

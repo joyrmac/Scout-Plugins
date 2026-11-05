@@ -64,12 +64,30 @@ final class Scout_Accessibility {
 
 	/** True when scout-core's business info is available. */
 	public static function has_core(): bool {
-		return class_exists( 'Scout_Core_Business', false );
+		return function_exists( 'scout_core_business' ) || class_exists( 'Scout_Core_Business', false );
 	}
 
-	/** @return array<string,string> */
+	/**
+	 * Business info from Scout Core, read live at display time so a change
+	 * there shows on the statement at once.
+	 *
+	 * @return array<string,string>
+	 */
 	private static function core_business(): array {
-		return self::has_core() ? (array) Scout_Core_Business::get() : array();
+		if ( function_exists( 'scout_core_business' ) ) {
+			return (array) scout_core_business();
+		}
+		return class_exists( 'Scout_Core_Business', false ) ? (array) Scout_Core_Business::get() : array();
+	}
+
+	/** Business info's email, '' when Scout Core is off or it is blank. */
+	public static function business_email(): string {
+		return sanitize_email( (string) ( self::core_business()['email'] ?? '' ) );
+	}
+
+	/** Business info's phone, '' when Scout Core is off or it is blank. */
+	public static function business_phone(): string {
+		return trim( (string) ( self::core_business()['phone'] ?? '' ) );
 	}
 
 	/** Business name from scout-core, else the site name. */
@@ -79,22 +97,22 @@ final class Scout_Accessibility {
 		return '' !== $name ? $name : wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 	}
 
-	/** Contact email: this screen first, then scout-core, then nothing. */
+	/**
+	 * Contact email. The field on this screen is an optional override; when
+	 * it is blank, Business info's email is read live.
+	 */
 	public static function email(): string {
-		$s = self::settings();
-		if ( '' !== $s['email'] ) {
-			return $s['email'];
-		}
-		return sanitize_email( (string) ( self::core_business()['email'] ?? '' ) );
+		$own = trim( (string) self::settings()['email'] );
+		return '' !== $own ? $own : self::business_email();
 	}
 
-	/** Contact phone: this screen first, then scout-core. */
+	/**
+	 * Contact phone. The field on this screen is an optional override; when
+	 * it is blank, Business info's phone is read live.
+	 */
 	public static function phone(): string {
-		$s = self::settings();
-		if ( '' !== $s['phone'] ) {
-			return $s['phone'];
-		}
-		return trim( (string) ( self::core_business()['phone'] ?? '' ) );
+		$own = trim( (string) self::settings()['phone'] );
+		return '' !== $own ? $own : self::business_phone();
 	}
 
 	/** The statement page, if it exists and is not in the trash. */

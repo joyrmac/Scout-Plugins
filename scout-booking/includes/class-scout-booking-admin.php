@@ -562,7 +562,7 @@ final class Scout_Booking_Admin {
 					?>
 					<span class="description"><?php esc_html_e( 'Links in booking emails lead here. Set by itself the first time the form is shown.', 'scout-booking' ); ?></span>
 				</p>
-				<p class="sbk-field"><label for="sbk-notify"><?php esc_html_e( 'Send booking emails for you to', 'scout-booking' ); ?></label><input type="email" id="sbk-notify" name="sb[notify]" class="regular-text" value="<?php echo esc_attr( $s['notify'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>"><span class="description"><?php esc_html_e( 'Empty uses the site email. Clients see this address when a change is too late to make online.', 'scout-booking' ); ?></span></p>
+				<p class="sbk-field"><label for="sbk-notify"><?php esc_html_e( 'Send booking emails for you to', 'scout-booking' ); ?></label><input type="email" id="sbk-notify" name="sb[notify]" class="regular-text" value="<?php echo esc_attr( $s['notify'] ); ?>" placeholder="<?php echo esc_attr( Scout_Booking::shared_notice_email() ); ?>"><span class="description"><?php esc_html_e( 'Leave it blank to use the notice address in Business info. Clients see this address when a change is too late to make online.', 'scout-booking' ); ?></span></p>
 				<p class="sbk-check"><label><input type="checkbox" name="sb[reminders]" value="1" <?php checked( $s['reminders'] ); ?>> <?php esc_html_e( 'Email each client a reminder the day before their session.', 'scout-booking' ); ?></label></p>
 			</section>
 

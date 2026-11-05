@@ -79,8 +79,8 @@ final class Scout_Optimize_Batch {
 		$parent = Scout_Optimize::parent();
 		add_submenu_page(
 			'tools.php' === $parent ? $parent : '',
-			__( 'Optimize existing images', 'scout-optimize' ),
-			__( 'Optimize existing images', 'scout-optimize' ),
+			__( 'Shrink older photos', 'scout-optimize' ),
+			__( 'Shrink older photos', 'scout-optimize' ),
 			SCOUT_OPTIMIZE_CAP,
 			'scout-optimize-sweep',
 			array( $this, 'render_page' )
@@ -319,7 +319,7 @@ final class Scout_Optimize_Batch {
 		$percent = $stats['total'] > 0 ? (int) round( ( $stats['optimized'] / $stats['total'] ) * 100 ) : 0;
 		$action  = admin_url( 'admin-post.php' );
 		?>
-		<?php Scout_Admin_UI::open( __( 'Optimize existing images', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Images', 'scout-optimize' ), 'scout-optimize' ); ?>
+		<?php Scout_Admin_UI::open( __( 'Shrink older photos', 'scout-optimize' ), __( 'Runs the optimizer over images uploaded before it was turned on.', 'scout-optimize' ), __( 'Images', 'scout-optimize' ), 'scout-optimize' ); ?>
 			<section class="sh-box">
 				<h2><?php esc_html_e( 'Your media library', 'scout-optimize' ); ?></h2>
 				<p><?php esc_html_e( 'This runs in the background in small batches and backs up each original first. New uploads are handled automatically, so this is only for the library you already have.', 'scout-optimize' ); ?></p>

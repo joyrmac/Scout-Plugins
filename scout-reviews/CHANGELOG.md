@@ -1,5 +1,10 @@
 # Scout Reviews: Changelog
 
+## Unreleased (2026-11-05)
+
+- **Private notes use the shared notice address.** "Send private notes to" is now an optional override. When it is blank, notes go to the notice address in Business info (its "Send notices to" email, else its email, else the site admin email). Before, a blank field always meant the site admin email. An address already saved here keeps getting the notes. The hint now reads "Leave blank to use Business info."
+- **Plainer labels.** Review inbox is now New reviews (menu and screen). The Google box is now Bring in Google reviews, the Display box is now How reviews look, and the closed box with the shortcodes is now Add to a page. Page addresses and saved settings are unchanged.
+
 ## 0.5.10 (2026-11-05)
 
 - **Ask for reviews, Review inbox and Review settings now use the one Scout screen layout.** Each opens with the Scout bar, breadcrumb and section list, then one status line, then the thing you use most, then lists, with rarely changed settings in a closed "More options" box at the bottom. One column throughout, so nothing squeezes beside the section list.

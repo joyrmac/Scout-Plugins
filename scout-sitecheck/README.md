@@ -36,12 +36,14 @@ long enough for the host to cut it off. The last step to land finishes the
 report and sends it, exactly once. If the visitor closes the tab, a scheduled
 job finishes the run ten minutes later.
 
-## Settings: Scout → Business → Site check
+## Settings: Scout → Your website → Free site check
+
+Requests land in **Check requests** in the Inbox.
 
 - **Make the page (as a draft):** a "Free website check" page at `/site-check/`
   with the shortcode. Publish it when it's ready.
 - **Email new checks to:** gets a copy of every check, and is the reply address
-  on the report.
+  on the report. Blank uses Send notices to in Business info.
 - **Who follows up:** the report says "Reply to this email and Sean will walk
   you through them." Blank: "we'll walk you through them."
 - **Their photo:** a JPG or PNG link for the email.
@@ -65,7 +67,7 @@ the sample out.
 
 | What | Where it is kept | How long | Shared with |
 |---|---|---|---|
-| What a person types into the site check form: their name, their email address and the website address they want checked, plus the check results for that website, the address of the page the form was on, and when the report was sent (When someone runs a check with the [scout_site_check] form.) | This website's database, as private site check records | Until someone deletes it. Deleting the plugin keeps these records. | Emailed to the visitor (their report) and emailed to the site's own address (the notify address in Site Check settings, or the site admin email) |
+| What a person types into the site check form: their name, their email address and the website address they want checked, plus the check results for that website, the address of the page the form was on, and when the report was sent (When someone runs a check with the [scout_site_check] form.) | This website's database, as private site check records | Until someone deletes it. Deleting the plugin keeps these records. | Emailed to the visitor (their report) and emailed to the site's own address (the address on the Free site check screen, or when that is blank, Send notices to in Business info, or the site admin email) |
 | The website address the person asked to check (During every site check.) | Sent to Google's speed tool to measure the site's speed on phones | Not kept there by this website | Google PageSpeed Insights |
 | A scrambled (hashed) form of the visitor's IP address and a scrambled form of their email address, each with a count of checks, used to limit checks to three an hour per connection and three a day per email (When someone submits the site check form with a valid name, email and web address.) | A temporary record in this website's database | One hour for the IP address record and one day for the email record | Nobody |
 

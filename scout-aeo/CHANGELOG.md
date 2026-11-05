@@ -1,5 +1,10 @@
 # Scout AI Search changelog
 
+## Unreleased (2026-11-05)
+
+- **One FAQ system in the schema.** With Scout Core active, a page's questions and answers now go into Core's schema graph instead of a second FAQPage block in the footer. On Core's own FAQ page the questions join Core's FAQPage, skipping any it already asks, so a page never carries two FAQPage entries. The FAQ entry also carries the page's name and dates. Without Scout Core, the separate block prints exactly as before. The answers visitors see do not change; this is a change to the data Google reads.
+- **Plain labels.** "Guide for AI tools" is now "AI guide page" and "View robots.txt" is now "View search engine rules". Same setting, same links.
+
 ## 0.2.9 (2026-11-05)
 
 - **The AI search screen opens with one status line.** It says whether AI search tools can read the site, plus training, the /llms.txt guide, instant updates and how many pages have questions and answers. The staging note is part of that line now. What the guide says (description, pages, recent posts) moves into a closed More options box. The page list box uses the kit's surface color instead of a typed white.

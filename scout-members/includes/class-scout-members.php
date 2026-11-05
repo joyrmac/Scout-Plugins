@@ -240,7 +240,12 @@ final class Scout_Members {
 	/** Where new applications are announced. */
 	public static function notify_email(): string {
 		$to = self::settings()['notify'];
-		return is_email( $to ) ? $to : (string) get_option( 'admin_email' );
+		return is_email( $to ) ? $to : self::shared_notice_email();
+	}
+
+	/** The site's shared notice address from Business info, or the site email without Scout Core. */
+	public static function shared_notice_email(): string {
+		return function_exists( 'scout_core_notice_email' ) ? (string) scout_core_notice_email() : (string) get_option( 'admin_email' );
 	}
 
 	/* ---------- members ---------- */

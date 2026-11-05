@@ -47,5 +47,25 @@ Scout_Booking_Types_Admin::boot();
 // WooCommerce loads after this plugin in alphabetical order, so check for it later.
 add_action( 'plugins_loaded', array( 'Scout_Booking_Woo', 'boot' ), 20 );
 
+/*
+ * scout_booking_url(): where every "Book" button on the site goes (Call
+ * buttons, Chat, Free site check). Defined after the theme loads, so a theme
+ * that has its own scout_booking_url() keeps it. Only defined while a booking
+ * page is set and published, so those plugins keep their own fallback (such as
+ * the Contact page) until then. Returns '' if the page goes away later.
+ */
+add_action(
+	'after_setup_theme',
+	static function () {
+		if ( ! function_exists( 'scout_booking_url' ) && Scout_Booking_Front::has_page() ) {
+			/** The booking page's address, or '' when there is none. */
+			function scout_booking_url(): string {
+				return Scout_Booking_Front::booking_url();
+			}
+		}
+	},
+	20
+);
+
 register_activation_hook( __FILE__, array( 'Scout_Booking', 'install' ) );
 register_deactivation_hook( __FILE__, array( 'Scout_Booking', 'unschedule' ) );

@@ -42,7 +42,7 @@ final class Scout_Redirects_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Redirects', 'scout-redirects' ), __( 'Redirects', 'scout-redirects' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Moved pages', 'scout-redirects' ), __( 'Moved pages', 'scout-redirects' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -381,9 +381,9 @@ final class Scout_Redirects_Admin {
 		$post_url = admin_url( 'admin-post.php' );
 
 		Scout_Admin_UI::open(
-			__( 'Old pages, forwarded to new ones', 'scout-redirects' ),
-			__( 'When a page moves or goes away, a redirect sends visitors and search engines to the right place. This screen also lists the missing pages people ask for, so each one can become a redirect in one click.', 'scout-redirects' ),
-			__( 'Redirects', 'scout-redirects' )
+			__( 'Moved pages', 'scout-redirects' ),
+			__( 'When a page moves or goes away, a redirect sends visitors and search engines to the new page. This screen also lists the missing pages people tried to open, so you can forward each one in one click.', 'scout-redirects' ),
+			__( 'Moved pages', 'scout-redirects' )
 		);
 		self::messages();
 		?>
@@ -533,7 +533,7 @@ final class Scout_Redirects_Admin {
 		</section>
 
 		<section class="sh-box" id="scout-list">
-			<h2 class="sh-title"><?php esc_html_e( 'Redirect list', 'scout-redirects' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Your moved pages', 'scout-redirects' ); ?></h2>
 			<p><?php esc_html_e( 'Old addresses and where they go now. Permanent (301) is right for pages that moved for good; search engines then pass the old page\'s standing to the new one.', 'scout-redirects' ); ?></p>
 			<?php if ( $total > self::PER_PAGE || '' !== $search ) : ?>
 				<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' === self::parent() ? 'options-general.php' : 'admin.php' ) ); ?>" class="sr-search" role="search">

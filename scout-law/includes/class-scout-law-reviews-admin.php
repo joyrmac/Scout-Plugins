@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout → Policies → Page reviews: which pages are due for an attorney's
+ * Scout → Policies → Attorney sign-offs: which pages are due for an attorney's
  * review, a quick way to record one, the settings, and the review record.
  *
  * @package Scout_Law
@@ -24,7 +24,7 @@ final class Scout_Law_Reviews_Admin {
 		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 2 );
 	}
 
-	/** Page reviews files under Policies, beside Disclaimers and Approvals. */
+	/** Attorney sign-offs files under Policies, beside Disclaimers and Firm approvals. */
 	public static function nav_group( string $group, string $slug ): string {
 		return self::SLUG === strtok( $slug, '&' ) ? Scout_Law_Admin::policies_group() : $group;
 	}
@@ -37,7 +37,7 @@ final class Scout_Law_Reviews_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( Scout_Law_Admin::parent(), __( 'Page reviews', 'scout-law' ), __( 'Page reviews', 'scout-law' ), 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( Scout_Law_Admin::parent(), __( 'Attorney sign-offs', 'scout-law' ), __( 'Attorney sign-offs', 'scout-law' ), 'edit_pages', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -88,7 +88,7 @@ final class Scout_Law_Reviews_Admin {
 		$people   = Scout_Law_Reviews::attorneys();
 		$due      = Scout_Law_Reviews::due();
 		Scout_Admin_UI::open(
-			__( 'Page reviews', 'scout-law' ),
+			__( 'Attorney sign-offs', 'scout-law' ),
 			__( 'An attorney reads each page on a schedule and signs it. The page then shows who reviewed it and when.', 'scout-law' ),
 			__( 'Policies', 'scout-law' )
 		);

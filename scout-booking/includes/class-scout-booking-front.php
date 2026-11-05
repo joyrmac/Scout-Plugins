@@ -54,6 +54,17 @@ final class Scout_Booking_Front {
 		return $u ? (string) $u : home_url( '/' );
 	}
 
+	/** The booking page's address when one is set and published, else ''. Behind scout_booking_url(). */
+	public static function booking_url(): string {
+		return self::has_page() ? self::page_url() : '';
+	}
+
+	/** True when the settings name a published booking page. */
+	public static function has_page(): bool {
+		$id = (int) Scout_Booking::settings()['page_id'];
+		return $id > 0 && 'publish' === get_post_status( $id );
+	}
+
 	public static function manage_url( array $row, array $args = array() ): string {
 		return add_query_arg( array_merge( array( 'sb_manage' => $row['token'] ), $args ), self::page_url() );
 	}

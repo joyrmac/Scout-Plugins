@@ -45,7 +45,7 @@ final class Scout_Chat {
 			'launcher'  => (string) ( $s['launcher'] ?? '' ),
 			'teaser'    => ! isset( $s['teaser'] ) || ! empty( $s['teaser'] ),
 			'teaser_by' => (string) ( $s['teaser_by'] ?? '' ),
-			'notify'    => (string) ( $s['notify'] ?? get_option( 'admin_email' ) ),
+			'notify'    => (string) ( $s['notify'] ?? '' ),
 			'alert'     => (string) ( $s['alert'] ?? '' ),
 			'book_url'  => (string) ( $s['book_url'] ?? '' ),
 			'work_url'  => (string) ( $s['work_url'] ?? '' ),
@@ -54,6 +54,19 @@ final class Scout_Chat {
 			'ai_url'    => (string) ( $s['ai_url'] ?? '' ),
 			'ai_key'    => (string) ( $s['ai_key'] ?? '' ),
 		);
+	}
+
+	/**
+	 * Where new chat emails go: this screen's own address when one is set, else
+	 * the shared "Send notices to" address in Business info (Scout Core), else
+	 * the site's admin email.
+	 */
+	public static function notify_to(): string {
+		$own = sanitize_email( self::settings()['notify'] );
+		if ( '' !== $own ) {
+			return $own;
+		}
+		return sanitize_email( function_exists( 'scout_core_notice_email' ) ? (string) scout_core_notice_email() : (string) get_option( 'admin_email' ) );
 	}
 
 	/** The connection key: wp-config's SCOUT_CHAT_AI_KEY wins over the setting. */
@@ -77,11 +90,11 @@ final class Scout_Chat {
 			self::CPT,
 			array(
 				'labels'          => array(
-					'name'          => __( 'Chat questions', 'scout-chat' ),
-					'singular_name' => __( 'Chat question', 'scout-chat' ),
-					'edit_item'     => __( 'Chat question', 'scout-chat' ),
-					'search_items'  => __( 'Search questions', 'scout-chat' ),
-					'not_found'     => __( 'No questions yet. Every question a visitor leaves contact details for lands here.', 'scout-chat' ),
+					'name'          => __( 'Chat messages', 'scout-chat' ),
+					'singular_name' => __( 'Chat message', 'scout-chat' ),
+					'edit_item'     => __( 'Chat message', 'scout-chat' ),
+					'search_items'  => __( 'Search messages', 'scout-chat' ),
+					'not_found'     => __( 'No messages yet. Every chat where a visitor leaves contact details lands here.', 'scout-chat' ),
 				),
 				'public'          => false,
 				'show_ui'         => true,
@@ -242,7 +255,7 @@ final class Scout_Chat {
 		update_post_meta( $id, '_scout_chat_answered', 0 );
 
 		$contact = trim( ( '' !== $phone ? __( 'Text back:', 'scout-chat' ) . ' ' . self::pretty_phone( $phone ) . ' ' : '' ) . ( '' !== $email ? '<' . $email . '>' : '' ) );
-		$to      = sanitize_email( self::settings()['notify'] );
+		$to      = self::notify_to();
 		if ( is_email( $to ) ) {
 			$body = $kinds[ $kind ] . "\n" . $name . ' ' . $contact . "\n" . ( '' !== $phone ? __( 'Tap to text:', 'scout-chat' ) . ' sms:+' . $phone . "\n" : '' ) . ( $page ? __( 'Page:', 'scout-chat' ) . ' ' . $page . "\n" : '' )
 				. "\n" . implode( "\n\n", $lines ) . "\n\n" . __( 'Open the inbox:', 'scout-chat' ) . ' ' . admin_url( 'edit.php?post_type=' . self::CPT );
@@ -262,6 +275,8 @@ final class Scout_Chat {
 			$rid = Scout_Hub_Requests::create( $ask . "\n\n" . __( 'From the site chat:', 'scout-chat' ) . ' ' . $who, $page, 'whenever', 0, $name );
 			if ( $rid ) {
 				update_post_meta( $id, '_scout_chat_request', $rid );
+				// The request list now tracks it, so the Inbox shows it once, as the request.
+				update_post_meta( $id, '_scout_chat_answered', 1 );
 			}
 		}
 		do_action( 'scout_chat_lead', $id, $kind, $name, $email );

@@ -8,6 +8,14 @@
  *                    volunteers, vendors and presenters as "form".
  *   Tickets          scout_events_ticket_bought, and any paid WooCommerce
  *                    order carrying a ticked box from the checkout.
+ *
+ * This plugin owns the one newsletter box at the WooCommerce checkout. While
+ * it is active, Scout Events prints no box of its own there: a checkout that
+ * holds event tickets shows this box even when the "checkout box" setting is
+ * off, so ticket buyers are still asked, once. Scout Booking asks on its own
+ * booking form, so a checkout that only pays for bookings skips this box when
+ * the booking form already asked. Other plugins steer it with the
+ * scout_newsletter_checkout_box filter. One box, one consent record.
  *   Scout Members    a ticked newsletter question on the application.
  *   Gravity Forms    a per-form "Newsletter consent field" setting.
  *
@@ -40,10 +48,10 @@ final class Scout_Newsletter_Sources {
 		add_filter( 'gform_form_settings_fields', array( __CLASS__, 'gf_settings' ), 10, 2 );
 		add_action( 'gform_after_submission', array( __CLASS__, 'gf_submission' ), 10, 2 );
 
-		// WooCommerce checkout box (off unless switched on in the settings).
+		// WooCommerce checkout box: on with the setting, and on any checkout holding event tickets.
+		add_action( 'woocommerce_review_order_before_submit', array( __CLASS__, 'checkout_box' ) );
+		add_action( 'woocommerce_checkout_create_order', array( __CLASS__, 'checkout_save' ), 10, 2 );
 		if ( ! empty( Scout_Newsletter::settings()['checkout_box'] ) ) {
-			add_action( 'woocommerce_review_order_before_submit', array( __CLASS__, 'checkout_box' ) );
-			add_action( 'woocommerce_checkout_create_order', array( __CLASS__, 'checkout_save' ), 10, 2 );
 			add_action( 'woocommerce_init', array( __CLASS__, 'block_field' ) );
 		}
 		add_action( 'woocommerce_payment_complete', array( __CLASS__, 'order_paid' ) );
@@ -87,8 +95,22 @@ final class Scout_Newsletter_Sources {
 
 	/* ---------- WooCommerce ---------- */
 
+	/**
+	 * Show the box on this checkout? On with the "checkout box" setting. Scout
+	 * Events turns it on for a cart with tickets; Scout Booking turns it off
+	 * for a cart that only pays for bookings it already asked about.
+	 */
+	public static function show_box(): bool {
+		return (bool) apply_filters( 'scout_newsletter_checkout_box', ! empty( Scout_Newsletter::settings()['checkout_box'] ) );
+	}
+
 	public static function checkout_box(): void {
-		echo '<p class="form-row scout-newsletter-optin"><label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox"><input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="scout_newsletter_optin" value="1"> <span>' . esc_html( Scout_Newsletter::wording() ) . '</span></label></p>';
+		if ( ! self::show_box() ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- refilling the box only.
+		$ticked = ! empty( $_POST['scout_newsletter_optin'] );
+		echo '<p class="form-row scout-newsletter-optin"><label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox"><input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="scout_newsletter_optin" value="1"' . checked( $ticked, true, false ) . '> <span>' . esc_html( Scout_Newsletter::wording() ) . '</span></label></p>';
 	}
 
 	/** Classic checkout: keep the words they saw on the order. WooCommerce checked its own nonce. */
@@ -121,6 +143,10 @@ final class Scout_Newsletter_Sources {
 	/** The words a ticked box on this order showed, or ''. */
 	public static function order_optin( $order ): string {
 		$words = (string) $order->get_meta( self::ORDER_OPTIN );
+		if ( self::is_time( $words ) ) {
+			// Scout Events' own ticket box saved the time it was ticked under the same key. Its words were these.
+			return class_exists( 'Scout_Events_Agreements' ) ? Scout_Events_Agreements::newsletter_label() : 'Send me the newsletter';
+		}
 		if ( '' !== $words ) {
 			return $words;
 		}
@@ -142,7 +168,8 @@ final class Scout_Newsletter_Sources {
 		}
 		$words  = self::order_optin( $order );
 		$email  = (string) $order->get_billing_email();
-		$source = $event || self::has_ticket( $order ) ? 'ticket' : 'form';
+		$event  = $event ? $event : self::ticket_event( $order );
+		$source = $event ? 'ticket' : 'form';
 		if ( '' !== $words ) {
 			Scout_Newsletter::optin(
 				$email,
@@ -162,14 +189,20 @@ final class Scout_Newsletter_Sources {
 		$order->save();
 	}
 
-	/** True when an order holds a Scout Events ticket. */
-	private static function has_ticket( $order ): bool {
+	/** The event of the first Scout Events ticket on an order, or 0 when it holds none. */
+	private static function ticket_event( $order ): int {
 		foreach ( $order->get_items() as $item ) {
-			if ( method_exists( $item, 'get_product_id' ) && get_post_meta( (int) $item->get_product_id(), class_exists( 'Scout_Events_Woo' ) ? Scout_Events_Woo::EVENT : '_scout_event_id', true ) ) {
-				return true;
+			$event = method_exists( $item, 'get_product_id' ) ? (int) get_post_meta( (int) $item->get_product_id(), class_exists( 'Scout_Events_Woo' ) ? Scout_Events_Woo::EVENT : '_scout_event_id', true ) : 0;
+			if ( $event ) {
+				return $event;
 			}
 		}
-		return false;
+		return 0;
+	}
+
+	/** True for a "YYYY-MM-DD HH:MM:SS" time, which is what Scout Events' own box saved. */
+	public static function is_time( string $value ): bool {
+		return 1 === preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $value );
 	}
 
 	/* ---------- Scout Members ---------- */

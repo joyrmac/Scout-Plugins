@@ -264,7 +264,7 @@ final class Scout_Reviews_Settings {
 			</section>
 
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Display', 'scout-reviews' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'How reviews look', 'scout-reviews' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><label for="scout-reviews-disclaimer"><?php esc_html_e( 'Disclaimer (optional)', 'scout-reviews' ); ?></label></th>
@@ -279,7 +279,7 @@ final class Scout_Reviews_Settings {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'New 5-star reviews', 'scout-reviews' ); ?></th>
 						<td>
-							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[auto_add_five]' ); ?>" value="1" <?php checked( ! empty( $settings['auto_add_five'] ) ); ?> /> <?php esc_html_e( 'Add new 5-star Google reviews to the site automatically, on the pages they match. Everything else still waits in the Review inbox.', 'scout-reviews' ); ?></label>
+							<label><input type="checkbox" name="<?php echo esc_attr( $name . '[auto_add_five]' ); ?>" value="1" <?php checked( ! empty( $settings['auto_add_five'] ) ); ?> /> <?php esc_html_e( 'Add new 5-star Google reviews to the site automatically, on the pages they match. Everything else still waits in New reviews.', 'scout-reviews' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Leave off for law firms: bar rules expect a person to approve each testimonial.', 'scout-reviews' ); ?></p>
 						</td>
 					</tr>
@@ -306,7 +306,7 @@ final class Scout_Reviews_Settings {
 			<?php submit_button(); ?>
 		</form>
 
-		<?php Scout_Reviews_Menu::fold_open( __( 'Putting reviews on a page', 'scout-reviews' ) ); ?>
+		<?php Scout_Reviews_Menu::fold_open( __( 'Add to a page', 'scout-reviews' ) ); ?>
 			<p><?php esc_html_e( 'In the block editor, add the "Scout Reviews" block. Anywhere else, use a shortcode:', 'scout-reviews' ); ?></p>
 			<ul class="srk-codes">
 				<li><code>[scout_reviews]</code> <?php esc_html_e( 'shows the rating summary and every published review.', 'scout-reviews' ); ?></li>

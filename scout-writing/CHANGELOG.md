@@ -1,5 +1,9 @@
 # Scout Writing changelog
 
+## Unreleased (2026-11-05)
+
+- **Plainer labels.** Writing (all) is now All writing, and Writing settings is now Settings, in the Your Writing menu and on each screen. Page addresses and saved settings are unchanged.
+
 ## 0.1.5 (2026-11-05)
 
 - **The writing room sits inside the Scout admin frame**, with the same top bar, section list and footer as every Scout screen. A status line comes first: how many prompts are done, how many are written and how many are sent to Scout. The numbers still update as you mark prompts done.

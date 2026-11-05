@@ -1,5 +1,9 @@
 # Scout CRM Sync changelog
 
+## Unreleased (2026-11-05)
+
+- **Plainer label.** The "Tags it uses" box on Customer list is now "Labels it adds". The tags themselves are unchanged.
+
 ## 0.1.3 (2026-11-05)
 
 - **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.

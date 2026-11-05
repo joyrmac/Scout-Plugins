@@ -30,11 +30,11 @@ can have one (Joy, 2026-11-03).
 
 ## What administrators see
 
-- **Writing (all)** in the site's Build section (Scout Build, Recon Build, Site
+- **All writing** in the site's Build section (Scout Build, Recon Build, Site
   Build or Scout; under Your Writing on a site without one): every entry with
   step, status, writer and last edited, and a **Sent to Scout** view. Each
   entry shows its prompt, voice memos and draft post.
-- **Writing settings**: where the prompts come from, an upload when the theme
+- **Settings** (under Your Writing): where the prompts come from, an upload when the theme
   has none, the Send to Scout address, and the log of what moved over from the
   Bliss Boogie room.
 - With no prompts yet, writers see nothing at all (no menu, no toolbar button,
@@ -86,7 +86,7 @@ updates with every theme release. Every key is optional except `prompts`.
 | `prompts` | Path of the prompts file inside the theme. | none (then the uploaded file) |
 | `menu_label` | The menu and toolbar name. | Your Writing |
 | `menu_tag` | Small tag beside the menu name; `""` for none. | New |
-| `send_to` | One address, a comma list, or a JSON list. Writing settings wins when filled in. | team@scoutraleigh.com |
+| `send_to` | One address, a comma list, or a JSON list. Settings wins when filled in. | team@scoutraleigh.com |
 | `text.kicker` | Small label above the room's title. | Your writing |
 | `text.dashboard_kicker` | Small label on the dashboard welcome (after ✦). | Your writing · *site name* |
 | `text.search_hint` | Placeholder in the search box. | Search, for example: a word from any prompt |
@@ -104,7 +104,7 @@ is added) or a full CSS list; `font_files` are paths inside the theme and load
 only on the writing screens. No fonts load from outside the site.
 
 **Without a theme file**, an administrator can upload the same JSON in
-**Writing settings**. The theme's file always wins when it exists.
+**Settings** under Your Writing. The theme's file always wins when it exists.
 
 ## The prompts file
 
@@ -162,7 +162,7 @@ as typed.
 On activation, and on the first admin screen after an update, any
 `bb_writing` entries, `_bb_*` meta and `scout_bb_writing_marks` are renamed in
 place to the names above: the same IDs, authors, dates, words, memos and draft
-links. It is safe to run again, and each move is logged in Writing settings.
+links. It is safe to run again, and each move is logged in Settings.
 The room's old address, `admin.php?page=scout-bb-writing&write=<id>`, redirects
 to the same prompt here, so links already sent keep working.
 

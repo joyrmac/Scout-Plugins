@@ -37,7 +37,7 @@ final class Scout_Reviews_Google_Admin {
 		$settings = Scout_Reviews_Menu::url( Scout_Reviews_Settings::PAGE );
 		?>
 		<section class="sh-box srk-google">
-			<h2 class="sh-title"><?php esc_html_e( 'Google reviews sync', 'scout-reviews' ); ?></h2>
+			<h2 class="sh-title"><?php esc_html_e( 'Bring in Google reviews', 'scout-reviews' ); ?></h2>
 
 			<?php if ( ! Scout_Reviews_Google::has_credentials() ) : ?>
 				<p><?php esc_html_e( 'Step 1: paste the OAuth client ID and secret from Google Cloud (APIs & Services > Credentials). Add this exact address as an "Authorized redirect URI" on that client:', 'scout-reviews' ); ?></p>
@@ -76,7 +76,7 @@ final class Scout_Reviews_Google_Admin {
 				<p>
 					<?php
 					/* translators: %s: business name on Google. */
-					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones land in the Review inbox, where one click adds each to the right pages.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
+					echo wp_kses_post( sprintf( __( 'Connected to <strong>%s</strong>. Reviews sync once a day. New ones land in New reviews, where one click adds each to the right pages.', 'scout-reviews' ), esc_html( $g['location_title'] ) ) );
 					?>
 				</p>
 				<p>

@@ -1,5 +1,13 @@
 # Scout Core — Changelog
 
+## Unreleased (2026-11-05)
+
+- **One address for notices.** Business info has a new optional field, "Send notices to", for whoever gets form, booking and chat emails. Left blank, the email above it is used. Other plugins read it through `scout_core_notice_email()`, which falls back to Business info's email and then the WordPress admin email. A plugin's own "send notices to" field still wins when it is filled in.
+- **No star rating built from testimonials.** The business entry Google reads no longer carries a star rating or Review entries made from the testimonials you picked by hand, since those are not a platform's full count. Testimonials themselves, and how they show on pages, do not change. A plugin that has real totals from a review platform can still add a rating through the `scout_schema_aggregate_rating` filter, which now starts empty. The `scout_schema_review_limit` filter is gone with the Review entries.
+- **Business info no longer offers an Hours box.** Weekly hours live in Scout Hours. Any text a site saved in the old box stays saved and readable by the theme; it is just not shown. With Scout Hours on, the row still points to the Hours screen.
+- **Plain labels.** Search health is now Google checks (the menu, the screen and its list). SEO is now Search settings. Site Sync is now Page copy, and its "Last sync" box is "Last update from the theme". On Business info, "Schema type" is "Type of business" and "Profile URLs" is "Your other profiles", each with a help line. Same page addresses, tabs and saved settings.
+- **Removed unused code.** The old Settings → Scout Business screen (`Scout_Core_Business::admin_menu()` and `render_page()`) was never hooked up, so it is gone.
+
 ## 1.8.1 (2026-11-05)
 
 - **Search health opens with one status line, and the checks are a list.** Without the Scout Build hub, the checks show one row each (name, what to do, All set or Needs a look, and its button) instead of a grid of cards. The hub's Site health still shows them as cards.

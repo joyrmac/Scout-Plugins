@@ -373,7 +373,7 @@ final class Scout_Events_Vendors {
 			}
 		}
 		/* translators: %s: business name. */
-		wp_mail( (string) get_option( 'admin_email' ), sprintf( __( 'New vendor application: %s', 'scout-events' ), $name ), __( "A new vendor applied. Review them here:\n", 'scout-events' ) . admin_url( 'post.php?post=' . (int) $id . '&action=edit' ) );
+		wp_mail( Scout_Events::notice_email(), sprintf( __( 'New vendor application: %s', 'scout-events' ), $name ), __( "A new vendor applied. Review them here:\n", 'scout-events' ) . admin_url( 'post.php?post=' . (int) $id . '&action=edit' ) );
 		$back( $photo < 0 ? 'photo' : 'applied' );
 	}
 

@@ -1,5 +1,9 @@
 # Scout Cards changelog
 
+## Unreleased (2026-11-05)
+
+- **Plainer labels.** Cards & Links is now Cards and links, in the menu and on the screen. The People box is now Card people, ready for its move to People later. The page address and saved settings are unchanged.
+
 ## 1.0.26 (2026-11-05)
 
 - **Cards & Links follows the one Scout screen layout.** A status line comes first: whether the cards are live at /card/, how many people have a card, and whether the links page is on, with a View card button.

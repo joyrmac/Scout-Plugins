@@ -1,5 +1,9 @@
 # Scout Hours changelog
 
+## Unreleased (2026-11-05)
+
+- **The screen title matches the menu.** The Hours screen is now titled Hours (was "When you’re open"), the same as its menu item. In the "Where it updates" box, the "Schema" line is now called "Google listing". Same page address and settings. Visitors see no change.
+
 ## 0.1.13 (2026-11-05)
 
 - **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.

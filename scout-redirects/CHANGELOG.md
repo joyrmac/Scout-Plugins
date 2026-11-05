@@ -1,5 +1,9 @@
 # Scout Redirects changelog
 
+## Unreleased (2026-11-05)
+
+- **Plainer names.** The menu item and screen title are both "Moved pages" (was "Redirects" and "Old pages, forwarded to new ones"), the list box is "Your moved pages", and the opening sentence is plainer. The Site Health link reads "Open Moved pages". Same address, settings and redirects.
+
 ## 0.1.15 (2026-11-05)
 
 - **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.

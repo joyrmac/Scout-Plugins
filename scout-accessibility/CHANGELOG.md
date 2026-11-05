@@ -1,5 +1,10 @@
 # Scout Accessibility changelog
 
+## Unreleased (2026-11-05)
+
+- **Email and phone read Business info live.** The Email for barrier reports and Phone fields on the Accessibility statement screen are optional overrides. When one is blank, the statement uses Business info's email or phone at the moment the page shows. A value already saved here keeps showing exactly as before. Both hints now read "Leave blank to use Business info." and the placeholders show what Business info holds.
+- **Plainer label.** The footer box "Use the shortcode" is now "Add it to a page". The shortcode is the same.
+
 ## 0.1.17 (2026-11-05)
 
 - **The Accessibility statement screen opens with one status line.** Published with a View the page button, or not created yet with a link to the statement. It replaces the single status card.

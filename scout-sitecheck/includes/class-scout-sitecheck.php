@@ -36,7 +36,7 @@ final class Scout_Sitecheck {
 	public static function settings(): array {
 		$s = (array) get_option( self::OPTION, array() );
 		return array(
-			'notify'     => (string) ( $s['notify'] ?? get_option( 'admin_email' ) ),
+			'notify'     => (string) ( $s['notify'] ?? '' ),
 			'lead_name'  => (string) ( $s['lead_name'] ?? '' ),
 			'lead_photo' => (string) ( $s['lead_photo'] ?? '' ),
 			'book_url'   => (string) ( $s['book_url'] ?? '' ),
@@ -44,6 +44,19 @@ final class Scout_Sitecheck {
 			'hold'       => ! empty( $s['hold'] ),
 			'page'       => (int) ( $s['page'] ?? 0 ),
 		);
+	}
+
+	/**
+	 * Where the team's copy goes, and the reply address on the report: this
+	 * screen's own address when one is set, else the shared "Send notices to"
+	 * address in Business info (Scout Core), else the site's admin email.
+	 */
+	public static function notify_to(): string {
+		$own = sanitize_email( self::settings()['notify'] );
+		if ( '' !== $own ) {
+			return $own;
+		}
+		return sanitize_email( function_exists( 'scout_core_notice_email' ) ? (string) scout_core_notice_email() : (string) get_option( 'admin_email' ) );
 	}
 
 	/** Google's speed tool key: wp-config's SCOUT_SITECHECK_PSI_KEY wins over the setting. */
@@ -70,11 +83,11 @@ final class Scout_Sitecheck {
 			self::CPT,
 			array(
 				'labels'          => array(
-					'name'          => __( 'Site checks', 'scout-sitecheck' ),
-					'singular_name' => __( 'Site check', 'scout-sitecheck' ),
-					'edit_item'     => __( 'Site check', 'scout-sitecheck' ),
-					'search_items'  => __( 'Search site checks', 'scout-sitecheck' ),
-					'not_found'     => __( 'No site checks yet. Every check someone runs from the site lands here.', 'scout-sitecheck' ),
+					'name'          => __( 'Check requests', 'scout-sitecheck' ),
+					'singular_name' => __( 'Check request', 'scout-sitecheck' ),
+					'edit_item'     => __( 'Check request', 'scout-sitecheck' ),
+					'search_items'  => __( 'Search check requests', 'scout-sitecheck' ),
+					'not_found'     => __( 'No check requests yet. Every check someone runs from the site lands here.', 'scout-sitecheck' ),
 				),
 				'public'          => false,
 				'show_ui'         => true,

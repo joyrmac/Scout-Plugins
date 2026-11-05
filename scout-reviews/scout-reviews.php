@@ -81,7 +81,7 @@ register_activation_hook(
 	}
 );
 
-// The Scout admin look on the Review settings, Ask for reviews and Review inbox screens.
+// The Scout admin look on the Review settings, Ask for reviews and New reviews screens.
 add_action(
 	'admin_enqueue_scripts',
 	static function ( $hook ) {

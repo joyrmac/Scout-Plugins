@@ -1,6 +1,6 @@
 <?php
 /**
- * Reviews > Inbox: new reviews pulled from Google and notes sent from the
+ * Reviews > New reviews: new reviews pulled from Google and notes sent from the
  * review page (/review/note/), one row each, with "Approve and add to site"
  * and "Skip".
  * A note the client did not OK for the site can only be marked as read.
@@ -33,13 +33,13 @@ final class Scout_Reviews_Inbox {
 	public static function menu(): void {
 		$count = Scout_Reviews_Google_Sync::new_count();
 		$build = Scout_Reviews_Menu::build();
-		$label = '' !== $build ? __( 'Review inbox', 'scout-reviews' ) : __( 'Inbox', 'scout-reviews' );
+		$label = __( 'New reviews', 'scout-reviews' );
 		if ( $count ) {
 			$label .= ' <span class="awaiting-mod"><span class="pending-count">' . (int) $count . '</span></span>';
 		}
 		add_submenu_page(
 			Scout_Reviews_Menu::parent(),
-			__( 'Review inbox', 'scout-reviews' ),
+			__( 'New reviews', 'scout-reviews' ),
 			$label,
 			'edit_posts',
 			self::PAGE,
@@ -74,7 +74,7 @@ final class Scout_Reviews_Inbox {
 		$count  = count( $items );
 
 		Scout_Admin_UI::open(
-			__( 'Review inbox', 'scout-reviews' ),
+			__( 'New reviews', 'scout-reviews' ),
 			__( 'New Google reviews and notes from your review page wait here. Check the pages each one belongs on (we pre-check the ones that match), then add it to the site. Skipped items stay saved as hidden drafts under All reviews.', 'scout-reviews' )
 		);
 

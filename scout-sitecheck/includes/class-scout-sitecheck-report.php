@@ -112,7 +112,7 @@ final class Scout_Sitecheck_Report {
 		if ( ! is_email( $to ) ) {
 			return false;
 		}
-		$notify  = Scout_Sitecheck::settings()['notify'];
+		$notify  = Scout_Sitecheck::notify_to();
 		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 		if ( is_email( $notify ) ) {
 			$headers[] = 'Reply-To: ' . self::from_name() . ' <' . $notify . '>';
@@ -195,7 +195,7 @@ final class Scout_Sitecheck_Report {
 	/* ---------- the team's copy ---------- */
 
 	public static function notify_team( int $id, bool $unreachable = false ): void {
-		$to = Scout_Sitecheck::settings()['notify'];
+		$to = Scout_Sitecheck::notify_to();
 		if ( ! is_email( $to ) ) {
 			return;
 		}

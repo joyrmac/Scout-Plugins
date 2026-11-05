@@ -11,7 +11,7 @@
  *   without JavaScript through a plain form (admin-post).
  * - Send to Scout: status "ready" and an email to Scout with an admin link (no public link).
  * - Start a draft from this (website or newsletter prompts): a normal WordPress draft post, never published.
- * - Writing (all) (manage_options): every entry, with a "Sent to Scout" view.
+ * - All writing (manage_options): every entry, with a "Sent to Scout" view.
  * - A welcome panel at the top of the dashboard with one suggested prompt and progress.
  *
  * Entries are never public: not queryable, not searchable, not in REST, not in sitemaps, status private.
@@ -143,8 +143,8 @@ add_action( 'init', function () {
 			'labels'              => array(
 				'name'          => 'Writing',
 				'singular_name' => 'Writing entry',
-				'menu_name'     => 'Writing (all)',
-				'all_items'     => 'Writing (all)',
+				'menu_name'     => 'All writing',
+				'all_items'     => 'All writing',
 				'edit_item'     => 'Writing entry',
 				'search_items'  => 'Search writing',
 				'not_found'     => 'Nothing written yet.',
@@ -614,8 +614,8 @@ add_action( 'admin_menu', function () {
 	$icon = 'data:image/svg+xml;base64,' . base64_encode( '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="black" d="M15.6 2.2a1.6 1.6 0 0 1 2.2 2.2l-9.6 9.6-3.1.9.9-3.1zM3 16.5h14v1.5H3z"/></svg>' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	$hook = add_menu_page( $label, $label, 'edit_posts', SCOUT_WRITING_PAGE, 'scout_writing_render', $icon, 2.5 );
 	add_submenu_page( SCOUT_WRITING_PAGE, $label, 'Write', 'edit_posts', SCOUT_WRITING_PAGE );
-	add_submenu_page( SCOUT_WRITING_PAGE, 'Writing (all)', 'Writing (all)', 'manage_options', $list );
-	$settings = add_submenu_page( SCOUT_WRITING_PAGE, 'Writing settings', 'Writing settings', 'manage_options', SCOUT_WRITING_SETTINGS_PAGE, 'scout_writing_settings_render' );
+	add_submenu_page( SCOUT_WRITING_PAGE, 'All writing', 'All writing', 'manage_options', $list );
+	$settings = add_submenu_page( SCOUT_WRITING_PAGE, 'Settings', 'Settings', 'manage_options', SCOUT_WRITING_SETTINGS_PAGE, 'scout_writing_settings_render' );
 	add_action( 'load-' . $hook, 'scout_writing_assets_hook' );
 	if ( $settings ) {
 		add_action( 'load-' . $settings, 'scout_writing_settings_assets_hook' );
@@ -667,7 +667,7 @@ add_action( 'admin_bar_menu', function ( $bar ) {
 	$bar->add_node( array( 'id' => 'scout-writing', 'title' => '✦ ' . esc_html( scout_writing_menu_label() ), 'href' => scout_writing_url() ) );
 }, 31 );
 
-/** Writing (all) stays highlighted on the list and on an entry. */
+/** All writing stays highlighted on the list and on an entry. */
 add_filter( 'parent_file', function ( $parent ) {
 	global $submenu_file;
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
@@ -1013,7 +1013,7 @@ function scout_writing_render() {
 		scout_writing_status_line( 'off', 'No prompts yet.', 'Writers see nothing until there are prompts.' );
 		echo '<section class="sh-box sw"><h2 class="sh-title">Two ways to add prompts</h2><ol class="sw-setup">';
 		echo '<li><b>From the theme.</b> Add a <code>writing</code> section to the theme\'s <code>scout-setup.json</code> that names the prompts file, for example <code>{ "writing": { "prompts": "writing-prompts.json" } }</code>. It then updates with every theme release.</li>';
-		echo '<li><b>Upload a file.</b> <a href="' . esc_url( admin_url( 'admin.php?page=' . SCOUT_WRITING_SETTINGS_PAGE ) ) . '">Writing settings</a> takes a prompts file (.json) when the theme has none.</li>';
+		echo '<li><b>Upload a file.</b> <a href="' . esc_url( admin_url( 'admin.php?page=' . SCOUT_WRITING_SETTINGS_PAGE ) ) . '">Settings</a> takes a prompts file (.json) when the theme has none.</li>';
 		echo '</ol></section>';
 		Scout_Admin_UI::close();
 		return;
@@ -1229,7 +1229,7 @@ add_action( 'admin_notices', function () {
 	<?php
 } );
 
-/* ------------------------------------------------------------------ Scout's view: Writing (all) */
+/* ------------------------------------------------------------------ Scout's view: All writing */
 
 add_filter( 'manage_' . SCOUT_WRITING_CPT . '_posts_columns', function () {
 	return array(

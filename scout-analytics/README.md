@@ -38,12 +38,12 @@ Events in use: `card_view`, `card_save_contact`, `card_call`, `card_email`,
 
 ## Settings
 
-Scout Build (or Site Build) → Analytics.
+Scout Build (or Site Build) → Visits and cookies.
 
 | Setting | Default |
 |---|---|
-| Tag Manager container ID | none |
-| GA4 measurement ID (only without Tag Manager) | none |
+| Google tracking code (the Tag Manager container ID, GTM-) | none |
+| Google tracking code under More options (a GA4 measurement ID, G-, only without Tag Manager) | none |
 | Before a visitor chooses | Count, with opt out |
 | Ad signals | Off |
 | Notice text | Standard wording |

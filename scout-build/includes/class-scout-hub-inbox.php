@@ -94,8 +94,17 @@ final class Scout_Hub_Inbox {
 				array(
 					'post_type'      => Scout_Chat::CPT,
 					'post_status'    => 'private',
-					'meta_key'       => '_scout_chat_answered', // phpcs:ignore WordPress.DB.SlowDBQuery
-					'meta_value'     => '0', // phpcs:ignore WordPress.DB.SlowDBQuery
+					// Unanswered, leaving out chat change requests: those show once, as the request above.
+					'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery
+						array(
+							'key'   => '_scout_chat_answered',
+							'value' => '0',
+						),
+						array(
+							'key'     => '_scout_chat_request',
+							'compare' => 'NOT EXISTS',
+						),
+					),
 					'posts_per_page' => 50,
 				)
 			);

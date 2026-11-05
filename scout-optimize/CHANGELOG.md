@@ -1,5 +1,9 @@
 # Changelog — scout-optimize
 
+## Unreleased (2026-11-05)
+
+- **Plainer label.** Optimize existing images is now Shrink older photos, on the button and on its screen. The page address is unchanged.
+
 ## 0.9.8 (2026-11-05)
 
 - **The Image optimizer screen opens with one status line.** It says whether new uploads are optimized, the size limit and quality, which smaller copies are made, and whether visitors get them. Optimizing images already in the library and what the server can do now come before the settings.

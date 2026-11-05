@@ -71,6 +71,12 @@ final class Scout_Events {
 		return $s;
 	}
 
+	/** Where application notices go: the shared notice address from Business info, else the site email. */
+	public static function notice_email(): string {
+		$to = function_exists( 'scout_core_notice_email' ) ? (string) scout_core_notice_email() : '';
+		return is_email( $to ) ? $to : (string) get_option( 'admin_email' );
+	}
+
 	public static function register_post_types(): void {
 		if ( post_type_exists( self::EVENT ) ) {
 			return;

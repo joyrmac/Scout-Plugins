@@ -5,7 +5,7 @@
  *
  *   /review/          a phone page with the "leave a review" button
  *   /review/?via=qr   same, counted as a QR scan (also text, email, card, link)
- *   /review/note/     a private note form that lands in Reviews > Inbox
+ *   /review/note/     a private note form that lands in Reviews > New reviews
  *
  * Why the QR points at the site and not at Google: the printed cards outlive
  * any one link. If the review link changes, or the business adds Yelp, the
@@ -58,7 +58,7 @@ final class Scout_Reviews_Requests {
 			'mode'          => 'page', // page: the review page. direct: skip it and go straight to one platform.
 			'primary'       => 'google',
 			'notes'         => true,   // The private note form at /review/note/.
-			'note_email'    => '',     // Who gets private notes. Empty: the site admin email.
+			'note_email'    => '',     // Who gets private notes. Empty: the shared notice address (Business info).
 			'business'      => '',
 			'headline'      => __( 'Thanks for working with us.', 'scout-reviews' ),
 			'ask'           => __( 'An honest review takes about a minute and helps other people find us.', 'scout-reviews' ),
@@ -74,6 +74,23 @@ final class Scout_Reviews_Requests {
 			$s['business'] = self::short_name( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
 		}
 		return $s;
+	}
+
+	/**
+	 * The shared notice address from Business info (Scout Core), or the site
+	 * admin email when Scout Core is not on.
+	 */
+	public static function shared_notice_email(): string {
+		return function_exists( 'scout_core_notice_email' ) ? (string) scout_core_notice_email() : (string) get_option( 'admin_email' );
+	}
+
+	/**
+	 * Who gets private notes. The field on the screen is an optional
+	 * override; when it is blank, the shared notice address is used.
+	 */
+	public static function note_recipient(): string {
+		$own = trim( (string) self::get()['note_email'] );
+		return '' !== $own ? $own : self::shared_notice_email();
 	}
 
 	/**
@@ -372,7 +389,7 @@ final class Scout_Reviews_Requests {
 				<?php if ( $s['notes'] ) : ?>
 					<p class="srk-sublabel"><?php esc_html_e( 'Private note form', 'scout-reviews' ); ?></p>
 					<div class="srk-link"><code><?php echo esc_html( self::note_link() ); ?></code></div>
-					<p class="sh-note"><?php esc_html_e( 'Linked quietly at the bottom of the review page. Notes land in your Review inbox and only go on the site when the client said yes.', 'scout-reviews' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'Linked quietly at the bottom of the review page. Notes land in New reviews and only go on the site when the client said yes.', 'scout-reviews' ); ?></p>
 				<?php endif; ?>
 			</section>
 
@@ -536,8 +553,8 @@ final class Scout_Reviews_Requests {
 					</tr>
 					<tr>
 						<th scope="row"><label for="srk-note-email"><?php esc_html_e( 'Send private notes to', 'scout-reviews' ); ?></label></th>
-						<td><input id="srk-note-email" type="email" class="regular-text" name="<?php echo esc_attr( $name . '[note_email]' ); ?>" value="<?php echo esc_attr( $s['note_email'] ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" />
-						<p class="description"><?php esc_html_e( 'Leave empty to use the site\'s admin email.', 'scout-reviews' ); ?></p></td>
+						<td><input id="srk-note-email" type="email" class="regular-text" name="<?php echo esc_attr( $name . '[note_email]' ); ?>" value="<?php echo esc_attr( $s['note_email'] ); ?>" placeholder="<?php echo esc_attr( self::shared_notice_email() ); ?>" />
+						<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-reviews' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="srk-business"><?php esc_html_e( 'Business name', 'scout-reviews' ); ?></label></th>

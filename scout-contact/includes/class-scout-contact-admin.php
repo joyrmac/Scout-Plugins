@@ -129,8 +129,9 @@ final class Scout_Contact_Admin {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$s = Scout_Contact::settings();
-		$o = Scout_Contact::OPTION;
+		$s   = Scout_Contact::saved();
+		$o   = Scout_Contact::OPTION;
+		$biz = Scout_Contact::business_phone();
 		$a = Scout_Contact::actions();
 		$n = count( array_filter( $a ) );
 		Scout_Admin_UI::open(
@@ -148,7 +149,7 @@ final class Scout_Contact_Admin {
 			$detail = sprintf( _n( 'The call bar shows on phones, with %d option in the sheet.', 'The call bar shows on phones, with %d options in the sheet.', $n, 'scout-contact' ), $n );
 		} else {
 			$headline = __( 'Off.', 'scout-contact' );
-			$detail   = $n ? __( 'Tick Show the call bar on phones below.', 'scout-contact' ) : __( 'Add a phone number or a booking link below.', 'scout-contact' );
+			$detail   = $n ? __( 'Tick Show the call bar on phones below.', 'scout-contact' ) : __( 'Add a phone number in Business info or below, or a booking link below.', 'scout-contact' );
 		}
 		$detail .= ' ' . __( 'It stays hidden on computers, where the header already shows the phone number and booking button.', 'scout-contact' );
 		$detail .= ' ' . ( class_exists( 'Scout_Analytics' ) ? __( 'Taps are counted in Analytics as contact_call, contact_text, contact_book or contact_open.', 'scout-contact' ) : __( 'Taps are not counted until Scout Analytics is on.', 'scout-contact' ) );
@@ -166,8 +167,8 @@ final class Scout_Contact_Admin {
 					</tr>
 					<tr>
 						<th scope="row"><label for="scc-phone"><?php esc_html_e( 'Phone number', 'scout-contact' ); ?></label></th>
-						<td><input id="scc-phone" type="text" class="regular-text" name="<?php echo esc_attr( $o ); ?>[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="(919) 555-0100">
-							<p class="description"><?php esc_html_e( 'Shown in the sheet exactly as typed. Use the same format as the rest of the site.', 'scout-contact' ); ?></p></td>
+						<td><input id="scc-phone" type="text" class="regular-text" name="<?php echo esc_attr( $o ); ?>[phone]" value="<?php echo esc_attr( $s['phone'] ); ?>" placeholder="<?php echo esc_attr( '' !== $biz ? $biz : '(919) 555-0100' ); ?>">
+							<p class="description"><?php esc_html_e( 'Leave blank to use Business info.', 'scout-contact' ); ?> <?php esc_html_e( 'A number typed here is shown in the sheet exactly as typed. Use the same format as the rest of the site.', 'scout-contact' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="scc-text"><?php esc_html_e( 'Texting number', 'scout-contact' ); ?></label></th>

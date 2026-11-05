@@ -163,10 +163,10 @@ final class Scout_AEO_Admin {
 							<p class="description"><?php esc_html_e( 'ChatGPT search also draws on Bing, so changes reach AI answers sooner. Runs on the live site only.', 'scout-aeo' ); ?></p></td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Guide for AI tools', 'scout-aeo' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'AI guide page', 'scout-aeo' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[llms]" value="1" <?php checked( $s['llms'] ); ?>> <?php esc_html_e( 'Publish a plain-text guide to the site at /llms.txt', 'scout-aeo' ); ?></label>
 							<?php if ( $s['llms'] ) : ?>
-								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the guide', 'scout-aeo' ); ?></a> · <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View robots.txt', 'scout-aeo' ); ?></a></p>
+								<p class="description"><a href="<?php echo esc_url( home_url( '/llms.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View the guide', 'scout-aeo' ); ?></a> · <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View search engine rules', 'scout-aeo' ); ?></a></p>
 							<?php endif; ?></td>
 					</tr>
 				</table>

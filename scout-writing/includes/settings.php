@@ -99,7 +99,7 @@ function scout_writing_settings_render() {
 	);
 	$msg = isset( $_GET['sw_msg'] ) ? sanitize_key( wp_unslash( $_GET['sw_msg'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- display only.
 
-	Scout_Admin_UI::open( 'Writing settings', 'Where the writing room gets its prompts, and where Send to Scout goes.', 'Writing' );
+	Scout_Admin_UI::open( 'Settings', 'Where the writing room gets its prompts, and where Send to Scout goes.', 'Writing' );
 	if ( isset( $notes[ $msg ] ) ) {
 		echo '<div class="notice notice-' . ( 'ok' === $notes[ $msg ][0] ? 'success' : 'error' ) . ' is-dismissible"><p>' . esc_html( $notes[ $msg ][1] ) . '</p></div>';
 	}

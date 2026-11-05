@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout → Policies → Approvals: which kinds of content need the firm's
+ * Scout → Policies → Firm approvals: which kinds of content need the firm's
  * approval before publishing, what is waiting, what changed after approval,
  * and the approval record.
  *
@@ -23,7 +23,7 @@ final class Scout_Law_Approvals_Admin {
 		add_filter( 'scout_admin_nav_group', array( __CLASS__, 'nav_group' ), 10, 2 );
 	}
 
-	/** Approvals files under Policies, beside Disclaimers. */
+	/** Firm approvals files under Policies, beside Disclaimers. */
 	public static function nav_group( string $group, string $slug ): string {
 		return self::SLUG === strtok( $slug, '&' ) ? Scout_Law_Admin::policies_group() : $group;
 	}
@@ -36,7 +36,7 @@ final class Scout_Law_Approvals_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( Scout_Law_Admin::parent(), __( 'Approvals', 'scout-law' ), __( 'Approvals', 'scout-law' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( Scout_Law_Admin::parent(), __( 'Firm approvals', 'scout-law' ), __( 'Firm approvals', 'scout-law' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -83,7 +83,7 @@ final class Scout_Law_Approvals_Admin {
 		$types = Scout_Law_Approvals::types();
 		$q     = Scout_Law_Approvals::queues();
 		Scout_Admin_UI::open(
-			__( 'Approvals', 'scout-law' ),
+			__( 'Firm approvals', 'scout-law' ),
 			__( 'Pages and posts the firm signs off on before they go live. Each approval keeps the attorney\'s name, the date and the exact version.', 'scout-law' ),
 			__( 'Policies', 'scout-law' )
 		);

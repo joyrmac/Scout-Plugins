@@ -76,12 +76,12 @@ final class Scout_Hub_Admin {
 		add_submenu_page( $parent, __( 'Inbox', 'scout-build' ), __( 'Inbox', 'scout-build' ) . self::bubble( self::waiting_total() ), 'edit_posts', $base . '&tab=inbox', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Request a change', 'scout-build' ), __( 'Request a change', 'scout-build' ), 'edit_posts', $base . '&tab=requests', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Site health', 'scout-build' ), __( 'Site health', 'scout-build' ), 'edit_posts', $base . '&tab=health', array( __CLASS__, 'render' ) );
-		// Build (operators): the features, every update (rule 12), and the Site log. The admin kit hides the group from everyone else.
+		// Build (operators): the features, every update (rule 12), and Site history. The admin kit hides the group from everyone else.
 		add_submenu_page( $parent, __( 'Features', 'scout-build' ), __( 'Features', 'scout-build' ), 'edit_posts', $base . '&tab=features', array( __CLASS__, 'render' ) );
 		add_submenu_page( $parent, __( 'Updates', 'scout-build' ), __( 'Updates', 'scout-build' ), 'edit_posts', $base . '&tab=updates', array( __CLASS__, 'render' ) );
-		// Operators see the full Site log under Build; everyone else sees it as "Your site" under Overview.
-		$log_label = Scout_Hub_Access::is_operator() ? __( 'Site log', 'scout-build' ) : __( 'Your site', 'scout-build' );
-		add_submenu_page( $parent, $log_label, $log_label, 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
+		// One plain name for everyone: operators find the full Site history under Build, everyone
+		// else finds their own view of it under Home (the admin kit and Scout_Hub_Log::nav_group sort it).
+		add_submenu_page( $parent, __( 'Site history', 'scout-build' ), __( 'Site history', 'scout-build' ), 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
 			update_option( 'scout_hub_page', $slug, false );
@@ -372,11 +372,13 @@ final class Scout_Hub_Admin {
 			'updates'  => __( 'Updates', 'scout-build' ),
 			'requests' => __( 'Request a change', 'scout-build' ),
 			'health'   => __( 'Site health', 'scout-build' ),
-			'log'      => Scout_Hub_Access::is_operator() && empty( $_GET['view'] ) ? __( 'Site log', 'scout-build' ) : __( 'Your site', 'scout-build' ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'log'      => __( 'Site history', 'scout-build' ),
 		);
+		// The client's view: everyone who is not an operator, and an operator using "See it as the client".
+		$client_view = ! Scout_Hub_Access::is_operator() || ! empty( $_GET['view'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'overview';
-		$lede = 'updates' === $tab ? __( 'Everything that brings a new version or new content onto this site, in one place: the theme, the plugins, the setup file, Site Sync, imports and the change log.', 'scout-build' ) : '';
-		if ( 'log' === $tab && __( 'Your site', 'scout-build' ) === $tabs['log'] ) {
+		$lede = 'updates' === $tab ? __( 'Everything that brings a new version or new content onto this site, in one place: the theme, the plugins, the setup file, page copy, imports and the change log.', 'scout-build' ) : '';
+		if ( 'log' === $tab && $client_view ) {
 			$lede = __( 'What Scout has done on your website, and anything you have asked for.', 'scout-build' );
 		}
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
@@ -579,7 +581,7 @@ final class Scout_Hub_Admin {
 							<li><span class="sh-when"><?php echo esc_html( wp_date( 'M j', strtotime( $row['date'] ) ) ); ?></span><span><?php echo esc_html( ( ! $operator && '' !== $row['client_text'] ) ? $row['client_text'] : $row['title'] ); ?></span></li>
 						<?php endforeach; ?>
 					</ul>
-					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site log', 'scout-build' ) : __( 'Everything Scout has done on your site', 'scout-build' ) ); ?> &rsaquo;</a></p>
+					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : __( 'Everything Scout has done on your site', 'scout-build' ) ); ?> &rsaquo;</a></p>
 				<?php endif; ?>
 			</section>
 		</div>
@@ -617,7 +619,7 @@ final class Scout_Hub_Admin {
 				<?php esc_html_e( 'Operators:', 'scout-build' ); ?>
 				<a href="<?php echo esc_url( self::url( 'features' ) ); ?>"><?php esc_html_e( 'Features', 'scout-build' ); ?></a> ·
 				<a href="<?php echo esc_url( self::url( 'updates' ) ); ?>"><?php esc_html_e( 'Updates', 'scout-build' ); ?></a> ·
-				<a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Site log', 'scout-build' ); ?></a>
+				<a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Site history', 'scout-build' ); ?></a>
 			</p>
 		<?php endif; ?>
 		<?php self::more_features(); ?>
@@ -960,9 +962,9 @@ final class Scout_Hub_Admin {
 				'go'    => Scout_Hub_Setup::data() ? ( $operator ? Scout_Hub_Features::button( '', 'refill', __( 'Fill from theme again', 'scout-build' ), 'button' ) : '' ) : '<span class="sh-note">' . esc_html__( 'This theme has no setup file.', 'scout-build' ) . '</span>',
 			),
 			array(
-				'title' => __( 'Site Sync', 'scout-build' ),
+				'title' => __( 'Page copy', 'scout-build' ),
 				'text'  => __( 'Pulls page copy from the theme\'s bundle, the way it left the repo. Untouched pages update on their own; anything edited here waits for review.', 'scout-build' ),
-				'go'    => '' !== $sync ? '<a class="button" href="' . esc_url( $sync ) . '">' . esc_html__( 'Open Site Sync', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Needs Scout Core.', 'scout-build' ) . '</span>',
+				'go'    => '' !== $sync ? '<a class="button" href="' . esc_url( $sync ) . '">' . esc_html__( 'Open Page copy', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Needs Scout Core.', 'scout-build' ) . '</span>',
 			),
 			array(
 				'title' => __( 'Import posts (XML)', 'scout-build' ),
@@ -1450,7 +1452,7 @@ final class Scout_Hub_Admin {
 				<label><input type="checkbox" name="client" value="1" <?php checked( $filter['client'] ); ?>> <?php esc_html_e( 'Client sees', 'scout-build' ); ?></label>
 				<button type="submit" class="button"><?php esc_html_e( 'Filter', 'scout-build' ); ?></button>
 			</form>
-			<p class="sh-note sh-log-links"><a href="#sh-log-note"><?php esc_html_e( 'Add a note', 'scout-build' ); ?></a> &middot; <a href="#sh-log-export" data-sh-open><?php esc_html_e( 'Export CSV', 'scout-build' ); ?></a></p>
+			<p class="sh-note sh-log-links"><a href="#sh-log-note"><?php esc_html_e( 'Add a note', 'scout-build' ); ?></a> &middot; <a href="#sh-log-export" data-sh-open><?php esc_html_e( 'Download spreadsheet', 'scout-build' ); ?></a></p>
 
 			<?php if ( ! $page['items'] ) : ?>
 				<p class="sh-note"><?php esc_html_e( 'Nothing logged yet for this view. Lines appear as plugins, the theme and copy update, when requests come in, and when someone adds a note.', 'scout-build' ); ?></p>
@@ -1602,7 +1604,7 @@ final class Scout_Hub_Admin {
 						<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( (string) $filter[ $key ] ); ?>">
 					<?php endforeach; ?>
 					<input type="hidden" name="client" value="<?php echo $filter['client'] ? '1' : ''; ?>">
-					<button type="submit" class="button"><?php esc_html_e( 'Download CSV', 'scout-build' ); ?></button>
+					<button type="submit" class="button"><?php esc_html_e( 'Download spreadsheet', 'scout-build' ); ?></button>
 				</form>
 			</div>
 
@@ -1621,11 +1623,11 @@ final class Scout_Hub_Admin {
 					<p class="sh-note">
 						<?php
 						/* translators: %s: date */
-						echo esc_html( sprintf( __( 'Keys made here on %s. The endpoint is on.', 'scout-build' ), date_i18n( get_option( 'date_format' ), Scout_Hub_Log_API::keys_made() ) ) );
+						echo esc_html( sprintf( __( 'Keys made here on %s. The connection is on.', 'scout-build' ), date_i18n( get_option( 'date_format' ), Scout_Hub_Log_API::keys_made() ) ) );
 						?>
 					</p>
 				<?php else : ?>
-					<p class="sh-note"><?php esc_html_e( 'No keys yet, so the endpoint is off.', 'scout-build' ); ?></p>
+					<p class="sh-note"><?php esc_html_e( 'No keys yet, so the connection is off.', 'scout-build' ); ?></p>
 				<?php endif; ?>
 				<?php if ( 'config' !== $source ) : ?>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sh-inline">
@@ -1726,7 +1728,7 @@ final class Scout_Hub_Admin {
 		};
 		?>
 		<?php if ( $preview ) : ?>
-			<div class="notice notice-info"><p><?php esc_html_e( 'This is the client\'s view. Only lines marked "Client sees" appear, in their client wording.', 'scout-build' ); ?> <a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Back to the Site log', 'scout-build' ); ?> &rsaquo;</a></p></div>
+			<div class="notice notice-info"><p><?php esc_html_e( 'This is the client\'s view. Only lines marked "Client sees" appear, in their client wording.', 'scout-build' ); ?> <a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Back to Site history', 'scout-build' ); ?> &rsaquo;</a></p></div>
 		<?php endif; ?>
 
 		<?php

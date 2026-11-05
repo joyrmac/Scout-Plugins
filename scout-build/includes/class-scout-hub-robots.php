@@ -36,7 +36,7 @@ final class Scout_Hub_Robots {
 
 	/** A page with no menu item: reached from the Site health card. */
 	public static function menu(): void {
-		add_submenu_page( '', __( 'robots.txt file', 'scout-build' ), '', 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
+		add_submenu_page( '', __( 'Search engine rules', 'scout-build' ), '', 'manage_options', self::PAGE, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -219,14 +219,14 @@ final class Scout_Hub_Robots {
 		$lost = $has ? self::lost_rules( (string) file_get_contents( self::file() ), self::generated() ) : array();
 		$op   = Scout_Hub_Access::is_operator();
 
-		Scout_Admin_UI::open( __( 'robots.txt file', 'scout-build' ), __( 'robots.txt tells search engines and AI tools what they may read. WordPress writes it, and Scout features add to it, unless a file on the server takes over.', 'scout-build' ), __( 'Site health', 'scout-build' ) );
+		Scout_Admin_UI::open( __( 'Search engine rules', 'scout-build' ), __( 'These rules tell search engines and AI tools what they may read. They live in a file called robots.txt. WordPress writes it, and Scout features add to it, unless a file on the server takes over.', 'scout-build' ), __( 'Site health', 'scout-build' ) );
 		if ( $notice ) {
 			printf( '<div class="notice notice-%s inline"><p>%s</p></div>', esc_attr( $notice['type'] ), esc_html( $notice['message'] ) );
 		}
 		?>
 		<div class="sh-box">
 			<?php if ( ! $has ) : ?>
-				<h2 class="sh-title"><?php esc_html_e( 'WordPress writes robots.txt', 'scout-build' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'The rules are working', 'scout-build' ); ?></h2>
 				<p><?php esc_html_e( 'There is no file in the way, so everything Scout adds reaches search engines.', 'scout-build' ); ?> <a href="<?php echo esc_url( home_url( '/robots.txt' ) ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View robots.txt', 'scout-build' ); ?></a></p>
 				<?php if ( $op && self::latest_backup() ) : ?>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

@@ -1288,8 +1288,8 @@ final class Scout_Members_Admin {
 					</p>
 					<p class="sm-field">
 						<label for="sm-set-notify"><?php esc_html_e( 'Send new applications to', 'scout-members' ); ?></label>
-						<input type="email" id="sm-set-notify" name="scout_members[notify]" value="<?php echo esc_attr( $s['notify'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>">
-						<span class="sh-note"><?php esc_html_e( 'The email names the applicant only. Their answers stay on the site.', 'scout-members' ); ?></span>
+						<input type="email" id="sm-set-notify" name="scout_members[notify]" value="<?php echo esc_attr( $s['notify'] ); ?>" class="regular-text" placeholder="<?php echo esc_attr( Scout_Members::shared_notice_email() ); ?>">
+						<span class="sh-note"><?php esc_html_e( 'Leave it blank to use the notice address in Business info. The email names the applicant only. Their answers stay on the site.', 'scout-members' ); ?></span>
 					</p>
 				</section>
 

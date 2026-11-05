@@ -22,15 +22,15 @@ screen or feature, is in `../docs/dashboard-map.md`.
 
 | Item | Who | What it holds |
 |---|---|---|
-| **Home** | everyone, the first screen | Is the site all right, what needs you, what Scout is doing, the things a client does here, and one line to ask for more. Clients also find **Your site** here (what Scout has done on the site, with Approve). |
+| **Home** | everyone, the first screen | Is the site all right, what needs you, what Scout is doing, the things a client does here, and one line to ask for more. Clients also find **Site history** here (what Scout has done on the site, with Approve). |
 | **Inbox** | everyone | One list of everything waiting on a person, newest first, with filter chips: chat questions, new reviews, change requests and their status, site check requests, booking requests. Plugins add items with `scout_hub_inbox_items` (or a count row with `scout_hub_inbox`). Each person picks Inbox emails: never, once a day, or every new item. |
 | **Reports** | owner, operator | Recon's numbers, when Recon is on. Empty groups never show to clients. |
 | **Your business** | everyone | Facts typed once: Business info, Hours, Team, Case results, a companion plugin's own types. |
-| **Your website** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & Links, Newsletter, Redirects, Site check settings. |
-| **Get found** | owner, operator | SEO, AI search, Analytics and the cookie notice, robots.txt, and later site search and the sitemap. |
+| **Your website** | owner, operator | What visitors see and use: Call buttons, Chat, Reviews and Review settings, Cards & Links, Newsletter, Moved pages (redirects), Free site check. |
+| **Get found** | owner, operator | SEO, AI search, Analytics and the cookie notice, Search engine rules (robots.txt), and later site search and the sitemap. |
 | **Policies** | owner, operator | Accessibility statement now; privacy policy, terms and law-firm disclaimers as they arrive. |
 | **Site health** | owner, operator | The whole report, Search health, Spam protection, the image optimizer. |
-| **Scout tools** | operators only | Features, Updates, Site log, Email, Chat settings, Customer list, Site Sync, the Change log, a theme's own screen. Reads **Build tools** when `SCOUT_HUB_BRAND` is false. Every action on it still checks for an operator. |
+| **Scout tools** | operators only | Features, Updates, Site history, Email, Chat, Customer list, Site Sync (Page copy on Updates), the Change log, a theme's own screen. Reads **Build tools** when `SCOUT_HUB_BRAND` is false. Every action on it still checks for an operator. |
 
 Plus modules (Bookings, Events, Members, Partners, Writing room) keep their own
 sidebar sections and only appear on sites that have them.
@@ -46,17 +46,18 @@ drifts from the map. A screen never moves its address; only where it is filed.
 | `SCOUT_HUB_OPERATORS` | `sean@scoutraleigh.com, joy@scoutraleigh.com` | Who can turn features on and off, go back a version, set the plan, and change request statuses. Must also be a WordPress admin. |
 | `SCOUT_HUB_REQUEST_EMAIL` | `team@scoutraleigh.com` | Where change requests and the "hidden from Google" alert are emailed (the alert can also be changed with the `scout_build_alert_email` filter). **Set this on partner-side sites** so nothing routes to a Scout address. |
 | `SCOUT_HUB_BRAND` | `true` | Labels the menu **Scout** with the bolt and shows the "Built and looked after by Scout Media" sign-off. **Set to `false` on partner-side or white-label sites**: the menu then says Site Build and nothing mentions Scout. |
-| `SCOUT_HUB_READ_TOKEN` | (none) | Optional. A key of 20+ characters that lets the Scout Client Hub read `scout-build/v1/log`, `/requests` and `/site` (Bearer). Normally operators make the keys on Scout → Site log instead; a constant here wins over those. |
-| `SCOUT_HUB_WRITE_TOKEN` | (none) | Same, plus `POST /log` for note lines (how Claude logs work as it ships). Cannot change anything else. |
+| `SCOUT_HUB_READ_TOKEN` | (none) | Optional. A key of 20+ characters that lets the Scout Client Hub read `scout-build/v1/log`, `/requests` and `/site` (Bearer). Normally operators make the keys on Scout → Site history instead; a constant here wins over those. |
+| `SCOUT_HUB_WRITE_TOKEN` | (none) | Same, plus `POST /log` for note lines (how Scout's tools log work as it ships). Cannot change anything else. |
 | `SCOUT_HUB_LOG_API` | `false` | On a white-label site (`SCOUT_HUB_BRAND` false) the endpoint stays off unless this is true. |
 | `SCOUT_THEME_TOKEN` | (none) | The read-only GitHub key for the theme's own repo, instead of saving it on Scout → Updates. See "Theme updates" below. |
 | `DISALLOW_FILE_MODS` | (WordPress) | When true, features that are not installed must be uploaded by hand; on and off still work. |
 
-## Release rings and the pause switch (0.11.1+)
+## Release rings (update order) and the pause switch (0.11.1+)
 
 Site Standard rule 19: a Scout plugin release installs itself on
 scoutraleigh.com and staging first (ring 1), Recon a day later (ring 2),
-client sites two days after it is out (ring 3). Until then the automatic
+client sites two days after it is out (ring 3). Screens call this the
+**update order** (first, a day later, two days later). Until then the automatic
 update waits and Build, Updates says when it installs; Update now always
 works. Set the ring with `SCOUT_HUB_RING` (1, 2 or 3) in wp-config.php or on
 the Updates screen; otherwise the address decides. Two brakes:
@@ -83,9 +84,9 @@ of each release. **Check for new versions** checks the theme too. A theme
 without `Update URI` keeps updating by upload. Steps for each client:
 `tools/theme-release/README.md`.
 
-## The Site log
+## The Site log (Site history on screen)
 
-**Scout, Site log** keeps one line for every change to the site, written by
+**Scout, Site history** keeps one line for every change to the site, written by
 the plugin that made it: Scout plugin and theme updates (with the changelog
 headline), features turned on, off or sent back, Site Sync runs, the setup
 file, change requests coming in and moving, and the hidden-from-Google alert.
@@ -94,16 +95,16 @@ status (done, planned, waiting on you), a version, a measure and a "client
 sees" flag with its own plain wording, which is what the client's monthly
 update is built from. A done line never changes; corrections are a new line.
 
-**Your site (0.11.0):** everyone who is not an operator sees the log as Scout → Your site: client
+**The client's view (0.11.0):** everyone who is not an operator sees the log as Scout → Site history: client
 lines only, in client wording, with Waiting on you (Approve button), This month, Your requests and
 Coming up. To put something up for the client's OK, add a note with status "Waiting on you" and
 Client sees on.
 
-**Hub keys:** operators press Make keys on the Site log screen; the read key goes in the Scout
-Client Hub Sheet, the write key is Claude's. Shown once, stored encrypted.
+**Hub keys:** operators press Make keys on the Site history screen; the read key goes in the Scout
+Client Hub Sheet, the write key is for Scout's tools. Shown once, stored encrypted.
 
 One-time import: upload the site's file from `docs/site-log-import/` on the
-Site log screen. Spec and the hub it feeds: `../docs/site-log-spec.md`.
+Site history screen. Spec and the hub it feeds: `../docs/site-log-spec.md`.
 
 ## The feature list
 

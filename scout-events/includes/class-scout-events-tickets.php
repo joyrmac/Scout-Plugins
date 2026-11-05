@@ -7,6 +7,9 @@
  *   as one of the event's tickets.
  * - Checkout asks for each ticket holder's name, and their agreements when the
  *   event asks (Scout_Events_Agreements), plus an unticked newsletter box.
+ *   With Scout Newsletter active, that box is Scout Newsletter's own checkout
+ *   box (this class asks it to show for ticket carts and prints none of its
+ *   own), so a buyer sees one box and one consent record is saved.
  *   A block checkout page switches to the classic checkout form while the cart
  *   holds tickets, because the block checkout has no place for repeated
  *   per-ticket fields.
@@ -63,6 +66,7 @@ final class Scout_Events_Tickets {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'checkout_style' ), 20 );
 		add_action( 'woocommerce_checkout_after_customer_details', array( __CLASS__, 'checkout_fields' ) );
 		add_action( 'woocommerce_review_order_before_submit', array( __CLASS__, 'checkout_newsletter' ) );
+		add_filter( 'scout_newsletter_checkout_box', array( __CLASS__, 'newsletter_box' ) );
 		add_action( 'woocommerce_after_checkout_validation', array( __CLASS__, 'validate' ), 10, 2 );
 		add_action( 'woocommerce_checkout_create_order', array( __CLASS__, 'order_meta' ), 10, 2 );
 		add_action( 'woocommerce_payment_complete', array( __CLASS__, 'make_attendees' ), 20 );
@@ -353,7 +357,7 @@ final class Scout_Events_Tickets {
 	}
 
 	public static function checkout_newsletter(): void {
-		if ( ! self::cart_tickets() ) {
+		if ( ! self::cart_tickets() || Scout_Events_Agreements::newsletter_owns_checkout() ) {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- refilling the box only.
@@ -410,8 +414,16 @@ final class Scout_Events_Tickets {
 		}
 	}
 
-	/** The newsletter choice on the order, with the time it was made. */
+	/** Scout Newsletter's checkout box: shown whenever the cart holds tickets, as our own box was. */
+	public static function newsletter_box( $show ): bool {
+		return (bool) $show || ( self::cart_tickets() && Scout_Events_Agreements::offer_newsletter() );
+	}
+
+	/** The newsletter choice on the order, with the time it was made. Scout Newsletter saves its own when active. */
 	public static function order_meta( $order, $data ): void {
+		if ( Scout_Events_Agreements::newsletter_owns_checkout() ) {
+			return;
+		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce has checked the checkout nonce.
 		if ( ! empty( $_POST['se_newsletter'] ) && self::cart_tickets() && Scout_Events_Agreements::offer_newsletter() ) {
 			$order->update_meta_data( self::OPTIN, current_time( 'mysql' ) );
@@ -455,6 +467,11 @@ final class Scout_Events_Tickets {
 		$buyer = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
 		$email = (string) $order->get_billing_email();
 		$optin = (string) $order->get_meta( self::OPTIN );
+		$owned = Scout_Events_Agreements::newsletter_owns_checkout();
+		if ( $owned ) {
+			// Scout Newsletter's box: it saves the consent record itself. The ticket only notes when they joined.
+			$optin = '' === Scout_Newsletter_Sources::order_optin( $order ) ? '' : ( Scout_Newsletter_Sources::is_time( $optin ) ? $optin : current_time( 'mysql' ) );
+		}
 		$made  = array();
 		$found = false;
 		foreach ( $order->get_items() as $item_id => $item ) {
@@ -503,7 +520,7 @@ final class Scout_Events_Tickets {
 				}
 			}
 		}
-		if ( '' !== $optin && $made && ! $order->get_meta( self::OPTIN_SENT ) ) {
+		if ( ! $owned && '' !== $optin && $made && ! $order->get_meta( self::OPTIN_SENT ) ) {
 			$order->update_meta_data( self::OPTIN_SENT, current_time( 'mysql' ) );
 			$order->save();
 			Scout_Events_Agreements::optin( $email, $buyer, 'ticket', array_keys( $made ) );

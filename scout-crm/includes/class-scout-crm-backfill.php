@@ -55,7 +55,7 @@ final class Scout_CRM_Backfill {
 			wp_nonce_field( 'scout_crm_backfill' );
 			echo '<p><button type="submit" class="button button-primary">' . esc_html__( 'Bring them in', 'scout-crm' ) . '</button></p></form></section>';
 		}
-		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Tags it uses', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Attendee, Waitlist, Volunteer, Vendor, Presenter, Ticket buyer, Member applicant, Member, Plan: (plan name), Event: (event name), Region: (region name), Ticket: (ticket type).', 'scout-crm' ) . '</p></section>';
+		echo '<section class="sh-box"><h2 class="sh-title">' . esc_html__( 'Labels it adds', 'scout-crm' ) . '</h2><p>' . esc_html__( 'Attendee, Waitlist, Volunteer, Vendor, Presenter, Ticket buyer, Member applicant, Member, Plan: (plan name), Event: (event name), Region: (region name), Ticket: (ticket type).', 'scout-crm' ) . '</p></section>';
 		if ( $ui ) {
 			Scout_Admin_UI::close();
 		} else {

@@ -1,5 +1,17 @@
 # Scout Build changelog
 
+## Unreleased (2026-11-05)
+
+- **A chat change request shows once in the Inbox.** A change request from the site chat already shows as a request; the Inbox no longer lists the same chat as a chat question too.
+- **Plainer names on screen.** Only the words people read changed; addresses, settings and saved values are the same.
+  - The Site log is "Site history" for everyone, in the menu and the title. The client's view was called "Your site" and now uses the same name. Links, the approval email and the Hub keys line say Site history too.
+  - Release rings read as the update order: "Update order: first", "a day later" or "two days later", with a plain Save button. The Updates box, the saved message, the "Installs by itself" line and the wp-config note use the same words.
+  - The robots.txt screen is "Search engine rules", and its all-good heading is "The rules are working".
+  - The Hub keys note says "The connection is on" (or off) instead of the endpoint.
+  - Export CSV and Download CSV on Site history are "Download spreadsheet".
+  - The Email screen's Settings box is "Sending address".
+  - On Updates, the Site Sync box is "Page copy", with an Open Page copy button.
+
 ## 0.12.2 (2026-11-05)
 
 - **Four screens follow the one layout.** Request a change, the Site log, Your site and Email now read top to bottom in one column: a status line first, then the thing people use most, then lists, with rare settings in a closed More options box. Each screen has at most one main (filled) button. Nothing they do has changed: the same forms, fields and buttons, in a new order.

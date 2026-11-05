@@ -50,7 +50,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 
 ## Approval before publishing (0.2.0)
 
-- **Scout → Policies → Approvals** picks what needs approval. Blog posts and
+- **Scout → Policies → Firm approvals** picks what needs approval. Blog posts and
   team bios start on; Pages is off until the site is built, because it also
   holds pages Scout publishes. Case results keep their own approval.
 - Publishing without an approval saves as **Pending review** (block editor,
@@ -68,7 +68,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
 
 - An attorney on the firm's Team (Team profile with **Attorney** ticked) signs a
   page as reviewed: the **Reviewed by** panel in the block editor, the classic
-  editor box, or **Scout → Policies → Page reviews**. The name and the date are
+  editor box, or **Scout → Policies → Attorney sign-offs**. The name and the date are
   saved together, only when "Reviewed today" is ticked.
 - The page shows "Reviewed by *attorney*, *role*. Last reviewed *date*." under
   its words, linked to the profile, and its schema gains `reviewedBy` (the
@@ -76,7 +76,7 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
   options; a theme places it itself with `add_theme_support( 'scout-law-reviewed' )`
   and `scout_law_reviewed()`.
 - Pages not reviewed in the review period (6 months by default) are listed on
-  Page reviews, counted in the Inbox, and put on Home's Today list. The privacy
+  Attorney sign-offs, counted in the Inbox, and put on Home's Today list. The privacy
   page is left out (it has its own yearly review).
 - Scout team logins never appear: only Team profiles can sign.
 - Filter `scout_law_review_types`; action `scout_law_page_reviewed`. Every

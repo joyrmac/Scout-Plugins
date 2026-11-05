@@ -262,7 +262,7 @@ final class Scout_Hours_Admin {
 		$route     = Scout_Hours_Schema::route();
 
 		Scout_Admin_UI::open(
-			__( 'When you’re open', 'scout-hours' ),
+			__( 'Hours', 'scout-hours' ),
 			__( 'Set your weekly hours and holiday closures once. The site shows them, keeps the "Open now" line current, and adds them to the schema Google reads.', 'scout-hours' ),
 			__( 'Hours', 'scout-hours' )
 		);
@@ -403,7 +403,7 @@ final class Scout_Hours_Admin {
 							),
 							array(
 								'none' !== $route,
-								__( 'Schema', 'scout-hours' ),
+								__( 'Google listing', 'scout-hours' ),
 								'core' === $route
 									? __( 'Opening hours and holiday hours are added to the business details from Scout Core.', 'scout-hours' )
 									: ( 'standalone' === $route

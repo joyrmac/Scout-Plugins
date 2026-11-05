@@ -24,15 +24,28 @@ final class Scout_Contact {
 		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
 	}
 
-	public static function defaults(): array {
-		$phone = '';
-		if ( class_exists( 'Scout_Core_Business' ) ) {
-			$biz   = (array) Scout_Core_Business::get();
-			$phone = (string) ( $biz['phone'] ?? '' );
+	/**
+	 * The phone number in Business info (Scout Core), read live each time so a
+	 * change there shows here at once. '' when Scout Core is not active.
+	 */
+	public static function business_phone(): string {
+		$biz = array();
+		if ( function_exists( 'scout_core_business' ) ) {
+			$biz = (array) scout_core_business();
+		} elseif ( class_exists( 'Scout_Core_Business' ) ) {
+			$biz = (array) Scout_Core_Business::get();
 		}
+		return trim( (string) ( $biz['phone'] ?? '' ) );
+	}
+
+	/**
+	 * The phone field is an optional override: blank means "use Business
+	 * info", which settings() fills in live at display time.
+	 */
+	public static function defaults(): array {
 		return array(
 			'enabled'   => 1,
-			'phone'     => $phone,
+			'phone'     => '',
 			'text'      => '',
 			'text_off'  => 0,
 			'book_url'  => function_exists( 'scout_booking_url' ) ? (string) scout_booking_url() : '',
@@ -46,9 +59,19 @@ final class Scout_Contact {
 		);
 	}
 
-	public static function settings(): array {
+	/** What is saved on this screen, with blanks left blank (the form shows these). */
+	public static function saved(): array {
 		$saved = get_option( self::OPTION, array() );
 		return array_merge( self::defaults(), is_array( $saved ) ? $saved : array() );
+	}
+
+	/** What the bar uses: the saved values, with a blank phone read from Business info. */
+	public static function settings(): array {
+		$s = self::saved();
+		if ( '' === trim( (string) $s['phone'] ) ) {
+			$s['phone'] = self::business_phone();
+		}
+		return $s;
 	}
 
 	/** A dialable number: digits only, with +1 added to ten-digit US numbers. */

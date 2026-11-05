@@ -1,5 +1,9 @@
 # Scout Forms Guard — Changelog
 
+## Unreleased (2026-11-05)
+
+- **One name in its messages.** The hidden upload warning and its health check now call this feature Spam protection, the same name the rest of the dashboard uses. The checks themselves are unchanged.
+
 ## 0.3.5 (2026-11-05)
 
 - **Shared admin kit 1.10.0.** Side-by-side boxes stack by the width of the main column, not the window, so nothing squeezes beside the section list. The kit adds one status line for the top of a screen, list rows and a closed More options box.

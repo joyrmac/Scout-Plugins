@@ -3,9 +3,9 @@
   "items": [
     {
       "what": "What a person sends on the private note form: their name, their note, a star rating (optional), their business name (optional), whether they said it is OK to show it on the website, and the date it was sent",
-      "where": "This website's database, as draft reviews in Reviews > Inbox",
+      "where": "This website's database, as draft reviews in Reviews > New reviews",
       "kept": "Until someone deletes it",
-      "shared": "Emailed to the site's own address (the note email set in Reviews, or the site admin email)",
+      "shared": "Emailed to the site's own address (the note email set in Reviews, or the notice address in Business info)",
       "when": "When someone sends the note form at /review/note/. A note is only shown on the website if the person ticked the OK box."
     },
     {

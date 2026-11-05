@@ -272,6 +272,14 @@ final class Scout_Events_Agreements {
 
 	/* ---------- the newsletter ---------- */
 
+	/**
+	 * True when Scout Newsletter is active. It then owns the newsletter box at
+	 * the WooCommerce checkout, and ticket checkouts show its box, not ours.
+	 */
+	public static function newsletter_owns_checkout(): bool {
+		return class_exists( 'Scout_Newsletter_Sources' );
+	}
+
 	/** Offer the box only when a newsletter connector is listening. */
 	public static function offer_newsletter(): bool {
 		return (bool) apply_filters( 'scout_events_offer_newsletter', (bool) has_action( 'scout_newsletter_optin' ) );

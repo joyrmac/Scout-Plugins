@@ -21,8 +21,8 @@ No WordPress Pages are needed; the plugin owns these addresses. The words
 
 - **Reads the business identity from Scout Core** (name, phone, email, city,
   profile URLs). Typed once in Scout -> Business, used here. Any field can be
-  overridden on the Cards & Links screen. Works without Scout Core too.
-- **Dashboard:** Scout -> **Cards & Links** when Scout Core is active, otherwise a
+  overridden on the Cards and links screen. Works without Scout Core too.
+- **Dashboard:** Scout -> **Cards and links** when Scout Core is active, otherwise a
   top-level **Site Build** section (the dashboard standard in the Scout playbook).
 - **Matches each brand:** the page loads the theme's stylesheet, so the card uses
   the site's own font. The accent color and light or dark mode are settings.
@@ -35,7 +35,7 @@ No WordPress Pages are needed; the plugin owns these addresses. The words
 1. Install and activate (Plugins -> Add New -> Upload, or let a release arrive).
 2. Check **Scout -> Business** is filled in, and set a **Site Icon** (Appearance ->
    Customize, or Settings -> General) for the logo and home-screen icon.
-3. **Scout -> Cards & Links:** pick the accent color and mode, write the main intro,
+3. **Scout -> Cards and links:** pick the accent color and mode, write the main intro,
    add each person (name, link name, title, email, intro, "why talk to them," tags,
    headshot), and set the link rows. Each card has an optional **Spotlight** (a heading,
    a short note, and one link row) for a product, booking page, or second business.
@@ -57,7 +57,7 @@ the option.
 - `includes/routes.php`: rewrite rules and dispatch
 - `includes/vcard.php`: the vCard builder and photo conversion
 - `includes/render.php`: the card, share, links pages, and the web app manifest
-- `includes/admin.php`: the Cards & Links screen
+- `includes/admin.php`: the Cards and links screen
 - `assets/cards.css`: card styles (scoped to `.scc`)
 - `assets/qrcode.min.js`: qrcode-generator 1.4.4 by Kazuhiko Arase (MIT)
 

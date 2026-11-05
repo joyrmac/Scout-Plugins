@@ -380,7 +380,7 @@ final class Scout_Optimize {
 				<section class="sh-box">
 					<h2><?php esc_html_e( 'Images already in the library', 'scout-optimize' ); ?></h2>
 					<p><?php esc_html_e( 'New uploads are handled automatically once the options below are on. Photos uploaded before that can be optimized in one pass.', 'scout-optimize' ); ?></p>
-					<p><a class="button" href="<?php echo esc_url( self::url( 'scout-optimize-sweep' ) ); ?>"><?php esc_html_e( 'Optimize existing images', 'scout-optimize' ); ?></a></p>
+					<p><a class="button" href="<?php echo esc_url( self::url( 'scout-optimize-sweep' ) ); ?>"><?php esc_html_e( 'Shrink older photos', 'scout-optimize' ); ?></a></p>
 				</section>
 				<section class="sh-box">
 					<h2><?php esc_html_e( 'This server', 'scout-optimize' ); ?></h2>

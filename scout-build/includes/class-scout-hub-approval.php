@@ -287,7 +287,7 @@ final class Scout_Hub_Approval {
 		};
 		echo '<section class="sh-box" id="sh-approval"><h2 class="sh-title">' . esc_html__( 'Waiting for your OK', 'scout-build' ) . '</h2>';
 		if ( ! $on ) {
-			echo '<p>' . esc_html__( 'Off on this site. Scout releases install by themselves when their ring comes up.', 'scout-build' ) . '</p>';
+			echo '<p>' . esc_html__( 'Off on this site. Scout releases install by themselves when their turn in the update order comes up.', 'scout-build' ) . '</p>';
 		} elseif ( ! $waiting ) {
 			echo '<p><span class="sh-tag is-current">' . esc_html__( 'Nothing waiting', 'scout-build' ) . '</span> ' . esc_html__( 'New releases stop here until you approve them. Check each one on staging first.', 'scout-build' ) . '</p>';
 		} else {

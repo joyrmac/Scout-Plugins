@@ -2,7 +2,8 @@
 /**
  * Site Sync screen, notices and health check.
  *
- * The screen is the Scout menu's "Site Sync" tab: counts at the top, then every
+ * The screen is the Scout menu's "Page copy" tab (tab key "sync"; the screen
+ * was called Site Sync before 2026-11-05): counts at the top, then every
  * row that is not already current, with what WordPress holds next to what the
  * theme ships. Looking never changes anything; every change is a button.
  *
@@ -61,14 +62,14 @@ final class Scout_Sync_Admin {
 		if ( is_array( $auto ) && $auto['written'] > 0 ) {
 			delete_transient( 'scout_sync_last_auto' );
 			printf(
-				'<div class="notice notice-success is-dismissible"><p><strong>Site Sync:</strong> %s <a href="%s">See what changed</a>.</p></div>',
+				'<div class="notice notice-success is-dismissible"><p><strong>Page copy:</strong> %s <a href="%s">See what changed</a>.</p></div>',
 				esc_html( sprintf( _n( 'the theme update brought %d change to the site.', 'the theme update brought %d changes to the site.', $auto['written'], 'scout-core' ), $auto['written'] ) ),
 				esc_url( self::url() )
 			);
 		}
 		if ( $summary['review'] > 0 ) {
 			printf(
-				'<div class="notice notice-warning"><p><strong>Site Sync:</strong> %s <a href="%s">Review</a>.</p></div>',
+				'<div class="notice notice-warning"><p><strong>Page copy:</strong> %s <a href="%s">Review</a>.</p></div>',
 				esc_html( sprintf( _n( '%d item needs a look before it can sync.', '%d items need a look before they can sync.', $summary['review'], 'scout-core' ), $summary['review'] ) ),
 				esc_url( self::url() )
 			);
@@ -81,13 +82,13 @@ final class Scout_Sync_Admin {
 			return $checks;
 		}
 		$checks[] = array(
-			'label'        => 'Site Sync',
+			'label'        => 'Page copy',
 			'status'       => $summary['review'] ? 'warn' : 'good',
 			'message'      => $summary['review']
 				? sprintf( _n( '%d item needs a look before it can sync.', '%d items need a look before they can sync.', $summary['review'], 'scout-core' ), $summary['review'] )
 				: 'The site matches the copy in the theme, apart from edits you chose to keep.',
 			'action'       => self::url(),
-			'action_label' => $summary['review'] ? 'Review Site Sync' : 'Open Site Sync',
+			'action_label' => $summary['review'] ? 'Review page copy' : 'Open Page copy',
 		);
 		return $checks;
 	}
@@ -106,7 +107,7 @@ final class Scout_Sync_Admin {
 
 		if ( ! $plan['manifest'] ) {
 			echo '<section class="sh-box"><h2>This theme does not bundle any copy yet</h2>';
-			echo '<p>Site Sync keeps pages in step with the copy a theme ships in its <code>scout-sync.json</code> file. This theme has none, so there is nothing to sync and nothing will change.</p></section>';
+			echo '<p>This screen keeps pages in step with the copy a theme ships in its <code>scout-sync.json</code> file. This theme has none, so there is nothing to sync and nothing will change.</p></section>';
 			return;
 		}
 
@@ -137,7 +138,7 @@ final class Scout_Sync_Admin {
 			$level    = 'good';
 			$headline = 'Everything is in sync.';
 		}
-		self::ui_status( $plan['errors'] ? 'bad' : $level, $headline, 'Site Sync keeps pages in step with the copy this theme ships. It never overwrites an edit made in WordPress on its own.' );
+		self::ui_status( $plan['errors'] ? 'bad' : $level, $headline, 'This screen keeps pages in step with the copy this theme ships. It never overwrites an edit made in WordPress on its own.' );
 
 		echo '<section class="sh-box"><div class="sh-stats">';
 		foreach ( $counts as $key => $meta ) {
@@ -169,7 +170,7 @@ final class Scout_Sync_Admin {
 		$review = array_merge( $state[ Scout_Sync::EDITED ] ?? array(), $state[ Scout_Sync::CONFLICT ] ?? array() );
 		if ( $review ) {
 			echo '<section class="sh-box"><h2>Changes made in WordPress</h2>';
-			echo '<p>These differ from the theme copy. Site Sync never overwrites them on its own. Tick the ones to decide on, then choose. "Keep the WordPress copy" also means the edit should go back into the client repo so the next theme carries it.</p>';
+			echo '<p>These differ from the theme copy. They are never overwritten on their own. Tick the ones to decide on, then choose. "Keep the WordPress copy" also means the edit should go back into the client repo so the next theme carries it.</p>';
 			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 			self::rows( $review, true );
 			self::hidden( 'pick', $plan['hash'] );
@@ -179,7 +180,7 @@ final class Scout_Sync_Admin {
 
 		$missing = $state[ Scout_Sync::MISSING ] ?? array();
 		if ( $missing ) {
-			echo '<section class="sh-box"><h2>Pages the theme names but the site does not have</h2><p>Create them by hand, or add <code>"create": true</code> to the page in scout-sync.json and Site Sync makes them on the next run.</p><ul class="sh-list">';
+			echo '<section class="sh-box"><h2>Pages the theme names but the site does not have</h2><p>Create them by hand, or add <code>"create": true</code> to the page in scout-sync.json and they are made on the next update from the theme.</p><ul class="sh-list">';
 			foreach ( $missing as $row ) {
 				echo '<li>' . esc_html( Scout_Sync::label( $row ) ) . '</li>';
 			}
@@ -190,7 +191,7 @@ final class Scout_Sync_Admin {
 
 		$journal = get_option( Scout_Sync::JOURNAL, array() );
 		if ( in_array( $journal['state'] ?? '', array( 'applied', 'failed', 'applying' ), true ) ) {
-			echo '<section class="sh-box"><h2>Last sync</h2>';
+			echo '<section class="sh-box"><h2>Last update from the theme</h2>';
 			printf(
 				'<p>%s, %s. %s</p>',
 				esc_html( 'auto' === ( $journal['who'] ?? '' ) ? 'Automatic, after a theme update' : 'Run by hand' ),

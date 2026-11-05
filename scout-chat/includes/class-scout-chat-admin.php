@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout Build -> Chat (settings) and Chat questions (the inbox).
+ * Scout Build -> Chat (settings) and Chat messages (the inbox).
  *
  * @package Scout_Chat
  */
@@ -84,8 +84,17 @@ final class Scout_Chat_Admin {
 			array(
 				'post_type'      => Scout_Chat::CPT,
 				'post_status'    => 'private',
-				'meta_key'       => '_scout_chat_answered', // phpcs:ignore WordPress.DB.SlowDBQuery
-				'meta_value'     => '0', // phpcs:ignore WordPress.DB.SlowDBQuery
+				// Unanswered, and not already in Scout Build's request list (that list tracks those).
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery
+					array(
+						'key'   => '_scout_chat_answered',
+						'value' => '0',
+					),
+					array(
+						'key'     => '_scout_chat_request',
+						'compare' => 'NOT EXISTS',
+					),
+				),
 				'fields'         => 'ids',
 				'posts_per_page' => 99,
 				'no_found_rows'  => true,
@@ -98,8 +107,8 @@ final class Scout_Chat_Admin {
 		$parent = self::parent();
 		$n      = self::unanswered();
 		$bubble = $n ? ' <span class="awaiting-mod">' . (int) $n . '</span>' : '';
-		add_submenu_page( $parent, __( 'Chat questions', 'scout-chat' ), __( 'Chat questions', 'scout-chat' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Chat::CPT );
-		add_submenu_page( $parent, __( 'Chat settings', 'scout-chat' ), __( 'Chat settings', 'scout-chat' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Chat messages', 'scout-chat' ), __( 'Chat messages', 'scout-chat' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Chat::CPT );
+		add_submenu_page( $parent, __( 'Chat', 'scout-chat' ), __( 'Chat', 'scout-chat' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	/** Keep the Build section open while reading a question. */
@@ -156,6 +165,10 @@ final class Scout_Chat_Admin {
 			$k = (string) get_post_meta( $id, '_scout_chat_kind', true );
 			echo esc_html( array( 'question' => __( 'Question', 'scout-chat' ), 'change' => __( 'Change request', 'scout-chat' ), 'person' => __( 'Wants a person', 'scout-chat' ) )[ $k ] ?? $k );
 		} elseif ( 'scout_done' === $col ) {
+			if ( get_post_meta( $id, '_scout_chat_request', true ) ) {
+				echo '<span class="sh-pill is-good">' . esc_html__( 'In Requests', 'scout-chat' ) . '</span>';
+				return;
+			}
 			echo get_post_meta( $id, '_scout_chat_answered', true ) ? '<span class="sh-pill is-good">' . esc_html__( 'Yes', 'scout-chat' ) . '</span>' : '<span class="sh-pill is-warn">' . esc_html__( 'Not yet', 'scout-chat' ) . '</span>';
 		}
 	}
@@ -248,7 +261,7 @@ final class Scout_Chat_Admin {
 		$o  = Scout_Chat::OPTION;
 		$ai = Scout_Chat::ai_connected();
 		$n  = self::unanswered();
-		Scout_Admin_UI::open( __( 'Chat assistant', 'scout-chat' ), __( 'A chat in the corner of the site. It answers the common questions, books calls and takes change requests, and saves every visitor question to Chat questions.', 'scout-chat' ), __( 'Chat', 'scout-chat' ) );
+		Scout_Admin_UI::open( __( 'Chat', 'scout-chat' ), __( 'A chat in the corner of the site. It answers the common questions, books calls and takes change requests, and saves every visitor message to Chat messages.', 'scout-chat' ), __( 'Chat', 'scout-chat' ) );
 		settings_errors( $o );
 		if ( $s['enabled'] ) {
 			$headline = __( 'On.', 'scout-chat' );
@@ -263,7 +276,7 @@ final class Scout_Chat_Admin {
 			$detail .= ' ' . sprintf( _n( '%d question is waiting for an answer.', '%d questions are waiting for an answer.', $n, 'scout-chat' ), $n );
 		}
 		$state = ! $s['enabled'] ? 'off' : ( $n ? 'warn' : 'good' );
-		$go    = '<a class="button" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ) . '">' . esc_html__( 'Open Chat questions', 'scout-chat' ) . '</a>';
+		$go    = '<a class="button" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Chat::CPT ) ) . '">' . esc_html__( 'Open Chat messages', 'scout-chat' ) . '</a>';
 		self::ui_status( $state, $headline, $detail, $go );
 		?>
 
@@ -286,7 +299,7 @@ final class Scout_Chat_Admin {
 				<h2 class="sh-title"><?php esc_html_e( 'Where it sends people', 'scout-chat' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<?php
-					self::row( __( 'Email new questions to', 'scout-chat' ), self::text( 'notify', $s['notify'], get_option( 'admin_email' ), 'email' ) );
+					self::row( __( 'Email new questions to', 'scout-chat' ), self::text( 'notify', $s['notify'], Scout_Chat::notify_to(), 'email' ), __( 'Leave blank to use Send notices to in Business info.', 'scout-chat' ) );
 					self::row( __( 'Text me new questions', 'scout-chat' ), self::text( 'alert', $s['alert'], '9195551234@vtext.com', 'email' ), __( 'A short text with the question and the number to text back. Use your cell number at your carrier: @vtext.com (Verizon), @tmomail.net (T-Mobile), @msg.fi.google.com (Google Fi). AT&T stopped this in 2025. Blank: no text.', 'scout-chat' ) );
 					self::row( __( 'Booking page', 'scout-chat' ), self::text( 'book_url', $s['book_url'], function_exists( 'scout_booking_url' ) ? scout_booking_url() : home_url( '/contact/' ), 'url' ), __( 'Blank uses the site\'s booking page, or Contact.', 'scout-chat' ) );
 					self::row( __( 'Our work page', 'scout-chat' ), self::text( 'work_url', $s['work_url'], 'https://', 'url' ), __( 'Blank hides "Show me your work".', 'scout-chat' ) );

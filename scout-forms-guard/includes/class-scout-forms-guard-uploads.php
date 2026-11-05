@@ -350,8 +350,8 @@ final class Scout_Forms_Guard_Uploads {
 		}
 		echo '</ul><p>' . esc_html__( 'To fix one, open the form, click the field, and in its Advanced settings set Visibility to Visible. If the form does not need the field, delete it instead. Save the form, and this message goes away.', 'scout-forms-guard' ) . '</p>';
 		echo '<p>' . ( self::enabled()
-			? esc_html__( 'Until then, Scout Forms Guard refuses any file sent to these fields.', 'scout-forms-guard' )
-			: esc_html__( 'Scout Forms Guard\'s upload blocking is switched off on this site, so these fields are open until they are fixed.', 'scout-forms-guard' ) ) . '</p></div>';
+			? esc_html__( 'Until then, Spam protection refuses any file sent to these fields.', 'scout-forms-guard' )
+			: esc_html__( 'Spam protection\'s upload blocking is switched off on this site, so these fields are open until they are fixed.', 'scout-forms-guard' ) ) . '</p></div>';
 	}
 
 	/**
@@ -387,7 +387,7 @@ final class Scout_Forms_Guard_Uploads {
 			implode( ', ', $titles )
 		);
 		$note .= ' ' . ( self::enabled()
-			? __( 'Scout Forms Guard refuses files sent to it until then.', 'scout-forms-guard' )
+			? __( 'Spam protection refuses files sent to it until then.', 'scout-forms-guard' )
 			: __( 'Upload blocking is switched off, so the field is open.', 'scout-forms-guard' ) );
 		return array(
 			'label'     => $label,

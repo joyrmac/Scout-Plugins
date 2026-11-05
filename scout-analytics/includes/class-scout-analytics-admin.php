@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout Build -> Analytics: the Tag Manager container, the consent choice and
+ * Scout Build -> Visits and cookies: the Tag Manager container, the consent choice and
  * the cookie notice.
  *
  * @package Scout_Analytics
@@ -76,7 +76,7 @@ final class Scout_Analytics_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Analytics', 'scout-analytics' ), __( 'Analytics', 'scout-analytics' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Visits and cookies', 'scout-analytics' ), __( 'Visits and cookies', 'scout-analytics' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	public static function assets( string $hook ): void {
@@ -126,9 +126,9 @@ final class Scout_Analytics_Admin {
 		$o   = Scout_Analytics::OPTION;
 		$tag = Scout_Analytics::tag();
 		Scout_Admin_UI::open(
-			__( 'Analytics', 'scout-analytics' ),
+			__( 'Visits and cookies', 'scout-analytics' ),
 			__( 'Loads Google Tag Manager on the live site, with Google consent mode set up first and a small cookie notice for visitors.', 'scout-analytics' ),
-			__( 'Analytics', 'scout-analytics' )
+			__( 'Visits and cookies', 'scout-analytics' )
 		);
 		settings_errors( $o );
 		if ( 'gtm' === $tag ) {
@@ -150,13 +150,13 @@ final class Scout_Analytics_Admin {
 		<form method="post" action="options.php">
 			<?php settings_fields( 'scout_analytics_group' ); ?>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Tag and consent', 'scout-analytics' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'Tracking and privacy', 'scout-analytics' ); ?></h2>
 				<p class="sh-note"><?php esc_html_e( 'Google consent mode is set before any tag runs. Browsers that send Global Privacy Control count as a no.', 'scout-analytics' ); ?></p>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="sa-gtm"><?php esc_html_e( 'Tag Manager container ID', 'scout-analytics' ); ?></label></th>
+						<th scope="row"><label for="sa-gtm"><?php esc_html_e( 'Google tracking code', 'scout-analytics' ); ?></label></th>
 						<td><input id="sa-gtm" type="text" class="regular-text code" placeholder="GTM-XXXXXXX" name="<?php echo esc_attr( $o ); ?>[gtm]" value="<?php echo esc_attr( $s['gtm'] ); ?>">
-							<p class="description"><?php esc_html_e( 'Our standard for every site. Tag Manager, Admin, Container ID. Put the GA4 tag and any conversion tags inside the container.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Your Google Tag Manager container ID, which starts with GTM-. Our standard for every site. Find it in Tag Manager, Admin, Container ID. Put the GA4 tag and any conversion tags inside the container.', 'scout-analytics' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Before a visitor chooses', 'scout-analytics' ); ?></th>
@@ -181,9 +181,9 @@ final class Scout_Analytics_Admin {
 			<?php self::ui_fold_open( __( 'More options', 'scout-analytics' ) ); ?>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="sa-ga4"><?php esc_html_e( 'GA4 measurement ID (only without Tag Manager)', 'scout-analytics' ); ?></label></th>
+						<th scope="row"><label for="sa-ga4"><?php esc_html_e( 'Google tracking code', 'scout-analytics' ); ?></label></th>
 						<td><input id="sa-ga4" type="text" class="regular-text code" placeholder="G-XXXXXXXXXX" name="<?php echo esc_attr( $o ); ?>[ga4]" value="<?php echo esc_attr( $s['ga4'] ); ?>">
-							<p class="description"><?php esc_html_e( 'Ignored while a Tag Manager ID is set, so the visit is never counted twice.', 'scout-analytics' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'A Google Analytics 4 (GA4) measurement ID, which starts with G-. Use it only on a site with no Tag Manager. It is ignored while a Tag Manager ID is set, so the visit is never counted twice.', 'scout-analytics' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Ad signals', 'scout-analytics' ); ?></th>

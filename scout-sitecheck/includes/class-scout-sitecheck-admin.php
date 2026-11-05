@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout → Business → Site check (settings) and Site checks (the inbox).
+ * Scout → Free site check (settings) and Check requests (the inbox).
  *
  * @package Scout_Sitecheck
  */
@@ -103,8 +103,8 @@ final class Scout_Sitecheck_Admin {
 		$parent = self::parent();
 		$n      = self::waiting();
 		$bubble = $n ? ' <span class="awaiting-mod">' . (int) $n . '</span>' : '';
-		add_submenu_page( $parent, __( 'Site checks', 'scout-sitecheck' ), __( 'Site checks', 'scout-sitecheck' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Sitecheck::CPT );
-		add_submenu_page( $parent, __( 'Site check settings', 'scout-sitecheck' ), __( 'Site check settings', 'scout-sitecheck' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( $parent, __( 'Check requests', 'scout-sitecheck' ), __( 'Check requests', 'scout-sitecheck' ) . $bubble, 'edit_posts', 'edit.php?post_type=' . Scout_Sitecheck::CPT );
+		add_submenu_page( $parent, __( 'Free site check', 'scout-sitecheck' ), __( 'Free site check', 'scout-sitecheck' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 	}
 
 	/** Site checks are leads, so they sit with the business screens. */
@@ -333,7 +333,7 @@ final class Scout_Sitecheck_Admin {
 		$live = $page && 'publish' === $page->post_status;
 		$key  = '' !== Scout_Sitecheck::psi_key();
 		$n    = self::waiting();
-		Scout_Admin_UI::open( __( 'Free site check', 'scout-sitecheck' ), __( 'Visitors enter their web address and get a free check of eight things: speed, security, page titles, business info for Google, phone layout, AI crawlers, the sitemap and photo sizes. They see the result on the page and get the full report by email. Every request lands in Site checks.', 'scout-sitecheck' ), __( 'Site check', 'scout-sitecheck' ) );
+		Scout_Admin_UI::open( __( 'Free site check', 'scout-sitecheck' ), __( 'Visitors enter their web address and get a free check of eight things: speed, security, page titles, business info for Google, phone layout, AI crawlers, the sitemap and photo sizes. They see the result on the page and get the full report by email. Every request lands in Check requests.', 'scout-sitecheck' ), __( 'Site check', 'scout-sitecheck' ) );
 		settings_errors( $o );
 		?>
 		<?php
@@ -360,7 +360,7 @@ final class Scout_Sitecheck_Admin {
 		} else {
 			$go = '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_ssc_page' ), 'scout_ssc_page' ) ) . '">' . esc_html__( 'Make the page (as a draft)', 'scout-sitecheck' ) . '</a>';
 		}
-		$go .= ' <a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Sitecheck::CPT ) ) . '">' . esc_html__( 'Open Site checks', 'scout-sitecheck' ) . '</a>';
+		$go .= ' <a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Sitecheck::CPT ) ) . '">' . esc_html__( 'Open Check requests', 'scout-sitecheck' ) . '</a>';
 		self::ui_status( ( $live && $key && ! $n ) ? 'good' : 'warn', $headline, $detail, $go );
 		?>
 
@@ -370,7 +370,7 @@ final class Scout_Sitecheck_Admin {
 				<h2 class="sh-title"><?php esc_html_e( 'Who follows up', 'scout-sitecheck' ); ?></h2>
 				<table class="form-table" role="presentation">
 					<?php
-					self::row( __( 'Email new checks to', 'scout-sitecheck' ), self::text( 'notify', $s['notify'], get_option( 'admin_email' ), 'email' ), __( 'Gets a copy of every check, and is the reply address on the report.', 'scout-sitecheck' ) );
+					self::row( __( 'Email new checks to', 'scout-sitecheck' ), self::text( 'notify', $s['notify'], Scout_Sitecheck::notify_to(), 'email' ), __( 'Gets a copy of every check, and is the reply address on the report. Leave blank to use Send notices to in Business info.', 'scout-sitecheck' ) );
 					self::row( __( 'Who follows up', 'scout-sitecheck' ), self::text( 'lead_name', $s['lead_name'], 'Sean' ), __( 'The report says "Reply to this email and Sean will walk you through them." Blank: "we\'ll walk you through them." Only name someone who has agreed to follow up.', 'scout-sitecheck' ) );
 					self::row( __( 'Their photo', 'scout-sitecheck' ), self::text( 'lead_photo', $s['lead_photo'], 'https://', 'url' ), __( 'Optional. A JPG or PNG link (email apps can\'t show WebP). Shows next to the follow-up line.', 'scout-sitecheck' ) );
 					self::row( __( 'Booking page', 'scout-sitecheck' ), self::text( 'book_url', $s['book_url'], Scout_Sitecheck::book_url(), 'url' ), __( 'Where "Book a call" goes. Blank uses the site\'s booking page, or Contact.', 'scout-sitecheck' ) );

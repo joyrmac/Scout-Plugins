@@ -156,7 +156,12 @@ final class Scout_Booking {
 	/** Where booking emails for the owner go. */
 	public static function notify_email(): string {
 		$e = self::settings()['notify'];
-		return '' !== $e ? $e : (string) get_option( 'admin_email' );
+		return '' !== $e ? $e : self::shared_notice_email();
+	}
+
+	/** The site's shared notice address from Business info, or the site email without Scout Core. */
+	public static function shared_notice_email(): string {
+		return function_exists( 'scout_core_notice_email' ) ? (string) scout_core_notice_email() : (string) get_option( 'admin_email' );
 	}
 
 	/** The cancellation policy line shown before booking and in every email. */

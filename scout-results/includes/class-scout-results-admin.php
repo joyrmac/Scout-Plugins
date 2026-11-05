@@ -77,7 +77,7 @@ final class Scout_Results_Admin {
 	}
 
 	public static function menu(): void {
-		add_submenu_page( self::parent(), __( 'Case results settings', 'scout-results' ), __( 'Case results settings', 'scout-results' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
+		add_submenu_page( self::parent(), __( 'Case results', 'scout-results' ), __( 'Case results', 'scout-results' ), 'manage_options', self::SLUG, array( __CLASS__, 'render' ) );
 		// The list sits in the Build menu too, so the sidebar keeps one Scout section.
 		if ( 'options-general.php' !== self::parent() ) {
 			$list = 'edit.php?post_type=' . Scout_Results::POST_TYPE;
@@ -178,7 +178,7 @@ final class Scout_Results_Admin {
 		Scout_Admin_UI::open(
 			__( 'Case results', 'scout-results' ),
 			__( 'Show the firm\'s case results with the firm\'s approval on every one and the disclaimer printed next to each result.', 'scout-results' ),
-			__( 'Results and disclaimers', 'scout-results' )
+			__( 'Case results', 'scout-results' )
 		);
 		settings_errors( $o );
 		?>
@@ -245,7 +245,7 @@ final class Scout_Results_Admin {
 			</section>
 		</div>
 
-		<?php self::ui_fold_open( __( 'More options: put the results on a page', 'scout-results' ) ); ?>
+		<?php self::ui_fold_open( __( 'Add to a page', 'scout-results' ) ); ?>
 			<p><?php esc_html_e( 'Add a shortcode block to any page. Visitors can filter the grid by practice area.', 'scout-results' ); ?></p>
 			<table class="sh-table sr-shortcodes">
 				<tr><td>[scout_results]</td><td><?php esc_html_e( 'Every approved result, with practice-area filters.', 'scout-results' ); ?></td></tr>

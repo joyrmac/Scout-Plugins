@@ -1,5 +1,9 @@
 # Scout Site Check changelog
 
+## Unreleased (2026-11-05)
+
+- **Site check emails can use the shared notice address.** "Email new checks to" is now an optional override. When it is blank, the team's copy and the report's reply address use Send notices to in Business info (or the site email when Scout Core is older). An address already saved here keeps working.
+- **Plainer names.** The settings screen and its menu item are both "Free site check" (the menu said "Site check settings"), and the list of requests is "Check requests" (was "Site checks"). Same addresses and settings.
 
 ## 0.2.9 (2026-11-05)
 
