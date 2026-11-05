@@ -103,12 +103,23 @@ kit = {
     'inc/scout-requires-build.php': os.path.join(TOOLS, 'theme-kit', 'scout-requires-build.php'),
     'inc/class-scout-admin-ui.php': os.path.join(TOOLS, 'admin-kit', 'class-scout-admin-ui.php'),
     'assets/css/scout-admin.css': os.path.join(TOOLS, 'admin-kit', 'scout-admin.css'),
+    'inc/scout-style-guide.php': os.path.join(TOOLS, 'theme-kit', 'style-guide', 'scout-style-guide.php'),
+    'page-style-guide.php': os.path.join(TOOLS, 'theme-kit', 'style-guide', 'page-style-guide.php'),
+    'templates/page-style-guide.html': os.path.join(TOOLS, 'theme-kit', 'style-guide', 'style-guide.html'),
 }
 for relp, canon in kit.items():
     p = os.path.join(THEME, relp)
     if os.path.isfile(p) and os.path.isfile(canon):
         if open(p, 'rb').read() != open(canon, 'rb').read():
             fail('stale-kit', p, f"{relp} differs from Scout-Plugins {os.path.relpath(canon, TOOLS)}. Copy the current kit file over (rule 25).")
+
+# Every Scout theme ships /style-guide/ (Client Design Playbook, decision 4, 2026-11-05).
+if not os.path.isfile(os.path.join(THEME, 'inc/scout-style-guide.php')):
+    warn('style-guide', None, "No inc/scout-style-guide.php: every Scout theme ships /style-guide/. Copy it from tools/theme-kit/style-guide/ (Client Design Playbook, decision 4).")
+else:
+    page = 'templates/page-style-guide.html' if is_block else 'page-style-guide.php'
+    if not os.path.isfile(os.path.join(THEME, page)):
+        warn('style-guide', None, f"inc/scout-style-guide.php is there but {page} is not. Copy it from tools/theme-kit/style-guide/.")
 
 # ---------- DESIGN.md and the generated files (§4) ----------
 if os.path.isfile(os.path.join(THEME, 'DESIGN.md')):
@@ -120,7 +131,7 @@ if os.path.isfile(os.path.join(THEME, 'DESIGN.md')):
             warn('design', None, line.split('::', 2)[-1])
 
 # ---------- rule 7: what a theme never holds ----------
-SKIP = {'inc/scout-requires-build.php', 'inc/class-scout-admin-ui.php'}
+SKIP = {'inc/scout-requires-build.php', 'inc/class-scout-admin-ui.php', 'inc/scout-style-guide.php'}
 def files(exts):
     for root, dirs, names in os.walk(THEME):
         dirs[:] = [d for d in dirs if d not in ('node_modules', 'vendor', '.git', 'sync', '_static-source')]
