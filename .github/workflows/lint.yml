@@ -81,6 +81,8 @@ jobs:
           coverage: none
       - name: DESIGN.md parser, token merge, contrast and scout_core_owns (no WordPress needed)
         run: php tools/tests/design.php
+      - name: Theme kit style guide, the brief reader and the contrast pairs
+        run: php tools/tests/style-guide.php
       - name: Admin kit files every Scout screen by the dashboard map (docs/dashboard-map.md)
         run: php tools/tests/admin-kit-groups.php
       - name: Dashboard tokens match tools/admin-kit/tokens.json, kit copies are current, contrast passes
