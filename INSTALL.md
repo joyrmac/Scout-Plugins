@@ -42,14 +42,19 @@ zip contains `scout-core/scout-core.php`, not just the loose files), then use
 ## Step 3 — Turn the plugins on, in this order
 
 1. `scout-core` (the engine, do this one first)
-2. `scout-forms-guard`
-3. `scout-rvpark`
+2. `scout-build` (the Scout dashboard; it turns the other features on)
+3. `scout-forms-guard`
+4. `scout-rvpark`
 
 > `scout-forms-guard` only does something once Gravity Forms is installed. It's
 > fine to activate it now; it just sits quietly until then.
 
 > `scout-rvpark` is the reference companion plugin. On a real client build you
 > would swap it for that client's own companion plugin.
+
+> The other Scout features (Call buttons, Hours, Reviews, AI search and the
+> rest) switch on from **Scout → Scout tools → Features** once Scout Build is
+> active.
 
 ---
 

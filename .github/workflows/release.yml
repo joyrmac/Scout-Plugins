@@ -26,23 +26,30 @@ on:
         required: true
         type: choice
         options:
+          - scout-accessibility
           - scout-aeo
           - scout-analytics
-          - scout-build
           - scout-booking
+          - scout-build
           - scout-cards
           - scout-chat
+          - scout-contact
           - scout-core
+          - scout-crm
           - scout-events
+          - scout-forms-guard
+          - scout-hours
+          - scout-law
           - scout-members
           - scout-newsletter
-          - scout-partners
-          - scout-crm
-          - scout-forms-guard
           - scout-optimize
+          - scout-partners
+          - scout-redirects
+          - scout-results
           - scout-reviews
           - scout-rvpark
           - scout-sitecheck
+          - scout-team
           - scout-writing
 
 permissions:
