@@ -730,7 +730,13 @@ final class Scout_Hub_Admin {
 						<button type="submit" class="button"><?php esc_html_e( 'Save plan', 'scout-build' ); ?></button>
 					</form>
 				</div>
-				<p class="sh-note"><?php esc_html_e( 'Friends and family includes the core features plus anything you add to the plan below. Plus modules are added one at a time on any plan. Clients only see what is on and what you recommend.', 'scout-build' ); ?></p>
+				<p class="sh-note"><?php
+					echo esc_html(
+						'ff' === $plan
+							? __( 'Friends and family includes the core features plus anything you add to the plan below. Plus modules are added one at a time on any plan. Clients only see what is on and what you recommend.', 'scout-build' )
+							: __( 'Everything listed without a label is included in this plan. Plus modules are added one at a time on any plan, from each feature\'s More menu. Clients only see what is on and what you recommend.', 'scout-build' )
+					);
+				?></p>
 				<?php if ( ! Scout_Hub_Access::can_install() ) : ?>
 					<p class="sh-note"><?php esc_html_e( 'This site blocks plugin installs from the dashboard, so features that are not installed yet need to be uploaded by hand.', 'scout-build' ); ?></p>
 				<?php endif; ?>
@@ -753,13 +759,40 @@ final class Scout_Hub_Admin {
 			<div class="sh-section-head">
 				<p class="sh-eyebrow"><?php echo esc_html( $title . ' · ' . count( $groups[ $key ] ) ); ?></p>
 			</div>
-			<div class="sh-grid<?php echo 'skip' === $key ? ' sh-skip' : ''; ?>">
-				<?php foreach ( $groups[ $key ] as $slug => $row ) : ?>
-					<?php self::card( $slug, $row['f'], $row['s'], $operator, 'picked' === $key ? ++$step : 0 ); ?>
-				<?php endforeach; ?>
-			</div>
+			<section class="sh-box sh-flist-box<?php echo 'skip' === $key ? ' sh-skip' : ''; ?>">
+				<ul class="sh-flist">
+					<?php foreach ( $groups[ $key ] as $slug => $row ) : ?>
+						<?php self::card( $slug, $row['f'], $row['s'], $operator, 'picked' === $key ? ++$step : 0 ); ?>
+					<?php endforeach; ?>
+				</ul>
+			</section>
 		<?php endforeach; ?>
-		<style>.sh-skip .sh-card{opacity:.55}.sh-skip .sh-card:hover,.sh-skip .sh-card:focus-within{opacity:1}.sh-order{font-weight:600}.sh-build-ver{margin-left:12px;white-space:nowrap}</style>
+		<style>
+		.sh-flist-box{padding-top:4px;padding-bottom:4px}
+		.sh-flist{list-style:none;margin:0;padding:0}
+		.sh-frow{display:grid;grid-template-columns:minmax(0,1fr) 220px 190px;gap:6px 24px;align-items:center;padding:14px 0;border-top:1px solid var(--sh-border);margin:0}
+		.sh-frow:first-child{border-top:0}
+		.sh-fname{margin:0;font-weight:600;color:var(--sh-text)}
+		.sh-fsum{margin:2px 0 0;color:var(--sh-text-2);font-size:var(--sh-fs-note);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+		.sh-frow:hover .sh-fsum,.sh-frow:focus-within .sh-fsum{-webkit-line-clamp:unset}
+		.sh-fmeta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:flex-start;font-size:var(--sh-fs-note);color:var(--sh-text-3)}
+		.sh-fmeta .sh-ver{font-family:var(--sh-mono)}
+		.sh-fact{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+		.sh-fact .button{min-height:36px;line-height:34px;padding:0 14px}
+		.sh-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sh-border-strong);margin-right:10px;vertical-align:2px}
+		.sh-frow.is-on .sh-dot{background:var(--sh-good)}
+		.sh-more{position:relative}
+		.sh-more>summary{list-style:none;cursor:pointer;color:var(--sh-accent-text);padding:6px 10px;border-radius:var(--sh-r-control)}
+		.sh-more>summary::-webkit-details-marker{display:none}
+		.sh-more>summary:hover,.sh-more[open]>summary{background:var(--sh-surface-2)}
+		.sh-more>div{position:absolute;right:0;top:calc(100% + 4px);z-index:20;display:flex;flex-direction:column;gap:2px;min-width:240px;padding:6px;background:var(--sh-surface);border:1px solid var(--sh-border);border-radius:var(--sh-r-control);box-shadow:var(--sh-shadow-hover)}
+		.sh-more form{margin:0;display:block}
+		.sh-more .button,.sh-more .button-link{display:block;width:100%;text-align:left;border:0;background:none;box-shadow:none;min-height:36px;line-height:36px;padding:0 10px;color:var(--sh-text);font-size:var(--sh-fs-note);text-decoration:none;border-radius:var(--sh-r-chip)}
+		.sh-more .button:hover,.sh-more .button-link:hover{background:var(--sh-surface-2)}
+		.sh-skip .sh-frow{opacity:.55}.sh-skip .sh-frow:hover,.sh-skip .sh-frow:focus-within{opacity:1}
+		.sh-order{font-weight:600}.sh-build-ver{margin-left:12px;white-space:nowrap}
+		@media (max-width:782px){.sh-frow{grid-template-columns:minmax(0,1fr)}.sh-fmeta,.sh-fact{justify-content:flex-start;flex-wrap:wrap}.sh-more{flex-basis:100%}.sh-more>div{position:static;margin-top:6px;box-shadow:none}}
+		</style>
 
 		<?php if ( $groups['unused'] ) : ?>
 			<section class="sh-box sh-unused">
@@ -952,7 +985,7 @@ final class Scout_Hub_Admin {
 	}
 
 
-	/** One feature card. */
+	/** One feature, as a row: the name and what it does, its plan and version, then one main action and a More menu. */
 	private static function card( string $slug, array $f, array $s, bool $operator, int $step = 0 ): void {
 		$states   = array(
 			'missing' => __( 'Not installed', 'scout-build' ),
@@ -965,70 +998,79 @@ final class Scout_Hub_Admin {
 			'addon' => '&#9670; ',
 			'plus'  => '+ ',       // A plus sign for Plus.
 		);
+		$main = '';
+		$more = array();
+		if ( $operator ) {
+			$update   = $s['update'] ? Scout_Hub_Features::update_url( $slug ) : '';
+			$settings = 'on' === $s['state'] ? self::settings_url( $slug ) : '';
+			if ( '' !== $update ) {
+				$main = '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
+			}
+			if ( 'on' === $s['state'] ) {
+				if ( '' !== $settings ) {
+					$link = '<a class="button" href="' . esc_url( $settings ) . '">' . esc_html__( 'Settings', 'scout-build' ) . '</a>';
+					if ( '' === $main ) {
+						$main = $link;
+					} else {
+						$more[] = $link; // One main button a row: Update now leads, Settings moves into More.
+					}
+				}
+				$more[] = Scout_Hub_Features::button( $slug, 'off', __( 'Turn off', 'scout-build' ) );
+				if ( $s['previous'] ) {
+					/* translators: %s: version */
+					$more[] = Scout_Hub_Features::button( $slug, 'back', sprintf( __( 'Go back to v%s', 'scout-build' ), $s['previous'] ) );
+				}
+			} else {
+				$main .= Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ), 'button button-primary' );
+			}
+			$picked_now = in_array( $slug, Scout_Hub_Access::picks(), true );
+			// Only offer "add to the plan" when the plan does not already include it.
+			if ( $picked_now || ! $included ) {
+				ob_start();
+				self::plan_button( $slug, $picked_now ? 'unpick' : 'pick', $picked_now ? __( 'Take out of this site\'s plan', 'scout-build' ) : __( 'Add to this site\'s plan', 'scout-build' ) );
+				$more[] = (string) ob_get_clean();
+			}
+			if ( 'on' !== $s['state'] ) {
+				$recommends = in_array( $slug, Scout_Hub_Access::recommended(), true );
+				ob_start();
+				self::plan_button( $slug, $recommends ? 'unrecommend' : 'recommend', $recommends ? __( 'Stop recommending', 'scout-build' ) : __( 'Recommend to the client', 'scout-build' ) );
+				$more[] = (string) ob_get_clean();
+			}
+		} elseif ( 'on' === $s['state'] && '' !== self::settings_url( $slug ) ) {
+			$main = '<a class="button" href="' . esc_url( self::settings_url( $slug ) ) . '">' . esc_html__( 'Settings', 'scout-build' ) . '</a>';
+		} elseif ( 'on' !== $s['state'] ) {
+			/* translators: %s: feature */
+			$ask  = sprintf( __( 'Please add %s to our site.', 'scout-build' ), $f['name'] );
+			$main = '<a class="button" href="' . esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ) . '">' . esc_html__( 'Ask us to add this', 'scout-build' ) . '</a>';
+		}
 		?>
-		<article class="sh-card is-<?php echo esc_attr( $s['state'] ); ?>" id="feature-<?php echo esc_attr( $slug ); ?>">
-			<div class="sh-cardhead">
-				<h2><?php if ( $step ) : ?><span class="sh-order"><?php echo esc_html( $step . '. ' ); ?></span><?php endif; ?><?php echo esc_html( $f['name'] ); ?></h2>
-				<span class="sh-pill is-<?php echo esc_attr( $s['state'] ); ?>"><?php echo esc_html( $states[ $s['state'] ] ); ?></span>
+		<li class="sh-frow is-<?php echo esc_attr( $s['state'] ); ?>" id="feature-<?php echo esc_attr( $slug ); ?>">
+			<div>
+				<p class="sh-fname"><span class="sh-dot" aria-hidden="true"></span><?php if ( $step ) : ?><span class="sh-order"><?php echo esc_html( $step . '. ' ); ?></span><?php endif; ?><?php echo esc_html( $f['name'] ); ?><span class="screen-reader-text"><?php echo esc_html( ', ' . $states[ $s['state'] ] ); ?></span></p>
+				<p class="sh-fsum"><?php echo esc_html( $f['summary'] ); ?></p>
 			</div>
-			<p class="sh-summary"><?php echo esc_html( $f['summary'] ); ?></p>
-			<p class="sh-meta">
-				<span class="sh-tier<?php echo $included ? ' is-included' : ''; ?>"><?php echo isset( $mark[ $f['tier'] ] ) ? $mark[ $f['tier'] ] : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed entities. ?><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'], $slug ) ); ?></span>
-				<?php if ( $f['law'] ) : ?><span class="sh-tag"><?php esc_html_e( 'Built for law firms', 'scout-build' ); ?></span><?php endif; ?>
+			<div class="sh-fmeta">
+				<?php if ( 'on' !== $s['state'] ) : ?><span><?php echo esc_html( $states[ $s['state'] ] ); ?></span><?php endif; ?>
+				<?php if ( ! $included || in_array( $slug, Scout_Hub_Access::picks(), true ) ) : // "Included in your plan" on every row is noise; say the plan only when it is something else. ?>
+					<span class="sh-tier<?php echo $included ? ' is-included' : ''; ?>"><?php echo isset( $mark[ $f['tier'] ] ) ? $mark[ $f['tier'] ] : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed entities. ?><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'], $slug ) ); ?></span>
+				<?php endif; ?>
+				<?php if ( $f['law'] ) : ?><span class="sh-tag"><?php esc_html_e( 'Law firms', 'scout-build' ); ?></span><?php endif; ?>
 				<?php if ( $s['version'] ) : ?><span class="sh-ver"><?php echo esc_html( 'v' . $s['version'] ); ?></span><?php endif; ?>
 				<?php if ( $s['update'] ) : ?>
 					<span class="sh-tag is-update"><?php echo esc_html( sprintf( /* translators: %s: version */ __( 'Update ready: v%s', 'scout-build' ), $s['update'] ) ); ?></span>
-				<?php elseif ( $s['version'] && $s['checked'] ) : ?>
-					<span class="sh-tag is-current"><?php esc_html_e( 'Up to date', 'scout-build' ); ?></span>
 				<?php endif; ?>
 				<?php if ( Scout_Hub_Features::held( $slug ) ) : ?><span class="sh-tag is-held"><?php esc_html_e( 'Updates paused', 'scout-build' ); ?></span><?php endif; ?>
-			</p>
-			<div class="sh-actions">
-				<?php
-				if ( $operator ) {
-					if ( 'on' !== $s['state'] && $s['update'] ) {
-						$update = Scout_Hub_Features::update_url( $slug );
-						if ( '' !== $update ) {
-							echo '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
-						}
-					}
-					if ( 'on' === $s['state'] ) {
-						$update = $s['update'] ? Scout_Hub_Features::update_url( $slug ) : '';
-						if ( '' !== $update ) {
-							echo '<a class="button button-primary" href="' . esc_url( $update ) . '">' . esc_html__( 'Update now', 'scout-build' ) . '</a>';
-						}
-						$settings = self::settings_url( $slug );
-						if ( '' !== $settings ) {
-							echo '<a class="button' . ( '' === $update ? ' button-primary' : '' ) . '" href="' . esc_url( $settings ) . '">' . esc_html__( 'Settings', 'scout-build' ) . '</a>';
-						}
-						echo Scout_Hub_Features::button( $slug, 'off', __( 'Turn off', 'scout-build' ) ); // phpcs:ignore WordPress.Security.EscapeOutput
-						if ( $s['previous'] ) {
-							echo Scout_Hub_Features::button( $slug, 'back', sprintf( /* translators: %s: version */ __( 'Go back to v%s', 'scout-build' ), $s['previous'] ), 'button sh-quiet' ); // phpcs:ignore WordPress.Security.EscapeOutput
-						}
-					} else {
-						echo Scout_Hub_Features::button( $slug, 'on', __( 'Turn on', 'scout-build' ), 'button button-primary' ); // phpcs:ignore WordPress.Security.EscapeOutput
-					}
-				} elseif ( 'on' === $s['state'] && '' !== self::settings_url( $slug ) ) {
-					echo '<a class="button" href="' . esc_url( self::settings_url( $slug ) ) . '">' . esc_html__( 'Settings', 'scout-build' ) . '</a>';
-				} elseif ( 'on' !== $s['state'] ) {
-					$ask = sprintf( /* translators: %s: feature */ __( 'Please add %s to our site.', 'scout-build' ), $f['name'] );
-					echo '<a class="button" href="' . esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ) . '">' . esc_html__( 'Ask us to add this', 'scout-build' ) . '</a>';
-				}
-				?>
 			</div>
-			<?php if ( $operator ) : ?>
-				<?php
-				$picked_now = in_array( $slug, Scout_Hub_Access::picks(), true );
-				$recommends = in_array( $slug, Scout_Hub_Access::recommended(), true );
-				?>
-				<div class="sh-actions" style="margin-top:6px">
-					<?php self::plan_button( $slug, $picked_now ? 'unpick' : 'pick', $picked_now ? __( 'Take out of this site\'s plan', 'scout-build' ) : __( 'Add to this site\'s plan', 'scout-build' ) ); ?>
-					<?php if ( 'on' !== $s['state'] ) : ?>
-						<?php self::plan_button( $slug, $recommends ? 'unrecommend' : 'recommend', $recommends ? __( 'Stop recommending', 'scout-build' ) : __( 'Recommend to the client', 'scout-build' ) ); ?>
-					<?php endif; ?>
-				</div>
-			<?php endif; ?>
-		</article>
+			<div class="sh-fact">
+				<?php echo $main; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?>
+				<?php if ( $more ) : ?>
+					<details class="sh-more">
+						<summary><?php esc_html_e( 'More', 'scout-build' ); ?><span class="screen-reader-text"><?php echo esc_html( ': ' . $f['name'] ); ?></span></summary>
+						<div><?php echo implode( '', $more ); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts. ?></div>
+					</details>
+				<?php endif; ?>
+			</div>
+		</li>
 		<?php
 	}
 

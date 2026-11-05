@@ -9,6 +9,7 @@
   - **Security fixes skip the wait:** a `"security"` entry in catalog.json lets a site still below that version install it at once. Once the site has the fix, later releases wait for an OK again.
   - Operators get one Inbox row, "Updates waiting for your OK". Clients never see it.
   - On by default on live sites, off on staging and local copies. One button on the Updates screen switches it for a site; `SCOUT_HUB_APPROVAL` in wp-config.php sets it too.
+- **Features is a clean list (Joy, 2026-11-05).** Each group is one box with a row per feature instead of a grid of big cards. A row shows a dot for on or off, the name, one line of what it does (the full line on hover), the version, one main button (Settings, Turn on or Update now) and a **More** menu for Turn off, Go back a version and the plan choices. Columns line up from row to row, and on a phone the row stacks. "Included in your plan" no longer repeats on every row: a feature shows its plan only when it is a Plus module, a Bonus or picked by hand. "Add to this site's plan" only shows for a feature the plan does not already include, and the note under the plan picker matches the plan chosen.
 - **Visitor contact details stay on the site.** The Hub key's request list now blanks email addresses and phone numbers in a request a visitor sent through the chat. The visitor's name and the request itself still come through.
 - **A calmer Updates screen (Joy, 2026-11-04).**
   - The plugin list comes first, then "When updates install" (the ring and the pause), then the theme.
