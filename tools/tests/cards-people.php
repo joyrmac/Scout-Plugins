@@ -2,8 +2,12 @@
 // Scout Cards reads from Scout People: the one-time move matches each card person to
 // a profile (login, then email, then exact name), never overwrites a People value,
 // makes card only profiles for the rest, and every card, share page, contact file and
-// the links page render the same before and after. With Scout People off, or a profile
-// gone, cards use their own saved details; Card off in People means "not found".
+// the links page render the same before and after. The second move copies each card's
+// intro, "why talk to them" and tags into the profile where it has none, and the card
+// reads them from People from then on. With Scout People off, or a profile gone, cards
+// use their own saved details; Card off in People means "not found". The main card
+// takes its name, email, logo and intro from Business info unless one is typed, and
+// the Cards screen keeps only switches per person while People is on.
 // Runs without WordPress:
 //   php tools/tests/cards-people.php
 $fail = 0;
@@ -102,6 +106,22 @@ function wp_insert_post( $a, $err = false ) {
 	return $id;
 }
 function get_edit_post_link( $id ) { return 'https://site.test/wp-admin/post.php?post=' . $id . '&action=edit'; }
+// Business info (Scout Core), when a test sets $GLOBALS['core_business'].
+class Scout_Core_Business { public static function get() { return array_merge( array( 'name' => '', 'phone' => '', 'email' => '', 'city' => '', 'region' => '', 'postal' => '', 'country' => '', 'same_as' => '' ), $GLOBALS['core_business'] ?? array() ); } }
+function scout_core_business() { return Scout_Core_Business::get(); }
+// For drawing the Cards screen.
+class Scout_Admin_UI {
+	public static function open( $t, $l = '' ) { echo '<div class="sh"><h1>' . esc_html( $t ) . '</h1>'; }
+	public static function close() { echo '</div>'; }
+	public static function status( $st, $h, $d = '', $go = '' ) { echo '<p class="sh-status">' . esc_html( $h ) . '</p>'; }
+	public static function fold_open( $t ) { echo '<details class="sh-box sh-fold"><summary class="sh-title">' . esc_html( $t ) . '</summary>'; }
+	public static function fold_close() { echo '</details>'; }
+}
+function current_user_can( $c ) { return true; }
+function checked( $a, $b = true, $echo = true ) { $r = (string) $a === (string) $b ? ' checked="checked"' : ''; if ( $echo ) { echo $r; } return $r; }
+function wp_nonce_field( $a = '' ) { echo '<input type="hidden" name="_wpnonce" value="n">'; }
+function submit_button( $t = '' ) { echo '<p class="submit"><button type="submit">' . esc_html( $t ) . '</button></p>'; }
+function get_page_by_path( $p ) { return null; }
 function get_query_var( $k ) { return $GLOBALS['qv'][ $k ] ?? ''; }
 function status_header( $c ) { $GLOBALS['status'] = $c; }
 class Fake_Query { public $is404 = false; public function set_404() { $this->is404 = true; } }
@@ -237,7 +257,9 @@ ok( 10 === has_action( 'wp_after_insert_post', array( 'Scout_Team', 'new_person_
 $recs = $GLOBALS['opts'][ $S::OPTION ]['people'];
 ok( $made[0] === $recs[0]['profile_id'] && $made[1] === $recs[1]['profile_id'], 'site 1: each card record now points at its profile' );
 ok( 'Sean McNamara' === $recs[0]['name'] && 11 === $recs[0]['photo_id'] && 'sean@scoutraleigh.com' === $recs[0]['email'], 'site 1: the card keeps its old details for the fallback' );
-ok( 'Moved 2 card people into People.' === $C::take_note(), 'site 1: the note says "Moved 2 card people into People."' );
+$note = $C::take_note();
+ok( 0 === strpos( $note, 'Moved 2 card people into People.' ), 'site 1: the note says "Moved 2 card people into People."' );
+ok( false !== strpos( $note, 'tags for 2 people now live on their People profiles, under Business card.' ), 'site 1: the note says the card words for 2 people moved to People' );
 ok( '' === $C::take_note(), 'site 1: the note shows once' );
 $after = render_all();
 ok( array_keys( $before ) === array_keys( $after ), 'site 1: the same addresses before and after' );
@@ -249,6 +271,42 @@ ok( $made[0] === $people['sean']['profile'], 'site 1: after the move the card re
 $count = count( $GLOBALS['posts'] );
 $C::maybe_upgrade();
 ok( count( $GLOBALS['posts'] ) === $count, 'site 1: the move never runs twice' );
+
+// Move 2: the card's words now live on the profile.
+ok( 2 === $GLOBALS['opts']['scout_cards_people_db'] && $C::words_copied(), 'site 1: both moves ran and the gate reads 2' );
+$sp = $GLOBALS['meta'][ $made[0] ]['_scout_team'];
+ok( 'I run the strategy side.' === $sp['card_intro'] && 'Search, ads and tracking.' === $sp['card_why'] && 'SEO, Ads, Recon' === $sp['card_tags'], 'site 1: Sean\'s intro, why talk to him and tags were copied into his profile' );
+$jp = $GLOBALS['meta'][ $made[1] ]['_scout_team'];
+ok( 'I design and build every site.' === $jp['card_intro'] && '' === $jp['card_why'] && '' === $jp['card_tags'], 'site 1: Joy\'s intro was copied, and her empty why and tags stay empty' );
+ok( 'I run the strategy side.' === $recs[0]['intro'] && 'Search, ads and tracking.' === $GLOBALS['opts'][ $S::OPTION ]['people'][0]['pick'], 'site 1: the card keeps its own words for the fallback' );
+
+// The card reads its words from People now, and falls back to its own when People has none.
+$GLOBALS['meta'][ $made[0] ]['_scout_team']['card_intro'] = 'Strategy, from People.';
+$GLOBALS['meta'][ $made[0] ]['_scout_team']['card_why']   = 'Ask me about search.';
+$GLOBALS['meta'][ $made[0] ]['_scout_team']['card_tags']  = 'SEO, Recon';
+$S::flush();
+$sean_now = $S::people()['sean'];
+ok( 'Strategy, from People.' === $sean_now['intro'] && 'Ask me about search.' === $sean_now['pick'] && array( 'SEO', 'Recon' ) === $sean_now['tags'], 'an intro, why and tags changed in People show on the card' );
+ok( false !== strpos( render_all()['https://site.test/card/'], 'Ask me about search.' ), 'the main card lists the why from People' );
+$GLOBALS['meta'][ $made[0] ]['_scout_team']['card_intro'] = '';
+$GLOBALS['meta'][ $made[0] ]['_scout_team']['card_why']   = '';
+$GLOBALS['meta'][ $made[0] ]['_scout_team']['card_tags']  = '';
+$S::flush();
+$sean_now = $S::people()['sean'];
+ok( 'I run the strategy side.' === $sean_now['intro'] && 'Search, ads and tracking.' === $sean_now['pick'] && array( 'SEO', 'Ads', 'Recon' ) === $sean_now['tags'], 'empty in People: the card uses its own saved words, as before' );
+$GLOBALS['meta'][ $made[0] ]['_scout_team'] = array_merge( $GLOBALS['meta'][ $made[0] ]['_scout_team'], array( 'card_intro' => 'I run the strategy side.', 'card_why' => 'Search, ads and tracking.', 'card_tags' => 'SEO, Ads, Recon' ) );
+$S::flush();
+ok( render_all() === $after, 'site 1: with the copied words back, every page is the same as before the moves' );
+
+// The Intro and Tags switches.
+$GLOBALS['opts'][ $S::OPTION ]['people'][0]['show_intro'] = 0;
+$GLOBALS['opts'][ $S::OPTION ]['people'][0]['show_tags']  = 0;
+$S::flush();
+$html = render_all()['https://site.test/card/sean/'];
+ok( false === strpos( $html, 'I run the strategy side.' ) && false === strpos( $html, 'scc-hero-tags' ), 'switches: Intro and Tags off hide them on the card' );
+ok( array() === $S::people()['sean']['tags'] && false === strpos( render_all()['https://site.test/card/'], '<span>Recon</span>' ), 'switches: Tags off hides them on the main card too' );
+unset( $GLOBALS['opts'][ $S::OPTION ]['people'][0]['show_intro'], $GLOBALS['opts'][ $S::OPTION ]['people'][0]['show_tags'] );
+$S::flush();
 
 // People edits reach the card.
 $GLOBALS['meta'][ $made[0] ]['_scout_team']['role'] = 'Co-Founder';
@@ -390,6 +448,111 @@ ok( 'New intro.' === $saved[0]['intro'] && 0 === $saved[0]['show_email'], 'scree
 ok( 4 === count( array_filter( $saved, static fn( $r ) => ! empty( $r['name'] ) ) ), 'screen: cards not on the form stay as they were' );
 $last = end( $saved );
 ok( 150 === $last['profile_id'] && 'riley-park' === $last['slug'] && 1 === $last['show_links'], 'screen: someone new in People gets a card record with their link name' );
+
+$keep_words = $save->invoke( null, array( array( 'rec' => 0, 'profile_id' => 101, 'key' => 'dana', 'slug' => 'dana', 'share_id' => 0, 'show_phone' => 1 ) ) );
+ok( 'Business cases.' === $keep_words[0]['intro'] && array_key_exists( 'pick', $keep_words[0] ) && array_key_exists( 'tags', $keep_words[0] ), 'screen: with People on the form sends no words, and the card keeps its own for the fallback' );
+
+// ---------- move 2 on a site that already had move 1 ----------
+ok( array( 'card_intro' => 'Card words.' ) === $C::words_to_copy( $T::shape( array() ), array( 'intro' => 'Card words.', 'pick' => '  ', 'tags' => '' ) ), 'words to copy: only what the card has' );
+ok( array() === $C::words_to_copy( $T::shape( array( 'card_intro' => 'Mine.' ) ), array( 'intro' => 'Card words.' ) ), 'words to copy: a People value is never overwritten' );
+$GLOBALS['opts']  = array( 'scout_team_db' => 1, 'scout_cards_people_db' => 1 );
+$GLOBALS['posts'] = array();
+$GLOBALS['meta']  = array();
+$GLOBALS['terms'] = array();
+$prof( 301, 'Dana Lee', 'publish', array( 'role' => 'Partner', 'card_intro' => 'Written in People.', 'shows' => array( 'card' => true ) ) );
+$prof( 302, 'Sam Ortiz', 'publish', array( 'role' => 'Paralegal', 'shows' => array( 'card' => true ) ) );
+$GLOBALS['opts'][ $S::OPTION ] = cards_option(
+	array(
+		array( 'profile_id' => 301 ) + $dana + array( 'pick' => 'Business cases.', 'tags' => 'Contracts' ),
+		array( 'profile_id' => 302 ) + $sam,
+	)
+);
+$GLOBALS['opts'][ $S::OPTION ]['people'][0]['pick'] = 'Business cases.';
+$GLOBALS['opts'][ $S::OPTION ]['people'][0]['tags'] = 'Contracts';
+$before3 = render_all();
+$people3 = $S::people();
+ok( 'Written in People.' === $people3['dana']['intro'], 'site 3 before: a profile intro already wins over the card\'s' );
+$C::maybe_upgrade();
+ok( 2 === $GLOBALS['opts']['scout_cards_people_db'] && 0 === count( array_diff( array_keys( $GLOBALS['posts'] ), array( 301, 302 ) ) ), 'site 3: only move 2 ran (no new profiles)' );
+ok( 'Written in People.' === $GLOBALS['meta'][301]['_scout_team']['card_intro'], 'site 3: Dana\'s People intro is never overwritten' );
+ok( 'Business cases.' === $GLOBALS['meta'][301]['_scout_team']['card_why'] && 'Contracts' === $GLOBALS['meta'][301]['_scout_team']['card_tags'], 'site 3: her empty why and tags were filled from the card' );
+ok( 'Scheduling.' === $GLOBALS['meta'][302]['_scout_team']['card_why'] && 'Intake' === $GLOBALS['meta'][302]['_scout_team']['card_tags'] && '' === $GLOBALS['meta'][302]['_scout_team']['card_intro'], 'site 3: Sam\'s why and tags copied, his empty intro stays empty' );
+ok( 'Partner' === $GLOBALS['meta'][301]['_scout_team']['role'] && true === $GLOBALS['meta'][301]['_scout_team']['shows']['card'], 'site 3: nothing else on the profile changes' );
+ok( false !== strpos( $C::take_note(), 'for 2 people now live on their People profiles' ), 'site 3: the note says the card words for 2 people moved' );
+$after3 = render_all();
+ok( array_keys( $before3 ) === array_keys( $after3 ), 'site 3: the same addresses before and after' );
+$same3 = true;
+foreach ( $before3 as $url => $html ) {
+	$same3 = $same3 && $html === $after3[ $url ];
+}
+ok( $same3, 'site 3 parity: every card, share page, contact file and the links page are the same before and after move 2' );
+$GLOBALS['meta'][302]['_scout_team']['card_why'] = 'Changed.';
+$C::maybe_upgrade();
+ok( 'Changed.' === $GLOBALS['meta'][302]['_scout_team']['card_why'], 'site 3: move 2 never runs twice' );
+
+// ---------- the main card and Business info ----------
+$GLOBALS['core_business'] = array( 'name' => 'Scout Media & Consulting', 'email' => 'team@scoutraleigh.com', 'logo_id' => 12, 'description' => 'Websites for law firms.' );
+$opt = $GLOBALS['opts'][ $S::OPTION ];
+$GLOBALS['opts'][ $S::OPTION ] = array_merge( $opt, array( 'name' => '', 'email' => '', 'photo_id' => 0, 'team_intro' => '' ) );
+$S::flush();
+$team = $S::people()['team'];
+ok( 'Scout Media & Consulting' === $team['name'] && 'team@scoutraleigh.com' === $team['email'], 'main card: empty name and email use Business info' );
+ok( 12 === $team['photo_id'] && 'https://site.test/img/12-medium.jpg' === $team['photo'], 'main card: no photo of its own uses the Business info logo' );
+ok( 'Websites for law firms.' === $team['intro'], 'main card: an empty intro uses the Business info description' );
+$GLOBALS['opts'][ $S::OPTION ] = array_merge( $opt, array( 'name' => 'Scout', 'email' => 'hello@scoutraleigh.com', 'photo_id' => 13, 'team_intro' => 'Our own words.' ) );
+$S::flush();
+$team = $S::people()['team'];
+ok( 'Scout' === $team['name'] && 'hello@scoutraleigh.com' === $team['email'] && 13 === $team['photo_id'] && 'Our own words.' === $team['intro'], 'main card: "Use something else" values win' );
+$GLOBALS['core_business'] = array( 'name' => 'Scout Media & Consulting', 'email' => 'team@scoutraleigh.com' );
+$GLOBALS['opts'][ $S::OPTION ] = array_merge( $opt, array( 'photo_id' => 0, 'team_intro' => '' ) );
+$S::flush();
+$team = $S::people()['team'];
+ok( 0 === $team['photo_id'] && 'Websites for firms that want results.' === $team['intro'], 'main card: with no Business info logo or description, the Site Icon and tagline stay as before' );
+
+// ---------- the Cards screen ----------
+$screen = static function () {
+	Scout_Cards_Settings::flush();
+	ob_start();
+	Scout_Cards_Admin::render();
+	return ob_get_clean();
+};
+$names = static function ( $html ) {
+	preg_match_all( '/name="scout_cards_settings\[([a-z_]+)\]/', $html, $m );
+	return array_count_values( $m[1] );
+};
+$GLOBALS['core_business'] = array( 'name' => 'Scout Media & Consulting', 'email' => 'team@scoutraleigh.com', 'description' => 'Websites for law firms.' );
+$GLOBALS['opts'][ $S::OPTION ] = array_merge( $opt, array( 'name' => 'Scout Media & Consulting', 'email' => 'hello@scoutraleigh.com', 'team_intro' => '' ) );
+$on = $screen();
+$keys = array( 'name', 'phone', 'city', 'region', 'postal', 'footer', 'font', 'pick_heading', 'note', 'team_intro', 'links_intro', 'socials', 'email', 'mode', 'accent', 'photo_id', 'logo_id', 'share_card_id', 'share_links_id', 'spot_heading', 'spot_text', 'spot_label', 'spot_sub', 'spot_url', 'links_latest', 'enable_cards', 'enable_links', 'card_base', 'links_base', 'people', 'links' );
+$got = $names( $on );
+ok( array() === array_diff( $keys, array_keys( $got ) ), 'screen, People on: every saved setting is still on the form' );
+ok( 1 === $got['name'] && 1 === $got['email'] && 1 === $got['team_intro'] && 1 === $got['pick_heading'], 'screen, People on: name, email, intro and the heading are on the form once' );
+ok( false !== strpos( $on, 'From Business info: <strong>Scout Media &amp; Consulting</strong>' ) && false !== strpos( $on, 'From Business info: <strong>Websites for law firms.</strong>' ), 'screen, People on: the main card says what it takes from Business info' );
+ok( 1 === preg_match( '#<details class="scc-else"><summary>Use something else</summary><label class="screen-reader-text" for="[^"]+">Name on the card</label><input class="regular-text" type="text" id="[^"]+" name="scout_cards_settings\[name\]" value="">#', $on ), 'screen, People on: a name the same as Business info shows as empty, with "Use something else" closed' );
+ok( 1 === preg_match( '#<details class="scc-else" open><summary>Use something else</summary><label class="screen-reader-text" for="[^"]+">Email on the card</label><input class="regular-text" type="email" id="[^"]+" name="scout_cards_settings\[email\]" value="hello@scoutraleigh.com">#', $on ), 'screen, People on: an email of its own opens "Use something else" with it filled in' );
+ok( false !== strpos( $on, '<details class="scc-fold"><summary>Extras</summary>' ) && false !== strpos( $on, 'Heading above the people' ), 'screen, People on: the heading and Spotlight sit under Extras' );
+foreach ( array( 'Phone', 'Email', 'Intro', 'Tags', 'Profile links', 'Short bio', 'Save contact' ) as $label ) {
+	ok( false !== strpos( $on, '> ' . $label . '</label>' ), 'screen, People on: a "' . $label . '" switch under Show on the card' );
+}
+ok( false === strpos( $on, '[people][0][intro]' ) && false === strpos( $on, '[people][0][pick]' ) && false === strpos( $on, '[people][0][tags]' ) && false === strpos( $on, '[people][0][name]' ) && false === strpos( $on, '[people][0][title]' ), 'screen, People on: no content fields per person' );
+ok( false !== strpos( $on, 'name="scout_cards_settings[people][0][slug]"' ) && false !== strpos( $on, 'Link name' ) && false !== strpos( $on, '>Share mode</a>' ) && false !== strpos( $on, '<summary>QR code</summary>' ) && false !== strpos( $on, 'Edit in People</a>' ), 'screen, People on: each card has its link name, Share mode, QR code and Edit in People' );
+ok( 1 === preg_match( '#<details class="scc-fold"><summary>More</summary><table class="form-table" role="presentation"><tr><th scope="row">Share picture</th>#', $on ) && false !== strpos( $on, 'name="scout_cards_settings[people][0][spot_heading]"' ), 'screen, People on: the share picture and Spotlight sit under each card\'s More' );
+foreach ( array( 'Full name', 'Intro (on their card, in their voice)', 'Why talk to them (on the main card)', 'Main card words', 'Business name', 'Main email' ) as $gone ) {
+	ok( false === strpos( $on, $gone ), 'screen, People on: "' . $gone . '" is gone' );
+}
+
+// Scout People off: the screen as it was.
+$GLOBALS['opts']['scout_cards_people_db'] = 0;
+$off = $screen();
+$got = $names( $off );
+ok( array() === array_diff( $keys, array_keys( $got ) ), 'screen, People off: every saved setting is on the form' );
+foreach ( array( 'Card people', 'Full name', 'Intro (on their card, in their voice)', 'Why talk to them (on the main card)', 'Tags', 'Main card words', 'Heading above the people', 'Business name', 'Main email', 'Logo or photo' ) as $kept ) {
+	ok( false !== strpos( $off, $kept ), 'screen, People off: "' . $kept . '" is still there' );
+}
+ok( false === strpos( $off, 'Use something else' ) && false === strpos( $off, '<summary>Extras</summary>' ) && false === strpos( $off, 'Show on the card' ), 'screen, People off: none of the new People parts show' );
+ok( false !== strpos( $off, 'name="scout_cards_settings[people][0][intro]"' ), 'screen, People off: each person keeps their intro field' );
+$GLOBALS['opts']['scout_cards_people_db'] = 2;
+unset( $GLOBALS['core_business'] );
 
 echo $fail ? "\n$fail failed\n" : "\nAll passed\n";
 exit( $fail ? 1 : 0 );
