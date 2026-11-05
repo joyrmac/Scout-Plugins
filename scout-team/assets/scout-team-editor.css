@@ -38,6 +38,8 @@
 .st-rows { display: grid; gap: 10px; }
 .st-row { display: grid; gap: 0 12px; align-items: end; grid-template-columns: repeat(var(--st-cols, 3), minmax(0, 1fr)) auto; padding-bottom: 10px; border-bottom: 1px solid var(--st-line); }
 .st-row:last-child { border-bottom: 0; }
+.st-cols-1 { --st-cols: 1; }
+.st-cols-2 { --st-cols: 2; }
 .st-cols-3 { --st-cols: 3; }
 .st-cols-4 { --st-cols: 4; }
 .st-row .st-field { margin-bottom: 0; }
@@ -51,6 +53,19 @@
 
 .scout-team-fullbio { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 22px 0 10px; padding: 0; font-size: 15px; font-weight: 600; }
 .scout-team-fullbio span { font-size: 13px; font-weight: 400; color: var(--st-text-3); }
+
+/* Source: its own full-width line under each credential (kit tokens only). */
+.scout-team-form .st-row .st-col-source { grid-column: 1 / -1; margin-top: var(--sh-space-2); }
+.scout-team-form .st-source-note { margin: var(--sh-space-2) 0 var(--sh-space-3); }
+
+/* Shows on and Groups boxes on the side. */
+.scout-team-form.st-shows, .scout-team-form.st-groups { padding: 2px 0 4px; }
+.scout-team-form .st-checks { border: 0; margin: 0; padding: 0; }
+.scout-team-form .st-checks .st-check { margin: 0; }
+.scout-team-form .st-checks .st-check label { font-weight: 500; min-height: var(--sh-tap); }
+.scout-team-form.st-shows > .description, .scout-team-form.st-groups > .description { margin: var(--sh-space-2) 0 0; color: var(--sh-text-2); }
+.scout-team-form .st-card-only { margin-top: var(--sh-space-4); padding: var(--sh-space-3) var(--sh-space-3) var(--sh-space-1); }
+.scout-team-form .st-card-only .st-field input { min-height: var(--sh-tap); }
 
 @media (max-width: 782px) {
 	.st-row { grid-template-columns: 1fr; }

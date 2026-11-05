@@ -39,6 +39,28 @@ final class Scout_Team {
 		add_action( 'init', array( __CLASS__, 'register_post_type' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_taxonomy' ), 6 );
 		add_action( 'init', array( __CLASS__, 'maybe_upgrade' ), 20 );
+		add_action( 'wp_after_insert_post', array( __CLASS__, 'new_person_group' ), 10, 3 );
+	}
+
+	/**
+	 * A person added any other way (an import, Site Sync, code) with no group
+	 * starts in Team, the way people always landed on the team page. The edit
+	 * screen sets groups itself, so a person someone takes out of every group
+	 * stays out.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    The post.
+	 * @param bool    $update  An update rather than a new post.
+	 */
+	public static function new_person_group( $post_id, $post, $update ): void {
+		if ( $update || ! $post instanceof WP_Post || self::POST_TYPE !== $post->post_type || ! self::upgraded() ) {
+			return;
+		}
+		$have = wp_get_object_terms( (int) $post_id, self::TAX, array( 'fields' => 'ids' ) );
+		$team = self::team_term();
+		if ( $team && ! is_wp_error( $have ) && ! $have ) {
+			wp_set_object_terms( (int) $post_id, array( $team ), self::TAX, true );
+		}
 	}
 
 	public static function register_post_type(): void {

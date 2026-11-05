@@ -1,6 +1,6 @@
 <?php
 /**
- * Scout Team uninstall cleanup. Runs only when the plugin is deleted.
+ * Scout People (scout-team) uninstall cleanup. Runs only when the plugin is deleted.
  *
  * Conservative on purpose, like Scout Core and Scout Reviews: profiles are
  * content someone typed in, so they stay unless the site defines
@@ -31,3 +31,8 @@ foreach ( $scout_team_ids as $scout_team_id ) {
 
 // Any profile meta left behind (for example on revisions).
 delete_metadata( 'post', 0, '_scout_team', '', true );
+
+// The record that the move to People ran. It stays when profiles stay, so a
+// reinstall never puts people back in groups someone took them out of.
+// Groups (the scout_people_group terms) are never deleted.
+delete_option( 'scout_team_db' );

@@ -126,7 +126,7 @@ final class Scout_Team_Front {
 	/** A theme is about to print a person's photo: remember the name. */
 	public static function photo_begin( $post_id, $thumb_id ): void {
 		unset( $thumb_id );
-		self::$alt_name = ( ! self::$rendering && Scout_Team::POST_TYPE === get_post_type( (int) $post_id ) ) ? wp_strip_all_tags( get_the_title( (int) $post_id ) ) : '';
+		self::$alt_name = ( ! is_admin() && ! self::$rendering && Scout_Team::POST_TYPE === get_post_type( (int) $post_id ) ) ? wp_strip_all_tags( get_the_title( (int) $post_id ) ) : '';
 	}
 
 	public static function photo_end(): void {
