@@ -21,6 +21,14 @@
 .sh .scc-form .scc-js-only { display: none; }
 .sh .scc-form.scc-js .scc-js-only:not([hidden]) { display: inline-flex; }
 
+/* People with a card: a QR code under the card links, the card's switches, and rows with nothing to edit here. */
+.scc-qr summary { cursor: pointer; color: var(--sh-accent-text); font-weight: 500; }
+.scc-qr-box { width: 160px; margin-top: var(--sh-space-2); padding: var(--sh-space-1); background: var(--sh-surface); border: 1px solid var(--sh-border); border-radius: var(--sh-r-control); }
+.scc-qr-box svg { display: block; width: 100%; height: auto; }
+.scc-show { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); margin-right: var(--sh-space-4); }
+.scc-remove { display: inline-flex; align-items: center; gap: var(--sh-space-2); min-height: var(--sh-tap); }
+.scc-boxhead + p { margin-top: var(--sh-space-2); }
+
 /* Photo pickers. */
 .scc-thumb { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: var(--sh-space-2); }
 .scc-spot-head th { padding-bottom: 0; }

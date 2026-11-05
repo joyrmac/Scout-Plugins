@@ -68,6 +68,7 @@ final class Scout_Cards_Admin {
 			wp_enqueue_media();
 			Scout_Admin_UI::enqueue( SCOUT_CARDS_URL . 'assets/scout-admin.css' );
 			wp_enqueue_style( 'scout-cards-admin', SCOUT_CARDS_URL . 'assets/cards-admin.css', array( 'scout-admin' ), SCOUT_CARDS_VERSION );
+			wp_enqueue_script( 'scout-cards-qr', SCOUT_CARDS_URL . 'assets/qrcode.min.js', array(), SCOUT_CARDS_VERSION, true );
 		}
 	}
 
@@ -166,8 +167,9 @@ final class Scout_Cards_Admin {
 	 * @param string $button Button words.
 	 * @param string $class  Extra row classes.
 	 * @param callable $fields Prints the panel's form table rows.
+	 * @param string $go     More buttons beside Edit, already escaped.
 	 */
-	private static function person_row( $id, $photo, $name, $sub, $card, $button, $class, $fields ) {
+	private static function person_row( $id, $photo, $name, $sub, $card, $button, $class, $fields, $go = '' ) {
 		echo '<li class="sh-row scc-row' . ( $class ? ' ' . esc_attr( $class ) : '' ) . '">';
 		echo '<div class="scc-who">';
 		if ( $photo ) {
@@ -186,68 +188,170 @@ final class Scout_Cards_Admin {
 			$path = (string) wp_parse_url( $card['url'], PHP_URL_PATH );
 			echo '<a href="' . esc_url( $card['url'] ) . '" target="_blank" rel="noopener"><code>' . esc_html( '' !== $path ? $path : $card['url'] ) . '</code></a>';
 			echo '<a href="' . esc_url( $card['share'] ) . '" target="_blank" rel="noopener">Share mode</a>';
+			if ( ! empty( $card['profile'] ) ) {
+				self::qr( $card['url'] );
+			}
 		}
 		echo '</div>';
-		echo '<div class="sh-row-go"><button type="button" class="button scc-edit" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '">' . esc_html( $button ) . '</button></div>';
+		echo '<div class="sh-row-go"><button type="button" class="button scc-edit" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '">' . esc_html( $button ) . '</button>' . $go . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $go is escaped by the caller.
 		echo '<div class="scc-panel" id="' . esc_attr( $id ) . '"><table class="form-table" role="presentation">';
 		call_user_func( $fields );
 		echo '</table></div></li>';
 	}
 
-	public static function render() {
-		if ( ! current_user_can( 'edit_pages' ) ) {
-			return;
+	/** A QR code for a card, drawn in the browser when it opens. */
+	private static function qr( $url ) {
+		echo '<details class="scc-qr"><summary>QR code</summary><div class="scc-qr-box" data-qr-url="' . esc_url( $url ) . '" role="img" aria-label="' . esc_attr( 'QR code that opens ' . $url ) . '"></div></details>';
+	}
+
+	/** A row with nothing to edit here: photo, name, one line and its buttons. */
+	private static function plain_row( $photo, $name, $sub, $go, $facts = '' ) {
+		echo '<li class="sh-row scc-row is-plain"><div class="scc-who">';
+		if ( $photo ) {
+			echo '<img class="scc-avatar" src="' . esc_url( $photo ) . '" alt="">';
+		} else {
+			$letter = function_exists( 'mb_substr' ) ? mb_substr( trim( (string) $name ), 0, 1 ) : substr( trim( (string) $name ), 0, 1 );
+			echo '<span class="scc-avatar" aria-hidden="true">' . esc_html( strtoupper( $letter ) ) . '</span>';
 		}
-		$s      = Scout_Cards_Settings::get();
-		$n      = Scout_Cards_Settings::OPTION;
-		$people = Scout_Cards_Settings::people();
-		$count  = count( $people ) - 1; // 'team' is the main card, not a person.
-		$card   = Scout_Cards_Settings::card_url();
-		$links  = home_url( '/' . $s['links_base'] . '/' );
-		Scout_Admin_UI::open( 'Cards & links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
-		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
+		echo '<div><p class="sh-row-name">' . esc_html( $name ) . '</p><p class="sh-row-sub">' . esc_html( $sub ) . '</p></div></div>';
+		echo '<div class="sh-row-facts">' . $facts . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		echo '<div class="sh-row-go">' . $go . '</div></li>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+	}
+
+	/** The People edit screen for a person, as a quiet button. */
+	private static function edit_in_people( $profile_id ) {
+		$url = get_edit_post_link( (int) $profile_id );
+		return $url ? ' <a class="button sh-quiet" href="' . esc_url( $url ) . '">Edit in People</a>' : '';
+	}
+
+	/** Which profile fields show on a card: one checkbox each. */
+	private static function show_fields( $base, array $show ) {
+		$labels = array(
+			'phone' => 'Phone',
+			'email' => 'Email',
+			'links' => 'Profile links',
+			'bio'   => 'Short bio',
+			'save'  => 'Save contact button',
+		);
+		echo '<tr><th scope="row">Show on the card</th><td><fieldset><legend class="screen-reader-text">Show on the card</legend>';
+		foreach ( $labels as $k => $label ) {
+			echo '<label class="scc-show"><input type="hidden" name="' . esc_attr( "{$base}[show_{$k}]" ) . '" value="0"><input type="checkbox" name="' . esc_attr( "{$base}[show_{$k}]" ) . '" value="1"' . checked( ! empty( $show[ $k ] ), true, false ) . '> ' . esc_html( $label ) . '</label> ';
 		}
-		if ( isset( $_GET['reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			echo '<div class="notice notice-info is-dismissible"><p>Reset to the defaults.</p></div>';
-		}
-		foreach ( array( $s['card_base'], $s['links_base'] ) as $slug ) {
-			if ( get_page_by_path( $slug ) ) {
-				echo '<div class="notice notice-warning"><p>A WordPress Page already uses <code>/' . esc_html( $slug ) . '/</code>. Scout Cards will show at that address instead of the Page. Change the address under More options, or rename that Page.</p></div>';
+		echo '<p class="description">From their People profile. A blank card phone or email uses the business one.</p></fieldset></td></tr>';
+	}
+
+	/**
+	 * The people box when cards read from People: the main card, then one row for
+	 * each person with Card on. Their name, title, photo and contact are edited in
+	 * People; this screen keeps each card's own settings.
+	 */
+	private static function people_box( $n, array $s, array $people ) {
+		echo '<section class="sh-box"><div class="scc-boxhead"><h2 class="sh-title">People with a card</h2>';
+		echo '<a class="button" href="' . esc_url( Scout_Cards_People::add_url() ) . '">Add a person</a></div>';
+		echo '<p>Anyone in People with Card on gets a card. Their name, title, photo, phone and email come from People.</p>';
+		echo '<input type="hidden" name="' . esc_attr( $n ) . '[people_mode]" value="people">';
+		echo '<ul class="sh-rows">';
+		$team = $people['team'];
+		self::person_row(
+			'scc-person-main',
+			(string) $team['photo'],
+			(string) $s['name'],
+			'Main card. It shows everyone below.',
+			$team,
+			'Edit',
+			'',
+			static function () use ( $n, $s ) {
+				self::photo( "{$n}[photo_id]", (int) $s['photo_id'], 'Logo or photo', 'Blank uses the Site Icon, or the first letter of the name.' );
+				self::photo( "{$n}[logo_id]", (int) $s['logo_id'], 'Logo for the links and share pages', 'Optional. When the card shows a person, the links page and share page can show the logo instead.' );
+				self::spot_fields( $n, $s );
+			}
+		);
+
+		// Saved card settings by link name, the same way people() reads them.
+		$list = array_values( (array) $s['people'] );
+		$recs = array();
+		foreach ( $list as $i => $rec ) {
+			$slug = sanitize_title( (string) ( $rec['slug'] ?? '' ) );
+			if ( '' !== $slug ) {
+				$recs[ $slug ] = (int) $i;
 			}
 		}
-		if ( ! class_exists( 'Scout_Core_Business' ) ) {
-			echo '<div class="notice notice-info"><p>Scout Core is off, so fill in the business details under More options.</p></div>';
+		$i    = 0;
+		$live = array();
+		foreach ( $people as $key => $card ) {
+			if ( 'team' === $key ) {
+				continue;
+			}
+			$idx = isset( $recs[ $key ] ) ? $recs[ $key ] : -1;
+			$rec = $idx >= 0 ? (array) $list[ $idx ] : array();
+			if ( empty( $card['profile'] ) ) {
+				// A card whose profile is gone: it keeps showing its own saved details.
+				$base = "{$n}[people][$i]";
+				$keep = '<input type="hidden" name="' . esc_attr( "{$base}[rec]" ) . '" value="' . esc_attr( $idx ) . '"><input type="hidden" name="' . esc_attr( "{$base}[profile_id]" ) . '" value="0">'
+					. '<label class="scc-remove"><input type="checkbox" name="' . esc_attr( "{$base}[remove]" ) . '" value="1"> Take this card off</label>';
+				$facts = '<a href="' . esc_url( $card['url'] ) . '" target="_blank" rel="noopener"><code>' . esc_html( (string) wp_parse_url( $card['url'], PHP_URL_PATH ) ) . '</code></a>';
+				self::plain_row( (string) $card['photo'], (string) $card['name'], 'Not in People. This card uses the details it had saved.', $keep, $facts );
+				++$i;
+				continue;
+			}
+			$live[] = (int) $card['profile'];
+			$pid    = (int) $card['profile'];
+			if ( $idx >= 0 && (int) ( $rec['profile_id'] ?? 0 ) !== $pid ) {
+				$idx = -1;
+				$rec = array();
+			}
+			$base = "{$n}[people][$i]";
+			self::person_row(
+				'scc-person-' . $i,
+				(string) $card['photo'],
+				(string) $card['name'],
+				(string) $card['title'],
+				$card,
+				'Card settings',
+				'',
+				static function () use ( $base, $s, $rec, $idx, $pid, $key, $card ) {
+					echo '<tr hidden><td colspan="2"><input type="hidden" name="' . esc_attr( "{$base}[rec]" ) . '" value="' . esc_attr( $idx ) . '"><input type="hidden" name="' . esc_attr( "{$base}[profile_id]" ) . '" value="' . esc_attr( $pid ) . '"><input type="hidden" name="' . esc_attr( "{$base}[key]" ) . '" value="' . esc_attr( $key ) . '"></td></tr>';
+					self::field( "{$base}[slug]", $key, 'Link name', 'text', 'Lowercase, no spaces. "alex" makes /' . $s['card_base'] . '/alex/.' );
+					self::show_fields( $base, $card['show'] );
+					self::field( "{$base}[intro]", (string) ( $rec['intro'] ?? '' ), 'Intro (on their card, in their voice)', 'textarea' );
+					self::field( "{$base}[pick]", (string) ( $rec['pick'] ?? '' ), 'Why talk to them (on the main card)', 'textarea' );
+					self::field( "{$base}[tags]", (string) ( $rec['tags'] ?? '' ), 'Tags', 'text', 'Comma separated, two to four short topics.' );
+					self::photo( "{$base}[share_id]", (int) ( $rec['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this card\'s link is texted or posted. 1200 by 630 pixels.' );
+					self::spot_fields( $base, $rec );
+				},
+				self::edit_in_people( $pid )
+			);
+			++$i;
 		}
 
-		// Status line: where the cards live, how many people, and whether the links page is on.
-		$who = 0 === $count ? 'the main card only' : ( 1 === $count ? 'the main card and 1 person' : 'the main card and ' . $count . ' people' );
-		if ( $s['enable_cards'] ) {
-			self::status(
-				'good',
-				'Live.',
-				'At /' . $s['card_base'] . '/ with ' . $who . '. The links page is ' . ( $s['enable_links'] ? 'on at /' . $s['links_base'] . '/.' : 'off.' ),
-				'<a class="button" href="' . esc_url( $card ) . '" target="_blank" rel="noopener">View card</a>'
-			);
-		} elseif ( $s['enable_links'] ) {
-			self::status(
-				'off',
-				'Cards off.',
-				'The links page is on at /' . $s['links_base'] . '/. Turn cards on under More options.',
-				'<a class="button" href="' . esc_url( $links ) . '" target="_blank" rel="noopener">View links</a>'
-			);
-		} else {
-			self::status( 'off', 'Off.', 'Turn cards and links on under More options.' );
+		// People with Card on who are not live yet: no card until they are.
+		foreach ( Scout_Cards_People::available() ? array_map( 'intval', (array) Scout_Team::card_ids( false ) ) : array() as $pid ) {
+			if ( in_array( $pid, $live, true ) ) {
+				continue;
+			}
+			$c = Scout_Cards_People::profile( $pid );
+			if ( ! $c ) {
+				continue;
+			}
+			$photo = $c['photo_id'] ? (string) wp_get_attachment_image_url( (int) $c['photo_id'], 'thumbnail' ) : '';
+			self::plain_row( $photo, '' !== $c['name'] ? $c['name'] : '(no name)', 'Not live in People yet, so there is no card.', self::edit_in_people( $pid ) );
 		}
+		echo '</ul>';
+		if ( 1 === count( $people ) ) {
+			echo '<p class="sh-note">No one has a card yet. Add a person, or turn on Card for someone in People.</p>';
+		}
+		echo '</section>';
+	}
 
-		echo '<form method="post" class="scc-form" id="scc-form" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-		// With JavaScript, the Edit panels and spare rows start closed; without it, every field shows.
-		echo '<script>document.getElementById("scc-form").classList.add("scc-js");</script>';
-		wp_nonce_field( 'scout_cards_save' );
-		echo '<input type="hidden" name="action" value="scout_cards_save">';
-
-		// People: the main card, then one row per person.
+	/**
+	 * The people box when cards keep their own details: Scout People is off, or
+	 * its one-time move has not run yet. The same fields as before People.
+	 */
+	private static function legacy_box( $n, array $s, array $people ) {
 		echo '<section class="sh-box"><h2 class="sh-title">Card people</h2>';
+		if ( ! Scout_Cards_People::available() ) {
+			echo '<p class="sh-note">Turn on Scout People to keep one profile per person. Cards then read names, photos and contact details from it.</p>';
+		}
 		echo '<p>Each person gets their own card and shows on the main card. Share mode opens a big QR code: open it on your phone and add it to your home screen (iPhone: Share, then Add to Home Screen), so it opens like an app.</p>';
 		echo '<ul class="sh-rows">';
 		$team = $people['team'];
@@ -295,10 +399,80 @@ final class Scout_Cards_Admin {
 					self::photo( "{$n}[people][$i][photo_id]", (int) $p['photo_id'], 'Photo', 'A square headshot works best.' );
 					self::photo( "{$n}[people][$i][share_id]", (int) ( $p['share_id'] ?? 0 ), 'Share picture', 'Optional. Shows when this person\'s card link is texted or posted. 1200 by 630 pixels.' );
 					self::spot_fields( "{$n}[people][$i]", $p );
+					// Kept as they are through a save: the People profile this card belongs to, and its switches.
+					echo '<tr hidden><td colspan="2"><input type="hidden" name="' . esc_attr( "{$n}[people][$i][profile_id]" ) . '" value="' . esc_attr( (int) ( $p['profile_id'] ?? 0 ) ) . '">';
+					foreach ( Scout_Cards_People::show( $p ) as $k => $on ) {
+						echo '<input type="hidden" name="' . esc_attr( "{$n}[people][$i][show_{$k}]" ) . '" value="' . esc_attr( $on ) . '">';
+					}
+					echo '</td></tr>';
 				}
 			);
 		}
 		echo '</ul></section>';
+	}
+
+	public static function render() {
+		if ( ! current_user_can( 'edit_pages' ) ) {
+			return;
+		}
+		$s      = Scout_Cards_Settings::get();
+		$n      = Scout_Cards_Settings::OPTION;
+		$people = Scout_Cards_Settings::people();
+		$count  = count( $people ) - 1; // 'team' is the main card, not a person.
+		$card   = Scout_Cards_Settings::card_url();
+		$links  = home_url( '/' . $s['links_base'] . '/' );
+		Scout_Admin_UI::open( 'Cards & links', 'A digital business card for each person, a QR code to share it, and a link page for your social bios.' );
+		if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>Saved. The card and links pages are updated. Clear the site cache if you do not see the change.</p></div>';
+		}
+		if ( isset( $_GET['reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-info is-dismissible"><p>Reset to the defaults.</p></div>';
+		}
+		foreach ( array( $s['card_base'], $s['links_base'] ) as $slug ) {
+			if ( get_page_by_path( $slug ) ) {
+				echo '<div class="notice notice-warning"><p>A WordPress Page already uses <code>/' . esc_html( $slug ) . '/</code>. Scout Cards will show at that address instead of the Page. Change the address under More options, or rename that Page.</p></div>';
+			}
+		}
+		if ( ! class_exists( 'Scout_Core_Business' ) ) {
+			echo '<div class="notice notice-info"><p>Scout Core is off, so fill in the business details under More options.</p></div>';
+		}
+		$moved = Scout_Cards_People::take_note();
+		if ( '' !== $moved ) {
+			echo '<div class="notice notice-info is-dismissible"><p>' . esc_html( $moved ) . '</p></div>';
+		}
+
+		// Status line: where the cards live, how many people, and whether the links page is on.
+		$who = 0 === $count ? 'the main card only' : ( 1 === $count ? 'the main card and 1 person' : 'the main card and ' . $count . ' people' );
+		if ( $s['enable_cards'] ) {
+			self::status(
+				'good',
+				'Live.',
+				'At /' . $s['card_base'] . '/ with ' . $who . '. The links page is ' . ( $s['enable_links'] ? 'on at /' . $s['links_base'] . '/.' : 'off.' ),
+				'<a class="button" href="' . esc_url( $card ) . '" target="_blank" rel="noopener">View card</a>'
+			);
+		} elseif ( $s['enable_links'] ) {
+			self::status(
+				'off',
+				'Cards off.',
+				'The links page is on at /' . $s['links_base'] . '/. Turn cards on under More options.',
+				'<a class="button" href="' . esc_url( $links ) . '" target="_blank" rel="noopener">View links</a>'
+			);
+		} else {
+			self::status( 'off', 'Off.', 'Turn cards and links on under More options.' );
+		}
+
+		echo '<form method="post" class="scc-form" id="scc-form" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		// With JavaScript, the Edit panels and spare rows start closed; without it, every field shows.
+		echo '<script>document.getElementById("scc-form").classList.add("scc-js");</script>';
+		wp_nonce_field( 'scout_cards_save' );
+		echo '<input type="hidden" name="action" value="scout_cards_save">';
+
+		if ( Scout_Cards_People::reading() ) {
+			self::people_box( $n, $s, $people );
+		} else {
+			self::legacy_box( $n, $s, $people );
+		}
+
 
 		// Links page: the intro, the newest post switch, then one row per link.
 		echo '<section class="sh-box"><div class="scc-boxhead"><h2 class="sh-title">Links page</h2>';
@@ -409,6 +583,12 @@ final class Scout_Cards_Admin {
 		      if(!form.querySelector(more.getAttribute('data-scc-more')+'.scc-spare:not(.is-shown)')){more.hidden=true;}
 		    }
 		  });
+		  // A card's QR code is drawn when its box opens.
+		  form.addEventListener('toggle',function(e){
+		    var d=e.target;if(!d.classList||!d.classList.contains('scc-qr')){return;}
+		    var box=d.querySelector('[data-qr-url]');if(!box||box.firstChild||!window.qrcode){return;}
+		    var q=qrcode(0,'M');q.addData(box.getAttribute('data-qr-url'));q.make();box.innerHTML=q.createSvgTag({cellSize:6,margin:2,scalable:true});
+		  },true);
 		  // A field the browser flags (a bad email, say) may sit in a closed panel or More options: open it first.
 		  form.addEventListener('invalid',function(e){
 		    var el=e.target;
@@ -421,6 +601,87 @@ final class Scout_Cards_Admin {
 		</script>
 		<?php
 		Scout_Admin_UI::close();
+	}
+
+	/** The card's "Show on the card" switches from a submitted card, when the form sent them. */
+	private static function clean_show( $v ) {
+		$out = array();
+		foreach ( array_keys( Scout_Cards_People::SHOW ) as $k ) {
+			if ( isset( $v[ 'show_' . $k ] ) ) {
+				$out[ 'show_' . $k ] = empty( $v[ 'show_' . $k ] ) ? 0 : 1;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Cards that read from People: each submitted card updates its own settings on
+	 * its saved record (found by its People profile), or adds a record for someone
+	 * new in People. A saved record keeps the name, title, email and photo it had,
+	 * so the card can fall back to them. Records not on the form stay as they are.
+	 *
+	 * @param array $rows Submitted cards.
+	 */
+	private static function save_people( array $rows ) {
+		$raw  = get_option( Scout_Cards_Settings::OPTION );
+		$recs = is_array( $raw ) && is_array( $raw['people'] ?? null ) ? array_values( $raw['people'] ) : array();
+		$drop = array();
+		foreach ( $rows as $row ) {
+			$row = (array) $row;
+			$pid = absint( $row['profile_id'] ?? 0 );
+			$idx = -1;
+			if ( $pid ) {
+				foreach ( $recs as $j => $r ) {
+					if ( (int) ( $r['profile_id'] ?? 0 ) === $pid ) {
+						$idx = $j;
+						break;
+					}
+				}
+			} else {
+				$j = isset( $row['rec'] ) ? (int) $row['rec'] : -1;
+				if ( $j >= 0 && isset( $recs[ $j ] ) && empty( $recs[ $j ]['profile_id'] ) ) {
+					$idx = $j;
+				}
+			}
+			if ( ! empty( $row['remove'] ) ) {
+				if ( $idx >= 0 ) {
+					$drop[] = $idx;
+				}
+				continue;
+			}
+			if ( $idx < 0 && ! $pid ) {
+				continue;
+			}
+			if ( ! isset( $row['slug'] ) ) {
+				continue; // Nothing to change on this card.
+			}
+			$old  = $idx >= 0 ? $recs[ $idx ] : array( 'profile_id' => $pid );
+			$slug = sanitize_title( (string) $row['slug'] );
+			if ( '' === $slug ) {
+				$slug = sanitize_title( (string) ( $old['slug'] ?? ( $row['key'] ?? '' ) ) );
+			}
+			$new = array_merge(
+				$old,
+				array(
+					'slug'     => $slug,
+					'intro'    => sanitize_textarea_field( (string) ( $row['intro'] ?? '' ) ),
+					'pick'     => sanitize_textarea_field( (string) ( $row['pick'] ?? '' ) ),
+					'tags'     => sanitize_text_field( (string) ( $row['tags'] ?? '' ) ),
+					'share_id' => absint( $row['share_id'] ?? 0 ),
+				),
+				self::clean_spot( $row ),
+				self::clean_show( $row )
+			);
+			if ( $idx >= 0 ) {
+				$recs[ $idx ] = $new;
+			} else {
+				$recs[] = $new;
+			}
+		}
+		foreach ( $drop as $j ) {
+			unset( $recs[ $j ] );
+		}
+		return array_values( $recs );
 	}
 
 	public static function save() {
@@ -454,23 +715,31 @@ final class Scout_Cards_Admin {
 		$out['enable_links'] = empty( $in['enable_links'] ) ? 0 : 1;
 		$out['card_base']    = sanitize_title( $in['card_base'] ?? '' ) ? sanitize_title( $in['card_base'] ) : 'card';
 		$out['links_base']   = sanitize_title( $in['links_base'] ?? '' ) ? sanitize_title( $in['links_base'] ) : 'links';
-		$out['people']       = array();
-		foreach ( (array) ( $in['people'] ?? array() ) as $p ) {
-			if ( '' === trim( (string) ( $p['name'] ?? '' ) ) ) {
-				continue;
+		if ( 'people' === ( $in['people_mode'] ?? '' ) ) {
+			$out['people'] = self::save_people( (array) ( $in['people'] ?? array() ) );
+		} else {
+			$out['people'] = array();
+			foreach ( (array) ( $in['people'] ?? array() ) as $p ) {
+				if ( '' === trim( (string) ( $p['name'] ?? '' ) ) ) {
+					continue;
+				}
+				$first = preg_split( '/\s+/', trim( $p['name'] ) )[0];
+				$rec   = array(
+					'name'     => $txt( $p['name'] ),
+					'slug'     => sanitize_title( ! empty( $p['slug'] ) ? $p['slug'] : $first ),
+					'title'    => $txt( $p['title'] ?? '' ),
+					'email'    => sanitize_email( $p['email'] ?? '' ),
+					'intro'    => $area( $p['intro'] ?? '' ),
+					'pick'     => $area( $p['pick'] ?? '' ),
+					'tags'     => $txt( $p['tags'] ?? '' ),
+					'photo_id' => absint( $p['photo_id'] ?? 0 ),
+					'share_id' => absint( $p['share_id'] ?? 0 ),
+				) + self::clean_spot( $p );
+				if ( ! empty( $p['profile_id'] ) ) {
+					$rec['profile_id'] = absint( $p['profile_id'] );
+				}
+				$out['people'][] = $rec + self::clean_show( $p );
 			}
-			$first           = preg_split( '/\s+/', trim( $p['name'] ) )[0];
-			$out['people'][] = array(
-				'name'     => $txt( $p['name'] ),
-				'slug'     => sanitize_title( ! empty( $p['slug'] ) ? $p['slug'] : $first ),
-				'title'    => $txt( $p['title'] ?? '' ),
-				'email'    => sanitize_email( $p['email'] ?? '' ),
-				'intro'    => $area( $p['intro'] ?? '' ),
-				'pick'     => $area( $p['pick'] ?? '' ),
-				'tags'     => $txt( $p['tags'] ?? '' ),
-				'photo_id' => absint( $p['photo_id'] ?? 0 ),
-				'share_id' => absint( $p['share_id'] ?? 0 ),
-			) + self::clean_spot( $p );
 		}
 		$out['links'] = array();
 		foreach ( (array) ( $in['links'] ?? array() ) as $l ) {
@@ -485,6 +754,7 @@ final class Scout_Cards_Admin {
 			);
 		}
 		update_option( Scout_Cards_Settings::OPTION, $out, false );
+		Scout_Cards_Settings::flush();
 		wp_safe_redirect( self::url( array( 'saved' => 1 ) ) );
 		exit;
 	}
