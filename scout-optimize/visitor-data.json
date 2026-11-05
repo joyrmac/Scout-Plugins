@@ -1,0 +1,6 @@
+{
+  "plugin": "scout-optimize",
+  "items": [],
+  "cookies": [],
+  "notes": "This plugin shrinks and converts images that site staff upload and changes how pages load their files. It does not collect or send anything about visitors."
+}

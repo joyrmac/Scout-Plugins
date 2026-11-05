@@ -1,0 +1,28 @@
+{
+  "plugin": "scout-redirects",
+  "items": [
+    {
+      "what": "Addresses on this website that visitors asked for but that do not exist (missing pages), without any query string, with how many times each was asked for and the first and last time",
+      "where": "A table in this website's database (the missing-page list)",
+      "kept": "Until someone deletes it. The list holds 500 addresses by default (the setting allows 50 to 2,000). When it is full, the oldest, least visited addresses are removed. Deleting the plugin removes the list.",
+      "shared": "",
+      "when": "Only while \"Keep a list of missing pages people ask for\" is on (it is on by default). Search engines, scripts and file requests are skipped."
+    },
+    {
+      "what": "The web page a visitor came from when they reached a missing page (the referrer), without its query string and cut to 255 characters",
+      "where": "A table in this website's database (the missing-page list)",
+      "kept": "Until someone deletes it, or until its missing page drops off the full list. Deleting the plugin removes the list.",
+      "shared": "",
+      "when": "Only when the visitor's browser sends it, under the same rules as the missing-page list."
+    },
+    {
+      "what": "A count of how many times each redirect was used and when it was last used. Nothing about the visitor is saved with it.",
+      "where": "This website's database, on each redirect",
+      "kept": "Until someone deletes the redirect",
+      "shared": "",
+      "when": "When a visitor opens an old address that is forwarded."
+    }
+  ],
+  "cookies": [],
+  "notes": "The plugin reads the browser type only to skip search engines and scripts and does not save it."
+}

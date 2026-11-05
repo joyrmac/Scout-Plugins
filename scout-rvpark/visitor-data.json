@@ -1,0 +1,6 @@
+{
+  "plugin": "scout-rvpark",
+  "items": [],
+  "cookies": [],
+  "notes": "This plugin adds the park's amenities and site types, which site staff write. It does not collect or send anything about visitors."
+}

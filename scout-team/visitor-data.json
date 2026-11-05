@@ -1,0 +1,14 @@
+{
+  "plugin": "scout-team",
+  "items": [
+    {
+      "what": "Which team member's profile a visitor views, and when they click a team member's profile, phone number or email link (the team member's name and the link clicked)",
+      "where": "Not saved by this website. It is handed to the site's analytics tag in the visitor's browser.",
+      "kept": "Not kept by this plugin. How long Google keeps it depends on the site's Google account settings.",
+      "shared": "Google Analytics or Google Tag Manager, through the Scout Analytics plugin",
+      "when": "Only when the Scout Analytics plugin is installed and its tag is on the page."
+    }
+  ],
+  "cookies": [],
+  "notes": "Team profiles are written by site staff. The plugin has no form and saves nothing about visitors."
+}
