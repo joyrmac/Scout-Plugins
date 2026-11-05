@@ -1,5 +1,9 @@
 # Scout Case Results changelog
 
+## Unreleased (2026-11-05)
+
+- **Status line is a headline and one sentence.** The Law note names the menu group from the kit (Legal pages → Disclaimers) instead of "Scout → Legal pages → Disclaimers". Shorter lede and help. The editor's field grid stops at three across.
+
 ## 0.1.15 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

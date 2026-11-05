@@ -302,7 +302,9 @@ final class Scout_Reviews_Requests {
 		}
 		// The screens use the shared Scout admin kit (no web fonts in the dashboard);
 		// ask.css only adds the review link, the card previews, the inbox rows and
-		// the platform rows on Review settings.
+		// the platform rows on Review settings. The kit goes first: queued only as a
+		// dependency, WordPress 6.9.1 drops both and the screens show unstyled.
+		Scout_Admin_UI::enqueue( SCOUT_REVIEWS_URL . 'assets/scout-admin.css' );
 		wp_enqueue_style( 'scout-reviews-ask', SCOUT_REVIEWS_URL . 'assets/ask.css', array( 'scout-admin' ), SCOUT_REVIEWS_VERSION );
 		if ( false !== strpos( $hook, self::PAGE ) ) {
 			// The client's own fonts, for the printed card previews only.

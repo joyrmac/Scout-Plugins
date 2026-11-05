@@ -1,5 +1,11 @@
 # Scout Reviews: Changelog
 
+## Unreleased (2026-11-05)
+
+- **New reviews rows stack.** Each review is a name line with stars and one outlined button (Approve and add to site, or Mark as read) and a quiet Skip on the right, then a line of tags (source, date, OK to show). Ask for a Google review too moved into the Read it all fold. "Private: not OK to show" is a calm grey pill, no longer amber.
+- **Fix: the review screens lost their look on WordPress 6.9.1.** Ask for reviews' stylesheet was queued before the shared kit, so WordPress dropped both and New reviews, Ask for reviews and Review settings showed unstyled. The kit now loads first.
+- **Wording.** "QR code & printed cards" and "More options: review page & cards". The QR row's "For printers, signs and invoices" is a plain line under the link. The Law disclaimer note names the menu group from the kit (Legal pages → Disclaimers) instead of "Scout → Legal pages → Disclaimers", so white-label sites read right. Shorter help on New reviews and Review settings.
+
 ## 0.5.12 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** The private note form asks for no email, so WordPress's privacy tools cannot find a note. The list now says to delete one by hand in New reviews. No code changed.

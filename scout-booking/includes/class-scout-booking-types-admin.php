@@ -165,11 +165,11 @@ final class Scout_Booking_Types_Admin {
 							</div>
 							<div class="sh-row-facts">
 								<span class="sh-pill <?php echo $t['active'] ? 'is-on' : 'is-off'; ?>"><?php echo esc_html( $t['active'] ? __( 'On the booking page', 'scout-booking' ) : __( 'Off', 'scout-booking' ) ); ?></span>
-								<?php if ( Scout_Booking::is_request( $t ) ) : ?>
-									<span class="sh-tag"><?php esc_html_e( 'By request', 'scout-booking' ); ?></span>
-								<?php endif; ?>
 								<span class="sh-tag"><?php echo esc_html( Scout_Booking::length_label( $t['length'] ) ); ?></span>
-								<span class="sh-tag"><?php echo esc_html( Scout_Booking_Front::price_line( $t ) ); ?></span>
+								<?php // The price and how it's paid ("$95 · by request") as two tags, not a dot list. ?>
+								<?php foreach ( explode( ' · ', Scout_Booking_Front::price_line( $t ) ) as $part ) : ?>
+									<span class="sh-tag"><?php echo esc_html( ucfirst( $part ) ); ?></span>
+								<?php endforeach; ?>
 								<?php if ( $t['buffer'] ) : ?>
 									<span class="sh-tag"><?php echo esc_html( sprintf( /* translators: %s: buffer length. */ __( '%s buffer after', 'scout-booking' ), Scout_Booking::length_label( $t['buffer'] ) ) ); ?></span>
 								<?php endif; ?>

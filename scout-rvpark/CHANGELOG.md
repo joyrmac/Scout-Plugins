@@ -1,5 +1,9 @@
 # Scout — North Crest RV Park — Changelog
 
+## Unreleased (2026-11-05)
+
+- **Home** opens with a status line, headings read "Site types (4)" and "Amenities (12)", and an empty rate or length leaves the cell blank (screen readers hear "None") instead of a dash. Shorter lede and note.
+
 ## 0.2.2 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

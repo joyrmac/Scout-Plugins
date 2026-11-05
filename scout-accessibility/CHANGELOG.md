@@ -1,5 +1,10 @@
 # Scout Accessibility changelog
 
+## Unreleased (2026-11-05)
+
+- **Accessibility checks open with one status line** ("1 check to fix. 2 of 4 launch checks reviewed.") instead of two status cards. The Fix pill and icon use the kit's warning tokens.
+- **Footer link.** The three cards (menu, page, every page) are three rows in one box. Shorter lede and help.
+
 ## 0.1.18 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

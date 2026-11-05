@@ -1,5 +1,11 @@
 # Scout Writing changelog
 
+## Unreleased (2026-11-05)
+
+- **My writing rows stack**: the prompt with Keep writing on the right, then status, step, group and word-count tags and the last edit. No more "Step 2 · group".
+- **Settings.** Upload is outlined so Save is the one filled button. The theme-file how-to (scout-setup.json, README) sits behind More. The Send to Scout box is now "Where sent writing goes", which reads right on any site.
+- **Styles.** An error message uses the red tint instead of amber, the guest and inventory grids stop at three across, and the empty search result is no longer centered.
+
 ## 0.1.6 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.
