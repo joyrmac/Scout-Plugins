@@ -1,5 +1,9 @@
 # Scout Chat changelog
 
+## 0.3.6 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.3.5 (2026-11-05)
 
 - **Privacy tools reach chat messages.** WordPress's Export and Erase Personal Data tools now find a visitor's chat messages by the email they gave, trashed ones included. Erasing deletes the messages. A message left with only a phone number is still deleted by hand.

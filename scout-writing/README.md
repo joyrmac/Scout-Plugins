@@ -171,6 +171,13 @@ plugin is active. If this plugin is switched off, that copy runs again and
 moves the writing back under its names first; switching this back on moves it
 forward again.
 
+## What this feature needs from the theme
+
+- No tokens. The writing room is a dashboard screen with its own look, drawn from the `brand` colors and fonts in the theme's setup file.
+- A `writing` section in the theme's `scout-setup.json` (the child theme's first), with at least `prompts`, the path of the prompts file inside the theme. The rest (menu label, send-to address, wording, brand, font files) is optional.
+- The prompts file and any font files it names, shipped inside the theme so they travel with each release.
+- Nothing on the site. The room prints no pages, shortcodes or styles for visitors.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

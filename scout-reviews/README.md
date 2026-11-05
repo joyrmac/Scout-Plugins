@@ -69,36 +69,31 @@ The page loads Hanken Grotesk and Geist Mono from Google Fonts; return an
 empty string from `scout_reviews_page_fonts_url` to use system fonts. If visit
 counts look low on WP Engine, exclude `/review/` from the page cache.
 
-## Theme integration
+## What this feature needs from the theme
 
-One call per spot where reviews belong. It prints nothing when there is
-nothing to show, so it never leaves an empty section:
+- Tokens the reviews sections read, each with a fallback mixed from the page's text color: `--surface`, `--line`, `--text-2`, `--text-3`, `--accent-text`, `--font-mono`, `--r-card`.
+- One `scout_reviews_slot()` call per spot where reviews belong. It prints nothing when there is nothing to show, so it never leaves an empty section. Options: `topic` (default: the page's slug, `home` on the front page), `count`, `before`, `after`, `layout` (grid, row, list), `summary` (rating line, on by default), `fallback` (`featured` by default, `none` shows nothing when the topic is empty), `label` (topic name if it has to be created).
+- A `scout_reviews_slots` filter in `functions.php` that declares the theme's topics (`slug => [ label, keywords ]`), so they exist before anyone visits the pages.
+- Shortcodes `[scout_reviews]` and `[scout_review_summary]` where a page editor places reviews instead.
+- To restyle: override the `--sr-*` variables on `.scout-reviews`, copy `templates/section.php`, `summary.php` or `card.php` to `{theme}/scout-reviews/`, or turn the stylesheet off in Settings or with `add_filter( 'scout_reviews_load_styles', '__return_false' )`.
+- No page. The `/review/` page is the plugin's own and brings its own styles and fonts. `scout_reviews_page_fonts_url` swaps the fonts, and an empty string means system fonts.
 
 ```php
 <?php
 if ( function_exists( 'scout_reviews_slot' ) ) {
 	scout_reviews_slot( array(
-		'topic'  => 'law-firms',          // Default: the page's slug ("home" on the front page).
+		'topic'  => 'law-firms',
 		'count'  => 3,
 		'before' => '<section class="section"><div class="container"><h2>What firms say</h2>',
 		'after'  => '</div></section>',
 	) );
 }
-```
 
-Declare the theme's slots once in `functions.php` so the topics exist before
-anyone visits the pages:
-
-```php
 add_filter( 'scout_reviews_slots', function ( $slots ) {
 	$slots['law-firms'] = array( 'label' => 'Law firms', 'keywords' => array( 'law', 'attorney', 'lawyer' ) );
 	return $slots;
 } );
 ```
-
-Other options: `layout` (grid, row, list), `summary` (rating line, default on),
-`fallback` ("featured" by default; "none" shows nothing when the topic is
-empty), `label` (topic name if it has to be created).
 
 ## Honesty rules built in
 
@@ -130,19 +125,6 @@ Once Google approves API access ([setup steps](docs/google-business-profile-api.
 New reviews arrive as drafts with a count on the Reviews menu. Publish the
 ones you want. Google keeps control of the name, text, stars, and date; a
 review deleted on Google comes off the site on the next sync.
-
-## Design
-
-The stylesheet reads Scout design tokens when the theme has them (`--surface`,
-`--line`, `--text-2`, `--accent-text`, `--font-mono`, `--r-card`) and
-otherwise mixes colors from the page's text color, so it fits light and dark
-themes. To restyle:
-
-- Override the `--sr-*` variables on `.scout-reviews`.
-- Replace markup by copying `templates/section.php`, `summary.php`, or
-  `card.php` to `{theme}/scout-reviews/`.
-- Turn the stylesheet off in Settings or with
-  `add_filter( 'scout_reviews_load_styles', '__return_false' );`.
 
 ## Filters
 

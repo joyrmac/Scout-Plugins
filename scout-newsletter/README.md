@@ -144,6 +144,12 @@ also covers Action Scheduler, the checkout box and the application question.
 Settings, the key and the log go. The consent records stay unless
 `SCOUT_PURGE_ON_UNINSTALL` is true in `wp-config.php` (download them first).
 
+## What this feature needs from the theme
+
+- No tokens. The sign-up box takes the theme's fonts and colors, and every rule sits in `:where()` so theme CSS wins.
+- A spot for the box where wanted: `[scout_newsletter heading="" button="" name="yes" tag=""]` or the Newsletter sign-up block. Nothing else prints on the site. The checkout box, event forms and Gravity Forms consent fields come from those plugins.
+- Nothing to call. A theme form that asks for the newsletter fires `do_action( 'scout_newsletter_optin', ... )` only when the box is ticked.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

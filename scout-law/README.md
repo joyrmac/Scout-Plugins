@@ -30,16 +30,6 @@ the approver's name, the date and the exact words are kept as the record.
 - Every approval is kept in `scout_law_approval_log`, which stays when the
   plugin is deleted.
 
-### For themes
-
-```php
-add_theme_support( 'scout-law-footer' ); // the theme places the footer lines
-scout_law_disclaimers( 'footer' );        // where the theme wants them
-```
-
-Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
-`[scout_disclaimer line="relationship"]` (one line).
-
 ### Filters
 
 | Filter | What it changes |
@@ -99,6 +89,15 @@ Shortcodes: `[scout_disclaimers place="footer"]` (every line for a place) and
   intake records, are untouched.
 - `scout_law_entry_days()` returns the days kept (0 when off), for the privacy
   policy page.
+
+## What this feature needs from the theme
+
+- No tokens. The disclaimer lines print with a few quiet inline styles. Restyle `.scout-law-disclaimers` and `.scout-law-reviewed` in the theme.
+- `wp_footer()`. The footer lines print there by default. The form lines ride on Gravity Forms, the results line on Scout Case Results and the reviews line on Scout Reviews, with no theme code.
+- A theme that places the footer lines itself declares `add_theme_support( 'scout-law-footer' )` and calls `scout_law_disclaimers( 'footer' )` where they go. The other places are `forms`, `results` and `reviews`.
+- A theme that places the "Reviewed by" line itself declares `add_theme_support( 'scout-law-reviewed' )` and calls `scout_law_reviewed()`. Otherwise the line prints under the page's words.
+- Shortcodes for page editors: `[scout_disclaimers place="footer"]` (every line for a place) and `[scout_disclaimer line="relationship"]` (one line).
+- Scout Team profiles for the attorneys who sign pages. No page or menu.
 
 <!-- visitor-data:start -->
 ## Visitor data

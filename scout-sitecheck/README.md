@@ -62,6 +62,12 @@ the sample out.
 
 3 checks per visitor per hour, 3 per email per day, 40 per site per day.
 
+## What this feature needs from the theme
+
+- Tokens the form and report read, each with a fallback: `--bg`, `--surface`, `--surface-2`, `--text`, `--text-2`, `--text-3`, `--line`, `--accent`, `--accent-fill`, `--accent-fill-hover`, `--accent-text`, `--positive`, `--caution`, `--negative`, `--font-mono`.
+- A page holding `[scout_site_check]`. The settings screen's "Make the page" button creates it. The theme only needs to link to it.
+- Nothing to call. The styles load only on the page that shows the form.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

@@ -1,5 +1,9 @@
 # Scout Law Firm Tools changelog
 
+## 0.4.4 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.4.3 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** Gravity Forms decides whether WordPress's privacy tools reach form entries, so the list now says to turn on its Personal Data setting on each form. No code changed.

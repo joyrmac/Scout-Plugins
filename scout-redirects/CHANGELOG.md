@@ -1,5 +1,9 @@
 # Scout Redirects changelog
 
+## 0.1.17 (2026-11-05)
+
+- **README says what this feature needs from the theme: nothing.** The new "What this feature needs from the theme" section, so the list is complete across every plugin (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.1.16 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

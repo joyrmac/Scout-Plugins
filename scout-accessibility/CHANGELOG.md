@@ -1,5 +1,9 @@
 # Scout Accessibility changelog
 
+## 0.1.19 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.1.18 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

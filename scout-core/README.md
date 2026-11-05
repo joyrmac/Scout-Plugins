@@ -266,6 +266,18 @@ Every change to this plugin:
 2. Bumps `SCOUT_CORE_VERSION`.
 3. Adds a dated entry to `CHANGELOG.md`.
 
+## What this feature needs from the theme
+
+- No tokens read. Scout Core supplies them: `scout_design()` reads the theme's `DESIGN.md` front matter (colors `bg`, `surface`, `surface_2`, `text`, `text_2`, `line`, `accent`, `accent_fill`, `on_accent`; fonts `heading`, `body`, `label`; radius `pill`, `card`, `control`, `chip`) and `scout_design_css()` prints them as `--scout-*` variables. A theme without `DESIGN.md` gets Scout's defaults.
+- A `DESIGN.md` at the theme root, the one design source for the site (Site Standard §4). `## Feature: <name>` sections hold one feature's overrides.
+- A `scout-sync.json` manifest and the copy it lists, for Site Sync.
+- Block Bindings in the templates: `scout/field` for a field on the current post and `scout/business` for business info, so content flows into the design without a theme function.
+- `add_theme_support( 'scout-breadcrumbs' )` plus `scout_core_breadcrumbs()` where the links go. Without the declaration Core prints no trail and no BreadcrumbList.
+- `add_theme_support( 'scout-seo-head' )` only in a theme that still prints its own title, description, canonical and share tags. Core then steps aside. The Scout Media and Recon themes are detected by their head functions.
+- `scout_core_owns( 'hours' )` (and the other jobs) around any fallback the standard allows, so the theme's copy stands down when a plugin does the job. The theme kit's `scout-requires-build.php` carries a stand-in so the call never fatals.
+- Page fieldsets name the pages they belong to by `post_type`, `front_page`, `template` or `slug`, so the theme's template names and page slugs are part of the contract.
+- The usual `wp_head()` and `wp_footer()` calls. The head tags and the schema graph print there.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

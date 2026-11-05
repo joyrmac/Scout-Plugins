@@ -70,6 +70,10 @@ Build section.
 Deleting the plugin removes the missing-page log, its options and notices. The redirects stay, so reinstalling brings them straight back. To remove them too, define `SCOUT_PURGE_ON_UNINSTALL` as `true` in wp-config.php before deleting.
 Export the redirects first if they may be needed again.
 
+## What this feature needs from the theme
+
+- Nothing. Redirects run on `template_redirect` before any template loads, and missing pages are logged from WordPress's own 404 state, so the theme's 404 template needs no change.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

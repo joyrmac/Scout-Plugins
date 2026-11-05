@@ -121,6 +121,14 @@ Turn on and Go back download the `<slug>.zip` asset from this repo's GitHub
 releases (`<slug>-v<version>` tags), the same releases the updater uses. The
 repo's releases must stay public for this to work without a login.
 
+## What this feature needs from the theme
+
+- No tokens and nothing on the site. Scout Build is a dashboard. It reads the theme's `DESIGN.md` through `scout_design()` for the contrast check in Site status and the brand color in its emails.
+- `Update URI:` and `Scout Release:` headers in `style.css` when the theme updates itself from its own repo, plus the theme's `CHANGELOG.md`, which the Site log reads for each theme version.
+- `scout-setup.json` at the theme root with the client's facts (team, reviews, chat, hours, analytics, features, cards). The hub fills blanks from it once per theme version.
+- `add_theme_support( '<feature slug>' )` in a theme listed under `not_with_themes` in the catalog that wants the feature anyway. Scout Media and Recon opt in to `scout-core` this way for Site Sync.
+- `add_theme_support( 'scout-seo-head' )` in a theme that prints its own head tags, so Site status counts its structured data.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

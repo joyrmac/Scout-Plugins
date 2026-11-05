@@ -37,12 +37,11 @@ never anywhere else. Links are marked `rel="sponsored"`. Search engines and
 link checkers are not counted, and no visitor details are kept: only a number
 per month, for two years.
 
-## Styling
+## What this feature needs from the theme
 
-Class names: `.sp-partners`, `.sp-grid`, `.sp-rail`, `.sp-logos`, `.sp-title`,
-`.sp-level`, `.sp-level-name`, `.sp-list`, `.sp-partner`, `.sp-link`,
-`.sp-logo`, `.sp-name`, `.sp-line`. Custom properties:
-`--scout-partners-line`, `--scout-partners-logo-bg`, `--scout-partners-radius`.
+- Custom properties, each with a neutral fallback: `--scout-partners-line`, `--scout-partners-logo-bg`, `--scout-partners-radius`. Set them on `.sp-partners` or `:root`. Fonts and text color come from the theme.
+- Stable class names for restyling: `.sp-partners`, `.sp-grid`, `.sp-rail`, `.sp-logos`, `.sp-title`, `.sp-level`, `.sp-level-name`, `.sp-list`, `.sp-partner`, `.sp-link`, `.sp-logo`, `.sp-name`, `.sp-line`.
+- A page or template part holding `[scout_partners]` (`layout="rail"` for a header strip or sidebar). Partners beside events and on every event page come from the plugin's settings, not the theme.
 
 ## Data
 

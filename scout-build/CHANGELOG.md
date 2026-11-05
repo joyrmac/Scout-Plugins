@@ -1,5 +1,9 @@
 # Scout Build changelog
 
+## 0.12.5 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.12.4 (2026-11-05)
 
 - **Privacy tools reach chat change requests.** WordPress's Export and Erase Personal Data tools now find change requests a visitor sent through Scout Chat, by the email they gave. Erasing keeps the request as a work item and takes out their name, email and phone, and the Site log line that named them now says Scout Chat. Requests staff send from the dashboard are not touched.

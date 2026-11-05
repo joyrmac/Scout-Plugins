@@ -152,18 +152,13 @@ person's membership record. Deleting the plugin keeps member accounts.
   `scout_events_ticket_html`, `scout_events_card_tags` and
   `scout_events_imported_event` when Scout Events 0.6.0 or later is active.
 
-## Styling
+## What this feature needs from the theme
 
-Class names stay stable for themes: `.sm-portal`, `.sm-form`, `.sm-group`,
-`.sm-field`, `.sm-statement`, `.sm-check`, `.sm-button`, `.sm-account`,
-`.sm-badge`, `.sm-facts`, `.sm-gate`, `.sm-signin-form`, `.sm-signin-more`,
-`.sm-home`, `.sm-perks`, `.sm-perk`, `.sm-perk-title`, `.sm-perk-tag`,
-`.sm-perk-text`, `.sm-member-link`, `.sm-invitations`, `.sm-invite`,
-`.sm-invite-title`, `.sm-invite-meta`, `.sm-invite-answers`, `.sm-mine`,
-`.sm-invite-new`, `.sm-invite-form`, `.sm-pay`, `.sm-pay-note`,
-`.sm-thanks` (the order received note). Colors are custom properties:
-`--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`,
-`--scout-members-inset`, `--scout-members-radius`.
+- Custom properties the members pages read, each with a neutral fallback: `--scout-members-accent`, `--scout-members-on-accent`, `--scout-members-line`, `--scout-members-inset`, `--scout-members-radius`. Fonts and text color come from the theme.
+- Stable class names for restyling: `.sm-portal`, `.sm-form`, `.sm-group`, `.sm-field`, `.sm-statement`, `.sm-check`, `.sm-button`, `.sm-account`, `.sm-badge`, `.sm-facts`, `.sm-gate`, `.sm-signin-form`, `.sm-signin-more`, `.sm-home`, `.sm-perks`, `.sm-perk`, `.sm-perk-title`, `.sm-perk-tag`, `.sm-perk-text`, `.sm-member-link`, `.sm-invitations`, `.sm-invite`, `.sm-invite-title`, `.sm-invite-meta`, `.sm-invite-answers`, `.sm-mine`, `.sm-invite-new`, `.sm-invite-form`, `.sm-pay`, `.sm-pay-note`, `.sm-thanks` (the order received note).
+- A membership page holding `[scout_membership]`, and a Members home page (picked in Settings) that members land on after signing in. Pages under the home are the perks.
+- Optional spots: `[scout_invitations]` on a members page, `[scout_member_signin]` where a sign-in form belongs, and `[scout_member_link]` or a menu custom link to `#scout-member-link` for the sign-in link in the header or footer.
+- No template. A theme may pick its own members template by `Scout_Members::home_id()` (see "What themes rely on" below). `[scout_members_only]` and the Members only box need no theme code.
 
 ## What themes rely on (keep stable)
 

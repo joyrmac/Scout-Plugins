@@ -204,16 +204,13 @@ without the Scout menu). The address stays `?page=scout-team`.
 [scout_team heading="h2"]     heading level for names (h2, h3, h4)
 ```
 
-## Theming
+## What this feature needs from the theme
 
-The profile and grid inherit the theme's fonts and colors. A theme can
-restyle them with `--scout-team-accent`, `--scout-team-muted`,
-`--scout-team-line`, `--scout-team-surface`, `--scout-team-radius` and
-`--scout-team-gap` on `.scout-team-profile` and `.scout-team-grid`.
-The stylesheet loads only on team pages and pages that use the shortcode.
-
-On a profile page the plugin prints the photo itself, so the theme's own
-featured image for that person is hidden to avoid showing it twice.
+- `--wp--preset--color--primary` from the theme's `theme.json` palette for the accent, else the text color. The grid and profile also take `--scout-team-accent`, `--scout-team-muted`, `--scout-team-line`, `--scout-team-surface`, `--scout-team-radius` and `--scout-team-gap` on `.scout-team-profile` and `.scout-team-grid`. Fonts and colors are inherited. The stylesheet loads only on team pages and pages that use the shortcode.
+- `DESIGN.md` tokens on the "Send them a link" page, through Scout Core's `scout_design_css()`: `--scout-accent-fill`, `--scout-on-accent` and `--scout-radius-control`, each with a fallback.
+- No template. Profiles print inside `the_content()` on `/team/<name>/`, and `/team/` is the type's own list page, so the theme's usual single and list templates do the job. The plugin prints the photo itself and hides the theme's featured image on a profile, so it never shows twice.
+- A team page holding `[scout_team]` when the team belongs on a page the client edits instead of the `/team/` list.
+- `wp_head()` for the Person schema when Scout Core is off.
 
 ## Analytics
 

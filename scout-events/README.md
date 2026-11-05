@@ -54,9 +54,7 @@ overview lists what each upcoming and draft event still needs.
   `scout_events_schedule_html( $id )` for themes and other Scout features.
 
 Session descriptions open in place with `<details>`, so no script loads. The
-stylesheet loads only on pages that show events. Colors are custom
-properties: `--scout-events-accent`, `--scout-events-on-accent`,
-`--scout-events-line`, `--scout-events-inset`, `--scout-events-radius`.
+stylesheet loads only on pages that show events.
 
 Other Scout features add to the event pages with filters:
 `scout_events_detail_rows` (rows of the details panel), `scout_events_ticket_html`
@@ -379,6 +377,14 @@ A real payment service (turned on in WooCommerce when the merchant account
 exists), ticket transfers between people, per-ticket fields in the block
 checkout, holding places for orders that wait for payment, and filling events
 from `scout-setup.json` (Scout Build needs an `events` section first).
+
+## What this feature needs from the theme
+
+- Custom properties the event pages and lists read, each with a neutral fallback: `--scout-events-accent`, `--scout-events-on-accent`, `--scout-events-line`, `--scout-events-muted`, `--scout-events-inset`, `--scout-events-radius`. Set them on `:root`. Fonts and text color come from the theme.
+- No template. Event, session and speaker pages fill themselves in through `the_content()`, and the types have no list pages of their own. A theme that places the pieces in its own template turns that off with the `scout_events_auto_content` filter and uses `scout_event_data()`, `scout_events_schedule_html()` and `scout_events_upcoming()`.
+- Pages that hold the shortcodes: an events page with `[scout_events]`, and pages for the rest where the site uses them (`[scout_speakers]`, `[scout_schedule]`, `[scout_directory]`, `[scout_topics]`, `[scout_regions]`, `[scout_vendors]`, `[scout_vendor_apply]`, `[scout_volunteer]`, `[scout_presenter_portal]`).
+- `wp_head()` for the event schema when Scout Core is off.
+- Tickets, the newsletter box and CRM ride on other plugins, not the theme.
 
 <!-- visitor-data:start -->
 ## Visitor data

@@ -55,6 +55,10 @@ this plugin does nothing.
 The timestamp is signed, so a cached form stays valid for up to a day. The
 honeypot and signature work regardless of caching.
 
+## What this feature needs from the theme
+
+- Nothing. The guard hooks Gravity Forms itself. The honeypot, time trap, token and message check ride on the form, and the hidden upload check runs before the theme loads. A theme that prints forms from a template needs no extra call.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

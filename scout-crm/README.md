@@ -46,6 +46,10 @@ nothing.
 
 Needs FluentCRM. Without it the plugin does nothing and says so on its page.
 
+## What this feature needs from the theme
+
+- Nothing. The sync runs in the dashboard and on other plugins' hooks (`scout_events_person`, `scout_events_ticket_bought`, `scout_members_status_changed`) and prints nothing on the site. It needs FluentCRM, not the theme.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

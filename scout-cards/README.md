@@ -61,6 +61,14 @@ the option.
 - `assets/cards.css`: card styles (scoped to `.scc`)
 - `assets/qrcode.min.js`: qrcode-generator 1.4.4 by Kazuhiko Arase (MIT)
 
+## What this feature needs from the theme
+
+- No theme tokens. The card pages carry their own `--scc-*` variables under `.scc`, with the accent color and light or dark mode set on the Cards and links screen.
+- The theme's stylesheet. The card pages call `wp_head()`, so the theme's CSS loads and the card inherits the site's body font. The font setting overrides it.
+- No page or template. The plugin owns `/card/` and `/links/` and prints its own `<head>`.
+- A Site Icon (Settings, General) for the logo and the home-screen icon. That is a WordPress setting, not a theme file.
+- A theme with its own cards screen says so through the `scout_cards_theme_has_cards` filter, or by defining `scout_cards_admin_page()`, and the plugin stands down.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

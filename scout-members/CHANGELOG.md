@@ -1,5 +1,9 @@
 # Scout Members changelog
 
+## 0.4.8 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.4.7 (2026-11-05)
 
 - **Fuller privacy export.** Export Personal Data now includes staff notes and any payment flagged for review. Erasing now says the login stays.

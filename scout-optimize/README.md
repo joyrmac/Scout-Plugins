@@ -79,6 +79,13 @@ npx @wordpress/env start  # disposable WordPress with the plugin mounted
 3. Clients never see quality controls; all admin surfaces sit behind the
    `manage_scout_optimize` capability.
 
+## What this feature needs from the theme
+
+- Nothing for images. Every `<img>` the page prints is rewritten on the way out, whether it came from the editor, `wp_get_attachment_image()` or template markup, so the theme adds no call.
+- No tokens. The plugin prints nothing a visitor sees.
+- One filter when the theme prints a Gravity Form from a template instead of the page content: `scout_optimize_form_ids` names the form IDs so their scripts load in `<head>`. A form in a shortcode or block needs nothing.
+- Optional: `scout_async_styles` names stylesheet handles to load without blocking (default `scout-chat` and `scout-reviews`). A theme adds its own handles there if it wants the same.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

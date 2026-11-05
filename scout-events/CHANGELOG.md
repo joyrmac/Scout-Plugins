@@ -1,5 +1,9 @@
 # Scout Events changelog
 
+## 0.16.8 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.16.7 (2026-11-05)
 
 - **Privacy tools reach presenters.** Export Personal Data now lists a presenter's application, profile, private details and changes waiting for approval, found by their login email or the profile's contact email. Erasing removes the private details and waiting changes. The public profile and the login stay for staff to remove by hand, and the tool says so.

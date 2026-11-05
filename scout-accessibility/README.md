@@ -83,6 +83,14 @@ Options `scout_accessibility`, `scout_accessibility_results`,
 `scout_accessibility_launch` and the weekly event. Uninstall removes them all,
 and removes the Accessibility page only if nobody has edited it.
 
+## What this feature needs from the theme
+
+- Custom properties the statement reads, each with a fallback: `--scout-a11y-gap`, `--scout-a11y-radius`, `--scout-a11y-border`, `--scout-a11y-muted`. Fonts and colors come from the theme.
+- A footer menu assigned to a theme menu location. "Add it to a menu" puts the Accessibility page in the menu you pick, and the weekly check looks for the link in the menus the theme has assigned.
+- Or a spot for `[scout_accessibility_link]` in a footer widget, block or template part, or the automatic link after `wp_footer()` (off by default).
+- No page to make. The statement page is created from the settings screen.
+- Nothing to call.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

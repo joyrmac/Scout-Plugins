@@ -1,5 +1,9 @@
 # Scout CRM Sync changelog
 
+## 0.1.6 (2026-11-05)
+
+- **README says what this feature needs from the theme: nothing.** The new "What this feature needs from the theme" section, so the list is complete across every plugin (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.1.5 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** The contacts live in FluentCRM, so the list now says to export or delete a person there. No code changed.

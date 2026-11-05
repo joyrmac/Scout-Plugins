@@ -1,5 +1,9 @@
 # Scout Team changelog
 
+## 0.3.1 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.3.0 (2026-11-05)
 
 - **Add a person is a short walkthrough.** The People screen's Add a person button now opens three steps on one screen inside the People section, with a numbered progress row: who they are (name, title, groups with Team ticked), photo and short bio (a photo from the media library, its alt text, which uses their name when empty), and where they show (the same Shows on switches and defaults, plus Writes posts as, which turns the byline on). Save as draft, Publish, or Save and send them a link. It saves through the edit screen's own code, so the profile, groups and defaults are the same, then opens the full edit screen with "Add credentials and links here when you have them." It works without JavaScript too: all three steps show and the photo is a plain upload. "Use the full editor" still opens WordPress's own Add screen.

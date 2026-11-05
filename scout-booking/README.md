@@ -172,12 +172,11 @@ requests unpaid after the pay window, and sends reminders.
 - `scout_booking_types_saved` after session types change.
 - `scout_booking_now` filters the clock (tests).
 
-## Front-end styles
+## What this feature needs from the theme
 
-`assets/scout-booking.css` loads only where the shortcode is. Fonts and text
-color come from the theme. Colors are custom properties a theme can set:
-`--scout-booking-accent`, `--scout-booking-on-accent`, `--scout-booking-line`,
-`--scout-booking-inset`, `--scout-booking-radius`, `--scout-booking-danger`.
+- Custom properties the booking steps read, each with a neutral fallback: `--scout-booking-accent`, `--scout-booking-on-accent`, `--scout-booking-line`, `--scout-booking-inset`, `--scout-booking-radius`, `--scout-booking-danger`. Set them on `.sb` or `:root`. Fonts and text color come from the theme.
+- A page holding `[scout_booking]`. The first published page that shows the form becomes the booking page for email links, the call bar and the chat (`scout_booking_url()`). Settings can change it.
+- Nothing else. `assets/scout-booking.css` loads only where the shortcode is, and the three steps are plain page addresses, so no template or script comes from the theme.
 
 ## Data
 

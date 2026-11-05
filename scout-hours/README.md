@@ -31,11 +31,6 @@ carries a two-week plan with every moment already worked out on the server,
 and a small script picks the right line every minute, so a cached page still
 says "Open now" at the right time. Without scripts the server's line shows.
 
-Front-end CSS and JS load only on pages that show the hours or the bar. Every
-color is a custom property (`--scout-hours-open`, `--scout-hours-closed`,
-`--scout-hours-line`, `--scout-hours-today`, `--scout-hours-bar-bg`,
-`--scout-hours-bar-text`); fonts and text color come from the theme.
-
 ## Schema
 
 - **Scout Core active:** `openingHoursSpecification` and
@@ -66,6 +61,14 @@ The notice bar's close button sends `hours_notice_hide` through
 
 Options `scout_hours`, `scout_hours_closures`, `scout_hours_dismissed`.
 All three are removed when the plugin is deleted.
+
+## What this feature needs from the theme
+
+- Custom properties, each with a neutral fallback: `--scout-hours-open`, `--scout-hours-closed`, `--scout-hours-line`, `--scout-hours-today`, `--scout-hours-bar-bg`, `--scout-hours-bar-text`. Fonts and text color come from the theme. The CSS and script load only on pages that show the hours or the bar.
+- `[scout_hours]` on a page, or `scout_hours_html( array( 'show' => 'status' ) )` in a template, where the hours belong. `scout_hours_status()` and `scout_hours_data()` give the live status as plain data.
+- `wp_body_open()` right after `<body>`, so the holiday bar sits at the top. A theme without it still gets the bar, pinned to the bottom from `wp_footer()`.
+- The theme's own hours line stands down while `scout_core_owns( 'hours' )` is true (Site Standard rule 6).
+- `wp_head()` for the hours schema when Scout Core is off.
 
 <!-- visitor-data:start -->
 ## Visitor data

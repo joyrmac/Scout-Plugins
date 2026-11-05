@@ -49,11 +49,11 @@ date are kept on each result as the record.
 | `[scout_results filters="no"]` | The grid without filters |
 | `[scout_result id="12"]` | One result |
 
-## Styling
+## What this feature needs from the theme
 
-The grid inherits the theme's fonts and colors. A theme can set these on
-`.scout-results`: `--scout-results-surface`, `--scout-results-border`,
-`--scout-results-accent`, `--scout-results-radius`, `--scout-results-gap`.
+- Custom properties set on `.scout-results`: `--scout-results-surface`, `--scout-results-border`, `--scout-results-accent`, `--scout-results-radius`, `--scout-results-gap`. The grid inherits the theme's fonts and colors.
+- A page holding `[scout_results]` (the results page), or `[scout_result id=""]` where one result belongs. Results have no list page of their own.
+- Nothing to call. The prior-results wording comes from Settings or from Scout Law.
 
 ## Analytics
 

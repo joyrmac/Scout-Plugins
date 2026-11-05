@@ -32,6 +32,12 @@ bindings so the theme can display them.
 That split is what lets a small team maintain one platform across the whole
 roster instead of N bespoke codebases.
 
+## What this feature needs from the theme
+
+- No tokens and no styles. The plugin registers content types only.
+- Block Bindings in the theme's templates (`scout/field` with the field key: `icon`, `summary`, `highlight` on an amenity; `hookups`, `nightly`, `monthly`, `max_length` on a site type), or `scout_core_field()` in a classic template, to show the fields.
+- An Amenities page at `/amenities/`. The amenity type has no list page of its own, so that page and its menu link belong to the site.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

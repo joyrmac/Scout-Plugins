@@ -1,5 +1,9 @@
 # Scout Booking changelog
 
+## 0.2.2 (2026-11-05)
+
+- **README lists what this feature needs from the theme.** The tokens it reads, the calls, theme supports and filters a theme adds, and the pages it expects, in one "What this feature needs from the theme" section (Site Standard rule 4, status item F9). No code changed.
+
 ## 0.2.1 (2026-11-05)
 
 - **Privacy tools keep paid bookings.** WordPress's Erase Personal Data tool still deletes a person's unpaid bookings. A booking that took money now stays as the payment record, with the name, email, phone and answers taken out, and the tool says so. The export also lists the amount paid, the order number and whether the newsletter box was ticked.

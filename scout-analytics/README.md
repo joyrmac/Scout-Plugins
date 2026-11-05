@@ -52,6 +52,15 @@ Scout Build (or Site Build) → Visits and cookies.
 
 Filter `scout_analytics_is_live` overrides the live-site check.
 
+## What this feature needs from the theme
+
+- No tokens. The notice carries its own colors. Its button takes the site's brand color from Scout Build (the theme's `DESIGN.md` `accent_fill` when there is one), else the `scout_brand_accent` filter, else Scout's cerulean.
+- `data-theme="dark"` on the `<html>` element when the site shows dark mode. The notice switches its colors on that attribute.
+- `wp_head()`, `wp_body_open()` and `wp_footer()`. Consent defaults print in the head, the Tag Manager no-script frame right after `<body>`, and the notice and script in the footer.
+- A privacy policy page, picked in Settings (the site's privacy page by default). The notice links to it.
+- Optional: a "Privacy choices" link in the footer, either `[scout_privacy_choices]` or any link to `#privacy-choices`.
+- Optional: `data-scout-track="event_name"` on a theme link whose clicks should be counted, and `data-scout-view` for a view. The call bar, cards and booking already carry theirs.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

@@ -85,6 +85,12 @@ Through Scout Analytics: `chat_open`, `chip_click`, `handoff`,
 - Transcripts are trimmed (30 messages, 1,500 characters each) and stored as
   private posts that only editors can see.
 
+## What this feature needs from the theme
+
+- Tokens the chat panel reads, each with a fallback: `--bg`, `--surface`, `--surface-2`, `--text`, `--text-2`, `--text-3`, `--line`, `--accent`, `--accent-text`, `--font-sans`, `--font-mono`.
+- `wp_head()` and `wp_footer()`, so the stylesheet and the script that draws the button and panel load. The `scout_chat_show` filter hides it on a page.
+- A booking page. "Book a call" reads Scout Booking's page through `scout_booking_url()`, or the link in Settings, else `/contact/`. "Our work" needs its link in Settings.
+
 <!-- visitor-data:start -->
 ## Visitor data
 

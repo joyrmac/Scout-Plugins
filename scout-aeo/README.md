@@ -29,6 +29,11 @@ Release it (`scout-aeo-v0.1.0`), then on each site: **Site Build → Your
 features → AI search → Turn on**. Then add answers to the pages that bring in
 business. Copy follows each client's claims rules (bar rules for law firms).
 
+## What this feature needs from the theme
+
+- Nothing. The questions box prints at the end of `the_content()` with its own small styles drawn from `currentColor`, `/llms.txt` and `robots.txt` are served by the plugin, and IndexNow runs on publish.
+- Optional: `[scout_faq]` moves the answers to a chosen spot on a page, and the `scout_aeo_llms_txt` filter keeps a hand-written guide (the Scout Media theme uses it).
+
 <!-- visitor-data:start -->
 ## Visitor data
 
