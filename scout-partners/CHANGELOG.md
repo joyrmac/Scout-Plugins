@@ -1,6 +1,6 @@
 # Scout Partners changelog
 
-## Unreleased (2026-11-05)
+## 0.1.9 (2026-11-05)
 
 - **Colors and fonts from DESIGN.md (Site Standard rule 3):** partner cards now read the theme's DESIGN.md line and card corner (from `design-tokens.css`) when the theme does not set `--scout-partners-line` or `--scout-partners-radius`. Sites that set them, or set neither, look exactly the same.
 - **Home opens with the status line** ("8 partners on the site." with clicks this month and how many end within 30 days) instead of a row of 4 to 6 numbers. Ending within 30 days is a list of rows with the dates as a tag. Shorter lede and help.

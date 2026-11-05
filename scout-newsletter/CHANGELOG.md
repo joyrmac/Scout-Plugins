@@ -1,6 +1,6 @@
 # Scout Newsletter changelog
 
-## Unreleased (2026-11-05)
+## 0.1.8 (2026-11-05)
 
 - **Status line is a headline and one sentence** ("Connected to …" and whether sending is on). The counts moved to tags in Who said yes. Queued and waiting records use a calm pill, failed ones red.
 - **One filled button.** Send them to Beehiiv is outlined so Save is the screen's one primary. Tables have no zebra stripes. On white-label sites the note for people who can't change settings says "Your web team looks after these settings". Shorter help.

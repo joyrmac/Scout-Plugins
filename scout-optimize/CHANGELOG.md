@@ -1,6 +1,6 @@
 # Changelog — scout-optimize
 
-## Unreleased (2026-11-05)
+## 0.9.10 (2026-11-05)
 
 - **Image optimizer.** The status line is a headline and one sentence, with Shrink older photos as its button. The settings are one box (what to do, quality, largest size) instead of cards, and the server facts sit in More options. Plainer labels: "Make WebP copies (a smaller image format every browser shows)", "Make AVIF copies (a newer format, smaller still, if the server can)", "Show visitors the smaller copies". The setting keys are unchanged.
 - **Shrink older photos** opens with a status line ("12 images to shrink. 30 of 42 done (71%).") with Start or Stop, and a progress meter, instead of four number cards.

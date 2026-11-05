@@ -1,6 +1,6 @@
 # Scout Cards changelog
 
-## Unreleased (2026-11-05)
+## 1.1.0 (2026-11-05)
 
 - **Takes over the business cards from the Scout Media theme, with nothing changing for visitors (Site Standard rules 6, 7 and 20).** Scout Cards now stands down only while the theme still draws cards (its Cards screen and its card builder both loaded). Scout Media 1.54.0 loads neither while this plugin is active, so the plugin takes over every card address.
 - **One-time copy from the theme.** On the first page load after the theme stands down, the theme's saved card settings (`scout_cards`, read through the theme's `scout_card_settings()` when it has it) are copied into this plugin's settings: the main card name and company name, phone, email, city, state, ZIP, footer line, contact note, intros, Spotlight, link rows, Latest from the blog, and the social links the theme showed. Only empty fields are filled, and a value that already matches Business info stays empty so it keeps following Business info. Each theme card person becomes a card record unless one with that link name is there, and the People move then links them to their People profiles, never overwriting a People value. Recorded once in the new `scout_cards_theme_import` option. The theme's own option is left as it was, so turning the plugin off brings the theme's cards back. The Cards screen says once that the cards came from the theme.

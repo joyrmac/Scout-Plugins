@@ -1,6 +1,6 @@
 # Scout Core — Changelog
 
-## Unreleased (2026-11-05)
+## 1.10.0 (2026-11-05)
 
 - **Screen cleanup (Joy's dashboard review).** Page copy opens with its status line only: the row of up to six numbers is gone, since the status line already counts. Its two boxes each open with one sentence, the extra note sits behind More, and only Sync these now is a filled button (Keep the WordPress copy is outlined). Page copy errors say "Page copy" instead of the old name Site Sync. The comparison table has no zebra stripes.
 - **Privacy & terms.** Each document's state uses the kit's dot and word (an amber dot only when it changed after approval) instead of hand-made symbols, and only the first Make the page button is filled. The lede is one sentence. The settings-group screens use the kit's colors, corners and text size, and fill the kit's column instead of a narrower 900px box. The select placeholder reads "Select one" (no dashes). The staging notice says "your web team" on white-label sites.

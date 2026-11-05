@@ -1,6 +1,6 @@
 # Scout Events changelog
 
-## Unreleased (2026-11-05)
+## 0.16.8 (2026-11-05)
 
 - **Colors and fonts from DESIGN.md (Site Standard rule 3):** event cards, the ticket and the portals now read the theme's DESIGN.md (accent fill, on accent, line, muted text, surface 2 and card corner, from `design-tokens.css`) when the theme does not set `--scout-events-*`. Sites that set them, or set neither, look exactly the same.
 - **Events home opens with the status line** ("4 things need you. Next up: Spring Summit, …" with a See what button) instead of five number cards. The counts of events, sessions and speakers are one line in Coming up. The overview table has no zebra stripes. A Postponed or Moved event shows a plain tag, and Cancelled a red one, instead of amber.

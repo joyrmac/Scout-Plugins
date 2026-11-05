@@ -1,6 +1,6 @@
 # Scout Writing changelog
 
-## Unreleased (2026-11-05)
+## 0.1.7 (2026-11-05)
 
 - **Writing room names Scout only on Scout-branded sites.** "Send to Scout", "Sent to Scout", the private note and the email subject say "your web team" on white-label sites. "Let Joy or Sean know" is now "Let Scout know" (or "your web team").
 

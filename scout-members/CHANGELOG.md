@@ -1,6 +1,6 @@
 # Scout Members changelog
 
-## Unreleased (2026-11-05)
+## 0.4.8 (2026-11-05)
 
 - **Colors and fonts from DESIGN.md (Site Standard rule 3):** the membership pages now read the theme's DESIGN.md (accent fill, on accent, line, surface 2 and card corner, from `design-tokens.css`) when the theme does not set `--scout-members-*`. Sites that set them, or set neither, look exactly the same.
 - **All members rows stack**: name and email with one Edit button, then status, plan, renewal and payment tags. Edit opens the status, plan, renewal price and date fields under the row, with Save and a quiet Paid today. Without scripts the fields stay open. Real warnings (past due, lapsed, payment to review) keep amber; "Approved, dues not paid yet" is calm.

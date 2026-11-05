@@ -1,6 +1,6 @@
 # Scout Redirects changelog
 
-## Unreleased (2026-11-05)
+## 0.2.0 (2026-11-05)
 
 - **One status line instead of three stat cards (Joy, 2026-11-05).** "4 redirects live. Visitors tried 12 missing addresses in the last 7 days, and 1 link on your own pages is broken." It turns amber only when a link on the site's own pages is broken, with a quiet link down to them.
 - **One primary button.** Add redirect is the screen's main button; Save settings and Import in More options are outlined.

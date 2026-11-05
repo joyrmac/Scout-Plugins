@@ -1,6 +1,6 @@
 # Scout Team changelog
 
-## Unreleased (2026-11-05)
+## 0.4.0 (2026-11-05)
 
 - **Business card box on the People profile (Joy, 2026-11-05).** The Card only phone and email grew into a Business card box under Profile: Intro (one or two sentences in their own voice), Why talk to them (one line for the team card), Tags (comma separated), Card phone and Card email. Stored in the profile like every other field (`card_intro`, `card_why`, `card_tags`), through the same clean and store path. Scout Cards reads them through `Scout_Team::card()` (`intro`, `why`, `tags`), so they are typed once, in People.
 - **Card words stay card only.** Like the card phone and email, they never show on the profile page or the team page, never go into the schema and are never sent by the REST API. `Scout_Team::card_keys()` lists all five.

@@ -1,6 +1,6 @@
 # Scout Build changelog
 
-## Unreleased (2026-11-05)
+## 0.13.0 (2026-11-05)
 
 - **One name for the client's view: "What's new on your site".** Clients see it in the menu, the screen title, the Home link ("See everything that's new") and the dashboard widget. Scout still sees "Site history".
 

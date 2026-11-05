@@ -1,6 +1,6 @@
 # Scout AI Search changelog
 
-## Unreleased (2026-11-05)
+## 0.2.11 (2026-11-05)
 
 - **Status line is a headline and one sentence.** Each switch already shows its own state, so the training, guide page, Bing and Q&A sentences came off the status line. The robots.txt note sits behind More. View the AI guide page and View search engine rules are two links, not a dot list. Shorter help.
 

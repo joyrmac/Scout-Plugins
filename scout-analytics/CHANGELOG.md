@@ -1,6 +1,6 @@
 # Scout Analytics changelog
 
-## Unreleased (2026-11-05)
+## 0.1.22 (2026-11-05)
 
 - **Two fields had the same label.** The Tag Manager field is now "Tag Manager code" and the one in More options "GA4 code (no Tag Manager)". The setting keys are unchanged.
 - **Status line is a headline and one sentence.** The box intro is one sentence; the Global Privacy Control note moved under the consent choice. Shorter help.

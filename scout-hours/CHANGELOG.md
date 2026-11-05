@@ -1,6 +1,6 @@
 # Scout Hours changelog
 
-## Unreleased (2026-11-05)
+## 0.1.15 (2026-11-05)
 
 - **Colors and fonts from DESIGN.md (Site Standard rule 3):** the hours table and the notice bar now read the theme's DESIGN.md line, surface 2, accent fill and on accent (from `design-tokens.css`) when the theme does not set `--scout-hours-*`. Sites that set them, or set neither, look exactly the same.
 - **Hours opens with the status line** ("Hours are on the site." or "Hours aren’t on the site yet.") instead of an amber pill in an amber-bordered box. The confirm box is now "Owner’s OK" with one short line and the tick box.

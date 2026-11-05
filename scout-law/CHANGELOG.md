@@ -1,6 +1,6 @@
 # Scout Law Firm Tools changelog
 
-## Unreleased (2026-11-05)
+## 0.4.4 (2026-11-05)
 
 - **Old names.** Attorney sign-offs says People instead of the Team screen and Team profile.
 - **Status lines.** Disclaimers and Firm approvals open with a status line, and Attorney sign-offs and Form entries use the kit's dot instead of hand-made symbols. "Needs the firm’s approval" is a calm pill; "Changed since approval" keeps amber. No ◆ marks on statuses.

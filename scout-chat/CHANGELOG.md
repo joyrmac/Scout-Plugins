@@ -1,6 +1,6 @@
 # Scout Chat changelog
 
-## Unreleased (2026-11-05)
+## 0.3.6 (2026-11-05)
 
 - **Colors and fonts from DESIGN.md (Site Standard rule 3):** the panel's colors and fonts now read the theme's DESIGN.md (the `--scout-*` names from `design-tokens.css`) when the theme's own `--surface`, `--accent` and the rest are not set; white text on the accent reads DESIGN.md's on accent. Sites that set them, or set neither, look exactly the same.
 - **Status line is one sentence (Joy, 2026-11-05).** "On. 2 questions are waiting." plus one line. Whether the AI server is connected moved into More options: AI connection, as its own small status line.
