@@ -65,6 +65,7 @@ require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-head.php';
 require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-box.php';
 require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-sitemap.php';
 require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-breadcrumbs.php';
+require_once SCOUT_CORE_DIR . 'includes/seo/class-seo-empty-searches.php';
 
 /* ---- SEO global defaults, the unified Scout admin, and the update tracker ---- */
 require_once SCOUT_CORE_DIR . 'includes/seo/seo-settings.php';
@@ -136,6 +137,7 @@ Scout_SEO_Head::init();
 Scout_SEO_Box::init();
 Scout_SEO_Sitemap::init();
 Scout_SEO_Breadcrumbs::init();
+Scout_SEO_Empty_Searches::init();
 Scout_Schema_Conflicts::init();
 
 /* The one Scout menu (Dashboard / Business / SEO). */

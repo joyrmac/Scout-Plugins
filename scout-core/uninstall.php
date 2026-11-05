@@ -28,6 +28,10 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // the next update check.
 delete_transient( 'scout_updater_scout-core' );
 
+// The list of searches that found nothing is visitor data, not the client's
+// work, so it goes with the plugin. Its 30-minute transients expire on their own.
+delete_option( 'scout_core_empty_searches' );
+
 $scout_core_settings = get_option( 'scout_seo_defaults', array() );
 $scout_core_purge    = is_array( $scout_core_settings ) && ! empty( $scout_core_settings['purge_on_uninstall'] );
 

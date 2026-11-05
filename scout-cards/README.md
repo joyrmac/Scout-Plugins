@@ -66,7 +66,7 @@ the option.
 
 This plugin keeps nothing about the people who visit the site and sets no cookies.
 
-The card, contact file and link pages only show the team's own details. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site.
+The card, contact file and link pages only show the team's own details: each person's name, title, photo, card phone and card email come from their People profile, and only for people with Card switched on. The QR code is drawn in the visitor's browser, and the share and copy buttons use the visitor's own device; nothing is sent back to the site.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->
