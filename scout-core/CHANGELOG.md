@@ -1,5 +1,9 @@
 # Scout Core — Changelog
 
+## Unreleased (2026-11-05)
+
+- **Turn off the code editor.** A new Spam protection switch (on by default) does what DISALLOW_FILE_EDIT in wp-config.php does: the theme and plugin code editors leave wp-admin, so a stolen login can't change site code (Site Standard rule 22). A value set in wp-config.php still wins. Nothing visitors see changes.
+
 ## 1.10.0 (2026-11-05)
 
 - **Screen cleanup (Joy's dashboard review).** Page copy opens with its status line only: the row of up to six numbers is gone, since the status line already counts. Its two boxes each open with one sentence, the extra note sits behind More, and only Sync these now is a filled button (Keep the WordPress copy is outlined). Page copy errors say "Page copy" instead of the old name Site Sync. The comparison table has no zebra stripes.

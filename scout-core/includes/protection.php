@@ -58,6 +58,7 @@ final class Scout_Core_Protection {
 			'hide_users'      => 'Hide login names from visitors',
 			'xmlrpc_off'      => 'Turn off XML-RPC',
 			'browser_headers' => 'Send basic browser protections',
+			'file_edit_off'   => 'Turn off the code editor',
 		);
 	}
 
@@ -78,6 +79,18 @@ final class Scout_Core_Protection {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_guard' ), 9999 );
 		add_action( 'init', array( __CLASS__, 'maybe_close_comments' ), 20 );
 		add_action( 'init', array( __CLASS__, 'maybe_harden' ), 20 );
+		add_action( 'plugins_loaded', array( __CLASS__, 'maybe_lock_editor' ), 0 );
+	}
+
+	/**
+	 * Site Standard rule 22: no editing theme or plugin code from wp-admin. Same as
+	 * DISALLOW_FILE_EDIT in wp-config.php, set from here so nobody has to edit that file.
+	 * A value already set in wp-config.php always wins.
+	 */
+	public static function maybe_lock_editor() {
+		if ( self::on( 'file_edit_off' ) && ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+			define( 'DISALLOW_FILE_EDIT', true );
+		}
 	}
 
 	public static function register_settings() {
@@ -481,6 +494,7 @@ final class Scout_Core_Protection {
 			'hide_users'      => 'Visitors cannot look up login names, which are half of a password guess.',
 			'xmlrpc_off'      => 'XML-RPC is an old way to post from other apps that bots use to guess passwords. It stays on with Jetpack.',
 			'browser_headers' => 'Tells browsers to use a secure connection and not let other sites frame your pages. Hides the WordPress version.',
+			'file_edit_off'   => 'Hides the theme and plugin code editors in WordPress, so a stolen login can\'t change site code.',
 		);
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'scout_protection_group' );

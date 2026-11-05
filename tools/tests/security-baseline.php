@@ -47,7 +47,7 @@ ok( 'warn' === $r['state'] && ! isset( $r['link'] ) && false !== strpos( $r['not
 // File editing.
 ok( 'good' === $S::file_edit_row( true )['state'], 'file editing off is ok' );
 $r = $S::file_edit_row( false );
-ok( 'warn' === $r['state'] && false !== strpos( $r['note'], "DISALLOW_FILE_EDIT" ) && false !== strpos( $r['note'], 'wp-config.php' ), 'file editing on wants a look and says how to turn it off' );
+ok( 'warn' === $r['state'] && false !== strpos( $r['note'], 'Turn off the code editor' ), 'file editing on wants a look and says how to turn it off' );
 
 // Admins.
 $admin = static fn( $name, $login, $last, $reg = 0 ) => array( 'name' => $name, 'login' => $login, 'last' => $last, 'registered' => $reg ?: $now - 400 * $day, 'two_step' => null );

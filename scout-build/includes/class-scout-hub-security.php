@@ -185,7 +185,7 @@ final class Scout_Hub_Security {
 			'state' => $off ? 'good' : 'warn',
 			'note'  => $off
 				? __( 'Nobody can change theme or plugin code from inside WordPress.', 'scout-build' )
-				: __( 'Admins can change theme and plugin code in WordPress. Turn it off in wp-config.php: define( \'DISALLOW_FILE_EDIT\', true );', 'scout-build' ),
+				: __( 'Admins can change theme and plugin code in WordPress. Turn on "Turn off the code editor" in Spam protection (Scout Core 1.10.1 and up).', 'scout-build' ),
 		);
 	}
 
