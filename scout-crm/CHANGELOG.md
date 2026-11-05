@@ -1,6 +1,6 @@
 # Scout CRM Sync changelog
 
-## Unreleased (2026-11-05)
+## 0.1.5 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** The contacts live in FluentCRM, so the list now says to export or delete a person there. No code changed.
 

@@ -1,6 +1,6 @@
 # Scout Site Check changelog
 
-## Unreleased (2026-11-05)
+## 0.2.11 (2026-11-05)
 
 - **Privacy tools reach check requests.** WordPress's Export and Erase Personal Data tools now find a person's check requests by email. Erasing deletes them and clears the count that limits checks per email.
 

@@ -1,6 +1,6 @@
 # Scout Law Firm Tools changelog
 
-## Unreleased (2026-11-05)
+## 0.4.3 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** Gravity Forms decides whether WordPress's privacy tools reach form entries, so the list now says to turn on its Personal Data setting on each form. No code changed.
 

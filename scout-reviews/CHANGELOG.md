@@ -1,6 +1,6 @@
 # Scout Reviews: Changelog
 
-## Unreleased (2026-11-05)
+## 0.5.12 (2026-11-05)
 
 - **Visitor data list covers privacy requests.** The private note form asks for no email, so WordPress's privacy tools cannot find a note. The list now says to delete one by hand in New reviews. No code changed.
 

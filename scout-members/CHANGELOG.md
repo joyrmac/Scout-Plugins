@@ -1,6 +1,6 @@
 # Scout Members changelog
 
-## Unreleased (2026-11-05)
+## 0.4.7 (2026-11-05)
 
 - **Fuller privacy export.** Export Personal Data now includes staff notes and any payment flagged for review. Erasing now says the login stays.
 

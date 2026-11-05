@@ -1,6 +1,6 @@
 # Scout Chat changelog
 
-## Unreleased (2026-11-05)
+## 0.3.5 (2026-11-05)
 
 - **Privacy tools reach chat messages.** WordPress's Export and Erase Personal Data tools now find a visitor's chat messages by the email they gave, trashed ones included. Erasing deletes the messages. A message left with only a phone number is still deleted by hand.
 

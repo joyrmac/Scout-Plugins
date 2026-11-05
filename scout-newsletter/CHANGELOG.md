@@ -1,6 +1,6 @@
 # Scout Newsletter changelog
 
-## Unreleased (2026-11-05)
+## 0.1.7 (2026-11-05)
 
 - **Privacy tools reach Who said yes.** WordPress's Export and Erase Personal Data tools now find a person's newsletter records by email. Erasing keeps each record as proof of the yes, with the email replaced by a one-way code and the first name and extra fields removed, and stops any send still waiting. Beehiiv keeps its own copy, so remove the person there too.
 

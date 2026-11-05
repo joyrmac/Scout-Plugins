@@ -1,6 +1,6 @@
 # Scout Booking changelog
 
-## Unreleased (2026-11-05)
+## 0.2.1 (2026-11-05)
 
 - **Privacy tools keep paid bookings.** WordPress's Erase Personal Data tool still deletes a person's unpaid bookings. A booking that took money now stays as the payment record, with the name, email, phone and answers taken out, and the tool says so. The export also lists the amount paid, the order number and whether the newsletter box was ticked.
 

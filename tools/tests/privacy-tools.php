@@ -12,7 +12,7 @@ define( 'ARRAY_A', 'ARRAY_A' );
 /* ---------- which plugins must have privacy tools ---------- */
 
 // Plugins that keep a person's details where an email can find them.
-$must = array( 'scout-booking', 'scout-build', 'scout-chat', 'scout-events', 'scout-members', 'scout-newsletter', 'scout-sitecheck' );
+$must = array( 'scout-booking', 'scout-build', 'scout-chat', 'scout-events', 'scout-members', 'scout-newsletter', 'scout-sitecheck', 'scout-team' );
 // Plugins that keep something in the site's database but nothing an email can reach, and why.
 $exempt = array(
 	'scout-crm'       => 'FluentCRM holds the contacts',
