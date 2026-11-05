@@ -265,19 +265,22 @@ final class Scout_Hub_Form_Mail {
 
 	/** Entries (not spam, not trash) since a time, or null when Gravity Forms can't say. */
 	private static function entries_since( int $from ): ?int {
-		if ( ! method_exists( 'GFAPI', 'count_entries' ) || $from >= time() ) {
-			return 0;
+		// Home builds the checks more than once a page, so count once per page.
+		static $memo = array();
+		if ( array_key_exists( $from, $memo ) ) {
+			return $memo[ $from ];
 		}
-		try {
-			$forms = (array) GFAPI::get_forms();
-			if ( ! $forms ) {
-				return 0;
+		$n = 0;
+		if ( method_exists( 'GFAPI', 'count_entries' ) && $from < time() ) {
+			try {
+				$n = (array) GFAPI::get_forms() ? GFAPI::count_entries( 0, array( 'status' => 'active', 'start_date' => wp_date( 'Y-m-d H:i:s', $from ) ) ) : 0;
+				$n = is_numeric( $n ) ? (int) $n : null;
+			} catch ( Throwable $e ) {
+				$n = null;
 			}
-			$n = GFAPI::count_entries( 0, array( 'status' => 'active', 'start_date' => wp_date( 'Y-m-d H:i:s', $from ) ) );
-			return is_numeric( $n ) ? (int) $n : null;
-		} catch ( Throwable $e ) {
-			return null;
 		}
+		$memo[ $from ] = $n;
+		return $n;
 	}
 
 	/**
