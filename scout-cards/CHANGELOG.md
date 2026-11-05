@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
+- Card rows use the stacked layout: the name line with Card settings and Edit in People on the right, the card address, Share mode and QR code on a full-width line under it, so an open QR code no longer squeezes the row.
+
 - **What a card says now lives on the People profile (Joy, 2026-11-05).** Each person's intro, "why talk to them" and tags are edited in People, in its new Business card box, beside the card phone and card email. The card reads them from there, and uses its own saved words when People has none, or when Scout People is off.
 - **One-time copy, nothing changes for visitors.** On the first page load with a Scout People that has the Business card box, each card's intro, why and tags are copied into the person's profile, only where the profile field is empty. A People value is never overwritten, and the card keeps its own copy for the fallback. Every card, share page, contact file and the links page stay the same. The Cards screen says once how many profiles got them. Gated by `scout_cards_people_db` 2.
 - **The Cards screen is switches only while People is on.** Each person's Card settings has the link name and Show on the card (Phone, Email, Intro, Tags, Profile links, Short bio, Save contact), with Share mode, the QR code and Edit in People on the row. The share picture and Spotlight sit under a closed More. Intro and Tags are new switches; both start on, the way cards always showed them.

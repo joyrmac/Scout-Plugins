@@ -46,11 +46,8 @@
 .sbk-weekday { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; padding: 6px 0; border: 0; border-top: 1px solid var(--sh-border); }
 .sbk-weekday-name { width: 130px; font-weight: 600; }
 
-.sbk-types { margin: 0; padding: 0; list-style: none; }
-.sbk-type { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--sh-border); margin: 0; }
-.sbk-type:first-child { border-top: 0; }
-.sbk-type.is-off { opacity: .7; }
-.sbk-type p { margin: 0 0 3px; }
+/* Session types: the kit's stacked rows (.sh-rows.is-stacked). */
+.sbk-type.is-off .sh-row-name { color: var(--sh-text-2); }
 .sbk-questions { display: grid; gap: 8px; }
 .sbk-question { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .sbk-question input[type="text"] { flex: 1 1 280px; }

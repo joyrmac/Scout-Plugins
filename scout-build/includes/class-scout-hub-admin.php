@@ -379,7 +379,7 @@ final class Scout_Hub_Admin {
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'overview';
 		$lede = 'updates' === $tab ? __( 'Every update to this site in one place: theme, plugins, setup file, page copy and imports.', 'scout-build' ) : '';
 		if ( 'log' === $tab && $client_view ) {
-			$lede = __( 'What Scout has done on your website, and anything you have asked for.', 'scout-build' );
+			$lede = self::branded() ? __( 'What Scout has done on your website, and anything you have asked for.', 'scout-build' ) : __( 'What your web team has done on your website, and anything you have asked for.', 'scout-build' );
 		}
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
 		$site = trim( (string) preg_split( '/\s+[|–—-]\s+/u', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) )[0] );
@@ -509,19 +509,11 @@ final class Scout_Hub_Admin {
 		}
 		?>
 		<style>
-			.sh-ov-status{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
-			.sh-ov-status .sh-dot{width:10px;height:10px;border-radius:50%;flex:none}
-			.sh-ov-status .is-good{background:var(--sh-good)}.sh-ov-status .is-warn{background:var(--sh-warn)}.sh-ov-status .is-bad{background:var(--sh-bad,#F2553D)}
-			.sh-ov-status p{margin:0;font-size:17px;font-weight:600}
-			.sh-ov-rows{display:grid;gap:6px;margin-top:10px}
-			.sh-ov-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding:10px 12px;border-radius:10px;background:var(--sh-surface-2)}
-			.sh-ov-row .sh-num{font:600 20px/1 var(--sh-mono);margin:0;min-width:28px}
-			.sh-ov-row .sh-note{margin:0}
-			.sh-ov-do{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
-			.sh-ov-do a{display:grid;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid var(--sh-border);text-decoration:none;color:inherit}
-			.sh-ov-do a:hover{border-color:var(--sh-accent)}
-			.sh-ov-do b{color:var(--sh-text)}
-			.sh-ov-do span{font-size:13px;color:var(--sh-text-2)}
+			.sh-ov-do .sh-row{padding:12px 0}
+			.sh-ov-do .sh-row-name a{color:var(--sh-accent-text);text-decoration:none}
+			.sh-ov-do .sh-row-name a:hover{text-decoration:underline}
+			.sh-ov-ops{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:14px}
+			.sh-ov-ops .sh-label{margin:0 4px 0 0}
 			.sh-ov-log{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:6px}
 			.sh-ov-log li{display:grid;grid-template-columns:auto 1fr;gap:10px;color:var(--sh-text-2)}
 			.sh-ov-log .sh-when{font-family:var(--sh-mono);font-size:12px;color:var(--sh-text-3);padding-top:2px;white-space:nowrap}
@@ -534,19 +526,16 @@ final class Scout_Hub_Admin {
 		?>
 		<p class="sh-note" style="margin:8px 0 0"><a href="<?php echo esc_url( self::url( 'inbox' ) ); ?>"><?php esc_html_e( 'Open To do', 'scout-build' ); ?> &rsaquo;</a></p>
 
-		<section class="sh-box">
-			<div class="sh-ov-status">
-				<span class="sh-dot is-<?php echo esc_attr( $state ); ?>" aria-hidden="true"></span>
-				<p><?php echo esc_html( $line ); ?></p>
-				<a href="<?php echo esc_url( self::url( 'health' ) ); ?>"><?php esc_html_e( 'See the full report', 'scout-build' ); ?> &rsaquo;</a>
-			</div>
-			<p class="sh-note" style="margin-top:8px">
-				<?php
-				/* translators: 1: site name, 2: checks ready for AI search, 3: total AI checks */
-				echo esc_html( sprintf( __( '%1$s is ready for AI search on %2$d of %3$d checks.', 'scout-build' ), $site, $ready, count( $ai ) ) );
-				?>
-			</p>
-		</section>
+		<?php
+		// The kit status line (dot, a few bold words, one sentence, one quiet link).
+		self::status_line(
+			$state,
+			$line,
+			/* translators: 1: site name, 2: checks ready for AI search, 3: total AI checks */
+			sprintf( __( '%1$s is ready for AI search on %2$d of %3$d checks.', 'scout-build' ), $site, $ready, count( $ai ) ),
+			'<a class="button sh-quiet" href="' . esc_url( self::url( 'health' ) ) . '">' . esc_html__( 'See the full report', 'scout-build' ) . ' &rsaquo;</a>'
+		);
+		?>
 
 
 		<div>
@@ -582,7 +571,7 @@ final class Scout_Hub_Admin {
 							<li><span class="sh-when"><?php echo esc_html( wp_date( 'M j', strtotime( $row['date'] ) ) ); ?></span><span><?php echo esc_html( ( ! $operator && '' !== $row['client_text'] ) ? $row['client_text'] : $row['title'] ); ?></span></li>
 						<?php endforeach; ?>
 					</ul>
-					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : __( 'Everything Scout has done on your site', 'scout-build' ) ); ?> &rsaquo;</a></p>
+					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : ( self::branded() ? __( 'Everything Scout has done on your site', 'scout-build' ) : __( 'Everything done on your site', 'scout-build' ) ) ); ?> &rsaquo;</a></p>
 				<?php endif; ?>
 			</section>
 		</div>
@@ -602,28 +591,29 @@ final class Scout_Hub_Admin {
 			$do[] = array( admin_url( 'admin.php?page=scout&tab=business' ), __( 'Business info', 'scout-build' ), __( 'Name, phone, address and profiles, typed once.', 'scout-build' ) );
 		}
 		?>
-		<div class="sh-section-head"><p class="sh-eyebrow"><?php esc_html_e( 'Things you can do here', 'scout-build' ); ?></p></div>
-		<div class="sh-ov-do">
-			<?php foreach ( $do as list( $url, $title, $text ) ) : ?>
-				<a href="<?php echo esc_url( $url ); ?>"><b><?php echo esc_html( $title ); ?></b><span><?php echo esc_html( $text ); ?></span></a>
-			<?php endforeach; ?>
-		</div>
-		<section class="sh-box" style="margin-top:16px">
-			<p>
-				<?php echo esc_html( self::branded() ? __( 'Want something added or changed? Ask Scout.', 'scout-build' ) : __( 'Want something added or changed? Ask us.', 'scout-build' ) ); ?>
-				<a class="button" style="margin-left:8px" href="<?php echo esc_url( self::url( 'requests' ) ); ?>"><?php esc_html_e( 'Request a change', 'scout-build' ); ?></a>
-			</p>
-			<p class="sh-note" style="margin:10px 0 0"><a href="<?php echo esc_url( admin_url( 'profile.php#scout-comfort' ) ); ?>"><?php esc_html_e( 'Make these screens easier to read: larger text, less motion', 'scout-build' ); ?> &rsaquo;</a></p>
+		<section class="sh-box sh-ov-do">
+			<h2 class="sh-title"><?php esc_html_e( 'Things you can do here', 'scout-build' ); ?></h2>
+			<ul class="sh-rows">
+				<?php foreach ( $do as list( $url, $title, $text ) ) : ?>
+					<li class="sh-row">
+						<div>
+							<p class="sh-row-name"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?> &rsaquo;</a></p>
+							<p class="sh-row-sub"><?php echo esc_html( $text ); ?></p>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 		</section>
 		<?php if ( $operator ) : ?>
-			<p class="sh-note" style="margin-top:14px">
-				<?php esc_html_e( 'Operators:', 'scout-build' ); ?>
-				<a href="<?php echo esc_url( self::url( 'features' ) ); ?>"><?php esc_html_e( 'Features', 'scout-build' ); ?></a> ·
-				<a href="<?php echo esc_url( self::url( 'updates' ) ); ?>"><?php esc_html_e( 'Updates', 'scout-build' ); ?></a> ·
-				<a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Site history', 'scout-build' ); ?></a>
+			<p class="sh-ov-ops">
+				<span class="sh-label"><?php echo esc_html( method_exists( 'Scout_Admin_UI', 'label' ) ? Scout_Admin_UI::label( 'build' ) : __( 'Scout tools', 'scout-build' ) ); ?></span>
+				<a class="button sh-quiet" href="<?php echo esc_url( self::url( 'features' ) ); ?>"><?php esc_html_e( 'Features', 'scout-build' ); ?></a>
+				<a class="button sh-quiet" href="<?php echo esc_url( self::url( 'updates' ) ); ?>"><?php esc_html_e( 'Updates', 'scout-build' ); ?></a>
+				<a class="button sh-quiet" href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php esc_html_e( 'Site history', 'scout-build' ); ?></a>
 			</p>
 		<?php endif; ?>
 		<?php self::more_features(); ?>
+		<p class="sh-note" style="margin-top:16px"><a href="<?php echo esc_url( admin_url( 'profile.php#scout-comfort' ) ); ?>"><?php esc_html_e( 'Make these screens easier to read: larger text, less motion', 'scout-build' ); ?> &rsaquo;</a></p>
 		<?php
 	}
 
@@ -649,23 +639,24 @@ final class Scout_Hub_Admin {
 			return;
 		}
 		?>
-		<details class="sh-box" style="margin-top:16px">
-			<summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center">
-				<?php
-				/* translators: %d: recommended features */
-				echo esc_html( sprintf( _n( 'More features: %d recommended for you', 'More features: %d recommended for you', count( $list ), 'scout-build' ), count( $list ) ) );
-				?>
-			</summary>
-			<ul class="sh-list" style="margin-top:8px">
+		<?php
+		/* translators: %d: recommended features */
+		self::fold_open( sprintf( _n( 'More features: %d recommended for you', 'More features: %d recommended for you', count( $list ), 'scout-build' ), count( $list ) ) );
+		?>
+			<ul class="sh-rows">
 				<?php foreach ( $list as $slug => $f ) : ?>
 					<?php $ask = sprintf( /* translators: %s: feature */ __( 'Please add %s to our site.', 'scout-build' ), $f['name'] ); ?>
-					<li style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 0">
-						<span style="flex:1 1 280px"><strong><?php echo esc_html( $f['name'] ); ?></strong> <span class="sh-note"><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'], $slug ) ); ?></span><br><span class="sh-note"><?php echo esc_html( $f['summary'] ); ?></span></span>
-						<a class="button" href="<?php echo esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ); ?>"><?php esc_html_e( 'Ask us to add this', 'scout-build' ); ?></a>
+					<li class="sh-row">
+						<div>
+							<p class="sh-row-name"><?php echo esc_html( $f['name'] ); ?></p>
+							<p class="sh-row-sub"><?php echo esc_html( $f['summary'] ); ?></p>
+						</div>
+						<p class="sh-row-facts"><span class="sh-tag"><?php echo esc_html( Scout_Hub_Access::tier_label( $f['tier'], $slug ) ); ?></span></p>
+						<div class="sh-row-go"><a class="button" href="<?php echo esc_url( self::url( 'requests', array( 'ask' => rawurlencode( $ask ) ) ) ); ?>"><?php esc_html_e( 'Ask us to add this', 'scout-build' ); ?></a></div>
 					</li>
 				<?php endforeach; ?>
 			</ul>
-		</details>
+		<?php self::fold_close(); ?>
 		<?php
 	}
 

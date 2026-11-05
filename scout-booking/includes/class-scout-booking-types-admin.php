@@ -155,20 +155,31 @@ final class Scout_Booking_Types_Admin {
 			<?php if ( ! $types ) : ?>
 				<p class="sbk-empty"><?php esc_html_e( 'No session types yet. Add the first one, such as a 60-minute massage.', 'scout-booking' ); ?></p>
 			<?php else : ?>
-				<ul class="sbk-types">
+				<?php $sbk_ops = ! method_exists( 'Scout_Admin_UI', 'is_operator' ) || Scout_Admin_UI::is_operator(); ?>
+				<ul class="sh-rows is-stacked sbk-types">
 					<?php foreach ( $types as $t ) : ?>
-						<li class="sbk-type<?php echo $t['active'] ? '' : ' is-off'; ?>">
+						<li class="sh-row sbk-type<?php echo $t['active'] ? '' : ' is-off'; ?>">
 							<div>
-								<p class="sbk-what"><?php echo esc_html( $t['name'] ); ?>
-									<span class="sh-pill <?php echo $t['active'] ? 'is-on' : ''; ?>"><?php echo esc_html( $t['active'] ? __( 'On the booking page', 'scout-booking' ) : __( 'Off', 'scout-booking' ) ); ?></span>
-									<?php if ( Scout_Booking::is_request( $t ) ) : ?>
-										<span class="sh-pill is-received"><?php esc_html_e( 'By request', 'scout-booking' ); ?></span>
-									<?php endif; ?>
-								</p>
-								<p class="sh-note"><?php echo esc_html( Scout_Booking::length_label( $t['length'] ) . ' · ' . Scout_Booking_Front::price_line( $t ) . ( $t['buffer'] ? ' · ' . sprintf( /* translators: %s: buffer length. */ __( '%s buffer after', 'scout-booking' ), Scout_Booking::length_label( $t['buffer'] ) ) : '' ) ); ?></p>
-								<p class="sh-note"><?php echo esc_html( Scout_Booking_Slots::source( $t ) ); ?> · <?php esc_html_e( 'Id', 'scout-booking' ); ?> <code><?php echo esc_html( $t['id'] ); ?></code></p>
+								<p class="sh-row-name"><?php echo esc_html( $t['name'] ); ?></p>
+								<p class="sh-row-sub"><?php echo esc_html( Scout_Booking_Slots::source( $t ) ); ?></p>
 							</div>
-							<a class="button" href="<?php echo esc_url( self::url( array( 'edit' => $t['id'] ) ) ); ?>"><?php esc_html_e( 'Edit', 'scout-booking' ); ?><span class="screen-reader-text"> <?php echo esc_html( $t['name'] ); ?></span></a>
+							<div class="sh-row-facts">
+								<span class="sh-pill <?php echo $t['active'] ? 'is-on' : 'is-off'; ?>"><?php echo esc_html( $t['active'] ? __( 'On the booking page', 'scout-booking' ) : __( 'Off', 'scout-booking' ) ); ?></span>
+								<?php if ( Scout_Booking::is_request( $t ) ) : ?>
+									<span class="sh-tag"><?php esc_html_e( 'By request', 'scout-booking' ); ?></span>
+								<?php endif; ?>
+								<span class="sh-tag"><?php echo esc_html( Scout_Booking::length_label( $t['length'] ) ); ?></span>
+								<span class="sh-tag"><?php echo esc_html( Scout_Booking_Front::price_line( $t ) ); ?></span>
+								<?php if ( $t['buffer'] ) : ?>
+									<span class="sh-tag"><?php echo esc_html( sprintf( /* translators: %s: buffer length. */ __( '%s buffer after', 'scout-booking' ), Scout_Booking::length_label( $t['buffer'] ) ) ); ?></span>
+								<?php endif; ?>
+								<?php if ( $sbk_ops ) : ?>
+									<span><?php esc_html_e( 'Id', 'scout-booking' ); ?> <code><?php echo esc_html( $t['id'] ); ?></code></span>
+								<?php endif; ?>
+							</div>
+							<div class="sh-row-go">
+								<a class="button" href="<?php echo esc_url( self::url( array( 'edit' => $t['id'] ) ) ); ?>"><?php esc_html_e( 'Edit', 'scout-booking' ); ?><span class="screen-reader-text"> <?php echo esc_html( $t['name'] ); ?></span></a>
+							</div>
 						</li>
 					<?php endforeach; ?>
 				</ul>
@@ -262,7 +273,7 @@ final class Scout_Booking_Types_Admin {
 				<p class="description"><?php esc_html_e( 'Leave a row empty to skip it.', 'scout-booking' ); ?></p>
 			</section>
 
-			<p><button type="submit" class="button button-primary button-hero"><?php esc_html_e( 'Save session type', 'scout-booking' ); ?></button></p>
+			<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save session type', 'scout-booking' ); ?></button></p>
 		</form>
 		<?php if ( ! $new ) : ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sbk-delete">

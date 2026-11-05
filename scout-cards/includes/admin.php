@@ -349,7 +349,7 @@ final class Scout_Cards_Admin {
 		echo '<a class="button" href="' . esc_url( Scout_Cards_People::add_url() ) . '">Add a person</a></div>';
 		echo '<p>Anyone in People with Card on gets a card, with the words and contact from their profile.</p>';
 		echo '<input type="hidden" name="' . esc_attr( $n ) . '[people_mode]" value="people">';
-		echo '<ul class="sh-rows">';
+		echo '<ul class="sh-rows is-stacked">';
 		$team = $people['team'];
 		self::person_row(
 			'scc-person-main',
@@ -454,7 +454,7 @@ final class Scout_Cards_Admin {
 			echo '<p class="sh-note">Turn on Scout People to keep one profile per person. Cards then read names, photos and contact details from it.</p>';
 		}
 		echo '<p>Each person gets their own card and shows on the main card. Share mode opens a big QR code: open it on your phone and add it to your home screen (iPhone: Share, then Add to Home Screen), so it opens like an app.</p>';
-		echo '<ul class="sh-rows">';
+		echo '<ul class="sh-rows is-stacked">';
 		$team = $people['team'];
 		self::person_row(
 			'scc-person-main',
