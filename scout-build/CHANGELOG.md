@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
+- **One name for the client's view: "What's new on your site".** Clients see it in the menu, the screen title, the Home link ("See everything that's new") and the dashboard widget. Scout still sees "Site history".
+
 - **Features list says "People".** The feature once called "Team credentials" is now "People", with a summary that fits every kind of site, and no "Law firms" tag. Chat and Free site check say their messages land in To do.
 
 - **Site status is one list per section (Joy, 2026-11-05).** The wall of about 20 check cards, three across, is now five kit lists: Basics, Search listing, Ready for AI search, Security and Plugins. Each row has a dot and the check's name, its value, one short line, and a link on the right. A long note shows its first sentence with the rest under More. A status line opens the screen ("3 to fix, 11 to look at."). The test email, the restore test and Copy the report moved into More options at the bottom; Copy the report is an outlined button now and copies exactly the same text. Coming back from Send a test opens that fold.

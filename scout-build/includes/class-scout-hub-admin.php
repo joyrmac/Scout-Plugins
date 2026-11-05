@@ -81,7 +81,9 @@ final class Scout_Hub_Admin {
 		add_submenu_page( $parent, __( 'Updates', 'scout-build' ), __( 'Updates', 'scout-build' ), 'edit_posts', $base . '&tab=updates', array( __CLASS__, 'render' ) );
 		// One plain name for everyone: operators find the full Site history under Build, everyone
 		// else finds their own view of it under Home (the admin kit and Scout_Hub_Log::nav_group sort it).
-		add_submenu_page( $parent, __( 'Site history', 'scout-build' ), __( 'Site history', 'scout-build' ), 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
+		// Clients read it as "What's new on your site" (Joy, 2026-11-05); Scout keeps "Site history".
+		$log_name = Scout_Hub_Access::is_operator() ? __( 'Site history', 'scout-build' ) : __( 'What\'s new on your site', 'scout-build' );
+		add_submenu_page( $parent, $log_name, $log_name, 'edit_posts', $base . '&tab=log', array( __CLASS__, 'render' ) );
 		$slug = 'site-build' === $parent ? 'site-build' : self::PAGE;
 		if ( get_option( 'scout_hub_page' ) !== $slug ) {
 			update_option( 'scout_hub_page', $slug, false );
@@ -379,6 +381,7 @@ final class Scout_Hub_Admin {
 		$tab  = isset( $tabs[ $tab ] ) ? $tab : 'overview';
 		$lede = 'updates' === $tab ? __( 'Every update to this site in one place: theme, plugins, setup file, page copy and imports.', 'scout-build' ) : '';
 		if ( 'log' === $tab && $client_view ) {
+			$tabs['log'] = __( 'What\'s new on your site', 'scout-build' );
 			$lede = self::branded() ? __( 'What Scout has done on your website, and anything you have asked for.', 'scout-build' ) : __( 'What your web team has done on your website, and anything you have asked for.', 'scout-build' );
 		}
 		// Site name in the eyebrow, trimmed at a " | " tagline so it fits a phone.
@@ -571,7 +574,7 @@ final class Scout_Hub_Admin {
 							<li><span class="sh-when"><?php echo esc_html( wp_date( 'M j', strtotime( $row['date'] ) ) ); ?></span><span><?php echo esc_html( ( ! $operator && '' !== $row['client_text'] ) ? $row['client_text'] : $row['title'] ); ?></span></li>
 						<?php endforeach; ?>
 					</ul>
-					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : ( self::branded() ? __( 'Everything Scout has done on your site', 'scout-build' ) : __( 'Everything done on your site', 'scout-build' ) ) ); ?> &rsaquo;</a></p>
+					<p class="sh-note" style="margin-top:8px"><a href="<?php echo esc_url( self::url( 'log' ) ); ?>"><?php echo esc_html( $operator ? __( 'The whole Site history', 'scout-build' ) : __( 'See everything that\'s new', 'scout-build' ) ); ?> &rsaquo;</a></p>
 				<?php endif; ?>
 			</section>
 		</div>

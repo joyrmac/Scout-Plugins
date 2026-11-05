@@ -185,7 +185,7 @@ final class Scout_Hub_Dashboard {
 				/* translators: %d: updates this month */
 				echo esc_html( sprintf( _n( '%d update to your site this month.', '%d updates to your site this month.', $n, 'scout-build' ), $n ) );
 				?>
-				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'log' ) ); ?>"><?php echo esc_html__( 'Site history', 'scout-build' ); ?> &rsaquo;</a>
+				<a href="<?php echo esc_url( Scout_Hub_Admin::url( 'log' ) ); ?>"><?php echo esc_html__( 'See what\'s new', 'scout-build' ); ?> &rsaquo;</a>
 			</p>
 		<?php endif; ?>
 		<?php if ( $todo ) : ?>

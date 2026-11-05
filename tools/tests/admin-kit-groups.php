@@ -80,6 +80,7 @@ ok( array() === Scout_Admin_UI::hidden(), 'with no hub loaded and full rights, n
 eval( 'class Scout_Hub_Access { public static function is_operator() { return false; } }' );
 ok( array( 'build' ) === Scout_Admin_UI::hidden(), 'a client owner does not see Scout tools' );
 ok( 'overview' === Scout_Admin_UI::group( 'site-build-features&tab=log', 'Site history' ), "a client's Site history sits under Home, where they can reach it" );
+ok( 'overview' === Scout_Admin_UI::group( 'site-build-features&tab=log', "What's new on your site" ), "the client's name for it sits under Home too" );
 ok( ! array_filter( Scout_Admin_UI::LOOKING, static fn( $l ) => count( $l ) > 2 ), 'no group carries more than two Looking for links' );
 ok( ! array_diff( array_keys( Scout_Admin_UI::LOOKING ), array_keys( Scout_Admin_UI::GROUPS ) ), 'Looking for links belong to real groups' );
 ok( in_array( 'scout-writing', Scout_Admin_UI::PLUS_MENUS, true ) && in_array( 'scout-events', Scout_Admin_UI::PLUS_MENUS, true ), 'Plus modules get the Plus tag in the sidebar' );
