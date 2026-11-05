@@ -945,7 +945,7 @@ final class Scout_Hub_Admin {
 			array(
 				'title' => __( 'Change log', 'scout-build' ),
 				'text'  => __( 'What was changed on this site, by whom and when, with a copy you can hand to Scout so the repo catches up.', 'scout-build' ),
-				'go'    => '' !== $changes ? '<a class="button" href="' . esc_url( $changes ) . '">' . esc_html__( 'Open the change log', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Needs Scout Core 1.7.0 or newer.', 'scout-build' ) . '</span>',
+				'go'    => '' !== $changes ? '<a class="button" href="' . esc_url( $changes ) . '">' . esc_html__( 'Open the change log', 'scout-build' ) . '</a>' : '<span class="sh-note">' . esc_html__( 'Coming in a later Scout Core release.', 'scout-build' ) . '</span>',
 			),
 		);
 		?>
