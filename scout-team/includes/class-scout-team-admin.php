@@ -279,13 +279,13 @@ final class Scout_Team_Admin {
 		$add_url = admin_url( 'post-new.php?post_type=' . Scout_Team::POST_TYPE );
 		Scout_Admin_UI::open(
 			__( 'People', 'scout-team' ),
-			__( 'Everyone the public sees on your site: your team, speakers, writers and members who want to be listed. One profile each, and you choose where each person shows.', 'scout-team' )
+			__( 'Everyone visitors see on the site. One profile per person. You pick where each one shows.', 'scout-team' )
 		);
 		echo '<div class="st-people">';
 
 		$go = '<a class="button button-primary" href="' . esc_url( $add_url ) . '">' . esc_html__( 'Add a person', 'scout-team' ) . '</a>';
 		if ( ! $total ) {
-			self::ui_status( 'off', __( 'No one yet.', 'scout-team' ), __( 'Add the first person to start the team page.', 'scout-team' ), $go );
+			self::ui_status( 'off', __( 'No one yet.', 'scout-team' ), __( 'Add a person to start the team page.', 'scout-team' ), $go );
 		} else {
 			/* translators: %d: number of people. */
 			$headline = sprintf( _n( '%d person.', '%d people.', $total, 'scout-team' ), $total );
@@ -312,12 +312,12 @@ final class Scout_Team_Admin {
 
 		echo '<section class="sh-box">';
 		if ( $total ) {
-			echo '<p class="sh-note st-hint">' . esc_html__( 'Listed in team page order: the Order number on each person (in the Page Attributes box), lowest first, then by name.', 'scout-team' ) . '</p>';
+			echo '<p class="sh-note st-hint">' . esc_html__( 'Sorted by each person\'s Order number, lowest first, then by name.', 'scout-team' ) . '</p>';
 		}
 
 		if ( $look ) {
 			$rows = array_values( array_filter( $people, static fn( $r ) => (bool) $r['look'] ) );
-			self::rows( $rows, __( 'No one needs a look. Every person has a photo with alt text, a source on every credential, and is live.', 'scout-team' ) );
+			self::rows( $rows, __( 'Nothing to fix. Everyone has a photo, alt text, sources and is live.', 'scout-team' ) );
 		} elseif ( '' !== $group ) {
 			$rows = array_values( array_filter( $people, static fn( $r ) => in_array( $group, $r['slugs'], true ) ) );
 			self::rows( $rows, __( 'No one in this group yet.', 'scout-team' ) );
@@ -353,7 +353,7 @@ final class Scout_Team_Admin {
 				self::rows( $section[1], '' );
 			}
 		} else {
-			echo '<p>' . esc_html__( 'Add a person to give them a profile. You choose where they show: their own page, the team page, a byline on their posts, or a business card.', 'scout-team' ) . '</p>';
+			echo '<p>' . esc_html__( 'Add a person, then pick where they show: their own page, the team page, their posts or a business card.', 'scout-team' ) . '</p>';
 		}
 
 		$archive = get_post_type_archive_link( Scout_Team::POST_TYPE );
@@ -361,7 +361,7 @@ final class Scout_Team_Admin {
 		if ( $total && $archive ) {
 			echo '<a class="button sh-quiet" href="' . esc_url( $archive ) . '">' . esc_html__( 'View the team page', 'scout-team' ) . '</a>';
 		}
-		echo '<a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Team::POST_TYPE ) ) . '">' . esc_html__( 'Full list (bulk edit and trash)', 'scout-team' ) . '</a>';
+		echo '<a class="button sh-quiet" href="' . esc_url( admin_url( 'edit.php?post_type=' . Scout_Team::POST_TYPE ) ) . '">' . esc_html__( 'Edit many at once', 'scout-team' ) . '</a>';
 		echo '</p>';
 		echo '</section>';
 
@@ -478,7 +478,7 @@ final class Scout_Team_Admin {
 
 		Scout_Admin_UI::open(
 			__( 'People settings', 'scout-team' ),
-			__( 'Choices for everyone at once: law firm details, email and phone, bylines and the team grid. Each person is on the People screen.', 'scout-team' )
+			__( 'Settings for everyone. To edit one person, go to People.', 'scout-team' )
 		);
 		settings_errors( $o );
 		?>
@@ -492,7 +492,7 @@ final class Scout_Team_Admin {
 						<td>
 							<fieldset>
 								<legend class="screen-reader-text"><?php esc_html_e( 'Law firm details', 'scout-team' ); ?></legend>
-								<label><input type="radio" name="<?php echo esc_attr( $o ); ?>[law]" value="auto" <?php checked( 'auto', $s['law'] ); ?>> <?php esc_html_e( 'Decide from the business type in Scout Core (LegalService or Attorney turns it on)', 'scout-team' ); ?></label><br>
+								<label><input type="radio" name="<?php echo esc_attr( $o ); ?>[law]" value="auto" <?php checked( 'auto', $s['law'] ); ?>> <?php esc_html_e( 'Automatic (on for law firms)', 'scout-team' ); ?></label><br>
 								<label><input type="radio" name="<?php echo esc_attr( $o ); ?>[law]" value="on" <?php checked( 'on', $s['law'] ); ?>> <?php esc_html_e( 'On: show bar admissions for attorneys', 'scout-team' ); ?></label><br>
 								<label><input type="radio" name="<?php echo esc_attr( $o ); ?>[law]" value="off" <?php checked( 'off', $s['law'] ); ?>> <?php esc_html_e( 'Off', 'scout-team' ); ?></label>
 							</fieldset>
@@ -501,11 +501,11 @@ final class Scout_Team_Admin {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Email and phone', 'scout-team' ); ?></th>
 						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[contact]" value="1" <?php checked( $s['contact'] ); ?>> <?php esc_html_e( 'Show each person\'s email and phone on their profile page', 'scout-team' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Off: they stay in the schema only, and visitors use the main contact details. Card only phone and email never show here either way.', 'scout-team' ); ?></p></td>
+							<p class="description"><?php esc_html_e( 'Off: visitors see the main business contact instead. Card-only phone and email never show here.', 'scout-team' ); ?></p></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Bylines', 'scout-team' ); ?></th>
-						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[bylines]" value="1" <?php checked( $s['bylines'] ); ?>> <?php esc_html_e( 'Author names on blog posts link to the writer\'s profile page', 'scout-team' ); ?></label></td>
+						<td><label><input type="checkbox" name="<?php echo esc_attr( $o ); ?>[bylines]" value="1" <?php checked( $s['bylines'] ); ?>> <?php esc_html_e( 'Author names on posts link to the writer\'s profile', 'scout-team' ); ?></label></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="st-columns"><?php esc_html_e( 'Grid columns on wide screens', 'scout-team' ); ?></label></th>
@@ -522,14 +522,14 @@ final class Scout_Team_Admin {
 		</section>
 
 		<?php self::ui_fold_open( __( 'Show the team on a page', 'scout-team' ) ); ?>
-			<p><?php esc_html_e( 'Paste this shortcode where the team grid should go, for example on the About page. Each card links to that person\'s profile page.', 'scout-team' ); ?></p>
+			<p><?php esc_html_e( 'Paste this where the team grid goes, like the About page. Each card links to that person\'s page.', 'scout-team' ); ?></p>
 			<table class="sh-table">
-				<tr><td>[scout_team]</td><td><?php esc_html_e( 'The team page: everyone live in the Team group with "The team page" ticked, in order.', 'scout-team' ); ?></td></tr>
-				<tr><td>[scout_team columns="2"]</td><td><?php esc_html_e( 'A different number of columns for this grid.', 'scout-team' ); ?></td></tr>
-				<tr><td>[scout_team ids="12,15"]</td><td><?php esc_html_e( 'Only these people, in this order, whatever their group. The ID is in the address bar when you edit a person.', 'scout-team' ); ?></td></tr>
+				<tr><td>[scout_team]</td><td><?php esc_html_e( 'Everyone in the Team group with "The team page" ticked.', 'scout-team' ); ?></td></tr>
+				<tr><td>[scout_team columns="2"]</td><td><?php esc_html_e( 'Columns for this grid only.', 'scout-team' ); ?></td></tr>
+				<tr><td>[scout_team ids="12,15"]</td><td><?php esc_html_e( 'Only these people, in this order. The ID is in the address bar when you edit a person.', 'scout-team' ); ?></td></tr>
 				<tr><td>[scout_team bio="no"]</td><td><?php esc_html_e( 'Photo, name and role only.', 'scout-team' ); ?></td></tr>
 			</table>
-			<p class="description"><?php esc_html_e( 'With Scout Analytics on, profile opens, calls and emails report as team_profile_click, team_profile_view, team_call and team_email.', 'scout-team' ); ?></p>
+			<p class="description"><?php esc_html_e( 'With Scout Analytics on, profile opens, calls and emails are counted (team_profile_click, team_profile_view, team_call, team_email).', 'scout-team' ); ?></p>
 		<?php self::ui_fold_close(); ?>
 		<?php
 		Scout_Admin_UI::close();

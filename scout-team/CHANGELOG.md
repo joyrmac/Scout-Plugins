@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-11-05)
 
+- **Plainer words on the People screens.** Help text cut to one short sentence each, in the dashboard word rules (admin kit DESIGN.md 2a). "Full list (bulk edit and trash)" now reads "Edit many at once". Labels only; nothing visitors see changes.
+
 - **Scout Team is now Scout People.** One profile for each person the public sees: your team, speakers, writers and members who want to be listed. It has its own People section in the Scout menu (shared admin kit 1.11.0) with three screens: People, Groups and People settings. The plugin folder and slug (`scout-team`), the `scout_team` post type, the stored profile and every `/team/` address are unchanged, so no data moves and no link breaks. People settings keeps its old address (`?page=scout-team`).
 - **Groups.** A new private `scout_people_group` taxonomy. The update makes Team, Speakers, Writers and Members, plus Attorneys when any profile is an attorney, and puts every existing person in Team (attorneys in Attorneys too). A new person starts in Team. Groups are never deleted.
 - **Shows on.** Six switches per person: their own profile page, the team page, a business card, a byline on their posts, the speakers page and chat answers. Existing profiles keep what they had: profile page and team page on, byline on when a login is linked. With the profile page off, visitors get "page not found", the page leaves the sitemap and the `/team/` archive, the grid lists the person without a link, the schema drops the address, and bylines keep WordPress's own author link. Editors can still open it, marked noindex. The team page shows live people in the Team group with the team page switch on.
