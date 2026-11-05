@@ -352,9 +352,10 @@ final class Scout_Team_Byline {
 			)
 		);
 		foreach ( $posts as $post ) {
-			$ids = Scout_Team::chosen_authors( (int) $post->ID );
+			$id  = is_object( $post ) ? (int) $post->ID : (int) $post;
+			$ids = Scout_Team::chosen_authors( $id );
 			if ( $ids ) {
-				$map[ (int) $post->ID ] = array( (int) $post->post_author, $ids );
+				$map[ $id ] = array( is_object( $post ) ? (int) $post->post_author : (int) get_post_field( 'post_author', $id ), $ids );
 			}
 		}
 		set_transient( self::CACHE, $map, DAY_IN_SECONDS );
