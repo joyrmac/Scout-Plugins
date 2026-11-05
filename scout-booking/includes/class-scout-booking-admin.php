@@ -289,6 +289,29 @@ final class Scout_Booking_Admin {
 			__( 'Bookings', 'scout-booking' )
 		);
 		self::message();
+		// The status line: requests waiting first, else the next booking.
+		$next = null;
+		foreach ( $week as $w ) {
+			if ( Scout_Booking::at( $w['start_at'] ) >= $now ) {
+				$next = $w;
+				break;
+			}
+		}
+		$next_words = $next
+			/* translators: 1: session name, 2: client name, 3: day and time. */
+			? sprintf( __( 'Next: %1$s with %2$s, %3$s.', 'scout-booking' ), $next['type_name'], Scout_Booking::client_name( $next ), Scout_Booking::when_label( $next ) )
+			: __( 'Nothing booked in the next 7 days.', 'scout-booking' );
+		if ( $reqs ) {
+			self::ui_status(
+				'warn',
+				/* translators: %d: number of requests. */
+				sprintf( _n( '%d request is waiting for you.', '%d requests are waiting for you.', count( $reqs ), 'scout-booking' ), count( $reqs ) ),
+				$next_words,
+				'<a class="button" href="#sb-requests">' . esc_html__( 'Read requests', 'scout-booking' ) . '</a>'
+			);
+		} else {
+			self::ui_status( 'good', __( 'No requests waiting.', 'scout-booking' ), $next_words );
+		}
 		self::setup_notes();
 		?>
 		<section class="sh-box">
@@ -334,9 +357,10 @@ final class Scout_Booking_Admin {
 							<a class="button" href="<?php echo esc_url( self::url( array( 'view' => $view, 'date' => $from->modify( '-' . $step )->format( 'Y-m-d' ) ), 'sb-schedule' ) ); ?>"><?php esc_html_e( 'Previous', 'scout-booking' ); ?></a>
 							<a class="button" href="<?php echo esc_url( self::url( array( 'view' => $view ), 'sb-schedule' ) ); ?>"><?php esc_html_e( 'Today', 'scout-booking' ); ?></a>
 							<a class="button" href="<?php echo esc_url( self::url( array( 'view' => $view, 'date' => $from->modify( '+' . $step )->format( 'Y-m-d' ) ), 'sb-schedule' ) ); ?>"><?php esc_html_e( 'Next', 'scout-booking' ); ?></a>
-							<span class="sbk-toggle">
-								<a class="button<?php echo 'day' === $view ? ' button-primary' : ''; ?>" href="<?php echo esc_url( self::url( array( 'view' => 'day', 'date' => $day->format( 'Y-m-d' ) ), 'sb-schedule' ) ); ?>"<?php echo 'day' === $view ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Day', 'scout-booking' ); ?></a>
-								<a class="button<?php echo 'week' === $view ? ' button-primary' : ''; ?>" href="<?php echo esc_url( self::url( array( 'view' => 'week', 'date' => $day->format( 'Y-m-d' ) ), 'sb-schedule' ) ); ?>"<?php echo 'week' === $view ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Week', 'scout-booking' ); ?></a>
+							<span class="sbk-toggle" role="group" aria-label="<?php esc_attr_e( 'Show', 'scout-booking' ); ?>">
+								<?php // The chosen view is outlined and marked current; the other is quiet. Links, so aria-current rather than aria-pressed. ?>
+								<a class="button<?php echo 'day' === $view ? ' is-current' : ' sh-quiet'; ?>" href="<?php echo esc_url( self::url( array( 'view' => 'day', 'date' => $day->format( 'Y-m-d' ) ), 'sb-schedule' ) ); ?>"<?php echo 'day' === $view ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Day', 'scout-booking' ); ?></a>
+								<a class="button<?php echo 'week' === $view ? ' is-current' : ' sh-quiet'; ?>" href="<?php echo esc_url( self::url( array( 'view' => 'week', 'date' => $day->format( 'Y-m-d' ) ), 'sb-schedule' ) ); ?>"<?php echo 'week' === $view ? ' aria-current="page"' : ''; ?>><?php esc_html_e( 'Week', 'scout-booking' ); ?></a>
 							</span>
 						</nav>
 					</div>
@@ -376,20 +400,19 @@ final class Scout_Booking_Admin {
 						</div>
 						<p class="description"><?php esc_html_e( 'Untick All day to block only the hours between From and To.', 'scout-booking' ); ?></p>
 						<p class="sbk-field"><label for="sbk-b-note"><?php esc_html_e( 'Note for you (optional)', 'scout-booking' ); ?></label><input type="text" id="sbk-b-note" name="note"></p>
-						<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Block this time', 'scout-booking' ); ?></button></p>
+						<p><button type="submit" class="button"><?php esc_html_e( 'Block this time', 'scout-booking' ); ?></button></p>
 					</form>
 				</section>
 
 				<?php self::feed_box(); ?>
 
-				<section class="sh-box">
-					<h2 class="sh-title"><?php esc_html_e( 'Showing the booking form', 'scout-booking' ); ?></h2>
+				<?php self::ui_fold_open( __( 'Showing the booking form', 'scout-booking' ), false, 'sb-codes' ); ?>
 					<dl class="sbk-codes">
 						<dt><code>[scout_booking]</code></dt><dd><?php esc_html_e( 'Every session that is turned on.', 'scout-booking' ); ?></dd>
 						<dt><code>[scout_booking types="id,id"]</code></dt><dd><?php esc_html_e( 'Only some sessions, for a page about one kind of work. Ids are on the Session types screen.', 'scout-booking' ); ?></dd>
 						<dt><code>[scout_booking type="id"]</code></dt><dd><?php esc_html_e( 'One session, straight to picking a time.', 'scout-booking' ); ?></dd>
 					</dl>
-				</section>
+				<?php self::ui_fold_close(); ?>
 			</div>
 		</div>
 		<?php
@@ -448,7 +471,7 @@ final class Scout_Booking_Admin {
 			foreach ( array( 'approve' => __( 'Approve', 'scout-booking' ), 'decline' => __( 'Decline', 'scout-booking' ) ) as $k => $label ) {
 				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="scout_booking_decide"><input type="hidden" name="decision" value="' . esc_attr( $k ) . '"><input type="hidden" name="id" value="' . (int) $r['id'] . '">';
 				wp_nonce_field( 'scout_booking_decide' );
-				echo '<button type="submit" class="button' . ( 'approve' === $k ? ' button-primary' : '' ) . '">' . esc_html( $label ) . '<span class="screen-reader-text"> ' . esc_html( Scout_Booking::client_name( $r ) ) . '</span></button></form>';
+				echo '<button type="submit" class="button' . ( 'approve' === $k ? '' : ' sh-quiet' ) . '">' . esc_html( $label ) . '<span class="screen-reader-text"> ' . esc_html( Scout_Booking::client_name( $r ) ) . '</span></button></form>';
 			}
 			echo '</div>';
 		} elseif ( in_array( $status, array( 'approved', 'pending', 'confirmed' ), true ) && Scout_Booking::at( $r['end_at'] ) > Scout_Booking::now() ) {
@@ -599,4 +622,45 @@ final class Scout_Booking_Admin {
 		self::feed_box();
 		Scout_Admin_UI::close();
 	}
+
+	/* ---------- kit wrappers ---------- */
+
+	/**
+	 * The kit's status line, or the same markup when an older kit (before
+	 * 1.10.0, without status()) is the copy that loaded first.
+	 */
+	private static function ui_status( string $state, string $headline, string $detail = '', string $go = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'status' ) ) {
+			Scout_Admin_UI::status( $state, $headline, $detail, $go );
+			return;
+		}
+		$state = in_array( $state, array( 'good', 'warn', 'bad', 'off' ), true ) ? $state : 'good';
+		echo '<section class="sh-box"><p class="sh-status is-' . esc_attr( $state ) . '"><span class="sh-dot" aria-hidden="true"></span><strong>' . esc_html( $headline ) . '</strong>';
+		if ( '' !== $detail ) {
+			echo ' <span>' . esc_html( $detail ) . '</span>';
+		}
+		if ( '' !== $go ) {
+			echo ' <span class="sh-status-go">' . $go . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by the caller.
+		}
+		echo '</p></section>';
+	}
+
+	/** The kit's closed "More options" box, or the same markup on an older kit. */
+	private static function ui_fold_open( string $title, bool $open = false, string $id = '' ): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_open' ) ) {
+			Scout_Admin_UI::fold_open( $title, $open, $id );
+			return;
+		}
+		echo '<details class="sh-box sh-fold"' . ( $id ? ' id="' . esc_attr( $id ) . '"' : '' ) . ( $open ? ' open' : '' ) . '><summary class="sh-title">' . esc_html( $title ) . '</summary>';
+	}
+
+	/** Closes ui_fold_open(). */
+	private static function ui_fold_close(): void {
+		if ( method_exists( 'Scout_Admin_UI', 'fold_close' ) ) {
+			Scout_Admin_UI::fold_close();
+			return;
+		}
+		echo '</details>';
+	}
+
 }

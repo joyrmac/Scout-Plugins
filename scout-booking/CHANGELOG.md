@@ -1,5 +1,11 @@
 # Scout Booking changelog
 
+## Unreleased (2026-11-05)
+
+- **Schedule leads with a status line:** how many requests are waiting, or that none are, plus your next booking in the coming week.
+- **No more blue buttons on Schedule.** Approve and Block this time are outlined, Decline is a quiet text button, and Day and Week are a pair: the one you are on is outlined and marked current, the other is quiet.
+- **The booking form shortcodes moved into a closed box** at the bottom of the side column. Nothing about requests, blocking time or the calendar feed changed.
+
 ## 0.1.4 (2026-11-04)
 
 - **Files by the redesigned Scout menu: Home, Inbox, Reports, Your business, Your website, Get found, Policies, Site health and Scout tools.** Shared admin kit 1.8.0. Staff (anyone who cannot change site settings) see Home, Inbox and Your business. Greyed "Turn on" items show for operators only, so clients only see what their site has. Scout tools reads Build tools on white-label sites (dashboard redesign, Joy 2026-11-04).

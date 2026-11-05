@@ -135,9 +135,10 @@ final class Scout_Events_RSVP_Admin {
 	public static function view(): void {
 		$events = self::events();
 		if ( ! $events ) {
+			Scout_Events_Admin::ui_status( 'off', __( 'No event takes sign-ups yet.', 'scout-events' ) );
 			?>
 			<section class="sh-box">
-				<h2 class="sh-title"><?php esc_html_e( 'Sign-ups', 'scout-events' ); ?></h2>
+				<h2 class="sh-title"><?php esc_html_e( 'How to start taking sign-ups', 'scout-events' ); ?></h2>
 				<p><?php esc_html_e( 'No event takes sign-ups or sells tickets yet. Open an event, tick "Take sign-ups on this site" under Tickets (or create a ticket in "Tickets from the shop"), and save. People then get a ticket with a QR code.', 'scout-events' ); ?></p>
 			</section>
 			<?php
@@ -159,6 +160,17 @@ final class Scout_Events_RSVP_Admin {
 		$void    = array_values( array_filter( $rows, static fn( $r ) => 'void' === $r['status'] ) );
 		$owed    = count( array_filter( $going, static fn( $r ) => Scout_Events_Agreements::owed( $r, $e ) ) );
 		$nophoto = count( array_filter( $going, static fn( $r ) => 'no' === $r['photo'] ) );
+		// One status line for the chosen event instead of a row of four numbers.
+		$room   = null === $left ? __( 'No capacity set.', 'scout-events' ) : sprintf( /* translators: %d: places left. */ _n( '%d place left.', '%d places left.', (int) $left, 'scout-events' ), (int) $left );
+		$queue  = $c['waitlist'] ? ' ' . sprintf( /* translators: %d: people waiting. */ _n( '%d person on the waitlist.', '%d people on the waitlist.', (int) $c['waitlist'], 'scout-events' ), (int) $c['waitlist'] ) : '';
+		$move   = $c['waitlist'] > 0 && ( null === $left || $left > 0 ) && ! Scout_Events::is_past( $e );
+		Scout_Events_Admin::ui_status(
+			$move ? 'warn' : 'good',
+			/* translators: 1: people going, 2: people checked in. */
+			sprintf( __( '%1$d going, %2$d checked in.', 'scout-events' ), (int) $c['going'], (int) $c['checked_in'] ),
+			$room . $queue,
+			$move ? '<a class="button" href="#se-waitlist">' . esc_html__( 'Move people in', 'scout-events' ) . '</a>' : ''
+		);
 		?>
 		<section class="sh-box se-door">
 			<form method="get" class="se-door-pick">
@@ -171,12 +183,6 @@ final class Scout_Events_RSVP_Admin {
 				</select>
 				<noscript><button type="submit" class="button"><?php esc_html_e( 'Show', 'scout-events' ); ?></button></noscript>
 			</form>
-			<div class="sh-stats">
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) $c['going']; ?></p><p class="sh-note"><?php esc_html_e( 'people going', 'scout-events' ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) $c['checked_in']; ?></p><p class="sh-note"><?php esc_html_e( 'checked in', 'scout-events' ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo null === $left ? '&ndash;' : (int) $left; ?></p><p class="sh-note"><?php echo esc_html( null === $left ? __( 'no capacity set', 'scout-events' ) : __( 'places left', 'scout-events' ) ); ?></p></div>
-				<div class="sh-stat"><p class="sh-num"><?php echo (int) $c['waitlist']; ?></p><p class="sh-note"><?php esc_html_e( 'on the waitlist', 'scout-events' ); ?></p></div>
-			</div>
 			<div class="se-door-tools">
 				<form method="get" class="se-door-find" role="search">
 					<input type="hidden" name="page" value="<?php echo esc_attr( Scout_Events_Admin::SLUG . '-signups' ); ?>">
@@ -186,7 +192,7 @@ final class Scout_Events_RSVP_Admin {
 					<button type="submit" class="button"><?php esc_html_e( 'Find', 'scout-events' ); ?></button>
 				</form>
 				<span class="se-actions">
-					<a class="button" href="<?php echo esc_url( (string) get_permalink( $event ) ); ?>"><?php esc_html_e( 'Event page', 'scout-events' ); ?></a>
+					<a class="button sh-quiet" href="<?php echo esc_url( (string) get_permalink( $event ) ); ?>"><?php esc_html_e( 'Event page', 'scout-events' ); ?></a>
 					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=scout_events_signups_csv&event=' . $event ), 'scout_events_signups_csv_' . $event ) ); ?>"><?php esc_html_e( 'Download list', 'scout-events' ); ?></a>
 				</span>
 			</div>
@@ -204,7 +210,7 @@ final class Scout_Events_RSVP_Admin {
 		<?php
 		self::block( __( 'Going', 'scout-events' ), $going, '' !== $find ? __( 'No one going matches that search.', 'scout-events' ) : __( 'No sign-ups yet.', 'scout-events' ) );
 		if ( $waiting ) {
-			self::block( __( 'Waitlist', 'scout-events' ), $waiting, '' );
+			self::block( __( 'Waitlist', 'scout-events' ), $waiting, '', false, 'se-waitlist' );
 		}
 		if ( $gone ) {
 			self::block( __( 'Cancelled', 'scout-events' ), $gone, '', true );
@@ -214,9 +220,9 @@ final class Scout_Events_RSVP_Admin {
 		}
 	}
 
-	private static function block( string $title, array $rows, string $empty, bool $closed = false ): void {
+	private static function block( string $title, array $rows, string $empty, bool $closed = false, string $id = '' ): void {
 		?>
-		<section class="sh-box">
+		<section class="sh-box"<?php echo '' !== $id ? ' id="' . esc_attr( $id ) . '"' : ''; ?>>
 			<?php if ( $closed ) : ?>
 				<details><summary class="sh-title"><?php echo esc_html( $title . ' (' . count( $rows ) . ')' ); ?></summary>
 			<?php else : ?>
@@ -277,14 +283,14 @@ final class Scout_Events_RSVP_Admin {
 					<?php if ( $in ) : ?>
 						<button type="submit" name="op" value="undo" class="button"><?php esc_html_e( 'Undo', 'scout-events' ); ?></button>
 					<?php else : ?>
-						<button type="submit" name="op" value="in" class="button button-primary"><?php esc_html_e( 'Check in', 'scout-events' ); ?></button>
+						<button type="submit" name="op" value="in" class="button"><?php esc_html_e( 'Check in', 'scout-events' ); ?></button>
 						<?php if ( ! $paid ) : ?>
-							<button type="submit" name="op" value="cancel" class="button se-quiet"><?php esc_html_e( 'Cancel', 'scout-events' ); ?></button>
+							<button type="submit" name="op" value="cancel" class="button sh-quiet"><?php esc_html_e( 'Cancel', 'scout-events' ); ?></button>
 						<?php endif; ?>
 					<?php endif; ?>
 				<?php elseif ( 'waitlist' === $r['status'] ) : ?>
-					<button type="submit" name="op" value="move" class="button button-primary"><?php esc_html_e( 'Move in and email ticket', 'scout-events' ); ?></button>
-					<button type="submit" name="op" value="cancel" class="button se-quiet"><?php esc_html_e( 'Remove', 'scout-events' ); ?></button>
+					<button type="submit" name="op" value="move" class="button"><?php esc_html_e( 'Move in and email ticket', 'scout-events' ); ?></button>
+					<button type="submit" name="op" value="cancel" class="button sh-quiet"><?php esc_html_e( 'Remove', 'scout-events' ); ?></button>
 				<?php elseif ( 'cancelled' === $r['status'] ) : ?>
 					<button type="submit" name="op" value="restore" class="button"><?php esc_html_e( 'Put back', 'scout-events' ); ?></button>
 				<?php endif; ?>

@@ -66,8 +66,11 @@
 .se-empty-admin { color: var(--se-text-2); }
 .se-admin-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; align-items: start; }
 .se-settings .se-field label { display: flex; gap: 8px; align-items: center; }
-.se-slug { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; font-family: var(--se-mono); font-size: 12px; color: var(--se-text-3); }
-.se-slug input { width: 140px; min-height: 36px; font-size: 14px; }
+/* Settings: the site address sits above the word, and the field takes the full width. */
+.se-slug-base { font-family: var(--se-mono); font-size: 12px; color: var(--se-text-2); overflow-wrap: anywhere; }
+.se-slug-field input[type="text"] { width: 100%; max-width: 420px; }
+.se-save { margin: 18px 0 0; }
+.se-codes td:first-child { font-family: var(--se-mono); font-size: 12px; overflow-wrap: anywhere; }
 .se-short-input { max-width: 100px; }
 .se-import .se-field input[type="file"] { min-height: 0; font-size: 14px; }
 .se-report { margin: 0 0 16px; padding: 14px 16px; border-radius: 12px; background: var(--se-inset); }
@@ -95,7 +98,6 @@
 
 /* Sign-ups: the door list. Works at a phone's width. */
 .se-door-pick select { max-width: 100%; font-size: 15px; }
-.se-door .sh-stats { margin-top: 12px; }
 .se-door-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; margin-top: 16px; }
 .se-door-find { display: flex; gap: 6px; flex: 1 1 260px; }
 .se-door-find input { flex: 1; min-width: 0; }
