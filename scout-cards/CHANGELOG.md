@@ -1,5 +1,14 @@
 # Scout Cards changelog
 
+## Unreleased (2026-11-05)
+
+- **Cards read from People.** One profile per person. A person's name, title, photo, card phone and card email now come from their People profile, and anyone live in People with A business card switched on gets a card. Switch it off, or take them off the site, and their card address answers "not found".
+- **One-time move, nothing changes for visitors.** On the first page load with Scout People on, each card person is linked to their People profile (by the login with the card's email, then by email, then by exact name). Only what the profile is missing is copied in, and a People value is never overwritten. Anyone with no match gets a profile that shows on the card only, live only if cards were on. People who had Card on with no card have it switched off, so no new card appears. Every card, share page, QR code, contact file and the links page stay at the same address with the same output. The Cards screen says once what moved.
+- **The Cards screen lists People with a card:** photo, name, card address, Share mode and a QR code, with Edit in People and Card settings on each row, and Add a person, which opens the People walkthrough with Card on.
+- **Card settings stay in Cards:** link name, intro, why talk to them, tags, share picture, Spotlight, and new switches for what the card shows from the profile: Phone, Email, Profile links, Short bio and the Save contact button. They start the way cards always worked (phone, email and Save contact on).
+- **Fallback.** Each card keeps the details it had saved. With Scout People off, or the profile deleted, the card shows those exactly as before, and the screen keeps the old fields when People is off.
+- **Removed from the Cards screen when People is on:** the per-person Full name, Title, Email and Photo fields (now edited in People) and "To take this person off, clear the name and save." (turn off Card in People instead). The saved values stay for the fallback.
+
 ## 1.0.27 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

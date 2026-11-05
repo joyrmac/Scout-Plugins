@@ -99,6 +99,8 @@ jobs:
         run: php tools/tests/law-kit-fallback.php
       - name: Scout Core breadcrumbs, verification, thank-you pages and hardening (no WordPress needed)
         run: php tools/tests/core-seo-gaps.php
+      - name: Scout Core searches that found nothing (no WordPress needed)
+        run: php tools/tests/core-empty-search.php
       - name: Every plugin lists the visitor data it keeps (Site Standard rule 24)
         run: php tools/visitor-data.php --check
       - name: Approval hold, live sites wait for Scout's OK (no WordPress needed)
@@ -109,6 +111,8 @@ jobs:
         run: php tools/tests/wp-health.php
       - name: Security baseline in Site status (no WordPress needed)
         run: php tools/tests/security-baseline.php
+      - name: Form emails sent, in Site status (no WordPress needed)
+        run: php tools/tests/form-mail.php
       - name: Today list on Home (no WordPress needed)
         run: php tools/tests/today.php
       - name: Inbox list (no WordPress needed)

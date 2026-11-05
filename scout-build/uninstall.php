@@ -27,6 +27,7 @@ delete_option( 'scout_hub_log' );
 delete_option( 'scout_hub_answer_seen' );
 delete_option( 'scout_hub_page' );
 delete_option( 'scout_hub_hidden_alert_sent' );
+delete_option( 'scout_hub_form_mail' );
 delete_option( 'scout_hub_log_imported' );
 delete_option( 'scout_hub_log_keys' );
 wp_clear_scheduled_hook( 'scout_hub_daily_watch' );

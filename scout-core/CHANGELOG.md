@@ -1,5 +1,14 @@
 # Scout Core — Changelog
 
+## Unreleased (2026-11-05)
+
+- **Searches that found nothing.** When a visitor uses the site's own search box and gets no results, Scout Core counts the search words, so you can see what people look for and can't find. Search settings shows the top 20 with how many times and the last day each was searched, a "Clear the list" button, and the hint "Add a page or an FAQ answer for the top ones." Nothing changes for visitors, and no search box is added to any page.
+  - Only the words are kept, lowercased and cut to 80 characters, with a count and the first and last day seen. No IP address, browser or time of the search. Words with an @, seven or more digits in a row (phone numbers however they are written), a web address, or more than 8 words are never kept.
+  - Not counted for people logged in to edit the site, for bots, inside the dashboard, on page two of results, or when the search found something. One visitor's repeat search within 30 minutes counts once, through a short-lived record named by a scrambled copy of the words and IP address.
+  - At most 200 phrases. Phrases not searched for 90 days are removed by Core's existing daily check. The list is one setting that is not loaded on every page (`scout_core_empty_searches`), and deleting the plugin removes it.
+  - A new switch in Search settings, "Keep a list of searches that found nothing", is on by default and saved with the other Search settings (`scout_seo_defaults[empty_searches]`). Turning it off stops the count and clears the list.
+  - Scout Core's visitor data list now names the search words and the 30-minute record, so the privacy policy draft includes them.
+
 ## 1.9.0 (2026-11-05)
 
 - **Shared admin kit 1.11.0.** Plain menu names: To do, Business, People, Site features, Search, Legal pages and Site status (labels only, the group keys are the same). Ligatures on where the font has them, and one shared copy of the menu finder.

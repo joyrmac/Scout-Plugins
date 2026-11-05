@@ -675,6 +675,11 @@ final class Scout_Hub_Health {
 		if ( $forms ) {
 			$out[] = $forms;
 		}
+		// Whether those emails actually went out (Scout_Hub_Form_Mail). No row without Gravity Forms.
+		$sent = class_exists( 'Scout_Hub_Form_Mail' ) ? Scout_Hub_Form_Mail::row() : null;
+		if ( $sent ) {
+			$out[] = $sent;
+		}
 		$out[]   = self::test_builds();
 		$reviews = self::review_totals();
 		if ( $reviews ) {

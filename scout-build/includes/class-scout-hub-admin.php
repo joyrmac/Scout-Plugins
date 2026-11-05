@@ -1272,6 +1272,7 @@ final class Scout_Hub_Admin {
 		</script>
 		<?php self::check_grid( $basics ); ?>
 		<?php
+		Scout_Hub_Form_Mail::render_test();
 		if ( $security ) {
 			$safe = count( array_filter( $security, static fn( $c ) => 'good' === $c['state'] ) );
 			?>

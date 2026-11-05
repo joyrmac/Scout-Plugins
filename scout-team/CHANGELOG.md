@@ -1,5 +1,11 @@
 # Scout Team changelog
 
+## Unreleased (2026-11-05)
+
+- **A business card works.** With Scout Cards on, a person who is live with A business card switched on gets a card, which reads their name, title, photo, card phone, card email, and their profile links and short bio when the card shows them. Two new functions give Cards what it may show: `Scout_Team::card()` and `Scout_Team::card_ids()`.
+- **Profile pages that are off stay out of the site's own search results**, the same way they stay out of the sitemap. A person who shows on a card only never turns up there.
+- **Add a person from the Cards screen starts with A business card on** (`&card=1`). Opened from People, the defaults are the same as before.
+
 ## 0.3.0 (2026-11-05)
 
 - **Add a person is a short walkthrough.** The People screen's Add a person button now opens three steps on one screen inside the People section, with a numbered progress row: who they are (name, title, groups with Team ticked), photo and short bio (a photo from the media library, its alt text, which uses their name when empty), and where they show (the same Shows on switches and defaults, plus Writes posts as, which turns the byline on). Save as draft, Publish, or Save and send them a link. It saves through the edit screen's own code, so the profile, groups and defaults are the same, then opens the full edit screen with "Add credentials and links here when you have them." It works without JavaScript too: all three steps show and the photo is a plain upload. "Use the full editor" still opens WordPress's own Add screen.

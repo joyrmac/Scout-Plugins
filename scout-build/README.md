@@ -131,7 +131,7 @@ repo's releases must stay public for this to work without a login.
 | Names or emails and short previews of waiting visitor messages (chat questions, booking requests, new reviews and similar) (only for staff who chose daily or every-item Inbox emails) | Read from the plugins that hold them and listed in Inbox emails. This plugin keeps no copy. | Not kept by this plugin | Emailed to site staff who turned on Inbox emails |
 | Every email the website sends, including form notices, booking and chat emails, and replies to visitors, which can carry what visitors typed (only when the Email screen has a Google address and app password) | Sent through the Google mailbox set on the Email screen. This plugin keeps no copy. | Not kept by this plugin | Google (Gmail), which sends the site's email |
 
-This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent.
+This plugin sets no cookies and collects nothing from visitors itself. The items above come from other Scout plugins, mainly Scout Chat, and from how the site's email is sent. Site status counts whether form emails went out, keeping only the form, the notice's name, sent or failed, and the time, never who it went to or what it said.
 
 Source: `visitor-data.json`. Edit that file, then run `php tools/visitor-data.php`.
 <!-- visitor-data:end -->

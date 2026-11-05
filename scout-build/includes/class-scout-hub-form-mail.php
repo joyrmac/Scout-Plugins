@@ -123,7 +123,8 @@ final class Scout_Hub_Form_Mail {
 
 	/** An error message with every email address taken out, one line, 160 characters at most. */
 	public static function clean_error( string $error ): string {
-		$error = (string) preg_replace( '/[^\s<>"\'(),;:\[\]]+@[^\s<>"\'(),;:\[\]]+/', '[address]', $error );
+		// An address, with or without <angle brackets>. A full stop after it stays.
+		$error = (string) preg_replace( '/<?[^\s<>"\'(),;:\[\]@]+@[^\s<>"\'(),;:\[\]@.]+(?:\.[^\s<>"\'(),;:\[\]@.]+)*>?/', '[address]', $error );
 		$error = (string) preg_replace( '/<[^>]*>/', ' ', $error );
 		$error = trim( (string) preg_replace( '/\s+/', ' ', $error ) );
 		return function_exists( 'mb_substr' ) ? mb_substr( $error, 0, 160 ) : substr( $error, 0, 160 );

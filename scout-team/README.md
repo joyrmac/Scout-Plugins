@@ -48,7 +48,7 @@ Each person has six switches, stored in the profile as `shows`:
 |---|---|---|
 | Their own profile page | `bio` | Off: visitors who open `/team/<name>/` get "page not found", the page leaves the sitemap and the team page lists them without a link. People who can edit them still see it, marked noindex. |
 | The team page | `team` | On the grid and the `/team/` archive, when they are also in the Team group and live. |
-| A business card | `card` | Saved for Scout Cards. |
+| A business card | `card` | A card at `/card/<link name>/` when Scout Cards is on and they are live. Off: that address answers "not found". |
 | Byline on their posts | `byline` | Author links and the article's schema author point at their profile. Needs "Writes posts as" picked. |
 | The speakers page | `speaker` | Saved for the speakers page. |
 | Chat answers | `chat` | Saved for Scout Chat. |
@@ -61,6 +61,22 @@ byline on when a login is linked, the rest off.
 `card_phone` and `card_email` are for a person's business card only. They
 never print on the profile page or the team page and never go into the
 schema. The editor says so under the fields.
+
+## Business cards (Scout Cards)
+
+Scout Cards reads each card from the profile: name, title, photo and its alt
+text, `card_phone`, `card_email`, and the profile links and short bio when the
+card is set to show them. It calls two public functions, guarded so either
+plugin works alone:
+
+- `Scout_Team::card( $post_id )`: what a card may show of one person, plus
+  `on` (live with Card switched on). Role, bio and links come through
+  `public_profile()`, so a card never shows what the profile page hides.
+- `Scout_Team::card_ids()`: live people with Card on, in team page order.
+
+A profile page that is off also stays out of the site's own search results, so
+a person who shows on a card only never turns up there. **Add a person** opened
+from the Cards screen (`&card=1`) starts with A business card switched on.
 
 ## Sources on credentials
 
